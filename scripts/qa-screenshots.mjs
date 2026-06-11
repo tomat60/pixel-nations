@@ -11,6 +11,7 @@ const MANIFEST_PATH = `${OUTPUT_DIR}/manifest.json`;
 
 const captures = [
   { filename: "mobile-home.png", route: "/", viewport: "mobile", width: 390, height: 844 },
+  { filename: "mobile-world.png", route: "/world", viewport: "mobile", width: 390, height: 844, fullPage: true },
   { filename: "mobile-world-top.png", route: "/world", viewport: "mobile", width: 390, height: 844 },
   {
     filename: "mobile-world-atlas.png",
@@ -41,6 +42,7 @@ const captures = [
   { filename: "mobile-nation.png", route: "/nation", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-empire.png", route: "/empire", viewport: "mobile", width: 390, height: 844 },
   { filename: "desktop-home.png", route: "/", viewport: "desktop", width: 1440, height: 900 },
+  { filename: "desktop-world.png", route: "/world", viewport: "desktop", width: 1440, height: 900, fullPage: true },
   { filename: "desktop-world-top.png", route: "/world", viewport: "desktop", width: 1440, height: 900 },
   {
     filename: "desktop-world-atlas.png",
@@ -216,7 +218,7 @@ async function gotoAndCapture(page, capture) {
     return;
   }
 
-  await page.screenshot({ path: `${SCREENSHOT_DIR}/${capture.filename}`, fullPage: false });
+  await page.screenshot({ path: `${SCREENSHOT_DIR}/${capture.filename}`, fullPage: Boolean(capture.fullPage) });
 }
 
 async function main() {

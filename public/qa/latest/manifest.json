@@ -1,9 +1,14 @@
 {
-  "generatedAt": "2026-06-11T12:23:01.342Z",
+  "generatedAt": "2026-06-11T12:33:39.846Z",
   "screenshots": [
     {
       "filename": "mobile-home.png",
       "route": "/",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "mobile-world.png",
+      "route": "/world",
       "viewport": "mobile"
     },
     {
@@ -49,6 +54,11 @@
     {
       "filename": "desktop-home.png",
       "route": "/",
+      "viewport": "desktop"
+    },
+    {
+      "filename": "desktop-world.png",
+      "route": "/world",
       "viewport": "desktop"
     },
     {

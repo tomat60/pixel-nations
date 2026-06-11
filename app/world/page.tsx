@@ -23,14 +23,15 @@ type MapTile = {
   resources: string[];
   landName: string;
   cinematicLine: string;
+  contextLine: string;
   strategicValue: string;
   historicalNote: string;
   starter: boolean;
   claimed: boolean;
 };
 
-const GRID_WIDTH = 22;
-const GRID_HEIGHT = 14;
+const GRID_WIDTH = 18;
+const GRID_HEIGHT = 12;
 
 const TERRAIN_RESOURCES: Record<Terrain, string[]> = {
   plains: ["Food", "Timber"],
@@ -71,11 +72,11 @@ const REGION_BORDER: Record<Region, string> = {
 };
 
 const REGION_LABELS = [
-  { id: "north-frontier", name: "North Frontier", left: "29%", top: "17%" },
-  { id: "crownlands", name: "Crownlands", left: "75%", top: "22%" },
-  { id: "aurelia", name: "Aurelia", left: "50%", top: "48%" },
-  { id: "iron-coast", name: "Iron Coast", left: "17%", top: "66%" },
-  { id: "ember-basin", name: "Ember Basin", left: "58%", top: "82%" },
+  { id: "north-frontier", name: "North Frontier", left: "28%", top: "20%" },
+  { id: "crownlands", name: "Crownlands", left: "78%", top: "26%" },
+  { id: "aurelia", name: "Aurelia", left: "52%", top: "51%" },
+  { id: "iron-coast", name: "Iron Coast", left: "18%", top: "72%" },
+  { id: "ember-basin", name: "Ember Basin", left: "63%", top: "84%" },
 ];
 
 const MAP_ROUTES = [
@@ -88,6 +89,42 @@ const MAP_RIVERS = [
   "M 404 38 C 388 112 420 168 386 230 S 328 330 366 430",
   "M 636 86 C 594 132 584 190 614 248 S 680 334 644 424",
 ];
+
+const MAP_CONTOURS = [
+  "M 42 86 C 146 42 292 76 366 130 S 548 188 720 138",
+  "M 74 360 C 178 302 304 332 418 284 S 598 230 734 268",
+  "M 216 458 C 310 392 404 406 508 374 S 646 340 722 386",
+];
+
+const SECTOR_REGION_ZONES = [
+  {
+    id: "north-frontier",
+    className: "left-[16%] top-[4%] h-[34%] w-[48%] border-zinc-300/10 bg-zinc-300/[0.045]",
+    clipPath: "polygon(0 18%, 34% 0, 88% 12%, 100% 68%, 62% 96%, 10% 78%)",
+  },
+  {
+    id: "iron-coast",
+    className: "left-[0%] top-[24%] h-[72%] w-[33%] border-slate-300/10 bg-slate-300/[0.04]",
+    clipPath: "polygon(0 0, 72% 8%, 100% 48%, 72% 98%, 8% 86%, 0 42%)",
+  },
+  {
+    id: "aurelia",
+    className: "left-[28%] top-[30%] h-[42%] w-[48%] border-amber-400/14 bg-amber-500/[0.055]",
+    clipPath: "polygon(10% 18%, 56% 0, 100% 24%, 84% 78%, 36% 100%, 0 64%)",
+  },
+  {
+    id: "crownlands",
+    className: "left-[63%] top-[8%] h-[48%] w-[34%] border-amber-200/14 bg-amber-200/[0.055]",
+    clipPath: "polygon(16% 8%, 80% 0, 100% 42%, 78% 90%, 22% 100%, 0 50%)",
+  },
+  {
+    id: "ember-basin",
+    className: "left-[36%] top-[62%] h-[34%] w-[58%] border-orange-300/10 bg-orange-300/[0.04]",
+    clipPath: "polygon(4% 24%, 42% 0, 98% 16%, 88% 82%, 42% 100%, 0 74%)",
+  },
+];
+
+const STARTER_COORDS = new Set(["8,5", "9,5", "10,5", "8,6", "10,6", "11,6"]);
 
 const ATLAS_REGIONS = [
   {
@@ -146,22 +183,22 @@ const ATLAS_LAND_MARKS = Array.from({ length: 260 }, (_, index) => {
 });
 
 function getRegion(x: number, y: number): Region {
-  if (x >= 15 && y <= 5) return "Crownlands";
-  if (y <= 3 || (x <= 7 && y <= 5)) return "North Frontier";
-  if (x <= 4 && y >= 5) return "Iron Coast";
-  if (y >= 10 || (x >= 10 && y >= 8)) return "Ember Basin";
+  if (x >= 13 && y <= 4) return "Crownlands";
+  if (y <= 2 || (x <= 6 && y <= 4)) return "North Frontier";
+  if (x <= 3 && y >= 3) return "Iron Coast";
+  if (y >= 9 || (x >= 9 && y >= 7)) return "Ember Basin";
   return "Aurelia";
 }
 
 function getTerrain(x: number, y: number, region: Region): Terrain {
-  if ((x === 9 && y === 6) || (x === 13 && y === 9) || (x === 17 && y === 4)) return "ruins";
-  if (x <= 2 || (region === "Iron Coast" && x <= 5 && y % 2 === 0)) return "coast";
-  if (y <= 1 || x >= 20) return "coast";
-  if (region === "Crownlands") return x > 17 && y < 4 ? "crownland" : "mountain";
-  if (region === "North Frontier") return y < 3 || (x + y) % 4 === 0 ? "mountain" : "forest";
-  if (region === "Iron Coast") return x <= 4 ? "coast" : "forest";
-  if (region === "Ember Basin") return (x + y) % 3 === 0 ? "basin" : "plains";
-  if ((x >= 7 && x <= 9 && y >= 3 && y <= 7) || (x === 12 && y === 5)) return "forest";
+  if ((x === 7 && y === 5) || (x === 11 && y === 8) || (x === 14 && y === 4)) return "ruins";
+  if (x <= 1 || (region === "Iron Coast" && x <= 3)) return "coast";
+  if (y === 0 || x === GRID_WIDTH - 1) return "coast";
+  if (region === "Crownlands") return x >= 15 && y <= 3 ? "crownland" : "mountain";
+  if (region === "North Frontier") return y <= 1 || x + y < 7 ? "mountain" : "forest";
+  if (region === "Iron Coast") return y >= 8 ? "coast" : "forest";
+  if (region === "Ember Basin") return y >= 10 || x >= 12 ? "basin" : "plains";
+  if ((x >= 5 && x <= 8 && y >= 3 && y <= 6) || (x >= 9 && x <= 11 && y === 4)) return "forest";
   return "plains";
 }
 
@@ -194,6 +231,17 @@ function getCinematicLine(region: Region, terrain: Terrain) {
   return "Unwritten ground on the edge of a rising world.";
 }
 
+function getContextLine(region: Region, terrain: Terrain, starter: boolean) {
+  if (starter) return "A strong first settlement site near the first trade road.";
+  if (terrain === "coast") return "A future port position on the edge of continental routes.";
+  if (terrain === "mountain") return "A defensive holdfast above contested frontier passes.";
+  if (terrain === "crownland") return "A prestige claim near the old political center.";
+  if (terrain === "basin") return "A resource pocket likely to matter when borders expand.";
+  if (terrain === "ruins") return "A risky claim with relic value and future conflict potential.";
+  if (region === "Aurelia") return "Central ground with clean expansion paths into nearby regions.";
+  return "Frontier land with room to grow into a regional power.";
+}
+
 function getStrategicValue(terrain: Terrain, starter: boolean, claimed: boolean) {
   if (claimed) return "Already controlled by another founder.";
   if (starter) return "Ideal first settlement land.";
@@ -220,7 +268,7 @@ function buildTiles(): MapTile[] {
     const coordinates = `X${x + 14} / Y${y + 8}`;
     const landId = `PN-${String(401 + index).padStart(4, "0")}`;
     const claimed = (x * 7 + y * 11) % 23 === 0;
-    const starter = !claimed && region === "Aurelia" && (terrain === "plains" || terrain === "forest");
+    const starter = !claimed && STARTER_COORDS.has(`${x},${y}`);
 
     return {
       id: `world-tile-${index}`,
@@ -233,6 +281,7 @@ function buildTiles(): MapTile[] {
       resources: TERRAIN_RESOURCES[terrain],
       landName: getLandName(region, terrain),
       cinematicLine: getCinematicLine(region, terrain),
+      contextLine: getContextLine(region, terrain, starter),
       strategicValue: getStrategicValue(terrain, starter, claimed),
       historicalNote: getHistoricalNote(region, terrain, claimed),
       starter,
@@ -521,33 +570,54 @@ export default function WorldPage() {
               <div className="flex flex-col justify-between gap-3 border-b border-amber-500/10 pb-4 sm:flex-row sm:items-end">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-amber-600/80">
-                    Playable Sector
+                    Active Sector
                   </p>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200/80">
                     Sector 04 / Aurelia Frontier
                   </p>
                   <p className="mt-2 text-xs uppercase tracking-[0.22em] text-zinc-600">
-                    Choose one land inside the highlighted sector.
+                    216 visible lands from a 10,000-land world.
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-zinc-400">
+                    Choose a highlighted founder land to begin.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3 text-[10px] uppercase tracking-[0.2em] text-zinc-600">
-                  <span className="border border-amber-500/15 px-2 py-1">216 lands</span>
+                  <span className="border border-amber-500/15 px-2 py-1">216 visible lands</span>
+                  <span className="border border-amber-500/15 px-2 py-1">10,000 total lands</span>
                   <span className="border border-amber-500/15 px-2 py-1">5 regions</span>
                 </div>
               </div>
 
               <div className="mt-5 overflow-x-auto pb-2">
-                <div className="relative min-w-[760px] overflow-hidden border border-amber-500/20 bg-[#030306] p-3 shadow-[inset_0_0_60px_rgba(0,0,0,0.55)]">
+                <div className="relative min-w-[680px] overflow-hidden border border-amber-500/20 bg-[#030306] p-3 shadow-[inset_0_0_60px_rgba(0,0,0,0.55)]">
                   <div
                     aria-hidden
                     className="pointer-events-none absolute inset-3 border border-amber-500/10"
                   />
+                  {SECTOR_REGION_ZONES.map((zone) => (
+                    <div
+                      key={zone.id}
+                      aria-hidden
+                      className={`pointer-events-none absolute border ${zone.className}`}
+                      style={{ clipPath: zone.clipPath }}
+                    />
+                  ))}
                   <svg
                     aria-hidden
                     className="pointer-events-none absolute inset-3 h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)]"
                     viewBox="0 0 760 484"
                     preserveAspectRatio="none"
                   >
+                    {MAP_CONTOURS.map((path) => (
+                      <path
+                        key={path}
+                        d={path}
+                        fill="none"
+                        stroke="rgba(245,222,179,0.08)"
+                        strokeWidth="2"
+                      />
+                    ))}
                     {MAP_RIVERS.map((path) => (
                       <path
                         key={path}
@@ -577,7 +647,7 @@ export default function WorldPage() {
                       {label.name}
                     </span>
                   ))}
-                  <div className="relative z-10 grid grid-cols-[repeat(22,minmax(0,1fr))] gap-px">
+                  <div className="relative z-10 grid grid-cols-[repeat(18,minmax(0,1fr))] gap-px">
                     {tiles.map((tile) => {
                       const tileOwnedByYou = demoState.claimedLandId === tile.id && demoState.claimedLand;
                       const tileClaimed = tile.claimed || tileOwnedByYou;
@@ -609,7 +679,7 @@ export default function WorldPage() {
                           }`}
                         >
                           {tile.starter && !tileClaimed ? (
-                            <span className="pointer-events-none absolute right-0.5 top-0.5 h-1.5 w-1.5 animate-pulse rounded-full bg-amber-300/80 shadow-[0_0_10px_rgba(251,191,36,0.45)]" />
+                            <span className="pointer-events-none absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-amber-300/90 shadow-[0_0_12px_rgba(251,191,36,0.55)]" />
                           ) : null}
                           {tileOwnedByYou ? (
                             <span className="absolute inset-0 flex items-center justify-center bg-amber-500/10 text-[8px] font-bold uppercase tracking-[0.2em] text-amber-100">
@@ -619,6 +689,20 @@ export default function WorldPage() {
                         </button>
                       );
                     })}
+                  </div>
+                  <div className="relative z-20 mt-3 grid gap-2 border border-amber-500/10 bg-[#030306]/85 p-3 text-[9px] uppercase tracking-[0.18em] text-zinc-500 sm:grid-cols-5">
+                    {[
+                      ["Founder land", "bg-amber-300/90 shadow-[0_0_10px_rgba(251,191,36,0.45)]"],
+                      ["Frontier", "bg-zinc-300/25"],
+                      ["Crownlands", "bg-amber-200/30"],
+                      ["Route", "bg-amber-400/50"],
+                      ["Unclaimed land", "bg-zinc-500/30"],
+                    ].map(([label, swatch]) => (
+                      <div key={label} className="flex items-center gap-2">
+                        <span className={`h-2 w-2 rounded-full ${swatch}`} />
+                        <span>{label}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -636,6 +720,9 @@ export default function WorldPage() {
             </p>
             <p className="mt-4 border-l border-amber-500/30 pl-4 text-sm leading-7 text-zinc-400">
               {selectedTile.cinematicLine}
+            </p>
+            <p className="mt-4 border border-amber-500/15 bg-amber-500/[0.035] p-3 text-sm leading-6 text-amber-100/75">
+              {selectedTile.contextLine}
             </p>
 
             <div className="mt-6 space-y-4 border-t border-amber-500/10 pt-5 text-sm">
