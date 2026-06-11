@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { DEFAULT_SETTLEMENT_STATE, readSettlementState } from "../lib/settlement-state";
+import { DEFAULT_SETTLEMENT_STATE, clearSettlementState, readSettlementState } from "../lib/settlement-state";
 
 const territoryOverview = [
   { id: "region", label: "Region", value: "Aurelia" },
@@ -21,7 +22,9 @@ const founderBenefits = [
 ];
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [settlementState, setSettlementState] = useState(DEFAULT_SETTLEMENT_STATE);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   useEffect(() => {
     setSettlementState(readSettlementState());
@@ -233,7 +236,54 @@ export default function DashboardPage() {
             ))}
           </div>
         </section>
+
+        <div className="mt-12 border-t border-amber-500/10 pt-8">
+          <button
+            type="button"
+            onClick={() => setIsResetConfirmOpen(true)}
+            className="rounded border border-zinc-800 bg-[#08080f]/80 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500 transition-colors hover:border-zinc-700 hover:text-zinc-300"
+          >
+            Reset Demo State
+          </button>
+        </div>
       </div>
+
+      {isResetConfirmOpen ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm"
+        >
+          <div className="w-full max-w-lg border border-amber-500/20 bg-[#06060c] p-7 shadow-[0_30px_120px_rgba(0,0,0,0.7)] sm:p-9">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+              Reset Demo State
+            </p>
+            <p className="mt-5 text-base leading-8 text-zinc-300">
+              This will reset your local demo progress.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => {
+                  clearSettlementState();
+                  setIsResetConfirmOpen(false);
+                  router.push("/");
+                }}
+                className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100 sm:flex-1"
+              >
+                Reset
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsResetConfirmOpen(false)}
+                className="btn-secondary rounded border border-zinc-800 bg-[#08080f]/80 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-zinc-400 sm:flex-1"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

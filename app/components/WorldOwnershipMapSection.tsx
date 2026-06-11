@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { readSettlementState, writeSettlementState } from "../lib/settlement-state";
 
 const ownershipMapRegions = [
   { id: "north-frontier", name: "North Frontier", x: "31%", y: "22%" },
@@ -160,6 +161,12 @@ export function WorldOwnershipMapSection() {
 
   const claimSelectedLand = () => {
     setClaimedTileIds((current) => new Set(current).add(selectedTile.id));
+    const state = readSettlementState();
+    writeSettlementState({
+      ...state,
+      claimedLand: true,
+      founderBadgeEarned: true,
+    });
     setClaimSuccess(true);
   };
 

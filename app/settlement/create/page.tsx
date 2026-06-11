@@ -58,6 +58,8 @@ export default function SettlementCreatePage() {
     setSettlementName(normalizedName);
     writeSettlementState({
       ...DEFAULT_SETTLEMENT_STATE,
+      claimedLand: true,
+      founderBadgeEarned: true,
       settlementFounded: true,
       settlementName: normalizedName,
       population: 24,
