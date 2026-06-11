@@ -118,6 +118,8 @@ export default function NationCreatePage() {
       landsControlled: 5,
       settlementLevel: "Capital City",
       politicalStatus: "Nation Founder",
+      bordersExpanded: false,
+      expandedLands: [],
     };
 
     setNationName(normalizedName);

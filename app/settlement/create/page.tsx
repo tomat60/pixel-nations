@@ -78,6 +78,8 @@ export default function SettlementCreatePage() {
       nationName: "",
       nationIdeology: "",
       landsControlled: 1,
+      bordersExpanded: false,
+      expandedLands: [],
     });
     setIsFounded(true);
   };

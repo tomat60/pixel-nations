@@ -13,6 +13,7 @@ const FALLBACK = {
   ideology: "Crown Rule",
   tradeRouteDestination: "Iron Coast",
   allianceName: "Aurelian Pact",
+  expandedLands: ["North Road", "Iron Ridge", "Amber Fields"],
 };
 
 export default function NationPage() {
@@ -34,6 +35,8 @@ export default function NationPage() {
       influence: state.influence > 0 ? state.influence : 45,
       landsControlled: state.landsControlled > 0 ? state.landsControlled : 5,
       politicalStatus: state.politicalStatus || "Nation Founder",
+      bordersExpanded: state.bordersExpanded,
+      expandedLands: state.expandedLands.length > 0 ? state.expandedLands : FALLBACK.expandedLands,
     }),
     [state],
   );
@@ -114,24 +117,33 @@ export default function NationPage() {
                 ["Capital", nation.settlementName],
                 ["Founding Alliance", nation.allianceName],
                 ["Ideology", nation.ideology],
-                ["Next Objective", "Expand Borders"],
+                ["Next Objective", nation.bordersExpanded ? "Create Empire" : "Expand Borders"],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-start justify-between gap-5">
                   <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">{label}</span>
-                  <span className="text-right font-[family-name:var(--font-syne)] text-sm font-bold text-zinc-200">
+                <span className="break-words text-right font-[family-name:var(--font-syne)] text-sm font-bold text-zinc-200">
                     {value}
                   </span>
                 </div>
               ))}
             </div>
 
-            <button
-              type="button"
-              disabled
-              className="mt-9 cursor-not-allowed rounded border border-zinc-800 bg-[#08080f]/70 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-zinc-500"
-            >
-              Expansion Coming Soon
-            </button>
+            {nation.bordersExpanded ? (
+              <button
+                type="button"
+                disabled
+                className="mt-9 cursor-not-allowed rounded border border-zinc-800 bg-[#08080f]/70 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-zinc-500"
+              >
+                Empire Coming Soon
+              </button>
+            ) : (
+              <Link
+                href="/expansion/create"
+                className="btn-primary mt-9 inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
+              >
+                Expand Borders
+              </Link>
+            )}
           </motion.section>
 
           <motion.aside
@@ -153,9 +165,45 @@ export default function NationPage() {
                 Regional alliance formed: {nation.allianceName}
               </li>
               <li className="border-l border-amber-500/25 pl-4">Nation founded: {nation.nationName}</li>
+              {nation.bordersExpanded ? (
+                <li className="border-l border-amber-500/25 pl-4">
+                  Borders expanded: {nation.expandedLands.join(", ")}
+                </li>
+              ) : null}
             </ul>
           </motion.aside>
         </div>
+
+        {nation.bordersExpanded ? (
+          <motion.section
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.23, ease: "easeOut" }}
+            className="mt-10 border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">Expansion</p>
+            <div className="mt-6 space-y-5">
+              <div className="flex items-start justify-between gap-5 border-b border-amber-500/10 pb-4">
+                <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">Controlled Lands</span>
+                <span className="text-right font-[family-name:var(--font-syne)] text-sm font-bold text-amber-100">
+                  {nation.landsControlled}
+                </span>
+              </div>
+              <div className="flex items-start justify-between gap-5 border-b border-amber-500/10 pb-4">
+                <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">New Frontier Lands</span>
+                <span className="break-words text-right font-[family-name:var(--font-syne)] text-sm font-bold text-zinc-200">
+                  {nation.expandedLands.join(", ")}
+                </span>
+              </div>
+              <div className="flex items-start justify-between gap-5">
+                <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">Border Status</span>
+                <span className="text-right font-[family-name:var(--font-syne)] text-sm font-bold text-amber-100">
+                  Expanding
+                </span>
+              </div>
+            </div>
+          </motion.section>
+        ) : null}
 
         <motion.div
           initial={{ opacity: 0, y: 24 }}

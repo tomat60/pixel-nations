@@ -98,6 +98,8 @@ export default function TradeCreatePage() {
       nationName: "",
       nationIdeology: "",
       landsControlled: 1,
+      bordersExpanded: false,
+      expandedLands: [],
     };
 
     setSettlementState(nextState);

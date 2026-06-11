@@ -67,8 +67,8 @@ export default function DashboardPage() {
   const nextMilestone = settlementState.settlementFounded
     ? settlementState.nationFounded
       ? {
-          title: "Expand Borders",
-          progress: "1 / 1 Nation",
+          title: settlementState.bordersExpanded ? "Create Empire" : "Expand Borders",
+          progress: settlementState.bordersExpanded ? "1 / 1 Expansion" : "0 / 1 Expansion",
           cta: "View Nation",
           href: "/nation",
         }
@@ -116,7 +116,9 @@ export default function DashboardPage() {
           </div>
 
           <h1 className="mt-8 font-[family-name:var(--font-syne)] text-4xl font-extrabold tracking-tight text-amber-100 sm:text-5xl md:text-6xl">
-            Founder of Aurelia
+            {settlementState.nationFounded
+              ? `Founder of ${settlementState.nationName || "Aurelia"}`
+              : "Founder of Aurelia"}
           </h1>
           <p className="mt-4 text-xs uppercase tracking-[0.24em] text-zinc-500">
             Land ID

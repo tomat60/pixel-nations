@@ -139,6 +139,8 @@ export default function AllianceCreatePage() {
       nationName: "",
       nationIdeology: "",
       landsControlled: 1,
+      bordersExpanded: false,
+      expandedLands: [],
     };
 
     setAllianceName(normalizedName);

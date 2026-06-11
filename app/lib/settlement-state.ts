@@ -19,6 +19,8 @@ export const SETTLEMENT_STORAGE_KEYS = {
   nationName: "nationName",
   nationIdeology: "nationIdeology",
   landsControlled: "landsControlled",
+  bordersExpanded: "bordersExpanded",
+  expandedLands: "expandedLands",
 } as const;
 
 export type SettlementState = {
@@ -42,6 +44,8 @@ export type SettlementState = {
   nationName: string;
   nationIdeology: string;
   landsControlled: number;
+  bordersExpanded: boolean;
+  expandedLands: string[];
 };
 
 export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
@@ -65,6 +69,8 @@ export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
   nationName: "",
   nationIdeology: "",
   landsControlled: 1,
+  bordersExpanded: false,
+  expandedLands: [],
 };
 
 export function readSettlementState(): SettlementState {
@@ -106,6 +112,8 @@ export function readSettlementState(): SettlementState {
     localStorage.getItem(SETTLEMENT_STORAGE_KEYS.nationIdeology) ??
     DEFAULT_SETTLEMENT_STATE.nationIdeology;
   const landsControlledRaw = Number(localStorage.getItem(SETTLEMENT_STORAGE_KEYS.landsControlled));
+  const bordersExpanded = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.bordersExpanded) === "true";
+  const expandedLandsRaw = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.expandedLands);
 
   let alliancePartners: string[] = [];
   if (alliancePartnersRaw) {
@@ -116,6 +124,18 @@ export function readSettlementState(): SettlementState {
       }
     } catch {
       alliancePartners = [];
+    }
+  }
+
+  let expandedLands: string[] = [];
+  if (expandedLandsRaw) {
+    try {
+      const parsed = JSON.parse(expandedLandsRaw);
+      if (Array.isArray(parsed)) {
+        expandedLands = parsed.filter((value): value is string => typeof value === "string");
+      }
+    } catch {
+      expandedLands = [];
     }
   }
 
@@ -140,6 +160,8 @@ export function readSettlementState(): SettlementState {
     nationName,
     nationIdeology,
     landsControlled: Number.isFinite(landsControlledRaw) ? landsControlledRaw : 1,
+    bordersExpanded,
+    expandedLands,
   };
 }
 
@@ -175,4 +197,6 @@ export function writeSettlementState(state: SettlementState) {
   localStorage.setItem(SETTLEMENT_STORAGE_KEYS.nationName, state.nationName);
   localStorage.setItem(SETTLEMENT_STORAGE_KEYS.nationIdeology, state.nationIdeology);
   localStorage.setItem(SETTLEMENT_STORAGE_KEYS.landsControlled, String(state.landsControlled));
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.bordersExpanded, String(state.bordersExpanded));
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.expandedLands, JSON.stringify(state.expandedLands));
 }
