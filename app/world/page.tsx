@@ -24,9 +24,12 @@ type MapTile = {
   landName: string;
   cinematicLine: string;
   contextLine: string;
+  founderMeaning: string;
   strategicValue: string;
   historicalNote: string;
   starter: boolean;
+  landmark: boolean;
+  resourceRich: boolean;
   claimed: boolean;
 };
 
@@ -43,40 +46,22 @@ const TERRAIN_RESOURCES: Record<Terrain, string[]> = {
   ruins: ["Relics", "Stone"],
 };
 
-const TERRAIN_TONE: Record<Terrain, string> = {
-  plains: "bg-[#342718]/95",
-  forest: "bg-[#26321f]/95",
-  mountain: "bg-[#2b3038]/95",
-  coast: "bg-[#24313a]/95",
-  basin: "bg-[#38241f]/95",
-  crownland: "bg-[#46351c]/95",
-  ruins: "bg-[#433026]/95",
-};
-
-const TERRAIN_MARK: Record<Terrain, string> = {
-  plains: "after:bg-amber-200/15",
-  forest: "after:bg-lime-200/15",
-  mountain: "after:bg-zinc-200/20",
-  coast: "after:bg-slate-200/20",
-  basin: "after:bg-orange-300/15",
-  crownland: "after:bg-amber-200/25",
-  ruins: "after:bg-orange-200/20",
-};
-
-const REGION_BORDER: Record<Region, string> = {
-  Aurelia: "border-amber-400/20",
-  "North Frontier": "border-zinc-300/20",
-  "Iron Coast": "border-slate-300/20",
-  "Ember Basin": "border-orange-300/20",
-  Crownlands: "border-amber-200/25",
+const TERRAIN_TINT: Record<Terrain, string> = {
+  plains: "before:bg-[#4a3828]/18",
+  forest: "before:bg-[#2d4228]/22",
+  mountain: "before:bg-[#3a4048]/20",
+  coast: "before:bg-[#2a4550]/22",
+  basin: "before:bg-[#4a3028]/18",
+  crownland: "before:bg-[#5a4828]/24",
+  ruins: "before:bg-[#4a3828]/16",
 };
 
 const REGION_LABELS = [
-  { id: "north-frontier", name: "North Frontier", left: "28%", top: "20%" },
-  { id: "crownlands", name: "Crownlands", left: "78%", top: "26%" },
-  { id: "aurelia", name: "Aurelia", left: "52%", top: "51%" },
-  { id: "iron-coast", name: "Iron Coast", left: "18%", top: "72%" },
-  { id: "ember-basin", name: "Ember Basin", left: "63%", top: "84%" },
+  { id: "north-frontier", name: "North Frontier", left: "30%", top: "18%" },
+  { id: "crownlands", name: "Crownlands", left: "80%", top: "24%" },
+  { id: "aurelia", name: "Aurelia", left: "54%", top: "48%" },
+  { id: "iron-coast", name: "Iron Coast", left: "12%", top: "68%" },
+  { id: "ember-basin", name: "Ember Basin", left: "66%", top: "82%" },
 ];
 
 const MAP_ROUTES = [
@@ -99,28 +84,56 @@ const MAP_CONTOURS = [
 const SECTOR_REGION_ZONES = [
   {
     id: "north-frontier",
-    className: "left-[16%] top-[4%] h-[34%] w-[48%] border-zinc-300/10 bg-zinc-300/[0.045]",
+    className: "left-[14%] top-[2%] h-[36%] w-[50%] border-zinc-400/12 bg-zinc-400/[0.07]",
     clipPath: "polygon(0 18%, 34% 0, 88% 12%, 100% 68%, 62% 96%, 10% 78%)",
   },
   {
     id: "iron-coast",
-    className: "left-[0%] top-[24%] h-[72%] w-[33%] border-slate-300/10 bg-slate-300/[0.04]",
+    className: "left-[0%] top-[22%] h-[74%] w-[30%] border-slate-400/12 bg-slate-500/[0.08]",
     clipPath: "polygon(0 0, 72% 8%, 100% 48%, 72% 98%, 8% 86%, 0 42%)",
   },
   {
     id: "aurelia",
-    className: "left-[28%] top-[30%] h-[42%] w-[48%] border-amber-400/14 bg-amber-500/[0.055]",
+    className: "left-[26%] top-[28%] h-[44%] w-[50%] border-amber-400/16 bg-amber-500/[0.09]",
     clipPath: "polygon(10% 18%, 56% 0, 100% 24%, 84% 78%, 36% 100%, 0 64%)",
   },
   {
     id: "crownlands",
-    className: "left-[63%] top-[8%] h-[48%] w-[34%] border-amber-200/14 bg-amber-200/[0.055]",
+    className: "left-[61%] top-[6%] h-[50%] w-[36%] border-amber-200/16 bg-amber-300/[0.08]",
     clipPath: "polygon(16% 8%, 80% 0, 100% 42%, 78% 90%, 22% 100%, 0 50%)",
   },
   {
     id: "ember-basin",
-    className: "left-[36%] top-[62%] h-[34%] w-[58%] border-orange-300/10 bg-orange-300/[0.04]",
+    className: "left-[34%] top-[60%] h-[36%] w-[60%] border-orange-300/12 bg-orange-400/[0.07]",
     clipPath: "polygon(4% 24%, 42% 0, 98% 16%, 88% 82%, 42% 100%, 0 74%)",
+  },
+];
+
+const TERRAIN_MASSES = [
+  {
+    id: "coast-band",
+    className: "left-[0%] top-[18%] h-[78%] w-[16%] bg-gradient-to-r from-slate-700/35 to-transparent",
+    clipPath: "polygon(0 0, 100% 8%, 100% 92%, 0 100%)",
+  },
+  {
+    id: "forest-belt",
+    className: "left-[18%] top-[8%] h-[38%] w-[42%] bg-gradient-to-br from-emerald-950/40 to-transparent",
+    clipPath: "polygon(0 20%, 48% 0, 100% 28%, 88% 100%, 12% 88%)",
+  },
+  {
+    id: "plains-heart",
+    className: "left-[32%] top-[34%] h-[32%] w-[38%] bg-gradient-to-b from-amber-950/30 to-transparent",
+    clipPath: "polygon(8% 0, 92% 12%, 100% 88%, 48% 100%, 0 72%)",
+  },
+  {
+    id: "ridge-line",
+    className: "left-[58%] top-[4%] h-[44%] w-[38%] bg-gradient-to-bl from-zinc-700/35 to-transparent",
+    clipPath: "polygon(18% 0, 100% 8%, 92% 100%, 0 82%)",
+  },
+  {
+    id: "basin-floor",
+    className: "left-[38%] top-[64%] h-[30%] w-[54%] bg-gradient-to-t from-orange-950/35 to-transparent",
+    clipPath: "polygon(0 28%, 44% 0, 100% 18%, 92% 100%, 8% 100%)",
   },
 ];
 
@@ -242,6 +255,16 @@ function getContextLine(region: Region, terrain: Terrain, starter: boolean) {
   return "Frontier land with room to grow into a regional power.";
 }
 
+function getFounderMeaning(starter: boolean, terrain: Terrain, region: Region, claimed: boolean) {
+  if (claimed) return "Another founder has already written their name into this ground.";
+  if (starter) return "Your banner here becomes the first permanent mark on this land.";
+  if (terrain === "ruins") return "A bold founder could turn buried history into future leverage.";
+  if (terrain === "crownland") return "Claiming here signals ambition before the world has even formed.";
+  if (terrain === "coast") return "Whoever holds this shore may one day shape trade beyond the sector.";
+  if (region === "Aurelia") return "This choice sets the tone for everything that follows in Aurelia.";
+  return "Every founder begins somewhere. This land could become your first chapter.";
+}
+
 function getStrategicValue(terrain: Terrain, starter: boolean, claimed: boolean) {
   if (claimed) return "Already controlled by another founder.";
   if (starter) return "Ideal first settlement land.";
@@ -269,6 +292,8 @@ function buildTiles(): MapTile[] {
     const landId = `PN-${String(401 + index).padStart(4, "0")}`;
     const claimed = (x * 7 + y * 11) % 23 === 0;
     const starter = !claimed && STARTER_COORDS.has(`${x},${y}`);
+    const landmark = terrain === "ruins";
+    const resourceRich = terrain === "crownland" || terrain === "coast" || terrain === "basin";
 
     return {
       id: `world-tile-${index}`,
@@ -282,9 +307,12 @@ function buildTiles(): MapTile[] {
       landName: getLandName(region, terrain),
       cinematicLine: getCinematicLine(region, terrain),
       contextLine: getContextLine(region, terrain, starter),
+      founderMeaning: getFounderMeaning(starter, terrain, region, claimed),
       strategicValue: getStrategicValue(terrain, starter, claimed),
       historicalNote: getHistoricalNote(region, terrain, claimed),
       starter,
+      landmark,
+      resourceRich,
       claimed,
     };
   });
@@ -353,7 +381,6 @@ export default function WorldPage() {
   const ownedByYou = demoState.claimedLand && demoState.claimedLandId === selectedTile.id;
   const isUnavailable = selectedTile.claimed && !ownedByYou;
   const status = ownedByYou ? "Owned by You" : selectedTile.claimed ? "Claimed" : "Unclaimed";
-  const owner = ownedByYou ? "You" : selectedTile.claimed ? "Rival Founder" : "None";
   const continueRoute = getContinueRoute(demoState);
 
   const openClaimModal = () => {
@@ -448,8 +475,8 @@ export default function WorldPage() {
                 <p className="mt-1">world grid</p>
               </div>
               <div className="bg-[#08080f]/95 p-3">
-                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">Sector 04</p>
-                <p className="mt-1">demo begins</p>
+                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">Sector A-01</p>
+                <p className="mt-1">starting sector</p>
               </div>
             </div>
           </div>
@@ -536,10 +563,10 @@ export default function WorldPage() {
 
               <div className="absolute left-[43%] top-[42%] h-[28%] w-[28%] border border-amber-200/90 bg-amber-300/[0.04] shadow-[0_0_46px_rgba(251,191,36,0.26),inset_0_0_22px_rgba(251,191,36,0.1)]">
                 <span className="absolute left-1 top-1 border border-amber-500/30 bg-[#030306]/90 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.18em] text-amber-200/85 sm:hidden">
-                  Sector 04
+                  Sector A-01
                 </span>
                 <span className="absolute -top-8 left-0 hidden whitespace-nowrap border border-amber-500/30 bg-[#030306]/90 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.22em] text-amber-200/85 sm:block">
-                  Highlighted Playable Sector
+                  Aurelian Starting Sector
                 </span>
                 <span className="absolute bottom-2 right-2 h-2 w-2 rounded-full bg-amber-200 shadow-[0_0_16px_rgba(251,191,36,0.85)]" />
               </div>
@@ -567,34 +594,48 @@ export default function WorldPage() {
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(201,169,98,0.06),transparent_54%)]"
             />
             <div className="relative">
-              <div className="flex flex-col justify-between gap-3 border-b border-amber-500/10 pb-4 sm:flex-row sm:items-end">
-                <div>
+              <div className="flex flex-col justify-between gap-4 border-b border-amber-500/10 pb-5 sm:flex-row sm:items-end">
+                <div className="max-w-xl">
                   <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-amber-600/80">
-                    Active Sector
+                    Starting Sector
                   </p>
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200/80">
-                    Sector 04 / Aurelia Frontier
-                  </p>
-                  <p className="mt-2 text-xs uppercase tracking-[0.22em] text-zinc-600">
-                    216 visible lands from a 10,000-land world.
+                  <p className="mt-2 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100 sm:text-3xl">
+                    Aurelian Basin
                   </p>
                   <p className="mt-3 text-sm leading-7 text-zinc-400">
+                    This is the first playable sector of a 10,000-land world.
+                  </p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.22em] text-zinc-600">
                     Choose a highlighted founder land to begin.
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-3 text-[10px] uppercase tracking-[0.2em] text-zinc-600">
-                  <span className="border border-amber-500/15 px-2 py-1">216 visible lands</span>
-                  <span className="border border-amber-500/15 px-2 py-1">10,000 total lands</span>
-                  <span className="border border-amber-500/15 px-2 py-1">5 regions</span>
+                <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                  <span className="border border-amber-500/15 bg-[#08080f]/80 px-2.5 py-1.5 text-amber-100/80">
+                    216 visible lands
+                  </span>
+                  <span className="border border-amber-500/15 bg-[#08080f]/80 px-2.5 py-1.5">
+                    10,000 total world lands
+                  </span>
+                  <span className="border border-amber-500/15 bg-[#08080f]/80 px-2.5 py-1.5">
+                    Sector A-01
+                  </span>
                 </div>
               </div>
 
               <div className="mt-5 overflow-x-auto pb-2">
-                <div className="relative min-w-[680px] overflow-hidden border border-amber-500/20 bg-[#030306] p-3 shadow-[inset_0_0_60px_rgba(0,0,0,0.55)]">
+                <div className="relative min-w-[680px] overflow-hidden border border-amber-500/20 bg-[#080a0c] p-3 shadow-[inset_0_0_80px_rgba(0,0,0,0.65)]">
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute inset-3 border border-amber-500/10"
+                    className="pointer-events-none absolute inset-3 bg-[radial-gradient(ellipse_at_52%_48%,rgba(201,169,98,0.08),transparent_58%)]"
                   />
+                  {TERRAIN_MASSES.map((mass) => (
+                    <div
+                      key={mass.id}
+                      aria-hidden
+                      className={`pointer-events-none absolute ${mass.className}`}
+                      style={{ clipPath: mass.clipPath }}
+                    />
+                  ))}
                   {SECTOR_REGION_ZONES.map((zone) => (
                     <div
                       key={zone.id}
@@ -614,7 +655,7 @@ export default function WorldPage() {
                         key={path}
                         d={path}
                         fill="none"
-                        stroke="rgba(245,222,179,0.08)"
+                        stroke="rgba(245,222,179,0.1)"
                         strokeWidth="2"
                       />
                     ))}
@@ -623,8 +664,8 @@ export default function WorldPage() {
                         key={path}
                         d={path}
                         fill="none"
-                        stroke="rgba(148,163,184,0.24)"
-                        strokeWidth="2"
+                        stroke="rgba(148,163,184,0.28)"
+                        strokeWidth="2.5"
                       />
                     ))}
                     {MAP_ROUTES.map((path) => (
@@ -632,22 +673,30 @@ export default function WorldPage() {
                         key={path}
                         d={path}
                         fill="none"
-                        stroke="rgba(201,169,98,0.22)"
+                        stroke="rgba(201,169,98,0.28)"
                         strokeDasharray="5 7"
                         strokeWidth="2"
                       />
                     ))}
                   </svg>
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-3 z-[6] opacity-[0.22] [background-image:linear-gradient(rgba(201,169,98,0.45)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.45)_1px,transparent_1px)] [background-size:calc(100%/18)_calc(100%/12)]"
+                  />
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-3 z-[6] border border-amber-500/12"
+                  />
                   {REGION_LABELS.map((label) => (
                     <span
                       key={label.id}
-                      className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 border border-amber-500/15 bg-[#030306]/70 px-2 py-1 font-[family-name:var(--font-syne)] text-[9px] font-bold uppercase tracking-[0.22em] text-amber-100/55 backdrop-blur-sm"
+                      className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 border border-amber-500/12 bg-[#030306]/55 px-2 py-0.5 font-[family-name:var(--font-syne)] text-[8px] font-bold uppercase tracking-[0.2em] text-amber-100/45 backdrop-blur-sm sm:text-[9px]"
                       style={{ left: label.left, top: label.top }}
                     >
                       {label.name}
                     </span>
                   ))}
-                  <div className="relative z-10 grid grid-cols-[repeat(18,minmax(0,1fr))] gap-px">
+                  <div className="relative z-10 grid grid-cols-[repeat(18,minmax(0,1fr))] gap-0">
                     {tiles.map((tile) => {
                       const tileOwnedByYou = demoState.claimedLandId === tile.id && demoState.claimedLand;
                       const tileClaimed = tile.claimed || tileOwnedByYou;
@@ -660,29 +709,33 @@ export default function WorldPage() {
                           type="button"
                           onClick={() => setSelectedTileId(tile.id)}
                           aria-label={`${tile.landId}, ${tile.region}, ${toTerrainLabel(tile.terrain)}`}
-                          className={`relative aspect-square overflow-hidden border transition-colors duration-200 after:absolute after:left-1/2 after:top-1/2 after:h-1 after:w-1 after:-translate-x-1/2 after:-translate-y-1/2 after:rounded-full ${
-                            TERRAIN_TONE[tile.terrain]
-                          } ${TERRAIN_MARK[tile.terrain]} ${REGION_BORDER[tile.region]} ${
+                          className={`relative aspect-square overflow-hidden border border-white/[0.04] bg-black/10 transition-[border-color,box-shadow] duration-200 before:pointer-events-none before:absolute before:inset-0 ${TERRAIN_TINT[tile.terrain]} ${
                             tile.x === 0 || tile.x === GRID_WIDTH - 1 || tile.y === 0 || tile.y === GRID_HEIGHT - 1
-                              ? "opacity-70"
+                              ? "opacity-75"
                               : ""
                           } ${
                             isSelected
-                              ? "border-amber-200/90 shadow-[inset_0_0_0_1px_rgba(251,191,36,0.55),inset_0_0_16px_rgba(251,191,36,0.16)]"
-                              : "hover:border-amber-300/45"
+                              ? "z-[12] border-amber-200/90 shadow-[inset_0_0_14px_rgba(251,191,36,0.22),0_0_0_1px_rgba(251,191,36,0.35)]"
+                              : "hover:border-amber-300/35 hover:bg-black/20"
                           } ${
                             tileOwnedByYou
-                              ? "border-amber-200/80 shadow-[inset_0_0_0_1px_rgba(251,191,36,0.4)]"
+                              ? "border-amber-200/75 shadow-[inset_0_0_10px_rgba(251,191,36,0.18)]"
                               : tileUnavailable
-                                ? "opacity-50"
+                                ? "opacity-40"
                                 : ""
                           }`}
                         >
                           {tile.starter && !tileClaimed ? (
-                            <span className="pointer-events-none absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-amber-300/90 shadow-[0_0_12px_rgba(251,191,36,0.55)]" />
+                            <span className="pointer-events-none absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_10px_rgba(251,191,36,0.7)]" />
+                          ) : null}
+                          {!tile.starter && tile.landmark && !tileClaimed ? (
+                            <span className="pointer-events-none absolute right-1 top-1 h-1 w-1 rotate-45 bg-orange-200/80 shadow-[0_0_8px_rgba(251,191,36,0.4)]" />
+                          ) : null}
+                          {!tile.starter && !tile.landmark && tile.resourceRich && !tileClaimed ? (
+                            <span className="pointer-events-none absolute right-1 top-1 h-1 w-1 rounded-full bg-cyan-200/70" />
                           ) : null}
                           {tileOwnedByYou ? (
-                            <span className="absolute inset-0 flex items-center justify-center bg-amber-500/10 text-[8px] font-bold uppercase tracking-[0.2em] text-amber-100">
+                            <span className="absolute inset-0 flex items-center justify-center bg-amber-500/10 text-[7px] font-bold uppercase tracking-[0.18em] text-amber-100">
                               You
                             </span>
                           ) : null}
@@ -690,16 +743,15 @@ export default function WorldPage() {
                       );
                     })}
                   </div>
-                  <div className="relative z-20 mt-3 grid gap-2 border border-amber-500/10 bg-[#030306]/85 p-3 text-[9px] uppercase tracking-[0.18em] text-zinc-500 sm:grid-cols-5">
+                  <div className="relative z-20 mt-3 grid gap-2 border border-amber-500/10 bg-[#030306]/80 p-3 text-[9px] uppercase tracking-[0.18em] text-zinc-500 sm:grid-cols-4">
                     {[
-                      ["Founder land", "bg-amber-300/90 shadow-[0_0_10px_rgba(251,191,36,0.45)]"],
-                      ["Frontier", "bg-zinc-300/25"],
-                      ["Crownlands", "bg-amber-200/30"],
-                      ["Route", "bg-amber-400/50"],
-                      ["Unclaimed land", "bg-zinc-500/30"],
+                      ["Founder land", "h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.6)]"],
+                      ["Resource-rich", "h-1 w-1 rounded-full bg-cyan-200/70"],
+                      ["Landmark", "h-1 w-1 rotate-45 bg-orange-200/80"],
+                      ["Command grid", "h-px w-3 bg-amber-400/40"],
                     ].map(([label, swatch]) => (
                       <div key={label} className="flex items-center gap-2">
-                        <span className={`h-2 w-2 rounded-full ${swatch}`} />
+                        <span className={swatch} />
                         <span>{label}</span>
                       </div>
                     ))}
@@ -712,37 +764,42 @@ export default function WorldPage() {
           <aside
             id="selected-land-panel"
             data-qa="selected-land-panel"
-            className="border border-amber-500/15 bg-[#06060c]/90 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] lg:sticky lg:top-6 lg:self-start"
+            className="border border-amber-500/15 bg-[#06060c]/90 p-5 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-6 lg:sticky lg:top-6 lg:self-start"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">Selected Land</p>
             <p className="mt-3 break-words font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100">
               {selectedTile.landName}
             </p>
+            <p className="mt-3 text-xs uppercase tracking-[0.22em] text-zinc-600">
+              {status}
+            </p>
             <p className="mt-4 border-l border-amber-500/30 pl-4 text-sm leading-7 text-zinc-400">
               {selectedTile.cinematicLine}
             </p>
-            <p className="mt-4 border border-amber-500/15 bg-amber-500/[0.035] p-3 text-sm leading-6 text-amber-100/75">
-              {selectedTile.contextLine}
-            </p>
 
-            <div className="mt-6 space-y-4 border-t border-amber-500/10 pt-5 text-sm">
+            <div className="mt-5 space-y-3 border-t border-amber-500/10 pt-5 text-sm">
               {[
-                ["Land ID", selectedTile.landId],
-                ["Coordinates", selectedTile.coordinates],
                 ["Region", selectedTile.region],
                 ["Terrain", toTerrainLabel(selectedTile.terrain)],
                 ["Resources", selectedTile.resources.join(", ")],
-                ["Owner / Status", `${owner} / ${status}`],
                 ["Strategic Value", selectedTile.strategicValue],
                 ["Historical Note", selectedTile.historicalNote],
               ].map(([label, value]) => (
-                <div key={label} className="grid gap-2 border-b border-amber-500/10 pb-3 sm:grid-cols-[120px_1fr]">
+                <div key={label} className="grid gap-1.5 border-b border-amber-500/10 pb-3 sm:grid-cols-[110px_1fr]">
                   <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">{label}</span>
                   <span className="break-words font-[family-name:var(--font-syne)] text-sm font-bold text-zinc-200 sm:text-right">
                     {value}
                   </span>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-5 border border-amber-500/15 bg-amber-500/[0.04] p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
+                Founder Meaning
+              </p>
+              <p className="mt-3 text-sm leading-6 text-amber-100/80">{selectedTile.founderMeaning}</p>
+              <p className="mt-3 text-xs leading-6 text-zinc-500">{selectedTile.contextLine}</p>
             </div>
 
             <div className="mt-6">
