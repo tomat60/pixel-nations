@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-11T13:01:23.126Z",
+  "generatedAt": "2026-06-11T13:17:23.578Z",
   "screenshots": [
     {
       "filename": "mobile-home.png",
@@ -28,6 +28,11 @@
     },
     {
       "filename": "mobile-world-selected-land-panel.png",
+      "route": "/world",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "mobile-world-claim-tray.png",
       "route": "/world",
       "viewport": "mobile"
     },

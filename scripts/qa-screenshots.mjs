@@ -37,6 +37,20 @@ const captures = [
     height: 844,
     selector: "[data-qa='selected-land-panel']",
   },
+  {
+    filename: "mobile-world-claim-tray.png",
+    route: "/world",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    viewportOnly: true,
+    prepare: async (page) => {
+      const sector = page.locator("[data-qa='playable-sector']").first();
+      await sector.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(400);
+      await page.locator("[data-qa='mobile-claim-tray']").waitFor({ state: "visible", timeout: 5000 });
+    },
+  },
   { filename: "mobile-dashboard.png", route: "/dashboard", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-settlement.png", route: "/settlement", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-nation.png", route: "/nation", viewport: "mobile", width: 390, height: 844 },
@@ -209,6 +223,15 @@ async function gotoAndCapture(page, capture) {
   await page.waitForTimeout(700);
   await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
   await page.waitForTimeout(250);
+
+  if (capture.prepare) {
+    await capture.prepare(page);
+  }
+
+  if (capture.viewportOnly) {
+    await page.screenshot({ path: `${SCREENSHOT_DIR}/${capture.filename}` });
+    return;
+  }
 
   if (capture.selector) {
     const locator = page.locator(capture.selector).first();

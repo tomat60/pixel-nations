@@ -75,6 +75,18 @@ html {
   }
 }
 
+@keyframes world-tile-selected-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+    box-shadow: inset 0 0 10px rgba(251, 191, 36, 0.12);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: inset 0 0 18px rgba(251, 191, 36, 0.28);
+  }
+}
+
 @keyframes world-marker-pulse {
   0%,
   100% {
@@ -115,6 +127,10 @@ html {
 
 .animate-world-marker-pulse {
   animation: world-marker-pulse 3.8s ease-in-out infinite;
+}
+
+.animate-world-tile-selected-glow {
+  animation: world-tile-selected-glow 2.6s ease-in-out infinite;
 }
 
 .animate-world-map-drift {

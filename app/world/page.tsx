@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   DEFAULT_SETTLEMENT_STATE,
   readSettlementState,
@@ -381,7 +381,37 @@ export default function WorldPage() {
   const ownedByYou = demoState.claimedLand && demoState.claimedLandId === selectedTile.id;
   const isUnavailable = selectedTile.claimed && !ownedByYou;
   const status = ownedByYou ? "Owned by You" : selectedTile.claimed ? "Claimed" : "Unclaimed";
+  const mobileTrayStatus = ownedByYou
+    ? "Your claimed land"
+    : isUnavailable
+      ? "Already claimed"
+      : selectedTile.starter && !selectedTile.claimed
+        ? "Unclaimed founder land"
+        : "Unclaimed land";
   const continueRoute = getContinueRoute(demoState);
+
+  const selectedLandPanelRef = useRef<HTMLElement>(null);
+  const [mobileTrayDismissed, setMobileTrayDismissed] = useState(false);
+  const [selectedPanelInView, setSelectedPanelInView] = useState(false);
+
+  useEffect(() => {
+    setMobileTrayDismissed(false);
+  }, [selectedTileId]);
+
+  useEffect(() => {
+    const panel = selectedLandPanelRef.current;
+    if (!panel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setSelectedPanelInView(entry.isIntersecting),
+      { threshold: 0.12, rootMargin: "0px 0px -72px 0px" },
+    );
+    observer.observe(panel);
+    return () => observer.disconnect();
+  }, []);
+
+  const showMobileClaimTray =
+    !mobileTrayDismissed && !selectedPanelInView && !isClaimModalOpen;
 
   const openClaimModal = () => {
     setClaimSuccess(false);
@@ -408,7 +438,7 @@ export default function WorldPage() {
   };
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#020204] px-5 py-8 text-white sm:px-10 sm:py-14">
+    <main className="min-h-screen overflow-x-hidden bg-[#020204] px-5 py-8 pb-28 text-white sm:px-10 sm:py-14 lg:pb-14">
       <div className="mx-auto max-w-7xl">
         <header className="border-b border-amber-500/15 pb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.45em] text-amber-600/75">World Map</p>
@@ -734,6 +764,12 @@ export default function WorldPage() {
                           {!tile.starter && !tile.landmark && tile.resourceRich && !tileClaimed ? (
                             <span className="pointer-events-none absolute right-1 top-1 h-1 w-1 rounded-full bg-cyan-200/70" />
                           ) : null}
+                          {isSelected ? (
+                            <span
+                              aria-hidden
+                              className="pointer-events-none absolute inset-0 bg-amber-300/[0.06] animate-world-tile-selected-glow lg:hidden"
+                            />
+                          ) : null}
                           {tileOwnedByYou ? (
                             <span className="absolute inset-0 flex items-center justify-center bg-amber-500/10 text-[7px] font-bold uppercase tracking-[0.18em] text-amber-100">
                               You
@@ -762,6 +798,7 @@ export default function WorldPage() {
           </article>
 
           <aside
+            ref={selectedLandPanelRef}
             id="selected-land-panel"
             data-qa="selected-land-panel"
             className="border border-amber-500/15 bg-[#06060c]/90 p-5 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-6 lg:sticky lg:top-6 lg:self-start"
@@ -831,6 +868,61 @@ export default function WorldPage() {
           </aside>
         </section>
       </div>
+
+      {showMobileClaimTray ? (
+        <div
+          data-qa="mobile-claim-tray"
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-amber-500/25 bg-[#06060c]/96 px-4 py-3 shadow-[0_-16px_48px_rgba(0,0,0,0.7),0_0_40px_rgba(201,169,98,0.08)] backdrop-blur-md lg:hidden"
+        >
+          <div className="mx-auto flex max-w-lg items-end gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-[family-name:var(--font-syne)] text-base font-extrabold tracking-tight text-amber-100">
+                {selectedTile.landName}
+              </p>
+              <p className="mt-0.5 truncate text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                {selectedTile.region} · {toTerrainLabel(selectedTile.terrain)}
+              </p>
+              <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-amber-500/70">
+                {mobileTrayStatus}
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-col items-stretch gap-2">
+              <button
+                type="button"
+                onClick={() => setMobileTrayDismissed(true)}
+                aria-label="Dismiss quick claim tray"
+                className="self-end rounded border border-amber-500/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-500 transition-colors hover:border-amber-500/25 hover:text-zinc-300"
+              >
+                Dismiss
+              </button>
+              {ownedByYou ? (
+                <Link
+                  href="/dashboard"
+                  className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-4 py-2.5 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-amber-100"
+                >
+                  Enter Your Land
+                </Link>
+              ) : isUnavailable ? (
+                <button
+                  type="button"
+                  disabled
+                  className="cursor-not-allowed rounded border border-zinc-800 bg-[#08080f]/70 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500"
+                >
+                  Already Claimed
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={openClaimModal}
+                  className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-amber-100"
+                >
+                  Claim This Land
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {isClaimModalOpen ? (
         <div
