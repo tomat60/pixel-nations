@@ -4,6 +4,11 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  formatLandClaimHistory,
+  getClaimedLandDisplay,
+  getEmpireOriginQuote,
+} from "../lib/claimed-land";
 import { DEFAULT_SETTLEMENT_STATE, readSettlementState, type SettlementState } from "../lib/settlement-state";
 
 const FALLBACK = {
@@ -22,6 +27,8 @@ export default function EmpirePage() {
   useEffect(() => {
     setState(readSettlementState());
   }, []);
+
+  const claimedLand = useMemo(() => getClaimedLandDisplay(state), [state]);
 
   const empire = useMemo(
     () => ({
@@ -60,16 +67,19 @@ export default function EmpirePage() {
             {empire.empireName}
           </h1>
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">
-            &quot;The first empire has entered the history of the world.&quot;
+            {getEmpireOriginQuote(claimedLand.landName)}
+          </p>
+          <p className="mt-3 text-sm leading-7 text-zinc-500">
+            Imperial history begins where {claimedLand.landName} was first claimed in {claimedLand.region}.
           </p>
 
           <div className="mt-8 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-5">
             {[
               ["Founder", "You"],
               ["Capital", empire.settlementName],
+              ["Origin Land", claimedLand.landName],
               ["Origin Nation", empire.nationName],
               ["Doctrine", empire.doctrine],
-              ["Status", "Founded"],
             ].map(([label, value]) => (
               <div key={label} className="bg-[#08080f]/95 p-4 sm:p-5">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">{label}</p>
@@ -163,7 +173,7 @@ export default function EmpirePage() {
             <section className="border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">History</p>
               <ul className="mt-6 space-y-3 text-sm leading-7 text-zinc-300">
-                <li className="border-l border-amber-500/25 pl-4">Land claimed by You</li>
+                <li className="border-l border-amber-500/25 pl-4">{formatLandClaimHistory(state)}</li>
                 <li className="border-l border-amber-500/25 pl-4">Founder Badge earned</li>
                 <li className="border-l border-amber-500/25 pl-4">{empire.settlementName} founded</li>
                 <li className="border-l border-amber-500/25 pl-4">Town Hall built</li>

@@ -5,6 +5,12 @@ import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  formatLandClaimHistory,
+  getClaimedLandDisplay,
+  getSettlementOriginQuote,
+  getTerrainResourceValues,
+} from "../lib/claimed-land";
+import {
   DEFAULT_SETTLEMENT_STATE,
   type SettlementState,
   readSettlementState,
@@ -38,6 +44,8 @@ export default function SettlementPage() {
   useEffect(() => {
     setSettlementState(readSettlementState());
   }, []);
+
+  const claimedLand = useMemo(() => getClaimedLandDisplay(settlementState), [settlementState]);
 
   const displaySettlement = useMemo(
     () => ({
@@ -156,18 +164,17 @@ export default function SettlementPage() {
               href: "",
             };
 
-  const resourceValues = {
-    timber: 120,
-    stone: 80,
-    iron:
-      displaySettlement.tradeRouteEstablished && displaySettlement.tradeRouteDestination === "Iron Coast"
-        ? 40
-        : 25,
-    food:
-      displaySettlement.tradeRouteEstablished && displaySettlement.tradeRouteDestination === "Ember Basin"
-        ? 240
-        : 200,
-  };
+  const resourceValues = getTerrainResourceValues(
+    claimedLand.terrain,
+    displaySettlement.tradeRouteEstablished,
+    displaySettlement.tradeRouteDestination,
+  );
+
+  const originQuote = getSettlementOriginQuote(
+    claimedLand.terrain,
+    claimedLand.region,
+    claimedLand.landName,
+  );
 
   const resourceCards = STARTING_RESOURCES.map((resource) => ({
     ...resource,
@@ -200,16 +207,14 @@ export default function SettlementPage() {
           <h1 className="mt-7 break-words font-[family-name:var(--font-syne)] text-5xl font-extrabold leading-[1.02] tracking-tight text-amber-100 sm:text-6xl md:text-7xl">
             {displaySettlement.settlementName}
           </h1>
-          <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">
-            &quot;The first city of Aurelia begins here.&quot;
-          </p>
+          <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">{originQuote}</p>
 
           <div className="mt-8 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-4">
             {[
               ["Founder", displaySettlement.founder],
-              ["Region", displaySettlement.region],
-              ["Coordinates", displaySettlement.coordinates],
-              ["Status", "Founded"],
+              ["Origin Land", claimedLand.landName],
+              ["Region", claimedLand.region],
+              ["Terrain", claimedLand.terrain],
             ].map(([label, value]) => (
               <div key={label} className="bg-[#08080f]/95 p-4 sm:p-5">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">{label}</p>
@@ -320,7 +325,7 @@ export default function SettlementPage() {
             <section className="border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">History</p>
               <ul className="mt-6 space-y-3 text-sm leading-7 text-zinc-300">
-                <li className="border-l border-amber-500/25 pl-4">Land claimed by You</li>
+                <li className="border-l border-amber-500/25 pl-4">{formatLandClaimHistory(settlementState)}</li>
                 <li className="border-l border-amber-500/25 pl-4">Founder Badge earned</li>
                 <li className="border-l border-amber-500/25 pl-4">
                   {displaySettlement.settlementName} founded

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
+import { getClaimedLandDisplay } from "../../lib/claimed-land";
 import {
   DEFAULT_SETTLEMENT_STATE,
   readSettlementState,
@@ -34,9 +35,11 @@ export default function SettlementCreatePage() {
   const [settlementName, setSettlementName] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isFounded, setIsFounded] = useState(false);
+  const [claimedLand, setClaimedLand] = useState(getClaimedLandDisplay(DEFAULT_SETTLEMENT_STATE));
 
   useEffect(() => {
     const existingState = readSettlementState();
+    setClaimedLand(getClaimedLandDisplay(existingState));
     if (existingState.settlementFounded) {
       setSettlementName(existingState.settlementName);
       setIsFounded(true);
@@ -56,16 +59,19 @@ export default function SettlementCreatePage() {
     if (error) return;
 
     setSettlementName(normalizedName);
+    const existingState = readSettlementState();
+    const land = getClaimedLandDisplay(existingState);
     writeSettlementState({
       ...DEFAULT_SETTLEMENT_STATE,
+      ...existingState,
       claimedLand: true,
       founderBadgeEarned: true,
       settlementFounded: true,
       settlementName: normalizedName,
       population: 24,
       influence: 3,
-      region: "Aurelia",
-      coordinates: "X19 / Y12",
+      region: land.region,
+      coordinates: land.coordinates,
       founder: "You",
       townHallBuilt: false,
       settlementLevel: "Outpost",
@@ -120,6 +126,9 @@ export default function SettlementCreatePage() {
           </h1>
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">
             Every empire begins with a first city.
+          </p>
+          <p className="mt-3 text-sm leading-7 text-amber-200/70">
+            Your first city will inherit the strengths of {claimedLand.landName}.
           </p>
         </motion.header>
 
@@ -229,8 +238,10 @@ export default function SettlementCreatePage() {
                 <div className="mt-6 space-y-5">
                   {[
                     ["Settlement Name", settlementName.trim() || "Awaiting Name"],
-                    ["Region", "Aurelia"],
-                    ["Coordinates", "X19 / Y12"],
+                    ["Origin Land", claimedLand.landName],
+                    ["Region", claimedLand.region],
+                    ["Terrain", claimedLand.terrain],
+                    ["Coordinates", claimedLand.coordinates],
                     ["Founder", "You"],
                     ["Status", "Ready to Found"],
                   ].map(([label, value]) => (

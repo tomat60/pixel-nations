@@ -4,15 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  getClaimedLandDisplay,
+  getDashboardOriginQuote,
+  getFounderMeaningLine,
+} from "../lib/claimed-land";
 import { DEFAULT_SETTLEMENT_STATE, clearSettlementState, readSettlementState } from "../lib/settlement-state";
-
-const territoryOverview = [
-  { id: "region", label: "Region", value: "Aurelia" },
-  { id: "coordinates", label: "Coordinates", value: "X19 / Y12" },
-  { id: "land-tier", label: "Land Tier", value: "Frontier" },
-  { id: "status", label: "Status", value: "Claimed" },
-  { id: "owner-since", label: "Owner Since", value: "June 2026" },
-];
 
 const founderBenefits = [
   "Founder Badge",
@@ -118,11 +115,29 @@ export default function DashboardPage() {
         href: "/settlement/create",
       };
 
+  const claimedLand = useMemo(() => getClaimedLandDisplay(settlementState), [settlementState]);
+
   const founderTitle = settlementState.empireFounded
-    ? settlementState.empireName || "Aurelia"
+    ? settlementState.empireName || claimedLand.region
     : settlementState.nationFounded
-      ? settlementState.nationName || "Aurelia"
-      : "Aurelia";
+      ? settlementState.nationName || claimedLand.region
+      : settlementState.settlementFounded
+        ? settlementState.settlementName || claimedLand.landName
+        : claimedLand.landName || claimedLand.region;
+
+  const territoryOverview = useMemo(
+    () => [
+      { id: "land-name", label: "Land Name", value: claimedLand.landName },
+      { id: "coordinates", label: "Coordinates", value: claimedLand.coordinates },
+      { id: "region", label: "Region", value: claimedLand.region },
+      { id: "terrain", label: "Terrain", value: claimedLand.terrain },
+      { id: "status", label: "Status", value: "Claimed" },
+      { id: "origin-trait", label: "Origin Trait", value: getFounderMeaningLine(claimedLand.terrain) },
+    ],
+    [claimedLand],
+  );
+
+  const originQuote = getDashboardOriginQuote(claimedLand.landName, claimedLand.region);
 
   return (
     <main className="min-h-screen bg-[#050505] px-6 py-12 text-white sm:px-10 sm:py-16">
@@ -144,14 +159,15 @@ export default function DashboardPage() {
             {`Founder of ${founderTitle}`}
           </h1>
           <p className="mt-4 text-xs uppercase tracking-[0.24em] text-zinc-500">
-            Land ID
+            Origin Land
           </p>
-          <p className="mt-2 font-[family-name:var(--font-syne)] text-xl font-bold uppercase tracking-[0.2em] text-white sm:text-2xl">
-            Aurelia PN-0283
+          <p className="mt-2 break-words font-[family-name:var(--font-syne)] text-xl font-bold tracking-[0.08em] text-white sm:text-2xl">
+            {claimedLand.landName}
           </p>
-          <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">
-            &quot;The first record has been written.&quot;
+          <p className="mt-3 text-xs uppercase tracking-[0.22em] text-amber-500/70">
+            {claimedLand.region} / {claimedLand.terrain}
           </p>
+          <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">{originQuote}</p>
         </header>
 
         <section className="mt-10 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-4">
