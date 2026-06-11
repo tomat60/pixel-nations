@@ -90,6 +90,10 @@ export default function TradeCreatePage() {
       population: 100,
       influence: 12,
       settlementLevel: "Growing City",
+      regionalAllianceFormed: false,
+      allianceName: "",
+      alliancePartners: [],
+      politicalStatus: "",
     };
 
     setSettlementState(nextState);

@@ -11,6 +11,10 @@ export const SETTLEMENT_STORAGE_KEYS = {
   tradeRouteEstablished: "tradeRouteEstablished",
   tradeRouteDestination: "tradeRouteDestination",
   tradeRoutes: "tradeRoutes",
+  regionalAllianceFormed: "regionalAllianceFormed",
+  allianceName: "allianceName",
+  alliancePartners: "alliancePartners",
+  politicalStatus: "politicalStatus",
 } as const;
 
 export type SettlementState = {
@@ -26,6 +30,10 @@ export type SettlementState = {
   tradeRouteEstablished: boolean;
   tradeRouteDestination: string;
   tradeRoutes: number;
+  regionalAllianceFormed: boolean;
+  allianceName: string;
+  alliancePartners: string[];
+  politicalStatus: string;
 };
 
 export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
@@ -41,6 +49,10 @@ export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
   tradeRouteEstablished: false,
   tradeRouteDestination: "",
   tradeRoutes: 0,
+  regionalAllianceFormed: false,
+  allianceName: "",
+  alliancePartners: [],
+  politicalStatus: "",
 };
 
 export function readSettlementState(): SettlementState {
@@ -66,6 +78,27 @@ export function readSettlementState(): SettlementState {
     localStorage.getItem(SETTLEMENT_STORAGE_KEYS.tradeRouteDestination) ??
     DEFAULT_SETTLEMENT_STATE.tradeRouteDestination;
   const tradeRoutesRaw = Number(localStorage.getItem(SETTLEMENT_STORAGE_KEYS.tradeRoutes));
+  const regionalAllianceFormed =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.regionalAllianceFormed) === "true";
+  const allianceName =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.allianceName) ??
+    DEFAULT_SETTLEMENT_STATE.allianceName;
+  const alliancePartnersRaw = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.alliancePartners);
+  const politicalStatus =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.politicalStatus) ??
+    DEFAULT_SETTLEMENT_STATE.politicalStatus;
+
+  let alliancePartners: string[] = [];
+  if (alliancePartnersRaw) {
+    try {
+      const parsed = JSON.parse(alliancePartnersRaw);
+      if (Array.isArray(parsed)) {
+        alliancePartners = parsed.filter((value): value is string => typeof value === "string");
+      }
+    } catch {
+      alliancePartners = [];
+    }
+  }
 
   return {
     settlementFounded,
@@ -80,6 +113,10 @@ export function readSettlementState(): SettlementState {
     tradeRouteEstablished,
     tradeRouteDestination,
     tradeRoutes: Number.isFinite(tradeRoutesRaw) ? tradeRoutesRaw : 0,
+    regionalAllianceFormed,
+    allianceName,
+    alliancePartners,
+    politicalStatus,
   };
 }
 
@@ -101,4 +138,14 @@ export function writeSettlementState(state: SettlementState) {
   );
   localStorage.setItem(SETTLEMENT_STORAGE_KEYS.tradeRouteDestination, state.tradeRouteDestination);
   localStorage.setItem(SETTLEMENT_STORAGE_KEYS.tradeRoutes, String(state.tradeRoutes));
+  localStorage.setItem(
+    SETTLEMENT_STORAGE_KEYS.regionalAllianceFormed,
+    String(state.regionalAllianceFormed),
+  );
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.allianceName, state.allianceName);
+  localStorage.setItem(
+    SETTLEMENT_STORAGE_KEYS.alliancePartners,
+    JSON.stringify(state.alliancePartners),
+  );
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.politicalStatus, state.politicalStatus);
 }

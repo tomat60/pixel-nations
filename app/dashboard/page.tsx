@@ -56,19 +56,26 @@ export default function DashboardPage() {
   );
 
   const nextMilestone = settlementState.settlementFounded
-    ? settlementState.tradeRouteEstablished
+    ? settlementState.regionalAllianceFormed
       ? {
-          title: "Form Regional Alliance",
-          progress: "1 / 1 Trade Route",
+          title: "Found the First Nation",
+          progress: "1 / 1 Alliance",
           cta: "View Settlement",
           href: "/settlement",
         }
-      : {
-          title: "Build Your City",
-          progress: settlementState.townHallBuilt ? "0 / 1 Trade Route" : "0 / 1 Core Building",
-          cta: "View Settlement",
-          href: "/settlement",
-        }
+      : settlementState.tradeRouteEstablished
+        ? {
+            title: "Form Regional Alliance",
+            progress: "0 / 1 Alliance",
+            cta: "View Settlement",
+            href: "/settlement",
+          }
+        : {
+            title: "Build Your City",
+            progress: settlementState.townHallBuilt ? "0 / 1 Trade Route" : "0 / 1 Core Building",
+            cta: "View Settlement",
+            href: "/settlement",
+          }
     : {
         title: "Found the First Settlement",
         progress: "0 / 1 Settlement",

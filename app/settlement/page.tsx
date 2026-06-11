@@ -20,6 +20,7 @@ const FALLBACK_SETTLEMENT = {
   founder: "You",
   settlementLevel: "Outpost",
   tradeRouteDestination: "Iron Coast",
+  allianceName: "Aurelian Pact",
 };
 
 const STARTING_RESOURCES = [
@@ -51,6 +52,8 @@ export default function SettlementPage() {
       tradeRouteEstablished: settlementState.tradeRouteEstablished,
       tradeRouteDestination:
         settlementState.tradeRouteDestination || FALLBACK_SETTLEMENT.tradeRouteDestination,
+      regionalAllianceFormed: settlementState.regionalAllianceFormed,
+      allianceName: settlementState.allianceName || FALLBACK_SETTLEMENT.allianceName,
     }),
     [settlementState],
   );
@@ -72,38 +75,51 @@ export default function SettlementPage() {
       tradeRouteEstablished: false,
       tradeRouteDestination: "",
       tradeRoutes: 0,
+      regionalAllianceFormed: false,
+      allianceName: "",
+      alliancePartners: [],
+      politicalStatus: "",
     };
 
     setSettlementState(nextState);
     writeSettlementState(nextState);
   };
 
-  const development = displaySettlement.tradeRouteEstablished
+  const development = displaySettlement.regionalAllianceFormed
     ? {
-        stage: "Growing City",
-        objective: "Form Regional Alliance",
-        progress: "1 / 1 Trade Route",
-        cta: "Alliances Coming Soon",
+        stage: "Regional Power",
+        objective: "Found the First Nation",
+        progress: "1 / 1 Alliance",
+        cta: "Found Nation Coming Soon",
         disabled: true,
         href: "",
       }
-    : displaySettlement.townHallBuilt
+    : displaySettlement.tradeRouteEstablished
       ? {
-          stage: "City Seed",
-          objective: "Establish Trade Route",
-          progress: "0 / 1 Trade Route",
-          cta: "Establish Trade Route",
+          stage: "Growing City",
+          objective: "Form Regional Alliance",
+          progress: "0 / 1 Alliance",
+          cta: "Form Regional Alliance",
           disabled: false,
-          href: "/trade/create",
+          href: "/alliance/create",
         }
-      : {
-          stage: "Outpost",
-          objective: "Build the Town Hall",
-          progress: "0 / 1 Core Building",
-          cta: "Build Town Hall",
-          disabled: false,
-          href: "",
-        };
+      : displaySettlement.townHallBuilt
+        ? {
+            stage: "City Seed",
+            objective: "Establish Trade Route",
+            progress: "0 / 1 Trade Route",
+            cta: "Establish Trade Route",
+            disabled: false,
+            href: "/trade/create",
+          }
+        : {
+            stage: "Outpost",
+            objective: "Build the Town Hall",
+            progress: "0 / 1 Core Building",
+            cta: "Build Town Hall",
+            disabled: false,
+            href: "",
+          };
 
   const resourceValues = {
     timber: 120,
@@ -218,10 +234,10 @@ export default function SettlementPage() {
               </div>
             </div>
 
-            {displaySettlement.townHallBuilt && !displaySettlement.tradeRouteEstablished ? (
+            {development.href ? (
               <Link
                 href={development.href}
-                className="btn-primary mt-7 inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
+                className="btn-primary mt-9 inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
               >
                 {development.cta}
               </Link>
@@ -230,7 +246,7 @@ export default function SettlementPage() {
                 type="button"
                 onClick={buildTownHall}
                 disabled={development.disabled}
-                className={`mt-7 rounded border px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] ${
+                className={`mt-9 rounded border px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] ${
                   development.disabled
                     ? "cursor-not-allowed border-zinc-800 bg-[#08080f]/70 text-zinc-500"
                     : "btn-primary border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 text-amber-100"
@@ -280,6 +296,11 @@ export default function SettlementPage() {
                 {displaySettlement.tradeRouteEstablished ? (
                   <li className="border-l border-amber-500/25 pl-4">
                     Trade route established with {displaySettlement.tradeRouteDestination}
+                  </li>
+                ) : null}
+                {displaySettlement.regionalAllianceFormed ? (
+                  <li className="border-l border-amber-500/25 pl-4">
+                    Regional alliance formed: {displaySettlement.allianceName}
                   </li>
                 ) : null}
               </ul>
