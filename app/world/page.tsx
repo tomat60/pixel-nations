@@ -342,10 +342,12 @@ export default function WorldPage() {
       normalizedState = {
         ...state,
         claimedLandId: fallbackTile.id,
+        claimedLandPnId: fallbackTile.landId,
         claimedLandName: fallbackTile.landName,
         claimedLandCoordinates: fallbackTile.coordinates,
         claimedLandRegion: fallbackTile.region,
         claimedLandTerrain: toTerrainLabel(fallbackTile.terrain),
+        claimedLandResources: fallbackTile.resources.join(", "),
       };
       writeSettlementState(normalizedState);
     }
@@ -391,8 +393,16 @@ export default function WorldPage() {
   const continueRoute = getContinueRoute(demoState);
 
   const selectedLandPanelRef = useRef<HTMLElement>(null);
+  const playableSectorRef = useRef<HTMLElement>(null);
+  const [hasUserSelectedTile, setHasUserSelectedTile] = useState(false);
   const [mobileTrayDismissed, setMobileTrayDismissed] = useState(false);
   const [selectedPanelInView, setSelectedPanelInView] = useState(false);
+  const [playableSectorInView, setPlayableSectorInView] = useState(false);
+
+  const selectTile = (tileId: string) => {
+    setSelectedTileId(tileId);
+    setHasUserSelectedTile(true);
+  };
 
   useEffect(() => {
     setMobileTrayDismissed(false);
@@ -400,18 +410,33 @@ export default function WorldPage() {
 
   useEffect(() => {
     const panel = selectedLandPanelRef.current;
-    if (!panel) return;
+    const sector = playableSectorRef.current;
+    if (!panel || !sector) return;
 
-    const observer = new IntersectionObserver(
+    const panelObserver = new IntersectionObserver(
       ([entry]) => setSelectedPanelInView(entry.isIntersecting),
       { threshold: 0.12, rootMargin: "0px 0px -72px 0px" },
     );
-    observer.observe(panel);
-    return () => observer.disconnect();
+    const sectorObserver = new IntersectionObserver(
+      ([entry]) => setPlayableSectorInView(entry.isIntersecting),
+      { threshold: 0.2, rootMargin: "0px 0px -80px 0px" },
+    );
+
+    panelObserver.observe(panel);
+    sectorObserver.observe(sector);
+
+    return () => {
+      panelObserver.disconnect();
+      sectorObserver.disconnect();
+    };
   }, []);
 
   const showMobileClaimTray =
-    !mobileTrayDismissed && !selectedPanelInView && !isClaimModalOpen;
+    hasUserSelectedTile &&
+    playableSectorInView &&
+    !mobileTrayDismissed &&
+    !selectedPanelInView &&
+    !isClaimModalOpen;
 
   const openClaimModal = () => {
     setClaimSuccess(false);
@@ -424,10 +449,12 @@ export default function WorldPage() {
       claimedLand: true,
       founderBadgeEarned: true,
       claimedLandId: selectedTile.id,
+      claimedLandPnId: selectedTile.landId,
       claimedLandName: selectedTile.landName,
       claimedLandCoordinates: selectedTile.coordinates,
       claimedLandRegion: selectedTile.region,
       claimedLandTerrain: toTerrainLabel(selectedTile.terrain),
+      claimedLandResources: selectedTile.resources.join(", "),
       region: selectedTile.region,
       coordinates: selectedTile.coordinates,
     };
@@ -615,6 +642,7 @@ export default function WorldPage() {
 
         <section className="mt-8 grid gap-6 lg:mt-10 lg:grid-cols-[minmax(0,1fr)_360px]">
           <article
+            ref={playableSectorRef}
             id="playable-sector"
             data-qa="playable-sector"
             className="relative overflow-hidden border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_30px_120px_rgba(0,0,0,0.6)] sm:p-6"
@@ -737,7 +765,7 @@ export default function WorldPage() {
                         <button
                           key={tile.id}
                           type="button"
-                          onClick={() => setSelectedTileId(tile.id)}
+                          onClick={() => selectTile(tile.id)}
                           aria-label={`${tile.landId}, ${tile.region}, ${toTerrainLabel(tile.terrain)}`}
                           className={`relative aspect-square overflow-hidden border border-white/[0.04] bg-black/10 transition-[border-color,box-shadow] duration-200 before:pointer-events-none before:absolute before:inset-0 ${TERRAIN_TINT[tile.terrain]} ${
                             tile.x === 0 || tile.x === GRID_WIDTH - 1 || tile.y === 0 || tile.y === GRID_HEIGHT - 1
@@ -872,33 +900,35 @@ export default function WorldPage() {
       {showMobileClaimTray ? (
         <div
           data-qa="mobile-claim-tray"
-          className="fixed inset-x-0 bottom-0 z-40 border-t border-amber-500/25 bg-[#06060c]/96 px-4 py-3 shadow-[0_-16px_48px_rgba(0,0,0,0.7),0_0_40px_rgba(201,169,98,0.08)] backdrop-blur-md lg:hidden"
+          className="fixed inset-x-0 bottom-0 z-40 box-border w-full max-w-[100vw] border-t border-amber-500/25 bg-[#06060c]/96 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-16px_48px_rgba(0,0,0,0.7),0_0_40px_rgba(201,169,98,0.08)] backdrop-blur-md lg:hidden"
         >
-          <div className="mx-auto flex max-w-lg items-end gap-3">
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-[family-name:var(--font-syne)] text-base font-extrabold tracking-tight text-amber-100">
-                {selectedTile.landName}
-              </p>
-              <p className="mt-0.5 truncate text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                {selectedTile.region} · {toTerrainLabel(selectedTile.terrain)}
-              </p>
-              <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-amber-500/70">
-                {mobileTrayStatus}
-              </p>
-            </div>
-            <div className="flex shrink-0 flex-col items-stretch gap-2">
+          <div className="mx-auto w-full max-w-md">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="break-words font-[family-name:var(--font-syne)] text-sm font-extrabold leading-tight tracking-tight text-amber-100 sm:text-base">
+                  {selectedTile.landName}
+                </p>
+                <p className="mt-1 break-words text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                  {selectedTile.region} · {toTerrainLabel(selectedTile.terrain)}
+                </p>
+                <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-amber-500/70">
+                  {mobileTrayStatus}
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setMobileTrayDismissed(true)}
                 aria-label="Dismiss quick claim tray"
-                className="self-end rounded border border-amber-500/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-500 transition-colors hover:border-amber-500/25 hover:text-zinc-300"
+                className="shrink-0 rounded border border-amber-500/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-500 transition-colors hover:border-amber-500/25 hover:text-zinc-300"
               >
                 Dismiss
               </button>
+            </div>
+            <div className="mt-3">
               {ownedByYou ? (
                 <Link
                   href="/dashboard"
-                  className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-4 py-2.5 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-amber-100"
+                  className="btn-primary block w-full rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-4 py-2.5 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-amber-100"
                 >
                   Enter Your Land
                 </Link>
@@ -906,7 +936,7 @@ export default function WorldPage() {
                 <button
                   type="button"
                   disabled
-                  className="cursor-not-allowed rounded border border-zinc-800 bg-[#08080f]/70 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500"
+                  className="w-full cursor-not-allowed rounded border border-zinc-800 bg-[#08080f]/70 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500"
                 >
                   Already Claimed
                 </button>
@@ -914,7 +944,7 @@ export default function WorldPage() {
                 <button
                   type="button"
                   onClick={openClaimModal}
-                  className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-amber-100"
+                  className="btn-primary w-full rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-100"
                 >
                   Claim This Land
                 </button>

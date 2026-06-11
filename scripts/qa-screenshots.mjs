@@ -4,15 +4,65 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 
 const APP_URL = process.env.QA_APP_URL ?? "http://localhost:3000";
+const DEMO_STATE_KEY = "pixelNations.demoState.v1";
 const OUTPUT_DIR = "public/qa/latest";
 const SCREENSHOT_DIR = `${OUTPUT_DIR}/screenshots`;
 const REPORT_PATH = `${OUTPUT_DIR}/report.html`;
 const MANIFEST_PATH = `${OUTPUT_DIR}/manifest.json`;
 
+const QA_CLAIMED_DEMO_STATE = {
+  claimedLand: true,
+  founderBadgeEarned: true,
+  claimedLandId: "world-tile-98",
+  claimedLandPnId: "PN-0499",
+  claimedLandName: "Aurelia Verge",
+  claimedLandCoordinates: "X22 / Y13",
+  claimedLandRegion: "Aurelia",
+  claimedLandTerrain: "Plains",
+  claimedLandResources: "Grain, Livestock",
+  settlementFounded: false,
+  settlementName: "",
+  population: 0,
+  influence: 1,
+  region: "Aurelia",
+  coordinates: "X22 / Y13",
+  founder: "You",
+  townHallBuilt: false,
+  settlementLevel: "Outpost",
+  tradeRouteEstablished: false,
+  tradeRouteDestination: "",
+  tradeRoutes: 0,
+  regionalAllianceFormed: false,
+  allianceName: "",
+  alliancePartners: [],
+  politicalStatus: "",
+  nationFounded: false,
+  nationName: "",
+  nationIdeology: "",
+  landsControlled: 1,
+  bordersExpanded: false,
+  expandedLands: [],
+  empireFounded: false,
+  empireName: "",
+  empireDoctrine: "",
+  cities: 1,
+};
+
 const captures = [
   { filename: "mobile-home.png", route: "/", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-world.png", route: "/world", viewport: "mobile", width: 390, height: 844, fullPage: true },
-  { filename: "mobile-world-top.png", route: "/world", viewport: "mobile", width: 390, height: 844 },
+  {
+    filename: "mobile-world-top.png",
+    route: "/world",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    prepare: async (page) => {
+      await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+      await page.waitForTimeout(300);
+      await page.locator("[data-qa='mobile-claim-tray']").waitFor({ state: "hidden", timeout: 2000 });
+    },
+  },
   {
     filename: "mobile-world-atlas.png",
     route: "/world",
@@ -48,10 +98,30 @@ const captures = [
       const sector = page.locator("[data-qa='playable-sector']").first();
       await sector.scrollIntoViewIfNeeded();
       await page.waitForTimeout(400);
+      const tile = page.locator("[data-qa='playable-sector'] button").nth(40);
+      await tile.click();
+      await page.waitForTimeout(400);
       await page.locator("[data-qa='mobile-claim-tray']").waitFor({ state: "visible", timeout: 5000 });
     },
   },
-  { filename: "mobile-dashboard.png", route: "/dashboard", viewport: "mobile", width: 390, height: 844 },
+  {
+    filename: "mobile-dashboard.png",
+    route: "/dashboard",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    prepare: async (page) => {
+      await page.evaluate(
+        ({ key, state }) => {
+          localStorage.setItem(key, JSON.stringify(state));
+        },
+        { key: DEMO_STATE_KEY, state: QA_CLAIMED_DEMO_STATE },
+      );
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(700);
+    },
+  },
   { filename: "mobile-settlement.png", route: "/settlement", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-nation.png", route: "/nation", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-empire.png", route: "/empire", viewport: "mobile", width: 390, height: 844 },

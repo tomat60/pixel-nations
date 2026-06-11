@@ -155,7 +155,10 @@ export default function DashboardPage() {
 
           <div className="mt-6 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              ["Land ID", claimedLand.landId || "Awaiting Claim"],
+              [
+                "Land ID",
+                claimedLand.landId || (claimedLand.hasClaimedLand ? "Origin Recorded" : "Awaiting Claim"),
+              ],
               ["Origin Land", claimedLand.landName],
               ["Region", claimedLand.region],
               ["Terrain", claimedLand.terrain],

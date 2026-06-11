@@ -9,6 +9,8 @@ export const SETTLEMENT_STORAGE_KEYS = {
   claimedLandCoordinates: "claimedLandCoordinates",
   claimedLandRegion: "claimedLandRegion",
   claimedLandTerrain: "claimedLandTerrain",
+  claimedLandPnId: "claimedLandPnId",
+  claimedLandResources: "claimedLandResources",
   founderBadgeEarned: "founderBadgeEarned",
   founded: "settlementFounded",
   name: "settlementName",
@@ -45,6 +47,8 @@ export type SettlementState = {
   claimedLandCoordinates?: string;
   claimedLandRegion?: string;
   claimedLandTerrain?: string;
+  claimedLandPnId?: string;
+  claimedLandResources?: string;
   founderBadgeEarned: boolean;
   settlementFounded: boolean;
   settlementName: string;
@@ -81,6 +85,8 @@ export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
   claimedLandCoordinates: "",
   claimedLandRegion: "",
   claimedLandTerrain: "",
+  claimedLandPnId: "",
+  claimedLandResources: "",
   founderBadgeEarned: false,
   settlementFounded: false,
   settlementName: "",
@@ -119,6 +125,30 @@ function toSafeNumber(value: unknown, fallback: number) {
   return Number.isFinite(numeric) ? numeric : fallback;
 }
 
+function resolveClaimedLandPnId(claimedLandId?: string, claimedLandPnId?: string) {
+  if (claimedLandPnId) return claimedLandPnId;
+  if (!claimedLandId) return "";
+
+  const worldMatch = claimedLandId.match(/world-tile-(\d+)/);
+  if (worldMatch) return `PN-${String(401 + Number(worldMatch[1])).padStart(4, "0")}`;
+
+  const tileMatch = claimedLandId.match(/^tile-(\d+)$/);
+  if (tileMatch) return `PN-${String(1 + Number(tileMatch[1])).padStart(4, "0")}`;
+
+  if (/^PN-\d{4}$/.test(claimedLandId)) return claimedLandId;
+
+  return "";
+}
+
+function normalizeClaimedLandState(state: SettlementState): SettlementState {
+  if (!state.claimedLand) return state;
+
+  const claimedLandPnId = resolveClaimedLandPnId(state.claimedLandId, state.claimedLandPnId);
+  if (!claimedLandPnId || claimedLandPnId === state.claimedLandPnId) return state;
+
+  return { ...state, claimedLandPnId };
+}
+
 function sanitizeState(raw: unknown): SettlementState {
   const source = typeof raw === "object" && raw !== null ? (raw as Partial<SettlementState>) : {};
 
@@ -131,6 +161,9 @@ function sanitizeState(raw: unknown): SettlementState {
       typeof source.claimedLandCoordinates === "string" ? source.claimedLandCoordinates : "",
     claimedLandRegion: typeof source.claimedLandRegion === "string" ? source.claimedLandRegion : "",
     claimedLandTerrain: typeof source.claimedLandTerrain === "string" ? source.claimedLandTerrain : "",
+    claimedLandPnId: typeof source.claimedLandPnId === "string" ? source.claimedLandPnId : "",
+    claimedLandResources:
+      typeof source.claimedLandResources === "string" ? source.claimedLandResources : "",
     founderBadgeEarned: source.founderBadgeEarned === true,
     settlementFounded: source.settlementFounded === true,
     settlementName: typeof source.settlementName === "string" ? source.settlementName : "",
@@ -222,6 +255,12 @@ function readLegacyState(): SettlementState {
   const claimedLandTerrain =
     localStorage.getItem(SETTLEMENT_STORAGE_KEYS.claimedLandTerrain) ??
     DEFAULT_SETTLEMENT_STATE.claimedLandTerrain;
+  const claimedLandPnId =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.claimedLandPnId) ??
+    DEFAULT_SETTLEMENT_STATE.claimedLandPnId;
+  const claimedLandResources =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.claimedLandResources) ??
+    DEFAULT_SETTLEMENT_STATE.claimedLandResources;
   const founderBadgeEarned = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.founderBadgeEarned) === "true";
 
   let alliancePartners: string[] = [];
@@ -251,6 +290,8 @@ function readLegacyState(): SettlementState {
     claimedLandCoordinates,
     claimedLandRegion,
     claimedLandTerrain,
+    claimedLandPnId,
+    claimedLandResources,
     founderBadgeEarned,
     settlementFounded,
     settlementName,
@@ -286,17 +327,17 @@ export function readSettlementState(): SettlementState {
 
   try {
     const serialized = localStorage.getItem(DEMO_STATE_KEY);
-    if (serialized) return sanitizeState(JSON.parse(serialized));
+    if (serialized) return normalizeClaimedLandState(sanitizeState(JSON.parse(serialized)));
   } catch {
-    return readLegacyState();
+    return normalizeClaimedLandState(readLegacyState());
   }
 
-  return readLegacyState();
+  return normalizeClaimedLandState(readLegacyState());
 }
 
 export function writeSettlementState(state: SettlementState) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(DEMO_STATE_KEY, JSON.stringify(sanitizeState(state)));
+  localStorage.setItem(DEMO_STATE_KEY, JSON.stringify(normalizeClaimedLandState(sanitizeState(state))));
 }
 
 export function clearSettlementState() {
