@@ -1,0 +1,262 @@
+"use client";
+
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+
+import {
+  DEFAULT_SETTLEMENT_STATE,
+  type SettlementState,
+  readSettlementState,
+  writeSettlementState,
+} from "../lib/settlement-state";
+
+const FALLBACK_SETTLEMENT = {
+  settlementName: "Aurelia Prime",
+  population: 24,
+  influence: 3,
+  region: "Aurelia",
+  coordinates: "X19 / Y12",
+  founder: "You",
+  settlementLevel: "Outpost",
+};
+
+const STARTING_RESOURCES = [
+  { id: "timber", label: "Timber", value: "120" },
+  { id: "stone", label: "Stone", value: "80" },
+  { id: "iron", label: "Iron", value: "25" },
+  { id: "food", label: "Food", value: "200" },
+];
+
+export default function SettlementPage() {
+  const [settlementState, setSettlementState] = useState<SettlementState>(DEFAULT_SETTLEMENT_STATE);
+
+  useEffect(() => {
+    setSettlementState(readSettlementState());
+  }, []);
+
+  const displaySettlement = useMemo(
+    () => ({
+      settlementName: settlementState.settlementName || FALLBACK_SETTLEMENT.settlementName,
+      population:
+        settlementState.population > 0 ? settlementState.population : FALLBACK_SETTLEMENT.population,
+      influence:
+        settlementState.influence > 0 ? settlementState.influence : FALLBACK_SETTLEMENT.influence,
+      region: settlementState.region || FALLBACK_SETTLEMENT.region,
+      coordinates: settlementState.coordinates || FALLBACK_SETTLEMENT.coordinates,
+      founder: settlementState.founder || FALLBACK_SETTLEMENT.founder,
+      settlementLevel: settlementState.settlementLevel || FALLBACK_SETTLEMENT.settlementLevel,
+      townHallBuilt: settlementState.townHallBuilt,
+    }),
+    [settlementState],
+  );
+
+  const buildTownHall = () => {
+    if (displaySettlement.townHallBuilt) return;
+
+    const nextState: SettlementState = {
+      ...settlementState,
+      settlementFounded: true,
+      settlementName: displaySettlement.settlementName,
+      population: 64,
+      influence: 7,
+      region: displaySettlement.region,
+      coordinates: displaySettlement.coordinates,
+      founder: displaySettlement.founder,
+      townHallBuilt: true,
+      settlementLevel: "City Seed",
+    };
+
+    setSettlementState(nextState);
+    writeSettlementState(nextState);
+  };
+
+  const development = displaySettlement.townHallBuilt
+    ? {
+        stage: "City Seed",
+        objective: "Establish Trade Route",
+        progress: "1 / 1 Core Building",
+        cta: "Trade Routes Coming Soon",
+        disabled: true,
+      }
+    : {
+        stage: "Outpost",
+        objective: "Build the Town Hall",
+        progress: "0 / 1 Core Building",
+        cta: "Build Town Hall",
+        disabled: false,
+      };
+
+  const statCards = [
+    { id: "population", label: "Population", value: String(displaySettlement.population) },
+    { id: "influence", label: "Influence", value: String(displaySettlement.influence) },
+    { id: "lands", label: "Lands Controlled", value: "1" },
+    { id: "level", label: "Level", value: displaySettlement.settlementLevel },
+  ];
+
+  return (
+    <main className="relative min-h-screen overflow-hidden bg-[#050505] px-6 py-12 text-white sm:px-10 sm:py-16">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(201,169,98,0.09)_0%,transparent_60%)]"
+      />
+      <div className="relative mx-auto max-w-6xl">
+        <motion.header
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
+          className="border-b border-amber-500/15 pb-10"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-600/75">
+            First Settlement
+          </p>
+          <h1 className="mt-7 font-[family-name:var(--font-syne)] text-5xl font-extrabold leading-[1.02] tracking-tight text-amber-100 sm:text-6xl md:text-7xl">
+            {displaySettlement.settlementName}
+          </h1>
+          <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">
+            &quot;The first city of Aurelia begins here.&quot;
+          </p>
+
+          <div className="mt-8 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ["Founder", displaySettlement.founder],
+              ["Region", displaySettlement.region],
+              ["Coordinates", displaySettlement.coordinates],
+              ["Status", "Founded"],
+            ].map(([label, value]) => (
+              <div key={label} className="bg-[#08080f]/95 p-4 sm:p-5">
+                <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">{label}</p>
+                <p className="mt-2 font-[family-name:var(--font-syne)] text-base font-bold text-amber-100">
+                  {value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </motion.header>
+
+        <motion.section
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.08, ease: "easeOut" }}
+          className="mt-10 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          {statCards.map((stat) => (
+            <article key={stat.id} className="bg-[#08080f]/95 p-5 sm:p-6">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">{stat.label}</p>
+              <p className="mt-3 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-4xl">
+                {stat.value}
+              </p>
+            </article>
+          ))}
+        </motion.section>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <motion.section
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.14, ease: "easeOut" }}
+            className="border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+              City Development
+            </p>
+
+            <div className="mt-7 space-y-5 border-b border-amber-500/10 pb-6">
+              <div className="flex items-start justify-between gap-5">
+                <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">Current Stage</span>
+                <span className="text-right font-[family-name:var(--font-syne)] text-base font-bold text-amber-100">
+                  {development.stage}
+                </span>
+              </div>
+              <div className="flex items-start justify-between gap-5">
+                <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">Next Objective</span>
+                <span className="text-right font-[family-name:var(--font-syne)] text-base font-bold text-zinc-200">
+                  {development.objective}
+                </span>
+              </div>
+              <div className="flex items-start justify-between gap-5">
+                <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">Progress</span>
+                <span className="text-right font-[family-name:var(--font-syne)] text-sm font-bold text-zinc-300">
+                  {development.progress}
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={buildTownHall}
+              disabled={development.disabled}
+              className={`mt-7 rounded border px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] ${
+                development.disabled
+                  ? "cursor-not-allowed border-zinc-800 bg-[#08080f]/70 text-zinc-500"
+                  : "btn-primary border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 text-amber-100"
+              }`}
+            >
+              {development.cta}
+            </button>
+          </motion.section>
+
+          <motion.aside
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.2, ease: "easeOut" }}
+            className="space-y-6"
+          >
+            <section className="border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+                Resources
+              </p>
+              <div className="mt-6 space-y-5">
+                {STARTING_RESOURCES.map((resource) => (
+                  <div
+                    key={resource.id}
+                    className="flex items-start justify-between gap-5 border-b border-amber-500/10 pb-4 last:border-b-0 last:pb-0"
+                  >
+                    <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">{resource.label}</span>
+                    <span className="text-right font-[family-name:var(--font-syne)] text-sm font-bold text-amber-100">
+                      {resource.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">History</p>
+              <ul className="mt-6 space-y-3 text-sm leading-7 text-zinc-300">
+                <li className="border-l border-amber-500/25 pl-4">Land claimed by You</li>
+                <li className="border-l border-amber-500/25 pl-4">Founder Badge earned</li>
+                <li className="border-l border-amber-500/25 pl-4">
+                  {displaySettlement.settlementName} founded
+                </li>
+                {displaySettlement.townHallBuilt ? (
+                  <li className="border-l border-amber-500/25 pl-4">Town Hall built</li>
+                ) : null}
+              </ul>
+            </section>
+          </motion.aside>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.26, ease: "easeOut" }}
+          className="mt-10 flex flex-col gap-3 sm:flex-row"
+        >
+          <Link
+            href="/dashboard"
+            className="btn-secondary rounded border border-zinc-800 bg-[#08080f]/80 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-zinc-300 sm:inline-flex sm:items-center sm:justify-center"
+          >
+            Back To Dashboard
+          </Link>
+          <Link
+            href="/"
+            className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-amber-100 sm:inline-flex sm:items-center sm:justify-center"
+          >
+            View World
+          </Link>
+        </motion.div>
+      </div>
+    </main>
+  );
+}

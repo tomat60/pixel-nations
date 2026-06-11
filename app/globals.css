@@ -71,6 +71,28 @@ body {
   }
 }
 
+@keyframes world-marker-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  50% {
+    opacity: 0.75;
+    transform: translate(-50%, -50%) scale(1.35);
+  }
+}
+
+@keyframes world-map-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
 .animate-glow-pulse {
   animation: glow-pulse 12s ease-in-out infinite;
 }
@@ -85,6 +107,14 @@ body {
 
 .animate-border-glow {
   animation: border-glow 5s ease-in-out infinite;
+}
+
+.animate-world-marker-pulse {
+  animation: world-marker-pulse 3.8s ease-in-out infinite;
+}
+
+.animate-world-map-drift {
+  animation: world-map-drift 18s ease-in-out infinite;
 }
 
 .animation-delay-200 {
