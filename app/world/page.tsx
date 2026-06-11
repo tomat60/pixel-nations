@@ -47,13 +47,23 @@ const TERRAIN_RESOURCES: Record<Terrain, string[]> = {
 };
 
 const TERRAIN_TINT: Record<Terrain, string> = {
-  plains: "before:bg-[#4a3828]/18",
-  forest: "before:bg-[#2d4228]/22",
-  mountain: "before:bg-[#3a4048]/20",
-  coast: "before:bg-[#2a4550]/22",
-  basin: "before:bg-[#4a3028]/18",
-  crownland: "before:bg-[#5a4828]/24",
-  ruins: "before:bg-[#4a3828]/16",
+  plains: "before:bg-[#6b5438]/28",
+  forest: "before:bg-[#2f4a30]/34",
+  mountain: "before:bg-[#4a525c]/30",
+  coast: "before:bg-[#2f5a68]/32",
+  basin: "before:bg-[#5a3c30]/28",
+  crownland: "before:bg-[#7a6030]/36",
+  ruins: "before:bg-[#5a4838]/24",
+};
+
+const TERRAIN_TILE_SURFACE: Record<Terrain, string> = {
+  plains: "bg-[#2a2218]/70",
+  forest: "bg-[#142018]/75",
+  mountain: "bg-[#1a1e24]/72",
+  coast: "bg-[#122228]/74",
+  basin: "bg-[#241812]/72",
+  crownland: "bg-[#2a2010]/76",
+  ruins: "bg-[#221c14]/70",
 };
 
 const REGION_LABELS = [
@@ -68,72 +78,100 @@ const MAP_ROUTES = [
   "M 80 290 C 180 238 260 245 360 198 S 548 143 686 104",
   "M 148 96 C 248 148 302 182 384 254 S 512 350 640 382",
   "M 96 420 C 214 372 312 388 452 330 S 590 288 712 302",
+  "M 52 180 C 168 148 286 176 398 132 S 562 88 708 118",
+  "M 220 52 C 318 108 402 168 498 228 S 628 312 726 356",
 ];
 
 const MAP_RIVERS = [
   "M 404 38 C 388 112 420 168 386 230 S 328 330 366 430",
   "M 636 86 C 594 132 584 190 614 248 S 680 334 644 424",
+  "M 118 120 C 168 188 214 248 268 312 S 348 396 412 458",
+  "M 520 18 C 498 98 512 168 476 248 S 432 348 468 440",
 ];
 
 const MAP_CONTOURS = [
   "M 42 86 C 146 42 292 76 366 130 S 548 188 720 138",
   "M 74 360 C 178 302 304 332 418 284 S 598 230 734 268",
   "M 216 458 C 310 392 404 406 508 374 S 646 340 722 386",
+  "M 280 96 C 348 148 412 182 468 236 S 548 312 612 368",
+];
+
+const MAP_FRONTIER_LINES = [
+  "M 506 0 C 498 120 512 240 504 360 S 490 420 506 484",
+  "M 0 162 C 180 148 320 172 460 158 S 620 142 760 168",
+  "M 0 388 C 210 362 360 398 520 372 S 660 348 760 396",
+  "M 152 0 C 168 160 142 300 158 484",
 ];
 
 const SECTOR_REGION_ZONES = [
   {
     id: "north-frontier",
-    className: "left-[14%] top-[2%] h-[36%] w-[50%] border-zinc-400/12 bg-zinc-400/[0.07]",
-    clipPath: "polygon(0 18%, 34% 0, 88% 12%, 100% 68%, 62% 96%, 10% 78%)",
+    className:
+      "left-[12%] top-[0%] h-[38%] w-[52%] border-zinc-300/10 bg-zinc-300/[0.05] shadow-[inset_0_0_40px_rgba(161,161,170,0.04)]",
+    clipPath: "polygon(0 20%, 32% 0, 90% 10%, 100% 66%, 60% 98%, 8% 80%)",
   },
   {
     id: "iron-coast",
-    className: "left-[0%] top-[22%] h-[74%] w-[30%] border-slate-400/12 bg-slate-500/[0.08]",
-    clipPath: "polygon(0 0, 72% 8%, 100% 48%, 72% 98%, 8% 86%, 0 42%)",
+    className:
+      "left-[-1%] top-[20%] h-[78%] w-[32%] border-slate-300/10 bg-slate-400/[0.06] shadow-[inset_0_0_36px_rgba(148,163,184,0.05)]",
+    clipPath: "polygon(0 0, 74% 6%, 100% 46%, 74% 100%, 6% 88%, 0 40%)",
   },
   {
     id: "aurelia",
-    className: "left-[26%] top-[28%] h-[44%] w-[50%] border-amber-400/16 bg-amber-500/[0.09]",
-    clipPath: "polygon(10% 18%, 56% 0, 100% 24%, 84% 78%, 36% 100%, 0 64%)",
+    className:
+      "left-[24%] top-[26%] h-[46%] w-[52%] border-amber-400/14 bg-amber-500/[0.07] shadow-[inset_0_0_48px_rgba(251,191,36,0.06)]",
+    clipPath: "polygon(8% 16%, 54% 0, 100% 22%, 86% 80%, 34% 100%, 0 62%)",
   },
   {
     id: "crownlands",
-    className: "left-[61%] top-[6%] h-[50%] w-[36%] border-amber-200/16 bg-amber-300/[0.08]",
-    clipPath: "polygon(16% 8%, 80% 0, 100% 42%, 78% 90%, 22% 100%, 0 50%)",
+    className:
+      "left-[59%] top-[4%] h-[52%] w-[38%] border-amber-200/14 bg-amber-200/[0.06] shadow-[inset_0_0_40px_rgba(253,230,138,0.05)]",
+    clipPath: "polygon(14% 6%, 82% 0, 100% 40%, 76% 92%, 20% 100%, 0 48%)",
   },
   {
     id: "ember-basin",
-    className: "left-[34%] top-[60%] h-[36%] w-[60%] border-orange-300/12 bg-orange-400/[0.07]",
-    clipPath: "polygon(4% 24%, 42% 0, 98% 16%, 88% 82%, 42% 100%, 0 74%)",
+    className:
+      "left-[32%] top-[58%] h-[38%] w-[62%] border-orange-300/10 bg-orange-400/[0.06] shadow-[inset_0_0_36px_rgba(251,146,60,0.04)]",
+    clipPath: "polygon(2% 26%, 40% 0, 100% 14%, 90% 84%, 40% 100%, 0 72%)",
   },
 ];
 
 const TERRAIN_MASSES = [
   {
     id: "coast-band",
-    className: "left-[0%] top-[18%] h-[78%] w-[16%] bg-gradient-to-r from-slate-700/35 to-transparent",
-    clipPath: "polygon(0 0, 100% 8%, 100% 92%, 0 100%)",
+    className:
+      "left-[-2%] top-[14%] h-[84%] w-[22%] bg-gradient-to-r from-slate-600/45 via-slate-700/20 to-transparent blur-[1px]",
+    clipPath: "polygon(0 0, 88% 6%, 100% 48%, 82% 94%, 0 100%)",
   },
   {
     id: "forest-belt",
-    className: "left-[18%] top-[8%] h-[38%] w-[42%] bg-gradient-to-br from-emerald-950/40 to-transparent",
-    clipPath: "polygon(0 20%, 48% 0, 100% 28%, 88% 100%, 12% 88%)",
+    className:
+      "left-[12%] top-[4%] h-[46%] w-[48%] bg-gradient-to-br from-emerald-900/50 via-emerald-950/25 to-transparent blur-[2px]",
+    clipPath: "polygon(0 24%, 44% 0, 100% 22%, 92% 100%, 8% 90%)",
   },
   {
     id: "plains-heart",
-    className: "left-[32%] top-[34%] h-[32%] w-[38%] bg-gradient-to-b from-amber-950/30 to-transparent",
-    clipPath: "polygon(8% 0, 92% 12%, 100% 88%, 48% 100%, 0 72%)",
+    className:
+      "left-[28%] top-[30%] h-[38%] w-[44%] bg-gradient-to-b from-amber-900/42 via-amber-950/18 to-transparent blur-[1px]",
+    clipPath: "polygon(6% 0, 94% 10%, 100% 86%, 44% 100%, 0 68%)",
   },
   {
     id: "ridge-line",
-    className: "left-[58%] top-[4%] h-[44%] w-[38%] bg-gradient-to-bl from-zinc-700/35 to-transparent",
-    clipPath: "polygon(18% 0, 100% 8%, 92% 100%, 0 82%)",
+    className:
+      "left-[54%] top-[2%] h-[48%] w-[42%] bg-gradient-to-bl from-zinc-500/38 via-zinc-800/20 to-transparent blur-[2px]",
+    clipPath: "polygon(14% 0, 100% 6%, 94% 100%, 0 78%)",
   },
   {
     id: "basin-floor",
-    className: "left-[38%] top-[64%] h-[30%] w-[54%] bg-gradient-to-t from-orange-950/35 to-transparent",
-    clipPath: "polygon(0 28%, 44% 0, 100% 18%, 92% 100%, 8% 100%)",
+    className:
+      "left-[32%] top-[58%] h-[38%] w-[62%] bg-gradient-to-t from-orange-900/42 via-orange-950/18 to-transparent blur-[2px]",
+    clipPath: "polygon(0 32%, 40% 0, 100% 14%, 90% 100%, 6% 100%)",
+  },
+  {
+    id: "mist-veil",
+    className:
+      "inset-[8%] bg-[radial-gradient(ellipse_at_50%_42%,rgba(201,169,98,0.08),transparent_62%)]",
+    clipPath: "none",
   },
 ];
 
