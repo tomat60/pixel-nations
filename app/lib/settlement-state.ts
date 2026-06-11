@@ -21,6 +21,10 @@ export const SETTLEMENT_STORAGE_KEYS = {
   landsControlled: "landsControlled",
   bordersExpanded: "bordersExpanded",
   expandedLands: "expandedLands",
+  empireFounded: "empireFounded",
+  empireName: "empireName",
+  empireDoctrine: "empireDoctrine",
+  cities: "cities",
 } as const;
 
 export type SettlementState = {
@@ -46,6 +50,10 @@ export type SettlementState = {
   landsControlled: number;
   bordersExpanded: boolean;
   expandedLands: string[];
+  empireFounded: boolean;
+  empireName: string;
+  empireDoctrine: string;
+  cities: number;
 };
 
 export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
@@ -71,6 +79,10 @@ export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
   landsControlled: 1,
   bordersExpanded: false,
   expandedLands: [],
+  empireFounded: false,
+  empireName: "",
+  empireDoctrine: "",
+  cities: 1,
 };
 
 export function readSettlementState(): SettlementState {
@@ -114,6 +126,12 @@ export function readSettlementState(): SettlementState {
   const landsControlledRaw = Number(localStorage.getItem(SETTLEMENT_STORAGE_KEYS.landsControlled));
   const bordersExpanded = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.bordersExpanded) === "true";
   const expandedLandsRaw = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.expandedLands);
+  const empireFounded = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.empireFounded) === "true";
+  const empireName =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.empireName) ?? DEFAULT_SETTLEMENT_STATE.empireName;
+  const empireDoctrine =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.empireDoctrine) ?? DEFAULT_SETTLEMENT_STATE.empireDoctrine;
+  const citiesRaw = Number(localStorage.getItem(SETTLEMENT_STORAGE_KEYS.cities));
 
   let alliancePartners: string[] = [];
   if (alliancePartnersRaw) {
@@ -162,6 +180,10 @@ export function readSettlementState(): SettlementState {
     landsControlled: Number.isFinite(landsControlledRaw) ? landsControlledRaw : 1,
     bordersExpanded,
     expandedLands,
+    empireFounded,
+    empireName,
+    empireDoctrine,
+    cities: Number.isFinite(citiesRaw) ? citiesRaw : 1,
   };
 }
 
@@ -199,4 +221,8 @@ export function writeSettlementState(state: SettlementState) {
   localStorage.setItem(SETTLEMENT_STORAGE_KEYS.landsControlled, String(state.landsControlled));
   localStorage.setItem(SETTLEMENT_STORAGE_KEYS.bordersExpanded, String(state.bordersExpanded));
   localStorage.setItem(SETTLEMENT_STORAGE_KEYS.expandedLands, JSON.stringify(state.expandedLands));
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.empireFounded, String(state.empireFounded));
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.empireName, state.empireName);
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.empireDoctrine, state.empireDoctrine);
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.cities, String(state.cities));
 }

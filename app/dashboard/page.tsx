@@ -34,7 +34,11 @@ export default function DashboardPage() {
         label: "Lands Owned",
         value: String(settlementState.landsControlled > 0 ? settlementState.landsControlled : 1),
       },
-      { id: "settlements", label: "Settlements", value: settlementState.settlementFounded ? "1" : "0" },
+      {
+        id: "settlements",
+        label: "Settlements",
+        value: settlementState.empireFounded ? String(settlementState.cities > 0 ? settlementState.cities : 3) : settlementState.settlementFounded ? "1" : "0",
+      },
       { id: "population", label: "Population", value: String(settlementState.population) },
       { id: "influence", label: "Influence", value: String(settlementState.influence) },
     ],
@@ -59,45 +63,63 @@ export default function DashboardPage() {
         value: settlementState.nationFounded ? settlementState.nationName || "Awaiting Founder" : "Awaiting Founder",
       },
       ...(settlementState.nationFounded ? [{ id: "first-nation-founder", label: "Founder", value: "You" }] : []),
-      { id: "first-empire", label: "First Empire", value: "Awaiting Founder" },
+      {
+        id: "first-empire",
+        label: "First Empire",
+        value: settlementState.empireFounded ? settlementState.empireName || "Awaiting Founder" : "Awaiting Founder",
+      },
+      ...(settlementState.empireFounded ? [{ id: "first-empire-founder", label: "Founder", value: "You" }] : []),
     ],
     [settlementState],
   );
 
   const nextMilestone = settlementState.settlementFounded
-    ? settlementState.nationFounded
+    ? settlementState.empireFounded
       ? {
-          title: settlementState.bordersExpanded ? "Create Empire" : "Expand Borders",
-          progress: settlementState.bordersExpanded ? "1 / 1 Expansion" : "0 / 1 Expansion",
-          cta: "View Nation",
-          href: "/nation",
+          title: "Rule the World",
+          progress: "Empire Founded",
+          cta: "View Empire",
+          href: "/empire",
         }
-      : settlementState.regionalAllianceFormed
+      : settlementState.nationFounded
         ? {
-            title: "Found the First Nation",
-            progress: "0 / 1 Nation",
-            cta: "View Settlement",
-            href: "/settlement",
+            title: settlementState.bordersExpanded ? "Create Empire" : "Expand Borders",
+            progress: settlementState.bordersExpanded ? "0 / 1 Empire" : "0 / 1 Expansion",
+            cta: "View Nation",
+            href: "/nation",
           }
-        : settlementState.tradeRouteEstablished
+        : settlementState.regionalAllianceFormed
           ? {
-              title: "Form Regional Alliance",
-              progress: "0 / 1 Alliance",
+              title: "Found the First Nation",
+              progress: "0 / 1 Nation",
               cta: "View Settlement",
               href: "/settlement",
             }
-          : {
-              title: "Build Your City",
-              progress: settlementState.townHallBuilt ? "0 / 1 Trade Route" : "0 / 1 Core Building",
-              cta: "View Settlement",
-              href: "/settlement",
-            }
+          : settlementState.tradeRouteEstablished
+            ? {
+                title: "Form Regional Alliance",
+                progress: "0 / 1 Alliance",
+                cta: "View Settlement",
+                href: "/settlement",
+              }
+            : {
+                title: "Build Your City",
+                progress: settlementState.townHallBuilt ? "0 / 1 Trade Route" : "0 / 1 Core Building",
+                cta: "View Settlement",
+                href: "/settlement",
+              }
     : {
         title: "Found the First Settlement",
         progress: "0 / 1 Settlement",
         cta: "Found Settlement",
         href: "/settlement/create",
       };
+
+  const founderTitle = settlementState.empireFounded
+    ? settlementState.empireName || "Aurelia"
+    : settlementState.nationFounded
+      ? settlementState.nationName || "Aurelia"
+      : "Aurelia";
 
   return (
     <main className="min-h-screen bg-[#050505] px-6 py-12 text-white sm:px-10 sm:py-16">
@@ -116,9 +138,7 @@ export default function DashboardPage() {
           </div>
 
           <h1 className="mt-8 font-[family-name:var(--font-syne)] text-4xl font-extrabold tracking-tight text-amber-100 sm:text-5xl md:text-6xl">
-            {settlementState.nationFounded
-              ? `Founder of ${settlementState.nationName || "Aurelia"}`
-              : "Founder of Aurelia"}
+            {`Founder of ${founderTitle}`}
           </h1>
           <p className="mt-4 text-xs uppercase tracking-[0.24em] text-zinc-500">
             Land ID

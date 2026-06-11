@@ -22,6 +22,7 @@ const FALLBACK_SETTLEMENT = {
   tradeRouteDestination: "Iron Coast",
   allianceName: "Aurelian Pact",
   nationName: "The Aurelian Crown",
+  empireName: "Aurelian Empire",
 };
 
 const STARTING_RESOURCES = [
@@ -58,6 +59,8 @@ export default function SettlementPage() {
       nationFounded: settlementState.nationFounded,
       nationName: settlementState.nationName || FALLBACK_SETTLEMENT.nationName,
       landsControlled: settlementState.landsControlled > 0 ? settlementState.landsControlled : 1,
+      empireFounded: settlementState.empireFounded,
+      empireName: settlementState.empireName || FALLBACK_SETTLEMENT.empireName,
     }),
     [settlementState],
   );
@@ -89,30 +92,43 @@ export default function SettlementPage() {
       landsControlled: 1,
       bordersExpanded: false,
       expandedLands: [],
+      empireFounded: false,
+      empireName: "",
+      empireDoctrine: "",
+      cities: 1,
     };
 
     setSettlementState(nextState);
     writeSettlementState(nextState);
   };
 
-  const development = displaySettlement.nationFounded
+  const development = displaySettlement.empireFounded
     ? {
-        stage: "Capital City",
-        objective: "Expand Borders",
-        progress: "1 / 1 Nation",
-        cta: "View Nation",
+        stage: "Imperial Capital",
+        objective: "Rule the World",
+        progress: "Empire Founded",
+        cta: "View Empire",
         disabled: false,
-        href: "/nation",
+        href: "/empire",
       }
-    : displaySettlement.regionalAllianceFormed
+    : displaySettlement.nationFounded
       ? {
-          stage: "Regional Power",
-          objective: "Found the First Nation",
-          progress: "0 / 1 Nation",
-          cta: "Found First Nation",
+          stage: "Capital City",
+          objective: "Expand Borders",
+          progress: "0 / 1 Expansion",
+          cta: "View Nation",
           disabled: false,
-          href: "/nation/create",
+          href: "/nation",
         }
+      : displaySettlement.regionalAllianceFormed
+        ? {
+            stage: "Regional Power",
+            objective: "Found the First Nation",
+            progress: "0 / 1 Nation",
+            cta: "Found First Nation",
+            disabled: false,
+            href: "/nation/create",
+          }
       : displaySettlement.tradeRouteEstablished
         ? {
             stage: "Growing City",
@@ -325,6 +341,11 @@ export default function SettlementPage() {
                 {displaySettlement.nationFounded ? (
                   <li className="border-l border-amber-500/25 pl-4">
                     Nation founded: {displaySettlement.nationName}
+                  </li>
+                ) : null}
+                {displaySettlement.empireFounded ? (
+                  <li className="border-l border-amber-500/25 pl-4">
+                    Empire created: {displaySettlement.empireName}
                   </li>
                 ) : null}
               </ul>

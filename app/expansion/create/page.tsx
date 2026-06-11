@@ -100,6 +100,10 @@ export default function ExpansionCreatePage() {
       politicalStatus: "Expanding Nation",
       bordersExpanded: true,
       expandedLands: selectedLands,
+      empireFounded: false,
+      empireName: "",
+      empireDoctrine: "",
+      cities: 1,
     };
 
     setState(nextState);

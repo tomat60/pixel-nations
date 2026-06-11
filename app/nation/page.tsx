@@ -8,6 +8,8 @@ import { DEFAULT_SETTLEMENT_STATE, readSettlementState, type SettlementState } f
 
 const FALLBACK = {
   nationName: "The Aurelian Crown",
+  empireName: "Aurelian Empire",
+  empireDoctrine: "Golden Crown",
   settlementName: "Aurelia Prime",
   region: "Aurelia",
   ideology: "Crown Rule",
@@ -37,6 +39,10 @@ export default function NationPage() {
       politicalStatus: state.politicalStatus || "Nation Founder",
       bordersExpanded: state.bordersExpanded,
       expandedLands: state.expandedLands.length > 0 ? state.expandedLands : FALLBACK.expandedLands,
+      empireFounded: state.empireFounded,
+      empireName: state.empireName || FALLBACK.empireName,
+      empireDoctrine: state.empireDoctrine || FALLBACK.empireDoctrine,
+      cities: state.cities > 0 ? state.cities : 1,
     }),
     [state],
   );
@@ -69,7 +75,7 @@ export default function NationPage() {
               ["Founder", "You"],
               ["Capital", nation.settlementName],
               ["Region", nation.region],
-              ["Ideology", nation.ideology],
+            ["Ideology", nation.empireFounded ? nation.empireDoctrine : nation.ideology],
               ["Status", "Founded"],
             ].map(([label, value]) => (
               <div key={label} className="bg-[#08080f]/95 p-4 sm:p-5">
@@ -92,7 +98,7 @@ export default function NationPage() {
             ["Population", String(nation.population)],
             ["Influence", String(nation.influence)],
             ["Lands Controlled", String(nation.landsControlled)],
-            ["Cities", "1"],
+            ["Cities", String(nation.cities)],
           ].map(([label, value]) => (
             <article key={label} className="bg-[#08080f]/95 p-5 sm:p-6">
               <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">{label}</p>
@@ -117,7 +123,7 @@ export default function NationPage() {
                 ["Capital", nation.settlementName],
                 ["Founding Alliance", nation.allianceName],
                 ["Ideology", nation.ideology],
-                ["Next Objective", nation.bordersExpanded ? "Create Empire" : "Expand Borders"],
+                ["Next Objective", nation.empireFounded ? "Rule the World" : nation.bordersExpanded ? "Create Empire" : "Expand Borders"],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-start justify-between gap-5">
                   <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">{label}</span>
@@ -128,21 +134,28 @@ export default function NationPage() {
               ))}
             </div>
 
-            {nation.bordersExpanded ? (
+            {nation.empireFounded ? (
+              <Link
+                href="/empire"
+                className="btn-primary mt-9 inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
+              >
+                View Empire
+              </Link>
+            ) : nation.bordersExpanded ? (
+              <Link
+                href="/empire/create"
+                className="btn-primary mt-9 inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
+              >
+                Create Empire
+              </Link>
+            ) : (
               <button
                 type="button"
                 disabled
                 className="mt-9 cursor-not-allowed rounded border border-zinc-800 bg-[#08080f]/70 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-zinc-500"
               >
-                Empire Coming Soon
+                Expansion Coming Soon
               </button>
-            ) : (
-              <Link
-                href="/expansion/create"
-                className="btn-primary mt-9 inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
-              >
-                Expand Borders
-              </Link>
             )}
           </motion.section>
 
@@ -169,6 +182,9 @@ export default function NationPage() {
                 <li className="border-l border-amber-500/25 pl-4">
                   Borders expanded: {nation.expandedLands.join(", ")}
                 </li>
+              ) : null}
+              {nation.empireFounded ? (
+                <li className="border-l border-amber-500/25 pl-4">Empire created: {nation.empireName}</li>
               ) : null}
             </ul>
           </motion.aside>

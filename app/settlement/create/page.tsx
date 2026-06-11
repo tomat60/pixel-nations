@@ -80,6 +80,10 @@ export default function SettlementCreatePage() {
       landsControlled: 1,
       bordersExpanded: false,
       expandedLands: [],
+      empireFounded: false,
+      empireName: "",
+      empireDoctrine: "",
+      cities: 1,
     });
     setIsFounded(true);
   };
