@@ -243,7 +243,7 @@ export default function DashboardPage() {
             onClick={() => setIsResetConfirmOpen(true)}
             className="rounded border border-zinc-800 bg-[#08080f]/80 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500 transition-colors hover:border-zinc-700 hover:text-zinc-300"
           >
-            Reset Demo State
+            Reset Demo
           </button>
         </div>
       </div>
@@ -256,10 +256,10 @@ export default function DashboardPage() {
         >
           <div className="w-full max-w-lg border border-amber-500/20 bg-[#06060c] p-7 shadow-[0_30px_120px_rgba(0,0,0,0.7)] sm:p-9">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
-              Reset Demo State
+              Reset Demo
             </p>
             <p className="mt-5 text-base leading-8 text-zinc-300">
-              This will reset your local demo progress.
+              This clears your demo progress on this device.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <button

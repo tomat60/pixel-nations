@@ -536,10 +536,10 @@ export function WorldOwnershipMapSection() {
 
                   <div className="mt-8 flex items-center justify-between border-y border-amber-500/15 py-5">
                     <span className="text-xs uppercase tracking-[0.28em] text-zinc-600">
-                      Claim Cost
+                      Demo Claim
                     </span>
                     <span className="font-[family-name:var(--font-syne)] text-2xl font-extrabold text-amber-100">
-                      0.01 ETH
+                      Free
                     </span>
                   </div>
 

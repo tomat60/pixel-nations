@@ -168,6 +168,14 @@ export default function Home() {
     [demoState],
   );
 
+  const demoProgressMessage = useMemo(() => {
+    if (demoState.empireFounded) return "Empire founded. Continue from your empire.";
+    if (demoState.nationFounded) return "Nation founded. Continue your rise.";
+    if (demoState.settlementFounded) return "Settlement founded. Continue building.";
+    if (demoState.claimedLand) return "Land claimed. Continue your demo.";
+    return null;
+  }, [demoState]);
+
   const goToWorldPreview = useCallback(() => {
     const section = document.getElementById("world-preview");
     section?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -310,9 +318,9 @@ export default function Home() {
               <p className="text-sm leading-6 text-zinc-500">
                 Claim land, found a city, build a nation and create the first empire.
               </p>
-              {hasDemoProgress ? (
+              {hasDemoProgress && demoProgressMessage ? (
                 <p className="text-xs uppercase tracking-[0.2em] text-amber-300/80">
-                  Demo progress found. Continue your rise.
+                  {demoProgressMessage}
                 </p>
               ) : null}
             </div>
