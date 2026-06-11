@@ -372,6 +372,9 @@ export function WorldOwnershipMapSection() {
               >
                 Start Here
               </button>
+              <p className="mt-3 text-center text-xs leading-6 text-zinc-500">
+                Choose a land to begin the demo.
+              </p>
             </div>
 
             <p className="mt-8 text-sm leading-7 text-zinc-500">
