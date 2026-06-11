@@ -1,0 +1,46 @@
+{
+  "generatedAt": "2026-06-11T11:46:17.933Z",
+  "screenshots": [
+    {
+      "filename": "mobile-home.png",
+      "route": "/",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "mobile-world.png",
+      "route": "/world",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "mobile-dashboard.png",
+      "route": "/dashboard",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "mobile-settlement.png",
+      "route": "/settlement",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "mobile-nation.png",
+      "route": "/nation",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "mobile-empire.png",
+      "route": "/empire",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "desktop-home.png",
+      "route": "/",
+      "viewport": "desktop"
+    },
+    {
+      "filename": "desktop-world.png",
+      "route": "/world",
+      "viewport": "desktop"
+    }
+  ],
+  "notes": "Public QA screenshots for product/design review. Commit this folder and deploy to make /qa/latest/report.html available."
+}
