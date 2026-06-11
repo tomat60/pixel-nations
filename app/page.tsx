@@ -1,7 +1,10 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { PixelWorldMap } from "./components/PixelWorldMap";
 import { WorldOwnershipMapSection } from "./components/WorldOwnershipMapSection";
-
-const navLinks = ["Explore", "Nations", "World Map"];
+import { DEFAULT_SETTLEMENT_STATE, readSettlementState, type SettlementState } from "./lib/settlement-state";
 
 const progression = [
   {
@@ -149,6 +152,47 @@ const onboardingSteps = [
 ];
 
 export default function Home() {
+  const router = useRouter();
+  const [demoState, setDemoState] = useState<SettlementState>(DEFAULT_SETTLEMENT_STATE);
+
+  useEffect(() => {
+    setDemoState(readSettlementState());
+  }, []);
+
+  const hasDemoProgress = useMemo(
+    () =>
+      demoState.claimedLand ||
+      demoState.settlementFounded ||
+      demoState.nationFounded ||
+      demoState.empireFounded,
+    [demoState],
+  );
+
+  const goToWorldPreview = useCallback(() => {
+    const section = document.getElementById("world-preview");
+    section?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const handleStartDemo = useCallback(() => {
+    if (demoState.empireFounded) {
+      router.push("/empire");
+      return;
+    }
+    if (demoState.nationFounded) {
+      router.push("/nation");
+      return;
+    }
+    if (demoState.settlementFounded) {
+      router.push("/settlement");
+      return;
+    }
+    if (demoState.claimedLand) {
+      router.push("/dashboard");
+      return;
+    }
+    goToWorldPreview();
+  }, [demoState, goToWorldPreview, router]);
+
   const stats = [
     { id: "lands", value: "10,000", label: "Lands" },
     { id: "first-city", value: "First City", label: "Awaits" },
@@ -179,21 +223,34 @@ export default function Home() {
           </a>
 
           <ul className="hidden items-center gap-8 md:flex">
-            {navLinks.map((link) => (
-              <li key={link}>
-                <a href="#" className="nav-link text-sm font-medium text-zinc-500">
-                  {link}
-                </a>
-              </li>
-            ))}
+            <li>
+              <a href="#player-progression" className="nav-link text-sm font-medium text-zinc-500">
+                Explore
+              </a>
+            </li>
+            <li>
+              <a href="#player-destiny" className="nav-link text-sm font-medium text-zinc-500">
+                Nations
+              </a>
+            </li>
+            <li>
+              <button
+                type="button"
+                onClick={goToWorldPreview}
+                className="nav-link text-sm font-medium text-zinc-500"
+              >
+                World Map
+              </button>
+            </li>
           </ul>
 
-          <a
-            href="#"
+          <button
+            type="button"
+            onClick={handleStartDemo}
             className="rounded border border-amber-500/30 bg-amber-500/5 px-4 py-2 text-sm font-medium text-amber-300/90 transition-all hover:border-amber-500/50 hover:bg-amber-500/10 hover:text-amber-200"
           >
-            Login
-          </a>
+            Start Demo
+          </button>
         </nav>
       </header>
 
@@ -231,17 +288,33 @@ export default function Home() {
             <div className="animate-fade-up animation-delay-400 mt-12 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
               <button
                 type="button"
+                onClick={handleStartDemo}
                 className="btn-primary w-full rounded border border-amber-500/60 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-10 py-4 text-sm font-bold uppercase tracking-widest text-amber-100 shadow-[0_0_48px_rgba(201,169,98,0.1)] sm:w-auto sm:px-12 sm:text-base"
               >
-                Claim Your Land
+                Start Demo
               </button>
 
               <button
                 type="button"
+                onClick={goToWorldPreview}
                 className="btn-secondary w-full rounded border border-zinc-800 bg-[#08080f]/80 px-10 py-4 text-sm font-semibold uppercase tracking-widest text-zinc-400 sm:w-auto sm:px-12 sm:text-base"
               >
                 View the World
               </button>
+            </div>
+
+            <div className="mt-6 space-y-1 text-center">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-amber-600/70">
+                Playable MVP Demo
+              </p>
+              <p className="text-sm leading-6 text-zinc-500">
+                Claim land, found a city, build a nation and create the first empire.
+              </p>
+              {hasDemoProgress ? (
+                <p className="text-xs uppercase tracking-[0.2em] text-amber-300/80">
+                  Demo progress found. Continue your rise.
+                </p>
+              ) : null}
             </div>
 
             <div className="animate-fade-up animation-delay-600 mt-16 w-full max-w-4xl border-y border-amber-500/15 py-6">
@@ -284,7 +357,10 @@ export default function Home() {
         </section>
 
         {/* Progression */}
-        <section className="relative border-t border-amber-500/10 bg-[#030306]/80 px-6 py-28 sm:px-10 sm:py-36">
+        <section
+          id="player-progression"
+          className="relative border-t border-amber-500/10 bg-[#030306]/80 px-6 py-28 sm:px-10 sm:py-36"
+        >
           <div className="mx-auto max-w-6xl">
             <div className="mb-18 text-center sm:mb-22">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-600/70">
@@ -564,7 +640,10 @@ export default function Home() {
         </section>
 
         {/* First era */}
-        <section className="relative overflow-hidden border-t border-amber-500/10 bg-[#020204] px-6 py-34 sm:px-10 sm:py-48">
+        <section
+          id="player-destiny"
+          className="relative overflow-hidden border-t border-amber-500/10 bg-[#020204] px-6 py-34 sm:px-10 sm:py-48"
+        >
           <div
             aria-hidden
             className="pointer-events-none absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-700/7 blur-3xl"
@@ -604,7 +683,9 @@ export default function Home() {
           </div>
         </section>
 
-        <WorldOwnershipMapSection />
+        <div id="world-preview">
+          <WorldOwnershipMapSection />
+        </div>
 
         {/* Empire journey */}
         <section className="relative overflow-hidden border-t border-amber-500/10 bg-[#020204] px-6 py-34 sm:px-10 sm:py-48">
@@ -807,13 +888,15 @@ export default function Home() {
             <div className="mt-16 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <button
                 type="button"
+                onClick={handleStartDemo}
                 className="btn-primary w-full rounded border border-amber-500/65 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-12 py-4 text-sm font-bold uppercase tracking-widest text-amber-100 shadow-[0_0_60px_rgba(201,169,98,0.12)] sm:w-auto sm:text-base"
               >
-                Claim Your Land
+                Start Demo
               </button>
 
               <button
                 type="button"
+                onClick={goToWorldPreview}
                 className="btn-secondary w-full rounded border border-zinc-800 bg-[#08080f]/80 px-12 py-4 text-sm font-semibold uppercase tracking-widest text-zinc-400 sm:w-auto sm:text-base"
               >
                 View The World

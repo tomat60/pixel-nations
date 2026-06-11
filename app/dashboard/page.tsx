@@ -133,7 +133,7 @@ export default function DashboardPage() {
               Founder Dashboard
             </p>
             <Link
-              href="/"
+              href="/#world-preview"
               className="btn-secondary rounded border border-zinc-800 bg-[#08080f]/80 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400"
             >
               Back To World

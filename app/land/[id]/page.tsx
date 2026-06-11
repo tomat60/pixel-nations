@@ -128,7 +128,7 @@ export default async function LandDetailPage({
             </Link>
 
             <Link
-              href="/"
+              href="/#world-preview"
               className="hidden text-xs font-semibold uppercase tracking-[0.25em] text-zinc-600 transition-colors hover:text-amber-300 sm:block"
             >
               Back To World
