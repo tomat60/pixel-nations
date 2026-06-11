@@ -89,6 +89,47 @@ const MAP_RIVERS = [
   "M 636 86 C 594 132 584 190 614 248 S 680 334 644 424",
 ];
 
+const ATLAS_REGIONS = [
+  {
+    id: "north-frontier",
+    name: "North Frontier",
+    className: "left-[12%] top-[6%] h-[32%] w-[50%] border-zinc-300/12 bg-zinc-300/[0.055]",
+    clipPath: "polygon(8% 26%, 42% 4%, 88% 18%, 98% 64%, 58% 94%, 14% 76%)",
+  },
+  {
+    id: "crownlands",
+    name: "Crownlands",
+    className: "left-[58%] top-[10%] h-[34%] w-[34%] border-amber-200/18 bg-amber-300/[0.07]",
+    clipPath: "polygon(18% 10%, 78% 4%, 96% 42%, 74% 88%, 26% 96%, 4% 48%)",
+  },
+  {
+    id: "aurelia",
+    name: "Aurelia",
+    className: "left-[32%] top-[34%] h-[36%] w-[38%] border-amber-400/18 bg-amber-500/[0.06]",
+    clipPath: "polygon(14% 18%, 62% 2%, 96% 34%, 76% 82%, 32% 96%, 4% 62%)",
+  },
+  {
+    id: "iron-coast",
+    name: "Iron Coast",
+    className: "left-[8%] top-[45%] h-[42%] w-[32%] border-slate-300/14 bg-slate-300/[0.055]",
+    clipPath: "polygon(10% 4%, 82% 20%, 92% 72%, 48% 98%, 4% 82%, 0 28%)",
+  },
+  {
+    id: "ember-basin",
+    name: "Ember Basin",
+    className: "left-[42%] top-[66%] h-[27%] w-[44%] border-orange-300/14 bg-orange-300/[0.055]",
+    clipPath: "polygon(8% 22%, 46% 2%, 94% 18%, 86% 74%, 44% 98%, 2% 72%)",
+  },
+];
+
+const ATLAS_LABELS = [
+  { id: "north-frontier", name: "North Frontier", left: "31%", top: "20%" },
+  { id: "crownlands", name: "Crownlands", left: "76%", top: "27%" },
+  { id: "aurelia", name: "Aurelia", left: "51%", top: "51%" },
+  { id: "iron-coast", name: "Iron Coast", left: "22%", top: "70%" },
+  { id: "ember-basin", name: "Ember Basin", left: "63%", top: "80%" },
+];
+
 function getRegion(x: number, y: number): Region {
   if (x >= 15 && y <= 5) return "Crownlands";
   if (y <= 3 || (x <= 7 && y <= 5)) return "North Frontier";
@@ -313,8 +354,96 @@ export default function WorldPage() {
           </div>
         </header>
 
+        <section
+          id="world-atlas"
+          data-qa="world-atlas"
+          className="mt-6 border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.5)] sm:mt-8 sm:p-6"
+        >
+          <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200/80">
+                World Atlas
+              </p>
+              <h2 className="mt-4 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100 sm:text-3xl">
+                100 x 100 finite lands.
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-zinc-400">
+                The world is finite. Your first tile is permanent.
+              </p>
+              <div className="mt-5 grid grid-cols-2 gap-px border border-amber-500/10 bg-amber-500/10 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                <div className="bg-[#08080f]/95 p-3">
+                  <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">10,000</p>
+                  <p className="mt-1">total lands</p>
+                </div>
+                <div className="bg-[#08080f]/95 p-3">
+                  <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">Sector 04</p>
+                  <p className="mt-1">playable MVP</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden border border-amber-500/20 bg-[#030306] p-3 shadow-[inset_0_0_70px_rgba(0,0,0,0.65)]">
+              <div
+                aria-hidden
+                className="absolute inset-3 opacity-[0.16] [background-image:linear-gradient(rgba(201,169,98,0.55)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.55)_1px,transparent_1px)] [background-size:1%_1%]"
+              />
+              <div
+                aria-hidden
+                className="absolute inset-3 bg-[radial-gradient(ellipse_at_center,transparent_42%,rgba(2,2,4,0.72)_100%)]"
+              />
+              <div className="relative aspect-[16/9] min-h-[220px] overflow-hidden sm:min-h-[320px]">
+                {ATLAS_REGIONS.map((region) => (
+                  <div
+                    key={region.id}
+                    className={`absolute border ${region.className}`}
+                    style={{ clipPath: region.clipPath }}
+                  />
+                ))}
+                <svg
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 h-full w-full"
+                  viewBox="0 0 1000 562"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d="M 132 352 C 278 278 396 322 512 238 S 732 126 876 152"
+                    fill="none"
+                    stroke="rgba(201,169,98,0.2)"
+                    strokeDasharray="8 10"
+                    strokeWidth="3"
+                  />
+                  <path
+                    d="M 546 44 C 496 148 532 230 482 324 S 422 432 486 520"
+                    fill="none"
+                    stroke="rgba(148,163,184,0.22)"
+                    strokeWidth="3"
+                  />
+                </svg>
+                {ATLAS_LABELS.map((label) => (
+                  <span
+                    key={label.id}
+                    className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 border border-amber-500/15 bg-[#030306]/70 px-2 py-1 font-[family-name:var(--font-syne)] text-[9px] font-bold uppercase tracking-[0.22em] text-amber-100/65 backdrop-blur-sm"
+                    style={{ left: label.left, top: label.top }}
+                  >
+                    {label.name}
+                  </span>
+                ))}
+                <div className="absolute left-[43%] top-[42%] h-[28%] w-[28%] border border-amber-200/80 bg-amber-300/[0.035] shadow-[0_0_30px_rgba(251,191,36,0.18),inset_0_0_18px_rgba(251,191,36,0.08)]">
+                  <span className="absolute -top-7 left-0 whitespace-nowrap border border-amber-500/25 bg-[#030306]/85 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.22em] text-amber-200/80">
+                    Playable Sector
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="mt-8 grid gap-6 lg:mt-10 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <article className="relative overflow-hidden border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_30px_120px_rgba(0,0,0,0.6)] sm:p-6">
+          <article
+            id="playable-sector"
+            data-qa="playable-sector"
+            className="relative overflow-hidden border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_30px_120px_rgba(0,0,0,0.6)] sm:p-6"
+          >
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(201,169,98,0.06),transparent_54%)]"
@@ -323,10 +452,10 @@ export default function WorldPage() {
               <div className="flex flex-col justify-between gap-3 border-b border-amber-500/10 pb-4 sm:flex-row sm:items-end">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200/80">
-                    Playable Sector
+                    Sector 04 / Aurelia Frontier
                   </p>
                   <p className="mt-2 text-xs uppercase tracking-[0.22em] text-zinc-600">
-                    Inspect terrain. Choose carefully.
+                    Zoomed from the 100x100 world atlas
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3 text-[10px] uppercase tracking-[0.2em] text-zinc-600">
@@ -424,7 +553,11 @@ export default function WorldPage() {
             </div>
           </article>
 
-          <aside className="border border-amber-500/15 bg-[#06060c]/90 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] lg:sticky lg:top-6 lg:self-start">
+          <aside
+            id="selected-land-panel"
+            data-qa="selected-land-panel"
+            className="border border-amber-500/15 bg-[#06060c]/90 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] lg:sticky lg:top-6 lg:self-start"
+          >
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">Selected Land</p>
             <p className="mt-3 break-words font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100">
               {selectedTile.landName}

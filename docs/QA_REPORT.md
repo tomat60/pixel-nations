@@ -36,8 +36,9 @@ Useful direct links after deploy:
 
 ```text
 /qa/latest/screenshots/mobile-home.png
-/qa/latest/screenshots/mobile-world.png
-/qa/latest/screenshots/desktop-world.png
+/qa/latest/screenshots/mobile-world-top.png
+/qa/latest/screenshots/mobile-world-atlas.png
+/qa/latest/screenshots/desktop-world-atlas.png
 ```
 
 The report embeds the screenshots and includes a lightweight review checklist for landing hero, world preview, `/world` playable map, demo progress pages, mobile layout, modal behavior, and reset modal.

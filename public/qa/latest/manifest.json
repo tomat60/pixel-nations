@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-11T11:46:17.933Z",
+  "generatedAt": "2026-06-11T12:06:46.081Z",
   "screenshots": [
     {
       "filename": "mobile-home.png",
@@ -7,7 +7,22 @@
       "viewport": "mobile"
     },
     {
-      "filename": "mobile-world.png",
+      "filename": "mobile-world-top.png",
+      "route": "/world",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "mobile-world-atlas.png",
+      "route": "/world",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "mobile-world-playable-sector.png",
+      "route": "/world",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "mobile-world-selected-land-panel.png",
       "route": "/world",
       "viewport": "mobile"
     },
@@ -37,7 +52,22 @@
       "viewport": "desktop"
     },
     {
-      "filename": "desktop-world.png",
+      "filename": "desktop-world-top.png",
+      "route": "/world",
+      "viewport": "desktop"
+    },
+    {
+      "filename": "desktop-world-atlas.png",
+      "route": "/world",
+      "viewport": "desktop"
+    },
+    {
+      "filename": "desktop-world-playable-sector.png",
+      "route": "/world",
+      "viewport": "desktop"
+    },
+    {
+      "filename": "desktop-world-selected-land-panel.png",
       "route": "/world",
       "viewport": "desktop"
     }

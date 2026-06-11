@@ -11,13 +11,61 @@ const MANIFEST_PATH = `${OUTPUT_DIR}/manifest.json`;
 
 const captures = [
   { filename: "mobile-home.png", route: "/", viewport: "mobile", width: 390, height: 844 },
-  { filename: "mobile-world.png", route: "/world", viewport: "mobile", width: 390, height: 844 },
+  { filename: "mobile-world-top.png", route: "/world", viewport: "mobile", width: 390, height: 844 },
+  {
+    filename: "mobile-world-atlas.png",
+    route: "/world",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    selector: "[data-qa='world-atlas']",
+  },
+  {
+    filename: "mobile-world-playable-sector.png",
+    route: "/world",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    selector: "[data-qa='playable-sector']",
+  },
+  {
+    filename: "mobile-world-selected-land-panel.png",
+    route: "/world",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    selector: "[data-qa='selected-land-panel']",
+  },
   { filename: "mobile-dashboard.png", route: "/dashboard", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-settlement.png", route: "/settlement", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-nation.png", route: "/nation", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-empire.png", route: "/empire", viewport: "mobile", width: 390, height: 844 },
   { filename: "desktop-home.png", route: "/", viewport: "desktop", width: 1440, height: 900 },
-  { filename: "desktop-world.png", route: "/world", viewport: "desktop", width: 1440, height: 900 },
+  { filename: "desktop-world-top.png", route: "/world", viewport: "desktop", width: 1440, height: 900 },
+  {
+    filename: "desktop-world-atlas.png",
+    route: "/world",
+    viewport: "desktop",
+    width: 1440,
+    height: 900,
+    selector: "[data-qa='world-atlas']",
+  },
+  {
+    filename: "desktop-world-playable-sector.png",
+    route: "/world",
+    viewport: "desktop",
+    width: 1440,
+    height: 900,
+    selector: "[data-qa='playable-sector']",
+  },
+  {
+    filename: "desktop-world-selected-land-panel.png",
+    route: "/world",
+    viewport: "desktop",
+    width: 1440,
+    height: 900,
+    selector: "[data-qa='selected-land-panel']",
+  },
 ];
 
 async function isAppRunning() {
@@ -159,6 +207,15 @@ async function gotoAndCapture(page, capture) {
   await page.waitForTimeout(700);
   await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
   await page.waitForTimeout(250);
+
+  if (capture.selector) {
+    const locator = page.locator(capture.selector).first();
+    await locator.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(350);
+    await locator.screenshot({ path: `${SCREENSHOT_DIR}/${capture.filename}` });
+    return;
+  }
+
   await page.screenshot({ path: `${SCREENSHOT_DIR}/${capture.filename}`, fullPage: false });
 }
 
