@@ -21,7 +21,7 @@ const captures = [
     selector: "[data-qa='world-atlas']",
   },
   {
-    filename: "mobile-world-playable-sector.png",
+    filename: "mobile-world-sector.png",
     route: "/world",
     viewport: "mobile",
     width: 390,
@@ -51,7 +51,7 @@ const captures = [
     selector: "[data-qa='world-atlas']",
   },
   {
-    filename: "desktop-world-playable-sector.png",
+    filename: "desktop-world-sector.png",
     route: "/world",
     viewport: "desktop",
     width: 1440,

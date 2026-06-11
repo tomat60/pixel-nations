@@ -130,6 +130,21 @@ const ATLAS_LABELS = [
   { id: "ember-basin", name: "Ember Basin", left: "63%", top: "80%" },
 ];
 
+const ATLAS_LAND_MARKS = Array.from({ length: 260 }, (_, index) => {
+  const left = 4 + ((index * 37) % 92);
+  const top = 5 + ((index * 53) % 88);
+  const emphasis = (index * 11) % 17 === 0;
+  const dimmed = (index * 7) % 9 === 0;
+
+  return {
+    id: `atlas-land-${index}`,
+    left: `${left}%`,
+    top: `${top}%`,
+    opacity: emphasis ? 0.75 : dimmed ? 0.18 : 0.36,
+    size: emphasis ? 3 : 2,
+  };
+});
+
 function getRegion(x: number, y: number): Region {
   if (x >= 15 && y <= 5) return "Crownlands";
   if (y <= 3 || (x <= 7 && y <= 5)) return "North Frontier";
@@ -357,82 +372,136 @@ export default function WorldPage() {
         <section
           id="world-atlas"
           data-qa="world-atlas"
-          className="mt-6 border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.5)] sm:mt-8 sm:p-6"
+          className="mt-6 overflow-hidden border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.5)] sm:mt-8 sm:p-6"
         >
-          <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-center">
-            <div>
+          <div className="mb-5 grid gap-5 border-b border-amber-500/10 pb-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
+            <div className="max-w-3xl">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200/80">
                 World Atlas
               </p>
-              <h2 className="mt-4 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100 sm:text-3xl">
-                100 x 100 finite lands.
+              <h2 className="mt-4 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-5xl">
+                100 x 100 lands.
               </h2>
               <p className="mt-4 text-sm leading-7 text-zinc-400">
+                100 x 100 lands. One world. One history.
+              </p>
+              <p className="mt-2 text-sm leading-7 text-amber-200/70">
                 The world is finite. Your first tile is permanent.
               </p>
-              <div className="mt-5 grid grid-cols-2 gap-px border border-amber-500/10 bg-amber-500/10 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                <div className="bg-[#08080f]/95 p-3">
-                  <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">10,000</p>
-                  <p className="mt-1">total lands</p>
-                </div>
-                <div className="bg-[#08080f]/95 p-3">
-                  <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">Sector 04</p>
-                  <p className="mt-1">playable MVP</p>
-                </div>
+            </div>
+            <div className="grid grid-cols-3 gap-px border border-amber-500/10 bg-amber-500/10 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+              <div className="bg-[#08080f]/95 p-3">
+                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">10,000</p>
+                <p className="mt-1">finite lands</p>
+              </div>
+              <div className="bg-[#08080f]/95 p-3">
+                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">100 x 100</p>
+                <p className="mt-1">world grid</p>
+              </div>
+              <div className="bg-[#08080f]/95 p-3">
+                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">Sector 04</p>
+                <p className="mt-1">demo begins</p>
               </div>
             </div>
+          </div>
 
-            <div className="relative overflow-hidden border border-amber-500/20 bg-[#030306] p-3 shadow-[inset_0_0_70px_rgba(0,0,0,0.65)]">
-              <div
+          <div className="relative overflow-hidden border border-amber-500/20 bg-[#030306] p-3 shadow-[inset_0_0_90px_rgba(0,0,0,0.72)] sm:p-4">
+            <div
+              aria-hidden
+              className="absolute inset-3 opacity-[0.26] [background-image:linear-gradient(rgba(201,169,98,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.5)_1px,transparent_1px)] [background-size:1%_1%]"
+            />
+            <div
+              aria-hidden
+              className="absolute inset-3 opacity-[0.18] [background-image:linear-gradient(rgba(201,169,98,0.75)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.75)_1px,transparent_1px)] [background-size:10%_10%]"
+            />
+            <div
+              aria-hidden
+              className="absolute inset-3 bg-[radial-gradient(ellipse_at_center,transparent_38%,rgba(2,2,4,0.78)_100%)]"
+            />
+            <div className="relative aspect-[16/9] min-h-[260px] overflow-hidden sm:min-h-[420px] lg:min-h-[560px]">
+              {ATLAS_REGIONS.map((region) => (
+                <div
+                  key={region.id}
+                  className={`absolute border ${region.className}`}
+                  style={{ clipPath: region.clipPath }}
+                />
+              ))}
+
+              {ATLAS_LAND_MARKS.map((mark) => (
+                <span
+                  key={mark.id}
+                  className="pointer-events-none absolute rounded-[1px] bg-amber-100/70 shadow-[0_0_8px_rgba(251,191,36,0.18)]"
+                  style={{
+                    left: mark.left,
+                    top: mark.top,
+                    height: `${mark.size}px`,
+                    width: `${mark.size}px`,
+                    opacity: mark.opacity,
+                  }}
+                />
+              ))}
+
+              <svg
                 aria-hidden
-                className="absolute inset-3 opacity-[0.16] [background-image:linear-gradient(rgba(201,169,98,0.55)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.55)_1px,transparent_1px)] [background-size:1%_1%]"
-              />
-              <div
-                aria-hidden
-                className="absolute inset-3 bg-[radial-gradient(ellipse_at_center,transparent_42%,rgba(2,2,4,0.72)_100%)]"
-              />
-              <div className="relative aspect-[16/9] min-h-[220px] overflow-hidden sm:min-h-[320px]">
-                {ATLAS_REGIONS.map((region) => (
-                  <div
-                    key={region.id}
-                    className={`absolute border ${region.className}`}
-                    style={{ clipPath: region.clipPath }}
-                  />
-                ))}
-                <svg
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 h-full w-full"
-                  viewBox="0 0 1000 562"
-                  preserveAspectRatio="none"
+                className="pointer-events-none absolute inset-0 h-full w-full"
+                viewBox="0 0 1000 562"
+                preserveAspectRatio="none"
+              >
+                <path
+                  d="M 132 352 C 278 278 396 322 512 238 S 732 126 876 152"
+                  fill="none"
+                  stroke="rgba(201,169,98,0.2)"
+                  strokeDasharray="8 10"
+                  strokeWidth="3"
+                />
+                <path
+                  d="M 196 122 C 320 176 394 224 508 312 S 660 420 838 390"
+                  fill="none"
+                  stroke="rgba(201,169,98,0.16)"
+                  strokeDasharray="4 9"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M 546 44 C 496 148 532 230 482 324 S 422 432 486 520"
+                  fill="none"
+                  stroke="rgba(148,163,184,0.22)"
+                  strokeWidth="3"
+                />
+                <path
+                  d="M 716 84 C 648 162 636 238 696 318 S 734 428 680 520"
+                  fill="none"
+                  stroke="rgba(148,163,184,0.16)"
+                  strokeWidth="2"
+                />
+              </svg>
+
+              {ATLAS_LABELS.map((label) => (
+                <span
+                  key={label.id}
+                  className="pointer-events-none absolute hidden -translate-x-1/2 -translate-y-1/2 border border-amber-500/15 bg-[#030306]/75 px-2 py-1 font-[family-name:var(--font-syne)] text-[9px] font-bold uppercase tracking-[0.22em] text-amber-100/70 backdrop-blur-sm sm:block sm:text-[10px]"
+                  style={{ left: label.left, top: label.top }}
                 >
-                  <path
-                    d="M 132 352 C 278 278 396 322 512 238 S 732 126 876 152"
-                    fill="none"
-                    stroke="rgba(201,169,98,0.2)"
-                    strokeDasharray="8 10"
-                    strokeWidth="3"
-                  />
-                  <path
-                    d="M 546 44 C 496 148 532 230 482 324 S 422 432 486 520"
-                    fill="none"
-                    stroke="rgba(148,163,184,0.22)"
-                    strokeWidth="3"
-                  />
-                </svg>
-                {ATLAS_LABELS.map((label) => (
-                  <span
-                    key={label.id}
-                    className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 border border-amber-500/15 bg-[#030306]/70 px-2 py-1 font-[family-name:var(--font-syne)] text-[9px] font-bold uppercase tracking-[0.22em] text-amber-100/65 backdrop-blur-sm"
-                    style={{ left: label.left, top: label.top }}
-                  >
-                    {label.name}
-                  </span>
-                ))}
-                <div className="absolute left-[43%] top-[42%] h-[28%] w-[28%] border border-amber-200/80 bg-amber-300/[0.035] shadow-[0_0_30px_rgba(251,191,36,0.18),inset_0_0_18px_rgba(251,191,36,0.08)]">
-                  <span className="absolute -top-7 left-0 whitespace-nowrap border border-amber-500/25 bg-[#030306]/85 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.22em] text-amber-200/80">
-                    Playable Sector
-                  </span>
-                </div>
+                  {label.name}
+                </span>
+              ))}
+
+              <div className="absolute left-[43%] top-[42%] h-[28%] w-[28%] border border-amber-200/90 bg-amber-300/[0.04] shadow-[0_0_46px_rgba(251,191,36,0.26),inset_0_0_22px_rgba(251,191,36,0.1)]">
+                <span className="absolute left-1 top-1 border border-amber-500/30 bg-[#030306]/90 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.18em] text-amber-200/85 sm:hidden">
+                  Sector 04
+                </span>
+                <span className="absolute -top-8 left-0 hidden whitespace-nowrap border border-amber-500/30 bg-[#030306]/90 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.22em] text-amber-200/85 sm:block">
+                  Highlighted Playable Sector
+                </span>
+                <span className="absolute bottom-2 right-2 h-2 w-2 rounded-full bg-amber-200 shadow-[0_0_16px_rgba(251,191,36,0.85)]" />
+              </div>
+
+              <div className="absolute bottom-3 left-3 max-w-xs border border-amber-500/15 bg-[#030306]/80 p-3 backdrop-blur-sm">
+                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
+                  Demo Origin
+                </p>
+                <p className="mt-2 text-xs leading-6 text-zinc-400">
+                  The highlighted sector is where the demo begins.
+                </p>
               </div>
             </div>
           </div>
@@ -451,11 +520,14 @@ export default function WorldPage() {
             <div className="relative">
               <div className="flex flex-col justify-between gap-3 border-b border-amber-500/10 pb-4 sm:flex-row sm:items-end">
                 <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-amber-600/80">
+                    Playable Sector
+                  </p>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200/80">
                     Sector 04 / Aurelia Frontier
                   </p>
                   <p className="mt-2 text-xs uppercase tracking-[0.22em] text-zinc-600">
-                    Zoomed from the 100x100 world atlas
+                    Choose one land inside the highlighted sector.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3 text-[10px] uppercase tracking-[0.2em] text-zinc-600">

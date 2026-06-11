@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-11T12:06:46.081Z",
+  "generatedAt": "2026-06-11T12:23:01.342Z",
   "screenshots": [
     {
       "filename": "mobile-home.png",
@@ -17,7 +17,7 @@
       "viewport": "mobile"
     },
     {
-      "filename": "mobile-world-playable-sector.png",
+      "filename": "mobile-world-sector.png",
       "route": "/world",
       "viewport": "mobile"
     },
@@ -62,7 +62,7 @@
       "viewport": "desktop"
     },
     {
-      "filename": "desktop-world-playable-sector.png",
+      "filename": "desktop-world-sector.png",
       "route": "/world",
       "viewport": "desktop"
     },
