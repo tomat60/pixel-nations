@@ -13,24 +13,74 @@ export function getClaimedLandDisplay(state: SettlementState) {
     coordinates: state.claimedLandCoordinates || state.coordinates || FALLBACK_LAND.coordinates,
     region: state.claimedLandRegion || state.region || FALLBACK_LAND.region,
     terrain: state.claimedLandTerrain || FALLBACK_LAND.terrain,
+    landId: getClaimedLandIdDisplay(state.claimedLandId),
+    hasClaimedLand: Boolean(state.claimedLand && state.claimedLandName),
   };
+}
+
+export function getClaimedLandIdDisplay(claimedLandId?: string) {
+  if (!claimedLandId) return "";
+
+  const match = claimedLandId.match(/world-tile-(\d+)/);
+  if (match) return `PN-${String(401 + Number(match[1])).padStart(4, "0")}`;
+
+  return claimedLandId;
+}
+
+export function getDashboardHeroTitle(state: SettlementState) {
+  const land = getClaimedLandDisplay(state);
+
+  if (state.claimedLandName) {
+    return land.region ? `${land.landName}, ${land.region}` : land.landName;
+  }
+
+  if (state.empireFounded) return state.empireName || land.region;
+  if (state.nationFounded) return state.nationName || land.region;
+  if (state.settlementFounded) return state.settlementName || land.landName;
+
+  return land.region;
 }
 
 export function getOriginTrait(terrain: string) {
   const normalized = terrain.toLowerCase();
 
   const traits: Record<string, { trait: string; advantage: string }> = {
-    forest: { trait: "Timber Supply", advantage: "Growth" },
-    mountain: { trait: "Stone & Iron", advantage: "Defense" },
-    coast: { trait: "Trade Reach", advantage: "Routes" },
-    plains: { trait: "Food Growth", advantage: "Expansion" },
-    crownland: { trait: "Legitimacy", advantage: "Influence" },
-    crownlands: { trait: "Legitimacy", advantage: "Influence" },
-    ruins: { trait: "Ancient Record", advantage: "Legacy" },
+    forest: { trait: "Timber Supply", advantage: "Early Growth" },
+    mountain: { trait: "Stone & Iron", advantage: "Defensive Position" },
+    coast: { trait: "Trade Reach", advantage: "Route Access" },
+    plains: { trait: "Food Growth", advantage: "Expansion Potential" },
+    crownland: { trait: "Legitimacy", advantage: "Political Influence" },
+    crownlands: { trait: "Legitimacy", advantage: "Political Influence" },
+    ruins: { trait: "Ancient Record", advantage: "Legacy Value" },
     basin: { trait: "Fresh Water", advantage: "Settlement" },
   };
 
   return traits[normalized] ?? { trait: "Balanced Ground", advantage: "Growth" };
+}
+
+export function getDashboardTerrainQuote(terrain: string, hasClaimedLand: boolean) {
+  if (!hasClaimedLand) {
+    return '"The first record has been written."';
+  }
+
+  const normalized = terrain.toLowerCase();
+  const quotes: Record<string, string> = {
+    forest: '"The first banner rises between timber and shadow."',
+    mountain: '"The first banner rises beneath stone and iron."',
+    coast: '"The first banner rises where routes will begin."',
+    plains: '"The first banner rises across open fields."',
+    crownland: '"The first banner rises near the old seat of power."',
+    crownlands: '"The first banner rises near the old seat of power."',
+    ruins: '"The first banner rises where forgotten history waits."',
+    basin: '"The first banner rises where fresh water gathers."',
+  };
+
+  return quotes[normalized] ?? '"The first record has been written."';
+}
+
+export function getOriginAdvantageLine(terrain: string) {
+  const { trait, advantage } = getOriginTrait(terrain);
+  return `${trait} / ${advantage}`;
 }
 
 export function formatLandClaimHistory(state: SettlementState) {
@@ -38,9 +88,9 @@ export function formatLandClaimHistory(state: SettlementState) {
   return "Land claimed by You";
 }
 
-export function getDashboardOriginQuote(landName: string, region: string) {
-  if (landName) return `"The first record has been written on ${landName}."`;
-  return `"The first record has been written in ${region}."`;
+export function getEmpireHeroQuote(landName: string) {
+  if (landName) return `"From ${landName}, the first empire entered the history of the world."`;
+  return '"The first empire has entered the history of the world."';
 }
 
 export function getSettlementOriginQuote(terrain: string, region: string, landName: string) {
@@ -101,6 +151,5 @@ export function getEmpireOriginQuote(landName: string) {
 }
 
 export function getFounderMeaningLine(terrain: string) {
-  const { trait, advantage } = getOriginTrait(terrain);
-  return `${trait} / ${advantage}`;
+  return getOriginAdvantageLine(terrain);
 }

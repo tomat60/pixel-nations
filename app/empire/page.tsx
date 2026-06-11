@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   formatLandClaimHistory,
   getClaimedLandDisplay,
-  getEmpireOriginQuote,
+  getEmpireHeroQuote,
 } from "../lib/claimed-land";
 import { DEFAULT_SETTLEMENT_STATE, readSettlementState, type SettlementState } from "../lib/settlement-state";
 
@@ -67,10 +67,7 @@ export default function EmpirePage() {
             {empire.empireName}
           </h1>
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">
-            {getEmpireOriginQuote(claimedLand.landName)}
-          </p>
-          <p className="mt-3 text-sm leading-7 text-zinc-500">
-            Imperial history begins where {claimedLand.landName} was first claimed in {claimedLand.region}.
+            {getEmpireHeroQuote(state.claimedLandName ? claimedLand.landName : "")}
           </p>
 
           <div className="mt-8 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-5">

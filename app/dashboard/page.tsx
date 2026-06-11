@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  formatLandClaimHistory,
   getClaimedLandDisplay,
-  getDashboardOriginQuote,
-  getFounderMeaningLine,
+  getDashboardHeroTitle,
+  getDashboardTerrainQuote,
+  getOriginAdvantageLine,
 } from "../lib/claimed-land";
 import { DEFAULT_SETTLEMENT_STATE, clearSettlementState, readSettlementState } from "../lib/settlement-state";
 
@@ -116,28 +118,20 @@ export default function DashboardPage() {
       };
 
   const claimedLand = useMemo(() => getClaimedLandDisplay(settlementState), [settlementState]);
-
-  const founderTitle = settlementState.empireFounded
-    ? settlementState.empireName || claimedLand.region
-    : settlementState.nationFounded
-      ? settlementState.nationName || claimedLand.region
-      : settlementState.settlementFounded
-        ? settlementState.settlementName || claimedLand.landName
-        : claimedLand.landName || claimedLand.region;
+  const heroTitle = useMemo(() => getDashboardHeroTitle(settlementState), [settlementState]);
+  const originQuote = getDashboardTerrainQuote(claimedLand.terrain, claimedLand.hasClaimedLand);
+  const originAdvantage = getOriginAdvantageLine(claimedLand.terrain);
 
   const territoryOverview = useMemo(
     () => [
-      { id: "land-name", label: "Land Name", value: claimedLand.landName },
+      { id: "land-name", label: "Origin Land", value: claimedLand.landName },
       { id: "coordinates", label: "Coordinates", value: claimedLand.coordinates },
       { id: "region", label: "Region", value: claimedLand.region },
       { id: "terrain", label: "Terrain", value: claimedLand.terrain },
       { id: "status", label: "Status", value: "Claimed" },
-      { id: "origin-trait", label: "Origin Trait", value: getFounderMeaningLine(claimedLand.terrain) },
     ],
     [claimedLand],
   );
-
-  const originQuote = getDashboardOriginQuote(claimedLand.landName, claimedLand.region);
 
   return (
     <main className="min-h-screen bg-[#050505] px-6 py-12 text-white sm:px-10 sm:py-16">
@@ -156,19 +150,39 @@ export default function DashboardPage() {
           </div>
 
           <h1 className="mt-8 break-words font-[family-name:var(--font-syne)] text-4xl font-extrabold tracking-tight text-amber-100 sm:text-5xl md:text-6xl">
-            {`Founder of ${founderTitle}`}
+            {`Founder of ${heroTitle}`}
           </h1>
-          <p className="mt-4 text-xs uppercase tracking-[0.24em] text-zinc-500">
-            Origin Land
-          </p>
-          <p className="mt-2 break-words font-[family-name:var(--font-syne)] text-xl font-bold tracking-[0.08em] text-white sm:text-2xl">
-            {claimedLand.landName}
-          </p>
-          <p className="mt-3 text-xs uppercase tracking-[0.22em] text-amber-500/70">
-            {claimedLand.region} / {claimedLand.terrain}
-          </p>
+
+          <div className="mt-6 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ["Land ID", claimedLand.landId || "Awaiting Claim"],
+              ["Origin Land", claimedLand.landName],
+              ["Region", claimedLand.region],
+              ["Terrain", claimedLand.terrain],
+            ].map(([label, value]) => (
+              <div key={label} className="bg-[#08080f]/95 p-4 sm:p-5">
+                <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">{label}</p>
+                <p className="mt-2 break-words font-[family-name:var(--font-syne)] text-sm font-bold text-amber-100 sm:text-base">
+                  {value}
+                </p>
+              </div>
+            ))}
+          </div>
+
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">{originQuote}</p>
         </header>
+
+        <section className="mt-8 border border-amber-500/15 bg-[#06060c]/85 p-5 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+            Origin Advantage
+          </p>
+          <p className="mt-4 font-[family-name:var(--font-syne)] text-xl font-extrabold tracking-tight text-amber-100 sm:text-2xl">
+            {originAdvantage}
+          </p>
+          <p className="mt-3 text-sm leading-7 text-zinc-400">
+            Your first land shapes how this story begins.
+          </p>
+        </section>
 
         <section className="mt-10 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-4">
           {founderStats.map((stat) => (
@@ -234,6 +248,23 @@ export default function DashboardPage() {
               {nextMilestone.cta}
             </Link>
           </div>
+        </section>
+
+        <section className="mt-10 border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">Founder History</p>
+          <ul className="mt-6 space-y-3 text-sm leading-7 text-zinc-300">
+            {settlementState.claimedLand ? (
+              <li className="border-l border-amber-500/25 pl-4">{formatLandClaimHistory(settlementState)}</li>
+            ) : null}
+            {settlementState.founderBadgeEarned ? (
+              <li className="border-l border-amber-500/25 pl-4">Founder Badge earned</li>
+            ) : null}
+            {settlementState.settlementFounded ? (
+              <li className="border-l border-amber-500/25 pl-4">
+                {settlementState.settlementName || "First settlement"} founded
+              </li>
+            ) : null}
+          </ul>
         </section>
 
         <section className="mt-10 border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8">
