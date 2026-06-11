@@ -441,9 +441,9 @@ export function WorldOwnershipMapSection() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="claim-land-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-6 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/75 px-6 py-6 backdrop-blur-sm sm:items-center"
         >
-          <div className="relative w-full max-w-2xl overflow-hidden border border-amber-500/20 bg-[#06060c] p-7 shadow-[0_30px_120px_rgba(0,0,0,0.7),0_0_90px_rgba(201,169,98,0.12)] sm:p-10">
+          <div className="relative my-auto w-full max-w-2xl overflow-hidden border border-amber-500/20 bg-[#06060c] p-7 shadow-[0_30px_120px_rgba(0,0,0,0.7),0_0_90px_rgba(201,169,98,0.12)] sm:p-10">
             <div
               aria-hidden
               className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/45 to-transparent"

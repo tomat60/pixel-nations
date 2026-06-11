@@ -197,7 +197,7 @@ export default function SettlementPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-600/75">
             First Settlement
           </p>
-          <h1 className="mt-7 font-[family-name:var(--font-syne)] text-5xl font-extrabold leading-[1.02] tracking-tight text-amber-100 sm:text-6xl md:text-7xl">
+          <h1 className="mt-7 break-words font-[family-name:var(--font-syne)] text-5xl font-extrabold leading-[1.02] tracking-tight text-amber-100 sm:text-6xl md:text-7xl">
             {displaySettlement.settlementName}
           </h1>
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">

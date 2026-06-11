@@ -140,7 +140,7 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <h1 className="mt-8 font-[family-name:var(--font-syne)] text-4xl font-extrabold tracking-tight text-amber-100 sm:text-5xl md:text-6xl">
+          <h1 className="mt-8 break-words font-[family-name:var(--font-syne)] text-4xl font-extrabold tracking-tight text-amber-100 sm:text-5xl md:text-6xl">
             {`Founder of ${founderTitle}`}
           </h1>
           <p className="mt-4 text-xs uppercase tracking-[0.24em] text-zinc-500">
