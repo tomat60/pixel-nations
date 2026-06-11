@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { readSettlementState, writeSettlementState } from "../lib/settlement-state";
 
 const ownershipMapRegions = [
@@ -129,6 +129,9 @@ export function WorldOwnershipMapSection() {
   const [claimedTileIds, setClaimedTileIds] = useState<Set<string>>(new Set());
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState(false);
+  const [mapSelectionHintActive, setMapSelectionHintActive] = useState(false);
+  const mapGridRef = useRef<HTMLDivElement | null>(null);
+  const mapSelectionHintTimeoutRef = useRef<number | undefined>(undefined);
 
   const selectedStatus = claimedTileIds.has(selectedTile.id)
     ? "Claimed"
@@ -146,12 +149,26 @@ export function WorldOwnershipMapSection() {
     item.id === "claimed" ? { ...item, value: String(claimedCount) } : item,
   );
 
-  const findLand = () => {
-    const nextTile =
-      ownershipTiles.find((tile) => tile.state === "unclaimed" && tile.region === "Aurelia") ??
-      ownershipTiles.find((tile) => tile.state === "unclaimed");
+  useEffect(() => {
+    return () => {
+      if (mapSelectionHintTimeoutRef.current !== undefined) {
+        window.clearTimeout(mapSelectionHintTimeoutRef.current);
+      }
+    };
+  }, []);
 
-    if (nextTile) setSelectedTile(nextTile);
+  const guideToMapSelection = () => {
+    mapGridRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    mapGridRef.current?.focus({ preventScroll: true });
+    setMapSelectionHintActive(true);
+
+    if (mapSelectionHintTimeoutRef.current !== undefined) {
+      window.clearTimeout(mapSelectionHintTimeoutRef.current);
+    }
+
+    mapSelectionHintTimeoutRef.current = window.setTimeout(() => {
+      setMapSelectionHintActive(false);
+    }, 1500);
   };
 
   const openClaimModal = () => {
@@ -232,14 +249,25 @@ export function WorldOwnershipMapSection() {
 
                 <button
                   type="button"
-                  onClick={findLand}
+                  onClick={guideToMapSelection}
                   className="btn-primary rounded border border-amber-500/45 bg-amber-500/10 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.22em] text-amber-100"
                 >
                   Claim Your Place
                 </button>
               </div>
+              <p className="mb-4 text-xs text-zinc-500">
+                Choose a highlighted land on the map below.
+              </p>
 
-              <div className="relative aspect-square overflow-hidden bg-[#030306] p-2 sm:p-3">
+              <div
+                ref={mapGridRef}
+                tabIndex={-1}
+                className={`relative aspect-square overflow-hidden bg-[#030306] p-2 transition-all duration-300 focus:outline-none sm:p-3 ${
+                  mapSelectionHintActive
+                    ? "ring-1 ring-amber-300/75 shadow-[0_0_48px_rgba(251,191,36,0.2)]"
+                    : ""
+                }`}
+              >
                 <div className="grid h-full w-full grid-cols-[repeat(24,minmax(0,1fr))] gap-px">
                   {ownershipTiles.map((tile) => (
                     <button
@@ -260,8 +288,18 @@ export function WorldOwnershipMapSection() {
                     className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
                     style={{ left: region.x, top: region.y }}
                   >
-                    <span className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-400/10 animate-world-marker-pulse" />
-                    <span className="relative block h-2 w-2 rounded-full bg-amber-300 shadow-[0_0_18px_rgba(251,191,36,0.75)]" />
+                    <span
+                      className={`absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full animate-world-marker-pulse ${
+                        mapSelectionHintActive ? "bg-amber-300/20" : "bg-amber-400/10"
+                      }`}
+                    />
+                    <span
+                      className={`relative block h-2 w-2 rounded-full transition-all duration-300 ${
+                        mapSelectionHintActive
+                          ? "bg-amber-100 shadow-[0_0_24px_rgba(251,191,36,0.95)]"
+                          : "bg-amber-300 shadow-[0_0_18px_rgba(251,191,36,0.75)]"
+                      }`}
+                    />
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 whitespace-nowrap border-l border-amber-500/35 bg-[#030306]/75 py-1 pl-2 font-[family-name:var(--font-syne)] text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-200/80 backdrop-blur-sm sm:text-[10px]">
                       {region.name}
                     </span>
