@@ -21,6 +21,7 @@ const FALLBACK_SETTLEMENT = {
   settlementLevel: "Outpost",
   tradeRouteDestination: "Iron Coast",
   allianceName: "Aurelian Pact",
+  nationName: "The Aurelian Crown",
 };
 
 const STARTING_RESOURCES = [
@@ -54,6 +55,9 @@ export default function SettlementPage() {
         settlementState.tradeRouteDestination || FALLBACK_SETTLEMENT.tradeRouteDestination,
       regionalAllianceFormed: settlementState.regionalAllianceFormed,
       allianceName: settlementState.allianceName || FALLBACK_SETTLEMENT.allianceName,
+      nationFounded: settlementState.nationFounded,
+      nationName: settlementState.nationName || FALLBACK_SETTLEMENT.nationName,
+      landsControlled: settlementState.landsControlled > 0 ? settlementState.landsControlled : 1,
     }),
     [settlementState],
   );
@@ -79,47 +83,60 @@ export default function SettlementPage() {
       allianceName: "",
       alliancePartners: [],
       politicalStatus: "",
+      nationFounded: false,
+      nationName: "",
+      nationIdeology: "",
+      landsControlled: 1,
     };
 
     setSettlementState(nextState);
     writeSettlementState(nextState);
   };
 
-  const development = displaySettlement.regionalAllianceFormed
+  const development = displaySettlement.nationFounded
     ? {
-        stage: "Regional Power",
-        objective: "Found the First Nation",
-        progress: "1 / 1 Alliance",
-        cta: "Found Nation Coming Soon",
-        disabled: true,
-        href: "",
+        stage: "Capital City",
+        objective: "Expand Borders",
+        progress: "1 / 1 Nation",
+        cta: "View Nation",
+        disabled: false,
+        href: "/nation",
       }
-    : displaySettlement.tradeRouteEstablished
+    : displaySettlement.regionalAllianceFormed
       ? {
-          stage: "Growing City",
-          objective: "Form Regional Alliance",
-          progress: "0 / 1 Alliance",
-          cta: "Form Regional Alliance",
+          stage: "Regional Power",
+          objective: "Found the First Nation",
+          progress: "0 / 1 Nation",
+          cta: "Found First Nation",
           disabled: false,
-          href: "/alliance/create",
+          href: "/nation/create",
         }
-      : displaySettlement.townHallBuilt
+      : displaySettlement.tradeRouteEstablished
         ? {
-            stage: "City Seed",
-            objective: "Establish Trade Route",
-            progress: "0 / 1 Trade Route",
-            cta: "Establish Trade Route",
+            stage: "Growing City",
+            objective: "Form Regional Alliance",
+            progress: "0 / 1 Alliance",
+            cta: "Form Regional Alliance",
             disabled: false,
-            href: "/trade/create",
+            href: "/alliance/create",
           }
-        : {
-            stage: "Outpost",
-            objective: "Build the Town Hall",
-            progress: "0 / 1 Core Building",
-            cta: "Build Town Hall",
-            disabled: false,
-            href: "",
-          };
+        : displaySettlement.townHallBuilt
+          ? {
+              stage: "City Seed",
+              objective: "Establish Trade Route",
+              progress: "0 / 1 Trade Route",
+              cta: "Establish Trade Route",
+              disabled: false,
+              href: "/trade/create",
+            }
+          : {
+              stage: "Outpost",
+              objective: "Build the Town Hall",
+              progress: "0 / 1 Core Building",
+              cta: "Build Town Hall",
+              disabled: false,
+              href: "",
+            };
 
   const resourceValues = {
     timber: 120,
@@ -142,7 +159,7 @@ export default function SettlementPage() {
   const statCards = [
     { id: "population", label: "Population", value: String(displaySettlement.population) },
     { id: "influence", label: "Influence", value: String(displaySettlement.influence) },
-    { id: "lands", label: "Lands Controlled", value: "1" },
+    { id: "lands", label: "Lands Controlled", value: String(displaySettlement.landsControlled) },
     { id: "level", label: "Level", value: displaySettlement.settlementLevel },
   ];
 
@@ -301,6 +318,11 @@ export default function SettlementPage() {
                 {displaySettlement.regionalAllianceFormed ? (
                   <li className="border-l border-amber-500/25 pl-4">
                     Regional alliance formed: {displaySettlement.allianceName}
+                  </li>
+                ) : null}
+                {displaySettlement.nationFounded ? (
+                  <li className="border-l border-amber-500/25 pl-4">
+                    Nation founded: {displaySettlement.nationName}
                   </li>
                 ) : null}
               </ul>

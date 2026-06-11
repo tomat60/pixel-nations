@@ -29,7 +29,11 @@ export default function DashboardPage() {
 
   const founderStats = useMemo(
     () => [
-      { id: "lands-owned", label: "Lands Owned", value: "1" },
+      {
+        id: "lands-owned",
+        label: "Lands Owned",
+        value: String(settlementState.landsControlled > 0 ? settlementState.landsControlled : 1),
+      },
       { id: "settlements", label: "Settlements", value: settlementState.settlementFounded ? "1" : "0" },
       { id: "population", label: "Population", value: String(settlementState.population) },
       { id: "influence", label: "Influence", value: String(settlementState.influence) },
@@ -49,33 +53,45 @@ export default function DashboardPage() {
       ...(settlementState.settlementFounded
         ? [{ id: "first-city-founder", label: "Founder", value: "You" }]
         : []),
-      { id: "first-nation", label: "First Nation", value: "Awaiting Founder" },
+      {
+        id: "first-nation",
+        label: "First Nation",
+        value: settlementState.nationFounded ? settlementState.nationName || "Awaiting Founder" : "Awaiting Founder",
+      },
+      ...(settlementState.nationFounded ? [{ id: "first-nation-founder", label: "Founder", value: "You" }] : []),
       { id: "first-empire", label: "First Empire", value: "Awaiting Founder" },
     ],
     [settlementState],
   );
 
   const nextMilestone = settlementState.settlementFounded
-    ? settlementState.regionalAllianceFormed
+    ? settlementState.nationFounded
       ? {
-          title: "Found the First Nation",
-          progress: "1 / 1 Alliance",
-          cta: "View Settlement",
-          href: "/settlement",
+          title: "Expand Borders",
+          progress: "1 / 1 Nation",
+          cta: "View Nation",
+          href: "/nation",
         }
-      : settlementState.tradeRouteEstablished
+      : settlementState.regionalAllianceFormed
         ? {
-            title: "Form Regional Alliance",
-            progress: "0 / 1 Alliance",
+            title: "Found the First Nation",
+            progress: "0 / 1 Nation",
             cta: "View Settlement",
             href: "/settlement",
           }
-        : {
-            title: "Build Your City",
-            progress: settlementState.townHallBuilt ? "0 / 1 Trade Route" : "0 / 1 Core Building",
-            cta: "View Settlement",
-            href: "/settlement",
-          }
+        : settlementState.tradeRouteEstablished
+          ? {
+              title: "Form Regional Alliance",
+              progress: "0 / 1 Alliance",
+              cta: "View Settlement",
+              href: "/settlement",
+            }
+          : {
+              title: "Build Your City",
+              progress: settlementState.townHallBuilt ? "0 / 1 Trade Route" : "0 / 1 Core Building",
+              cta: "View Settlement",
+              href: "/settlement",
+            }
     : {
         title: "Found the First Settlement",
         progress: "0 / 1 Settlement",

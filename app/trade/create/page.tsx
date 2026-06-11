@@ -94,6 +94,10 @@ export default function TradeCreatePage() {
       allianceName: "",
       alliancePartners: [],
       politicalStatus: "",
+      nationFounded: false,
+      nationName: "",
+      nationIdeology: "",
+      landsControlled: 1,
     };
 
     setSettlementState(nextState);

@@ -15,6 +15,10 @@ export const SETTLEMENT_STORAGE_KEYS = {
   allianceName: "allianceName",
   alliancePartners: "alliancePartners",
   politicalStatus: "politicalStatus",
+  nationFounded: "nationFounded",
+  nationName: "nationName",
+  nationIdeology: "nationIdeology",
+  landsControlled: "landsControlled",
 } as const;
 
 export type SettlementState = {
@@ -34,6 +38,10 @@ export type SettlementState = {
   allianceName: string;
   alliancePartners: string[];
   politicalStatus: string;
+  nationFounded: boolean;
+  nationName: string;
+  nationIdeology: string;
+  landsControlled: number;
 };
 
 export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
@@ -53,6 +61,10 @@ export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
   allianceName: "",
   alliancePartners: [],
   politicalStatus: "",
+  nationFounded: false,
+  nationName: "",
+  nationIdeology: "",
+  landsControlled: 1,
 };
 
 export function readSettlementState(): SettlementState {
@@ -87,6 +99,13 @@ export function readSettlementState(): SettlementState {
   const politicalStatus =
     localStorage.getItem(SETTLEMENT_STORAGE_KEYS.politicalStatus) ??
     DEFAULT_SETTLEMENT_STATE.politicalStatus;
+  const nationFounded = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.nationFounded) === "true";
+  const nationName =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.nationName) ?? DEFAULT_SETTLEMENT_STATE.nationName;
+  const nationIdeology =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.nationIdeology) ??
+    DEFAULT_SETTLEMENT_STATE.nationIdeology;
+  const landsControlledRaw = Number(localStorage.getItem(SETTLEMENT_STORAGE_KEYS.landsControlled));
 
   let alliancePartners: string[] = [];
   if (alliancePartnersRaw) {
@@ -117,6 +136,10 @@ export function readSettlementState(): SettlementState {
     allianceName,
     alliancePartners,
     politicalStatus,
+    nationFounded,
+    nationName,
+    nationIdeology,
+    landsControlled: Number.isFinite(landsControlledRaw) ? landsControlledRaw : 1,
   };
 }
 
@@ -148,4 +171,8 @@ export function writeSettlementState(state: SettlementState) {
     JSON.stringify(state.alliancePartners),
   );
   localStorage.setItem(SETTLEMENT_STORAGE_KEYS.politicalStatus, state.politicalStatus);
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.nationFounded, String(state.nationFounded));
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.nationName, state.nationName);
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.nationIdeology, state.nationIdeology);
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.landsControlled, String(state.landsControlled));
 }

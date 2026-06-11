@@ -70,6 +70,14 @@ export default function SettlementCreatePage() {
       tradeRouteEstablished: false,
       tradeRouteDestination: "",
       tradeRoutes: 0,
+      regionalAllianceFormed: false,
+      allianceName: "",
+      alliancePartners: [],
+      politicalStatus: "",
+      nationFounded: false,
+      nationName: "",
+      nationIdeology: "",
+      landsControlled: 1,
     });
     setIsFounded(true);
   };
