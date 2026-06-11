@@ -1,0 +1,41 @@
+---
+description: Cost-controlled agent workflow — build, QA, commits, scoped tasks
+alwaysApply: true
+---
+
+# Cost-controlled agent workflow
+
+## Task shape
+
+- Always prefer **scoped tasks** with explicit files and acceptance criteria.
+- Read relevant docs (`AGENTS.md`, `docs/PROJECT_OPERATING_RULES.md`, topic specs) before coding.
+- Ask for scope **only when truly blocked** — not to re-debate defined handoffs.
+
+## Tooling
+
+| Action | When |
+|--------|------|
+| `npm run build` | Code or config changed |
+| `npm run qa:screens` | UI changed or explicitly requested |
+| `npx playwright install chromium` | Only if QA run fails for missing browser |
+| `npm install` / new deps | Only with justification |
+| Broad refactors | Only when explicitly requested |
+
+## Docs-only work
+
+- No build required if only docs, rules, or markdown changed.
+- Do not touch `public/qa/latest/` generated assets.
+
+## Commits
+
+- Commit and push **only when requested** or when the prompt explicitly asks.
+- Code commits: build must pass; include QA assets only if QA was run for UI changes.
+- Use repository commit message style; do not amend unless rules allow.
+
+## Final report (keep short)
+
+- Changed files
+- What changed
+- Build status (or “skipped — docs only”)
+- QA status (if run)
+- Commit hash (if committed)

@@ -1,0 +1,35 @@
+---
+description: Pixel Nations product fantasy, visual identity, and copy tone
+globs: app/**/*
+alwaysApply: false
+---
+
+# Pixel Nations — product direction
+
+## Fantasy
+
+- **10,000 finite lands** in a 100 × 100 world — player-owned territory, not infinite procedural noise.
+- **Player-written history**: claim land → found city → create nation → create empire.
+- **No NPC kingdoms** — the world is empty until players act; founders create the record.
+- Demo persists progress in `localStorage`; claimed land identity must stay consistent across pages.
+
+## Visual identity
+
+- **Premium black/gold strategy game** — kingdom map, tactical atlas, founder dashboard.
+- Cinematic lighting, amber accents, dark surfaces, Syne-style headings where used.
+- World map should feel like **atlas / kingdom map**, not a spreadsheet or crypto dashboard.
+- Meaningful visual jumps when asked; not token polish passes.
+
+## Copy tone
+
+- Cinematic but **minimal** — short status lines, strategic vocabulary.
+- Honest about scale: Sector A-01 = **216 visible lands**; full world = **10,000 lands**.
+- **Forbidden framing:** crypto, NFT, wallet, token, mint, ETH, Web3, blockchain.
+
+## Pages (default touch policy)
+
+| Page | Default |
+|------|---------|
+| `/world` | Map/visual work per `docs/WORLD_MAP_V7_SPEC.md` |
+| Landing, dashboard, settlement, nation, empire | Do not redesign unless prompt requires |
+| Claim flow + persistence | Preserve unless task explicitly changes behavior |

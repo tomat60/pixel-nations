@@ -1,0 +1,38 @@
+---
+description: Pixel Nations core operating rules — scope, cost control, reporting
+alwaysApply: true
+---
+
+# Project operating rules
+
+Read `docs/PROJECT_OPERATING_RULES.md` and `AGENTS.md` before non-trivial work.
+
+## Scope
+
+- Define goal, files, acceptance criteria, and QA level **before** coding.
+- Do not change unrelated files or redesign sections outside the prompt scope.
+- Do not run broad repo audits or vague exploration unless explicitly requested.
+- Prefer **one strong scoped implementation** over many weak cosmetic iterations.
+- Do not do cosmetic-only loops (~5% color tweaks) when the ask is a meaningful improvement.
+
+## Cost control
+
+- Avoid repeated small agent iterations and expensive tooling without justification.
+- Do not run `npm run qa:screens` unless UI changed or the prompt explicitly requests it.
+- Do not install dependencies unless justified.
+- Run `npm run build` only when code or config changed; **docs-only changes skip build**.
+
+## Product direction
+
+- Preserve premium black/gold strategy-game aesthetic.
+- No crypto / NFT / wallet / token / mint / ETH language.
+- Cursor executes scoped handoffs; do not re-litigate product strategy when spec is clear.
+
+## Commits
+
+- Commit/push only when the prompt asks or when code build (+ required QA) passes.
+- Docs-only tasks: commit without build when no code/config changed.
+
+## Reporting (concise)
+
+Always report: changed files, what changed, build status, QA status (if run), commit hash (if committed).

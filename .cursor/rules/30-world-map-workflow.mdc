@@ -1,0 +1,51 @@
+---
+description: /world map workflow — follow WORLD_MAP_V7_SPEC, preserve claim flow
+globs: app/world/**/*
+alwaysApply: false
+---
+
+# World map workflow
+
+All `/world` map changes must follow **`docs/WORLD_MAP_V7_SPEC.md`**.
+
+## Visual bar
+
+- **World Atlas** is the benchmark — keep it mostly intact; playable sector should feel like the atlas came alive.
+- **No tiny “color polish” passes** when the ask is a major visual improvement — aim for a meaningful jump.
+- Playable sector must **not** feel like a raw spreadsheet grid.
+
+## Honest scale
+
+- Full world: **100 × 100 = 10,000 lands**.
+- Visible sector: **Sector A-01**, **216 visible lands** (18 × 12) — a starting window, not the whole world.
+- Copy and UI must not pretend the visible grid is all 10,000 lands.
+
+## Interaction constraints (hard)
+
+- Tiles stay clickable on a stable grid.
+- **No hover scale, no selected scale, no breakout animations.**
+- Selected tile: contained premium highlight only.
+- Founder lands: contained glow/dot/border — no map-covering pulse.
+
+## Preserve behavior
+
+- Claim modal, mobile claim tray, side panel — same claim path (`openClaimModal` / `claimLand`).
+- Land persistence: `claimedLandId`, `claimedLandPnId`, name, coordinates, region, terrain, resources.
+- Dashboard land identity must remain consistent after claim.
+
+## Mobile
+
+- No page-level horizontal overflow; map scrolls inside container.
+- Claim tray and modal must stay accessible.
+
+## Preferred files
+
+- `app/world/page.tsx` (primary)
+- `app/lib/claimed-land.ts`, `app/lib/settlement-state.ts` — only if needed
+- `app/globals.css` — map-specific utilities only
+
+Do not touch landing or demo progression unless required for routing compatibility.
+
+## QA after UI changes
+
+`npm run build` → `npm run qa:screens` (if UI changed) → commit including `public/qa/latest/` when requested.
