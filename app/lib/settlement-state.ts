@@ -8,6 +8,9 @@ export const SETTLEMENT_STORAGE_KEYS = {
   founder: "founder",
   townHallBuilt: "townHallBuilt",
   settlementLevel: "settlementLevel",
+  tradeRouteEstablished: "tradeRouteEstablished",
+  tradeRouteDestination: "tradeRouteDestination",
+  tradeRoutes: "tradeRoutes",
 } as const;
 
 export type SettlementState = {
@@ -20,6 +23,9 @@ export type SettlementState = {
   founder: string;
   townHallBuilt: boolean;
   settlementLevel: string;
+  tradeRouteEstablished: boolean;
+  tradeRouteDestination: string;
+  tradeRoutes: number;
 };
 
 export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
@@ -32,6 +38,9 @@ export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
   founder: "You",
   townHallBuilt: false,
   settlementLevel: "Outpost",
+  tradeRouteEstablished: false,
+  tradeRouteDestination: "",
+  tradeRoutes: 0,
 };
 
 export function readSettlementState(): SettlementState {
@@ -51,6 +60,12 @@ export function readSettlementState(): SettlementState {
   const settlementLevel =
     localStorage.getItem(SETTLEMENT_STORAGE_KEYS.settlementLevel) ??
     DEFAULT_SETTLEMENT_STATE.settlementLevel;
+  const tradeRouteEstablished =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.tradeRouteEstablished) === "true";
+  const tradeRouteDestination =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.tradeRouteDestination) ??
+    DEFAULT_SETTLEMENT_STATE.tradeRouteDestination;
+  const tradeRoutesRaw = Number(localStorage.getItem(SETTLEMENT_STORAGE_KEYS.tradeRoutes));
 
   return {
     settlementFounded,
@@ -62,6 +77,9 @@ export function readSettlementState(): SettlementState {
     founder,
     townHallBuilt,
     settlementLevel,
+    tradeRouteEstablished,
+    tradeRouteDestination,
+    tradeRoutes: Number.isFinite(tradeRoutesRaw) ? tradeRoutesRaw : 0,
   };
 }
 
@@ -77,4 +95,10 @@ export function writeSettlementState(state: SettlementState) {
   localStorage.setItem(SETTLEMENT_STORAGE_KEYS.founder, state.founder);
   localStorage.setItem(SETTLEMENT_STORAGE_KEYS.townHallBuilt, String(state.townHallBuilt));
   localStorage.setItem(SETTLEMENT_STORAGE_KEYS.settlementLevel, state.settlementLevel);
+  localStorage.setItem(
+    SETTLEMENT_STORAGE_KEYS.tradeRouteEstablished,
+    String(state.tradeRouteEstablished),
+  );
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.tradeRouteDestination, state.tradeRouteDestination);
+  localStorage.setItem(SETTLEMENT_STORAGE_KEYS.tradeRoutes, String(state.tradeRoutes));
 }

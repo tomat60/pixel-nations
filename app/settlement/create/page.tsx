@@ -67,6 +67,9 @@ export default function SettlementCreatePage() {
       founder: "You",
       townHallBuilt: false,
       settlementLevel: "Outpost",
+      tradeRouteEstablished: false,
+      tradeRouteDestination: "",
+      tradeRoutes: 0,
     });
     setIsFounded(true);
   };

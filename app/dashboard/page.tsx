@@ -56,16 +56,16 @@ export default function DashboardPage() {
   );
 
   const nextMilestone = settlementState.settlementFounded
-    ? settlementState.townHallBuilt
+    ? settlementState.tradeRouteEstablished
       ? {
-          title: "Establish Trade Route",
-          progress: "1 / 1 Core Building",
+          title: "Form Regional Alliance",
+          progress: "1 / 1 Trade Route",
           cta: "View Settlement",
           href: "/settlement",
         }
       : {
           title: "Build Your City",
-          progress: "0 / 1 Core Building",
+          progress: settlementState.townHallBuilt ? "0 / 1 Trade Route" : "0 / 1 Core Building",
           cta: "View Settlement",
           href: "/settlement",
         }
@@ -159,7 +159,7 @@ export default function DashboardPage() {
           <h2 className="mt-6 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             {nextMilestone.title}
           </h2>
-          <div className="mt-5 flex flex-col gap-6">
+          <div className="mt-6 flex flex-col gap-7">
             <p className="text-sm uppercase tracking-[0.24em] text-zinc-500">
               Progress: {nextMilestone.progress}
             </p>

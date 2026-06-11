@@ -19,6 +19,7 @@ const FALLBACK_SETTLEMENT = {
   coordinates: "X19 / Y12",
   founder: "You",
   settlementLevel: "Outpost",
+  tradeRouteDestination: "Iron Coast",
 };
 
 const STARTING_RESOURCES = [
@@ -47,6 +48,9 @@ export default function SettlementPage() {
       founder: settlementState.founder || FALLBACK_SETTLEMENT.founder,
       settlementLevel: settlementState.settlementLevel || FALLBACK_SETTLEMENT.settlementLevel,
       townHallBuilt: settlementState.townHallBuilt,
+      tradeRouteEstablished: settlementState.tradeRouteEstablished,
+      tradeRouteDestination:
+        settlementState.tradeRouteDestination || FALLBACK_SETTLEMENT.tradeRouteDestination,
     }),
     [settlementState],
   );
@@ -65,27 +69,59 @@ export default function SettlementPage() {
       founder: displaySettlement.founder,
       townHallBuilt: true,
       settlementLevel: "City Seed",
+      tradeRouteEstablished: false,
+      tradeRouteDestination: "",
+      tradeRoutes: 0,
     };
 
     setSettlementState(nextState);
     writeSettlementState(nextState);
   };
 
-  const development = displaySettlement.townHallBuilt
+  const development = displaySettlement.tradeRouteEstablished
     ? {
-        stage: "City Seed",
-        objective: "Establish Trade Route",
-        progress: "1 / 1 Core Building",
-        cta: "Trade Routes Coming Soon",
+        stage: "Growing City",
+        objective: "Form Regional Alliance",
+        progress: "1 / 1 Trade Route",
+        cta: "Alliances Coming Soon",
         disabled: true,
+        href: "",
       }
-    : {
-        stage: "Outpost",
-        objective: "Build the Town Hall",
-        progress: "0 / 1 Core Building",
-        cta: "Build Town Hall",
-        disabled: false,
-      };
+    : displaySettlement.townHallBuilt
+      ? {
+          stage: "City Seed",
+          objective: "Establish Trade Route",
+          progress: "0 / 1 Trade Route",
+          cta: "Establish Trade Route",
+          disabled: false,
+          href: "/trade/create",
+        }
+      : {
+          stage: "Outpost",
+          objective: "Build the Town Hall",
+          progress: "0 / 1 Core Building",
+          cta: "Build Town Hall",
+          disabled: false,
+          href: "",
+        };
+
+  const resourceValues = {
+    timber: 120,
+    stone: 80,
+    iron:
+      displaySettlement.tradeRouteEstablished && displaySettlement.tradeRouteDestination === "Iron Coast"
+        ? 40
+        : 25,
+    food:
+      displaySettlement.tradeRouteEstablished && displaySettlement.tradeRouteDestination === "Ember Basin"
+        ? 240
+        : 200,
+  };
+
+  const resourceCards = STARTING_RESOURCES.map((resource) => ({
+    ...resource,
+    value: String(resourceValues[resource.id as keyof typeof resourceValues]),
+  }));
 
   const statCards = [
     { id: "population", label: "Population", value: String(displaySettlement.population) },
@@ -143,7 +179,7 @@ export default function SettlementPage() {
           {statCards.map((stat) => (
             <article key={stat.id} className="bg-[#08080f]/95 p-5 sm:p-6">
               <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">{stat.label}</p>
-              <p className="mt-3 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-4xl">
+              <p className="mt-3 break-words font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100 sm:text-3xl md:text-4xl">
                 {stat.value}
               </p>
             </article>
@@ -182,18 +218,27 @@ export default function SettlementPage() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={buildTownHall}
-              disabled={development.disabled}
-              className={`mt-7 rounded border px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] ${
-                development.disabled
-                  ? "cursor-not-allowed border-zinc-800 bg-[#08080f]/70 text-zinc-500"
-                  : "btn-primary border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 text-amber-100"
-              }`}
-            >
-              {development.cta}
-            </button>
+            {displaySettlement.townHallBuilt && !displaySettlement.tradeRouteEstablished ? (
+              <Link
+                href={development.href}
+                className="btn-primary mt-7 inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
+              >
+                {development.cta}
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={buildTownHall}
+                disabled={development.disabled}
+                className={`mt-7 rounded border px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] ${
+                  development.disabled
+                    ? "cursor-not-allowed border-zinc-800 bg-[#08080f]/70 text-zinc-500"
+                    : "btn-primary border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 text-amber-100"
+                }`}
+              >
+                {development.cta}
+              </button>
+            )}
           </motion.section>
 
           <motion.aside
@@ -207,7 +252,7 @@ export default function SettlementPage() {
                 Resources
               </p>
               <div className="mt-6 space-y-5">
-                {STARTING_RESOURCES.map((resource) => (
+                {resourceCards.map((resource) => (
                   <div
                     key={resource.id}
                     className="flex items-start justify-between gap-5 border-b border-amber-500/10 pb-4 last:border-b-0 last:pb-0"
@@ -231,6 +276,11 @@ export default function SettlementPage() {
                 </li>
                 {displaySettlement.townHallBuilt ? (
                   <li className="border-l border-amber-500/25 pl-4">Town Hall built</li>
+                ) : null}
+                {displaySettlement.tradeRouteEstablished ? (
+                  <li className="border-l border-amber-500/25 pl-4">
+                    Trade route established with {displaySettlement.tradeRouteDestination}
+                  </li>
                 ) : null}
               </ul>
             </section>
