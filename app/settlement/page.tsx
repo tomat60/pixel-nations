@@ -366,7 +366,7 @@ export default function SettlementPage() {
             Back To Dashboard
           </Link>
           <Link
-            href="/#world-preview"
+            href="/world"
             className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-amber-100 sm:inline-flex sm:items-center sm:justify-center"
           >
             View World

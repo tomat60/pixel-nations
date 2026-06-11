@@ -4,6 +4,11 @@ const DEMO_STATE_KEY = "pixelNations.demoState.v1";
 
 export const SETTLEMENT_STORAGE_KEYS = {
   claimedLand: "claimedLand",
+  claimedLandId: "claimedLandId",
+  claimedLandName: "claimedLandName",
+  claimedLandCoordinates: "claimedLandCoordinates",
+  claimedLandRegion: "claimedLandRegion",
+  claimedLandTerrain: "claimedLandTerrain",
   founderBadgeEarned: "founderBadgeEarned",
   founded: "settlementFounded",
   name: "settlementName",
@@ -35,6 +40,11 @@ export const SETTLEMENT_STORAGE_KEYS = {
 
 export type SettlementState = {
   claimedLand: boolean;
+  claimedLandId?: string;
+  claimedLandName?: string;
+  claimedLandCoordinates?: string;
+  claimedLandRegion?: string;
+  claimedLandTerrain?: string;
   founderBadgeEarned: boolean;
   settlementFounded: boolean;
   settlementName: string;
@@ -66,6 +76,11 @@ export type SettlementState = {
 
 export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
   claimedLand: false,
+  claimedLandId: "",
+  claimedLandName: "",
+  claimedLandCoordinates: "",
+  claimedLandRegion: "",
+  claimedLandTerrain: "",
   founderBadgeEarned: false,
   settlementFounded: false,
   settlementName: "",
@@ -110,6 +125,12 @@ function sanitizeState(raw: unknown): SettlementState {
   return {
     ...DEFAULT_SETTLEMENT_STATE,
     claimedLand: source.claimedLand === true,
+    claimedLandId: typeof source.claimedLandId === "string" ? source.claimedLandId : "",
+    claimedLandName: typeof source.claimedLandName === "string" ? source.claimedLandName : "",
+    claimedLandCoordinates:
+      typeof source.claimedLandCoordinates === "string" ? source.claimedLandCoordinates : "",
+    claimedLandRegion: typeof source.claimedLandRegion === "string" ? source.claimedLandRegion : "",
+    claimedLandTerrain: typeof source.claimedLandTerrain === "string" ? source.claimedLandTerrain : "",
     founderBadgeEarned: source.founderBadgeEarned === true,
     settlementFounded: source.settlementFounded === true,
     settlementName: typeof source.settlementName === "string" ? source.settlementName : "",
@@ -188,6 +209,19 @@ function readLegacyState(): SettlementState {
     localStorage.getItem(SETTLEMENT_STORAGE_KEYS.empireDoctrine) ?? DEFAULT_SETTLEMENT_STATE.empireDoctrine;
   const citiesRaw = Number(localStorage.getItem(SETTLEMENT_STORAGE_KEYS.cities));
   const claimedLand = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.claimedLand) === "true";
+  const claimedLandId =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.claimedLandId) ?? DEFAULT_SETTLEMENT_STATE.claimedLandId;
+  const claimedLandName =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.claimedLandName) ?? DEFAULT_SETTLEMENT_STATE.claimedLandName;
+  const claimedLandCoordinates =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.claimedLandCoordinates) ??
+    DEFAULT_SETTLEMENT_STATE.claimedLandCoordinates;
+  const claimedLandRegion =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.claimedLandRegion) ??
+    DEFAULT_SETTLEMENT_STATE.claimedLandRegion;
+  const claimedLandTerrain =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.claimedLandTerrain) ??
+    DEFAULT_SETTLEMENT_STATE.claimedLandTerrain;
   const founderBadgeEarned = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.founderBadgeEarned) === "true";
 
   let alliancePartners: string[] = [];
@@ -212,6 +246,11 @@ function readLegacyState(): SettlementState {
 
   return sanitizeState({
     claimedLand,
+    claimedLandId,
+    claimedLandName,
+    claimedLandCoordinates,
+    claimedLandRegion,
+    claimedLandTerrain,
     founderBadgeEarned,
     settlementFounded,
     settlementName,

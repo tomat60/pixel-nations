@@ -176,11 +176,6 @@ export default function Home() {
     return null;
   }, [demoState]);
 
-  const goToWorldPreview = useCallback(() => {
-    const section = document.getElementById("world-preview");
-    section?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
-
   const handleStartDemo = useCallback(() => {
     if (demoState.empireFounded) {
       router.push("/empire");
@@ -198,8 +193,8 @@ export default function Home() {
       router.push("/dashboard");
       return;
     }
-    goToWorldPreview();
-  }, [demoState, goToWorldPreview, router]);
+    router.push("/world");
+  }, [demoState, router]);
 
   const stats = [
     { id: "lands", value: "10,000", label: "Lands" },
@@ -244,7 +239,7 @@ export default function Home() {
             <li>
               <button
                 type="button"
-                onClick={goToWorldPreview}
+                onClick={() => router.push("/world")}
                 className="nav-link text-sm font-medium text-zinc-500"
               >
                 World Map
@@ -304,7 +299,7 @@ export default function Home() {
 
               <button
                 type="button"
-                onClick={goToWorldPreview}
+                onClick={() => router.push("/world")}
                 className="btn-secondary w-full rounded border border-zinc-800 bg-[#08080f]/80 px-10 py-4 text-sm font-semibold uppercase tracking-widest text-zinc-400 sm:w-auto sm:px-12 sm:text-base"
               >
                 View the World
@@ -904,7 +899,7 @@ export default function Home() {
 
               <button
                 type="button"
-                onClick={goToWorldPreview}
+                onClick={() => router.push("/world")}
                 className="btn-secondary w-full rounded border border-zinc-800 bg-[#08080f]/80 px-12 py-4 text-sm font-semibold uppercase tracking-widest text-zinc-400 sm:w-auto sm:text-base"
               >
                 View The World
