@@ -161,6 +161,7 @@ export function WorldOwnershipMapSection() {
       claimedLand: true,
       founderBadgeEarned: true,
       claimedLandId: selectedTile.id,
+      claimedLandPnId: selectedTile.landId,
       claimedLandName: selectedLandName,
       claimedLandCoordinates: `X${selectedTile.x + 1} / Y${selectedTile.y + 1}`,
       claimedLandRegion: selectedTile.region,

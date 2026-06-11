@@ -13,18 +13,36 @@ export function getClaimedLandDisplay(state: SettlementState) {
     coordinates: state.claimedLandCoordinates || state.coordinates || FALLBACK_LAND.coordinates,
     region: state.claimedLandRegion || state.region || FALLBACK_LAND.region,
     terrain: state.claimedLandTerrain || FALLBACK_LAND.terrain,
-    landId: getClaimedLandIdDisplay(state.claimedLandId),
+    landId: getClaimedLandIdDisplay(state),
     hasClaimedLand: Boolean(state.claimedLand && state.claimedLandName),
   };
 }
 
-export function getClaimedLandIdDisplay(claimedLandId?: string) {
+export function getClaimedLandIdDisplay(
+  stateOrId?: Pick<SettlementState, "claimedLandId" | "claimedLandPnId"> | string,
+) {
+  if (!stateOrId) return "";
+
+  if (typeof stateOrId === "string") {
+    return resolveClaimedLandPnId(stateOrId);
+  }
+
+  if (stateOrId.claimedLandPnId) return stateOrId.claimedLandPnId;
+  return resolveClaimedLandPnId(stateOrId.claimedLandId);
+}
+
+function resolveClaimedLandPnId(claimedLandId?: string) {
   if (!claimedLandId) return "";
 
-  const match = claimedLandId.match(/world-tile-(\d+)/);
-  if (match) return `PN-${String(401 + Number(match[1])).padStart(4, "0")}`;
+  const worldMatch = claimedLandId.match(/world-tile-(\d+)/);
+  if (worldMatch) return `PN-${String(401 + Number(worldMatch[1])).padStart(4, "0")}`;
 
-  return claimedLandId;
+  const tileMatch = claimedLandId.match(/^tile-(\d+)$/);
+  if (tileMatch) return `PN-${String(1 + Number(tileMatch[1])).padStart(4, "0")}`;
+
+  if (/^PN-\d{4}$/.test(claimedLandId)) return claimedLandId;
+
+  return "";
 }
 
 export function getDashboardHeroTitle(state: SettlementState) {
