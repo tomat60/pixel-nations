@@ -511,10 +511,10 @@ export default function WorldPage() {
             CHOOSE YOUR FIRST LAND
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-400 sm:mt-5 sm:text-lg">
-            Choose the land where your history begins.
+            Choose one land in the first playable sector. Claim it to begin the path toward settlement, nation, and empire.
           </p>
           <p className="mt-3 text-xs uppercase tracking-[0.26em] text-amber-500/75">
-            10,000 lands. One first move.
+            Full world: 10,000 lands. Demo frontier: Aurelian Basin.
           </p>
           {hasProgress ? (
             <p className="mt-4 text-xs uppercase tracking-[0.22em] text-amber-300/80">
@@ -551,13 +551,13 @@ export default function WorldPage() {
                 World Atlas
               </p>
               <h2 className="mt-4 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-5xl">
-                100 x 100 lands.
+                Full world: 10,000 lands.
               </h2>
               <p className="mt-4 text-sm leading-7 text-zinc-400">
-                100 x 100 lands form the full world atlas.
+                The full world contains 10,000 lands across a 100 x 100 atlas.
               </p>
               <p className="mt-2 text-sm leading-7 text-amber-200/70">
-                Sector A-01 is the first frontier window into that 10,000-land world.
+                Aurelian Basin is the first playable frontier. Sector code: A-01.
               </p>
             </div>
             <div className="grid grid-cols-3 gap-px border border-amber-500/10 bg-amber-500/10 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
@@ -570,8 +570,8 @@ export default function WorldPage() {
                 <p className="mt-1">world grid</p>
               </div>
               <div className="bg-[#08080f]/95 p-3">
-                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">Sector A-01</p>
-                <p className="mt-1">starting sector</p>
+                <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">A-01</p>
+                <p className="mt-1">sector code</p>
               </div>
             </div>
           </div>
@@ -661,7 +661,7 @@ export default function WorldPage() {
                   Sector A-01
                 </span>
                 <span className="absolute -top-8 left-0 hidden whitespace-nowrap border border-amber-500/30 bg-[#030306]/90 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.22em] text-amber-200/85 sm:block">
-                  Aurelian Starting Sector
+                  Aurelian Basin / A-01
                 </span>
                 <span className="absolute bottom-2 right-2 h-2 w-2 rounded-full bg-amber-200 shadow-[0_0_16px_rgba(251,191,36,0.85)]" />
               </div>
@@ -671,7 +671,7 @@ export default function WorldPage() {
                   Demo Origin
                 </p>
                 <p className="mt-2 text-xs leading-6 text-zinc-400">
-                  The highlighted sector is where the demo begins.
+                  Sector code A-01 marks the first playable frontier, not the whole world.
                 </p>
               </div>
             </div>
@@ -693,16 +693,16 @@ export default function WorldPage() {
               <div className="flex flex-col justify-between gap-4 border-b border-amber-500/10 pb-5 sm:flex-row sm:items-end">
                 <div className="max-w-xl">
                   <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-amber-600/80">
-                    Starting Sector / Sector A-01
+                    First Playable Sector / Sector Code A-01
                   </p>
                   <p className="mt-2 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100 sm:text-3xl">
                     Aurelian Basin
                   </p>
                   <p className="mt-3 text-sm leading-7 text-zinc-400">
-                    A playable frontier window inside the 100 x 100 world atlas.
+                    Aurelian Basin is the demo frontier inside the 100 x 100 world atlas.
                   </p>
                   <p className="mt-2 text-xs uppercase tracking-[0.22em] text-zinc-600">
-                    216 visible lands. The full world holds 10,000.
+                    Choose one land and claim it. The full world contains 10,000 lands.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
@@ -713,10 +713,10 @@ export default function WorldPage() {
                     10,000 total world lands
                   </span>
                   <span className="border border-amber-500/15 bg-[#08080f]/80 px-2.5 py-1.5">
-                    Sector A-01
+                    Sector code: A-01
                   </span>
                   <span className="border border-amber-500/15 bg-[#08080f]/80 px-2.5 py-1.5">
-                    Starting frontier
+                    Claim one land
                   </span>
                 </div>
               </div>
