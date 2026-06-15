@@ -8,6 +8,9 @@
     "start": "next start",
     "qa:screens": "node scripts/qa-screenshots.mjs",
     "qa:smoke": "node scripts/qa-smoke.mjs",
+    "pn:handoff": "node scripts/pn-handoff.mjs",
+    "pn:quick": "npm run qa:smoke && npm run pn:handoff",
+    "pn:finish": "npm run build && npm run qa:smoke && npm run qa:screens && npm run qa:smoke && npm run pn:handoff",
     "lint": "eslint"
   },
   "dependencies": {
