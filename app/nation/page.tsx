@@ -130,7 +130,7 @@ export default function NationPage() {
                 ["Capital", nation.settlementName],
                 ["Founding Alliance", nation.allianceName],
                 ["Ideology", nation.ideology],
-                ["Next Objective", nation.empireFounded ? "Rule the World" : nation.bordersExpanded ? "Create Empire" : "Expand Borders"],
+                ["Next Objective", nation.empireFounded ? "Rule the World" : "Declare Empire"],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-start justify-between gap-5">
                   <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">{label}</span>
@@ -148,22 +148,19 @@ export default function NationPage() {
               >
                 View Empire
               </Link>
-            ) : nation.bordersExpanded ? (
+            ) : (
               <Link
                 href="/empire/create"
                 className="btn-primary mt-9 inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
               >
-                Create Empire
+                Declare Empire
               </Link>
-            ) : (
-              <button
-                type="button"
-                disabled
-                className="mt-9 cursor-not-allowed rounded border border-zinc-800 bg-[#08080f]/70 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-zinc-500"
-              >
-                Expansion Coming Soon
-              </button>
             )}
+            {!nation.empireFounded ? (
+              <p className="mt-4 max-w-md text-xs uppercase tracking-[0.18em] text-zinc-600">
+                Border expansion remains a future layer. The demo can declare its first empire now.
+              </p>
+            ) : null}
           </motion.section>
 
           <motion.aside
