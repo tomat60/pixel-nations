@@ -152,7 +152,7 @@ export default function NationCreatePage() {
             Raise the first banner of Aurelia.
           </h1>
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">
-            Cities become nations when people choose one destiny.
+            A city becomes a nation when its capital, founders, and regional allies rally behind one banner.
           </p>
 
           <div className="mt-8 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-4">
@@ -186,7 +186,7 @@ export default function NationCreatePage() {
                 First Nation Founded
               </h2>
               <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-400">
-                {nationName || "The first nation"} has become the first nation of Aurelia.
+                {nationName || "The first nation"} has become the first nation of Aurelia. The next milestone is empire.
               </p>
 
               <div className="mt-8 border-y border-amber-500/10 py-6">
@@ -311,6 +311,9 @@ export default function NationCreatePage() {
                   <p className="text-sm text-zinc-300">Controlled Lands: +4</p>
                   <p className="text-sm text-zinc-300">Political Status: First Nation</p>
                 </div>
+                <p className="mt-6 text-xs leading-6 text-zinc-500">
+                  The alliance marks regional support. No land merging is required to found this demo nation.
+                </p>
 
                 <div className="mt-8 flex flex-col gap-3">
                   <button

@@ -122,8 +122,8 @@ export default function SettlementPage() {
     : displaySettlement.nationFounded
       ? {
           stage: "Capital City",
-          objective: "Expand Borders",
-          progress: "0 / 1 Expansion",
+          objective: "Declare Empire",
+          progress: "Nation Founded",
           cta: "View Nation",
           disabled: false,
           href: "/nation",
@@ -157,7 +157,7 @@ export default function SettlementPage() {
             }
           : {
               stage: "Outpost",
-              objective: "Build the Town Hall",
+              objective: "Build the civic core",
               progress: "0 / 1 Core Building",
               cta: "Build Town Hall",
               disabled: false,
@@ -208,6 +208,9 @@ export default function SettlementPage() {
             {displaySettlement.settlementName}
           </h1>
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">{originQuote}</p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-200/70">
+            This city is the civic heart of your claimed land. Build its core, connect outward, then raise a nation.
+          </p>
 
           <div className="mt-8 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-4">
             {[
@@ -250,7 +253,7 @@ export default function SettlementPage() {
             className="border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
-              City Development
+              City Path
             </p>
 
             <div className="mt-7 space-y-5 border-b border-amber-500/10 pb-6">

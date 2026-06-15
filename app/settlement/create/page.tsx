@@ -125,10 +125,10 @@ export default function SettlementCreatePage() {
             Name your first settlement.
           </h1>
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">
-            Every empire begins with a first city.
+            Turn your claimed land into its first civic core.
           </p>
           <p className="mt-3 text-sm leading-7 text-amber-200/70">
-            Your first city will inherit the strengths of {claimedLand.landName}.
+            This settlement is the first step from your land toward city, nation, and empire.
           </p>
         </motion.header>
 
@@ -149,7 +149,7 @@ export default function SettlementCreatePage() {
                 First Settlement Founded
               </h2>
               <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-400">
-                History records the founding of {settlementName}.
+                History records the founding of {settlementName}, the first civic core of {claimedLand.landName}.
               </p>
 
               <div className="mt-8 border-y border-amber-500/10 py-6">

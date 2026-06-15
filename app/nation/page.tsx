@@ -76,6 +76,9 @@ export default function NationPage() {
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">
             {getNationOriginQuote(claimedLand.landName, claimedLand.region)}
           </p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-200/70">
+            This nation grew from one claimed land and its first city. Declare empire to complete the first demo arc.
+          </p>
 
           <div className="mt-8 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-5">
             {[
@@ -123,7 +126,7 @@ export default function NationPage() {
             transition={{ duration: 0.45, delay: 0.14, ease: "easeOut" }}
             className="border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">Government</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">Nation Command</p>
             <div className="mt-7 space-y-5 border-b border-amber-500/10 pb-6">
               {[
                 ["Political Status", nation.politicalStatus],

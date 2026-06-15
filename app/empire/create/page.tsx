@@ -140,10 +140,13 @@ export default function EmpireCreatePage() {
         >
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-600/75">Create Empire</p>
           <h1 className="mt-8 max-w-4xl font-[family-name:var(--font-syne)] text-5xl font-extrabold leading-[1.05] tracking-tight text-amber-100 sm:text-6xl md:text-7xl">
-            Crown the first empire of the world.
+            Declare the first empire of the demo arc.
           </h1>
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">
-            Nations become empires when their borders become history.
+            This completes the path: land to settlement, settlement to nation, nation to empire.
+          </p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-200/70">
+            Deeper expansion, diplomacy, economy, and alliance layers can come later.
           </p>
 
           <div className="mt-8 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-5">
@@ -178,7 +181,7 @@ export default function EmpireCreatePage() {
                 First Empire Created
               </h2>
               <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-400">
-                {(currentEmpireName || "The first empire")} has become the first empire in Pixel Nations.
+                {(currentEmpireName || "The first empire")} completes the first Pixel Nations demo arc.
               </p>
 
               <div className="mt-8 border-y border-amber-500/10 py-6">

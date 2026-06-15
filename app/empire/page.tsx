@@ -69,6 +69,9 @@ export default function EmpirePage() {
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">
             {getEmpireHeroQuote(state.claimedLandName ? claimedLand.landName : "")}
           </p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-200/70">
+            First demo arc complete: land -&gt; settlement -&gt; nation -&gt; empire.
+          </p>
 
           <div className="mt-8 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-5">
             {[
@@ -123,7 +126,7 @@ export default function EmpirePage() {
                 ["Capital", empire.settlementName],
                 ["Origin Nation", empire.nationName],
                 ["Doctrine", empire.doctrine],
-                ["Next Objective", "Rule the World"],
+                ["Next Objective", "First Arc Complete"],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-start justify-between gap-5">
                   <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">{label}</span>
@@ -138,8 +141,11 @@ export default function EmpirePage() {
               disabled
               className="mt-9 cursor-not-allowed rounded border border-zinc-800 bg-[#08080f]/70 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-zinc-500"
             >
-              World Campaign Coming Soon
+              Deeper World Layers Later
             </button>
+            <p className="mt-4 max-w-md text-xs leading-6 text-zinc-500">
+              Expansion, diplomacy, economy, and alliance systems can deepen the world after this first playable arc.
+            </p>
           </motion.section>
 
           <motion.aside

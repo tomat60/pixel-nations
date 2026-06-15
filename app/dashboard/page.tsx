@@ -85,9 +85,9 @@ export default function DashboardPage() {
         }
       : settlementState.nationFounded
         ? {
-            title: settlementState.bordersExpanded ? "Create Empire" : "Expand Borders",
-            progress: settlementState.bordersExpanded ? "0 / 1 Empire" : "0 / 1 Expansion",
-            cta: "View Nation",
+            title: "Declare the First Empire",
+            progress: "Nation Founded",
+            cta: "Continue To Nation",
             href: "/nation",
           }
         : settlementState.regionalAllianceFormed
@@ -124,7 +124,7 @@ export default function DashboardPage() {
 
   const territoryOverview = useMemo(
     () => [
-      { id: "land-name", label: "Origin Land", value: claimedLand.landName },
+      { id: "land-name", label: "Your Land", value: claimedLand.landName },
       { id: "coordinates", label: "Coordinates", value: claimedLand.coordinates },
       { id: "region", label: "Region", value: claimedLand.region },
       { id: "terrain", label: "Terrain", value: claimedLand.terrain },
@@ -139,7 +139,7 @@ export default function DashboardPage() {
         <header className="border-b border-amber-500/15 pb-10">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-600/75">
-              Founder Dashboard
+              Founder Command Center
             </p>
             <Link
               href="/world"
@@ -173,6 +173,9 @@ export default function DashboardPage() {
           </div>
 
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">{originQuote}</p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-200/70">
+            This is your command center after claiming land. Your land becomes the origin of a settlement, a nation, and an empire.
+          </p>
         </header>
 
         <section className="mt-8 border border-amber-500/15 bg-[#06060c]/85 p-5 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-6">
@@ -236,6 +239,9 @@ export default function DashboardPage() {
         <section className="mt-10 border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
             Your Next Milestone
+          </p>
+          <p className="mt-4 text-sm leading-7 text-zinc-500">
+            Demo path: claim land -&gt; settlement -&gt; nation -&gt; empire.
           </p>
           <h2 className="mt-6 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             {nextMilestone.title}
