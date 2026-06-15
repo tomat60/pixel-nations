@@ -133,6 +133,20 @@ html {
   animation: world-tile-selected-glow 2.6s ease-in-out infinite;
 }
 
+.world-sector-canvas {
+  background:
+    radial-gradient(ellipse at 18% 22%, rgba(74, 56, 40, 0.22), transparent 42%),
+    radial-gradient(ellipse at 72% 18%, rgba(58, 64, 72, 0.2), transparent 38%),
+    radial-gradient(ellipse at 48% 78%, rgba(90, 48, 28, 0.18), transparent 44%),
+    radial-gradient(ellipse at 82% 62%, rgba(42, 69, 80, 0.16), transparent 36%),
+    linear-gradient(155deg, #0b0d11 0%, #06080b 48%, #030406 100%);
+}
+
+.world-sector-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  opacity: 0.035;
+}
+
 .animate-world-map-drift {
   animation: world-map-drift 18s ease-in-out infinite;
 }
