@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "qa:screens": "node scripts/qa-screenshots.mjs",
+    "qa:smoke": "node scripts/qa-smoke.mjs",
     "lint": "eslint"
   },
   "dependencies": {
