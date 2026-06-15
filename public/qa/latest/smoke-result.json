@@ -1,6 +1,6 @@
 {
   "status": "FAIL",
-  "generatedAt": "2026-06-15T21:58:31.211Z",
+  "generatedAt": "2026-06-15T22:02:50.051Z",
   "appUrl": "http://localhost:3000",
   "appSource": "existing local app",
   "blockingStep": "attempt empire continuation path",
@@ -9,42 +9,42 @@
     {
       "name": "reset demo state and open /world",
       "status": "PASS",
-      "durationMs": 1271
+      "durationMs": 1197
     },
     {
       "name": "select a claimable Sector A-01 land",
       "status": "PASS",
-      "durationMs": 192
+      "durationMs": 574
     },
     {
       "name": "claim selected land",
       "status": "PASS",
-      "durationMs": 501
+      "durationMs": 453
     },
     {
       "name": "dashboard recognizes claimed land",
       "status": "PASS",
-      "durationMs": 366
+      "durationMs": 331
     },
     {
       "name": "create settlement",
       "status": "PASS",
-      "durationMs": 2903
+      "durationMs": 3083
     },
     {
       "name": "build settlement core and establish trade",
       "status": "PASS",
-      "durationMs": 2998
+      "durationMs": 3448
     },
     {
       "name": "form alliance and found nation",
       "status": "PASS",
-      "durationMs": 4742
+      "durationMs": 4606
     },
     {
       "name": "attempt empire continuation path",
       "status": "FAIL",
-      "durationMs": 13,
+      "durationMs": 18,
       "error": "Nation page blocks empire continuation: found disabled 'Expansion Coming Soon' and no enabled /expansion/create or /empire/create link"
     }
   ]
