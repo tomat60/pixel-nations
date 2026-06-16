@@ -78,12 +78,12 @@ html {
 @keyframes world-tile-selected-glow {
   0%,
   100% {
-    opacity: 0.35;
-    box-shadow: inset 0 0 10px rgba(251, 191, 36, 0.12);
+    opacity: 0.22;
+    box-shadow: inset 0 0 8px rgba(251, 191, 36, 0.08);
   }
   50% {
-    opacity: 0.7;
-    box-shadow: inset 0 0 18px rgba(251, 191, 36, 0.28);
+    opacity: 0.5;
+    box-shadow: inset 0 0 16px rgba(251, 191, 36, 0.18);
   }
 }
 
@@ -135,11 +135,8 @@ html {
 
 .world-sector-canvas {
   background:
-    radial-gradient(ellipse at 18% 22%, rgba(74, 56, 40, 0.22), transparent 42%),
-    radial-gradient(ellipse at 72% 18%, rgba(58, 64, 72, 0.2), transparent 38%),
-    radial-gradient(ellipse at 48% 78%, rgba(90, 48, 28, 0.18), transparent 44%),
-    radial-gradient(ellipse at 82% 62%, rgba(42, 69, 80, 0.16), transparent 36%),
-    linear-gradient(155deg, #0b0d11 0%, #06080b 48%, #030406 100%);
+    radial-gradient(ellipse at center, rgba(201, 169, 98, 0.08), transparent 58%),
+    linear-gradient(155deg, #080b0c 0%, #050608 52%, #020204 100%);
 }
 
 .world-sector-noise {

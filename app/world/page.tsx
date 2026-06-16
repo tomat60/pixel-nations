@@ -46,133 +46,12 @@ const TERRAIN_RESOURCES: Record<Terrain, string[]> = {
   ruins: ["Relics", "Stone"],
 };
 
-const TERRAIN_TINT: Record<Terrain, string> = {
-  plains: "before:bg-[#6b5438]/28",
-  forest: "before:bg-[#2f4a30]/34",
-  mountain: "before:bg-[#4a525c]/30",
-  coast: "before:bg-[#2f5a68]/32",
-  basin: "before:bg-[#5a3c30]/28",
-  crownland: "before:bg-[#7a6030]/36",
-  ruins: "before:bg-[#5a4838]/24",
-};
-
-const TERRAIN_TILE_SURFACE: Record<Terrain, string> = {
-  plains: "bg-[#2a2218]/70",
-  forest: "bg-[#142018]/75",
-  mountain: "bg-[#1a1e24]/72",
-  coast: "bg-[#122228]/74",
-  basin: "bg-[#241812]/72",
-  crownland: "bg-[#2a2010]/76",
-  ruins: "bg-[#221c14]/70",
-};
-
 const REGION_LABELS = [
   { id: "north-frontier", name: "North Frontier", left: "30%", top: "18%" },
   { id: "crownlands", name: "Crownlands", left: "80%", top: "24%" },
   { id: "aurelia", name: "Aurelia", left: "54%", top: "48%" },
   { id: "iron-coast", name: "Iron Coast", left: "12%", top: "68%" },
   { id: "ember-basin", name: "Ember Basin", left: "66%", top: "82%" },
-];
-
-const MAP_ROUTES = [
-  "M 80 290 C 180 238 260 245 360 198 S 548 143 686 104",
-  "M 148 96 C 248 148 302 182 384 254 S 512 350 640 382",
-  "M 96 420 C 214 372 312 388 452 330 S 590 288 712 302",
-  "M 52 180 C 168 148 286 176 398 132 S 562 88 708 118",
-  "M 220 52 C 318 108 402 168 498 228 S 628 312 726 356",
-];
-
-const MAP_RIVERS = [
-  "M 404 38 C 388 112 420 168 386 230 S 328 330 366 430",
-  "M 636 86 C 594 132 584 190 614 248 S 680 334 644 424",
-  "M 118 120 C 168 188 214 248 268 312 S 348 396 412 458",
-  "M 520 18 C 498 98 512 168 476 248 S 432 348 468 440",
-];
-
-const MAP_CONTOURS = [
-  "M 42 86 C 146 42 292 76 366 130 S 548 188 720 138",
-  "M 74 360 C 178 302 304 332 418 284 S 598 230 734 268",
-  "M 216 458 C 310 392 404 406 508 374 S 646 340 722 386",
-  "M 280 96 C 348 148 412 182 468 236 S 548 312 612 368",
-];
-
-const MAP_FRONTIER_LINES = [
-  "M 506 0 C 498 120 512 240 504 360 S 490 420 506 484",
-  "M 0 162 C 180 148 320 172 460 158 S 620 142 760 168",
-  "M 0 388 C 210 362 360 398 520 372 S 660 348 760 396",
-  "M 152 0 C 168 160 142 300 158 484",
-];
-
-const SECTOR_REGION_ZONES = [
-  {
-    id: "north-frontier",
-    className:
-      "left-[12%] top-[0%] h-[38%] w-[52%] border-zinc-300/10 bg-zinc-300/[0.05] shadow-[inset_0_0_40px_rgba(161,161,170,0.04)]",
-    clipPath: "polygon(0 20%, 32% 0, 90% 10%, 100% 66%, 60% 98%, 8% 80%)",
-  },
-  {
-    id: "iron-coast",
-    className:
-      "left-[-1%] top-[20%] h-[78%] w-[32%] border-slate-300/10 bg-slate-400/[0.06] shadow-[inset_0_0_36px_rgba(148,163,184,0.05)]",
-    clipPath: "polygon(0 0, 74% 6%, 100% 46%, 74% 100%, 6% 88%, 0 40%)",
-  },
-  {
-    id: "aurelia",
-    className:
-      "left-[24%] top-[26%] h-[46%] w-[52%] border-amber-400/14 bg-amber-500/[0.07] shadow-[inset_0_0_48px_rgba(251,191,36,0.06)]",
-    clipPath: "polygon(8% 16%, 54% 0, 100% 22%, 86% 80%, 34% 100%, 0 62%)",
-  },
-  {
-    id: "crownlands",
-    className:
-      "left-[59%] top-[4%] h-[52%] w-[38%] border-amber-200/14 bg-amber-200/[0.06] shadow-[inset_0_0_40px_rgba(253,230,138,0.05)]",
-    clipPath: "polygon(14% 6%, 82% 0, 100% 40%, 76% 92%, 20% 100%, 0 48%)",
-  },
-  {
-    id: "ember-basin",
-    className:
-      "left-[32%] top-[58%] h-[38%] w-[62%] border-orange-300/10 bg-orange-400/[0.06] shadow-[inset_0_0_36px_rgba(251,146,60,0.04)]",
-    clipPath: "polygon(2% 26%, 40% 0, 100% 14%, 90% 84%, 40% 100%, 0 72%)",
-  },
-];
-
-const TERRAIN_MASSES = [
-  {
-    id: "coast-band",
-    className:
-      "left-[-2%] top-[14%] h-[84%] w-[22%] bg-gradient-to-r from-slate-600/45 via-slate-700/20 to-transparent blur-[1px]",
-    clipPath: "polygon(0 0, 88% 6%, 100% 48%, 82% 94%, 0 100%)",
-  },
-  {
-    id: "forest-belt",
-    className:
-      "left-[12%] top-[4%] h-[46%] w-[48%] bg-gradient-to-br from-emerald-900/50 via-emerald-950/25 to-transparent blur-[2px]",
-    clipPath: "polygon(0 24%, 44% 0, 100% 22%, 92% 100%, 8% 90%)",
-  },
-  {
-    id: "plains-heart",
-    className:
-      "left-[28%] top-[30%] h-[38%] w-[44%] bg-gradient-to-b from-amber-900/42 via-amber-950/18 to-transparent blur-[1px]",
-    clipPath: "polygon(6% 0, 94% 10%, 100% 86%, 44% 100%, 0 68%)",
-  },
-  {
-    id: "ridge-line",
-    className:
-      "left-[54%] top-[2%] h-[48%] w-[42%] bg-gradient-to-bl from-zinc-500/38 via-zinc-800/20 to-transparent blur-[2px]",
-    clipPath: "polygon(14% 0, 100% 6%, 94% 100%, 0 78%)",
-  },
-  {
-    id: "basin-floor",
-    className:
-      "left-[32%] top-[58%] h-[38%] w-[62%] bg-gradient-to-t from-orange-900/42 via-orange-950/18 to-transparent blur-[2px]",
-    clipPath: "polygon(0 32%, 40% 0, 100% 14%, 90% 100%, 6% 100%)",
-  },
-  {
-    id: "mist-veil",
-    className:
-      "inset-[8%] bg-[radial-gradient(ellipse_at_50%_42%,rgba(201,169,98,0.08),transparent_62%)]",
-    clipPath: "none",
-  },
 ];
 
 const STARTER_COORDS = new Set(["8,5", "9,5", "10,5", "8,6", "10,6", "11,6"]);
@@ -693,13 +572,13 @@ export default function WorldPage() {
               <div className="flex flex-col justify-between gap-4 border-b border-amber-500/10 pb-5 sm:flex-row sm:items-end">
                 <div className="max-w-xl">
                   <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-amber-600/80">
-                    First Playable Sector / Sector Code A-01
+                    Aurelian Basin · Sector A-01
                   </p>
                   <p className="mt-2 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100 sm:text-3xl">
-                    Aurelian Basin
+                    First Playable Frontier
                   </p>
                   <p className="mt-3 text-sm leading-7 text-zinc-400">
-                    Aurelian Basin is the demo frontier inside the 100 x 100 world atlas.
+                    A painted frontier region inside the larger 100 x 100 world atlas.
                   </p>
                   <p className="mt-2 text-xs uppercase tracking-[0.22em] text-zinc-600">
                     Choose one land and claim it. The full world contains 10,000 lands.
@@ -721,197 +600,129 @@ export default function WorldPage() {
                 </div>
               </div>
 
-              <div className="mt-5 overflow-x-auto pb-2">
-                <div className="world-sector-canvas relative min-w-[680px] overflow-hidden border border-amber-500/25 p-3 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)]">
-                  <div aria-hidden className="world-sector-noise pointer-events-none absolute inset-0 z-[1]" />
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_center,transparent_42%,rgba(2,2,4,0.72)_100%)]"
-                  />
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-2 z-[3] border border-amber-500/10 shadow-[inset_0_0_22px_rgba(201,169,98,0.05)]"
-                  />
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute left-3 top-3 z-[24] h-5 w-5 border-l border-t border-amber-200/35"
-                  />
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute right-3 top-3 z-[24] h-5 w-5 border-r border-t border-amber-200/35"
-                  />
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute bottom-3 left-3 z-[24] h-5 w-5 border-b border-l border-amber-200/35"
-                  />
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute bottom-3 right-3 z-[24] h-5 w-5 border-b border-r border-amber-200/35"
-                  />
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-3 z-[4] bg-[radial-gradient(ellipse_at_52%_48%,rgba(201,169,98,0.12),transparent_58%)]"
-                  />
-                  {TERRAIN_MASSES.map((mass) => (
-                    <div
-                      key={mass.id}
-                      aria-hidden
-                      className={`pointer-events-none absolute z-[5] ${mass.className}`}
-                      style={{ clipPath: mass.clipPath }}
+              <div className="mt-5 pb-2">
+                <div className="world-sector-canvas relative overflow-hidden border border-amber-500/25 p-2 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)] sm:p-3">
+                  <div className="relative aspect-[4/5] min-h-[420px] overflow-hidden sm:aspect-[16/9] sm:min-h-[420px] lg:min-h-[560px]">
+                    <img
+                      src="/assets/world-map/aurelian-basin-v1.png"
+                      alt=""
+                      className="absolute inset-0 h-full w-full object-cover object-center"
                     />
-                  ))}
-                  {SECTOR_REGION_ZONES.map((zone) => (
                     <div
-                      key={zone.id}
                       aria-hidden
-                      className={`pointer-events-none absolute z-[7] border ${zone.className}`}
-                      style={{ clipPath: zone.clipPath }}
+                      className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(2,2,4,0.18),transparent_28%,rgba(2,2,4,0.22)),radial-gradient(ellipse_at_center,transparent_46%,rgba(2,2,4,0.72)_100%)]"
                     />
-                  ))}
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute left-6 top-6 z-[23] border border-amber-500/20 bg-[#030306]/75 px-2 py-1 font-[family-name:var(--font-syne)] text-[8px] font-bold uppercase tracking-[0.22em] text-amber-100/65 backdrop-blur-sm"
-                  >
-                    Sector A-01 / 216 lands
-                  </div>
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute bottom-6 right-6 z-[23] border border-amber-500/15 bg-[#030306]/70 px-2 py-1 text-[8px] uppercase tracking-[0.2em] text-zinc-500 backdrop-blur-sm"
-                  >
-                    Full world: 10,000 lands
-                  </div>
-                  <svg
-                    aria-hidden
-                    className="pointer-events-none absolute inset-3 z-[8] h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)]"
-                    viewBox="0 0 760 484"
-                    preserveAspectRatio="none"
-                  >
-                    {MAP_CONTOURS.map((path) => (
-                      <path
-                        key={path}
-                        d={path}
-                        fill="none"
-                        stroke="rgba(245,222,179,0.12)"
-                        strokeWidth="2"
-                      />
-                    ))}
-                    {MAP_FRONTIER_LINES.map((path) => (
-                      <path
-                        key={path}
-                        d={path}
-                        fill="none"
-                        stroke="rgba(201,169,98,0.18)"
-                        strokeDasharray="2 11"
-                        strokeLinecap="round"
-                        strokeWidth="1.5"
-                      />
-                    ))}
-                    {MAP_RIVERS.map((path) => (
-                      <path
-                        key={path}
-                        d={path}
-                        fill="none"
-                        stroke="rgba(148,163,184,0.32)"
-                        strokeLinecap="round"
-                        strokeWidth="2.5"
-                      />
-                    ))}
-                    {MAP_ROUTES.map((path) => (
-                      <path
-                        key={path}
-                        d={path}
-                        fill="none"
-                        stroke="rgba(201,169,98,0.32)"
-                        strokeDasharray="5 7"
-                        strokeLinecap="round"
-                        strokeWidth="2"
-                      />
-                    ))}
-                  </svg>
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-3 z-[9] opacity-[0.14] [background-image:linear-gradient(rgba(201,169,98,0.55)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.55)_1px,transparent_1px)] [background-size:calc(100%/18)_calc(100%/12)]"
-                  />
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-3 z-[10] border border-amber-500/18"
-                  />
-                  {REGION_LABELS.map((label) => (
-                    <span
-                      key={label.id}
-                      className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 border border-amber-500/14 bg-[#030306]/60 px-2 py-0.5 font-[family-name:var(--font-syne)] text-[8px] font-bold uppercase tracking-[0.2em] text-amber-100/55 backdrop-blur-sm sm:text-[9px]"
-                      style={{ left: label.left, top: label.top }}
+                    <div aria-hidden className="world-sector-noise pointer-events-none absolute inset-0 z-[2]" />
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-2 z-[3] border border-amber-500/12 shadow-[inset_0_0_22px_rgba(201,169,98,0.05)]"
+                    />
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute left-3 top-3 z-[24] h-5 w-5 border-l border-t border-amber-200/35"
+                    />
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute right-3 top-3 z-[24] h-5 w-5 border-r border-t border-amber-200/35"
+                    />
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute bottom-3 left-3 z-[24] h-5 w-5 border-b border-l border-amber-200/35"
+                    />
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute bottom-3 right-3 z-[24] h-5 w-5 border-b border-r border-amber-200/35"
+                    />
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute left-5 top-5 z-[23] border border-amber-500/20 bg-[#030306]/70 px-2 py-1 font-[family-name:var(--font-syne)] text-[8px] font-bold uppercase tracking-[0.22em] text-amber-100/70 backdrop-blur-sm sm:left-6 sm:top-6"
                     >
-                      {label.name}
-                    </span>
-                  ))}
-                  <div className="relative z-[12] grid grid-cols-[repeat(18,minmax(0,1fr))] gap-px bg-amber-500/[0.035] p-px">
-                    {tiles.map((tile) => {
-                      const tileOwnedByYou = demoState.claimedLandId === tile.id && demoState.claimedLand;
-                      const tileClaimed = tile.claimed || tileOwnedByYou;
-                      const tileUnavailable = tile.claimed && !tileOwnedByYou;
-                      const isSelected = selectedTile.id === tile.id;
+                      Aurelian Basin / A-01
+                    </div>
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute bottom-5 right-5 z-[23] hidden border border-amber-500/15 bg-[#030306]/70 px-2 py-1 text-[8px] uppercase tracking-[0.2em] text-zinc-400 backdrop-blur-sm sm:block"
+                    >
+                      Full world: 10,000 lands
+                    </div>
+                    {REGION_LABELS.map((label) => (
+                      <span
+                        key={label.id}
+                        className="pointer-events-none absolute z-20 hidden -translate-x-1/2 -translate-y-1/2 border border-amber-500/14 bg-[#030306]/50 px-2 py-0.5 font-[family-name:var(--font-syne)] text-[8px] font-bold uppercase tracking-[0.2em] text-amber-100/55 backdrop-blur-sm sm:block sm:text-[9px]"
+                        style={{ left: label.left, top: label.top }}
+                      >
+                        {label.name}
+                      </span>
+                    ))}
+                    <div className="absolute inset-2 z-[12] grid grid-cols-[repeat(18,minmax(0,1fr))] grid-rows-[repeat(12,minmax(0,1fr))]">
+                      {tiles.map((tile) => {
+                        const tileOwnedByYou = demoState.claimedLandId === tile.id && demoState.claimedLand;
+                        const tileClaimed = tile.claimed || tileOwnedByYou;
+                        const tileUnavailable = tile.claimed && !tileOwnedByYou;
+                        const isSelected = selectedTile.id === tile.id;
 
-                      return (
-                        <button
-                          key={tile.id}
-                          type="button"
-                          onClick={() => selectTile(tile.id)}
-                          aria-label={`${tile.landId}, ${tile.region}, ${toTerrainLabel(tile.terrain)}`}
-                          className={`relative aspect-square overflow-hidden border border-white/[0.025] ${TERRAIN_TILE_SURFACE[tile.terrain]} transition-[border-color,box-shadow,background-color] duration-200 before:pointer-events-none before:absolute before:inset-0 before:opacity-90 after:pointer-events-none after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.04),transparent_42%)] ${TERRAIN_TINT[tile.terrain]} ${
-                            tile.x === 0 || tile.x === GRID_WIDTH - 1 || tile.y === 0 || tile.y === GRID_HEIGHT - 1
-                              ? "opacity-[0.72]"
-                              : ""
-                          } ${
-                            isSelected
-                              ? "z-[14] border-amber-100/95 shadow-[inset_0_0_18px_rgba(251,191,36,0.28),inset_0_0_0_1px_rgba(251,191,36,0.18),0_0_0_1px_rgba(251,191,36,0.42)]"
-                              : "hover:border-amber-300/40 hover:bg-black/15"
-                          } ${
-                            tileOwnedByYou
-                              ? "border-amber-200/75 shadow-[inset_0_0_12px_rgba(251,191,36,0.2)]"
-                              : tileUnavailable
-                                ? "opacity-[0.34] saturate-[0.55]"
+                        return (
+                          <button
+                            key={tile.id}
+                            type="button"
+                            onClick={() => selectTile(tile.id)}
+                            aria-label={`${tile.landId}, ${tile.region}, ${toTerrainLabel(tile.terrain)}`}
+                            className={`relative overflow-hidden border border-transparent bg-transparent transition-[border-color,box-shadow,background-color,filter] duration-200 ${
+                              tileUnavailable
+                                ? "bg-black/[0.08] saturate-[0.82]"
+                                : "hover:border-amber-200/35 hover:bg-amber-100/[0.045] hover:shadow-[inset_0_0_16px_rgba(251,191,36,0.1)]"
+                            } ${
+                              isSelected
+                                ? "z-[20] border-amber-100/80 bg-amber-300/[0.08] shadow-[inset_0_0_18px_rgba(251,191,36,0.2),0_0_0_1px_rgba(251,191,36,0.2),0_0_28px_rgba(251,191,36,0.18)]"
                                 : ""
-                          } ${
-                            tile.starter && !tileClaimed
-                              ? "shadow-[inset_0_0_12px_rgba(251,191,36,0.14)]"
-                              : ""
-                          }`}
-                        >
-                          {tile.starter && !tileClaimed ? (
-                            <>
-                              <span className="pointer-events-none absolute inset-[2px] border border-amber-300/18" />
-                              <span className="pointer-events-none absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_10px_rgba(251,191,36,0.7)]" />
-                            </>
-                          ) : null}
-                          {!tile.starter && tile.landmark && !tileClaimed ? (
-                            <span className="pointer-events-none absolute right-1 top-1 h-1 w-1 rotate-45 bg-orange-200/80 shadow-[0_0_8px_rgba(251,191,36,0.4)]" />
-                          ) : null}
-                          {!tile.starter && !tile.landmark && tile.resourceRich && !tileClaimed ? (
-                            <span className="pointer-events-none absolute right-1 top-1 h-1 w-1 rounded-full bg-cyan-200/70" />
-                          ) : null}
-                          {isSelected ? (
-                            <span
-                              aria-hidden
-                              className="pointer-events-none absolute inset-0 bg-amber-300/[0.06] animate-world-tile-selected-glow"
-                            />
-                          ) : null}
-                          {tileOwnedByYou ? (
-                            <span className="absolute inset-0 flex items-center justify-center bg-amber-500/10 text-[7px] font-bold uppercase tracking-[0.18em] text-amber-100">
-                              You
-                            </span>
-                          ) : null}
-                        </button>
-                      );
-                    })}
+                            } ${
+                              tileOwnedByYou
+                                ? "border-amber-200/45 bg-amber-400/[0.07] shadow-[inset_0_0_14px_rgba(251,191,36,0.16)]"
+                                : ""
+                            }`}
+                          >
+                            {tile.starter && !tileClaimed ? (
+                              <span className="pointer-events-none absolute right-1 top-1 h-1 w-1 rounded-full bg-amber-200/70 shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                            ) : null}
+                            {!tile.starter && tile.landmark && !tileClaimed ? (
+                              <span className="pointer-events-none absolute right-1 top-1 h-1 w-1 rotate-45 bg-orange-200/70 shadow-[0_0_8px_rgba(251,191,36,0.35)]" />
+                            ) : null}
+                            {!tile.starter && !tile.landmark && tile.resourceRich && !tileClaimed ? (
+                              <span className="pointer-events-none absolute right-1 top-1 h-1 w-1 rounded-full bg-cyan-100/60" />
+                            ) : null}
+                            {isSelected ? (
+                              <>
+                                <span
+                                  aria-hidden
+                                  className="pointer-events-none absolute inset-[12%] border border-amber-100/45 bg-amber-300/[0.035] animate-world-tile-selected-glow"
+                                />
+                                <span
+                                  aria-hidden
+                                  className="pointer-events-none absolute left-1/2 top-1/2 h-5 w-3 -translate-x-1/2 -translate-y-full border border-amber-100/55 bg-[#071018]/90 shadow-[0_0_18px_rgba(251,191,36,0.26)] sm:h-7 sm:w-4"
+                                >
+                                  <span className="absolute left-1/2 top-full h-3 w-px -translate-x-1/2 bg-amber-100/45" />
+                                </span>
+                              </>
+                            ) : null}
+                            {tileOwnedByYou ? (
+                              <span className="absolute inset-0 flex items-center justify-center">
+                                <span className="relative h-2.5 w-2.5 rounded-full border border-amber-100/50 bg-amber-300/40 shadow-[0_0_14px_rgba(251,191,36,0.5)]">
+                                  <span className="absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-100" />
+                                </span>
+                              </span>
+                            ) : null}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                   <div className="relative z-20 mt-3 grid gap-2 border border-amber-500/10 bg-[#030306]/82 p-3 text-[9px] uppercase tracking-[0.18em] text-zinc-500 backdrop-blur-sm sm:grid-cols-5">
                     {[
                       ["Founder land", "h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.6)]"],
                       ["Resource-rich", "h-1 w-1 rounded-full bg-cyan-200/70"],
                       ["Landmark", "h-1 w-1 rotate-45 bg-orange-200/80"],
-                      ["Ownership grid", "h-px w-3 bg-amber-400/40"],
-                      ["Routes / rivers", "h-px w-3 bg-slate-300/60"],
+                      ["Subtle land overlay", "h-px w-3 bg-amber-400/30"],
+                      ["Painted terrain", "h-px w-3 bg-slate-300/60"],
                     ].map(([label, swatch]) => (
                       <div key={label} className="flex items-center gap-2">
                         <span className={swatch} />
