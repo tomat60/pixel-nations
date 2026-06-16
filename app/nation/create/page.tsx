@@ -198,7 +198,7 @@ export default function NationCreatePage() {
                     "Nation Founder",
                     "Capital City",
                     "Regional Rule",
-                    "Diplomatic Sovereignty",
+                    "Sovereign Banner",
                   ].map((benefit) => (
                     <li key={benefit} className="border-l border-amber-500/25 pl-4">
                       <span className="mr-2 text-amber-300">{"\u2713"}</span>

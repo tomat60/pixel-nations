@@ -10,52 +10,52 @@ const progression = [
   {
     step: "01",
     title: "Claim Land",
-    desc: "Choose your territory and plant the first banner.",
+    desc: "Choose one land and plant the first banner.",
   },
   {
     step: "02",
-    title: "Build Cities",
-    desc: "Turn claimed land into strongholds of power.",
+    title: "Found Settlement",
+    desc: "Turn claimed land into the first civic core.",
   },
   {
     step: "03",
-    title: "Create Nations",
-    desc: "Unite cities beneath one banner and one destiny.",
+    title: "Found Nation",
+    desc: "Raise a capital, a banner, and a political identity.",
   },
   {
     step: "04",
-    title: "Rule Empires",
-    desc: "Project power across the world and shape its future.",
+    title: "Declare Empire",
+    desc: "Complete the first rise from land to empire.",
   },
 ];
 
 const worldScale = [
   { id: "lands", value: "10,000", label: "Finite Lands" },
   { id: "world", value: "1", label: "Persistent World" },
-  { id: "territories", value: "100%", label: "Player-Owned Territory" },
-  { id: "nations", value: "∞", label: "Player-Created Nations" },
+  { id: "territories", value: "1", label: "First Playable Sector" },
+  { id: "nations", value: "4", label: "Demo Milestones" },
 ];
 
 const differentiators = [
   {
     id: "player-owned-land",
-    title: "Player-Owned Land",
-    desc: "Every land tile can be claimed, developed, traded or conquered.",
+    title: "One Land Matters",
+    desc: "Every claimed land can become the origin of a city, nation and empire.",
   },
   {
     id: "persistent-history",
-    title: "Persistent History",
-    desc: "Nothing resets. Victories, wars and alliances become permanent history.",
+    title: "Founder Record",
+    desc: "Claims, cities, nations and empires remain part of the demo history.",
   },
   {
     id: "nation-building",
-    title: "Nation Building",
-    desc: "Cities unite into nations. Nations grow into empires.",
+    title: "Nation To Empire",
+    desc: "The vertical slice follows one clear rise from city to nation to empire.",
   },
   {
     id: "emergent-politics",
-    title: "Emergent Politics",
-    desc: "Diplomacy, trade and conflict are driven by players, not scripted events.",
+    title: "Player-Made History",
+    desc: "There are no scripted kingdoms. The first founders define the age.",
   },
 ];
 
@@ -63,28 +63,28 @@ const empireJourney = [
   {
     step: "01",
     title: "Claim Land",
-    desc: "Buy your first tile and secure your place in the world.",
+    desc: "Claim your first land and secure your place in the world.",
     numberClass: "text-5xl sm:text-7xl",
     titleClass: "text-4xl sm:text-6xl md:text-7xl",
   },
   {
     step: "02",
     title: "Build City",
-    desc: "Develop infrastructure and attract settlers.",
+    desc: "Found the civic core that turns land into a city.",
     numberClass: "text-6xl sm:text-8xl",
     titleClass: "text-5xl sm:text-7xl md:text-8xl",
   },
   {
     step: "03",
     title: "Form Nation",
-    desc: "Join forces with other players and shape borders.",
+    desc: "Raise a capital and give your people one banner.",
     numberClass: "text-7xl sm:text-9xl",
     titleClass: "text-5xl sm:text-8xl md:text-9xl",
   },
   {
     step: "04",
     title: "Rule Empire",
-    desc: "Control trade, politics and the fate of continents.",
+    desc: "Complete the first demo arc and leave an imperial record.",
     numberClass: "text-7xl sm:text-9xl",
     titleClass: "text-5xl sm:text-8xl md:text-[8rem]",
   },
@@ -93,26 +93,26 @@ const empireJourney = [
 const playerWorldFeatures = [
   {
     id: "player-cities",
-    title: "Player Cities",
-    desc: "Cities are founded, expanded and managed by players.",
+    title: "Founder Cities",
+    desc: "Cities begin from claimed land and become the first centers of power.",
     className: "lg:col-span-7",
   },
   {
     id: "real-nations",
-    title: "Real Nations",
-    desc: "Nations emerge from alliances, diplomacy and conquest.",
+    title: "First Nations",
+    desc: "Nations emerge when a capital and its founders choose one banner.",
     className: "lg:col-span-5 lg:translate-y-16",
   },
   {
-    id: "living-economy",
-    title: "Living Economy",
-    desc: "Resources, trade routes and markets are shaped by players.",
+    id: "strategic-routes",
+    title: "Strategic Routes",
+    desc: "Routes and regional ties give the first city a reason to grow.",
     className: "lg:col-span-5",
   },
   {
-    id: "wars-politics",
-    title: "Wars & Politics",
-    desc: "Borders change through conflict, negotiation and power.",
+    id: "imperial-legacy",
+    title: "Imperial Legacy",
+    desc: "The first empire ends the opening arc and points to deeper play later.",
     className: "lg:col-span-7 lg:translate-y-12",
   },
   {
@@ -136,18 +136,18 @@ const onboardingSteps = [
   },
   {
     step: "03",
-    title: "Meet Players",
-    desc: "Trade, negotiate and form alliances.",
+    title: "Build Civic Core",
+    desc: "Raise the first seat of power.",
   },
   {
     step: "04",
-    title: "Join A Nation",
-    desc: "Shape borders and politics.",
+    title: "Found Nation",
+    desc: "Turn a city into a banner.",
   },
   {
     step: "05",
-    title: "Leave A Legacy",
-    desc: "Build something future players will remember.",
+    title: "Declare Empire",
+    desc: "Complete the first rise.",
   },
 ];
 
@@ -275,17 +275,16 @@ export default function Home() {
             </p>
 
             <h1 className="font-[family-name:var(--font-syne)] text-5xl font-extrabold leading-[0.95] tracking-tight text-white sm:text-6xl md:text-7xl lg:text-8xl">
-              The world begins
+              History begins
               <br />
               <span className="bg-gradient-to-b from-amber-100 via-amber-200/90 to-amber-600/70 bg-clip-text text-transparent">
-                with 10,000 lands.
+                with one land.
               </span>
             </h1>
 
             <p className="animate-fade-up animation-delay-200 mt-8 max-w-2xl text-base leading-8 text-zinc-500 sm:text-lg">
-              Every tile can have one owner. Every nation starts somewhere.
-              Claim your place before the map fills and the first histories are
-              written.
+              A finite world of 10,000 lands is opening. Claim your first land,
+              found a settlement, raise a nation and declare the first empire.
             </p>
 
             <div className="animate-fade-up animation-delay-400 mt-12 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
@@ -294,7 +293,7 @@ export default function Home() {
                 onClick={handleStartDemo}
                 className="btn-primary w-full rounded border border-amber-500/60 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-10 py-4 text-sm font-bold uppercase tracking-widest text-amber-100 shadow-[0_0_48px_rgba(201,169,98,0.1)] sm:w-auto sm:px-12 sm:text-base"
               >
-                Start Demo
+                Claim Your First Land
               </button>
 
               <button
@@ -302,7 +301,7 @@ export default function Home() {
                 onClick={() => router.push("/world")}
                 className="btn-secondary w-full rounded border border-zinc-800 bg-[#08080f]/80 px-10 py-4 text-sm font-semibold uppercase tracking-widest text-zinc-400 sm:w-auto sm:px-12 sm:text-base"
               >
-                View the World
+                View First Sector
               </button>
             </div>
 
@@ -311,7 +310,7 @@ export default function Home() {
                 Playable MVP Demo
               </p>
               <p className="text-sm leading-6 text-zinc-500">
-                Claim land, found a city, build a nation and create the first empire.
+                The playable demo follows one rise: land to settlement to nation to empire.
               </p>
               {hasDemoProgress && demoProgressMessage ? (
                 <p className="text-xs uppercase tracking-[0.2em] text-amber-300/80">
@@ -495,9 +494,9 @@ export default function Home() {
             </h2>
 
             <p className="mx-auto mt-8 max-w-2xl text-base leading-8 text-zinc-500 sm:text-lg">
-              Pixel Nations is not a game you play and leave behind. Every land
-              is owned. Every nation is founded by a player. Every empire that
-              rises and falls becomes part of a record that never resets.
+              Pixel Nations begins with a simple promise: one land can become a city,
+              a nation, and an empire. The first demo arc records that rise without
+              pretending the whole world is finished.
             </p>
 
             <div className="mx-auto mt-20 grid max-w-4xl grid-cols-2 gap-x-8 gap-y-14 sm:gap-x-12 lg:grid-cols-4">
@@ -549,7 +548,7 @@ export default function Home() {
                 no resets. No new continents. No second worlds.
               </p>
               <p>
-                Early owners set the terms. Later arrivals negotiate with them.
+                Early founders set the record. Later arrivals inherit the world they shaped.
               </p>
             </div>
 
@@ -671,8 +670,8 @@ export default function Home() {
 
             <div className="mx-auto mt-18 max-w-2xl space-y-5 text-base leading-8 text-zinc-500 sm:text-lg">
               <p>The first explorers will claim the most valuable land.</p>
-              <p>Early cities will control trade routes.</p>
-              <p>New nations will define borders.</p>
+              <p>Early cities will become capitals.</p>
+              <p>New nations will raise the first banners.</p>
               <p>Rising empires will write history.</p>
             </div>
 
@@ -805,7 +804,7 @@ export default function Home() {
               </h2>
 
               <p className="mx-auto mt-8 max-w-2xl text-base leading-8 text-zinc-500 sm:text-lg">
-                The journey from explorer to empire starts with a single tile.
+                The journey from founder to empire starts with a single land.
               </p>
             </div>
 
@@ -894,7 +893,7 @@ export default function Home() {
                 onClick={handleStartDemo}
                 className="btn-primary w-full rounded border border-amber-500/65 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-12 py-4 text-sm font-bold uppercase tracking-widest text-amber-100 shadow-[0_0_60px_rgba(201,169,98,0.12)] sm:w-auto sm:text-base"
               >
-                Start Demo
+                Claim Your First Land
               </button>
 
               <button
@@ -902,7 +901,7 @@ export default function Home() {
                 onClick={() => router.push("/world")}
                 className="btn-secondary w-full rounded border border-zinc-800 bg-[#08080f]/80 px-12 py-4 text-sm font-semibold uppercase tracking-widest text-zinc-400 sm:w-auto sm:text-base"
               >
-                View The World
+                View First Sector
               </button>
             </div>
           </div>

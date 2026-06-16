@@ -161,7 +161,7 @@ export default function NationPage() {
             )}
             {!nation.empireFounded ? (
               <p className="mt-4 max-w-md text-xs uppercase tracking-[0.18em] text-zinc-600">
-                Border expansion remains a future layer. The demo can declare its first empire now.
+                Expansion remains a future layer. This demo can declare its first empire now.
               </p>
             ) : null}
           </motion.section>
