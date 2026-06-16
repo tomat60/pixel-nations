@@ -422,31 +422,28 @@ export default function WorldPage() {
         <section
           id="world-atlas"
           data-qa="world-atlas"
-          className="mt-6 overflow-hidden border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.5)] sm:mt-8 sm:p-6"
+          className="mt-6 overflow-hidden border border-amber-500/10 bg-[#050509]/72 p-4 shadow-[0_12px_44px_rgba(0,0,0,0.32)] sm:mt-8 sm:p-5"
         >
-          <div className="mb-5 grid gap-5 border-b border-amber-500/10 pb-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
-            <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200/80">
-                World Atlas
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center">
+            <div className="max-w-2xl">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-500/70">
+                World Context
               </p>
-              <h2 className="mt-4 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-5xl">
-                Full world: 10,000 lands.
+              <h2 className="mt-2 font-[family-name:var(--font-syne)] text-xl font-extrabold tracking-tight text-amber-100 sm:text-2xl">
+                Aurelian Basin is Sector A-01 inside a 10,000-land world.
               </h2>
-              <p className="mt-4 text-sm leading-7 text-zinc-400">
-                The full world contains 10,000 lands across a 100 x 100 atlas.
-              </p>
-              <p className="mt-2 text-sm leading-7 text-amber-200/70">
-                Aurelian Basin is the first playable frontier. Sector code: A-01.
+              <p className="mt-2 text-sm leading-7 text-zinc-400">
+                The playable map below is the first frontier window, not the whole world.
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-px border border-amber-500/10 bg-amber-500/10 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+            <div className="grid grid-cols-3 gap-px border border-amber-500/10 bg-amber-500/10 text-[10px] uppercase tracking-[0.18em] text-zinc-500">
               <div className="bg-[#08080f]/95 p-3">
                 <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">10,000</p>
                 <p className="mt-1">finite lands</p>
               </div>
               <div className="bg-[#08080f]/95 p-3">
                 <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">100 x 100</p>
-                <p className="mt-1">world grid</p>
+                <p className="mt-1">world scale</p>
               </div>
               <div className="bg-[#08080f]/95 p-3">
                 <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">A-01</p>
@@ -455,7 +452,7 @@ export default function WorldPage() {
             </div>
           </div>
 
-          <div className="relative overflow-hidden border border-amber-500/20 bg-[#030306] p-3 shadow-[inset_0_0_90px_rgba(0,0,0,0.72)] sm:p-4">
+          <div className="hidden">
             <div
               aria-hidden
               className="absolute inset-3 opacity-[0.26] [background-image:linear-gradient(rgba(201,169,98,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.5)_1px,transparent_1px)] [background-size:1%_1%]"
