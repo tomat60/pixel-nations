@@ -78,7 +78,7 @@ export default function DashboardPage() {
   const nextMilestone = settlementState.settlementFounded
     ? settlementState.empireFounded
       ? {
-          title: "Rule the World",
+          title: "First Demo Arc Complete",
           progress: "Empire Founded",
           cta: "View Empire",
           href: "/empire",
@@ -174,7 +174,7 @@ export default function DashboardPage() {
 
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">{originQuote}</p>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-200/70">
-            This is your command center after claiming land. Your land becomes the origin of a settlement, a nation, and an empire.
+            This command center tracks your rise after claiming land. Your land becomes the origin of a settlement, a nation, and an empire.
           </p>
         </header>
 

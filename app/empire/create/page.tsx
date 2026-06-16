@@ -187,7 +187,7 @@ export default function EmpireCreatePage() {
               <div className="mt-8 border-y border-amber-500/10 py-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-600/75">Unlocked Benefits</p>
                 <ul className="mt-5 grid gap-3 text-sm text-zinc-300 sm:grid-cols-2">
-                  {["Empire Founder", "Imperial Capital", "World Legacy", "Expansion Mandate"].map((benefit) => (
+                  {["Empire Founder", "Imperial Capital", "World Legacy", "Opening Arc Complete"].map((benefit) => (
                     <li key={benefit} className="border-l border-amber-500/25 pl-4">
                       <span className="mr-2 text-amber-300">{"\u2713"}</span>
                       {benefit}
