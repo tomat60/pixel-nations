@@ -109,6 +109,10 @@ export default function SettlementPage() {
       tradeRouteIdentity: settlementState.tradeRouteIdentity || "",
       regionalAllianceFormed: settlementState.regionalAllianceFormed,
       allianceName: settlementState.allianceName || FALLBACK_SETTLEMENT.allianceName,
+      allianceStrategy: settlementState.allianceStrategy || "",
+      allianceBonus: settlementState.allianceBonus || "",
+      allianceIdentity: settlementState.allianceIdentity || "",
+      diplomaticReach: settlementState.diplomaticReach ?? 0,
       nationFounded: settlementState.nationFounded,
       nationName: settlementState.nationName || FALLBACK_SETTLEMENT.nationName,
       landsControlled: settlementState.landsControlled > 0 ? settlementState.landsControlled : 1,
@@ -442,9 +446,14 @@ export default function SettlementPage() {
                   </>
                 ) : null}
                 {displaySettlement.regionalAllianceFormed ? (
-                  <li className="border-l border-amber-500/25 pl-4">
-                    Regional alliance formed: {displaySettlement.allianceName}
-                  </li>
+                  <>
+                    <li className="border-l border-amber-500/25 pl-4">
+                      Regional alliance formed: {displaySettlement.allianceName}
+                    </li>
+                    <li className="border-l border-amber-500/25 pl-4">
+                      Alliance strategy: {displaySettlement.allianceStrategy || "Regional support"}
+                    </li>
+                  </>
                 ) : null}
                 {displaySettlement.nationFounded ? (
                   <li className="border-l border-amber-500/25 pl-4">

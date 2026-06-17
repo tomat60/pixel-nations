@@ -81,6 +81,10 @@ export default function NationCreatePage() {
 
   const settlementName = settlementState.settlementName || "Aurelia Prime";
   const allianceName = settlementState.allianceName || "Aurelian Pact";
+  const allianceStrategy = settlementState.allianceStrategy || "Regional Support";
+  const allianceIdentity =
+    settlementState.allianceIdentity ||
+    "The alliance gives the city enough regional support to raise a national banner.";
   const influence = settlementState.influence > 0 ? settlementState.influence : 20;
   const selectedIdeology =
     IDEOLOGIES.find((ideology) => ideology.id === selectedIdeologyId) ?? IDEOLOGIES[0];
@@ -293,6 +297,7 @@ export default function NationCreatePage() {
                     ["Capital", settlementName],
                     ["Region", settlementState.region || "Aurelia"],
                     ["Founding Alliance", allianceName],
+                    ["Alliance Strategy", allianceStrategy],
                     ["Ideology", selectedIdeology.title],
                   ].map(([label, value]) => (
                     <div key={label} className="flex items-start justify-between gap-5">
@@ -312,7 +317,7 @@ export default function NationCreatePage() {
                   <p className="text-sm text-zinc-300">Political Status: First Nation</p>
                 </div>
                 <p className="mt-6 text-xs leading-6 text-zinc-500">
-                  The alliance marks regional support. No land merging is required to found this demo nation.
+                  {allianceIdentity} No land merging is required to found this demo nation.
                 </p>
 
                 <div className="mt-8 flex flex-col gap-3">

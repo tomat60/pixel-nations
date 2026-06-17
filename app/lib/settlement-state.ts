@@ -35,6 +35,10 @@ export const SETTLEMENT_STORAGE_KEYS = {
   regionalAllianceFormed: "regionalAllianceFormed",
   allianceName: "allianceName",
   alliancePartners: "alliancePartners",
+  allianceStrategy: "allianceStrategy",
+  allianceBonus: "allianceBonus",
+  allianceIdentity: "allianceIdentity",
+  diplomaticReach: "diplomaticReach",
   politicalStatus: "politicalStatus",
   nationFounded: "nationFounded",
   nationName: "nationName",
@@ -81,6 +85,10 @@ export type SettlementState = {
   regionalAllianceFormed: boolean;
   allianceName: string;
   alliancePartners: string[];
+  allianceStrategy?: string;
+  allianceBonus?: string;
+  allianceIdentity?: string;
+  diplomaticReach?: number;
   politicalStatus: string;
   nationFounded: boolean;
   nationName: string;
@@ -127,6 +135,10 @@ export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
   regionalAllianceFormed: false,
   allianceName: "",
   alliancePartners: [],
+  allianceStrategy: "",
+  allianceBonus: "",
+  allianceIdentity: "",
+  diplomaticReach: 0,
   politicalStatus: "",
   nationFounded: false,
   nationName: "",
@@ -243,6 +255,10 @@ function sanitizeState(raw: unknown): SettlementState {
     regionalAllianceFormed: source.regionalAllianceFormed === true,
     allianceName: typeof source.allianceName === "string" ? source.allianceName : "",
     alliancePartners: isStringArray(source.alliancePartners) ? source.alliancePartners : [],
+    allianceStrategy: typeof source.allianceStrategy === "string" ? source.allianceStrategy : "",
+    allianceBonus: typeof source.allianceBonus === "string" ? source.allianceBonus : "",
+    allianceIdentity: typeof source.allianceIdentity === "string" ? source.allianceIdentity : "",
+    diplomaticReach: toSafeNumber(source.diplomaticReach, DEFAULT_SETTLEMENT_STATE.diplomaticReach ?? 0),
     politicalStatus: typeof source.politicalStatus === "string" ? source.politicalStatus : "",
     nationFounded: source.nationFounded === true,
     nationName: typeof source.nationName === "string" ? source.nationName : "",
