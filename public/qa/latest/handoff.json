@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-17T17:26:31.363Z",
-  "branch": "sprint/project-automation-file-handoff-v0-2",
-  "isClean": false,
+  "generatedAt": "2026-06-17T17:37:32.831Z",
+  "branch": "main",
+  "isClean": true,
   "git": {
-    "statusSummary": "## sprint/project-automation-file-handoff-v0-2\n M public/qa/latest/handoff.json\n M public/qa/latest/handoff.txt",
-    "lastCommits": "67a9af7 Update QA outputs after file-based handoff automation\n2ba3588 Write handoff reports to QA files\n5da26eb Update QA outputs after landing scroll stability fix\n95940c4 Merge landing scroll stability fix\n1b197fc Stabilize landing scroll and remove duplicate map layer"
+    "statusSummary": "## main...origin/main",
+    "lastCommits": "4ad9832 Merge file-based handoff automation\n513351f Update QA handoff files on main\n67a9af7 Update QA outputs after file-based handoff automation\n2ba3588 Write handoff reports to QA files\n5da26eb Update QA outputs after landing scroll stability fix"
   },
   "qa": {
     "smoke": {

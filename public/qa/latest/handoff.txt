@@ -1,20 +1,18 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-17T17:26:31.363Z
+Generated: 2026-06-17T17:37:32.831Z
 
-Branch: sprint/project-automation-file-handoff-v0-2
-Working tree: has changes
+Branch: main
+Working tree: clean
 
 Git status:
-  ## sprint/project-automation-file-handoff-v0-2
-   M public/qa/latest/handoff.json
-   M public/qa/latest/handoff.txt
+  ## main...origin/main
 
 Last 5 commits:
+  4ad9832 Merge file-based handoff automation
+  513351f Update QA handoff files on main
   67a9af7 Update QA outputs after file-based handoff automation
   2ba3588 Write handoff reports to QA files
   5da26eb Update QA outputs after landing scroll stability fix
-  95940c4 Merge landing scroll stability fix
-  1b197fc Stabilize landing scroll and remove duplicate map layer
 
 QA:
 Smoke result: PASS
