@@ -27,6 +27,10 @@ export const SETTLEMENT_STORAGE_KEYS = {
   settlementFocusIdentity: "settlementFocusIdentity",
   tradeRouteEstablished: "tradeRouteEstablished",
   tradeRouteDestination: "tradeRouteDestination",
+  tradeRouteId: "tradeRouteId",
+  tradeRouteBonus: "tradeRouteBonus",
+  tradeRouteResourceFlow: "tradeRouteResourceFlow",
+  tradeRouteIdentity: "tradeRouteIdentity",
   tradeRoutes: "tradeRoutes",
   regionalAllianceFormed: "regionalAllianceFormed",
   allianceName: "allianceName",
@@ -69,6 +73,10 @@ export type SettlementState = {
   settlementFocusIdentity?: string;
   tradeRouteEstablished: boolean;
   tradeRouteDestination: string;
+  tradeRouteId?: string;
+  tradeRouteBonus?: string;
+  tradeRouteResourceFlow?: string;
+  tradeRouteIdentity?: string;
   tradeRoutes: number;
   regionalAllianceFormed: boolean;
   allianceName: string;
@@ -111,6 +119,10 @@ export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
   settlementFocusIdentity: "",
   tradeRouteEstablished: false,
   tradeRouteDestination: "",
+  tradeRouteId: "",
+  tradeRouteBonus: "",
+  tradeRouteResourceFlow: "",
+  tradeRouteIdentity: "",
   tradeRoutes: 0,
   regionalAllianceFormed: false,
   allianceName: "",
@@ -211,6 +223,22 @@ function sanitizeState(raw: unknown): SettlementState {
       typeof source.tradeRouteDestination === "string"
         ? source.tradeRouteDestination
         : DEFAULT_SETTLEMENT_STATE.tradeRouteDestination,
+    tradeRouteId:
+      typeof source.tradeRouteId === "string"
+        ? source.tradeRouteId
+        : DEFAULT_SETTLEMENT_STATE.tradeRouteId,
+    tradeRouteBonus:
+      typeof source.tradeRouteBonus === "string"
+        ? source.tradeRouteBonus
+        : DEFAULT_SETTLEMENT_STATE.tradeRouteBonus,
+    tradeRouteResourceFlow:
+      typeof source.tradeRouteResourceFlow === "string"
+        ? source.tradeRouteResourceFlow
+        : DEFAULT_SETTLEMENT_STATE.tradeRouteResourceFlow,
+    tradeRouteIdentity:
+      typeof source.tradeRouteIdentity === "string"
+        ? source.tradeRouteIdentity
+        : DEFAULT_SETTLEMENT_STATE.tradeRouteIdentity,
     tradeRoutes: toSafeNumber(source.tradeRoutes, DEFAULT_SETTLEMENT_STATE.tradeRoutes),
     regionalAllianceFormed: source.regionalAllianceFormed === true,
     allianceName: typeof source.allianceName === "string" ? source.allianceName : "",

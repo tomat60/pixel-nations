@@ -78,6 +78,9 @@ export default function AllianceCreatePage() {
         .filter((id): id is string => Boolean(id))
         .slice(0, 2);
       if (validPartners.length > 0) setSelectedPartners(validPartners);
+    } else if (state.tradeRouteDestination) {
+      const routePartner = PARTNERS.find((partner) => partner.name === state.tradeRouteDestination);
+      if (routePartner) setSelectedPartners([routePartner.id]);
     }
     if (state.regionalAllianceFormed) setIsFormed(true);
   }, []);
