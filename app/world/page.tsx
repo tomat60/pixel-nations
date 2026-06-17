@@ -511,7 +511,7 @@ export default function WorldPage() {
             CHOOSE YOUR FIRST LAND
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-400 sm:mt-5 sm:text-lg">
-            Choose one land in the first playable sector. Claim it to begin the path toward settlement, nation, and empire.
+            Step 1: choose one land in Sector A-01. Step 2: claim it. Step 3: enter your command center and found the first settlement.
           </p>
           <p className="mt-3 text-xs uppercase tracking-[0.26em] text-amber-500/75">
             Full world: 10,000 lands. Demo frontier: Aurelian Basin.
@@ -539,6 +539,27 @@ export default function WorldPage() {
             ) : null}
           </div>
         </header>
+
+        <section
+          data-qa="first-60-guidance"
+          className="mt-6 grid gap-3 border border-amber-500/15 bg-amber-500/[0.035] p-4 text-sm text-zinc-400 sm:grid-cols-3 sm:p-5"
+        >
+          {[
+            ["1", "Select land", "Click an available land on the Aurelian Basin map."],
+            ["2", "Claim it", "Confirm the free demo claim and create your founder record."],
+            ["3", "Build upward", "Enter your command center and found the first settlement."],
+          ].map(([step, title, copy]) => (
+            <div key={title} className="border-l border-amber-500/25 pl-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
+                Step {step}
+              </p>
+              <p className="mt-2 font-[family-name:var(--font-syne)] text-base font-bold text-amber-100">
+                {title}
+              </p>
+              <p className="mt-1 leading-6">{copy}</p>
+            </div>
+          ))}
+        </section>
 
         <section
           id="world-atlas"
@@ -942,7 +963,7 @@ export default function WorldPage() {
             data-qa="selected-land-panel"
             className="border border-amber-500/15 bg-[#06060c]/90 p-5 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-6 lg:sticky lg:top-6 lg:self-start"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">Selected Land</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">Step 1 / Selected Land</p>
             <p className="mt-3 break-words font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100">
               {selectedTile.landName}
             </p>
@@ -972,7 +993,7 @@ export default function WorldPage() {
 
             <div className="mt-5 border border-amber-500/15 bg-amber-500/[0.04] p-4">
               <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
-                Founder Meaning
+                Why This Land Matters
               </p>
               <p className="mt-3 text-sm leading-6 text-amber-100/80">{selectedTile.founderMeaning}</p>
               <p className="mt-3 text-xs leading-6 text-zinc-500">{selectedTile.contextLine}</p>
@@ -1086,7 +1107,7 @@ export default function WorldPage() {
                     Land Claimed.
                   </h3>
                   <p className="mx-auto mt-6 max-w-md text-base leading-8 text-zinc-400">
-                    You now control {selectedTile.landName}.
+                    You now control {selectedTile.landName}. Next, enter your command center and found the first settlement.
                   </p>
                   <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
                     <Link
@@ -1107,7 +1128,7 @@ export default function WorldPage() {
               ) : (
                 <>
                   <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-600/75">
-                    Confirm Land Claim
+                    Step 2 / Confirm First Claim
                   </p>
                   <h3
                     id="world-claim-title"
