@@ -21,6 +21,8 @@ type AlliancePartner = {
   role: string;
   contribution: string;
   trust: string;
+  politicalStyle: string;
+  identity: string;
 };
 
 const PARTNERS: AlliancePartner[] = [
@@ -30,6 +32,8 @@ const PARTNERS: AlliancePartner[] = [
     role: "Industrial Partner",
     contribution: "Iron Supply",
     trust: "High",
+    politicalStyle: "Industrial Compact",
+    identity: "A practical alliance built on material strength, supply lines, and frontier production.",
   },
   {
     id: "ember-basin",
@@ -37,6 +41,8 @@ const PARTNERS: AlliancePartner[] = [
     role: "Frontier Market",
     contribution: "Food Network",
     trust: "Medium",
+    politicalStyle: "Market Accord",
+    identity: "A flexible alliance built on food exchange, merchant influence, and civic growth.",
   },
   {
     id: "crownlands",
@@ -44,6 +50,8 @@ const PARTNERS: AlliancePartner[] = [
     role: "Political Center",
     contribution: "Legitimacy",
     trust: "Medium",
+    politicalStyle: "Crown Pact",
+    identity: "A symbolic alliance built on legitimacy, banners, and the right to rule.",
   },
 ];
 
@@ -59,6 +67,83 @@ function getAllianceNameError(value: string) {
     return "Use letters, spaces, and hyphens only.";
   }
   return "";
+}
+
+function getAllianceOutcome(partners: AlliancePartner[]) {
+  const ids = partners.map((partner) => partner.id);
+  const hasIron = ids.includes("iron-coast");
+  const hasEmber = ids.includes("ember-basin");
+  const hasCrown = ids.includes("crownlands");
+
+  if (hasIron && hasCrown) {
+    return {
+      strategy: "Crown-Industrial Bloc",
+      bonus: "+ Industry and legitimacy",
+      identity: "The alliance joins material production with political legitimacy. It is built to support a strong capital and future nationhood.",
+      population: 150,
+      influence: 26,
+      diplomaticReach: 2,
+      politicalStatus: "Regional Bloc Leader",
+    };
+  }
+
+  if (hasEmber && hasCrown) {
+    return {
+      strategy: "Civic Crown Accord",
+      bonus: "+ Growth and legitimacy",
+      identity: "The alliance links market growth with symbolic authority. It is built to turn prosperity into political recognition.",
+      population: 164,
+      influence: 24,
+      diplomaticReach: 2,
+      politicalStatus: "Civic Accord Leader",
+    };
+  }
+
+  if (hasIron && hasEmber) {
+    return {
+      strategy: "Industrial Market League",
+      bonus: "+ Production and food network",
+      identity: "The alliance joins supply and markets. It is built to make the city larger, richer, and harder to isolate.",
+      population: 172,
+      influence: 22,
+      diplomaticReach: 2,
+      politicalStatus: "Trade League Leader",
+    };
+  }
+
+  if (hasCrown) {
+    return {
+      strategy: "Crown Pact",
+      bonus: "+ Political legitimacy",
+      identity: "The alliance is centered on legitimacy and symbolic authority. It prepares the city to raise a national banner.",
+      population: 132,
+      influence: 26,
+      diplomaticReach: 1,
+      politicalStatus: "Crown Pact Leader",
+    };
+  }
+
+  if (hasEmber) {
+    return {
+      strategy: "Market Accord",
+      bonus: "+ Civic growth",
+      identity: "The alliance is centered on food exchange and market access. It makes the city more attractive to settlers and merchants.",
+      population: 166,
+      influence: 20,
+      diplomaticReach: 1,
+      politicalStatus: "Market Accord Leader",
+    };
+  }
+
+  return {
+    strategy: "Industrial Compact",
+    bonus: "+ Material strength",
+    identity: "The alliance is centered on iron supply and frontier production. It gives the city a harder industrial backbone.",
+    population: 142,
+    influence: 22,
+    diplomaticReach: 1,
+    politicalStatus: "Industrial Compact Leader",
+  };
 }
 
 export default function AllianceCreatePage() {
@@ -92,9 +177,15 @@ export default function AllianceCreatePage() {
   const nameError = useMemo(() => getAllianceNameError(allianceName), [allianceName]);
   const showError = isSubmitted && !isFormed && Boolean(nameError);
 
-  const selectedPartnerNames = selectedPartners
-    .map((id) => PARTNERS.find((partner) => partner.id === id)?.name)
-    .filter((value): value is string => Boolean(value));
+  const selectedPartnerDetails = useMemo(
+    () =>
+      selectedPartners
+        .map((id) => PARTNERS.find((partner) => partner.id === id))
+        .filter((partner): partner is AlliancePartner => Boolean(partner)),
+    [selectedPartners],
+  );
+  const selectedPartnerNames = selectedPartnerDetails.map((partner) => partner.name);
+  const allianceOutcome = useMemo(() => getAllianceOutcome(selectedPartnerDetails), [selectedPartnerDetails]);
 
   const togglePartner = (partnerId: string) => {
     setSelectedPartners((current) => {
@@ -134,10 +225,14 @@ export default function AllianceCreatePage() {
       regionalAllianceFormed: true,
       allianceName: normalizedName,
       alliancePartners: partnerNames,
-      population: 140,
-      influence: 20,
+      allianceStrategy: allianceOutcome.strategy,
+      allianceBonus: allianceOutcome.bonus,
+      allianceIdentity: allianceOutcome.identity,
+      diplomaticReach: allianceOutcome.diplomaticReach,
+      population: allianceOutcome.population,
+      influence: allianceOutcome.influence,
       settlementLevel: "Regional Power",
-      politicalStatus: "Alliance Leader",
+      politicalStatus: allianceOutcome.politicalStatus,
       nationFounded: false,
       nationName: "",
       nationIdeology: "",
@@ -212,6 +307,9 @@ export default function AllianceCreatePage() {
               <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-400">
                 {allianceName || "The new alliance"} now binds the first powers of Aurelia.
               </p>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-200/70">
+                {allianceOutcome.identity}
+              </p>
 
               <div className="mt-8 border-y border-amber-500/10 py-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-600/75">
@@ -221,8 +319,8 @@ export default function AllianceCreatePage() {
                   {[
                     "Regional Diplomacy",
                     "Shared Trade Network",
-                    "Political Influence",
-                    "Nation Founding Eligibility",
+                    allianceOutcome.bonus,
+                    allianceOutcome.politicalStatus,
                   ].map((benefit) => (
                     <li key={benefit} className="border-l border-amber-500/25 pl-4">
                       <span className="mr-2 text-amber-300">{"\u2713"}</span>
@@ -304,6 +402,7 @@ export default function AllianceCreatePage() {
                         </p>
                         <p className="mt-2 text-sm text-zinc-300">Contribution: {partner.contribution}</p>
                         <p className="mt-1 text-sm text-zinc-400">Trust: {partner.trust}</p>
+                        <p className="mt-2 text-sm leading-6 text-zinc-500">{partner.identity}</p>
                       </button>
                     );
                   })}
@@ -333,14 +432,20 @@ export default function AllianceCreatePage() {
                       {selectedPartnerNames.join(", ")}
                     </span>
                   </div>
+                  <div className="flex items-start justify-between gap-5">
+                    <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">Strategy</span>
+                    <span className="text-right font-[family-name:var(--font-syne)] text-sm font-bold text-zinc-200">
+                      {allianceOutcome.strategy}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="mt-6 space-y-4">
                   <p className="text-xs uppercase tracking-[0.2em] text-zinc-600">Expected Gain</p>
-                  <p className="text-sm text-zinc-300">Influence: +8</p>
-                  <p className="text-sm text-zinc-300">Population: +40</p>
-                  <p className="text-sm text-zinc-300">Diplomatic Reach: +1</p>
-                  <p className="text-sm text-zinc-300">Political Status: Regional Power</p>
+                  <p className="text-sm text-zinc-300">Population: {allianceOutcome.population}</p>
+                  <p className="text-sm text-zinc-300">Influence: {allianceOutcome.influence}</p>
+                  <p className="text-sm text-zinc-300">Diplomatic Reach: +{allianceOutcome.diplomaticReach}</p>
+                  <p className="text-sm text-zinc-300">Political Status: {allianceOutcome.politicalStatus}</p>
                 </div>
 
                 <div className="mt-8 flex flex-col gap-3">
