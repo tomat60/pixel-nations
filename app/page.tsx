@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PixelWorldMap } from "./components/PixelWorldMap";
-import { WorldOwnershipMapSection } from "./components/WorldOwnershipMapSection";
 import { DEFAULT_SETTLEMENT_STATE, readSettlementState, type SettlementState } from "./lib/settlement-state";
 
 const progression = [
@@ -260,13 +258,17 @@ export default function Home() {
       <main className="relative z-10">
         {/* Hero */}
         <section className="relative flex min-h-[calc(100vh-65px)] flex-col items-center justify-center overflow-hidden px-6 py-18 sm:px-10 sm:py-24">
-          {/* Subtle world map background */}
+          {/* Aurelian Basin v9 world-map background */}
           <div aria-hidden className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-0 scale-125 opacity-[0.075]">
-              <PixelWorldMap background className="h-full w-full" />
-            </div>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#020204_68%)]" />
-            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#020204] to-transparent" />
+            <div
+              className="absolute inset-0 bg-cover bg-center opacity-[0.34]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(180deg, rgba(2,2,4,0.08), rgba(2,2,4,0.64)), url('/assets/world-map/aurelian-basin-v1.png')",
+              }}
+            />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(2,2,4,0.2)_0%,#020204_74%)]" />
+            <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#020204] to-transparent" />
           </div>
 
           <div className="animate-fade-up relative z-10 flex max-w-5xl flex-col items-center text-center">
@@ -685,9 +687,78 @@ export default function Home() {
           </div>
         </section>
 
-        <div id="world-preview">
-          <WorldOwnershipMapSection />
-        </div>
+        <section
+          id="world-preview"
+          className="relative overflow-hidden border-t border-amber-500/10 bg-[#020204] px-6 py-28 sm:px-10 sm:py-40"
+        >
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_35%,rgba(201,169,98,0.08)_0%,transparent_55%)]"
+          />
+          <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.5em] text-amber-600/75">
+                World Preview
+              </p>
+              <h2 className="mt-7 max-w-4xl font-[family-name:var(--font-syne)] text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-7xl">
+                The first frontier
+                <br />
+                <span className="bg-gradient-to-b from-amber-100 via-amber-300/90 to-amber-700/65 bg-clip-text text-transparent">
+                  is already visible.
+                </span>
+              </h2>
+              <p className="mt-7 max-w-2xl text-base leading-8 text-zinc-500 sm:text-lg">
+                Aurelian Basin is Sector A-01: the first playable slice of a finite world of 10,000 lands.
+                The full claim interaction lives on the world map.
+              </p>
+
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => router.push("/world")}
+                  className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-7 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
+                >
+                  Enter Sector A-01
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStartDemo}
+                  className="btn-secondary rounded border border-zinc-800 bg-[#08080f]/80 px-7 py-3 text-xs font-bold uppercase tracking-[0.24em] text-zinc-400"
+                >
+                  Start Demo
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-hidden border border-amber-500/20 bg-[#050509]/90 p-3 shadow-[0_30px_120px_rgba(0,0,0,0.6),0_0_90px_rgba(201,169,98,0.08)]">
+              <div
+                className="relative aspect-[16/9] overflow-hidden bg-cover bg-center"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(180deg, rgba(2,2,4,0.04), rgba(2,2,4,0.48)), url('/assets/world-map/aurelian-basin-v1.png')",
+                }}
+              >
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_38%,rgba(2,2,4,0.72)_100%)]" />
+                <div className="absolute left-4 top-4 border border-amber-500/25 bg-[#030306]/78 px-3 py-2 backdrop-blur-sm">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-amber-500/80">
+                    Sector A-01
+                  </p>
+                  <p className="mt-1 font-[family-name:var(--font-syne)] text-sm font-bold text-amber-100">
+                    Aurelian Basin
+                  </p>
+                </div>
+                <div className="absolute bottom-4 right-4 border border-amber-500/15 bg-[#030306]/72 px-3 py-2 text-right backdrop-blur-sm">
+                  <p className="text-[9px] uppercase tracking-[0.22em] text-zinc-500">
+                    Playable on /world
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-amber-100/80">
+                    Claim one land. Begin an empire.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Empire journey */}
         <section className="relative overflow-hidden border-t border-amber-500/10 bg-[#020204] px-6 py-34 sm:px-10 sm:py-48">
