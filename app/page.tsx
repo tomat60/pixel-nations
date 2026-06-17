@@ -303,7 +303,7 @@ export default function Home() {
                 onClick={() => router.push("/world")}
                 className="btn-secondary w-full rounded border border-zinc-800 bg-[#08080f]/80 px-10 py-4 text-sm font-semibold uppercase tracking-widest text-zinc-400 sm:w-auto sm:px-12 sm:text-base"
               >
-                View First Sector
+                Preview Sector A-01
               </button>
             </div>
 
@@ -312,7 +312,7 @@ export default function Home() {
                 Playable MVP Demo
               </p>
               <p className="text-sm leading-6 text-zinc-500">
-                The playable demo follows one rise: land to settlement to nation to empire.
+                Start by claiming one land. The demo then guides you through settlement, nation, and empire.
               </p>
               {hasDemoProgress && demoProgressMessage ? (
                 <p className="text-xs uppercase tracking-[0.2em] text-amber-300/80">

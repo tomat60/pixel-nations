@@ -178,6 +178,27 @@ export default function DashboardPage() {
           </p>
         </header>
 
+        <section
+          data-qa="dashboard-next-action"
+          className="mt-8 border border-amber-500/25 bg-amber-500/[0.045] p-5 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-6"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+            Step 3 / Next Action
+          </p>
+          <h2 className="mt-4 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-4xl">
+            {nextMilestone.title}
+          </h2>
+          <p className="mt-3 text-sm leading-7 text-zinc-400">
+            Your land is claimed. The demo continues upward: settlement → nation → empire.
+          </p>
+          <Link
+            href={nextMilestone.href}
+            className="btn-primary mt-6 inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
+          >
+            {nextMilestone.cta}
+          </Link>
+        </section>
+
         <section className="mt-8 border border-amber-500/15 bg-[#06060c]/85 p-5 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-6">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
             Origin Advantage
