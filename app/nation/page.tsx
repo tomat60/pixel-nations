@@ -18,6 +18,10 @@ const FALLBACK = {
   settlementName: "Aurelia Prime",
   region: "Aurelia",
   ideology: "Crown Rule",
+  doctrine: "Civic Mandate",
+  doctrineBonus: "+ Civic Stability",
+  doctrineIdentity:
+    "The nation grows from its capital city, civic institutions, and the first promise of homeland.",
   tradeRouteDestination: "Iron Coast",
   allianceName: "Aurelian Pact",
   expandedLands: ["North Road", "Iron Ridge", "Amber Fields"],
@@ -38,6 +42,10 @@ export default function NationPage() {
       settlementName: state.settlementName || FALLBACK.settlementName,
       region: state.region || FALLBACK.region,
       ideology: state.nationIdeology || FALLBACK.ideology,
+      doctrine: state.nationDoctrine || FALLBACK.doctrine,
+      doctrineBonus: state.nationDoctrineBonus || FALLBACK.doctrineBonus,
+      doctrineIdentity: state.nationDoctrineIdentity || FALLBACK.doctrineIdentity,
+      settlementFocus: state.settlementFocus || "Balanced Charter",
       tradeRouteDestination: state.tradeRouteDestination || FALLBACK.tradeRouteDestination,
       allianceName: state.allianceName || FALLBACK.allianceName,
       population: state.population > 0 ? state.population : 250,
@@ -80,13 +88,14 @@ export default function NationPage() {
             This nation grew from one claimed land and its first city. Declare empire to complete the first demo arc.
           </p>
 
-          <div className="mt-8 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-8 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-6">
             {[
               ["Founder", "You"],
               ["Capital", nation.settlementName],
               ["Founding Land", claimedLand.landName],
               ["Region", claimedLand.region],
-              ["Ideology", nation.empireFounded ? nation.empireDoctrine : nation.ideology],
+              ["Ideology", nation.ideology],
+              ["Doctrine", nation.empireFounded ? nation.empireDoctrine : nation.doctrine],
             ].map(([label, value]) => (
               <div key={label} className="bg-[#08080f]/95 p-4 sm:p-5">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">{label}</p>
@@ -133,6 +142,8 @@ export default function NationPage() {
                 ["Capital", nation.settlementName],
                 ["Founding Alliance", nation.allianceName],
                 ["Ideology", nation.ideology],
+                ["Governing Doctrine", nation.doctrine],
+                ["Doctrine Bonus", nation.doctrineBonus],
                 ["Next Objective", nation.empireFounded ? "Rule the World" : "Declare Empire"],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-start justify-between gap-5">
@@ -142,6 +153,14 @@ export default function NationPage() {
                   </span>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-7 border-l border-amber-500/25 pl-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-zinc-600">Why This Nation Works</p>
+              <p className="mt-3 text-sm leading-7 text-zinc-400">
+                {nation.doctrineIdentity} Its first institutions grew from {nation.settlementFocus}, a route to{" "}
+                {nation.tradeRouteDestination}, and the alliance called {nation.allianceName}.
+              </p>
             </div>
 
             {nation.empireFounded ? (
@@ -185,6 +204,7 @@ export default function NationPage() {
                 Regional alliance formed: {nation.allianceName}
               </li>
               <li className="border-l border-amber-500/25 pl-4">Nation founded: {nation.nationName}</li>
+              <li className="border-l border-amber-500/25 pl-4">Governing doctrine chosen: {nation.doctrine}</li>
               {nation.bordersExpanded ? (
                 <li className="border-l border-amber-500/25 pl-4">
                   Borders expanded: {nation.expandedLands.join(", ")}

@@ -43,6 +43,10 @@ export const SETTLEMENT_STORAGE_KEYS = {
   nationFounded: "nationFounded",
   nationName: "nationName",
   nationIdeology: "nationIdeology",
+  nationDoctrineId: "nationDoctrineId",
+  nationDoctrine: "nationDoctrine",
+  nationDoctrineBonus: "nationDoctrineBonus",
+  nationDoctrineIdentity: "nationDoctrineIdentity",
   landsControlled: "landsControlled",
   bordersExpanded: "bordersExpanded",
   expandedLands: "expandedLands",
@@ -93,6 +97,10 @@ export type SettlementState = {
   nationFounded: boolean;
   nationName: string;
   nationIdeology: string;
+  nationDoctrineId?: string;
+  nationDoctrine?: string;
+  nationDoctrineBonus?: string;
+  nationDoctrineIdentity?: string;
   landsControlled: number;
   bordersExpanded: boolean;
   expandedLands: string[];
@@ -143,6 +151,10 @@ export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
   nationFounded: false,
   nationName: "",
   nationIdeology: "",
+  nationDoctrineId: "",
+  nationDoctrine: "",
+  nationDoctrineBonus: "",
+  nationDoctrineIdentity: "",
   landsControlled: 1,
   bordersExpanded: false,
   expandedLands: [],
@@ -263,6 +275,11 @@ function sanitizeState(raw: unknown): SettlementState {
     nationFounded: source.nationFounded === true,
     nationName: typeof source.nationName === "string" ? source.nationName : "",
     nationIdeology: typeof source.nationIdeology === "string" ? source.nationIdeology : "",
+    nationDoctrineId: typeof source.nationDoctrineId === "string" ? source.nationDoctrineId : "",
+    nationDoctrine: typeof source.nationDoctrine === "string" ? source.nationDoctrine : "",
+    nationDoctrineBonus: typeof source.nationDoctrineBonus === "string" ? source.nationDoctrineBonus : "",
+    nationDoctrineIdentity:
+      typeof source.nationDoctrineIdentity === "string" ? source.nationDoctrineIdentity : "",
     landsControlled: toSafeNumber(source.landsControlled, DEFAULT_SETTLEMENT_STATE.landsControlled),
     bordersExpanded: source.bordersExpanded === true,
     expandedLands: isStringArray(source.expandedLands) ? source.expandedLands : [],
