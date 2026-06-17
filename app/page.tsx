@@ -264,7 +264,7 @@ export default function Home() {
               className="absolute inset-0 bg-cover bg-center opacity-[0.34]"
               style={{
                 backgroundImage:
-                  "linear-gradient(180deg, rgba(2,2,4,0.08), rgba(2,2,4,0.64)), url('/assets/world-map/aurelian-basin-v1.png')",
+                  "linear-gradient(180deg, rgba(2,2,4,0.02), rgba(2,2,4,0.54)), url('/assets/world-map/aurelian-basin-v1.png')",
               }}
             />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(2,2,4,0.2)_0%,#020204_74%)]" />
@@ -697,11 +697,7 @@ export default function Home() {
           />
           <div
             aria-hidden
-            className="landing-ghost-globe pointer-events-none absolute right-[-16rem] top-1/2 hidden h-[780px] w-[780px] -translate-y-1/2 rounded-full border border-amber-500/12 bg-[url('/assets/world-map/aurelian-basin-v1.png')] bg-cover bg-center opacity-[0.24] shadow-[inset_0_0_120px_rgba(0,0,0,0.82),0_0_180px_rgba(201,169,98,0.11)] blur-[0.2px] lg:block"
-          />
-          <div
-            aria-hidden
-            className="landing-ghost-globe-shade pointer-events-none absolute right-[-18rem] top-1/2 hidden h-[840px] w-[840px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_35%_35%,transparent_0%,rgba(2,2,4,0.1)_38%,rgba(2,2,4,0.84)_78%)] lg:block"
+            className="pointer-events-none absolute right-[-14rem] top-1/2 hidden h-[760px] w-[760px] -translate-y-1/2 rounded-full border border-amber-500/8 bg-[radial-gradient(circle_at_35%_35%,rgba(201,169,98,0.12)_0%,rgba(201,169,98,0.035)_34%,rgba(2,2,4,0.72)_72%,rgba(2,2,4,0.96)_100%)] shadow-[0_0_150px_rgba(201,169,98,0.08)] lg:block"
           />
           <div className="relative mx-auto grid max-w-[1500px] gap-12 lg:grid-cols-[minmax(0,0.78fr)_minmax(520px,1fr)] lg:items-center xl:gap-16">
             <div>
