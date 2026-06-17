@@ -272,33 +272,3 @@ html {
     display: none !important;
   }
 }
-
-@keyframes landingGhostGlobeDrift {
-  0% {
-    transform: translate3d(0, -50%, 0) scale(1);
-    background-position: 50% 50%;
-  }
-  100% {
-    transform: translate3d(-18px, -50%, 0) scale(1.025);
-    background-position: 54% 48%;
-  }
-}
-
-@keyframes landingGhostGlobeShadeDrift {
-  0% {
-    transform: translate3d(0, -50%, 0) scale(1);
-  }
-  100% {
-    transform: translate3d(-12px, -50%, 0) scale(1.02);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .landing-ghost-globe {
-    animation: landingGhostGlobeDrift 42s ease-in-out infinite alternate;
-  }
-
-  .landing-ghost-globe-shade {
-    animation: landingGhostGlobeShadeDrift 42s ease-in-out infinite alternate;
-  }
-}
