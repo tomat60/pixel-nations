@@ -298,6 +298,10 @@ export default function NationCreatePage() {
               <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-400">
                 {nationName || "The first nation"} has become the first nation of Aurelia. The next milestone is empire.
               </p>
+              <p className="mt-4 max-w-2xl border-l border-amber-500/25 pl-4 text-sm leading-7 text-zinc-500">
+                Your nation has already been founded. You can enter it, review the founding logic, or reset the local
+                demo path to experience the decision again.
+              </p>
 
               <div className="mt-8 border-y border-amber-500/10 py-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-600/75">
@@ -318,12 +322,34 @@ export default function NationCreatePage() {
                 </ul>
               </div>
 
-              <Link
-                href="/nation"
-                className="btn-primary mt-8 inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
-              >
-                Enter Nation
-              </Link>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <Link
+                  href="/nation"
+                  className="btn-primary inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-amber-100 sm:items-center sm:justify-center"
+                >
+                  Enter Nation
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSubmitted(false);
+                    setIsFounded(false);
+                  }}
+                  className="btn-secondary rounded border border-zinc-800 bg-[#08080f]/80 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-zinc-300"
+                >
+                  Review Founding Choices
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.clear();
+                    window.location.href = "/world";
+                  }}
+                  className="rounded border border-amber-500/20 bg-amber-500/5 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-amber-200/80 transition-colors hover:border-amber-500/45 hover:bg-amber-500/10"
+                >
+                  Start Fresh Demo Path
+                </button>
+              </div>
             </motion.section>
           ) : (
             <motion.form
