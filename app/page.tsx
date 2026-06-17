@@ -974,6 +974,13 @@ export default function Home() {
               >
                 View First Sector
               </button>
+
+              <a
+                href="mailto:tomat6@gmail.com?subject=Pixel%20Nations%20demo%20feedback&body=I%20visited%20the%20Pixel%20Nations%20demo.%0A%0AWhat%20felt%20exciting%3A%0A%0AWhat%20was%20confusing%3A%0A%0AWhat%20I%20would%20like%20next%3A%0A"
+                className="w-full rounded border border-amber-500/20 bg-[#08080f]/55 px-12 py-4 text-center text-sm font-semibold uppercase tracking-widest text-amber-200/75 transition-colors hover:border-amber-500/35 hover:text-amber-100 sm:w-auto sm:text-base"
+              >
+                Send Feedback
+              </a>
             </div>
           </div>
         </section>
