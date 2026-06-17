@@ -1,0 +1,33 @@
+Pixel Nations Handoff Report
+Generated: 2026-06-17T17:20:01.846Z
+
+Branch: sprint/project-automation-file-handoff-v0-2
+Working tree: has changes
+
+Git status:
+  ## sprint/project-automation-file-handoff-v0-2
+   M public/qa/latest/smoke-result.json
+   M scripts/pn-handoff.mjs
+
+Last 5 commits:
+  5da26eb Update QA outputs after landing scroll stability fix
+  95940c4 Merge landing scroll stability fix
+  1b197fc Stabilize landing scroll and remove duplicate map layer
+  bee8639 Update QA outputs after landing globe polish
+  1a22d4e Merge landing globe and map crop polish
+
+QA:
+Smoke result: PASS
+Smoke generated: 2026-06-17T17:20:01.266Z
+Smoke app source: existing local app
+Smoke steps: 9/9 passed
+Smoke result path: public/qa/latest/smoke-result.json
+Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
+Public handoff TXT: https://pixel-nations.vercel.app/qa/latest/handoff.txt
+Public handoff JSON: https://pixel-nations.vercel.app/qa/latest/handoff.json
+World URL: https://pixel-nations.vercel.app/world
+Local QA report: /Users/tomchuck/Desktop/pixel-nations/public/qa/latest/report.html
+Local handoff TXT: /Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.txt
+Local handoff JSON: /Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.json
+
+Next instruction: Upload public/qa/latest/handoff.txt to ChatGPT, paste the public handoff link, or type: raport gotowy.

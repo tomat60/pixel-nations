@@ -1,0 +1,79 @@
+{
+  "project": "Pixel Nations",
+  "generatedAt": "2026-06-17T17:20:01.846Z",
+  "branch": "sprint/project-automation-file-handoff-v0-2",
+  "isClean": false,
+  "git": {
+    "statusSummary": "## sprint/project-automation-file-handoff-v0-2\n M public/qa/latest/smoke-result.json\n M scripts/pn-handoff.mjs",
+    "lastCommits": "5da26eb Update QA outputs after landing scroll stability fix\n95940c4 Merge landing scroll stability fix\n1b197fc Stabilize landing scroll and remove duplicate map layer\nbee8639 Update QA outputs after landing globe polish\n1a22d4e Merge landing globe and map crop polish"
+  },
+  "qa": {
+    "smoke": {
+      "status": "PASS",
+      "generatedAt": "2026-06-17T17:20:01.266Z",
+      "appUrl": "http://localhost:3000",
+      "appSource": "existing local app",
+      "blockingStep": "",
+      "error": "",
+      "steps": [
+        {
+          "name": "reset demo state and open /world",
+          "status": "PASS",
+          "durationMs": 1193
+        },
+        {
+          "name": "select a claimable Sector A-01 land",
+          "status": "PASS",
+          "durationMs": 232
+        },
+        {
+          "name": "claim selected land",
+          "status": "PASS",
+          "durationMs": 384
+        },
+        {
+          "name": "dashboard recognizes claimed land",
+          "status": "PASS",
+          "durationMs": 356
+        },
+        {
+          "name": "create settlement",
+          "status": "PASS",
+          "durationMs": 2429
+        },
+        {
+          "name": "build settlement core and establish trade",
+          "status": "PASS",
+          "durationMs": 3072
+        },
+        {
+          "name": "form alliance and found nation",
+          "status": "PASS",
+          "durationMs": 6784
+        },
+        {
+          "name": "attempt empire continuation path",
+          "status": "PASS",
+          "durationMs": 1440
+        },
+        {
+          "name": "create empire",
+          "status": "PASS",
+          "durationMs": 1433
+        }
+      ],
+      "passedSteps": 9,
+      "totalSteps": 9,
+      "path": "public/qa/latest/smoke-result.json",
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-17T17:20:01.266Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+    },
+    "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
+    "worldUrl": "https://pixel-nations.vercel.app/world",
+    "publicHandoffTxtUrl": "https://pixel-nations.vercel.app/qa/latest/handoff.txt",
+    "publicHandoffJsonUrl": "https://pixel-nations.vercel.app/qa/latest/handoff.json",
+    "localQaReportPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/report.html",
+    "localHandoffTxtPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.txt",
+    "localHandoffJsonPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.json"
+  },
+  "nextInstruction": "Upload public/qa/latest/handoff.txt to ChatGPT, paste the public handoff link, or type: raport gotowy."
+}
