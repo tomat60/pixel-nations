@@ -121,7 +121,7 @@ Before merge:
 - update `public/qa/latest`
 - `npm run pn:handoff`
 
-Manual unfusion overrides screenshot approval.
+Manual user confusion overrides screenshot approval.
 
 ## Stop Condition
 
