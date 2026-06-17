@@ -697,13 +697,13 @@ export default function Home() {
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute right-[-18rem] top-1/2 hidden h-[760px] w-[760px] -translate-y-1/2 rounded-full border border-amber-500/10 bg-[url('/assets/world-map/aurelian-basin-v1.png')] bg-cover bg-center opacity-[0.16] shadow-[inset_0_0_120px_rgba(0,0,0,0.85),0_0_160px_rgba(201,169,98,0.08)] blur-[0.2px] lg:block"
+            className="landing-ghost-globe pointer-events-none absolute right-[-16rem] top-1/2 hidden h-[780px] w-[780px] -translate-y-1/2 rounded-full border border-amber-500/12 bg-[url('/assets/world-map/aurelian-basin-v1.png')] bg-cover bg-center opacity-[0.24] shadow-[inset_0_0_120px_rgba(0,0,0,0.82),0_0_180px_rgba(201,169,98,0.11)] blur-[0.2px] lg:block"
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute right-[-20rem] top-1/2 hidden h-[820px] w-[820px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_35%_35%,transparent_0%,rgba(2,2,4,0.12)_38%,rgba(2,2,4,0.88)_78%)] lg:block"
+            className="landing-ghost-globe-shade pointer-events-none absolute right-[-18rem] top-1/2 hidden h-[840px] w-[840px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_35%_35%,transparent_0%,rgba(2,2,4,0.1)_38%,rgba(2,2,4,0.84)_78%)] lg:block"
           />
-          <div className="relative mx-auto grid max-w-[1500px] gap-12 lg:grid-cols-[minmax(0,0.82fr)_minmax(520px,1fr)] lg:items-center xl:gap-16">
+          <div className="relative mx-auto grid max-w-[1500px] gap-12 lg:grid-cols-[minmax(0,0.78fr)_minmax(520px,1fr)] lg:items-center xl:gap-16">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.5em] text-amber-600/75">
                 World Preview
@@ -738,7 +738,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="relative overflow-hidden border border-amber-500/25 bg-[#050509]/90 p-3 shadow-[0_40px_150px_rgba(0,0,0,0.68),0_0_120px_rgba(201,169,98,0.12)] lg:-mr-8 xl:-mr-14">
+            <div className="relative overflow-hidden border border-amber-500/25 bg-[#050509]/90 p-3 shadow-[0_40px_150px_rgba(0,0,0,0.68),0_0_120px_rgba(201,169,98,0.12)]">
               <div
                 className="relative aspect-[4/3] min-h-[320px] overflow-hidden bg-cover bg-center sm:min-h-[420px] lg:min-h-[520px]"
                 style={{
