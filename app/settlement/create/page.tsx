@@ -15,6 +15,50 @@ const MIN_NAME_LENGTH = 3;
 const MAX_NAME_LENGTH = 24;
 const VALID_NAME_PATTERN = /^[A-Za-z\s-]+$/;
 
+type SettlementFocus = {
+  id: string;
+  title: string;
+  type: string;
+  bonus: string;
+  identity: string;
+  population: number;
+  influence: number;
+  settlementLevel: string;
+};
+
+const SETTLEMENT_FOCUSES: SettlementFocus[] = [
+  {
+    id: "growth",
+    title: "Growth Charter",
+    type: "Population First",
+    bonus: "+ Starting population",
+    identity: "A welcoming settlement built to attract families, workers, and future citizens.",
+    population: 36,
+    influence: 3,
+    settlementLevel: "Growth Outpost",
+  },
+  {
+    id: "trade",
+    title: "Trade Charter",
+    type: "Resources First",
+    bonus: "+ Early influence",
+    identity: "A practical settlement built around routes, markets, and resource flow.",
+    population: 28,
+    influence: 5,
+    settlementLevel: "Market Outpost",
+  },
+  {
+    id: "defense",
+    title: "Defense Charter",
+    type: "Stability First",
+    bonus: "+ Civic stability",
+    identity: "A guarded settlement built to hold its land and survive pressure from the frontier.",
+    population: 26,
+    influence: 6,
+    settlementLevel: "Fortified Outpost",
+  },
+];
+
 function getNameError(value: string) {
   const trimmed = value.trim();
 
@@ -33,6 +77,7 @@ function getNameError(value: string) {
 
 export default function SettlementCreatePage() {
   const [settlementName, setSettlementName] = useState("");
+  const [selectedFocusId, setSelectedFocusId] = useState(SETTLEMENT_FOCUSES[0].id);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isFounded, setIsFounded] = useState(false);
   const [claimedLand, setClaimedLand] = useState(getClaimedLandDisplay(DEFAULT_SETTLEMENT_STATE));
@@ -40,6 +85,8 @@ export default function SettlementCreatePage() {
   useEffect(() => {
     const existingState = readSettlementState();
     setClaimedLand(getClaimedLandDisplay(existingState));
+    const existingFocus = SETTLEMENT_FOCUSES.find((focus) => focus.id === existingState.settlementFocusId);
+    if (existingFocus) setSelectedFocusId(existingFocus.id);
     if (existingState.settlementFounded) {
       setSettlementName(existingState.settlementName);
       setIsFounded(true);
@@ -48,6 +95,10 @@ export default function SettlementCreatePage() {
 
   const validationError = useMemo(() => getNameError(settlementName), [settlementName]);
   const showError = isSubmitted && !isFounded && Boolean(validationError);
+  const selectedFocus = useMemo(
+    () => SETTLEMENT_FOCUSES.find((focus) => focus.id === selectedFocusId) ?? SETTLEMENT_FOCUSES[0],
+    [selectedFocusId],
+  );
 
   const confirmSettlement = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -68,13 +119,17 @@ export default function SettlementCreatePage() {
       founderBadgeEarned: true,
       settlementFounded: true,
       settlementName: normalizedName,
-      population: 24,
-      influence: 3,
+      population: selectedFocus.population,
+      influence: selectedFocus.influence,
       region: land.region,
       coordinates: land.coordinates,
       founder: "You",
       townHallBuilt: false,
-      settlementLevel: "Outpost",
+      settlementLevel: selectedFocus.settlementLevel,
+      settlementFocusId: selectedFocus.id,
+      settlementFocus: selectedFocus.title,
+      settlementFocusBonus: selectedFocus.bonus,
+      settlementFocusIdentity: selectedFocus.identity,
       tradeRouteEstablished: false,
       tradeRouteDestination: "",
       tradeRoutes: 0,
@@ -151,6 +206,9 @@ export default function SettlementCreatePage() {
               <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-400">
                 History records the founding of {settlementName}, the first civic core of {claimedLand.landName}.
               </p>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-200/70">
+                Founder focus: {selectedFocus.title}. {selectedFocus.identity}
+              </p>
 
               <div className="mt-8 border-y border-amber-500/10 py-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-600/75">
@@ -159,7 +217,7 @@ export default function SettlementCreatePage() {
                 <ul className="mt-5 grid gap-3 text-sm text-zinc-300 sm:grid-cols-2">
                   {[
                     "City Founder",
-                    "Historical Record",
+                    "Founder Focus Recorded",
                     "Population Tracking",
                     "Trade Route Eligibility",
                   ].map((benefit) => (
@@ -215,6 +273,36 @@ export default function SettlementCreatePage() {
                   </p>
                 )}
 
+                <p className="mt-9 text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+                  Founder Focus
+                </p>
+                <div className="mt-5 grid gap-3">
+                  {SETTLEMENT_FOCUSES.map((focus) => {
+                    const isSelected = focus.id === selectedFocusId;
+                    return (
+                      <button
+                        key={focus.id}
+                        type="button"
+                        onClick={() => setSelectedFocusId(focus.id)}
+                        className={`border p-4 text-left transition-colors sm:p-5 ${
+                          isSelected
+                            ? "border-amber-400/65 bg-amber-500/10"
+                            : "border-amber-500/15 bg-[#08080f]/90 hover:border-amber-500/35"
+                        }`}
+                      >
+                        <p className="font-[family-name:var(--font-syne)] text-xl font-bold text-amber-100">
+                          {focus.title}
+                        </p>
+                        <p className="mt-2 text-xs uppercase tracking-[0.2em] text-zinc-500">
+                          Type: {focus.type}
+                        </p>
+                        <p className="mt-2 text-sm text-zinc-300">Bonus: {focus.bonus}</p>
+                        <p className="mt-1 text-sm leading-6 text-zinc-400">{focus.identity}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+
                 <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                   <button
                     type="submit"
@@ -243,6 +331,8 @@ export default function SettlementCreatePage() {
                     ["Terrain", claimedLand.terrain],
                     ["Coordinates", claimedLand.coordinates],
                     ["Founder", "You"],
+                    ["Founder Focus", selectedFocus.title],
+                    ["Early Bonus", selectedFocus.bonus],
                     ["Status", "Ready to Found"],
                   ].map(([label, value]) => (
                     <div

@@ -21,6 +21,10 @@ export const SETTLEMENT_STORAGE_KEYS = {
   founder: "founder",
   townHallBuilt: "townHallBuilt",
   settlementLevel: "settlementLevel",
+  settlementFocusId: "settlementFocusId",
+  settlementFocus: "settlementFocus",
+  settlementFocusBonus: "settlementFocusBonus",
+  settlementFocusIdentity: "settlementFocusIdentity",
   tradeRouteEstablished: "tradeRouteEstablished",
   tradeRouteDestination: "tradeRouteDestination",
   tradeRoutes: "tradeRoutes",
@@ -59,6 +63,10 @@ export type SettlementState = {
   founder: string;
   townHallBuilt: boolean;
   settlementLevel: string;
+  settlementFocusId?: string;
+  settlementFocus?: string;
+  settlementFocusBonus?: string;
+  settlementFocusIdentity?: string;
   tradeRouteEstablished: boolean;
   tradeRouteDestination: string;
   tradeRoutes: number;
@@ -97,6 +105,10 @@ export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
   founder: "You",
   townHallBuilt: false,
   settlementLevel: "Outpost",
+  settlementFocusId: "",
+  settlementFocus: "",
+  settlementFocusBonus: "",
+  settlementFocusIdentity: "",
   tradeRouteEstablished: false,
   tradeRouteDestination: "",
   tradeRoutes: 0,
@@ -178,6 +190,22 @@ function sanitizeState(raw: unknown): SettlementState {
       typeof source.settlementLevel === "string"
         ? source.settlementLevel
         : DEFAULT_SETTLEMENT_STATE.settlementLevel,
+    settlementFocusId:
+      typeof source.settlementFocusId === "string"
+        ? source.settlementFocusId
+        : DEFAULT_SETTLEMENT_STATE.settlementFocusId,
+    settlementFocus:
+      typeof source.settlementFocus === "string"
+        ? source.settlementFocus
+        : DEFAULT_SETTLEMENT_STATE.settlementFocus,
+    settlementFocusBonus:
+      typeof source.settlementFocusBonus === "string"
+        ? source.settlementFocusBonus
+        : DEFAULT_SETTLEMENT_STATE.settlementFocusBonus,
+    settlementFocusIdentity:
+      typeof source.settlementFocusIdentity === "string"
+        ? source.settlementFocusIdentity
+        : DEFAULT_SETTLEMENT_STATE.settlementFocusIdentity,
     tradeRouteEstablished: source.tradeRouteEstablished === true,
     tradeRouteDestination:
       typeof source.tradeRouteDestination === "string"

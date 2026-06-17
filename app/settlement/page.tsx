@@ -38,6 +38,42 @@ const STARTING_RESOURCES = [
   { id: "food", label: "Food", value: "200" },
 ];
 
+function getTownHallOutcome(focusId?: string) {
+  if (focusId === "growth") {
+    return {
+      population: 92,
+      influence: 8,
+      settlementLevel: "Growth City Seed",
+      identity: "The civic core turns the growth charter into organized expansion.",
+    };
+  }
+
+  if (focusId === "trade") {
+    return {
+      population: 76,
+      influence: 11,
+      settlementLevel: "Market City Seed",
+      identity: "The civic core turns the trade charter into coordinated routes and resource flow.",
+    };
+  }
+
+  if (focusId === "defense") {
+    return {
+      population: 72,
+      influence: 12,
+      settlementLevel: "Fortified City Seed",
+      identity: "The civic core turns the defense charter into a stable frontier seat.",
+    };
+  }
+
+  return {
+    population: 64,
+    influence: 7,
+    settlementLevel: "City Seed",
+    identity: "The civic core gives the settlement its first organized center of power.",
+  };
+}
+
 export default function SettlementPage() {
   const [settlementState, setSettlementState] = useState<SettlementState>(DEFAULT_SETTLEMENT_STATE);
 
@@ -58,6 +94,12 @@ export default function SettlementPage() {
       coordinates: settlementState.coordinates || FALLBACK_SETTLEMENT.coordinates,
       founder: settlementState.founder || FALLBACK_SETTLEMENT.founder,
       settlementLevel: settlementState.settlementLevel || FALLBACK_SETTLEMENT.settlementLevel,
+      settlementFocusId: settlementState.settlementFocusId || "",
+      settlementFocus: settlementState.settlementFocus || "Balanced Charter",
+      settlementFocusBonus: settlementState.settlementFocusBonus || "Balanced starting growth",
+      settlementFocusIdentity:
+        settlementState.settlementFocusIdentity ||
+        "A flexible settlement keeping growth, trade, and defense open.",
       townHallBuilt: settlementState.townHallBuilt,
       tradeRouteEstablished: settlementState.tradeRouteEstablished,
       tradeRouteDestination:
@@ -76,17 +118,20 @@ export default function SettlementPage() {
   const buildTownHall = () => {
     if (displaySettlement.townHallBuilt) return;
 
+    const townHallOutcome = getTownHallOutcome(displaySettlement.settlementFocusId);
+
     const nextState: SettlementState = {
       ...settlementState,
       settlementFounded: true,
       settlementName: displaySettlement.settlementName,
-      population: 64,
-      influence: 7,
+      population: townHallOutcome.population,
+      influence: townHallOutcome.influence,
       region: displaySettlement.region,
       coordinates: displaySettlement.coordinates,
       founder: displaySettlement.founder,
       townHallBuilt: true,
-      settlementLevel: "City Seed",
+      settlementLevel: townHallOutcome.settlementLevel,
+      settlementFocusIdentity: townHallOutcome.identity,
       tradeRouteEstablished: false,
       tradeRouteDestination: "",
       tradeRoutes: 0,
@@ -245,6 +290,27 @@ export default function SettlementPage() {
           ))}
         </motion.section>
 
+        <motion.section
+          data-qa="settlement-founder-focus"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.12, ease: "easeOut" }}
+          className="mt-10 border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+            Founder Focus
+          </p>
+          <h2 className="mt-4 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-4xl">
+            {displaySettlement.settlementFocus}
+          </h2>
+          <p className="mt-3 text-sm uppercase tracking-[0.22em] text-amber-200/70">
+            {displaySettlement.settlementFocusBonus}
+          </p>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-400">
+            {displaySettlement.settlementFocusIdentity}
+          </p>
+        </motion.section>
+
         <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <motion.section
             initial={{ opacity: 0, y: 24 }}
@@ -332,6 +398,9 @@ export default function SettlementPage() {
                 <li className="border-l border-amber-500/25 pl-4">Founder Badge earned</li>
                 <li className="border-l border-amber-500/25 pl-4">
                   {displaySettlement.settlementName} founded
+                </li>
+                <li className="border-l border-amber-500/25 pl-4">
+                  Founder focus chosen: {displaySettlement.settlementFocus}
                 </li>
                 {displaySettlement.townHallBuilt ? (
                   <li className="border-l border-amber-500/25 pl-4">Town Hall built</li>
