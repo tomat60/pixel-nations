@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-17T22:11:14.155Z",
+  "generatedAt": "2026-06-17T23:23:25.462Z",
   "branch": "sprint/empire-v0-2-first-imperial-direction",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## sprint/empire-v0-2-first-imperial-direction\n M app/empire/create/page.tsx\n M app/empire/page.tsx\n M app/lib/settlement-state.ts\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-empire.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
-    "lastCommits": "31b0ee1 Add Empire v0.2 implementation brief\nc4d7008 Lock Nation v0.2 gameplay baseline\n303d34d Merge Nation v0.2 governing doctrine\nd052297 Add nation founded-state review and reset controls\nb92c5a6 Add nation governing doctrine choice"
+    "statusSummary": "## sprint/empire-v0-2-first-imperial-direction...origin/sprint/empire-v0-2-first-imperial-direction",
+    "lastCommits": "d8e8245 Add Empire v0.2 first imperial direction\n31b0ee1 Add Empire v0.2 implementation brief\nc4d7008 Lock Nation v0.2 gameplay baseline\n303d34d Merge Nation v0.2 governing doctrine\nd052297 Add nation founded-state review and reset controls"
   },
   "qa": {
     "smoke": {

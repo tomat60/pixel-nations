@@ -1,30 +1,18 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-17T22:11:14.155Z
+Generated: 2026-06-17T23:23:25.462Z
 
 Branch: sprint/empire-v0-2-first-imperial-direction
-Working tree: has changes
+Working tree: clean
 
 Git status:
-  ## sprint/empire-v0-2-first-imperial-direction
-   M app/empire/create/page.tsx
-   M app/empire/page.tsx
-   M app/lib/settlement-state.ts
-   M public/qa/latest/manifest.json
-   M public/qa/latest/report.html
-   M public/qa/latest/screenshots/desktop-world-sector.png
-   M public/qa/latest/screenshots/desktop-world.png
-   M public/qa/latest/screenshots/mobile-empire.png
-   M public/qa/latest/screenshots/mobile-world-claim-tray.png
-   M public/qa/latest/screenshots/mobile-world-sector.png
-   M public/qa/latest/screenshots/mobile-world.png
-   M public/qa/latest/smoke-result.json
+  ## sprint/empire-v0-2-first-imperial-direction...origin/sprint/empire-v0-2-first-imperial-direction
 
 Last 5 commits:
+  d8e8245 Add Empire v0.2 first imperial direction
   31b0ee1 Add Empire v0.2 implementation brief
   c4d7008 Lock Nation v0.2 gameplay baseline
   303d34d Merge Nation v0.2 governing doctrine
   d052297 Add nation founded-state review and reset controls
-  b92c5a6 Add nation governing doctrine choice
 
 QA:
 Smoke result: PASS
