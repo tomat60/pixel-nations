@@ -23,6 +23,18 @@ type Ideology = {
   style: string;
 };
 
+type GoverningDoctrine = {
+  id: string;
+  title: string;
+  type: string;
+  bonus: string;
+  identity: string;
+  populationGain: number;
+  influenceGain: number;
+  landGain: number;
+  politicalStatus: string;
+};
+
 const IDEOLOGIES: Ideology[] = [
   {
     id: "crown-rule",
@@ -47,6 +59,74 @@ const IDEOLOGIES: Ideology[] = [
   },
 ];
 
+const GOVERNING_DOCTRINES: GoverningDoctrine[] = [
+  {
+    id: "civic-mandate",
+    title: "Civic Mandate",
+    type: "City-Led State",
+    bonus: "+ Civic Stability",
+    identity:
+      "The nation grows from its capital city, civic institutions, and the promise that one land can become a homeland.",
+    populationGain: 120,
+    influenceGain: 18,
+    landGain: 3,
+    politicalStatus: "Civic Nation Founder",
+  },
+  {
+    id: "trade-compact",
+    title: "Trade Compact",
+    type: "Route-Led State",
+    bonus: "+ Commercial Reach",
+    identity:
+      "The nation is bound together by roads, markets, and the first external connection beyond the capital.",
+    populationGain: 95,
+    influenceGain: 22,
+    landGain: 4,
+    politicalStatus: "Trade Nation Founder",
+  },
+  {
+    id: "sovereign-command",
+    title: "Sovereign Command",
+    type: "Banner-Led State",
+    bonus: "+ Political Authority",
+    identity:
+      "The nation centralizes power under one banner, preparing its borders and allies for future imperial ambition.",
+    populationGain: 80,
+    influenceGain: 30,
+    landGain: 5,
+    politicalStatus: "Sovereign Nation Founder",
+  },
+];
+
+function getRecommendedDoctrineId(state: SettlementState, ideologyId: string) {
+  const focus = `${state.settlementFocusId ?? ""} ${state.settlementFocus ?? ""}`.toLowerCase();
+  const route = `${state.tradeRouteId ?? ""} ${state.tradeRouteDestination ?? ""} ${state.tradeRouteBonus ?? ""}`.toLowerCase();
+  const alliance = `${state.allianceStrategy ?? ""} ${state.allianceBonus ?? ""}`.toLowerCase();
+
+  if (ideologyId === "free-cities" || focus.includes("trade") || route.includes("trade") || alliance.includes("market")) {
+    return "trade-compact";
+  }
+
+  if (ideologyId === "iron-pact" || focus.includes("defense") || alliance.includes("industrial") || alliance.includes("crown")) {
+    return "sovereign-command";
+  }
+
+  return "civic-mandate";
+}
+
+function getNationGain(state: SettlementState, doctrine: GoverningDoctrine) {
+  const basePopulation = state.population > 0 ? state.population : 140;
+  const baseInfluence = state.influence > 0 ? state.influence : 20;
+  const baseLands = state.landsControlled > 0 ? state.landsControlled : 1;
+
+  return {
+    population: basePopulation + doctrine.populationGain,
+    influence: baseInfluence + doctrine.influenceGain,
+    landsControlled: Math.max(5, baseLands + doctrine.landGain),
+    politicalStatus: doctrine.politicalStatus,
+  };
+}
+
 function getNationNameError(value: string) {
   const trimmed = value.trim();
   if (trimmed.length < MIN_NAME_LENGTH) {
@@ -65,6 +145,7 @@ export default function NationCreatePage() {
   const [settlementState, setSettlementState] = useState<SettlementState>(DEFAULT_SETTLEMENT_STATE);
   const [nationName, setNationName] = useState("");
   const [selectedIdeologyId, setSelectedIdeologyId] = useState(IDEOLOGIES[0].id);
+  const [selectedDoctrineId, setSelectedDoctrineId] = useState(GOVERNING_DOCTRINES[0].id);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isFounded, setIsFounded] = useState(false);
 
@@ -72,10 +153,23 @@ export default function NationCreatePage() {
     const state = readSettlementState();
     setSettlementState(state);
     if (state.nationName) setNationName(state.nationName);
+    let nextIdeologyId = IDEOLOGIES[0].id;
+
     if (state.nationIdeology) {
       const matching = IDEOLOGIES.find((ideology) => ideology.title === state.nationIdeology);
-      if (matching) setSelectedIdeologyId(matching.id);
+      if (matching) {
+        nextIdeologyId = matching.id;
+        setSelectedIdeologyId(matching.id);
+      }
     }
+
+    if (state.nationDoctrineId) {
+      const matchingDoctrine = GOVERNING_DOCTRINES.find((doctrine) => doctrine.id === state.nationDoctrineId);
+      if (matchingDoctrine) setSelectedDoctrineId(matchingDoctrine.id);
+    } else {
+      setSelectedDoctrineId(getRecommendedDoctrineId(state, nextIdeologyId));
+    }
+
     if (state.nationFounded) setIsFounded(true);
   }, []);
 
@@ -88,6 +182,12 @@ export default function NationCreatePage() {
   const influence = settlementState.influence > 0 ? settlementState.influence : 20;
   const selectedIdeology =
     IDEOLOGIES.find((ideology) => ideology.id === selectedIdeologyId) ?? IDEOLOGIES[0];
+  const recommendedDoctrineId = getRecommendedDoctrineId(settlementState, selectedIdeologyId);
+  const selectedDoctrine =
+    GOVERNING_DOCTRINES.find((doctrine) => doctrine.id === selectedDoctrineId) ??
+    GOVERNING_DOCTRINES.find((doctrine) => doctrine.id === recommendedDoctrineId) ??
+    GOVERNING_DOCTRINES[0];
+  const nationGain = getNationGain(settlementState, selectedDoctrine);
   const nationNameError = useMemo(() => getNationNameError(nationName), [nationName]);
   const showError = isSubmitted && !isFounded && Boolean(nationNameError);
 
@@ -98,6 +198,8 @@ export default function NationCreatePage() {
     const normalizedName = nationName.trim().replace(/\s+/g, " ");
     const validationError = getNationNameError(normalizedName);
     if (validationError) return;
+
+    const finalGain = getNationGain(settlementState, selectedDoctrine);
 
     const nextState: SettlementState = {
       ...settlementState,
@@ -117,11 +219,15 @@ export default function NationCreatePage() {
       nationFounded: true,
       nationName: normalizedName,
       nationIdeology: selectedIdeology.title,
-      population: 250,
-      influence: 45,
-      landsControlled: 5,
+      nationDoctrineId: selectedDoctrine.id,
+      nationDoctrine: selectedDoctrine.title,
+      nationDoctrineBonus: selectedDoctrine.bonus,
+      nationDoctrineIdentity: selectedDoctrine.identity,
+      population: finalGain.population,
+      influence: finalGain.influence,
+      landsControlled: finalGain.landsControlled,
       settlementLevel: "Capital City",
-      politicalStatus: "Nation Founder",
+      politicalStatus: finalGain.politicalStatus,
       bordersExpanded: false,
       expandedLands: [],
       empireFounded: false,
@@ -199,9 +305,9 @@ export default function NationCreatePage() {
                 </p>
                 <ul className="mt-5 grid gap-3 text-sm text-zinc-300 sm:grid-cols-2">
                   {[
-                    "Nation Founder",
+                    selectedDoctrine.title,
+                    selectedDoctrine.bonus,
                     "Capital City",
-                    "Regional Rule",
                     "Sovereign Banner",
                   ].map((benefit) => (
                     <li key={benefit} className="border-l border-amber-500/25 pl-4">
@@ -266,7 +372,10 @@ export default function NationCreatePage() {
                       <button
                         key={ideology.id}
                         type="button"
-                        onClick={() => setSelectedIdeologyId(ideology.id)}
+                        onClick={() => {
+                          setSelectedIdeologyId(ideology.id);
+                          setSelectedDoctrineId(getRecommendedDoctrineId(settlementState, ideology.id));
+                        }}
                         className={`border p-4 text-left transition-colors sm:p-5 ${
                           isSelected
                             ? "border-amber-400/65 bg-amber-500/10"
@@ -285,6 +394,48 @@ export default function NationCreatePage() {
                     );
                   })}
                 </div>
+
+                <p className="mt-8 text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+                  Governing Doctrine
+                </p>
+                <p className="mt-3 text-sm leading-7 text-zinc-500">
+                  This is the first real political identity of your nation. It should feel like a consequence of your city,
+                  route, alliance, and founding ideology.
+                </p>
+                <div className="mt-5 grid gap-3">
+                  {GOVERNING_DOCTRINES.map((doctrine) => {
+                    const isSelected = doctrine.id === selectedDoctrineId;
+                    const isRecommended = doctrine.id === recommendedDoctrineId;
+                    return (
+                      <button
+                        key={doctrine.id}
+                        type="button"
+                        onClick={() => setSelectedDoctrineId(doctrine.id)}
+                        className={`border p-4 text-left transition-colors sm:p-5 ${
+                          isSelected
+                            ? "border-amber-400/65 bg-amber-500/10"
+                            : "border-amber-500/15 bg-[#08080f]/90 hover:border-amber-500/35"
+                        }`}
+                      >
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <p className="font-[family-name:var(--font-syne)] text-xl font-bold text-amber-100">
+                            {doctrine.title}
+                          </p>
+                          {isRecommended ? (
+                            <span className="w-fit border border-amber-500/25 bg-amber-500/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-amber-200/80">
+                              Recommended by your path
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="mt-2 text-xs uppercase tracking-[0.2em] text-zinc-500">
+                          Type: {doctrine.type}
+                        </p>
+                        <p className="mt-2 text-sm text-zinc-300">Bonus: {doctrine.bonus}</p>
+                        <p className="mt-1 text-sm leading-6 text-zinc-400">{doctrine.identity}</p>
+                      </button>
+                    );
+                  })}
+                </div>
               </section>
 
               <aside className="border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8 lg:self-start">
@@ -299,6 +450,7 @@ export default function NationCreatePage() {
                     ["Founding Alliance", allianceName],
                     ["Alliance Strategy", allianceStrategy],
                     ["Ideology", selectedIdeology.title],
+                    ["Doctrine", selectedDoctrine.title],
                   ].map(([label, value]) => (
                     <div key={label} className="flex items-start justify-between gap-5">
                       <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">{label}</span>
@@ -311,13 +463,13 @@ export default function NationCreatePage() {
 
                 <div className="mt-6 space-y-4">
                   <p className="text-xs uppercase tracking-[0.2em] text-zinc-600">Expected Gain</p>
-                  <p className="text-sm text-zinc-300">Population: +110</p>
-                  <p className="text-sm text-zinc-300">Influence: +25</p>
-                  <p className="text-sm text-zinc-300">Controlled Lands: +4</p>
-                  <p className="text-sm text-zinc-300">Political Status: First Nation</p>
+                  <p className="text-sm text-zinc-300">Population: {nationGain.population}</p>
+                  <p className="text-sm text-zinc-300">Influence: {nationGain.influence}</p>
+                  <p className="text-sm text-zinc-300">Controlled Lands: {nationGain.landsControlled}</p>
+                  <p className="text-sm text-zinc-300">Political Status: {nationGain.politicalStatus}</p>
                 </div>
                 <p className="mt-6 text-xs leading-6 text-zinc-500">
-                  {allianceIdentity} No land merging is required to found this demo nation.
+                  {allianceIdentity} Doctrine: {selectedDoctrine.identity} No land merging is required to found this demo nation.
                 </p>
 
                 <div className="mt-8 flex flex-col gap-3">
