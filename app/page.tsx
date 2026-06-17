@@ -689,13 +689,21 @@ export default function Home() {
 
         <section
           id="world-preview"
-          className="relative overflow-hidden border-t border-amber-500/10 bg-[#020204] px-6 py-28 sm:px-10 sm:py-40"
+          className="relative overflow-hidden border-t border-amber-500/10 bg-[#020204] px-6 py-28 sm:px-10 sm:py-44"
         >
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_35%,rgba(201,169,98,0.08)_0%,transparent_55%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_35%,rgba(201,169,98,0.1)_0%,transparent_58%)]"
           />
-          <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-center">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute right-[-18rem] top-1/2 hidden h-[760px] w-[760px] -translate-y-1/2 rounded-full border border-amber-500/10 bg-[url('/assets/world-map/aurelian-basin-v1.png')] bg-cover bg-center opacity-[0.16] shadow-[inset_0_0_120px_rgba(0,0,0,0.85),0_0_160px_rgba(201,169,98,0.08)] blur-[0.2px] lg:block"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute right-[-20rem] top-1/2 hidden h-[820px] w-[820px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_35%_35%,transparent_0%,rgba(2,2,4,0.12)_38%,rgba(2,2,4,0.88)_78%)] lg:block"
+          />
+          <div className="relative mx-auto grid max-w-[1500px] gap-12 lg:grid-cols-[minmax(0,0.82fr)_minmax(520px,1fr)] lg:items-center xl:gap-16">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.5em] text-amber-600/75">
                 World Preview
@@ -730,9 +738,9 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="overflow-hidden border border-amber-500/20 bg-[#050509]/90 p-3 shadow-[0_30px_120px_rgba(0,0,0,0.6),0_0_90px_rgba(201,169,98,0.08)]">
+            <div className="relative overflow-hidden border border-amber-500/25 bg-[#050509]/90 p-3 shadow-[0_40px_150px_rgba(0,0,0,0.68),0_0_120px_rgba(201,169,98,0.12)] lg:-mr-8 xl:-mr-14">
               <div
-                className="relative aspect-[16/9] overflow-hidden bg-cover bg-center"
+                className="relative aspect-[4/3] min-h-[320px] overflow-hidden bg-cover bg-center sm:min-h-[420px] lg:min-h-[520px]"
                 style={{
                   backgroundImage:
                     "linear-gradient(180deg, rgba(2,2,4,0.04), rgba(2,2,4,0.48)), url('/assets/world-map/aurelian-basin-v1.png')",
