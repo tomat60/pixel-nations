@@ -196,12 +196,20 @@ export default function EmpireCreatePage() {
                 </ul>
               </div>
 
-              <Link
-                href="/empire"
-                className="btn-primary mt-8 inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
-              >
-                Enter Empire
-              </Link>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/empire"
+                  className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
+                >
+                  Enter Empire
+                </Link>
+                <a
+                  href="mailto:tomat6@gmail.com?subject=Pixel%20Nations%20demo%20feedback&body=I%20created%20an%20empire%20in%20the%20Pixel%20Nations%20demo.%0A%0AWhat%20felt%20exciting%3A%0A%0AWhat%20was%20confusing%3A%0A%0AWhat%20I%20would%20like%20next%3A%0A"
+                  className="btn-secondary rounded border border-zinc-800 bg-[#08080f]/80 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-zinc-300"
+                >
+                  Send Feedback
+                </a>
+              </div>
             </motion.section>
           ) : (
             <motion.form

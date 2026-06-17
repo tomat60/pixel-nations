@@ -196,6 +196,39 @@ export default function EmpirePage() {
           </motion.aside>
         </div>
 
+        <motion.section
+          data-qa="end-demo-feedback"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.24, ease: "easeOut" }}
+          className="mt-10 border border-amber-500/25 bg-amber-500/[0.045] p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+            Demo Complete
+          </p>
+          <h2 className="mt-4 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-4xl">
+            One land became an empire.
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-400">
+            You reached the end of the first playable Pixel Nations arc. Tell us what felt exciting,
+            confusing, or missing before the world grows deeper.
+          </p>
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <a
+              href="mailto:tomat6@gmail.com?subject=Pixel%20Nations%20demo%20feedback&body=I%20played%20the%20Pixel%20Nations%20demo.%0A%0AWhat%20felt%20exciting%3A%0A%0AWhat%20was%20confusing%3A%0A%0AWhat%20I%20would%20like%20next%3A%0A"
+              className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
+            >
+              Send Feedback
+            </a>
+            <Link
+              href="/world"
+              className="btn-secondary rounded border border-zinc-800 bg-[#08080f]/80 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-zinc-300"
+            >
+              Revisit World
+            </Link>
+          </div>
+        </motion.section>
+
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
