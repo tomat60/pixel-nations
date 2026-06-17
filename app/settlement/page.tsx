@@ -104,6 +104,9 @@ export default function SettlementPage() {
       tradeRouteEstablished: settlementState.tradeRouteEstablished,
       tradeRouteDestination:
         settlementState.tradeRouteDestination || FALLBACK_SETTLEMENT.tradeRouteDestination,
+      tradeRouteBonus: settlementState.tradeRouteBonus || "",
+      tradeRouteResourceFlow: settlementState.tradeRouteResourceFlow || "",
+      tradeRouteIdentity: settlementState.tradeRouteIdentity || "",
       regionalAllianceFormed: settlementState.regionalAllianceFormed,
       allianceName: settlementState.allianceName || FALLBACK_SETTLEMENT.allianceName,
       nationFounded: settlementState.nationFounded,
@@ -311,6 +314,29 @@ export default function SettlementPage() {
           </p>
         </motion.section>
 
+        {displaySettlement.tradeRouteEstablished ? (
+          <motion.section
+            data-qa="settlement-trade-route"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.16, ease: "easeOut" }}
+            className="mt-10 border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+              First Trade Route
+            </p>
+            <h2 className="mt-4 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-4xl">
+              {displaySettlement.tradeRouteDestination}
+            </h2>
+            <p className="mt-3 text-sm uppercase tracking-[0.22em] text-amber-200/70">
+              {displaySettlement.tradeRouteResourceFlow || displaySettlement.tradeRouteBonus}
+            </p>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-400">
+              {displaySettlement.tradeRouteIdentity || "The city now has its first external connection."}
+            </p>
+          </motion.section>
+        ) : null}
+
         <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <motion.section
             initial={{ opacity: 0, y: 24 }}
@@ -406,9 +432,14 @@ export default function SettlementPage() {
                   <li className="border-l border-amber-500/25 pl-4">Town Hall built</li>
                 ) : null}
                 {displaySettlement.tradeRouteEstablished ? (
-                  <li className="border-l border-amber-500/25 pl-4">
-                    Trade route established with {displaySettlement.tradeRouteDestination}
-                  </li>
+                  <>
+                    <li className="border-l border-amber-500/25 pl-4">
+                      Trade route established with {displaySettlement.tradeRouteDestination}
+                    </li>
+                    <li className="border-l border-amber-500/25 pl-4">
+                      Route effect: {displaySettlement.tradeRouteResourceFlow || displaySettlement.tradeRouteBonus || "External connection"}
+                    </li>
+                  </>
                 ) : null}
                 {displaySettlement.regionalAllianceFormed ? (
                   <li className="border-l border-amber-500/25 pl-4">

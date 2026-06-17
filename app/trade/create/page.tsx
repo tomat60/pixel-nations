@@ -18,6 +18,10 @@ type Destination = {
   bonus: string;
   distance: string;
   resourceFlow: string;
+  population: number;
+  influence: number;
+  settlementLevel: string;
+  identity: string;
 };
 
 const DESTINATIONS: Destination[] = [
@@ -28,6 +32,10 @@ const DESTINATIONS: Destination[] = [
     bonus: "+ Iron Flow",
     distance: "Near",
     resourceFlow: "Iron +15",
+    population: 96,
+    influence: 14,
+    settlementLevel: "Iron Route City",
+    identity: "Iron Coast gives the city durable material flow and a stronger industrial base.",
   },
   {
     id: "ember-basin",
@@ -36,6 +44,10 @@ const DESTINATIONS: Destination[] = [
     bonus: "+ Food Exchange",
     distance: "Medium",
     resourceFlow: "Food +40",
+    population: 116,
+    influence: 12,
+    settlementLevel: "Market Route City",
+    identity: "Ember Basin feeds population growth and turns the settlement into a frontier market.",
   },
   {
     id: "crownlands",
@@ -44,6 +56,10 @@ const DESTINATIONS: Destination[] = [
     bonus: "+ Influence",
     distance: "Far",
     resourceFlow: "Influence +3",
+    population: 92,
+    influence: 17,
+    settlementLevel: "Crown Route City",
+    identity: "Crownlands strengthens legitimacy and makes the city politically visible.",
   },
 ];
 
@@ -59,7 +75,7 @@ export default function TradeCreatePage() {
   useEffect(() => {
     const state = readSettlementState();
     setSettlementState(state);
-    const selected = normalizeDestination(state.tradeRouteDestination);
+    const selected = DESTINATIONS.find((destination) => destination.id === state.tradeRouteId) ?? normalizeDestination(state.tradeRouteDestination);
     setSelectedDestinationId(selected.id);
     setIsRouteEstablished(state.tradeRouteEstablished);
   }, []);
@@ -86,13 +102,17 @@ export default function TradeCreatePage() {
       townHallBuilt: true,
       tradeRouteEstablished: true,
       tradeRouteDestination: selectedDestination.name,
+      tradeRouteId: selectedDestination.id,
+      tradeRouteBonus: selectedDestination.bonus,
+      tradeRouteResourceFlow: selectedDestination.resourceFlow,
+      tradeRouteIdentity: selectedDestination.identity,
       tradeRoutes: 1,
-      population: 100,
-      influence: 12,
-      settlementLevel: "Growing City",
+      population: selectedDestination.population,
+      influence: selectedDestination.influence,
+      settlementLevel: selectedDestination.settlementLevel,
       regionalAllianceFormed: false,
       allianceName: "",
-      alliancePartners: [],
+      alliancePartners: [selectedDestination.name],
       politicalStatus: "",
       nationFounded: false,
       nationName: "",
@@ -166,13 +186,16 @@ export default function TradeCreatePage() {
               <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-400">
                 {settlementName} is now connected to {selectedDestination.name}.
               </p>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-200/70">
+                {selectedDestination.identity}
+              </p>
 
               <div className="mt-8 border-y border-amber-500/10 py-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-600/75">
                   Unlocked Benefits
                 </p>
                 <ul className="mt-5 grid gap-3 text-sm text-zinc-300 sm:grid-cols-2">
-                  {["Regional Trade", "Resource Flow", "City Growth", "Diplomatic Reach"].map((benefit) => (
+                  {["Regional Trade", selectedDestination.resourceFlow, selectedDestination.bonus, "Diplomatic Reach"].map((benefit) => (
                     <li key={benefit} className="border-l border-amber-500/25 pl-4">
                       <span className="mr-2 text-amber-300">{"\u2713"}</span>
                       {benefit}
@@ -223,6 +246,7 @@ export default function TradeCreatePage() {
                         </p>
                         <p className="mt-2 text-sm text-zinc-300">Bonus: {destination.bonus}</p>
                         <p className="mt-1 text-sm text-zinc-400">Distance: {destination.distance}</p>
+                        <p className="mt-2 text-sm leading-6 text-zinc-500">{destination.identity}</p>
                       </button>
                     );
                   })}
@@ -245,8 +269,9 @@ export default function TradeCreatePage() {
 
                 <div className="mt-6 space-y-4">
                   <p className="text-xs uppercase tracking-[0.2em] text-zinc-600">Expected Gain</p>
-                  <p className="text-sm text-zinc-300">Population: +36</p>
-                  <p className="text-sm text-zinc-300">Influence: +5</p>
+                  <p className="text-sm text-zinc-300">Population: {selectedDestination.population}</p>
+                  <p className="text-sm text-zinc-300">Influence: {selectedDestination.influence}</p>
+                  <p className="text-sm text-zinc-300">City Level: {selectedDestination.settlementLevel}</p>
                   <p className="text-sm text-zinc-300">Trade: +1 Route</p>
                   <p className="text-sm text-zinc-300">Resource Flow: {selectedDestination.resourceFlow}</p>
                 </div>
