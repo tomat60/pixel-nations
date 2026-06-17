@@ -579,18 +579,24 @@ export default function WorldPage() {
           <div className="relative overflow-hidden border border-amber-500/20 bg-[#030306] p-3 shadow-[inset_0_0_90px_rgba(0,0,0,0.72)] sm:p-4">
             <div
               aria-hidden
-              className="absolute inset-3 opacity-[0.26] [background-image:linear-gradient(rgba(201,169,98,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.5)_1px,transparent_1px)] [background-size:1%_1%]"
+              className="absolute inset-3 hidden opacity-[0.26] [background-image:linear-gradient(rgba(201,169,98,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.5)_1px,transparent_1px)] [background-size:1%_1%]"
             />
             <div
               aria-hidden
-              className="absolute inset-3 opacity-[0.18] [background-image:linear-gradient(rgba(201,169,98,0.75)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.75)_1px,transparent_1px)] [background-size:10%_10%]"
+              className="absolute inset-3 hidden opacity-[0.18] [background-image:linear-gradient(rgba(201,169,98,0.75)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.75)_1px,transparent_1px)] [background-size:10%_10%]"
             />
             <div
               aria-hidden
               className="absolute inset-3 bg-[radial-gradient(ellipse_at_center,transparent_38%,rgba(2,2,4,0.78)_100%)]"
             />
-            <div className="relative aspect-[16/9] min-h-[260px] overflow-hidden sm:min-h-[420px] lg:min-h-[560px]">
-              {ATLAS_REGIONS.map((region) => (
+            <div
+                className="relative aspect-[16/9] min-h-[260px] overflow-hidden bg-cover bg-center sm:min-h-[420px] lg:min-h-[560px]"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(180deg, rgba(2,2,4,0.10), rgba(2,2,4,0.46)), url('/assets/world-map/aurelian-basin-v1.png')",
+                }}
+              >
+              {false && ATLAS_REGIONS.map((region) => (
                 <div
                   key={region.id}
                   className={`absolute border ${region.className}`}
@@ -598,7 +604,7 @@ export default function WorldPage() {
                 />
               ))}
 
-              {ATLAS_LAND_MARKS.map((mark) => (
+              {false && ATLAS_LAND_MARKS.map((mark) => (
                 <span
                   key={mark.id}
                   className="pointer-events-none absolute rounded-[1px] bg-amber-100/70 shadow-[0_0_8px_rgba(251,191,36,0.18)]"
@@ -722,7 +728,13 @@ export default function WorldPage() {
               </div>
 
               <div className="mt-5 overflow-x-auto pb-2">
-                <div className="world-sector-canvas relative min-w-[680px] overflow-hidden border border-amber-500/25 p-3 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)]">
+                <div
+                    className="world-sector-canvas relative min-w-[680px] overflow-hidden border border-amber-500/25 bg-cover bg-center p-3 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)]"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(180deg, rgba(2,2,4,0.08), rgba(2,2,4,0.42)), url('/assets/world-map/aurelian-basin-v1.png')",
+                    }}
+                  >
                   <div aria-hidden className="world-sector-noise pointer-events-none absolute inset-0 z-[1]" />
                   <div
                     aria-hidden
@@ -752,7 +764,7 @@ export default function WorldPage() {
                     aria-hidden
                     className="pointer-events-none absolute inset-3 z-[4] bg-[radial-gradient(ellipse_at_52%_48%,rgba(201,169,98,0.12),transparent_58%)]"
                   />
-                  {TERRAIN_MASSES.map((mass) => (
+                  {false && TERRAIN_MASSES.map((mass) => (
                     <div
                       key={mass.id}
                       aria-hidden
@@ -760,7 +772,7 @@ export default function WorldPage() {
                       style={{ clipPath: mass.clipPath }}
                     />
                   ))}
-                  {SECTOR_REGION_ZONES.map((zone) => (
+                  {false && SECTOR_REGION_ZONES.map((zone) => (
                     <div
                       key={zone.id}
                       aria-hidden
@@ -830,7 +842,7 @@ export default function WorldPage() {
                   </svg>
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute inset-3 z-[9] opacity-[0.14] [background-image:linear-gradient(rgba(201,169,98,0.55)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.55)_1px,transparent_1px)] [background-size:calc(100%/18)_calc(100%/12)]"
+                    className="pointer-events-none absolute inset-3 z-[9] opacity-[0.045] [background-image:linear-gradient(rgba(201,169,98,0.55)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.55)_1px,transparent_1px)] [background-size:calc(100%/18)_calc(100%/12)]"
                   />
                   <div
                     aria-hidden
@@ -845,7 +857,7 @@ export default function WorldPage() {
                       {label.name}
                     </span>
                   ))}
-                  <div className="relative z-[12] grid grid-cols-[repeat(18,minmax(0,1fr))] gap-px bg-amber-500/[0.035] p-px">
+                  <div className="relative z-[12] grid grid-cols-[repeat(18,minmax(0,1fr))] gap-px bg-transparent p-px">
                     {tiles.map((tile) => {
                       const tileOwnedByYou = demoState.claimedLandId === tile.id && demoState.claimedLand;
                       const tileClaimed = tile.claimed || tileOwnedByYou;
@@ -858,7 +870,7 @@ export default function WorldPage() {
                           type="button"
                           onClick={() => selectTile(tile.id)}
                           aria-label={`${tile.landId}, ${tile.region}, ${toTerrainLabel(tile.terrain)}`}
-                          className={`relative aspect-square overflow-hidden border border-white/[0.025] ${TERRAIN_TILE_SURFACE[tile.terrain]} transition-[border-color,box-shadow,background-color] duration-200 before:pointer-events-none before:absolute before:inset-0 before:opacity-90 after:pointer-events-none after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.04),transparent_42%)] ${TERRAIN_TINT[tile.terrain]} ${
+                          className={`relative aspect-square overflow-hidden border border-white/[0.018] bg-black/[0.025] transition-[border-color,box-shadow,background-color] duration-200 before:pointer-events-none before:absolute before:inset-0 before:opacity-90 after:pointer-events-none after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.04),transparent_42%)] ${
                             tile.x === 0 || tile.x === GRID_WIDTH - 1 || tile.y === 0 || tile.y === GRID_HEIGHT - 1
                               ? "opacity-[0.72]"
                               : ""
