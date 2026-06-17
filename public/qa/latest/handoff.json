@@ -1,0 +1,79 @@
+{
+  "project": "Pixel Nations",
+  "generatedAt": "2026-06-17T22:11:14.155Z",
+  "branch": "sprint/empire-v0-2-first-imperial-direction",
+  "isClean": false,
+  "git": {
+    "statusSummary": "## sprint/empire-v0-2-first-imperial-direction\n M app/empire/create/page.tsx\n M app/empire/page.tsx\n M app/lib/settlement-state.ts\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-empire.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
+    "lastCommits": "31b0ee1 Add Empire v0.2 implementation brief\nc4d7008 Lock Nation v0.2 gameplay baseline\n303d34d Merge Nation v0.2 governing doctrine\nd052297 Add nation founded-state review and reset controls\nb92c5a6 Add nation governing doctrine choice"
+  },
+  "qa": {
+    "smoke": {
+      "status": "PASS",
+      "generatedAt": "2026-06-17T22:11:07.322Z",
+      "appUrl": "http://localhost:3000",
+      "appSource": "existing local app",
+      "blockingStep": "",
+      "error": "",
+      "steps": [
+        {
+          "name": "reset demo state and open /world",
+          "status": "PASS",
+          "durationMs": 2148
+        },
+        {
+          "name": "select a claimable Sector A-01 land",
+          "status": "PASS",
+          "durationMs": 379
+        },
+        {
+          "name": "claim selected land",
+          "status": "PASS",
+          "durationMs": 730
+        },
+        {
+          "name": "dashboard recognizes claimed land",
+          "status": "PASS",
+          "durationMs": 520
+        },
+        {
+          "name": "create settlement",
+          "status": "PASS",
+          "durationMs": 2524
+        },
+        {
+          "name": "build settlement core and establish trade",
+          "status": "PASS",
+          "durationMs": 4379
+        },
+        {
+          "name": "form alliance and found nation",
+          "status": "PASS",
+          "durationMs": 5567
+        },
+        {
+          "name": "attempt empire continuation path",
+          "status": "PASS",
+          "durationMs": 1455
+        },
+        {
+          "name": "create empire",
+          "status": "PASS",
+          "durationMs": 2323
+        }
+      ],
+      "passedSteps": 9,
+      "totalSteps": 9,
+      "path": "public/qa/latest/smoke-result.json",
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-17T22:11:07.322Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+    },
+    "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
+    "worldUrl": "https://pixel-nations.vercel.app/world",
+    "publicHandoffTxtUrl": "https://pixel-nations.vercel.app/qa/latest/handoff.txt",
+    "publicHandoffJsonUrl": "https://pixel-nations.vercel.app/qa/latest/handoff.json",
+    "localQaReportPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/report.html",
+    "localHandoffTxtPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.txt",
+    "localHandoffJsonPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.json"
+  },
+  "nextInstruction": "Upload public/qa/latest/handoff.txt to ChatGPT, paste the public handoff link, or type: raport gotowy."
+}

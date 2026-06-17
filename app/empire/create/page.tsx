@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import {
+  clearSettlementState,
   DEFAULT_SETTLEMENT_STATE,
   type SettlementState,
   readSettlementState,
@@ -15,37 +16,123 @@ const MIN_NAME_LENGTH = 3;
 const MAX_NAME_LENGTH = 36;
 const VALID_NAME_PATTERN = /^[A-Za-z\s-]+$/;
 
-type Doctrine = {
+type ImperialDirection = {
   id: string;
   title: string;
   type: string;
   bonus: string;
-  style: string;
+  identity: string;
+  reach: string;
+  populationGain: number;
+  influenceGain: number;
+  landGain: number;
+  citiesGain: number;
+  victoryStatus: string;
 };
 
-const DOCTRINES: Doctrine[] = [
+const IMPERIAL_DIRECTIONS: ImperialDirection[] = [
   {
-    id: "golden-crown",
-    title: "Golden Crown",
-    type: "Imperial Monarchy",
-    bonus: "+ Rule Stability",
-    style: "One empire, one throne, one world.",
+    id: "crown-empire",
+    title: "Crown Empire",
+    type: "Legitimacy-Led Empire",
+    bonus: "+ Imperial Legitimacy",
+    identity:
+      "The empire expands through law, banners, ceremonies, and controlled succession of power.",
+    reach: "Lawful authority across the first imperial provinces",
+    populationGain: 220,
+    influenceGain: 48,
+    landGain: 5,
+    citiesGain: 2,
+    victoryStatus: "Crown Empire Founder",
   },
   {
-    id: "frontier-dominion",
-    title: "Frontier Dominion",
-    type: "Expansionist Empire",
-    bonus: "+ Border Growth",
-    style: "Every frontier becomes a province.",
+    id: "trade-empire",
+    title: "Trade Empire",
+    type: "Route-Led Empire",
+    bonus: "+ Imperial Trade Reach",
+    identity:
+      "The empire expands by making neighbors depend on its roads, markets, contracts, and resource flow.",
+    reach: "Commercial dependency through routes, contracts, and resource flow",
+    populationGain: 260,
+    influenceGain: 42,
+    landGain: 4,
+    citiesGain: 2,
+    victoryStatus: "Trade Empire Founder",
   },
   {
-    id: "trade-imperium",
-    title: "Trade Imperium",
-    type: "Commercial Empire",
-    bonus: "+ Economic Power",
-    style: "Markets, cities and routes define imperial strength.",
+    id: "frontier-empire",
+    title: "Frontier Empire",
+    type: "Expansion-Led Empire",
+    bonus: "+ Frontier Expansion",
+    identity:
+      "The empire expands through settlement pressure, secured borders, frontier ambition, and controlled risk.",
+    reach: "Secured borders, settlement pressure, and controlled frontier risk",
+    populationGain: 200,
+    influenceGain: 38,
+    landGain: 8,
+    citiesGain: 2,
+    victoryStatus: "Frontier Empire Founder",
   },
 ];
+
+function containsAny(value: string, terms: string[]) {
+  const normalized = value.toLowerCase();
+  return terms.some((term) => normalized.includes(term));
+}
+
+function getRecommendedDirectionId(state: SettlementState) {
+  const doctrine = `${state.nationDoctrineId ?? ""} ${state.nationDoctrine ?? ""}`.toLowerCase();
+  const ideology = `${state.nationIdeology ?? ""}`.toLowerCase();
+  const tradePath = [
+    state.tradeRouteId,
+    state.tradeRouteDestination,
+    state.tradeRouteBonus,
+    state.tradeRouteIdentity,
+    state.tradeRouteResourceFlow,
+    state.allianceStrategy,
+    state.allianceBonus,
+    state.allianceIdentity,
+    state.settlementFocusId,
+    state.settlementFocus,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  if (
+    doctrine.includes("trade-compact") ||
+    doctrine.includes("trade compact") ||
+    ideology.includes("free cities") ||
+    containsAny(tradePath, ["trade", "market", "route", "commercial"])
+  ) {
+    return "trade-empire";
+  }
+
+  if (
+    doctrine.includes("sovereign-command") ||
+    doctrine.includes("sovereign command") ||
+    ideology.includes("iron pact") ||
+    containsAny(tradePath, ["defense", "industrial", "border", "military", "frontier"])
+  ) {
+    return "frontier-empire";
+  }
+
+  return "crown-empire";
+}
+
+function getEmpireOutcome(state: SettlementState, direction: ImperialDirection) {
+  const basePopulation = state.population > 0 ? state.population : 340;
+  const baseInfluence = state.influence > 0 ? state.influence : 55;
+  const baseLands = state.landsControlled > 0 ? state.landsControlled : 7;
+  const baseCities = state.cities > 0 ? state.cities : 1;
+
+  return {
+    population: basePopulation + direction.populationGain,
+    influence: baseInfluence + direction.influenceGain,
+    landsControlled: Math.max(10, baseLands + direction.landGain),
+    cities: Math.max(3, baseCities + direction.citiesGain),
+    politicalStatus: direction.victoryStatus,
+  };
+}
 
 function getEmpireNameError(value: string) {
   const trimmed = value.trim();
@@ -58,7 +145,7 @@ function getEmpireNameError(value: string) {
 export default function EmpireCreatePage() {
   const [state, setState] = useState<SettlementState>(DEFAULT_SETTLEMENT_STATE);
   const [empireName, setEmpireName] = useState("");
-  const [selectedDoctrineId, setSelectedDoctrineId] = useState(DOCTRINES[0].id);
+  const [selectedDirectionId, setSelectedDirectionId] = useState(IMPERIAL_DIRECTIONS[0].id);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isFounded, setIsFounded] = useState(false);
 
@@ -66,14 +153,29 @@ export default function EmpireCreatePage() {
     const next = readSettlementState();
     setState(next);
     if (next.empireName) setEmpireName(next.empireName);
-    if (next.empireDoctrine) {
-      const match = DOCTRINES.find((doctrine) => doctrine.title === next.empireDoctrine);
-      if (match) setSelectedDoctrineId(match.id);
+    if (next.empireDirectionId) {
+      const match = IMPERIAL_DIRECTIONS.find((direction) => direction.id === next.empireDirectionId);
+      if (match) {
+        setSelectedDirectionId(match.id);
+      }
+    } else {
+      setSelectedDirectionId(getRecommendedDirectionId(next));
+    }
+    if (!next.empireDirectionId && next.empireDoctrine) {
+      const match = IMPERIAL_DIRECTIONS.find((direction) => direction.title === next.empireDoctrine);
+      if (match) {
+        setSelectedDirectionId(match.id);
+      }
     }
     if (next.empireFounded) setIsFounded(true);
   }, []);
 
-  const selectedDoctrine = DOCTRINES.find((doctrine) => doctrine.id === selectedDoctrineId) ?? DOCTRINES[0];
+  const recommendedDirectionId = getRecommendedDirectionId(state);
+  const selectedDirection =
+    IMPERIAL_DIRECTIONS.find((direction) => direction.id === selectedDirectionId) ??
+    IMPERIAL_DIRECTIONS.find((direction) => direction.id === recommendedDirectionId) ??
+    IMPERIAL_DIRECTIONS[0];
+  const expectedOutcome = getEmpireOutcome(state, selectedDirection);
   const currentEmpireName = state.empireName || empireName;
   const nationName = state.nationName || "The Aurelian Crown";
   const settlementName = state.settlementName || "Aurelia Prime";
@@ -88,6 +190,8 @@ export default function EmpireCreatePage() {
     const normalizedName = empireName.trim().replace(/\s+/g, " ");
     const validationError = getEmpireNameError(normalizedName);
     if (validationError) return;
+
+    const finalOutcome = getEmpireOutcome(state, selectedDirection);
 
     const nextState: SettlementState = {
       ...state,
@@ -110,13 +214,18 @@ export default function EmpireCreatePage() {
       expandedLands: state.expandedLands.length > 0 ? state.expandedLands : ["North Road", "Iron Ridge", "Amber Fields"],
       empireFounded: true,
       empireName: normalizedName,
-      empireDoctrine: selectedDoctrine.title,
-      population: 600,
-      influence: 100,
-      landsControlled: 15,
-      cities: 3,
+      empireDoctrine: selectedDirection.title,
+      empireDirectionId: selectedDirection.id,
+      empireDirection: selectedDirection.title,
+      empireDirectionBonus: selectedDirection.bonus,
+      empireDirectionIdentity: selectedDirection.identity,
+      imperialReach: selectedDirection.reach,
+      population: finalOutcome.population,
+      influence: finalOutcome.influence,
+      landsControlled: finalOutcome.landsControlled,
+      cities: finalOutcome.cities,
       settlementLevel: "Imperial Capital",
-      politicalStatus: "Empire Founder",
+      politicalStatus: finalOutcome.politicalStatus,
     };
 
     setEmpireName(normalizedName);
@@ -181,13 +290,23 @@ export default function EmpireCreatePage() {
                 First Empire Created
               </h2>
               <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-400">
-                {(currentEmpireName || "The first empire")} completes the first Pixel Nations demo arc.
+                {(currentEmpireName || "The first empire")} completes the first Pixel Nations demo arc as a{" "}
+                {state.empireDirection || selectedDirection.title}.
+              </p>
+              <p className="mt-4 max-w-2xl border-l border-amber-500/25 pl-4 text-sm leading-7 text-zinc-500">
+                Your empire has already been founded. You can enter it, review the imperial direction choice,
+                or reset the local demo path to experience the decision again.
               </p>
 
               <div className="mt-8 border-y border-amber-500/10 py-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-600/75">Unlocked Benefits</p>
                 <ul className="mt-5 grid gap-3 text-sm text-zinc-300 sm:grid-cols-2">
-                  {["Empire Founder", "Imperial Capital", "World Legacy", "Opening Arc Complete"].map((benefit) => (
+                  {[
+                    state.empireDirection || selectedDirection.title,
+                    state.empireDirectionBonus || selectedDirection.bonus,
+                    "Imperial Capital",
+                    "Opening Arc Complete",
+                  ].map((benefit) => (
                     <li key={benefit} className="border-l border-amber-500/25 pl-4">
                       <span className="mr-2 text-amber-300">{"\u2713"}</span>
                       {benefit}
@@ -196,19 +315,33 @@ export default function EmpireCreatePage() {
                 </ul>
               </div>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
                   href="/empire"
-                  className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
+                  className="btn-primary inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-amber-100 sm:items-center sm:justify-center"
                 >
                   Enter Empire
                 </Link>
-                <a
-                  href="mailto:tomat6@gmail.com?subject=Pixel%20Nations%20demo%20feedback&body=I%20created%20an%20empire%20in%20the%20Pixel%20Nations%20demo.%0A%0AWhat%20felt%20exciting%3A%0A%0AWhat%20was%20confusing%3A%0A%0AWhat%20I%20would%20like%20next%3A%0A"
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSubmitted(false);
+                    setIsFounded(false);
+                  }}
                   className="btn-secondary rounded border border-zinc-800 bg-[#08080f]/80 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-zinc-300"
                 >
-                  Send Feedback
-                </a>
+                  Review Imperial Direction
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearSettlementState();
+                    window.location.href = "/world";
+                  }}
+                  className="rounded border border-amber-500/20 bg-amber-500/5 px-8 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-amber-200/80 transition-colors hover:border-amber-500/45 hover:bg-amber-500/10"
+                >
+                  Start Fresh Demo Path
+                </button>
               </div>
             </motion.section>
           ) : (
@@ -222,7 +355,10 @@ export default function EmpireCreatePage() {
               className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]"
             >
               <section className="border border-amber-500/20 bg-[#06060c]/90 p-7 shadow-[0_30px_120px_rgba(0,0,0,0.6),0_0_90px_rgba(201,169,98,0.08)] sm:p-10">
-                <label htmlFor="empire-name" className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-600/75">
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-600/75">
+                  Step 1 — Name Your Empire
+                </p>
+                <label htmlFor="empire-name" className="mt-4 block text-sm font-semibold text-amber-100">
                   Empire Name
                 </label>
                 <input
@@ -245,36 +381,58 @@ export default function EmpireCreatePage() {
                   </p>
                 )}
 
-                <p className="mt-8 text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">Imperial Doctrine</p>
+                <p className="mt-8 text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+                  Step 2 — Choose First Imperial Direction
+                </p>
+                <p className="mt-3 text-sm leading-7 text-zinc-500">
+                  This is the first strategic identity of your empire. The recommendation comes from your
+                  nation, doctrine, route, alliance, and founder path.
+                </p>
                 <div className="mt-5 grid gap-3">
-                  {DOCTRINES.map((doctrine) => {
-                    const isSelected = doctrine.id === selectedDoctrineId;
+                  {IMPERIAL_DIRECTIONS.map((direction) => {
+                    const isSelected = direction.id === selectedDirectionId;
+                    const isRecommended = direction.id === recommendedDirectionId;
                     return (
                       <button
-                        key={doctrine.id}
+                        key={direction.id}
                         type="button"
-                        onClick={() => setSelectedDoctrineId(doctrine.id)}
+                        onClick={() => setSelectedDirectionId(direction.id)}
                         className={`border p-4 text-left transition-colors sm:p-5 ${
                           isSelected
                             ? "border-amber-400/65 bg-amber-500/10"
                             : "border-amber-500/15 bg-[#08080f]/90 hover:border-amber-500/35"
                         }`}
                       >
-                        <p className="font-[family-name:var(--font-syne)] text-xl font-bold text-amber-100">{doctrine.title}</p>
-                        <p className="mt-2 text-xs uppercase tracking-[0.2em] text-zinc-500">Type: {doctrine.type}</p>
-                        <p className="mt-2 text-sm text-zinc-300">Bonus: {doctrine.bonus}</p>
-                        <p className="mt-1 text-sm text-zinc-400">{doctrine.style}</p>
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <p className="font-[family-name:var(--font-syne)] text-xl font-bold text-amber-100">
+                            {direction.title}
+                          </p>
+                          {isRecommended ? (
+                            <span className="w-fit border border-amber-500/25 bg-amber-500/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-amber-200/80">
+                              Recommended by your path
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="mt-2 text-xs uppercase tracking-[0.2em] text-zinc-500">
+                          Type: {direction.type}
+                        </p>
+                        <p className="mt-2 text-sm text-zinc-300">Bonus: {direction.bonus}</p>
+                        <p className="mt-1 text-sm leading-6 text-zinc-400">{direction.identity}</p>
                       </button>
                     );
                   })}
                 </div>
 
                 <div className="mt-8 border border-amber-500/15 bg-[#08080f]/90 p-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-600/75">Imperial Capital</p>
-                  <div className="mt-4 space-y-3 text-sm text-zinc-300">
-                    <p>Capital City: {settlementName}</p>
-                    <p>Capital Status: Imperial Seat</p>
-                    <p>Region: {state.region || "Aurelia"}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-600/75">
+                    Step 3 — Expected Imperial Identity
+                  </p>
+                  <p className="mt-4 text-sm leading-7 text-amber-100/80">{selectedDirection.identity}</p>
+                  <div className="mt-5 grid gap-3 text-sm text-zinc-300 sm:grid-cols-2">
+                    <p>Imperial Reach: {selectedDirection.reach}</p>
+                    <p>Victory Status: {expectedOutcome.politicalStatus}</p>
+                    <p>World Influence: {expectedOutcome.influence}</p>
+                    <p>Controlled Lands: {expectedOutcome.landsControlled}</p>
                   </div>
                 </div>
               </section>
@@ -286,7 +444,8 @@ export default function EmpireCreatePage() {
                     ["Empire", empireName.trim() || "Awaiting Name"],
                     ["Capital", settlementName],
                     ["Origin Nation", nationName],
-                    ["Doctrine", selectedDoctrine.title],
+                    ["Imperial Direction", selectedDirection.title],
+                    ["Direction Bonus", selectedDirection.bonus],
                   ].map(([label, value]) => (
                     <div key={label} className="flex items-start justify-between gap-5">
                       <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">{label}</span>
@@ -298,13 +457,16 @@ export default function EmpireCreatePage() {
                 </div>
 
                 <div className="mt-6 space-y-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-zinc-600">Expected Gain</p>
-                  <p className="text-sm text-zinc-300">Population: +260</p>
-                  <p className="text-sm text-zinc-300">Influence: +40</p>
-                  <p className="text-sm text-zinc-300">Controlled Lands: +7</p>
-                  <p className="text-sm text-zinc-300">Cities: +2</p>
-                  <p className="text-sm text-zinc-300">Political Status: First Empire</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-zinc-600">Expected Outcome</p>
+                  <p className="text-sm text-zinc-300">Population: {expectedOutcome.population}</p>
+                  <p className="text-sm text-zinc-300">World Influence: {expectedOutcome.influence}</p>
+                  <p className="text-sm text-zinc-300">Controlled Lands: {expectedOutcome.landsControlled}</p>
+                  <p className="text-sm text-zinc-300">Cities: {expectedOutcome.cities}</p>
+                  <p className="text-sm text-zinc-300">Victory Status: {expectedOutcome.politicalStatus}</p>
                 </div>
+                <p className="mt-6 text-xs leading-6 text-zinc-500">
+                  {selectedDirection.identity} This direction becomes the empire identity shown after founding.
+                </p>
 
                 <div className="mt-8 flex flex-col gap-3">
                   <button
