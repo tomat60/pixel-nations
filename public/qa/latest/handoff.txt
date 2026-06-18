@@ -1,25 +1,48 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-18T22:45:40.974Z
+Generated: 2026-06-18T22:57:26.785Z
 
-Branch: main
-Working tree: clean
+Branch: sprint/qa-evidence-freshness-v0-1
+Working tree: has changes
 
 Git status:
-  ## main...origin/main
+  ## sprint/qa-evidence-freshness-v0-1
+   M public/qa/latest/handoff.json
+   M public/qa/latest/handoff.txt
+   M public/qa/latest/manifest.json
+   D public/qa/latest/mobile-map-framing-v0-1-review-bundle.zip
+   D public/qa/latest/mobile-map-framing-v0-1-review.html
+   M public/qa/latest/report.html
+   M public/qa/latest/screenshots/desktop-world-sector.png
+   M public/qa/latest/screenshots/desktop-world.png
+   M public/qa/latest/screenshots/mobile-world-claim-tray.png
+   M public/qa/latest/screenshots/mobile-world-sector.png
+   M public/qa/latest/screenshots/mobile-world.png
+   M public/qa/latest/smoke-result.json
 
 Last 5 commits:
+  558a147 Update QA governance for stale evidence checks
+  952145f Add QA evidence freshness reporting
+  fd7a7f4 Update QA handoff files after virtual QA lock
   de9933d Lock virtual QA team protocol
   26c731b Update QA handoff files after public demo readiness review
-  1186e24 Add public demo readiness review v0.2
-  5d273d7 Update QA smoke result after mobile map framing merge
-  2548163 Update QA handoff files after mobile map framing merge
 
 QA:
 Smoke result: PASS
-Smoke generated: 2026-06-18T22:13:11.415Z
+Smoke generated: 2026-06-18T22:56:12.270Z
 Smoke app source: existing local app
 Smoke steps: 9/9 passed
 Smoke result path: public/qa/latest/smoke-result.json
+
+QA Evidence Freshness:
+Smoke generated: 2026-06-18T22:56:12.270Z
+Report modified: 2026-06-18T22:55:46.726Z
+Manifest modified: 2026-06-18T22:55:46.723Z
+Screenshots newest: 2026-06-18T22:55:46.544Z
+Screenshots oldest: 2026-06-18T22:54:49.311Z
+Screenshots count: 19
+Evidence status: FRESH
+Evidence warning: none
+
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
 Public handoff TXT: https://pixel-nations.vercel.app/qa/latest/handoff.txt
 Public handoff JSON: https://pixel-nations.vercel.app/qa/latest/handoff.json

@@ -115,6 +115,12 @@ The bundle should include:
 
 The user should not be asked to hunt through many files manually if a bundle can be generated.
 
+## QA Evidence Freshness Rule
+
+For visual, mobile, landing, map, or public-demo acceptance, the Virtual QA Team must check the `QA Evidence Freshness` section in `public/qa/latest/handoff.txt` or the `qaEvidenceFreshness.status` field in `public/qa/latest/handoff.json`.
+
+Visual/mobile work cannot be fully accepted when evidence status is `STALE`, `MISSING`, or `UNKNOWN`, unless the user uploads current screenshots or a current review bundle directly into ChatGPT for manual inspection.
+
 ## Human Tester Freeze Rule
 
 Do not recommend asking friends, public users, or external testers to test Pixel Nations until the user explicitly reopens that decision or the project reaches a stronger playable stage.
