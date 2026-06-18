@@ -50,6 +50,15 @@ const QA_CLAIMED_DEMO_STATE = {
 
 const captures = [
   { filename: "mobile-home.png", route: "/", viewport: "mobile", width: 390, height: 844 },
+  { filename: "mobile-landing-hero.png", route: "/", viewport: "mobile", width: 390, height: 844 },
+  {
+    filename: "mobile-landing-map-preview.png",
+    route: "/",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    selector: "[data-qa='landing-map-preview']",
+  },
   { filename: "mobile-world.png", route: "/world", viewport: "mobile", width: 390, height: 844, fullPage: true },
   {
     filename: "mobile-world-top.png",

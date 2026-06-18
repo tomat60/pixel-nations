@@ -1,8 +1,18 @@
 {
-  "generatedAt": "2026-06-18T16:48:19.943Z",
+  "generatedAt": "2026-06-18T20:53:00.676Z",
   "screenshots": [
     {
       "filename": "mobile-home.png",
+      "route": "/",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "mobile-landing-hero.png",
+      "route": "/",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "mobile-landing-map-preview.png",
       "route": "/",
       "viewport": "mobile"
     },
