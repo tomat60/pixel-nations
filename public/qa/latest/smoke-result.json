@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "generatedAt": "2026-06-18T15:37:25.165Z",
+  "generatedAt": "2026-06-18T16:49:02.840Z",
   "appUrl": "http://localhost:3000",
   "appSource": "existing local app",
   "blockingStep": "",
@@ -9,47 +9,47 @@
     {
       "name": "reset demo state and open /world",
       "status": "PASS",
-      "durationMs": 1212
+      "durationMs": 1115
     },
     {
       "name": "select a claimable Sector A-01 land",
       "status": "PASS",
-      "durationMs": 170
+      "durationMs": 193
     },
     {
       "name": "claim selected land",
       "status": "PASS",
-      "durationMs": 343
+      "durationMs": 371
     },
     {
       "name": "dashboard recognizes claimed land",
       "status": "PASS",
-      "durationMs": 293
+      "durationMs": 336
     },
     {
       "name": "create settlement",
       "status": "PASS",
-      "durationMs": 2394
+      "durationMs": 1816
     },
     {
       "name": "build settlement core and establish trade",
       "status": "PASS",
-      "durationMs": 2035
+      "durationMs": 2235
     },
     {
       "name": "form alliance and found nation",
       "status": "PASS",
-      "durationMs": 7812
+      "durationMs": 6880
     },
     {
       "name": "attempt empire continuation path",
       "status": "PASS",
-      "durationMs": 1443
+      "durationMs": 1441
     },
     {
       "name": "create empire",
       "status": "PASS",
-      "durationMs": 1430
+      "durationMs": 1421
     }
   ]
 }

@@ -735,13 +735,14 @@ export default function Home() {
             </div>
 
             <div className="relative overflow-hidden border border-amber-500/25 bg-[#050509]/90 p-3 shadow-[0_40px_150px_rgba(0,0,0,0.68),0_0_120px_rgba(201,169,98,0.12)]">
-              <div
-                className="relative aspect-[4/3] min-h-[320px] overflow-hidden bg-cover bg-center sm:min-h-[420px] lg:min-h-[520px]"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(180deg, rgba(2,2,4,0.04), rgba(2,2,4,0.48)), url('/assets/world-map/aurelian-basin-v1.png')",
-                }}
-              >
+              <div className="relative aspect-[4/3] min-h-[300px] overflow-hidden bg-[#030306] sm:min-h-[420px] lg:min-h-[520px]">
+                <img
+                  src="/assets/world-map/aurelian-basin-v1.png"
+                  alt=""
+                  aria-hidden
+                  className="absolute inset-0 h-full w-full object-contain opacity-95 sm:object-cover"
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,2,4,0.04),rgba(2,2,4,0.48))]" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_38%,rgba(2,2,4,0.72)_100%)]" />
                 <div className="absolute left-4 top-4 border border-amber-500/25 bg-[#030306]/78 px-3 py-2 backdrop-blur-sm">
                   <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-amber-500/80">
@@ -753,7 +754,7 @@ export default function Home() {
                 </div>
                 <div className="absolute bottom-4 right-4 border border-amber-500/15 bg-[#030306]/72 px-3 py-2 text-right backdrop-blur-sm">
                   <p className="text-[9px] uppercase tracking-[0.22em] text-zinc-500">
-                    Playable on /world
+                    Explore Sector A-01
                   </p>
                   <p className="mt-1 text-xs font-semibold text-amber-100/80">
                     Claim one land. Begin an empire.
