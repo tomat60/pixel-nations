@@ -245,3 +245,44 @@ This review is complete when the repository contains this document and the next 
 A — tester round
 B — focused polish sprint
 C — blocked
+
+## Superseding Decision — Virtual QA Only Before First Final Playable Version
+
+Human external testing is paused for now.
+
+The previous readiness framework allowed a possible decision of showing the demo to 3–5 external testers. That option is now superseded by the user's strategic decision:
+
+> No human testers until the game has a stronger playable engine / first final version and there is a meaningful reason for players to register, return, and participate in longer-term gameplay.
+
+Until then, readiness review should use:
+
+- virtual tester team review
+- project-owner manual review
+- screenshot/contact-sheet review
+- structured assistant-led QA
+- technical smoke/build/handoff checks
+
+The decision framework is updated:
+
+### A — Ready for Virtual QA Signoff
+
+Use this if first impression is clean, mobile and desktop are acceptable, gameplay spine is understandable, and no obvious visual blockers remain.
+
+Next step:
+Prepare the next focused product sprint or internal demo package.
+
+### B — One Focused Polish Sprint First
+
+Use this if the demo is mostly strong but one or two scoped quality risks remain.
+
+Next step:
+Create one polish sprint brief with narrow scope.
+
+### C — Blocked
+
+Use this if a core flow is unclear, a serious mobile/layout issue remains, or the demo cannot be understood without explanation.
+
+Next step:
+Stop feature work and fix the blocker.
+
+Human testers remain blocked until explicitly reopened.
