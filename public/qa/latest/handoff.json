@@ -1,16 +1,16 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-18T21:14:22.078Z",
+  "generatedAt": "2026-06-18T21:46:47.747Z",
   "branch": "sprint/mobile-map-framing-v0-1",
-  "isClean": true,
+  "isClean": false,
   "git": {
-    "statusSummary": "## sprint/mobile-map-framing-v0-1...origin/sprint/mobile-map-framing-v0-1",
-    "lastCommits": "d36f849 Fix landing mobile map preview framing\n2ef0ea7 Fix landing mobile map preview framing\n8c1fbdf Update QA handoff files after mobile map framing fix\n022beaf Fix mobile map framing and QA bundle rule\nfc57d3d Lock Empire v0.2 gameplay baseline"
+    "statusSummary": "## sprint/mobile-map-framing-v0-1...origin/sprint/mobile-map-framing-v0-1\n M app/world/page.tsx\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/manifest.json\n D public/qa/latest/mobile-map-framing-v0-1-review-bundle.zip\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-world-atlas.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world-selected-land-panel.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
+    "lastCommits": "bf135b2 Update QA review bundle after landing mobile framing fix\nd36f849 Fix landing mobile map preview framing\n2ef0ea7 Fix landing mobile map preview framing\n8c1fbdf Update QA handoff files after mobile map framing fix\n022beaf Fix mobile map framing and QA bundle rule"
   },
   "qa": {
     "smoke": {
       "status": "PASS",
-      "generatedAt": "2026-06-18T20:53:45.146Z",
+      "generatedAt": "2026-06-18T21:46:34.036Z",
       "appUrl": "http://localhost:3000",
       "appSource": "existing local app",
       "blockingStep": "",
@@ -19,53 +19,53 @@
         {
           "name": "reset demo state and open /world",
           "status": "PASS",
-          "durationMs": 1113
+          "durationMs": 1374
         },
         {
           "name": "select a claimable Sector A-01 land",
           "status": "PASS",
-          "durationMs": 204
+          "durationMs": 228
         },
         {
           "name": "claim selected land",
           "status": "PASS",
-          "durationMs": 386
+          "durationMs": 449
         },
         {
           "name": "dashboard recognizes claimed land",
           "status": "PASS",
-          "durationMs": 338
+          "durationMs": 624
         },
         {
           "name": "create settlement",
           "status": "PASS",
-          "durationMs": 2444
+          "durationMs": 2455
         },
         {
           "name": "build settlement core and establish trade",
           "status": "PASS",
-          "durationMs": 2233
+          "durationMs": 2219
         },
         {
           "name": "form alliance and found nation",
           "status": "PASS",
-          "durationMs": 6777
+          "durationMs": 5855
         },
         {
           "name": "attempt empire continuation path",
           "status": "PASS",
-          "durationMs": 1437
+          "durationMs": 1469
         },
         {
           "name": "create empire",
           "status": "PASS",
-          "durationMs": 1490
+          "durationMs": 1477
         }
       ],
       "passedSteps": 9,
       "totalSteps": 9,
       "path": "public/qa/latest/smoke-result.json",
-      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-18T20:53:45.146Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-18T21:46:34.036Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
     },
     "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
     "worldUrl": "https://pixel-nations.vercel.app/world",

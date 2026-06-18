@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pixel Nations Mobile Map Framing Review</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #020204;
+        --panel: #07070c;
+        --gold: #c9a962;
+        --muted: #9ca3af;
+        --border: rgba(201, 169, 98, 0.18);
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: #f8f5ed;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 36px 18px 56px;
+      }
+
+      header {
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+      }
+
+      .eyebrow,
+      .meta {
+        color: var(--gold);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 8vw, 4.5rem);
+        letter-spacing: -0.05em;
+        line-height: 0.95;
+        margin: 10px 0 0;
+      }
+
+      p {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+
+      article {
+        background: linear-gradient(180deg, rgba(201, 169, 98, 0.05), rgba(255, 255, 255, 0.015));
+        border: 1px solid var(--border);
+        padding: 14px;
+      }
+
+      h2 {
+        color: #f5deb3;
+        font-size: 1rem;
+        margin: 8px 0 12px;
+      }
+
+      img {
+        background: #000;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: block;
+        height: auto;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Pixel Nations QA</p>
+        <h1>Mobile Map Framing Review</h1>
+        <p>
+          Review gate for landing, World Atlas, playable sector, selected land panel, and mobile claim tray.
+        </p>
+      </header>
+
+      <section class="grid">
+        <article>
+          <p class="meta">Landing</p>
+          <h2>Mobile Landing Hero</h2>
+          <img src="./screenshots/mobile-landing-hero.png" alt="Mobile landing hero screenshot" />
+        </article>
+        <article>
+          <p class="meta">Landing</p>
+          <h2>Mobile Landing Map Preview</h2>
+          <img src="./screenshots/mobile-landing-map-preview.png" alt="Mobile landing map preview screenshot" />
+        </article>
+        <article>
+          <p class="meta">World</p>
+          <h2>Mobile World Page</h2>
+          <img src="./screenshots/mobile-world.png" alt="Mobile world page screenshot" />
+        </article>
+        <article>
+          <p class="meta">World Atlas</p>
+          <h2>Mobile World Atlas</h2>
+          <img src="./screenshots/mobile-world-atlas.png" alt="Mobile world atlas screenshot" />
+        </article>
+        <article>
+          <p class="meta">Playable Sector</p>
+          <h2>Mobile World Sector</h2>
+          <img src="./screenshots/mobile-world-sector.png" alt="Mobile playable sector screenshot" />
+        </article>
+        <article>
+          <p class="meta">Selected Land</p>
+          <h2>Mobile Selected Land Panel</h2>
+          <img src="./screenshots/mobile-world-selected-land-panel.png" alt="Mobile selected land panel screenshot" />
+        </article>
+        <article>
+          <p class="meta">Claim Tray</p>
+          <h2>Mobile Claim Tray</h2>
+          <img src="./screenshots/mobile-world-claim-tray.png" alt="Mobile claim tray screenshot" />
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

@@ -607,7 +607,7 @@ export default function WorldPage() {
             </div>
           </div>
 
-          <div className="relative overflow-hidden border border-amber-500/20 bg-[#030306] p-3 shadow-[inset_0_0_90px_rgba(0,0,0,0.72)] sm:p-4">
+          <div className="relative overflow-hidden border border-amber-500/20 bg-[#030306] p-2 shadow-[inset_0_0_90px_rgba(0,0,0,0.72)] sm:p-4">
             <div
               aria-hidden
               className="absolute inset-3 hidden opacity-[0.26] [background-image:linear-gradient(rgba(201,169,98,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.5)_1px,transparent_1px)] [background-size:1%_1%]"
@@ -620,12 +620,12 @@ export default function WorldPage() {
               aria-hidden
               className="absolute inset-3 bg-[radial-gradient(ellipse_at_center,transparent_38%,rgba(2,2,4,0.78)_100%)]"
             />
-            <div className="relative aspect-[16/9] min-h-[260px] overflow-hidden bg-[#030306] sm:min-h-[420px] lg:min-h-[560px]">
+            <div className="relative aspect-[4/3] overflow-hidden bg-[#030306] sm:aspect-[16/9] sm:min-h-[420px] lg:min-h-[560px]">
               <img
                 src="/assets/world-map/aurelian-basin-v1.png"
                 alt=""
                 aria-hidden
-                className="absolute inset-0 h-full w-full object-contain opacity-95 sm:object-cover"
+                className="absolute inset-0 h-full w-full object-contain object-center opacity-95 sm:object-cover"
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,2,4,0.10),rgba(2,2,4,0.46))]" />
               {false && ATLAS_REGIONS.map((region) => (
@@ -652,7 +652,7 @@ export default function WorldPage() {
 
               <svg
                 aria-hidden
-                className="pointer-events-none absolute inset-0 h-full w-full"
+                className="pointer-events-none absolute inset-0 hidden h-full w-full sm:block"
                 viewBox="0 0 1000 562"
                 preserveAspectRatio="none"
               >
@@ -696,7 +696,7 @@ export default function WorldPage() {
 
               <div className="absolute left-[43%] top-[42%] h-[28%] w-[28%] border border-amber-200/90 bg-amber-300/[0.04] shadow-[0_0_46px_rgba(251,191,36,0.26),inset_0_0_22px_rgba(251,191,36,0.1)]">
                 <span className="absolute left-1 top-1 border border-amber-500/30 bg-[#030306]/90 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.18em] text-amber-200/85 sm:hidden">
-                  Sector A-01
+                  A-01
                 </span>
                 <span className="absolute -top-8 left-0 hidden whitespace-nowrap border border-amber-500/30 bg-[#030306]/90 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.22em] text-amber-200/85 sm:block">
                   Aurelian Basin / A-01
@@ -704,7 +704,7 @@ export default function WorldPage() {
                 <span className="absolute bottom-2 right-2 h-2 w-2 rounded-full bg-amber-200 shadow-[0_0_16px_rgba(251,191,36,0.85)]" />
               </div>
 
-              <div className="absolute inset-x-3 bottom-3 border border-amber-500/15 bg-[#030306]/80 p-3 backdrop-blur-sm sm:left-3 sm:right-auto sm:max-w-xs">
+              <div className="absolute inset-x-3 bottom-3 hidden border border-amber-500/15 bg-[#030306]/80 p-3 backdrop-blur-sm sm:left-3 sm:right-auto sm:block sm:max-w-xs">
                 <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
                   Demo Origin
                 </p>
@@ -712,6 +712,14 @@ export default function WorldPage() {
                   Sector A-01 is the first playable frontier.
                 </p>
               </div>
+            </div>
+            <div className="mt-2 border border-amber-500/15 bg-[#030306]/86 p-3 sm:hidden">
+              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
+                Demo Origin
+              </p>
+              <p className="mt-2 text-xs leading-6 text-zinc-400">
+                Sector A-01 is the first playable frontier inside the wider atlas.
+              </p>
             </div>
           </div>
         </section>
