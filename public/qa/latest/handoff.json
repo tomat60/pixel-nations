@@ -1,16 +1,16 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-18T22:57:26.785Z",
-  "branch": "sprint/qa-evidence-freshness-v0-1",
+  "generatedAt": "2026-06-18T23:04:09.323Z",
+  "branch": "main",
   "isClean": false,
   "git": {
-    "statusSummary": "## sprint/qa-evidence-freshness-v0-1\n M public/qa/latest/handoff.json\n M public/qa/latest/handoff.txt\n M public/qa/latest/manifest.json\n D public/qa/latest/mobile-map-framing-v0-1-review-bundle.zip\n D public/qa/latest/mobile-map-framing-v0-1-review.html\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
-    "lastCommits": "558a147 Update QA governance for stale evidence checks\n952145f Add QA evidence freshness reporting\nfd7a7f4 Update QA handoff files after virtual QA lock\nde9933d Lock virtual QA team protocol\n26c731b Update QA handoff files after public demo readiness review"
+    "statusSummary": "## main...origin/main [ahead 4]\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
+    "lastCommits": "f30643d Merge QA evidence freshness v0.1\neb98ed2 Update QA handoff after evidence freshness sprint\n558a147 Update QA governance for stale evidence checks\n952145f Add QA evidence freshness reporting\nfd7a7f4 Update QA handoff files after virtual QA lock"
   },
   "qa": {
     "smoke": {
       "status": "PASS",
-      "generatedAt": "2026-06-18T22:56:12.270Z",
+      "generatedAt": "2026-06-18T23:04:08.668Z",
       "appUrl": "http://localhost:3000",
       "appSource": "existing local app",
       "blockingStep": "",
@@ -19,53 +19,53 @@
         {
           "name": "reset demo state and open /world",
           "status": "PASS",
-          "durationMs": 1329
+          "durationMs": 1426
         },
         {
           "name": "select a claimable Sector A-01 land",
           "status": "PASS",
-          "durationMs": 245
+          "durationMs": 361
         },
         {
           "name": "claim selected land",
           "status": "PASS",
-          "durationMs": 439
+          "durationMs": 575
         },
         {
           "name": "dashboard recognizes claimed land",
           "status": "PASS",
-          "durationMs": 286
+          "durationMs": 407
         },
         {
           "name": "create settlement",
           "status": "PASS",
-          "durationMs": 1752
+          "durationMs": 1641
         },
         {
           "name": "build settlement core and establish trade",
           "status": "PASS",
-          "durationMs": 3880
+          "durationMs": 2065
         },
         {
           "name": "form alliance and found nation",
           "status": "PASS",
-          "durationMs": 6142
+          "durationMs": 6091
         },
         {
           "name": "attempt empire continuation path",
           "status": "PASS",
-          "durationMs": 1451
+          "durationMs": 1447
         },
         {
           "name": "create empire",
           "status": "PASS",
-          "durationMs": 1583
+          "durationMs": 1431
         }
       ],
       "passedSteps": 9,
       "totalSteps": 9,
       "path": "public/qa/latest/smoke-result.json",
-      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-18T22:56:12.270Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-18T23:04:08.668Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
     },
     "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
     "worldUrl": "https://pixel-nations.vercel.app/world",
@@ -77,11 +77,11 @@
   },
   "qaEvidenceFreshness": {
     "status": "FRESH",
-    "smokeGeneratedAt": "2026-06-18T22:56:12.270Z",
-    "reportModifiedAt": "2026-06-18T22:55:46.726Z",
-    "manifestModifiedAt": "2026-06-18T22:55:46.723Z",
-    "screenshotsNewestModifiedAt": "2026-06-18T22:55:46.544Z",
-    "screenshotsOldestModifiedAt": "2026-06-18T22:54:49.311Z",
+    "smokeGeneratedAt": "2026-06-18T23:04:08.668Z",
+    "reportModifiedAt": "2026-06-18T23:03:51.622Z",
+    "manifestModifiedAt": "2026-06-18T23:03:51.620Z",
+    "screenshotsNewestModifiedAt": "2026-06-18T23:03:51.462Z",
+    "screenshotsOldestModifiedAt": "2026-06-18T23:03:00.406Z",
     "screenshotsCount": 19,
     "toleranceMinutes": 2,
     "warnings": []
