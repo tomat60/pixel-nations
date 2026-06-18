@@ -1,32 +1,18 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-18T16:49:10.650Z
+Generated: 2026-06-18T17:49:53.220Z
 
 Branch: sprint/mobile-map-framing-v0-1
-Working tree: has changes
+Working tree: clean
 
 Git status:
-  ## sprint/mobile-map-framing-v0-1
-   M app/page.tsx
-   M app/world/page.tsx
-   M docs/QA_GOVERNANCE_PROTOCOL.md
-   M public/qa/latest/manifest.json
-   M public/qa/latest/report.html
-   M public/qa/latest/screenshots/desktop-world-atlas.png
-   M public/qa/latest/screenshots/desktop-world-sector.png
-   M public/qa/latest/screenshots/desktop-world.png
-   M public/qa/latest/screenshots/mobile-world-atlas.png
-   M public/qa/latest/screenshots/mobile-world-claim-tray.png
-   M public/qa/latest/screenshots/mobile-world-sector.png
-   M public/qa/latest/screenshots/mobile-world-selected-land-panel.png
-   M public/qa/latest/screenshots/mobile-world.png
-   M public/qa/latest/smoke-result.json
+  ## sprint/mobile-map-framing-v0-1...origin/sprint/mobile-map-framing-v0-1
 
 Last 5 commits:
+  022beaf Fix mobile map framing and QA bundle rule
   fc57d3d Lock Empire v0.2 gameplay baseline
   0ebda75 Add Empire v0.2 first imperial direction
   008b6b9 Lock QA governance and mobile map known issue
   31b0ee1 Add Empire v0.2 implementation brief
-  c4d7008 Lock Nation v0.2 gameplay baseline
 
 QA:
 Smoke result: PASS
