@@ -15,7 +15,11 @@ const FALLBACK = {
   empireName: "Aurelian Empire",
   settlementName: "Aurelia Prime",
   nationName: "The Aurelian Crown",
-  empireDoctrine: "Golden Crown",
+  empireDirection: "Crown Empire",
+  empireDirectionBonus: "+ Imperial Legitimacy",
+  empireDirectionIdentity:
+    "The empire expands through law, banners, ceremonies, and controlled succession of power.",
+  imperialReach: "Lawful authority across the first imperial provinces",
   allianceName: "Aurelian Pact",
   tradeRouteDestination: "Iron Coast",
   expandedLands: ["North Road", "Iron Ridge", "Amber Fields"],
@@ -35,10 +39,18 @@ export default function EmpirePage() {
       empireName: state.empireName || FALLBACK.empireName,
       settlementName: state.settlementName || FALLBACK.settlementName,
       nationName: state.nationName || FALLBACK.nationName,
-      doctrine: state.empireDoctrine || FALLBACK.empireDoctrine,
+      direction: state.empireDirection || state.empireDoctrine || FALLBACK.empireDirection,
+      directionBonus: state.empireDirectionBonus || FALLBACK.empireDirectionBonus,
+      directionIdentity: state.empireDirectionIdentity || FALLBACK.empireDirectionIdentity,
+      imperialReach: state.imperialReach || FALLBACK.imperialReach,
       allianceName: state.allianceName || FALLBACK.allianceName,
       tradeRouteDestination: state.tradeRouteDestination || FALLBACK.tradeRouteDestination,
       expandedLands: state.expandedLands.length > 0 ? state.expandedLands : FALLBACK.expandedLands,
+      settlementFocus: state.settlementFocus || "Balanced Charter",
+      tradeRouteIdentity: state.tradeRouteIdentity || "The first route connected the capital to the wider world.",
+      allianceStrategy: state.allianceStrategy || "Regional Support",
+      nationIdeology: state.nationIdeology || "Crown Rule",
+      nationDoctrine: state.nationDoctrine || "Civic Mandate",
       population: state.population > 0 ? state.population : 600,
       influence: state.influence > 0 ? state.influence : 100,
       landsControlled: state.landsControlled > 0 ? state.landsControlled : 15,
@@ -79,7 +91,7 @@ export default function EmpirePage() {
               ["Capital", empire.settlementName],
               ["Origin Land", claimedLand.landName],
               ["Origin Nation", empire.nationName],
-              ["Doctrine", empire.doctrine],
+              ["Imperial Direction", empire.direction],
             ].map(([label, value]) => (
               <div key={label} className="bg-[#08080f]/95 p-4 sm:p-5">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">{label}</p>
@@ -99,7 +111,7 @@ export default function EmpirePage() {
         >
           {[
             ["Population", String(empire.population)],
-            ["Influence", String(empire.influence)],
+            ["World Influence", String(empire.influence)],
             ["Lands Controlled", String(empire.landsControlled)],
             ["Cities", String(empire.cities)],
           ].map(([label, value]) => (
@@ -125,7 +137,9 @@ export default function EmpirePage() {
                 ["Political Status", empire.politicalStatus],
                 ["Capital", empire.settlementName],
                 ["Origin Nation", empire.nationName],
-                ["Doctrine", empire.doctrine],
+                ["Imperial Direction", empire.direction],
+                ["Direction Bonus", empire.directionBonus],
+                ["Imperial Reach", empire.imperialReach],
                 ["Next Objective", "First Arc Complete"],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-start justify-between gap-5">
@@ -135,6 +149,10 @@ export default function EmpirePage() {
                   </span>
                 </div>
               ))}
+            </div>
+            <div className="mt-7 border-l border-amber-500/25 pl-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-zinc-600">Imperial Identity</p>
+              <p className="mt-3 text-sm leading-7 text-zinc-400">{empire.directionIdentity}</p>
             </div>
             <button
               type="button"
@@ -161,7 +179,8 @@ export default function EmpirePage() {
                   ["Controlled Lands", String(empire.landsControlled)],
                   ["Cities", String(empire.cities)],
                   ["Capital", empire.settlementName],
-                  ["Imperial Reach", empire.region],
+                  ["Imperial Reach", empire.imperialReach],
+                  ["Victory Status", empire.politicalStatus],
                 ].map(([label, value]) => (
                   <div key={label} className="flex items-start justify-between gap-5 border-b border-amber-500/10 pb-4 last:border-b-0 last:pb-0">
                     <span className="text-xs uppercase tracking-[0.2em] text-zinc-600">{label}</span>
@@ -171,6 +190,27 @@ export default function EmpirePage() {
                   </div>
                 ))}
               </div>
+            </section>
+
+            <section className="border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+                Why This Empire Works
+              </p>
+              <ul className="mt-6 space-y-3 text-sm leading-7 text-zinc-300">
+                {[
+                  `Origin: ${claimedLand.landName} in ${claimedLand.region}`,
+                  `Settlement focus: ${empire.settlementFocus}`,
+                  `Trade route: ${empire.tradeRouteDestination} - ${empire.tradeRouteIdentity}`,
+                  `Alliance: ${empire.allianceName} through ${empire.allianceStrategy}`,
+                  `Nation ideology: ${empire.nationIdeology}`,
+                  `Governing doctrine: ${empire.nationDoctrine}`,
+                  `Imperial direction: ${empire.direction}`,
+                ].map((line) => (
+                  <li key={line} className="border-l border-amber-500/25 pl-4">
+                    {line}
+                  </li>
+                ))}
+              </ul>
             </section>
 
             <section className="border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8">
@@ -190,7 +230,9 @@ export default function EmpirePage() {
                 <li className="border-l border-amber-500/25 pl-4">
                   Borders expanded: {empire.expandedLands.join(", ")}
                 </li>
-                <li className="border-l border-amber-500/25 pl-4">Empire created: {empire.empireName}</li>
+                <li className="border-l border-amber-500/25 pl-4">
+                  Empire created: {empire.empireName} as a {empire.direction}
+                </li>
               </ul>
             </section>
           </motion.aside>

@@ -53,6 +53,11 @@ export const SETTLEMENT_STORAGE_KEYS = {
   empireFounded: "empireFounded",
   empireName: "empireName",
   empireDoctrine: "empireDoctrine",
+  empireDirectionId: "empireDirectionId",
+  empireDirection: "empireDirection",
+  empireDirectionBonus: "empireDirectionBonus",
+  empireDirectionIdentity: "empireDirectionIdentity",
+  imperialReach: "imperialReach",
   cities: "cities",
 } as const;
 
@@ -107,6 +112,11 @@ export type SettlementState = {
   empireFounded: boolean;
   empireName: string;
   empireDoctrine: string;
+  empireDirectionId: string;
+  empireDirection: string;
+  empireDirectionBonus: string;
+  empireDirectionIdentity: string;
+  imperialReach: string;
   cities: number;
 };
 
@@ -161,6 +171,11 @@ export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
   empireFounded: false,
   empireName: "",
   empireDoctrine: "",
+  empireDirectionId: "",
+  empireDirection: "",
+  empireDirectionBonus: "",
+  empireDirectionIdentity: "",
+  imperialReach: "",
   cities: 1,
 };
 
@@ -286,6 +301,12 @@ function sanitizeState(raw: unknown): SettlementState {
     empireFounded: source.empireFounded === true,
     empireName: typeof source.empireName === "string" ? source.empireName : "",
     empireDoctrine: typeof source.empireDoctrine === "string" ? source.empireDoctrine : "",
+    empireDirectionId: typeof source.empireDirectionId === "string" ? source.empireDirectionId : "",
+    empireDirection: typeof source.empireDirection === "string" ? source.empireDirection : "",
+    empireDirectionBonus: typeof source.empireDirectionBonus === "string" ? source.empireDirectionBonus : "",
+    empireDirectionIdentity:
+      typeof source.empireDirectionIdentity === "string" ? source.empireDirectionIdentity : "",
+    imperialReach: typeof source.imperialReach === "string" ? source.imperialReach : "",
     cities: toSafeNumber(source.cities, DEFAULT_SETTLEMENT_STATE.cities),
   };
 }
@@ -329,6 +350,19 @@ function readLegacyState(): SettlementState {
     localStorage.getItem(SETTLEMENT_STORAGE_KEYS.empireName) ?? DEFAULT_SETTLEMENT_STATE.empireName;
   const empireDoctrine =
     localStorage.getItem(SETTLEMENT_STORAGE_KEYS.empireDoctrine) ?? DEFAULT_SETTLEMENT_STATE.empireDoctrine;
+  const empireDirectionId =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.empireDirectionId) ??
+    DEFAULT_SETTLEMENT_STATE.empireDirectionId;
+  const empireDirection =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.empireDirection) ?? DEFAULT_SETTLEMENT_STATE.empireDirection;
+  const empireDirectionBonus =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.empireDirectionBonus) ??
+    DEFAULT_SETTLEMENT_STATE.empireDirectionBonus;
+  const empireDirectionIdentity =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.empireDirectionIdentity) ??
+    DEFAULT_SETTLEMENT_STATE.empireDirectionIdentity;
+  const imperialReach =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.imperialReach) ?? DEFAULT_SETTLEMENT_STATE.imperialReach;
   const citiesRaw = Number(localStorage.getItem(SETTLEMENT_STORAGE_KEYS.cities));
   const claimedLand = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.claimedLand) === "true";
   const claimedLandId =
@@ -407,6 +441,11 @@ function readLegacyState(): SettlementState {
     empireFounded,
     empireName,
     empireDoctrine,
+    empireDirectionId,
+    empireDirection,
+    empireDirectionBonus,
+    empireDirectionIdentity,
+    imperialReach,
     cities: Number.isFinite(citiesRaw) ? citiesRaw : 1,
   });
 }
