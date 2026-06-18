@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-18T21:56:48.336Z",
+  "generatedAt": "2026-06-18T21:56:54.036Z",
   "branch": "sprint/mobile-map-framing-v0-1",
   "isClean": true,
   "git": {
     "statusSummary": "## sprint/mobile-map-framing-v0-1...origin/sprint/mobile-map-framing-v0-1",
-    "lastCommits": "b9df2d4 Fix world atlas mobile framing and review gate\nbf135b2 Update QA review bundle after landing mobile framing fix\nd36f849 Fix landing mobile map preview framing\n2ef0ea7 Fix landing mobile map preview framing\n8c1fbdf Update QA handoff files after mobile map framing fix"
+    "lastCommits": "57e6f2e Fix world atlas mobile framing and review gate\nb9df2d4 Fix world atlas mobile framing and review gate\nbf135b2 Update QA review bundle after landing mobile framing fix\nd36f849 Fix landing mobile map preview framing\n2ef0ea7 Fix landing mobile map preview framing"
   },
   "qa": {
     "smoke": {
