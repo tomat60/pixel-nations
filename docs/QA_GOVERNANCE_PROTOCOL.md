@@ -80,6 +80,9 @@ A sprint is not accepted until these gates are considered:
 - Important text is not clipped.
 - Important map/UI content is not cropped in a way that damages comprehension.
 - Scroll and layout are smooth on mobile.
+- `public/qa/latest/handoff.txt` and `handoff.json` must report QA evidence status as `FRESH` before visual/mobile acceptance.
+
+If QA evidence status is `STALE`, `MISSING`, or `UNKNOWN`, Virtual QA cannot fully accept visual/mobile work unless the user uploads current screenshots or a current review bundle directly into ChatGPT for manual inspection.
 
 ### First-Time Tester Gate
 
