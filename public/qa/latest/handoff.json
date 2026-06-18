@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-18T21:14:18.785Z",
+  "generatedAt": "2026-06-18T21:14:22.078Z",
   "branch": "sprint/mobile-map-framing-v0-1",
   "isClean": true,
   "git": {
     "statusSummary": "## sprint/mobile-map-framing-v0-1...origin/sprint/mobile-map-framing-v0-1",
-    "lastCommits": "2ef0ea7 Fix landing mobile map preview framing\n8c1fbdf Update QA handoff files after mobile map framing fix\n022beaf Fix mobile map framing and QA bundle rule\nfc57d3d Lock Empire v0.2 gameplay baseline\n0ebda75 Add Empire v0.2 first imperial direction"
+    "lastCommits": "d36f849 Fix landing mobile map preview framing\n2ef0ea7 Fix landing mobile map preview framing\n8c1fbdf Update QA handoff files after mobile map framing fix\n022beaf Fix mobile map framing and QA bundle rule\nfc57d3d Lock Empire v0.2 gameplay baseline"
   },
   "qa": {
     "smoke": {
