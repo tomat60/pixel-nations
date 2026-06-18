@@ -370,6 +370,7 @@ export default function WorldPage() {
   const [selectedTileId, setSelectedTileId] = useState<string>(tiles[0].id);
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState(false);
+  const [mobileMapZoom, setMobileMapZoom] = useState(1);
 
   useEffect(() => {
     const state = readSettlementState();
@@ -441,6 +442,15 @@ export default function WorldPage() {
     setSelectedTileId(tileId);
     setHasUserSelectedTile(true);
   };
+
+  const fitMobileMap = () => setMobileMapZoom(1);
+  const zoomMobileMapIn = () => setMobileMapZoom((current) => Math.min(1.5, current + 0.25));
+  const zoomMobileMapOut = () => setMobileMapZoom((current) => Math.max(1, current - 0.25));
+  const mobileMapControls = [
+    { label: "Fit", action: fitMobileMap },
+    { label: "Zoom Out", action: zoomMobileMapOut },
+    { label: "Zoom In", action: zoomMobileMapIn },
+  ];
 
   useEffect(() => {
     setMobileTrayDismissed(false);
@@ -581,7 +591,7 @@ export default function WorldPage() {
                 Aurelian Basin is the first playable frontier. Sector code: A-01.
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-px border border-amber-500/10 bg-amber-500/10 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+            <div className="grid grid-cols-1 gap-px border border-amber-500/10 bg-amber-500/10 text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:grid-cols-3">
               <div className="bg-[#08080f]/95 p-3">
                 <p className="font-[family-name:var(--font-syne)] text-lg font-bold text-amber-100">10,000</p>
                 <p className="mt-1">finite lands</p>
@@ -597,7 +607,7 @@ export default function WorldPage() {
             </div>
           </div>
 
-          <div className="relative overflow-hidden border border-amber-500/20 bg-[#030306] p-3 shadow-[inset_0_0_90px_rgba(0,0,0,0.72)] sm:p-4">
+          <div className="relative overflow-hidden border border-amber-500/20 bg-[#030306] p-2 shadow-[inset_0_0_90px_rgba(0,0,0,0.72)] sm:p-4">
             <div
               aria-hidden
               className="absolute inset-3 hidden opacity-[0.26] [background-image:linear-gradient(rgba(201,169,98,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(201,169,98,0.5)_1px,transparent_1px)] [background-size:1%_1%]"
@@ -610,13 +620,14 @@ export default function WorldPage() {
               aria-hidden
               className="absolute inset-3 bg-[radial-gradient(ellipse_at_center,transparent_38%,rgba(2,2,4,0.78)_100%)]"
             />
-            <div
-                className="relative aspect-[16/9] min-h-[260px] overflow-hidden bg-cover bg-center sm:min-h-[420px] lg:min-h-[560px]"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(180deg, rgba(2,2,4,0.10), rgba(2,2,4,0.46)), url('/assets/world-map/aurelian-basin-v1.png')",
-                }}
-              >
+            <div className="relative aspect-[4/3] overflow-hidden bg-[#030306] sm:aspect-[16/9] sm:min-h-[420px] lg:min-h-[560px]">
+              <img
+                src="/assets/world-map/aurelian-basin-v1.png"
+                alt=""
+                aria-hidden
+                className="absolute inset-0 h-full w-full object-contain object-center opacity-95 sm:object-cover"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,2,4,0.10),rgba(2,2,4,0.46))]" />
               {false && ATLAS_REGIONS.map((region) => (
                 <div
                   key={region.id}
@@ -641,7 +652,7 @@ export default function WorldPage() {
 
               <svg
                 aria-hidden
-                className="pointer-events-none absolute inset-0 h-full w-full"
+                className="pointer-events-none absolute inset-0 hidden h-full w-full sm:block"
                 viewBox="0 0 1000 562"
                 preserveAspectRatio="none"
               >
@@ -685,7 +696,7 @@ export default function WorldPage() {
 
               <div className="absolute left-[43%] top-[42%] h-[28%] w-[28%] border border-amber-200/90 bg-amber-300/[0.04] shadow-[0_0_46px_rgba(251,191,36,0.26),inset_0_0_22px_rgba(251,191,36,0.1)]">
                 <span className="absolute left-1 top-1 border border-amber-500/30 bg-[#030306]/90 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.18em] text-amber-200/85 sm:hidden">
-                  Sector A-01
+                  A-01
                 </span>
                 <span className="absolute -top-8 left-0 hidden whitespace-nowrap border border-amber-500/30 bg-[#030306]/90 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.22em] text-amber-200/85 sm:block">
                   Aurelian Basin / A-01
@@ -693,14 +704,22 @@ export default function WorldPage() {
                 <span className="absolute bottom-2 right-2 h-2 w-2 rounded-full bg-amber-200 shadow-[0_0_16px_rgba(251,191,36,0.85)]" />
               </div>
 
-              <div className="absolute bottom-3 left-3 max-w-xs border border-amber-500/15 bg-[#030306]/80 p-3 backdrop-blur-sm">
+              <div className="absolute inset-x-3 bottom-3 hidden border border-amber-500/15 bg-[#030306]/80 p-3 backdrop-blur-sm sm:left-3 sm:right-auto sm:block sm:max-w-xs">
                 <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
                   Demo Origin
                 </p>
-                <p className="mt-2 text-xs leading-6 text-zinc-400">
-                  Sector code A-01 marks the first playable frontier, not the whole world.
+                <p className="mt-2 whitespace-normal break-words text-xs leading-6 text-zinc-400">
+                  Sector A-01 is the first playable frontier.
                 </p>
               </div>
+            </div>
+            <div className="mt-2 border border-amber-500/15 bg-[#030306]/86 p-3 sm:hidden">
+              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
+                Demo Origin
+              </p>
+              <p className="mt-2 text-xs leading-6 text-zinc-400">
+                Sector A-01 is the first playable frontier inside the wider atlas.
+              </p>
             </div>
           </div>
         </section>
@@ -748,14 +767,33 @@ export default function WorldPage() {
                 </div>
               </div>
 
-              <div className="mt-5 overflow-x-auto pb-2">
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border border-amber-500/10 bg-[#08080f]/70 p-2 sm:hidden">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                  Default view fits Sector A-01. Zoom to inspect and pan.
+                </p>
+                <div className="flex gap-1.5">
+                  {mobileMapControls.map(({ label, action }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={action}
+                      className="rounded border border-amber-500/18 bg-[#030306]/80 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-amber-100/75"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4 overflow-x-auto pb-2 sm:mt-5">
                 <div
-                    className="world-sector-canvas relative min-w-[680px] overflow-hidden border border-amber-500/25 bg-cover bg-center p-3 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)]"
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(180deg, rgba(2,2,4,0.08), rgba(2,2,4,0.42)), url('/assets/world-map/aurelian-basin-v1.png')",
-                    }}
-                  >
+                  className="world-sector-canvas relative w-full min-w-0 overflow-hidden border border-amber-500/25 bg-contain bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)] transition-[width] duration-200 sm:min-w-[680px] sm:bg-cover sm:p-3"
+                  style={{
+                    width: `${Math.round(mobileMapZoom * 100)}%`,
+                    backgroundImage:
+                      "linear-gradient(180deg, rgba(2,2,4,0.08), rgba(2,2,4,0.42)), url('/assets/world-map/aurelian-basin-v1.png')",
+                  }}
+                >
                   <div aria-hidden className="world-sector-noise pointer-events-none absolute inset-0 z-[1]" />
                   <div
                     aria-hidden
@@ -809,7 +847,7 @@ export default function WorldPage() {
                   </div>
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute bottom-6 right-6 z-[23] border border-amber-500/15 bg-[#030306]/70 px-2 py-1 text-[8px] uppercase tracking-[0.2em] text-zinc-500 backdrop-blur-sm"
+                    className="pointer-events-none absolute bottom-6 right-6 z-[23] hidden border border-amber-500/15 bg-[#030306]/70 px-2 py-1 text-[8px] uppercase tracking-[0.2em] text-zinc-500 backdrop-blur-sm sm:block"
                   >
                     Full world: 10,000 lands
                   </div>

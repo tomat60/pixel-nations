@@ -1,0 +1,79 @@
+{
+  "project": "Pixel Nations",
+  "generatedAt": "2026-06-18T21:56:54.036Z",
+  "branch": "sprint/mobile-map-framing-v0-1",
+  "isClean": true,
+  "git": {
+    "statusSummary": "## sprint/mobile-map-framing-v0-1...origin/sprint/mobile-map-framing-v0-1",
+    "lastCommits": "57e6f2e Fix world atlas mobile framing and review gate\nb9df2d4 Fix world atlas mobile framing and review gate\nbf135b2 Update QA review bundle after landing mobile framing fix\nd36f849 Fix landing mobile map preview framing\n2ef0ea7 Fix landing mobile map preview framing"
+  },
+  "qa": {
+    "smoke": {
+      "status": "PASS",
+      "generatedAt": "2026-06-18T21:46:34.036Z",
+      "appUrl": "http://localhost:3000",
+      "appSource": "existing local app",
+      "blockingStep": "",
+      "error": "",
+      "steps": [
+        {
+          "name": "reset demo state and open /world",
+          "status": "PASS",
+          "durationMs": 1374
+        },
+        {
+          "name": "select a claimable Sector A-01 land",
+          "status": "PASS",
+          "durationMs": 228
+        },
+        {
+          "name": "claim selected land",
+          "status": "PASS",
+          "durationMs": 449
+        },
+        {
+          "name": "dashboard recognizes claimed land",
+          "status": "PASS",
+          "durationMs": 624
+        },
+        {
+          "name": "create settlement",
+          "status": "PASS",
+          "durationMs": 2455
+        },
+        {
+          "name": "build settlement core and establish trade",
+          "status": "PASS",
+          "durationMs": 2219
+        },
+        {
+          "name": "form alliance and found nation",
+          "status": "PASS",
+          "durationMs": 5855
+        },
+        {
+          "name": "attempt empire continuation path",
+          "status": "PASS",
+          "durationMs": 1469
+        },
+        {
+          "name": "create empire",
+          "status": "PASS",
+          "durationMs": 1477
+        }
+      ],
+      "passedSteps": 9,
+      "totalSteps": 9,
+      "path": "public/qa/latest/smoke-result.json",
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-18T21:46:34.036Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+    },
+    "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
+    "worldUrl": "https://pixel-nations.vercel.app/world",
+    "publicHandoffTxtUrl": "https://pixel-nations.vercel.app/qa/latest/handoff.txt",
+    "publicHandoffJsonUrl": "https://pixel-nations.vercel.app/qa/latest/handoff.json",
+    "localQaReportPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/report.html",
+    "localHandoffTxtPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.txt",
+    "localHandoffJsonPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.json"
+  },
+  "nextInstruction": "Upload public/qa/latest/handoff.txt to ChatGPT, paste the public handoff link, or type: raport gotowy."
+}

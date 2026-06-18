@@ -111,6 +111,10 @@ After any strategic decision or handoff review, the assistant should state:
 - Which tools are allowed or blocked
 - Stop condition
 
+## Review Upload Bundle Rule
+
+Future review/debug packages should create one upload bundle whenever possible: one folder or one `.zip` that includes the handoff, relevant screenshots, and review `.txt`/`.json` files. Avoid asking the user to hunt for many separate files.
+
 ## Merge Rule
 
 Do not merge a feature only because:

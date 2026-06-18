@@ -689,7 +689,8 @@ export default function Home() {
 
         <section
           id="world-preview"
-          className="relative overflow-hidden border-t border-amber-500/10 bg-[#020204] px-6 py-28 sm:px-10 sm:py-44"
+          data-qa="landing-map-preview"
+          className="relative overflow-hidden border-t border-amber-500/10 bg-[#020204] px-4 py-24 sm:px-10 sm:py-44"
         >
           <div
             aria-hidden
@@ -699,7 +700,7 @@ export default function Home() {
             aria-hidden
             className="pointer-events-none absolute right-[-14rem] top-1/2 hidden h-[760px] w-[760px] -translate-y-1/2 rounded-full border border-amber-500/8 bg-[radial-gradient(circle_at_35%_35%,rgba(201,169,98,0.12)_0%,rgba(201,169,98,0.035)_34%,rgba(2,2,4,0.72)_72%,rgba(2,2,4,0.96)_100%)] shadow-[0_0_150px_rgba(201,169,98,0.08)] lg:block"
           />
-          <div className="relative mx-auto grid max-w-[1500px] gap-12 lg:grid-cols-[minmax(0,0.78fr)_minmax(520px,1fr)] lg:items-center xl:gap-16">
+          <div className="relative mx-auto grid max-w-[1500px] gap-10 sm:gap-12 lg:grid-cols-[minmax(0,0.78fr)_minmax(520px,1fr)] lg:items-center xl:gap-16">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.5em] text-amber-600/75">
                 World Preview
@@ -720,30 +721,31 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => router.push("/world")}
-                  className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-7 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
+                  className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-5 py-3 text-xs font-bold uppercase tracking-[0.2em] text-amber-100 sm:px-7 sm:tracking-[0.24em]"
                 >
                   Enter Sector A-01
                 </button>
                 <button
                   type="button"
                   onClick={handleStartDemo}
-                  className="btn-secondary rounded border border-zinc-800 bg-[#08080f]/80 px-7 py-3 text-xs font-bold uppercase tracking-[0.24em] text-zinc-400"
+                  className="btn-secondary rounded border border-zinc-800 bg-[#08080f]/80 px-5 py-3 text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 sm:px-7 sm:tracking-[0.24em]"
                 >
                   Start Demo
                 </button>
               </div>
             </div>
 
-            <div className="relative overflow-hidden border border-amber-500/25 bg-[#050509]/90 p-3 shadow-[0_40px_150px_rgba(0,0,0,0.68),0_0_120px_rgba(201,169,98,0.12)]">
-              <div
-                className="relative aspect-[4/3] min-h-[320px] overflow-hidden bg-cover bg-center sm:min-h-[420px] lg:min-h-[520px]"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(180deg, rgba(2,2,4,0.04), rgba(2,2,4,0.48)), url('/assets/world-map/aurelian-basin-v1.png')",
-                }}
-              >
+            <div className="relative overflow-hidden border border-amber-500/25 bg-[#050509]/90 p-2 shadow-[0_40px_150px_rgba(0,0,0,0.68),0_0_120px_rgba(201,169,98,0.12)] sm:p-3">
+              <div className="relative min-h-[360px] overflow-hidden bg-[#030306] sm:aspect-[4/3] sm:min-h-[420px] lg:min-h-[520px]">
+                <img
+                  src="/assets/world-map/aurelian-basin-v1.png"
+                  alt=""
+                  aria-hidden
+                  className="absolute inset-0 h-full w-full object-contain object-center opacity-95 sm:object-cover"
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,2,4,0.04),rgba(2,2,4,0.48))]" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_38%,rgba(2,2,4,0.72)_100%)]" />
-                <div className="absolute left-4 top-4 border border-amber-500/25 bg-[#030306]/78 px-3 py-2 backdrop-blur-sm">
+                <div className="absolute left-3 right-3 top-3 border border-amber-500/25 bg-[#030306]/82 px-3 py-2 backdrop-blur-sm sm:left-4 sm:right-auto sm:top-4">
                   <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-amber-500/80">
                     Sector A-01
                   </p>
@@ -751,9 +753,9 @@ export default function Home() {
                     Aurelian Basin
                   </p>
                 </div>
-                <div className="absolute bottom-4 right-4 border border-amber-500/15 bg-[#030306]/72 px-3 py-2 text-right backdrop-blur-sm">
+                <div className="absolute inset-x-3 bottom-3 border border-amber-500/15 bg-[#030306]/78 px-3 py-2 text-left backdrop-blur-sm sm:bottom-4 sm:left-auto sm:right-4 sm:text-right">
                   <p className="text-[9px] uppercase tracking-[0.22em] text-zinc-500">
-                    Playable on /world
+                    Explore Sector A-01
                   </p>
                   <p className="mt-1 text-xs font-semibold text-amber-100/80">
                     Claim one land. Begin an empire.

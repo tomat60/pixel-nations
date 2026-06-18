@@ -1,0 +1,31 @@
+Pixel Nations Handoff Report
+Generated: 2026-06-18T21:56:54.036Z
+
+Branch: sprint/mobile-map-framing-v0-1
+Working tree: clean
+
+Git status:
+  ## sprint/mobile-map-framing-v0-1...origin/sprint/mobile-map-framing-v0-1
+
+Last 5 commits:
+  57e6f2e Fix world atlas mobile framing and review gate
+  b9df2d4 Fix world atlas mobile framing and review gate
+  bf135b2 Update QA review bundle after landing mobile framing fix
+  d36f849 Fix landing mobile map preview framing
+  2ef0ea7 Fix landing mobile map preview framing
+
+QA:
+Smoke result: PASS
+Smoke generated: 2026-06-18T21:46:34.036Z
+Smoke app source: existing local app
+Smoke steps: 9/9 passed
+Smoke result path: public/qa/latest/smoke-result.json
+Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
+Public handoff TXT: https://pixel-nations.vercel.app/qa/latest/handoff.txt
+Public handoff JSON: https://pixel-nations.vercel.app/qa/latest/handoff.json
+World URL: https://pixel-nations.vercel.app/world
+Local QA report: /Users/tomchuck/Desktop/pixel-nations/public/qa/latest/report.html
+Local handoff TXT: /Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.txt
+Local handoff JSON: /Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.json
+
+Next instruction: Upload public/qa/latest/handoff.txt to ChatGPT, paste the public handoff link, or type: raport gotowy.
