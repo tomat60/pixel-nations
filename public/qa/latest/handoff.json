@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-18T23:04:09.323Z",
+  "generatedAt": "2026-06-18T23:11:50.270Z",
   "branch": "main",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## main...origin/main [ahead 4]\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
-    "lastCommits": "f30643d Merge QA evidence freshness v0.1\neb98ed2 Update QA handoff after evidence freshness sprint\n558a147 Update QA governance for stale evidence checks\n952145f Add QA evidence freshness reporting\nfd7a7f4 Update QA handoff files after virtual QA lock"
+    "statusSummary": "## main...origin/main",
+    "lastCommits": "85883ca Update QA evidence after freshness merge\nf30643d Merge QA evidence freshness v0.1\neb98ed2 Update QA handoff after evidence freshness sprint\n558a147 Update QA governance for stale evidence checks\n952145f Add QA evidence freshness reporting"
   },
   "qa": {
     "smoke": {
