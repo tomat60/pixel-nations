@@ -1,5 +1,5 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-18T22:38:11.760Z
+Generated: 2026-06-18T22:45:40.974Z
 
 Branch: main
 Working tree: clean
@@ -8,11 +8,11 @@ Git status:
   ## main...origin/main
 
 Last 5 commits:
+  de9933d Lock virtual QA team protocol
+  26c731b Update QA handoff files after public demo readiness review
   1186e24 Add public demo readiness review v0.2
   5d273d7 Update QA smoke result after mobile map framing merge
   2548163 Update QA handoff files after mobile map framing merge
-  d0cfa4c Merge mobile map framing v0.1
-  5332427 Update QA handoff files after world atlas mobile framing fix
 
 QA:
 Smoke result: PASS

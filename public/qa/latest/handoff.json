@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-18T22:38:11.760Z",
+  "generatedAt": "2026-06-18T22:45:40.974Z",
   "branch": "main",
   "isClean": true,
   "git": {
     "statusSummary": "## main...origin/main",
-    "lastCommits": "1186e24 Add public demo readiness review v0.2\n5d273d7 Update QA smoke result after mobile map framing merge\n2548163 Update QA handoff files after mobile map framing merge\nd0cfa4c Merge mobile map framing v0.1\n5332427 Update QA handoff files after world atlas mobile framing fix"
+    "lastCommits": "de9933d Lock virtual QA team protocol\n26c731b Update QA handoff files after public demo readiness review\n1186e24 Add public demo readiness review v0.2\n5d273d7 Update QA smoke result after mobile map framing merge\n2548163 Update QA handoff files after mobile map framing merge"
   },
   "qa": {
     "smoke": {
