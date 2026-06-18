@@ -1,16 +1,16 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-18T21:56:54.036Z",
-  "branch": "sprint/mobile-map-framing-v0-1",
-  "isClean": true,
+  "generatedAt": "2026-06-18T22:13:14.321Z",
+  "branch": "main",
+  "isClean": false,
   "git": {
-    "statusSummary": "## sprint/mobile-map-framing-v0-1...origin/sprint/mobile-map-framing-v0-1",
-    "lastCommits": "57e6f2e Fix world atlas mobile framing and review gate\nb9df2d4 Fix world atlas mobile framing and review gate\nbf135b2 Update QA review bundle after landing mobile framing fix\nd36f849 Fix landing mobile map preview framing\n2ef0ea7 Fix landing mobile map preview framing"
+    "statusSummary": "## main...origin/main\n M public/qa/latest/smoke-result.json",
+    "lastCommits": "d0cfa4c Merge mobile map framing v0.1\n5332427 Update QA handoff files after world atlas mobile framing fix\n57e6f2e Fix world atlas mobile framing and review gate\nb9df2d4 Fix world atlas mobile framing and review gate\nbf135b2 Update QA review bundle after landing mobile framing fix"
   },
   "qa": {
     "smoke": {
       "status": "PASS",
-      "generatedAt": "2026-06-18T21:46:34.036Z",
+      "generatedAt": "2026-06-18T22:13:11.415Z",
       "appUrl": "http://localhost:3000",
       "appSource": "existing local app",
       "blockingStep": "",
@@ -19,53 +19,53 @@
         {
           "name": "reset demo state and open /world",
           "status": "PASS",
-          "durationMs": 1374
+          "durationMs": 1193
         },
         {
           "name": "select a claimable Sector A-01 land",
           "status": "PASS",
-          "durationMs": 228
+          "durationMs": 255
         },
         {
           "name": "claim selected land",
           "status": "PASS",
-          "durationMs": 449
+          "durationMs": 363
         },
         {
           "name": "dashboard recognizes claimed land",
           "status": "PASS",
-          "durationMs": 624
+          "durationMs": 307
         },
         {
           "name": "create settlement",
           "status": "PASS",
-          "durationMs": 2455
+          "durationMs": 1599
         },
         {
           "name": "build settlement core and establish trade",
           "status": "PASS",
-          "durationMs": 2219
+          "durationMs": 1974
         },
         {
           "name": "form alliance and found nation",
           "status": "PASS",
-          "durationMs": 5855
+          "durationMs": 7777
         },
         {
           "name": "attempt empire continuation path",
           "status": "PASS",
-          "durationMs": 1469
+          "durationMs": 1454
         },
         {
           "name": "create empire",
           "status": "PASS",
-          "durationMs": 1477
+          "durationMs": 1425
         }
       ],
       "passedSteps": 9,
       "totalSteps": 9,
       "path": "public/qa/latest/smoke-result.json",
-      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-18T21:46:34.036Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-18T22:13:11.415Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
     },
     "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
     "worldUrl": "https://pixel-nations.vercel.app/world",

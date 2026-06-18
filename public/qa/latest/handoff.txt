@@ -1,22 +1,23 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-18T21:56:54.036Z
+Generated: 2026-06-18T22:13:14.321Z
 
-Branch: sprint/mobile-map-framing-v0-1
-Working tree: clean
+Branch: main
+Working tree: has changes
 
 Git status:
-  ## sprint/mobile-map-framing-v0-1...origin/sprint/mobile-map-framing-v0-1
+  ## main...origin/main
+   M public/qa/latest/smoke-result.json
 
 Last 5 commits:
+  d0cfa4c Merge mobile map framing v0.1
+  5332427 Update QA handoff files after world atlas mobile framing fix
   57e6f2e Fix world atlas mobile framing and review gate
   b9df2d4 Fix world atlas mobile framing and review gate
   bf135b2 Update QA review bundle after landing mobile framing fix
-  d36f849 Fix landing mobile map preview framing
-  2ef0ea7 Fix landing mobile map preview framing
 
 QA:
 Smoke result: PASS
-Smoke generated: 2026-06-18T21:46:34.036Z
+Smoke generated: 2026-06-18T22:13:11.415Z
 Smoke app source: existing local app
 Smoke steps: 9/9 passed
 Smoke result path: public/qa/latest/smoke-result.json
