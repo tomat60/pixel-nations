@@ -49,3 +49,36 @@ The smoke test runs again after screenshot QA because `qa:screens` recreates `pu
 Cursor or another AI executor should stop after producing the handoff report. Paste the report into ChatGPT for strategy, review, and the next scoped instruction.
 
 ChatGPT remains the strategist and reviewer. Cursor remains the scoped executor.
+
+
+## Continuous Operating-System Audit Rule
+
+Pixel Nations must regularly review and improve its own project operating system.
+
+When repeated friction appears in QA, Cursor use, budget, screenshots, handoffs, or user confusion, stop normal sprinting and audit the process before continuing feature work.
+
+This protects quality, speed, and cost control.
+
+
+
+## Local Artifact Workspace Rule
+
+Generated audit bundles, merge packages, review bundles, and helper outputs should be organized under:
+
+`/Users/tomchuck/Desktop/Pixel Nations/`
+
+Use category subfolders such as:
+
+- `Audit Bundles`
+- `Merge Packages`
+- `Review Bundles`
+- `Handoffs`
+- `Strategy Docs`
+- `Temp`
+
+The repo stays at:
+
+`/Users/tomchuck/Desktop/pixel-nations`
+
+The local artifact workspace is separate from the repo.
+

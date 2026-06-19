@@ -172,3 +172,13 @@ The immediate project priority after locking this protocol is:
 # Public Demo Readiness Review with Virtual QA Team Only
 
 No human tester round is recommended now.
+
+
+## Continuous Operating-System Audit Rule
+
+Pixel Nations must regularly review and improve its own project operating system.
+
+When repeated friction appears in QA, Cursor use, budget, screenshots, handoffs, or user confusion, stop normal sprinting and audit the process before continuing feature work.
+
+This protects quality, speed, and cost control.
+

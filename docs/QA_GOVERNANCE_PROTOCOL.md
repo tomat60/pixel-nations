@@ -151,3 +151,13 @@ Future systems must include review/reset paths when demo progress can hide core 
 Mobile map presentation on the landing page and playable map requires dedicated review before public/demo polish can be considered strong.
 
 This is not necessarily the next implementation task, but it is now a known quality risk and must not be forgotten.
+
+
+## Continuous Operating-System Audit Rule
+
+Pixel Nations must regularly review and improve its own project operating system.
+
+When repeated friction appears in QA, Cursor use, budget, screenshots, handoffs, or user confusion, stop normal sprinting and audit the process before continuing feature work.
+
+This protects quality, speed, and cost control.
+
