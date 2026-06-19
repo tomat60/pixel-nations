@@ -434,3 +434,11 @@ This architecture is accepted when:
 - no Cursor cost used
 - next VPS step remains blocked pending explicit decision
 
+
+
+## v0.1 VPS Pilot Runbook Status
+
+The first VPS pilot must begin as read-only / safe-ops only.
+
+Cursor-on-server, API agent loops, autonomous merge, and server purchase remain blocked until live provider/pricing/security review and explicit user approval.
+
