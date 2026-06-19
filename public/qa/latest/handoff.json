@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T21:23:33.383Z",
+  "generatedAt": "2026-06-19T21:23:36.188Z",
   "branch": "main",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## main...origin/main\n M docs/LIVING_MAP_LAYER_V0_5_STRATEGY_BRIEF.md\n?? docs/LIVING_MAP_V0_5_IMPLEMENTATION_PLAN.md",
-    "lastCommits": "5697d68 Update QA handoff after Living Map v0.5 brief\ne3026a1 Add Living Map Layer v0.5 strategy brief\n7d27c55 Update QA handoff after visual gate push\nf084e04 Lock visual QA prompt gate and Cursor budget recovery\nb90bb04 Update QA handoff after landing map clipping push"
+    "statusSummary": "## main...origin/main",
+    "lastCommits": "01b2f09 Add Living Map v0.5 implementation plan\n5697d68 Update QA handoff after Living Map v0.5 brief\ne3026a1 Add Living Map Layer v0.5 strategy brief\n7d27c55 Update QA handoff after visual gate push\nf084e04 Lock visual QA prompt gate and Cursor budget recovery"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T21:23:33.383Z",
+    "localHandoffGeneratedAt": "2026-06-19T21:23:36.188Z",
     "localReportGeneratedAt": "2026-06-19T19:23:15.058Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
