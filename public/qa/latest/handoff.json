@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T19:23:37.330Z",
+  "generatedAt": "2026-06-19T19:23:42.335Z",
   "branch": "main",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## main...origin/main [ahead 2]\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-settlement-after-action.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-settlement-after-action.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
-    "lastCommits": "3e86d41 Merge landing map frame clipping v0.1\n2df9d7d Fix landing map frame clipping\n322353f Document map geography continuity known issue\n07d2e51 Update QA handoff after Visual Gamefeel v0.4 push\n05bae5d Update QA evidence after Visual Gamefeel v0.4 merge"
+    "statusSummary": "## main...origin/main",
+    "lastCommits": "b807266 Update QA evidence after landing map clipping merge\n3e86d41 Merge landing map frame clipping v0.1\n2df9d7d Fix landing map frame clipping\n322353f Document map geography continuity known issue\n07d2e51 Update QA handoff after Visual Gamefeel v0.4 push"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T19:23:37.330Z",
+    "localHandoffGeneratedAt": "2026-06-19T19:23:42.335Z",
     "localReportGeneratedAt": "2026-06-19T19:23:15.058Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
