@@ -7,11 +7,14 @@ import { dirname, resolve } from "node:path";
 const execFileAsync = promisify(execFile);
 
 const QA_REPORT_URL = "https://pixel-nations.vercel.app/qa/latest/report.html";
+const QA_INDEX_URL = "https://pixel-nations.vercel.app/qa/latest/";
 const WORLD_URL = "https://pixel-nations.vercel.app/world";
 const HANDOFF_TXT_URL = "https://pixel-nations.vercel.app/qa/latest/handoff.txt";
 const HANDOFF_JSON_URL = "https://pixel-nations.vercel.app/qa/latest/handoff.json";
+const QA_MANIFEST_URL = "https://pixel-nations.vercel.app/qa/latest/manifest.json";
 
 const SMOKE_RESULT_PATH = "public/qa/latest/smoke-result.json";
+const QA_INDEX_PATH = "public/qa/latest/index.html";
 const QA_REPORT_PATH = "public/qa/latest/report.html";
 const QA_MANIFEST_PATH = "public/qa/latest/manifest.json";
 const QA_SCREENSHOTS_PATH = "public/qa/latest/screenshots";
@@ -212,6 +215,115 @@ async function getQaEvidenceFreshness(smoke) {
   };
 }
 
+async function readJson(path) {
+  try {
+    return JSON.parse(await readFile(path, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+async function getLocalReportGeneratedAt() {
+  const manifest = await readJson(QA_MANIFEST_PATH);
+  const manifestGeneratedAt = parseTimestamp(manifest?.generatedAt);
+
+  if (manifestGeneratedAt) {
+    return formatDate(manifestGeneratedAt);
+  }
+
+  try {
+    const report = await readFile(QA_REPORT_PATH, "utf8");
+    const match = report.match(/Generated:\s*<code>([^<]+)<\/code>/);
+    return formatDate(parseTimestamp(match?.[1]));
+  } catch {
+    return null;
+  }
+}
+
+async function getPublicEvidence(generatedAt) {
+  const localReportGeneratedAt = await getLocalReportGeneratedAt();
+
+  return {
+    localHandoffGeneratedAt: generatedAt,
+    localReportGeneratedAt,
+    expectedUrls: {
+      index: QA_INDEX_URL,
+      report: QA_REPORT_URL,
+      handoffTxt: HANDOFF_TXT_URL,
+      handoffJson: HANDOFF_JSON_URL,
+      manifest: QA_MANIFEST_URL,
+    },
+    postDeployValidationRequired: true,
+    validationNote:
+      "After deploy, verify the public index, report, handoff TXT, and handoff JSON URLs are reachable and match the current QA evidence window.",
+  };
+}
+
+function buildPublicEvidenceSummary(publicEvidence) {
+  return [
+    "Public QA Evidence:",
+    `Local handoff generated: ${publicEvidence.localHandoffGeneratedAt}`,
+    `Local report generated: ${publicEvidence.localReportGeneratedAt ?? "unknown"}`,
+    `Public QA index: ${publicEvidence.expectedUrls.index}`,
+    `Public QA report: ${publicEvidence.expectedUrls.report}`,
+    `Public handoff TXT: ${publicEvidence.expectedUrls.handoffTxt}`,
+    `Public handoff JSON: ${publicEvidence.expectedUrls.handoffJson}`,
+    `Public manifest: ${publicEvidence.expectedUrls.manifest}`,
+    `Post-deploy validation required: ${publicEvidence.postDeployValidationRequired ? "yes" : "no"}`,
+    `Public evidence note: ${publicEvidence.validationNote}`,
+  ].join("\n");
+}
+
+async function checkPublicEvidenceArtifacts() {
+  const checks = [
+    { label: "QA index", path: QA_INDEX_PATH, required: true },
+    { label: "QA report", path: QA_REPORT_PATH, required: true },
+    { label: "Handoff TXT", path: HANDOFF_TXT_PATH, required: true },
+    { label: "Handoff JSON", path: HANDOFF_JSON_PATH, required: true },
+    { label: "Manifest", path: QA_MANIFEST_PATH, required: true },
+  ];
+
+  const screenshots = await getScreenshotsModifiedRange();
+  const results = await Promise.all(
+    checks.map(async (check) => {
+      const modifiedAt = await getModifiedAt(check.path);
+      return {
+        ...check,
+        exists: Boolean(modifiedAt),
+        modifiedAt: formatDate(modifiedAt),
+      };
+    }),
+  );
+
+  results.push({
+    label: "Screenshots",
+    path: QA_SCREENSHOTS_PATH,
+    required: true,
+    exists: screenshots.exists && screenshots.count > 0,
+    modifiedAt: formatDate(screenshots.newestModifiedAt),
+    count: screenshots.count,
+  });
+
+  const missing = results.filter((item) => item.required && !item.exists);
+
+  console.log("Public QA evidence local artifact check:");
+  for (const result of results) {
+    const suffix = result.count === undefined ? "" : ` (${result.count} files)`;
+    console.log(
+      `${result.exists ? "PASS" : "FAIL"} ${result.label}: ${result.path}${suffix}${
+        result.modifiedAt ? ` modified ${result.modifiedAt}` : ""
+      }`,
+    );
+  }
+
+  if (missing.length > 0) {
+    console.error(`Public QA evidence check FAILED: missing ${missing.map((item) => item.path).join(", ")}`);
+    process.exit(1);
+  }
+
+  console.log("Public QA evidence check PASS. Public URL reachability still requires post-deploy validation.");
+}
+
 function buildFreshnessSummary(freshness) {
   const warning = freshness.warnings.length > 0 ? freshness.warnings.join(" ") : "none";
 
@@ -241,7 +353,16 @@ function indent(value) {
     .join("\n");
 }
 
-function buildReport({ generatedAt, branch, statusSummary, isClean, lastCommits, smokeSummary, freshnessSummary }) {
+function buildReport({
+  generatedAt,
+  branch,
+  statusSummary,
+  isClean,
+  lastCommits,
+  smokeSummary,
+  freshnessSummary,
+  publicEvidenceSummary,
+}) {
   const localQaReport = existsSync(QA_REPORT_PATH) ? resolve(QA_REPORT_PATH) : `${QA_REPORT_PATH} (not found)`;
   const localHandoffTxt = resolve(HANDOFF_TXT_PATH);
   const localHandoffJson = resolve(HANDOFF_JSON_PATH);
@@ -262,6 +383,8 @@ QA:
 ${smokeSummary}
 
 ${freshnessSummary}
+
+${publicEvidenceSummary}
 
 Public QA report: ${QA_REPORT_URL}
 Public handoff TXT: ${HANDOFF_TXT_URL}
@@ -307,6 +430,11 @@ async function copyToClipboard(report) {
 }
 
 async function main() {
+  if (process.argv.includes("--check-public-evidence")) {
+    await checkPublicEvidenceArtifacts();
+    return;
+  }
+
   const generatedAt = new Date().toISOString();
   const [branch, statusSummary, porcelain, lastCommits, smoke] = await Promise.all([
     getBranch(),
@@ -317,6 +445,8 @@ async function main() {
   ]);
   const qaEvidenceFreshness = await getQaEvidenceFreshness(smoke);
   const freshnessSummary = buildFreshnessSummary(qaEvidenceFreshness);
+  const publicEvidence = await getPublicEvidence(generatedAt);
+  const publicEvidenceSummary = buildPublicEvidenceSummary(publicEvidence);
 
   const payload = {
     project: "Pixel Nations",
@@ -329,15 +459,18 @@ async function main() {
     },
     qa: {
       smoke,
+      publicQaIndexUrl: QA_INDEX_URL,
       publicQaReportUrl: QA_REPORT_URL,
       worldUrl: WORLD_URL,
       publicHandoffTxtUrl: HANDOFF_TXT_URL,
       publicHandoffJsonUrl: HANDOFF_JSON_URL,
+      publicManifestUrl: QA_MANIFEST_URL,
       localQaReportPath: existsSync(QA_REPORT_PATH) ? resolve(QA_REPORT_PATH) : null,
       localHandoffTxtPath: resolve(HANDOFF_TXT_PATH),
       localHandoffJsonPath: resolve(HANDOFF_JSON_PATH),
     },
     qaEvidenceFreshness,
+    publicEvidence,
     nextInstruction:
       "Upload public/qa/latest/handoff.txt to ChatGPT, paste the public handoff link, or type: raport gotowy.",
   };
@@ -350,6 +483,7 @@ async function main() {
     lastCommits,
     smokeSummary: smoke.summary,
     freshnessSummary,
+    publicEvidenceSummary,
   });
 
   const fileStatus = await writeHandoffFiles(report, payload);
