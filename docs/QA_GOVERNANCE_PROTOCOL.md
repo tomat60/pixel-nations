@@ -161,3 +161,15 @@ When repeated friction appears in QA, Cursor use, budget, screenshots, handoffs,
 
 This protects quality, speed, and cost control.
 
+
+## Map Geography Continuity Gate
+
+For any landing/world/map/public-demo review, also check `docs/MAP_GEOGRAPHY_CONTINUITY_KNOWN_ISSUE.md`.
+
+A screenshot PASS is not sufficient if:
+- globe highlight and playable map imply contradictory geography,
+- selected land appears to move between screens,
+- claimable markers appear on obvious water,
+- map labels/overlays are clipped by frames.
+
+These are product-trust issues, not only visual polish issues.

@@ -55,3 +55,13 @@ The issue is resolved only when:
 ## Do Not Forget
 
 Manual tester feedback overrides screenshot approval.
+
+## Related Known Issue
+
+See also `docs/MAP_GEOGRAPHY_CONTINUITY_KNOWN_ISSUE.md`.
+
+Mobile crop/framing issues must be reviewed together with broader cartography continuity:
+- does the map/frame clip labels,
+- does the selected land remain believable,
+- does any claim marker appear on obvious water,
+- does the globe/sector/land relationship still make sense to a first-time player.
