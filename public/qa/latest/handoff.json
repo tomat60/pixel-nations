@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T12:19:12.296Z",
+  "generatedAt": "2026-06-19T12:47:39.363Z",
   "branch": "main",
   "isClean": true,
   "git": {
     "statusSummary": "## main...origin/main",
-    "lastCommits": "0a795f8 Lock Pixel Nations operating system and budget governance\nd09e282 Update QA evidence after public publishing merge\n6b70526 Merge QA public evidence publishing v0.1\n2a80077 Update QA handoff after public evidence publishing sprint\ne0ff970 Add public QA evidence publishing checks"
+    "lastCommits": "f9aa276 Add Core Engine v0.3 strategy brief\n8ea7712 Trigger Vercel redeploy for QA public evidence\nb5470b3 Update QA handoff files after operating system lock\n0a795f8 Lock Pixel Nations operating system and budget governance\nd09e282 Update QA evidence after public publishing merge"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T12:19:12.296Z",
+    "localHandoffGeneratedAt": "2026-06-19T12:47:39.363Z",
     "localReportGeneratedAt": "2026-06-19T11:13:45.763Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",

@@ -1,5 +1,5 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T12:19:12.296Z
+Generated: 2026-06-19T12:47:39.363Z
 
 Branch: main
 Working tree: clean
@@ -8,11 +8,11 @@ Git status:
   ## main...origin/main
 
 Last 5 commits:
+  f9aa276 Add Core Engine v0.3 strategy brief
+  8ea7712 Trigger Vercel redeploy for QA public evidence
+  b5470b3 Update QA handoff files after operating system lock
   0a795f8 Lock Pixel Nations operating system and budget governance
   d09e282 Update QA evidence after public publishing merge
-  6b70526 Merge QA public evidence publishing v0.1
-  2a80077 Update QA handoff after public evidence publishing sprint
-  e0ff970 Add public QA evidence publishing checks
 
 QA:
 Smoke result: PASS
@@ -32,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T12:19:12.296Z
+Local handoff generated: 2026-06-19T12:47:39.363Z
 Local report generated: 2026-06-19T11:13:45.763Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
