@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T21:00:23.306Z",
+  "generatedAt": "2026-06-19T21:00:25.786Z",
   "branch": "main",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## main...origin/main\n M docs/QA_GOVERNANCE_PROTOCOL.md\n M package.json\n?? docs/CURSOR_BUDGET_RECOVERY_PLAN.md\n?? docs/PUBLIC_PREVIEW_QA_PROTOCOL.md\n?? docs/VISUAL_QA_AND_PROMPT_GATE_PROTOCOL.md\n?? public/qa/latest/visual-gate-report.md\n?? scripts/pn-visual-gate.mjs",
-    "lastCommits": "b90bb04 Update QA handoff after landing map clipping push\nb807266 Update QA evidence after landing map clipping merge\n3e86d41 Merge landing map frame clipping v0.1\n2df9d7d Fix landing map frame clipping\n322353f Document map geography continuity known issue"
+    "statusSummary": "## main...origin/main",
+    "lastCommits": "f084e04 Lock visual QA prompt gate and Cursor budget recovery\nb90bb04 Update QA handoff after landing map clipping push\nb807266 Update QA evidence after landing map clipping merge\n3e86d41 Merge landing map frame clipping v0.1\n2df9d7d Fix landing map frame clipping"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T21:00:23.306Z",
+    "localHandoffGeneratedAt": "2026-06-19T21:00:25.786Z",
     "localReportGeneratedAt": "2026-06-19T19:23:15.058Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",

@@ -1,25 +1,18 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T21:00:23.306Z
+Generated: 2026-06-19T21:00:25.786Z
 
 Branch: main
-Working tree: has changes
+Working tree: clean
 
 Git status:
   ## main...origin/main
-   M docs/QA_GOVERNANCE_PROTOCOL.md
-   M package.json
-  ?? docs/CURSOR_BUDGET_RECOVERY_PLAN.md
-  ?? docs/PUBLIC_PREVIEW_QA_PROTOCOL.md
-  ?? docs/VISUAL_QA_AND_PROMPT_GATE_PROTOCOL.md
-  ?? public/qa/latest/visual-gate-report.md
-  ?? scripts/pn-visual-gate.mjs
 
 Last 5 commits:
+  f084e04 Lock visual QA prompt gate and Cursor budget recovery
   b90bb04 Update QA handoff after landing map clipping push
   b807266 Update QA evidence after landing map clipping merge
   3e86d41 Merge landing map frame clipping v0.1
   2df9d7d Fix landing map frame clipping
-  322353f Document map geography continuity known issue
 
 QA:
 Smoke result: PASS
@@ -39,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T21:00:23.306Z
+Local handoff generated: 2026-06-19T21:00:25.786Z
 Local report generated: 2026-06-19T19:23:15.058Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
