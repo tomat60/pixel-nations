@@ -1,35 +1,18 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T20:17:04.556Z
+Generated: 2026-06-19T20:17:09.544Z
 
 Branch: sprint/landing-map-frame-containment-v0-2
-Working tree: has changes
+Working tree: clean
 
 Git status:
-  ## sprint/landing-map-frame-containment-v0-2
-   M app/page.tsx
-   M docs/QA_GOVERNANCE_PROTOCOL.md
-   D public/qa/latest/handoff.json
-   D public/qa/latest/handoff.txt
-   M public/qa/latest/index.html
-   M public/qa/latest/manifest.json
-   M public/qa/latest/report.html
-   M public/qa/latest/screenshots/desktop-landing-map-preview.png
-   M public/qa/latest/screenshots/desktop-settlement-after-action.png
-   M public/qa/latest/screenshots/desktop-world-sector.png
-   M public/qa/latest/screenshots/desktop-world.png
-   M public/qa/latest/screenshots/mobile-landing-map-preview.png
-   M public/qa/latest/screenshots/mobile-world-claim-tray.png
-   M public/qa/latest/screenshots/mobile-world-sector.png
-   M public/qa/latest/screenshots/mobile-world.png
-   M public/qa/latest/smoke-result.json
-  ?? docs/VISUAL_PROMPT_QA_GATE_PROTOCOL.md
+  ## sprint/landing-map-frame-containment-v0-2...origin/sprint/landing-map-frame-containment-v0-2
 
 Last 5 commits:
+  2e5a6dc Fix landing map frame containment and lock visual QA gate
   b90bb04 Update QA handoff after landing map clipping push
   b807266 Update QA evidence after landing map clipping merge
   3e86d41 Merge landing map frame clipping v0.1
   2df9d7d Fix landing map frame clipping
-  322353f Document map geography continuity known issue
 
 QA:
 Smoke result: PASS
@@ -49,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T20:17:04.556Z
+Local handoff generated: 2026-06-19T20:17:09.544Z
 Local report generated: 2026-06-19T20:16:43.577Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html

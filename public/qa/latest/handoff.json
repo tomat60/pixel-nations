@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T20:17:04.556Z",
+  "generatedAt": "2026-06-19T20:17:09.544Z",
   "branch": "sprint/landing-map-frame-containment-v0-2",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## sprint/landing-map-frame-containment-v0-2\n M app/page.tsx\n M docs/QA_GOVERNANCE_PROTOCOL.md\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-landing-map-preview.png\n M public/qa/latest/screenshots/desktop-settlement-after-action.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-landing-map-preview.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json\n?? docs/VISUAL_PROMPT_QA_GATE_PROTOCOL.md",
-    "lastCommits": "b90bb04 Update QA handoff after landing map clipping push\nb807266 Update QA evidence after landing map clipping merge\n3e86d41 Merge landing map frame clipping v0.1\n2df9d7d Fix landing map frame clipping\n322353f Document map geography continuity known issue"
+    "statusSummary": "## sprint/landing-map-frame-containment-v0-2...origin/sprint/landing-map-frame-containment-v0-2",
+    "lastCommits": "2e5a6dc Fix landing map frame containment and lock visual QA gate\nb90bb04 Update QA handoff after landing map clipping push\nb807266 Update QA evidence after landing map clipping merge\n3e86d41 Merge landing map frame clipping v0.1\n2df9d7d Fix landing map frame clipping"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T20:17:04.556Z",
+    "localHandoffGeneratedAt": "2026-06-19T20:17:09.544Z",
     "localReportGeneratedAt": "2026-06-19T20:16:43.577Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
