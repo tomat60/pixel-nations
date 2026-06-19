@@ -1104,23 +1104,23 @@ export default function WorldPage() {
                       );
                     })}
                   </div>
-                  <div className="relative z-20 mt-3 grid gap-2 border border-amber-500/10 bg-[#030306]/82 p-3 text-[9px] uppercase tracking-[0.18em] text-zinc-500 backdrop-blur-sm sm:grid-cols-5">
+                  <div className="relative z-20 mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border border-amber-500/10 bg-[#030306]/82 p-2 text-[8px] uppercase tracking-[0.14em] text-zinc-500 backdrop-blur-sm sm:grid-cols-5 sm:p-3 sm:text-[9px] sm:tracking-[0.18em]">
                     {[
-                      ["Founder land", "h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.6)]"],
-                      ["Resource-rich", "h-1 w-1 rounded-full bg-cyan-200/70"],
+                      ["Founder", "h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.6)]"],
+                      ["Resources", "h-1 w-1 rounded-full bg-cyan-200/70"],
                       ["Landmark", "h-1 w-1 rotate-45 bg-orange-200/80"],
-                      ["Ownership grid", "h-px w-3 bg-amber-400/40"],
-                      ["Routes / rivers", "h-px w-3 bg-slate-300/60"],
+                      ["Grid", "h-px w-3 bg-amber-400/40"],
+                      ["Routes", "h-px w-3 bg-slate-300/60"],
                       ...(demoState.claimedLand
-                        ? [["Your influence", "h-2 w-2 rounded-full border border-amber-300/50 bg-amber-300/20"]]
+                        ? [["Influence", "h-2 w-2 rounded-full border border-amber-300/50 bg-amber-300/20"]]
                         : []),
                       ...(demoState.tradeRouteEstablished
-                        ? [["Active trade route", "h-px w-4 bg-amber-300/80"]]
+                        ? [["Trade", "h-px w-4 bg-amber-300/80"]]
                         : []),
                     ].map(([label, swatch]) => (
-                      <div key={label} className="flex items-center gap-2">
+                      <div key={label} className="flex min-w-0 items-center gap-1.5">
                         <span className={swatch} />
-                        <span>{label}</span>
+                        <span className="truncate">{label}</span>
                       </div>
                     ))}
                   </div>
