@@ -1,36 +1,18 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T21:49:20.142Z
+Generated: 2026-06-19T21:49:24.965Z
 
 Branch: sprint/living-map-v0-5-first-world-activity
-Working tree: has changes
+Working tree: clean
 
 Git status:
-  ## sprint/living-map-v0-5-first-world-activity
-   M app/world/page.tsx
-   D public/qa/latest/handoff.json
-   D public/qa/latest/handoff.txt
-   M public/qa/latest/index.html
-   M public/qa/latest/manifest.json
-   M public/qa/latest/report.html
-   M public/qa/latest/screenshots/desktop-settlement-after-action.png
-   M public/qa/latest/screenshots/desktop-world-sector.png
-   M public/qa/latest/screenshots/desktop-world.png
-   M public/qa/latest/screenshots/mobile-settlement-after-action.png
-   M public/qa/latest/screenshots/mobile-world-claim-tray.png
-   M public/qa/latest/screenshots/mobile-world-sector.png
-   M public/qa/latest/screenshots/mobile-world.png
-   M public/qa/latest/smoke-result.json
-   M public/qa/latest/visual-gate-report.md
-   M scripts/qa-screenshots.mjs
-  ?? public/qa/latest/screenshots/desktop-world-living-map.png
-  ?? public/qa/latest/screenshots/mobile-world-living-map.png
+  ## sprint/living-map-v0-5-first-world-activity...origin/sprint/living-map-v0-5-first-world-activity
 
 Last 5 commits:
+  b34bebe Add Living Map v0.5 first world activity layer
   efce7c9 Update QA handoff after Living Map v0.5 implementation plan
   01b2f09 Add Living Map v0.5 implementation plan
   5697d68 Update QA handoff after Living Map v0.5 brief
   e3026a1 Add Living Map Layer v0.5 strategy brief
-  7d27c55 Update QA handoff after visual gate push
 
 QA:
 Smoke result: PASS
@@ -50,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T21:49:20.142Z
+Local handoff generated: 2026-06-19T21:49:24.965Z
 Local report generated: 2026-06-19T21:48:58.051Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html

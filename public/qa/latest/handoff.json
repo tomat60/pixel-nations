@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T21:49:20.142Z",
+  "generatedAt": "2026-06-19T21:49:24.965Z",
   "branch": "sprint/living-map-v0-5-first-world-activity",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## sprint/living-map-v0-5-first-world-activity\n M app/world/page.tsx\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-settlement-after-action.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-settlement-after-action.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json\n M public/qa/latest/visual-gate-report.md\n M scripts/qa-screenshots.mjs\n?? public/qa/latest/screenshots/desktop-world-living-map.png\n?? public/qa/latest/screenshots/mobile-world-living-map.png",
-    "lastCommits": "efce7c9 Update QA handoff after Living Map v0.5 implementation plan\n01b2f09 Add Living Map v0.5 implementation plan\n5697d68 Update QA handoff after Living Map v0.5 brief\ne3026a1 Add Living Map Layer v0.5 strategy brief\n7d27c55 Update QA handoff after visual gate push"
+    "statusSummary": "## sprint/living-map-v0-5-first-world-activity...origin/sprint/living-map-v0-5-first-world-activity",
+    "lastCommits": "b34bebe Add Living Map v0.5 first world activity layer\nefce7c9 Update QA handoff after Living Map v0.5 implementation plan\n01b2f09 Add Living Map v0.5 implementation plan\n5697d68 Update QA handoff after Living Map v0.5 brief\ne3026a1 Add Living Map Layer v0.5 strategy brief"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T21:49:20.142Z",
+    "localHandoffGeneratedAt": "2026-06-19T21:49:24.965Z",
     "localReportGeneratedAt": "2026-06-19T21:48:58.051Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
