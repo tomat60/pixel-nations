@@ -111,3 +111,18 @@ This foundation is complete when:
 - no Cursor cost is required
 - ChatGPT can use the report as a current evidence packet
 
+
+## No Manual Latest-File Hunting Rule
+
+The user should not have to search through timestamped files to know what to upload.
+
+Automation scripts that generate repeated reports must also write a stable latest/upload file, for example:
+
+- `LATEST_OPS_REPORT.md`
+- `LATEST_OPS_REPORT.json`
+- `UPLOAD_THIS_OPS_REPORT.md`
+- `UPLOAD_THIS_FILE.txt`
+
+Terminal output must clearly print the exact file to upload.
+
+This is a permanent automation-quality rule for Pixel Nations.

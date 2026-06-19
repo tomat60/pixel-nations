@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync, copyFileSync } from "node:fs";
 import path from "node:path";
 
 const repoRoot = process.cwd();
@@ -10,8 +10,14 @@ mkdirSync(outDir, { recursive: true });
 
 const now = new Date();
 const safeStamp = now.toISOString().replace(/[:.]/g, "-");
-const mdPath = path.join(outDir, `pixel-nations-ops-report-${safeStamp}.md`);
-const jsonPath = path.join(outDir, `pixel-nations-ops-report-${safeStamp}.json`);
+
+const timestampedMdPath = path.join(outDir, `pixel-nations-ops-report-${safeStamp}.md`);
+const timestampedJsonPath = path.join(outDir, `pixel-nations-ops-report-${safeStamp}.json`);
+
+const latestMdPath = path.join(outDir, "LATEST_OPS_REPORT.md");
+const latestJsonPath = path.join(outDir, "LATEST_OPS_REPORT.json");
+const uploadMdPath = path.join(outDir, "UPLOAD_THIS_OPS_REPORT.md");
+const pointerPath = path.join(outDir, "UPLOAD_THIS_FILE.txt");
 
 function run(cmd, args = [], options = {}) {
   try {
@@ -47,7 +53,7 @@ function readTextMaybe(filePath, maxChars = 12000) {
   }
 }
 
-function listFiles(dir, max = 200) {
+function listFiles(dir, max = 240) {
   try {
     if (!existsSync(dir)) return [];
     const results = [];
@@ -87,13 +93,17 @@ const handoffText = readTextMaybe(handoffTxtPath);
 const handoffJson = readJsonMaybe(handoffJsonPath);
 const smokeJson = readJsonMaybe(smokeJsonPath);
 
-const docsFiles = listFiles(path.join(repoRoot, "docs"), 300);
-const scriptsFiles = listFiles(path.join(repoRoot, "scripts"), 120);
-const qaFiles = listFiles(path.join(repoRoot, "public", "qa", "latest"), 300);
+const docsFiles = listFiles(path.join(repoRoot, "docs"), 320);
+const scriptsFiles = listFiles(path.join(repoRoot, "scripts"), 160);
+const qaFiles = listFiles(path.join(repoRoot, "public", "qa", "latest"), 320);
 
 const qaEvidence = handoffJson?.qaEvidenceFreshness || null;
 const publicEvidence = handoffJson?.publicQaEvidence || null;
-const smokePassed = handoffJson?.qa?.smokeResult === "PASS" || smokeJson?.status === "PASS" || smokeJson?.ok === true;
+const smokePassed =
+  handoffJson?.qa?.smokeResult === "PASS" ||
+  smokeJson?.status === "PASS" ||
+  smokeJson?.ok === true ||
+  /Smoke result:\s*PASS/.test(handoffText);
 
 const risks = [];
 if (!isClean) risks.push("Working tree is not clean.");
@@ -108,13 +118,20 @@ const recommendation = (() => {
   if (!isClean) return "STOP: clean or commit/revert current repo changes before any strategic or Cursor work.";
   if (!smokePassed) return "STOP: smoke is not PASS. Fix QA before strategy/implementation.";
   if (qaEvidence?.status && qaEvidence.status !== "FRESH") return "STOP: QA evidence is not fresh.";
-  return "OK FOR CHATGPT REVIEW: no Cursor required. Use this ops report as current evidence before deciding next sprint.";
+  return "OK FOR CHATGPT REVIEW: no Cursor required. Upload UPLOAD_THIS_OPS_REPORT.md when asked for an ops report.";
 })();
 
 const report = {
   generatedAt: now.toISOString(),
   repoRoot,
   workspaceRoot,
+  reportPaths: {
+    uploadThisMarkdown: uploadMdPath,
+    latestMarkdown: latestMdPath,
+    latestJson: latestJsonPath,
+    timestampedMarkdown: timestampedMdPath,
+    timestampedJson: timestampedJsonPath
+  },
   branch,
   isClean,
   status,
@@ -145,6 +162,14 @@ const report = {
 const md = `# Pixel Nations Ops Report
 
 Generated: ${report.generatedAt}
+
+## Upload Instruction
+
+Upload this file to ChatGPT when asked for the current ops report:
+
+\`${uploadMdPath}\`
+
+This stable filename always points to the newest generated ops report. You no longer need to search for the latest timestamped file.
 
 ## Executive Status
 
@@ -212,10 +237,14 @@ ${scriptsFiles.map((file) => `- ${file}`).join("\n")}
 ${qaFiles.map((file) => `- ${file}`).join("\n")}
 `;
 
-writeFileSync(mdPath, md);
-writeFileSync(jsonPath, JSON.stringify(report, null, 2));
+writeFileSync(timestampedMdPath, md);
+writeFileSync(timestampedJsonPath, JSON.stringify(report, null, 2));
+writeFileSync(latestMdPath, md);
+writeFileSync(latestJsonPath, JSON.stringify(report, null, 2));
+writeFileSync(uploadMdPath, md);
+writeFileSync(pointerPath, `${uploadMdPath}\n`);
 
-console.log(`Pixel Nations Ops Report`);
+console.log("Pixel Nations Ops Report");
 console.log(`Generated: ${report.generatedAt}`);
 console.log(`Branch: ${branch}`);
 console.log(`Working tree clean: ${isClean ? "YES" : "NO"}`);
@@ -223,6 +252,12 @@ console.log(`Smoke passed: ${smokePassed ? "YES" : "NO"}`);
 console.log(`QA evidence status: ${qaEvidence?.status || "UNKNOWN"}`);
 console.log(`Recommendation: ${recommendation}`);
 console.log("");
-console.log(`Wrote: ${mdPath}`);
-console.log(`Wrote: ${jsonPath}`);
+console.log("UPLOAD THIS FILE TO CHATGPT:");
+console.log(uploadMdPath);
+console.log("");
+console.log(`Stable latest MD: ${latestMdPath}`);
+console.log(`Stable latest JSON: ${latestJsonPath}`);
+console.log(`Timestamped MD: ${timestampedMdPath}`);
+console.log(`Timestamped JSON: ${timestampedJsonPath}`);
+console.log(`Pointer file: ${pointerPath}`);
 
