@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-19T19:23:15.058Z",
+  "generatedAt": "2026-06-19T21:48:58.051Z",
   "screenshots": [
     {
       "filename": "mobile-home.png",
@@ -33,6 +33,11 @@
     },
     {
       "filename": "mobile-world-sector.png",
+      "route": "/world",
+      "viewport": "mobile"
+    },
+    {
+      "filename": "mobile-world-living-map.png",
       "route": "/world",
       "viewport": "mobile"
     },
@@ -98,6 +103,11 @@
     },
     {
       "filename": "desktop-world-sector.png",
+      "route": "/world",
+      "viewport": "desktop"
+    },
+    {
+      "filename": "desktop-world-living-map.png",
       "route": "/world",
       "viewport": "desktop"
     },

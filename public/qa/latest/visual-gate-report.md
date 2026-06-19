@@ -1,14 +1,13 @@
 # Pixel Nations Visual Gate Report
 
-Generated: 2026-06-19T21:00:21.857Z
+Generated: 2026-06-19T21:48:58.637Z
 
-PASS required file: handoff.txt
-PASS required file: handoff.json
+FAIL required file: handoff.txt
+FAIL required file: handoff.json
 PASS required file: manifest.json
-PASS required file: smoke-result.json
+FAIL required file: smoke-result.json
 PASS required file: report.html
 
-PASS smoke result — {"status":"PASS"}
 
 PASS recommended screenshot: desktop-landing-map-preview.png
 PASS recommended screenshot: mobile-landing-hero.png
