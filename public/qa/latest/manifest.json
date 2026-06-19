@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-19T13:30:43.615Z",
+  "generatedAt": "2026-06-19T16:48:52.338Z",
   "screenshots": [
     {
       "filename": "mobile-home.png",
@@ -57,6 +57,11 @@
       "viewport": "mobile"
     },
     {
+      "filename": "mobile-settlement-after-action.png",
+      "route": "/settlement",
+      "viewport": "mobile"
+    },
+    {
       "filename": "mobile-nation.png",
       "route": "/nation",
       "viewport": "mobile"
@@ -94,6 +99,16 @@
     {
       "filename": "desktop-world-selected-land-panel.png",
       "route": "/world",
+      "viewport": "desktop"
+    },
+    {
+      "filename": "desktop-settlement.png",
+      "route": "/settlement",
+      "viewport": "desktop"
+    },
+    {
+      "filename": "desktop-settlement-after-action.png",
+      "route": "/settlement",
       "viewport": "desktop"
     }
   ],

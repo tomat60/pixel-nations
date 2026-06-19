@@ -171,6 +171,27 @@ const captures = [
       await page.locator("[data-qa='settlement-development']").waitFor({ state: "visible", timeout: 5000 });
     },
   },
+  {
+    filename: "mobile-settlement-after-action.png",
+    route: "/settlement",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    selector: "[data-qa='settlement-development']",
+    prepare: async (page) => {
+      await page.evaluate(
+        ({ key, state }) => {
+          localStorage.setItem(key, JSON.stringify(state));
+        },
+        { key: DEMO_STATE_KEY, state: QA_SETTLEMENT_DEVELOPMENT_STATE },
+      );
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+      await page.getByRole("button", { name: /^Build Farms/i }).click();
+      await page.waitForTimeout(500);
+      await page.locator("[data-qa='settlement-development']").waitFor({ state: "visible", timeout: 5000 });
+    },
+  },
   { filename: "mobile-nation.png", route: "/nation", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-empire.png", route: "/empire", viewport: "mobile", width: 390, height: 844 },
   { filename: "desktop-home.png", route: "/", viewport: "desktop", width: 1440, height: 900 },
@@ -199,6 +220,46 @@ const captures = [
     width: 1440,
     height: 900,
     selector: "[data-qa='selected-land-panel']",
+  },
+  {
+    filename: "desktop-settlement.png",
+    route: "/settlement",
+    viewport: "desktop",
+    width: 1440,
+    height: 900,
+    selector: "[data-qa='settlement-development']",
+    prepare: async (page) => {
+      await page.evaluate(
+        ({ key, state }) => {
+          localStorage.setItem(key, JSON.stringify(state));
+        },
+        { key: DEMO_STATE_KEY, state: QA_SETTLEMENT_DEVELOPMENT_STATE },
+      );
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+      await page.locator("[data-qa='settlement-development']").waitFor({ state: "visible", timeout: 5000 });
+    },
+  },
+  {
+    filename: "desktop-settlement-after-action.png",
+    route: "/settlement",
+    viewport: "desktop",
+    width: 1440,
+    height: 900,
+    selector: "[data-qa='settlement-development']",
+    prepare: async (page) => {
+      await page.evaluate(
+        ({ key, state }) => {
+          localStorage.setItem(key, JSON.stringify(state));
+        },
+        { key: DEMO_STATE_KEY, state: QA_SETTLEMENT_DEVELOPMENT_STATE },
+      );
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+      await page.getByRole("button", { name: /^Build Farms/i }).click();
+      await page.waitForTimeout(500);
+      await page.locator("[data-qa='settlement-development']").waitFor({ state: "visible", timeout: 5000 });
+    },
   },
 ];
 
