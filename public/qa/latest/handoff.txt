@@ -1,39 +1,52 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T17:26:04.940Z
+Generated: 2026-06-19T17:34:11.603Z
 
-Branch: sprint/visual-gamefeel-engine-v0-4
-Working tree: clean
+Branch: main
+Working tree: has changes
 
 Git status:
-  ## sprint/visual-gamefeel-engine-v0-4...origin/sprint/visual-gamefeel-engine-v0-4
+  ## main...origin/main [ahead 4]
+   D public/qa/latest/handoff.json
+   D public/qa/latest/handoff.txt
+   M public/qa/latest/index.html
+   M public/qa/latest/manifest.json
+   M public/qa/latest/report.html
+   M public/qa/latest/screenshots/desktop-settlement-after-action.png
+   M public/qa/latest/screenshots/desktop-world-sector.png
+   M public/qa/latest/screenshots/desktop-world.png
+   M public/qa/latest/screenshots/mobile-settlement-after-action.png
+   M public/qa/latest/screenshots/mobile-world-claim-tray.png
+   M public/qa/latest/screenshots/mobile-world-sector.png
+   M public/qa/latest/screenshots/mobile-world.png
+   M public/qa/latest/smoke-result.json
 
 Last 5 commits:
+  044de58 Merge Visual Gamefeel Engine v0.4
+  4a35e28 Update QA handoff after Visual Gamefeel v0.4 branch cleanup
   19f8295 Update QA handoff for visual gamefeel sprint
   8d27eb2 Implement settlement visual gamefeel
   ca77873 Update QA handoff after Visual Gamefeel Engine brief
-  fd4c521 Add Visual Gamefeel Engine v0.4 strategy brief
-  01057da Update QA handoff after GitHub Actions ops pilot push
 
 QA:
 Smoke result: PASS
-Smoke generated: 2026-06-19T16:49:20.372Z
+Smoke generated: 2026-06-19T17:34:10.993Z
 Smoke app source: existing local app
 Smoke steps: 9/9 passed
 Smoke result path: public/qa/latest/smoke-result.json
 
 QA Evidence Freshness:
-Smoke generated: 2026-06-19T16:49:20.372Z
-Report modified: 2026-06-19T16:48:52.341Z
-Manifest modified: 2026-06-19T16:48:52.339Z
-Screenshots newest: 2026-06-19T16:48:52.278Z
-Screenshots oldest: 2026-06-19T16:47:38.354Z
+Smoke generated: 2026-06-19T17:34:10.993Z
+Report modified: 2026-06-19T17:33:50.152Z
+Manifest modified: 2026-06-19T17:33:50.151Z
+Screenshots newest: 2026-06-19T17:33:50.104Z
+Screenshots oldest: 2026-06-19T17:32:38.893Z
 Screenshots count: 22
 Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T17:26:04.940Z
-Local report generated: 2026-06-19T16:48:52.338Z
+Local handoff generated: 2026-06-19T17:34:11.603Z
+Local report generated: 2026-06-19T17:33:50.150Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
 Public handoff TXT: https://pixel-nations.vercel.app/qa/latest/handoff.txt
