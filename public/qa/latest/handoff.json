@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T13:48:07.646Z",
+  "generatedAt": "2026-06-19T14:08:25.756Z",
   "branch": "main",
   "isClean": true,
   "git": {
     "statusSummary": "## main...origin/main",
-    "lastCommits": "a3bedc7 Lock game vision and assistant command protocol\nc4dd1c5 Update QA evidence after Core Engine v0.3 merge\nf490882 Merge Core Engine v0.3 local development cycle\n92ae9a7 Update QA handoff after Core Engine v0.3 sprint\nde4629c Add Core Engine v0.3 local development cycle"
+    "lastCommits": "b3df808 Add AI ops report command\nb16bcbd Update QA handoff after game vision lock\na3bedc7 Lock game vision and assistant command protocol\nc4dd1c5 Update QA evidence after Core Engine v0.3 merge\nf490882 Merge Core Engine v0.3 local development cycle"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T13:48:07.646Z",
+    "localHandoffGeneratedAt": "2026-06-19T14:08:25.756Z",
     "localReportGeneratedAt": "2026-06-19T13:30:43.615Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",

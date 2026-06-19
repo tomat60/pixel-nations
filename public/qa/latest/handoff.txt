@@ -1,5 +1,5 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T13:48:07.646Z
+Generated: 2026-06-19T14:08:25.756Z
 
 Branch: main
 Working tree: clean
@@ -8,11 +8,11 @@ Git status:
   ## main...origin/main
 
 Last 5 commits:
+  b3df808 Add AI ops report command
+  b16bcbd Update QA handoff after game vision lock
   a3bedc7 Lock game vision and assistant command protocol
   c4dd1c5 Update QA evidence after Core Engine v0.3 merge
   f490882 Merge Core Engine v0.3 local development cycle
-  92ae9a7 Update QA handoff after Core Engine v0.3 sprint
-  de4629c Add Core Engine v0.3 local development cycle
 
 QA:
 Smoke result: PASS
@@ -32,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T13:48:07.646Z
+Local handoff generated: 2026-06-19T14:08:25.756Z
 Local report generated: 2026-06-19T13:30:43.615Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
