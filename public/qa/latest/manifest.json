@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-19T17:33:50.150Z",
+  "generatedAt": "2026-06-19T18:50:50.143Z",
   "screenshots": [
     {
       "filename": "mobile-home.png",
@@ -73,6 +73,11 @@
     },
     {
       "filename": "desktop-home.png",
+      "route": "/",
+      "viewport": "desktop"
+    },
+    {
+      "filename": "desktop-landing-map-preview.png",
       "route": "/",
       "viewport": "desktop"
     },
