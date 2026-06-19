@@ -1,5 +1,5 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T14:40:53.052Z
+Generated: 2026-06-19T14:46:56.721Z
 
 Branch: main
 Working tree: clean
@@ -8,11 +8,11 @@ Git status:
   ## main...origin/main
 
 Last 5 commits:
+  d91ee64 Add AI ops VPS pilot runbook
+  50080ef Update QA handoff after AI ops server architecture lock
   4e99744 Lock AI ops server architecture v0.2
   713e0bf Update QA handoff after ops report UX improvement
   313bfcb Improve ops report latest-file workflow
-  0a46d5f Update QA handoff after AI ops report command
-  b3df808 Add AI ops report command
 
 QA:
 Smoke result: PASS
@@ -32,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T14:40:53.052Z
+Local handoff generated: 2026-06-19T14:46:56.721Z
 Local report generated: 2026-06-19T13:30:43.615Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
