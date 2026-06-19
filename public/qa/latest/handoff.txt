@@ -1,30 +1,18 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T13:31:04.767Z
+Generated: 2026-06-19T13:48:07.646Z
 
 Branch: main
-Working tree: has changes
+Working tree: clean
 
 Git status:
-  ## main...origin/main [ahead 3]
-   D public/qa/latest/handoff.json
-   D public/qa/latest/handoff.txt
-   M public/qa/latest/index.html
-   M public/qa/latest/manifest.json
-   M public/qa/latest/report.html
-   M public/qa/latest/screenshots/desktop-home.png
-   M public/qa/latest/screenshots/desktop-world-sector.png
-   M public/qa/latest/screenshots/desktop-world.png
-   M public/qa/latest/screenshots/mobile-world-claim-tray.png
-   M public/qa/latest/screenshots/mobile-world-sector.png
-   M public/qa/latest/screenshots/mobile-world.png
-   M public/qa/latest/smoke-result.json
+  ## main...origin/main
 
 Last 5 commits:
+  a3bedc7 Lock game vision and assistant command protocol
+  c4dd1c5 Update QA evidence after Core Engine v0.3 merge
   f490882 Merge Core Engine v0.3 local development cycle
   92ae9a7 Update QA handoff after Core Engine v0.3 sprint
   de4629c Add Core Engine v0.3 local development cycle
-  a061afe Update QA handoff after Core Engine strategy brief
-  f9aa276 Add Core Engine v0.3 strategy brief
 
 QA:
 Smoke result: PASS
@@ -44,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T13:31:04.767Z
+Local handoff generated: 2026-06-19T13:48:07.646Z
 Local report generated: 2026-06-19T13:30:43.615Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
