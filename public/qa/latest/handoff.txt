@@ -1,18 +1,20 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T21:14:37.759Z
+Generated: 2026-06-19T21:23:33.383Z
 
 Branch: main
-Working tree: clean
+Working tree: has changes
 
 Git status:
   ## main...origin/main
+   M docs/LIVING_MAP_LAYER_V0_5_STRATEGY_BRIEF.md
+  ?? docs/LIVING_MAP_V0_5_IMPLEMENTATION_PLAN.md
 
 Last 5 commits:
+  5697d68 Update QA handoff after Living Map v0.5 brief
   e3026a1 Add Living Map Layer v0.5 strategy brief
   7d27c55 Update QA handoff after visual gate push
   f084e04 Lock visual QA prompt gate and Cursor budget recovery
   b90bb04 Update QA handoff after landing map clipping push
-  b807266 Update QA evidence after landing map clipping merge
 
 QA:
 Smoke result: PASS
@@ -32,7 +34,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T21:14:37.759Z
+Local handoff generated: 2026-06-19T21:23:33.383Z
 Local report generated: 2026-06-19T19:23:15.058Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html

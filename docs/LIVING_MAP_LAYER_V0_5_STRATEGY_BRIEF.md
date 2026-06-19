@@ -349,3 +349,9 @@ The player should see:
 > I claimed land. I founded a settlement. I opened a route. My land is becoming a center of power.
 
 That feeling is more important than adding many new mechanics.
+
+## Implementation Planning
+
+See `docs/LIVING_MAP_V0_5_IMPLEMENTATION_PLAN.md` for the current execution plan.
+
+Implementation remains blocked until source inspection confirms whether a deterministic patch package is safe or Cursor is truly necessary.
