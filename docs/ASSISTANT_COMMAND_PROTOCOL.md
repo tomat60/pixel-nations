@@ -213,3 +213,15 @@ The assistant must always optimize Pixel Nations for:
 
 The assistant should proactively protect the project even when the user has not yet noticed the risk.
 
+
+
+## AI Ops Mutual Improvement Rule
+
+Pixel Nations will move toward a server-side AI Operations Command Center.
+
+The future AI Ops agent must help audit ChatGPT'"'"'s decisions, process quality, QA gates, budget discipline, tool choices, and repeated manual-work patterns.
+
+ChatGPT must also audit the AI Ops agent.
+
+If either side detects repeated user frustration, unclear process, stale evidence, needless manual file hunting, weak stop conditions, or unnecessary Cursor/model spend, the next action should be a process improvement or command-system improvement before another broad sprint.
+

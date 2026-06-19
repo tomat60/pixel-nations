@@ -126,3 +126,9 @@ Automation scripts that generate repeated reports must also write a stable lates
 Terminal output must clearly print the exact file to upload.
 
 This is a permanent automation-quality rule for Pixel Nations.
+
+
+## v0.2 Server Architecture Status
+
+AI Ops v0.2 locks the server-side command architecture as a strategic direction, but server purchase and Cursor-on-server execution remain blocked until a VPS pilot runbook is approved.
+
