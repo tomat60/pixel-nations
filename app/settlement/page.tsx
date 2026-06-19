@@ -11,6 +11,13 @@ import {
   getTerrainResourceValues,
 } from "../lib/claimed-land";
 import {
+  DEVELOPMENT_ACTIONS,
+  applyDevelopmentAction,
+  canApplyDevelopmentAction,
+  getSettlementDevelopmentState,
+  type DevelopmentActionId,
+} from "../lib/settlement-development";
+import {
   DEFAULT_SETTLEMENT_STATE,
   type SettlementState,
   readSettlementState,
@@ -82,6 +89,7 @@ export default function SettlementPage() {
   }, []);
 
   const claimedLand = useMemo(() => getClaimedLandDisplay(settlementState), [settlementState]);
+  const developmentState = useMemo(() => getSettlementDevelopmentState(settlementState), [settlementState]);
 
   const displaySettlement = useMemo(
     () => ({
@@ -158,6 +166,12 @@ export default function SettlementPage() {
       cities: 1,
     };
 
+    setSettlementState(nextState);
+    writeSettlementState(nextState);
+  };
+
+  const runDevelopmentAction = (actionId: DevelopmentActionId) => {
+    const nextState = applyDevelopmentAction(settlementState, actionId);
     setSettlementState(nextState);
     writeSettlementState(nextState);
   };
@@ -240,6 +254,16 @@ export default function SettlementPage() {
     { id: "level", label: "Level", value: displaySettlement.settlementLevel },
   ];
 
+  const developmentStats = [
+    { id: "population", label: "Population", value: String(developmentState.population) },
+    { id: "food", label: "Food", value: String(developmentState.food) },
+    { id: "materials", label: "Materials", value: String(developmentState.materials) },
+    { id: "influence", label: "Influence", value: String(developmentState.influence) },
+    { id: "security", label: "Security", value: String(developmentState.security) },
+    { id: "prosperity", label: "Prosperity", value: String(developmentState.prosperity) },
+    { id: "stability", label: "Stability", value: String(developmentState.stability) },
+  ];
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050505] px-6 py-12 text-white sm:px-10 sm:py-16">
       <div
@@ -317,6 +341,98 @@ export default function SettlementPage() {
             {displaySettlement.settlementFocusIdentity}
           </p>
         </motion.section>
+
+        {settlementState.settlementFounded ? (
+          <motion.section
+            data-qa="settlement-development"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.14, ease: "easeOut" }}
+            className="mt-10 border border-amber-500/20 bg-[#06060c]/90 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45),0_0_80px_rgba(201,169,98,0.06)] sm:p-8"
+          >
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+                  Settlement Development
+                </p>
+                <h2 className="mt-4 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-4xl">
+                  Cycle {developmentState.developmentCycle}
+                </h2>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-400">
+                  Choose one local development action. The result is saved on this device and the demo path remains open.
+                </p>
+              </div>
+              {development.href ? (
+                <Link
+                  href={development.href}
+                  className="btn-secondary w-full rounded border border-zinc-800 bg-[#08080f]/80 px-5 py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 sm:w-auto"
+                >
+                  Continue Path
+                </Link>
+              ) : (
+                <p className="max-w-xs border border-amber-500/10 bg-[#08080f]/75 p-4 text-xs leading-6 text-zinc-500">
+                  Build the Town Hall below when you are ready to continue the guided demo path.
+                </p>
+              )}
+            </div>
+
+            <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {developmentStats.map((stat) => (
+                <article key={stat.id} className="border border-amber-500/10 bg-[#08080f]/85 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">{stat.label}</p>
+                  <p className="mt-2 font-[family-name:var(--font-syne)] text-2xl font-extrabold text-amber-100">
+                    {stat.value}
+                  </p>
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-7 grid gap-4 lg:grid-cols-2">
+              {DEVELOPMENT_ACTIONS.map((action) => {
+                const canApply = canApplyDevelopmentAction(settlementState, action);
+
+                return (
+                  <button
+                    key={action.id}
+                    type="button"
+                    onClick={() => runDevelopmentAction(action.id)}
+                    disabled={!canApply}
+                    className={`border p-5 text-left transition-colors ${
+                      canApply
+                        ? "border-amber-500/20 bg-[#08080f]/90 hover:border-amber-400/60 hover:bg-amber-500/10"
+                        : "cursor-not-allowed border-zinc-800 bg-[#08080f]/60 opacity-60"
+                    }`}
+                  >
+                    <p className="font-[family-name:var(--font-syne)] text-xl font-bold text-amber-100">
+                      {action.title}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-zinc-400">{action.intent}</p>
+                    <div className="mt-4 space-y-2 text-xs uppercase tracking-[0.18em]">
+                      <p className="text-zinc-500">Cost: {action.cost}</p>
+                      <p className="text-amber-200/75">Effect: {action.effect}</p>
+                      <p className="text-zinc-500">Tradeoff: {action.tradeoff}</p>
+                    </div>
+                    {!canApply ? (
+                      <p className="mt-4 text-sm leading-6 text-amber-300">
+                        Not enough stored resources for this cycle.
+                      </p>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-7 border-l border-amber-500/30 bg-amber-500/[0.04] p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-600/75">
+                Latest Consequence
+              </p>
+              <p className="mt-3 text-sm leading-7 text-zinc-300">
+                {developmentState.latestDevelopmentSummary ||
+                  "No development action has been taken yet. Choose one action to shape how this settlement grows."}
+              </p>
+            </div>
+          </motion.section>
+        ) : null}
 
         {displaySettlement.tradeRouteEstablished ? (
           <motion.section

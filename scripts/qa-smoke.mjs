@@ -198,6 +198,14 @@ async function runSmoke(page) {
   await step("build settlement core and establish trade", async () => {
     await clickLink(page, /^View Settlement$/i, "build settlement core and establish trade");
     await page.waitForURL("**/settlement", { timeout: 5000 });
+    await clickButton(page, /^Build Farms/i, "build settlement core and establish trade");
+    await expectText(page, "Farms expanded along the river edge", "build settlement core and establish trade");
+    await expectState(
+      page,
+      "build settlement core and establish trade",
+      (state) => state?.developmentCycle === 2 && state?.food === 24 && state?.materials === 10,
+      "Settlement development action was not persisted",
+    );
     await clickButton(page, /^Build Town Hall$/i, "build settlement core and establish trade");
     await expectText(page, "Establish Trade Route", "build settlement core and establish trade");
     await clickLink(page, /^Establish Trade Route$/i, "build settlement core and establish trade");

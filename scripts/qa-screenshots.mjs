@@ -49,6 +49,26 @@ const QA_CLAIMED_DEMO_STATE = {
   cities: 1,
 };
 
+const QA_SETTLEMENT_DEVELOPMENT_STATE = {
+  ...QA_CLAIMED_DEMO_STATE,
+  settlementFounded: true,
+  settlementName: "Aurelia Prime",
+  population: 24,
+  food: 18,
+  materials: 12,
+  influence: 4,
+  security: 5,
+  prosperity: 3,
+  stability: 7,
+  developmentCycle: 1,
+  latestDevelopmentAction: "",
+  latestDevelopmentSummary: "",
+  settlementFocusId: "growth",
+  settlementFocus: "Growth Charter",
+  settlementFocusBonus: "+ Starting population",
+  settlementFocusIdentity: "A welcoming settlement built to attract families, workers, and future citizens.",
+};
+
 const captures = [
   { filename: "mobile-home.png", route: "/", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-landing-hero.png", route: "/", viewport: "mobile", width: 390, height: 844 },
@@ -132,7 +152,25 @@ const captures = [
       await page.waitForTimeout(700);
     },
   },
-  { filename: "mobile-settlement.png", route: "/settlement", viewport: "mobile", width: 390, height: 844 },
+  {
+    filename: "mobile-settlement.png",
+    route: "/settlement",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    prepare: async (page) => {
+      await page.evaluate(
+        ({ key, state }) => {
+          localStorage.setItem(key, JSON.stringify(state));
+        },
+        { key: DEMO_STATE_KEY, state: QA_SETTLEMENT_DEVELOPMENT_STATE },
+      );
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(700);
+      await page.locator("[data-qa='settlement-development']").waitFor({ state: "visible", timeout: 5000 });
+    },
+  },
   { filename: "mobile-nation.png", route: "/nation", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-empire.png", route: "/empire", viewport: "mobile", width: 390, height: 844 },
   { filename: "desktop-home.png", route: "/", viewport: "desktop", width: 1440, height: 900 },

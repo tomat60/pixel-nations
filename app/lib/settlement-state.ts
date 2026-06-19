@@ -15,7 +15,15 @@ export const SETTLEMENT_STORAGE_KEYS = {
   founded: "settlementFounded",
   name: "settlementName",
   population: "population",
+  food: "food",
+  materials: "materials",
   influence: "influence",
+  security: "security",
+  prosperity: "prosperity",
+  stability: "stability",
+  developmentCycle: "developmentCycle",
+  latestDevelopmentAction: "latestDevelopmentAction",
+  latestDevelopmentSummary: "latestDevelopmentSummary",
   region: "region",
   coordinates: "coordinates",
   founder: "founder",
@@ -74,7 +82,15 @@ export type SettlementState = {
   settlementFounded: boolean;
   settlementName: string;
   population: number;
+  food: number;
+  materials: number;
   influence: number;
+  security: number;
+  prosperity: number;
+  stability: number;
+  developmentCycle: number;
+  latestDevelopmentAction: string;
+  latestDevelopmentSummary: string;
   region: string;
   coordinates: string;
   founder: string;
@@ -133,7 +149,15 @@ export const DEFAULT_SETTLEMENT_STATE: SettlementState = {
   settlementFounded: false,
   settlementName: "",
   population: 0,
+  food: 18,
+  materials: 12,
   influence: 1,
+  security: 5,
+  prosperity: 3,
+  stability: 7,
+  developmentCycle: 1,
+  latestDevelopmentAction: "",
+  latestDevelopmentSummary: "",
   region: "Aurelia",
   coordinates: "X19 / Y12",
   founder: "You",
@@ -231,7 +255,17 @@ function sanitizeState(raw: unknown): SettlementState {
     settlementFounded: source.settlementFounded === true,
     settlementName: typeof source.settlementName === "string" ? source.settlementName : "",
     population: toSafeNumber(source.population, DEFAULT_SETTLEMENT_STATE.population),
+    food: toSafeNumber(source.food, DEFAULT_SETTLEMENT_STATE.food),
+    materials: toSafeNumber(source.materials, DEFAULT_SETTLEMENT_STATE.materials),
     influence: toSafeNumber(source.influence, DEFAULT_SETTLEMENT_STATE.influence),
+    security: toSafeNumber(source.security, DEFAULT_SETTLEMENT_STATE.security),
+    prosperity: toSafeNumber(source.prosperity, DEFAULT_SETTLEMENT_STATE.prosperity),
+    stability: toSafeNumber(source.stability, DEFAULT_SETTLEMENT_STATE.stability),
+    developmentCycle: toSafeNumber(source.developmentCycle, DEFAULT_SETTLEMENT_STATE.developmentCycle),
+    latestDevelopmentAction:
+      typeof source.latestDevelopmentAction === "string" ? source.latestDevelopmentAction : "",
+    latestDevelopmentSummary:
+      typeof source.latestDevelopmentSummary === "string" ? source.latestDevelopmentSummary : "",
     region: typeof source.region === "string" ? source.region : DEFAULT_SETTLEMENT_STATE.region,
     coordinates:
       typeof source.coordinates === "string" ? source.coordinates : DEFAULT_SETTLEMENT_STATE.coordinates,
@@ -315,7 +349,26 @@ function readLegacyState(): SettlementState {
   const settlementFounded = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.founded) === "true";
   const settlementName = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.name) ?? "";
   const populationRaw = Number(localStorage.getItem(SETTLEMENT_STORAGE_KEYS.population));
+  const foodStored = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.food);
+  const foodRaw = foodStored === null ? Number.NaN : Number(foodStored);
+  const materialsStored = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.materials);
+  const materialsRaw = materialsStored === null ? Number.NaN : Number(materialsStored);
   const influenceRaw = Number(localStorage.getItem(SETTLEMENT_STORAGE_KEYS.influence));
+  const securityStored = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.security);
+  const securityRaw = securityStored === null ? Number.NaN : Number(securityStored);
+  const prosperityStored = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.prosperity);
+  const prosperityRaw = prosperityStored === null ? Number.NaN : Number(prosperityStored);
+  const stabilityStored = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.stability);
+  const stabilityRaw = stabilityStored === null ? Number.NaN : Number(stabilityStored);
+  const developmentCycleStored = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.developmentCycle);
+  const developmentCycleRaw =
+    developmentCycleStored === null ? Number.NaN : Number(developmentCycleStored);
+  const latestDevelopmentAction =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.latestDevelopmentAction) ??
+    DEFAULT_SETTLEMENT_STATE.latestDevelopmentAction;
+  const latestDevelopmentSummary =
+    localStorage.getItem(SETTLEMENT_STORAGE_KEYS.latestDevelopmentSummary) ??
+    DEFAULT_SETTLEMENT_STATE.latestDevelopmentSummary;
   const region = localStorage.getItem(SETTLEMENT_STORAGE_KEYS.region) ?? DEFAULT_SETTLEMENT_STATE.region;
   const coordinates =
     localStorage.getItem(SETTLEMENT_STORAGE_KEYS.coordinates) ?? DEFAULT_SETTLEMENT_STATE.coordinates;
@@ -419,7 +472,16 @@ function readLegacyState(): SettlementState {
     settlementFounded,
     settlementName,
     population: Number.isFinite(populationRaw) ? populationRaw : 0,
+    food: Number.isFinite(foodRaw) ? foodRaw : DEFAULT_SETTLEMENT_STATE.food,
+    materials: Number.isFinite(materialsRaw) ? materialsRaw : DEFAULT_SETTLEMENT_STATE.materials,
     influence: Number.isFinite(influenceRaw) ? influenceRaw : 1,
+    security: Number.isFinite(securityRaw) ? securityRaw : DEFAULT_SETTLEMENT_STATE.security,
+    prosperity: Number.isFinite(prosperityRaw) ? prosperityRaw : DEFAULT_SETTLEMENT_STATE.prosperity,
+    stability: Number.isFinite(stabilityRaw) ? stabilityRaw : DEFAULT_SETTLEMENT_STATE.stability,
+    developmentCycle:
+      Number.isFinite(developmentCycleRaw) ? developmentCycleRaw : DEFAULT_SETTLEMENT_STATE.developmentCycle,
+    latestDevelopmentAction,
+    latestDevelopmentSummary,
     region,
     coordinates,
     founder,
