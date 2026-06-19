@@ -1,29 +1,18 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T11:14:05.380Z
+Generated: 2026-06-19T12:19:12.296Z
 
 Branch: main
-Working tree: has changes
+Working tree: clean
 
 Git status:
-  ## main...origin/main [ahead 3]
-   D public/qa/latest/handoff.json
-   D public/qa/latest/handoff.txt
-   M public/qa/latest/index.html
-   M public/qa/latest/manifest.json
-   M public/qa/latest/report.html
-   M public/qa/latest/screenshots/desktop-world-sector.png
-   M public/qa/latest/screenshots/desktop-world.png
-   M public/qa/latest/screenshots/mobile-world-claim-tray.png
-   M public/qa/latest/screenshots/mobile-world-sector.png
-   M public/qa/latest/screenshots/mobile-world.png
-   M public/qa/latest/smoke-result.json
+  ## main...origin/main
 
 Last 5 commits:
+  0a795f8 Lock Pixel Nations operating system and budget governance
+  d09e282 Update QA evidence after public publishing merge
   6b70526 Merge QA public evidence publishing v0.1
   2a80077 Update QA handoff after public evidence publishing sprint
   e0ff970 Add public QA evidence publishing checks
-  97fdf26 Update QA evidence after freshness merge
-  85883ca Update QA evidence after freshness merge
 
 QA:
 Smoke result: PASS
@@ -43,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T11:14:05.380Z
+Local handoff generated: 2026-06-19T12:19:12.296Z
 Local report generated: 2026-06-19T11:13:45.763Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html

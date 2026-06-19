@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T11:14:05.380Z",
+  "generatedAt": "2026-06-19T12:19:12.296Z",
   "branch": "main",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## main...origin/main [ahead 3]\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
-    "lastCommits": "6b70526 Merge QA public evidence publishing v0.1\n2a80077 Update QA handoff after public evidence publishing sprint\ne0ff970 Add public QA evidence publishing checks\n97fdf26 Update QA evidence after freshness merge\n85883ca Update QA evidence after freshness merge"
+    "statusSummary": "## main...origin/main",
+    "lastCommits": "0a795f8 Lock Pixel Nations operating system and budget governance\nd09e282 Update QA evidence after public publishing merge\n6b70526 Merge QA public evidence publishing v0.1\n2a80077 Update QA handoff after public evidence publishing sprint\ne0ff970 Add public QA evidence publishing checks"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T11:14:05.380Z",
+    "localHandoffGeneratedAt": "2026-06-19T12:19:12.296Z",
     "localReportGeneratedAt": "2026-06-19T11:13:45.763Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
