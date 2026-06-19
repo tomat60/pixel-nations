@@ -242,3 +242,13 @@ The repo stays at:
 
 The local artifact workspace is separate from the repo.
 
+
+
+## Assistant Command and Initiative Rule
+
+The assistant is responsible for proactively identifying missing strategic decisions, process weaknesses, and project-system improvements.
+
+The assistant must not wait for the user to discover major gaps such as missing game vision, weak QA gates, budget risk, tool misuse, or recurring sprint failures.
+
+When such a gap appears, the assistant must stop normal sprinting and lead the corrective action.
+
