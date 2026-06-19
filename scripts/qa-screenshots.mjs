@@ -7,6 +7,7 @@ const APP_URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const DEMO_STATE_KEY = "pixelNations.demoState.v1";
 const OUTPUT_DIR = "public/qa/latest";
 const SCREENSHOT_DIR = `${OUTPUT_DIR}/screenshots`;
+const INDEX_PATH = `${OUTPUT_DIR}/index.html`;
 const REPORT_PATH = `${OUTPUT_DIR}/report.html`;
 const MANIFEST_PATH = `${OUTPUT_DIR}/manifest.json`;
 
@@ -295,6 +296,62 @@ function buildReport({ generatedAt, appSource, screenshots }) {
 </html>`;
 }
 
+function buildIndex({ generatedAt, screenshots }) {
+  const screenshotLinks = screenshots
+    .map(
+      (shot) =>
+        `<li><a href="./screenshots/${encodeURIComponent(shot.filename)}">${escapeHtml(shot.filename)}</a> <span>${escapeHtml(
+          shot.viewport,
+        )} ${escapeHtml(shot.route)}</span></li>`,
+    )
+    .join("\n");
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pixel Nations QA Evidence</title>
+  <style>
+    :root { color-scheme: dark; --bg: #020204; --gold: #c9a962; --muted: #9ca3af; --border: rgba(201, 169, 98, 0.18); }
+    body { margin: 0; background: var(--bg); color: #f8f5ed; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    main { max-width: 900px; margin: 0 auto; padding: 40px 20px 64px; }
+    header, section { border: 1px solid var(--border); background: linear-gradient(180deg, rgba(201,169,98,0.05), rgba(255,255,255,0.015)); padding: 20px; margin-bottom: 18px; }
+    h1 { margin: 0 0 12px; font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: -0.04em; }
+    h2 { margin: 0 0 12px; color: #f5deb3; }
+    p, li, span { color: var(--muted); line-height: 1.7; }
+    a, code { color: #f5deb3; }
+    .eyebrow { color: var(--gold); text-transform: uppercase; letter-spacing: 0.22em; font-size: 0.72rem; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">Pixel Nations QA Evidence</p>
+      <h1>Public QA Evidence</h1>
+      <p>Generated: <code>${escapeHtml(generatedAt)}</code></p>
+      <p>This page is a stable public entry point for the latest committed QA artifacts.</p>
+    </header>
+
+    <section>
+      <h2>Primary Evidence</h2>
+      <ul>
+        <li><a href="./report.html">Visual QA report</a></li>
+        <li><a href="./handoff.txt">Handoff TXT</a></li>
+        <li><a href="./handoff.json">Handoff JSON</a></li>
+        <li><a href="./manifest.json">Screenshot manifest</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Screenshots</h2>
+      <ul>${screenshotLinks}</ul>
+    </section>
+  </main>
+</body>
+</html>`;
+}
+
 async function gotoAndCapture(page, capture) {
   await page.setViewportSize({ width: capture.width, height: capture.height });
   await page.goto(`${APP_URL}${capture.route}`, { waitUntil: "domcontentloaded" });
@@ -359,8 +416,10 @@ async function main() {
 
   await writeFile(MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`);
   await writeFile(REPORT_PATH, buildReport({ generatedAt, appSource, screenshots }));
+  await writeFile(INDEX_PATH, buildIndex({ generatedAt, screenshots }));
 
   console.log(`Public QA report written to ${REPORT_PATH}`);
+  console.log(`Public QA index written to ${INDEX_PATH}`);
   console.log(`Public QA screenshots saved to ${SCREENSHOT_DIR}`);
 }
 

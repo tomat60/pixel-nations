@@ -84,6 +84,8 @@ A sprint is not accepted until these gates are considered:
 
 If QA evidence status is `STALE`, `MISSING`, or `UNKNOWN`, Virtual QA cannot fully accept visual/mobile work unless the user uploads current screenshots or a current review bundle directly into ChatGPT for manual inspection.
 
+Public QA evidence cannot be used for Virtual QA acceptance unless the public report, public handoff TXT, and public handoff JSON are reachable after deploy, and the public report timestamp matches or is not older than the current QA evidence window. If public evidence is stale, missing, or unreachable, the user must upload the current bundle directly into ChatGPT for manual inspection.
+
 ### First-Time Tester Gate
 
 - A friend/tester who does not know the project should not immediately spot an obvious layout flaw.
