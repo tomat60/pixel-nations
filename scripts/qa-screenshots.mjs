@@ -79,6 +79,7 @@ const captures = [
     width: 390,
     height: 844,
     selector: "[data-qa='landing-map-preview']",
+    assertLandingMapSafeArea: 12,
   },
   { filename: "mobile-world.png", route: "/world", viewport: "mobile", width: 390, height: 844, fullPage: true },
   {
@@ -195,6 +196,15 @@ const captures = [
   { filename: "mobile-nation.png", route: "/nation", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-empire.png", route: "/empire", viewport: "mobile", width: 390, height: 844 },
   { filename: "desktop-home.png", route: "/", viewport: "desktop", width: 1440, height: 900 },
+  {
+    filename: "desktop-landing-map-preview.png",
+    route: "/",
+    viewport: "desktop",
+    width: 1440,
+    height: 900,
+    selector: "[data-qa='landing-map-preview']",
+    assertLandingMapSafeArea: 16,
+  },
   { filename: "desktop-world.png", route: "/world", viewport: "desktop", width: 1440, height: 900, fullPage: true },
   { filename: "desktop-world-top.png", route: "/world", viewport: "desktop", width: 1440, height: 900 },
   {
@@ -302,6 +312,32 @@ async function ensureApp() {
   startedProcess.stderr?.on("data", (data) => process.stderr.write(data));
   await waitForApp();
   return { startedProcess, appSource: existsSync(".next") ? "temporary next start" : "temporary next dev" };
+}
+
+async function assertLandingMapSafeArea(page, minInset) {
+  const frame = page.locator("[data-qa='landing-map-frame']").first();
+  const label = page.locator("[data-qa='landing-map-bottom-label']").first();
+
+  await frame.waitFor({ state: "visible", timeout: 5000 });
+  await label.waitFor({ state: "visible", timeout: 5000 });
+
+  const [frameBox, labelBox] = await Promise.all([frame.boundingBox(), label.boundingBox()]);
+
+  if (!frameBox || !labelBox) {
+    throw new Error("Landing map safe-area assertion could not read element bounds.");
+  }
+
+  const violations = [];
+  if (labelBox.x < frameBox.x) violations.push("left");
+  if (labelBox.x + labelBox.width > frameBox.x + frameBox.width) violations.push("right");
+  if (labelBox.y < frameBox.y) violations.push("top");
+  if (labelBox.y + labelBox.height > frameBox.y + frameBox.height - minInset) violations.push("bottom");
+
+  if (violations.length > 0) {
+    throw new Error(
+      `Landing map bottom label violates ${minInset}px frame safe area: ${violations.join(", ")}.`,
+    );
+  }
 }
 
 function escapeHtml(value) {
@@ -472,6 +508,9 @@ async function gotoAndCapture(page, capture) {
     const locator = page.locator(capture.selector).first();
     await locator.scrollIntoViewIfNeeded();
     await page.waitForTimeout(350);
+    if (capture.assertLandingMapSafeArea) {
+      await assertLandingMapSafeArea(page, capture.assertLandingMapSafeArea);
+    }
     await locator.screenshot({ path: `${SCREENSHOT_DIR}/${capture.filename}` });
     return;
   }

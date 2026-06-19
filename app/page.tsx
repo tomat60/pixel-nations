@@ -735,31 +735,41 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="relative overflow-hidden border border-amber-500/25 bg-[#050509]/90 p-2 shadow-[0_40px_150px_rgba(0,0,0,0.68),0_0_120px_rgba(201,169,98,0.12)] sm:p-3">
-              <div className="relative min-h-[360px] overflow-hidden bg-[#030306] sm:aspect-[4/3] sm:min-h-[420px] lg:min-h-[520px]">
-                <img
-                  src="/assets/world-map/aurelian-basin-v1.png"
-                  alt=""
-                  aria-hidden
-                  className="absolute inset-0 h-full w-full object-contain object-center opacity-95 sm:object-cover"
-                />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,2,4,0.04),rgba(2,2,4,0.48))]" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_38%,rgba(2,2,4,0.72)_100%)]" />
-                <div className="absolute left-3 right-3 top-3 border border-amber-500/25 bg-[#030306]/82 px-3 py-2 backdrop-blur-sm sm:left-4 sm:right-auto sm:top-4">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-amber-500/80">
-                    Sector A-01
-                  </p>
-                  <p className="mt-1 font-[family-name:var(--font-syne)] text-sm font-bold text-amber-100">
-                    Aurelian Basin
-                  </p>
+            <div
+              data-qa="landing-map-frame"
+              className="relative border border-amber-500/25 bg-[#050509]/90 p-2 shadow-[0_40px_150px_rgba(0,0,0,0.68),0_0_120px_rgba(201,169,98,0.12)] sm:p-3"
+            >
+              <div className="relative min-h-[360px] bg-[#030306] sm:aspect-[4/3] sm:min-h-[420px] lg:min-h-[520px]">
+                <div className="absolute inset-0 overflow-hidden">
+                  <img
+                    src="/assets/world-map/aurelian-basin-v1.png"
+                    alt=""
+                    aria-hidden
+                    className="absolute inset-0 h-full w-full object-contain object-center opacity-95 sm:object-cover"
+                  />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,2,4,0.04),rgba(2,2,4,0.48))]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_38%,rgba(2,2,4,0.72)_100%)]" />
                 </div>
-                <div className="absolute inset-x-3 bottom-3 border border-amber-500/15 bg-[#030306]/78 px-3 py-2 text-left backdrop-blur-sm sm:bottom-4 sm:left-auto sm:right-4 sm:text-right">
-                  <p className="text-[9px] uppercase tracking-[0.22em] text-zinc-500">
-                    Explore Sector A-01
-                  </p>
-                  <p className="mt-1 text-xs font-semibold text-amber-100/80">
-                    Claim one land. Begin an empire.
-                  </p>
+                <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-between gap-4 p-3 sm:p-4">
+                  <div className="self-stretch border border-amber-500/25 bg-[#030306]/82 px-3 py-2 backdrop-blur-sm sm:self-start">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-amber-500/80">
+                      Sector A-01
+                    </p>
+                    <p className="mt-1 font-[family-name:var(--font-syne)] text-sm font-bold text-amber-100">
+                      Aurelian Basin
+                    </p>
+                  </div>
+                  <div
+                    data-qa="landing-map-bottom-label"
+                    className="self-stretch border border-amber-500/15 bg-[#030306]/78 px-3 py-2 text-left backdrop-blur-sm sm:self-end sm:text-right"
+                  >
+                    <p className="text-[9px] uppercase tracking-[0.22em] text-zinc-500">
+                      Explore Sector A-01
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-amber-100/80">
+                      Claim one land. Begin an empire.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
