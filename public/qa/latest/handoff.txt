@@ -1,13 +1,14 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T06:00:16.958Z
+Generated: 2026-06-19T11:14:05.380Z
 
-Branch: sprint/qa-public-evidence-publishing-v0-1
+Branch: main
 Working tree: has changes
 
 Git status:
-  ## sprint/qa-public-evidence-publishing-v0-1
-   M public/qa/latest/handoff.json
-   M public/qa/latest/handoff.txt
+  ## main...origin/main [ahead 3]
+   D public/qa/latest/handoff.json
+   D public/qa/latest/handoff.txt
+   M public/qa/latest/index.html
    M public/qa/latest/manifest.json
    M public/qa/latest/report.html
    M public/qa/latest/screenshots/desktop-world-sector.png
@@ -16,35 +17,34 @@ Git status:
    M public/qa/latest/screenshots/mobile-world-sector.png
    M public/qa/latest/screenshots/mobile-world.png
    M public/qa/latest/smoke-result.json
-  ?? public/qa/latest/index.html
 
 Last 5 commits:
+  6b70526 Merge QA public evidence publishing v0.1
+  2a80077 Update QA handoff after public evidence publishing sprint
   e0ff970 Add public QA evidence publishing checks
   97fdf26 Update QA evidence after freshness merge
   85883ca Update QA evidence after freshness merge
-  f30643d Merge QA evidence freshness v0.1
-  eb98ed2 Update QA handoff after evidence freshness sprint
 
 QA:
 Smoke result: PASS
-Smoke generated: 2026-06-19T05:59:20.152Z
+Smoke generated: 2026-06-19T11:14:04.620Z
 Smoke app source: existing local app
 Smoke steps: 9/9 passed
 Smoke result path: public/qa/latest/smoke-result.json
 
 QA Evidence Freshness:
-Smoke generated: 2026-06-19T05:59:20.152Z
-Report modified: 2026-06-19T05:58:52.714Z
-Manifest modified: 2026-06-19T05:58:52.713Z
-Screenshots newest: 2026-06-19T05:58:52.573Z
-Screenshots oldest: 2026-06-19T05:58:01.369Z
+Smoke generated: 2026-06-19T11:14:04.620Z
+Report modified: 2026-06-19T11:13:45.769Z
+Manifest modified: 2026-06-19T11:13:45.765Z
+Screenshots newest: 2026-06-19T11:13:45.623Z
+Screenshots oldest: 2026-06-19T11:12:51.303Z
 Screenshots count: 19
 Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T06:00:16.958Z
-Local report generated: 2026-06-19T05:58:52.711Z
+Local handoff generated: 2026-06-19T11:14:05.380Z
+Local report generated: 2026-06-19T11:13:45.763Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
 Public handoff TXT: https://pixel-nations.vercel.app/qa/latest/handoff.txt
