@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync, copyFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 
 const repoRoot = process.cwd();
-const workspaceRoot = "/Users/tomchuck/Desktop/Pixel Nations";
-const outDir = path.join(workspaceRoot, "Audit Bundles", "Ops Reports");
+const workspaceRoot = process.env.PN_OPS_WORKSPACE || "/Users/tomchuck/Desktop/Pixel Nations";
+const outDir =
+  process.env.PN_OPS_REPORT_DIR ||
+  path.join(workspaceRoot, "Audit Bundles", "Ops Reports");
+
 mkdirSync(outDir, { recursive: true });
 
 const now = new Date();
@@ -77,7 +80,7 @@ function listFiles(dir, max = 240) {
   }
 }
 
-const branch = run("git", ["branch", "--show-current"]);
+const branch = run("git", ["branch", "--show-current"]) || process.env.GITHUB_REF_NAME || "unknown";
 const status = run("git", ["status", "--short", "--branch"]);
 const isClean = !run("git", ["status", "--porcelain"]);
 const recentCommits = run("git", ["log", "--oneline", "-20"]);
@@ -121,10 +124,22 @@ const recommendation = (() => {
   return "OK FOR CHATGPT REVIEW: no Cursor required. Upload UPLOAD_THIS_OPS_REPORT.md when asked for an ops report.";
 })();
 
+const ciContext = {
+  isGitHubActions: process.env.GITHUB_ACTIONS === "true",
+  workflow: process.env.GITHUB_WORKFLOW || null,
+  runId: process.env.GITHUB_RUN_ID || null,
+  runNumber: process.env.GITHUB_RUN_NUMBER || null,
+  actor: process.env.GITHUB_ACTOR || null,
+  refName: process.env.GITHUB_REF_NAME || null,
+  sha: process.env.GITHUB_SHA || null,
+};
+
 const report = {
   generatedAt: now.toISOString(),
   repoRoot,
   workspaceRoot,
+  outDir,
+  ciContext,
   reportPaths: {
     uploadThisMarkdown: uploadMdPath,
     latestMarkdown: latestMdPath,
@@ -170,6 +185,14 @@ Upload this file to ChatGPT when asked for the current ops report:
 \`${uploadMdPath}\`
 
 This stable filename always points to the newest generated ops report. You no longer need to search for the latest timestamped file.
+
+## Execution Context
+
+- GitHub Actions: **${ciContext.isGitHubActions ? "YES" : "NO"}**
+- Workflow: \`${ciContext.workflow || "local"}\`
+- Run ID: \`${ciContext.runId || "local"}\`
+- Actor: \`${ciContext.actor || "local"}\`
+- SHA: \`${ciContext.sha || "local"}\`
 
 ## Executive Status
 
