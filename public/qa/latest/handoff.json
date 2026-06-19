@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T16:50:19.296Z",
+  "generatedAt": "2026-06-19T17:26:04.940Z",
   "branch": "sprint/visual-gamefeel-engine-v0-4",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## sprint/visual-gamefeel-engine-v0-4\n M public/qa/latest/handoff.json\n M public/qa/latest/handoff.txt",
-    "lastCommits": "8d27eb2 Implement settlement visual gamefeel\nca77873 Update QA handoff after Visual Gamefeel Engine brief\nfd4c521 Add Visual Gamefeel Engine v0.4 strategy brief\n01057da Update QA handoff after GitHub Actions ops pilot push\nd8668de Update QA handoff after GitHub Actions ops pilot"
+    "statusSummary": "## sprint/visual-gamefeel-engine-v0-4...origin/sprint/visual-gamefeel-engine-v0-4",
+    "lastCommits": "19f8295 Update QA handoff for visual gamefeel sprint\n8d27eb2 Implement settlement visual gamefeel\nca77873 Update QA handoff after Visual Gamefeel Engine brief\nfd4c521 Add Visual Gamefeel Engine v0.4 strategy brief\n01057da Update QA handoff after GitHub Actions ops pilot push"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T16:50:19.296Z",
+    "localHandoffGeneratedAt": "2026-06-19T17:26:04.940Z",
     "localReportGeneratedAt": "2026-06-19T16:48:52.338Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",

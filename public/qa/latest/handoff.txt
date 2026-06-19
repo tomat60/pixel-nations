@@ -1,20 +1,18 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T16:50:19.296Z
+Generated: 2026-06-19T17:26:04.940Z
 
 Branch: sprint/visual-gamefeel-engine-v0-4
-Working tree: has changes
+Working tree: clean
 
 Git status:
-  ## sprint/visual-gamefeel-engine-v0-4
-   M public/qa/latest/handoff.json
-   M public/qa/latest/handoff.txt
+  ## sprint/visual-gamefeel-engine-v0-4...origin/sprint/visual-gamefeel-engine-v0-4
 
 Last 5 commits:
+  19f8295 Update QA handoff for visual gamefeel sprint
   8d27eb2 Implement settlement visual gamefeel
   ca77873 Update QA handoff after Visual Gamefeel Engine brief
   fd4c521 Add Visual Gamefeel Engine v0.4 strategy brief
   01057da Update QA handoff after GitHub Actions ops pilot push
-  d8668de Update QA handoff after GitHub Actions ops pilot
 
 QA:
 Smoke result: PASS
@@ -34,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T16:50:19.296Z
+Local handoff generated: 2026-06-19T17:26:04.940Z
 Local report generated: 2026-06-19T16:48:52.338Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
