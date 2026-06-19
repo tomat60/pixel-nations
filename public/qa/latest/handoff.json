@@ -1,16 +1,16 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T16:09:16.548Z",
-  "branch": "main",
+  "generatedAt": "2026-06-19T17:26:04.940Z",
+  "branch": "sprint/visual-gamefeel-engine-v0-4",
   "isClean": true,
   "git": {
-    "statusSummary": "## main...origin/main",
-    "lastCommits": "fd4c521 Add Visual Gamefeel Engine v0.4 strategy brief\n01057da Update QA handoff after GitHub Actions ops pilot push\nd8668de Update QA handoff after GitHub Actions ops pilot\n833979b Add GitHub Actions ops report pilot\nab03f8d Update QA handoff after AI ops VPS pilot runbook"
+    "statusSummary": "## sprint/visual-gamefeel-engine-v0-4...origin/sprint/visual-gamefeel-engine-v0-4",
+    "lastCommits": "19f8295 Update QA handoff for visual gamefeel sprint\n8d27eb2 Implement settlement visual gamefeel\nca77873 Update QA handoff after Visual Gamefeel Engine brief\nfd4c521 Add Visual Gamefeel Engine v0.4 strategy brief\n01057da Update QA handoff after GitHub Actions ops pilot push"
   },
   "qa": {
     "smoke": {
       "status": "PASS",
-      "generatedAt": "2026-06-19T13:31:04.156Z",
+      "generatedAt": "2026-06-19T16:49:20.372Z",
       "appUrl": "http://localhost:3000",
       "appSource": "existing local app",
       "blockingStep": "",
@@ -19,53 +19,53 @@
         {
           "name": "reset demo state and open /world",
           "status": "PASS",
-          "durationMs": 1361
+          "durationMs": 1441
         },
         {
           "name": "select a claimable Sector A-01 land",
           "status": "PASS",
-          "durationMs": 214
+          "durationMs": 319
         },
         {
           "name": "claim selected land",
           "status": "PASS",
-          "durationMs": 340
+          "durationMs": 574
         },
         {
           "name": "dashboard recognizes claimed land",
           "status": "PASS",
-          "durationMs": 308
+          "durationMs": 618
         },
         {
           "name": "create settlement",
           "status": "PASS",
-          "durationMs": 2389
+          "durationMs": 2564
         },
         {
           "name": "build settlement core and establish trade",
           "status": "PASS",
-          "durationMs": 3797
+          "durationMs": 2875
         },
         {
           "name": "form alliance and found nation",
           "status": "PASS",
-          "durationMs": 7800
+          "durationMs": 7608
         },
         {
           "name": "attempt empire continuation path",
           "status": "PASS",
-          "durationMs": 1461
+          "durationMs": 1451
         },
         {
           "name": "create empire",
           "status": "PASS",
-          "durationMs": 1406
+          "durationMs": 1570
         }
       ],
       "passedSteps": 9,
       "totalSteps": 9,
       "path": "public/qa/latest/smoke-result.json",
-      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-19T13:31:04.156Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-19T16:49:20.372Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
     },
     "publicQaIndexUrl": "https://pixel-nations.vercel.app/qa/latest/",
     "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
@@ -79,18 +79,18 @@
   },
   "qaEvidenceFreshness": {
     "status": "FRESH",
-    "smokeGeneratedAt": "2026-06-19T13:31:04.156Z",
-    "reportModifiedAt": "2026-06-19T13:30:43.618Z",
-    "manifestModifiedAt": "2026-06-19T13:30:43.617Z",
-    "screenshotsNewestModifiedAt": "2026-06-19T13:30:43.469Z",
-    "screenshotsOldestModifiedAt": "2026-06-19T13:29:52.091Z",
-    "screenshotsCount": 19,
+    "smokeGeneratedAt": "2026-06-19T16:49:20.372Z",
+    "reportModifiedAt": "2026-06-19T16:48:52.341Z",
+    "manifestModifiedAt": "2026-06-19T16:48:52.339Z",
+    "screenshotsNewestModifiedAt": "2026-06-19T16:48:52.278Z",
+    "screenshotsOldestModifiedAt": "2026-06-19T16:47:38.354Z",
+    "screenshotsCount": 22,
     "toleranceMinutes": 2,
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T16:09:16.548Z",
-    "localReportGeneratedAt": "2026-06-19T13:30:43.615Z",
+    "localHandoffGeneratedAt": "2026-06-19T17:26:04.940Z",
+    "localReportGeneratedAt": "2026-06-19T16:48:52.338Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
       "report": "https://pixel-nations.vercel.app/qa/latest/report.html",

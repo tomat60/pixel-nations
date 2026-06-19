@@ -45,6 +45,337 @@ const STARTING_RESOURCES = [
   { id: "food", label: "Food", value: "200" },
 ];
 
+type DevelopmentStatId =
+  | "population"
+  | "food"
+  | "materials"
+  | "influence"
+  | "security"
+  | "prosperity"
+  | "stability";
+
+type DevelopmentStat = {
+  id: DevelopmentStatId;
+  label: string;
+  value: number;
+  tone: string;
+};
+
+const DEVELOPMENT_STAT_META: Record<DevelopmentStatId, { label: string; tone: string }> = {
+  population: { label: "Population", tone: "from-amber-300/20 to-orange-700/10" },
+  food: { label: "Food", tone: "from-lime-300/20 to-emerald-800/10" },
+  materials: { label: "Materials", tone: "from-stone-300/20 to-zinc-800/10" },
+  influence: { label: "Influence", tone: "from-yellow-300/20 to-amber-800/10" },
+  security: { label: "Security", tone: "from-sky-300/20 to-blue-900/10" },
+  prosperity: { label: "Prosperity", tone: "from-orange-300/20 to-amber-900/10" },
+  stability: { label: "Stability", tone: "from-violet-300/20 to-indigo-900/10" },
+};
+
+const ACTION_VISUALS: Record<
+  DevelopmentActionId,
+  {
+    eyebrow: string;
+    symbol: string;
+    accent: string;
+    glow: string;
+    deltaLabel: string;
+    meaning: string;
+  }
+> = {
+  "build-farms": {
+    eyebrow: "Fields / Growth",
+    symbol: "F",
+    accent: "border-lime-300/35 bg-lime-400/10 text-lime-100",
+    glow: "from-lime-300/20 via-amber-500/10 to-transparent",
+    deltaLabel: "+6 Food",
+    meaning: "Food stores rise and new families can settle.",
+  },
+  "raise-watch": {
+    eyebrow: "Tower / Shield",
+    symbol: "W",
+    accent: "border-sky-300/35 bg-sky-400/10 text-sky-100",
+    glow: "from-sky-300/20 via-amber-500/10 to-transparent",
+    deltaLabel: "+3 Security",
+    meaning: "The frontier feels safer, but trade slows.",
+  },
+  "open-market": {
+    eyebrow: "Routes / Coin",
+    symbol: "M",
+    accent: "border-orange-300/35 bg-orange-400/10 text-orange-100",
+    glow: "from-orange-300/20 via-amber-500/10 to-transparent",
+    deltaLabel: "+3 Prosperity",
+    meaning: "Trade opens the settlement to wealth and risk.",
+  },
+  "civic-assembly": {
+    eyebrow: "Hall / Banner",
+    symbol: "C",
+    accent: "border-violet-300/35 bg-violet-400/10 text-violet-100",
+    glow: "from-violet-300/20 via-amber-500/10 to-transparent",
+    deltaLabel: "+3 Stability",
+    meaning: "A shared civic voice gives the city order.",
+  },
+};
+
+function formatDelta(delta?: number) {
+  if (!delta) return "";
+  return `${delta > 0 ? "+" : ""}${delta}`;
+}
+
+function formatStatDelta(label: string, delta?: number) {
+  const value = formatDelta(delta);
+  return value ? `${value} ${label}` : "";
+}
+
+function getSettlementVitality(stats: DevelopmentStat[]) {
+  const leading = [...stats].sort((a, b) => b.value - a.value)[0];
+
+  if (!leading) {
+    return {
+      title: "Balanced Outpost",
+      description: "The settlement is waiting for its first clear direction.",
+      pulse: "Civic hearth",
+      pillars: ["Growth", "Guard", "Trade"],
+    };
+  }
+
+  const identityByStat: Record<DevelopmentStatId, { title: string; description: string; pulse: string; pillars: string[] }> = {
+    population: {
+      title: "Growing Hearth",
+      description: "Families and workers are becoming the settlement's center of gravity.",
+      pulse: "New roofs",
+      pillars: ["Homes", "Fields", "Roads"],
+    },
+    food: {
+      title: "Breadbasket Outpost",
+      description: "Fields and stores are giving the settlement room to grow.",
+      pulse: "Full granaries",
+      pillars: ["Fields", "Stores", "Families"],
+    },
+    materials: {
+      title: "Builder's Yard",
+      description: "Stone, timber, and workshops define the settlement's next rise.",
+      pulse: "Stacked timber",
+      pillars: ["Yards", "Tools", "Walls"],
+    },
+    influence: {
+      title: "Founder Seat",
+      description: "The settlement's voice carries beyond its first streets.",
+      pulse: "Raised banner",
+      pillars: ["Hall", "Record", "Oath"],
+    },
+    security: {
+      title: "Frontier Watch",
+      description: "Towers and patrol paths shape the settlement's cautious strength.",
+      pulse: "Lit watchfire",
+      pillars: ["Tower", "Gate", "Patrol"],
+    },
+    prosperity: {
+      title: "Market Spark",
+      description: "Stalls, routes, and exchange are pulling life into the square.",
+      pulse: "Open stalls",
+      pillars: ["Stalls", "Coins", "Routes"],
+    },
+    stability: {
+      title: "Civic Order",
+      description: "Law, gathering, and shared ritual are binding the city together.",
+      pulse: "Charter hall",
+      pillars: ["Hall", "Banner", "Council"],
+    },
+  };
+
+  return identityByStat[leading.id];
+}
+
+function DevelopmentActionVisual({ actionId }: { actionId: DevelopmentActionId }) {
+  const visual = ACTION_VISUALS[actionId];
+
+  return (
+    <div className="relative min-h-24 overflow-hidden border border-amber-500/10 bg-[#050509]/90 p-4">
+      <div aria-hidden className={`absolute inset-0 bg-gradient-to-br ${visual.glow}`} />
+      <div className="relative flex items-center justify-between gap-4">
+        <div className={`grid size-14 place-items-center border ${visual.accent}`}>
+          <span className="font-[family-name:var(--font-syne)] text-2xl font-extrabold">{visual.symbol}</span>
+        </div>
+        <div className="flex flex-1 items-end justify-end gap-1.5">
+          <span className="h-5 w-2 bg-amber-200/30" />
+          <span className="h-8 w-2 bg-amber-200/45" />
+          <span className="h-12 w-2 bg-amber-200/65" />
+          <span className="h-7 w-2 bg-amber-200/35" />
+        </div>
+      </div>
+      <div className="relative mt-4 flex flex-wrap items-center gap-2">
+        <span className="rounded-full border border-amber-500/15 bg-black/25 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-100">
+          {visual.eyebrow}
+        </span>
+        <span className="rounded-full border border-amber-500/15 bg-amber-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-200">
+          {visual.deltaLabel}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function StatDeltaBadge({ label, delta }: { label: string; delta?: number }) {
+  if (!delta) return null;
+
+  const isPositive = delta > 0;
+  return (
+    <span
+      className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] ${
+        isPositive
+          ? "border-emerald-300/25 bg-emerald-400/10 text-emerald-100"
+          : "border-orange-300/25 bg-orange-400/10 text-orange-100"
+      }`}
+    >
+      {formatStatDelta(label, delta)}
+    </span>
+  );
+}
+
+function SettlementStatGrid({
+  stats,
+  latestDeltas,
+  cycle,
+}: {
+  stats: DevelopmentStat[];
+  latestDeltas: Partial<Record<DevelopmentStatId, number>>;
+  cycle: number;
+}) {
+  return (
+    <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {stats.map((stat) => {
+        const delta = latestDeltas[stat.id];
+        const changed = Boolean(delta);
+
+        return (
+          <article
+            key={`${stat.id}-${changed ? cycle : "idle"}`}
+            className={`relative overflow-hidden border p-4 transition-all duration-300 ${
+              changed
+                ? "border-amber-300/45 bg-amber-500/[0.08] shadow-[0_0_34px_rgba(201,169,98,0.13)] animate-border-glow"
+                : "border-amber-500/10 bg-[#08080f]/85"
+            }`}
+          >
+            <div aria-hidden className={`absolute inset-0 bg-gradient-to-br ${stat.tone} opacity-70`} />
+            <div className="relative flex min-h-24 flex-col justify-between gap-4">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">{stat.label}</p>
+                <StatDeltaBadge label={stat.label} delta={delta} />
+              </div>
+              <p className="font-[family-name:var(--font-syne)] text-3xl font-extrabold text-amber-100">
+                {stat.value}
+              </p>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
+function SettlementVitalityPreview({
+  vitality,
+  latestActionId,
+}: {
+  vitality: ReturnType<typeof getSettlementVitality>;
+  latestActionId?: DevelopmentActionId;
+}) {
+  const latestVisual = latestActionId ? ACTION_VISUALS[latestActionId] : null;
+
+  return (
+    <div className="mt-7 grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <section className="overflow-hidden border border-amber-500/15 bg-[#08080f]/90 p-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-600/75">
+          Settlement Vitality
+        </p>
+        <div className="mt-5 grid grid-cols-3 gap-2">
+          {vitality.pillars.map((pillar, index) => (
+            <div
+              key={pillar}
+              className={`min-h-24 border border-amber-500/10 bg-amber-500/[0.04] p-3 ${
+                index === 1 ? "shadow-[0_0_34px_rgba(201,169,98,0.1)]" : ""
+              }`}
+            >
+              <div
+                aria-hidden
+                className={`mx-auto h-10 w-8 border border-amber-300/25 bg-gradient-to-b ${
+                  latestVisual?.glow ?? "from-amber-300/20 via-amber-500/10 to-transparent"
+                }`}
+              />
+              <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
+                {pillar}
+              </p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 flex items-center gap-3 border border-amber-500/10 bg-black/20 p-3">
+          <span className="size-2 rounded-full bg-amber-300 shadow-[0_0_18px_rgba(251,191,36,0.65)]" />
+          <span className="text-xs uppercase tracking-[0.2em] text-amber-100">{vitality.pulse}</span>
+        </div>
+      </section>
+
+      <section className="border border-amber-500/15 bg-[#08080f]/90 p-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-600/75">
+          Current Character
+        </p>
+        <h3 className="mt-4 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100">
+          {vitality.title}
+        </h3>
+        <p className="mt-3 text-sm leading-7 text-zinc-400">{vitality.description}</p>
+        {latestVisual ? (
+          <p className="mt-4 border-l border-amber-400/35 pl-4 text-sm leading-7 text-amber-100/80">
+            Latest shift: {latestVisual.meaning}
+          </p>
+        ) : (
+          <p className="mt-4 border-l border-amber-500/20 pl-4 text-sm leading-7 text-zinc-500">
+            Choose an action to give the settlement a visible direction.
+          </p>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function ConsequenceBanner({
+  actionTitle,
+  summary,
+  deltas,
+}: {
+  actionTitle: string;
+  summary: string;
+  deltas: Partial<Record<DevelopmentStatId, number>>;
+}) {
+  const deltaEntries = Object.entries(deltas).filter(([, delta]) => Boolean(delta)) as [
+    DevelopmentStatId,
+    number,
+  ][];
+
+  return (
+    <div className="mt-7 overflow-hidden border border-amber-400/30 bg-amber-500/[0.055] shadow-[0_0_60px_rgba(201,169,98,0.1)]">
+      <div className="border-b border-amber-500/15 bg-gradient-to-r from-amber-500/15 via-amber-500/[0.04] to-transparent p-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-500/85">
+          Latest Consequence
+        </p>
+        <h3 className="mt-3 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100">
+          {actionTitle || "Awaiting First Development Order"}
+        </h3>
+      </div>
+      <div className="p-5">
+        <p className="text-sm leading-7 text-zinc-300">
+          {summary || "No development action has been taken yet. Choose one action to shape how this settlement grows."}
+        </p>
+        {deltaEntries.length > 0 ? (
+          <div className="mt-5 flex flex-wrap gap-2">
+            {deltaEntries.map(([id, delta]) => (
+              <StatDeltaBadge key={id} label={DEVELOPMENT_STAT_META[id].label} delta={delta} />
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function getTownHallOutcome(focusId?: string) {
   if (focusId === "growth") {
     return {
@@ -90,6 +421,10 @@ export default function SettlementPage() {
 
   const claimedLand = useMemo(() => getClaimedLandDisplay(settlementState), [settlementState]);
   const developmentState = useMemo(() => getSettlementDevelopmentState(settlementState), [settlementState]);
+  const latestDevelopmentAction = useMemo(
+    () => DEVELOPMENT_ACTIONS.find((action) => action.title === developmentState.latestDevelopmentAction),
+    [developmentState.latestDevelopmentAction],
+  );
 
   const displaySettlement = useMemo(
     () => ({
@@ -254,15 +589,17 @@ export default function SettlementPage() {
     { id: "level", label: "Level", value: displaySettlement.settlementLevel },
   ];
 
-  const developmentStats = [
-    { id: "population", label: "Population", value: String(developmentState.population) },
-    { id: "food", label: "Food", value: String(developmentState.food) },
-    { id: "materials", label: "Materials", value: String(developmentState.materials) },
-    { id: "influence", label: "Influence", value: String(developmentState.influence) },
-    { id: "security", label: "Security", value: String(developmentState.security) },
-    { id: "prosperity", label: "Prosperity", value: String(developmentState.prosperity) },
-    { id: "stability", label: "Stability", value: String(developmentState.stability) },
+  const developmentStats: DevelopmentStat[] = [
+    { id: "population", value: developmentState.population, ...DEVELOPMENT_STAT_META.population },
+    { id: "food", value: developmentState.food, ...DEVELOPMENT_STAT_META.food },
+    { id: "materials", value: developmentState.materials, ...DEVELOPMENT_STAT_META.materials },
+    { id: "influence", value: developmentState.influence, ...DEVELOPMENT_STAT_META.influence },
+    { id: "security", value: developmentState.security, ...DEVELOPMENT_STAT_META.security },
+    { id: "prosperity", value: developmentState.prosperity, ...DEVELOPMENT_STAT_META.prosperity },
+    { id: "stability", value: developmentState.stability, ...DEVELOPMENT_STAT_META.stability },
   ];
+  const latestDeltas = (latestDevelopmentAction?.deltas ?? {}) as Partial<Record<DevelopmentStatId, number>>;
+  const settlementVitality = getSettlementVitality(developmentStats);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050505] px-6 py-12 text-white sm:px-10 sm:py-16">
@@ -376,61 +713,86 @@ export default function SettlementPage() {
               )}
             </div>
 
-            <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {developmentStats.map((stat) => (
-                <article key={stat.id} className="border border-amber-500/10 bg-[#08080f]/85 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">{stat.label}</p>
-                  <p className="mt-2 font-[family-name:var(--font-syne)] text-2xl font-extrabold text-amber-100">
-                    {stat.value}
-                  </p>
-                </article>
-              ))}
-            </div>
+            <SettlementStatGrid
+              stats={developmentStats}
+              latestDeltas={latestDeltas}
+              cycle={developmentState.developmentCycle}
+            />
+
+            <SettlementVitalityPreview
+              vitality={settlementVitality}
+              latestActionId={latestDevelopmentAction?.id}
+            />
 
             <div className="mt-7 grid gap-4 lg:grid-cols-2">
               {DEVELOPMENT_ACTIONS.map((action) => {
                 const canApply = canApplyDevelopmentAction(settlementState, action);
+                const isLatest = latestDevelopmentAction?.id === action.id;
 
                 return (
                   <button
                     key={action.id}
                     type="button"
+                    aria-label={action.title}
                     onClick={() => runDevelopmentAction(action.id)}
                     disabled={!canApply}
-                    className={`border p-5 text-left transition-colors ${
+                    className={`group overflow-hidden border text-left transition-all duration-300 ${
                       canApply
-                        ? "border-amber-500/20 bg-[#08080f]/90 hover:border-amber-400/60 hover:bg-amber-500/10"
+                        ? isLatest
+                          ? "border-amber-300/60 bg-amber-500/[0.08] shadow-[0_0_44px_rgba(201,169,98,0.14)]"
+                          : "border-amber-500/20 bg-[#08080f]/90 hover:-translate-y-1 hover:border-amber-400/60 hover:bg-amber-500/10"
                         : "cursor-not-allowed border-zinc-800 bg-[#08080f]/60 opacity-60"
                     }`}
                   >
-                    <p className="font-[family-name:var(--font-syne)] text-xl font-bold text-amber-100">
-                      {action.title}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-zinc-400">{action.intent}</p>
-                    <div className="mt-4 space-y-2 text-xs uppercase tracking-[0.18em]">
-                      <p className="text-zinc-500">Cost: {action.cost}</p>
-                      <p className="text-amber-200/75">Effect: {action.effect}</p>
-                      <p className="text-zinc-500">Tradeoff: {action.tradeoff}</p>
+                    <DevelopmentActionVisual actionId={action.id} />
+                    <div className="p-5">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="font-[family-name:var(--font-syne)] text-xl font-bold text-amber-100">
+                            {action.title}
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-zinc-400">{action.intent}</p>
+                        </div>
+                        {isLatest ? (
+                          <span className="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-100">
+                            Latest
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="mt-4 grid gap-2 text-xs uppercase tracking-[0.16em] sm:grid-cols-3">
+                        <p className="border border-amber-500/10 bg-black/20 p-3 text-zinc-500">Cost: {action.cost}</p>
+                        <p className="border border-amber-500/10 bg-amber-500/[0.04] p-3 text-amber-200/75">
+                          Effect: {action.effect}
+                        </p>
+                        <p className="border border-amber-500/10 bg-black/20 p-3 text-zinc-500">
+                          Tradeoff: {action.tradeoff}
+                        </p>
+                      </div>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {Object.entries(action.deltas).map(([id, delta]) => (
+                          <StatDeltaBadge
+                            key={id}
+                            label={DEVELOPMENT_STAT_META[id as DevelopmentStatId].label}
+                            delta={delta}
+                          />
+                        ))}
+                      </div>
+                      {!canApply ? (
+                        <p className="mt-4 text-sm leading-6 text-amber-300">
+                          Not enough stored resources for this cycle.
+                        </p>
+                      ) : null}
                     </div>
-                    {!canApply ? (
-                      <p className="mt-4 text-sm leading-6 text-amber-300">
-                        Not enough stored resources for this cycle.
-                      </p>
-                    ) : null}
                   </button>
                 );
               })}
             </div>
 
-            <div className="mt-7 border-l border-amber-500/30 bg-amber-500/[0.04] p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-600/75">
-                Latest Consequence
-              </p>
-              <p className="mt-3 text-sm leading-7 text-zinc-300">
-                {developmentState.latestDevelopmentSummary ||
-                  "No development action has been taken yet. Choose one action to shape how this settlement grows."}
-              </p>
-            </div>
+            <ConsequenceBanner
+              actionTitle={developmentState.latestDevelopmentAction}
+              summary={developmentState.latestDevelopmentSummary}
+              deltas={latestDeltas}
+            />
           </motion.section>
         ) : null}
 
