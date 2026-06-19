@@ -700,7 +700,7 @@ export default function Home() {
             aria-hidden
             className="pointer-events-none absolute right-[-14rem] top-1/2 hidden h-[760px] w-[760px] -translate-y-1/2 rounded-full border border-amber-500/8 bg-[radial-gradient(circle_at_35%_35%,rgba(201,169,98,0.12)_0%,rgba(201,169,98,0.035)_34%,rgba(2,2,4,0.72)_72%,rgba(2,2,4,0.96)_100%)] shadow-[0_0_150px_rgba(201,169,98,0.08)] lg:block"
           />
-          <div className="relative mx-auto grid max-w-[1500px] gap-10 sm:gap-12 lg:grid-cols-[minmax(0,0.78fr)_minmax(520px,1fr)] lg:items-center xl:gap-16">
+          <div className="relative mx-auto grid max-w-7xl gap-10 sm:gap-12 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,0.98fr)] lg:items-center xl:gap-14">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.5em] text-amber-600/75">
                 World Preview
@@ -737,9 +737,9 @@ export default function Home() {
 
             <div
               data-qa="landing-map-frame"
-              className="relative border border-amber-500/25 bg-[#050509]/90 p-2 shadow-[0_40px_150px_rgba(0,0,0,0.68),0_0_120px_rgba(201,169,98,0.12)] sm:p-3"
+              className="relative w-full max-w-[760px] justify-self-center overflow-hidden border border-amber-500/25 bg-[#050509]/90 p-2 shadow-[0_40px_150px_rgba(0,0,0,0.68),0_0_120px_rgba(201,169,98,0.12)] sm:p-3 lg:justify-self-end"
             >
-              <div className="relative min-h-[360px] bg-[#030306] sm:aspect-[4/3] sm:min-h-[420px] lg:min-h-[520px]">
+              <div className="relative min-h-[340px] overflow-hidden border border-amber-500/10 bg-[#030306] sm:aspect-[4/3] sm:min-h-[400px] lg:min-h-[500px]">
                 <div className="absolute inset-0 overflow-hidden">
                   <img
                     src="/assets/world-map/aurelian-basin-v1.png"
@@ -750,7 +750,7 @@ export default function Home() {
                   <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,2,4,0.04),rgba(2,2,4,0.48))]" />
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_38%,rgba(2,2,4,0.72)_100%)]" />
                 </div>
-                <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-between gap-4 p-3 sm:p-4">
+                <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-between gap-4 p-4 sm:p-5">
                   <div className="self-stretch border border-amber-500/25 bg-[#030306]/82 px-3 py-2 backdrop-blur-sm sm:self-start">
                     <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-amber-500/80">
                       Sector A-01

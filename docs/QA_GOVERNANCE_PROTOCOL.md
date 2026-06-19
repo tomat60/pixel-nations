@@ -173,3 +173,16 @@ A screenshot PASS is not sufficient if:
 - map labels/overlays are clipped by frames.
 
 These are product-trust issues, not only visual polish issues.
+
+
+## Visual Prompt QA Gate
+
+For visual/layout/map/landing-page changes, follow `docs/VISUAL_PROMPT_QA_GATE_PROTOCOL.md`.
+
+Smoke PASS and screenshot generation do not equal visual acceptance. A merge is blocked if:
+- map/image content bleeds outside its frame,
+- text is clipped by a frame,
+- the visual fix creates a new first-impression regression,
+- a Cursor prompt did not pass Prompt QA for visual work.
+
+Prefer deterministic patch packages before spending Cursor budget on visual bugfixes.
