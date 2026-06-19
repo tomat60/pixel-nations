@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T21:00:25.786Z",
+  "generatedAt": "2026-06-19T21:14:35.070Z",
   "branch": "main",
-  "isClean": true,
+  "isClean": false,
   "git": {
-    "statusSummary": "## main...origin/main",
-    "lastCommits": "f084e04 Lock visual QA prompt gate and Cursor budget recovery\nb90bb04 Update QA handoff after landing map clipping push\nb807266 Update QA evidence after landing map clipping merge\n3e86d41 Merge landing map frame clipping v0.1\n2df9d7d Fix landing map frame clipping"
+    "statusSummary": "## main...origin/main\n M docs/GAME_VISION_MASTER_PLAN_V0_1.md\n?? docs/LIVING_MAP_LAYER_V0_5_STRATEGY_BRIEF.md",
+    "lastCommits": "7d27c55 Update QA handoff after visual gate push\nf084e04 Lock visual QA prompt gate and Cursor budget recovery\nb90bb04 Update QA handoff after landing map clipping push\nb807266 Update QA evidence after landing map clipping merge\n3e86d41 Merge landing map frame clipping v0.1"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T21:00:25.786Z",
+    "localHandoffGeneratedAt": "2026-06-19T21:14:35.070Z",
     "localReportGeneratedAt": "2026-06-19T19:23:15.058Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",

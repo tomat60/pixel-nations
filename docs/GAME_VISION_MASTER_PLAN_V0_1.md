@@ -293,3 +293,9 @@ This document is the central answer to:
 
 Future features must align with this direction unless explicitly changed.
 
+
+## Current Strategic Next Layer
+
+See `docs/LIVING_MAP_LAYER_V0_5_STRATEGY_BRIEF.md`.
+
+The next strategic layer after Visual Gamefeel v0.4 is Living Map Layer v0.5: first visible trade routes, influence pulses, and readable land states without building the final 10,000-land geography engine yet.
