@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T14:27:41.329Z",
+  "generatedAt": "2026-06-19T14:40:53.052Z",
   "branch": "main",
   "isClean": true,
   "git": {
     "statusSummary": "## main...origin/main",
-    "lastCommits": "313bfcb Improve ops report latest-file workflow\n0a46d5f Update QA handoff after AI ops report command\nb3df808 Add AI ops report command\nb16bcbd Update QA handoff after game vision lock\na3bedc7 Lock game vision and assistant command protocol"
+    "lastCommits": "4e99744 Lock AI ops server architecture v0.2\n713e0bf Update QA handoff after ops report UX improvement\n313bfcb Improve ops report latest-file workflow\n0a46d5f Update QA handoff after AI ops report command\nb3df808 Add AI ops report command"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T14:27:41.329Z",
+    "localHandoffGeneratedAt": "2026-06-19T14:40:53.052Z",
     "localReportGeneratedAt": "2026-06-19T13:30:43.615Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
