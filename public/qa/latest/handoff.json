@@ -1,16 +1,16 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-18T23:11:50.270Z",
-  "branch": "main",
-  "isClean": true,
+  "generatedAt": "2026-06-19T06:00:16.958Z",
+  "branch": "sprint/qa-public-evidence-publishing-v0-1",
+  "isClean": false,
   "git": {
-    "statusSummary": "## main...origin/main",
-    "lastCommits": "85883ca Update QA evidence after freshness merge\nf30643d Merge QA evidence freshness v0.1\neb98ed2 Update QA handoff after evidence freshness sprint\n558a147 Update QA governance for stale evidence checks\n952145f Add QA evidence freshness reporting"
+    "statusSummary": "## sprint/qa-public-evidence-publishing-v0-1\n M public/qa/latest/handoff.json\n M public/qa/latest/handoff.txt\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json\n?? public/qa/latest/index.html",
+    "lastCommits": "e0ff970 Add public QA evidence publishing checks\n97fdf26 Update QA evidence after freshness merge\n85883ca Update QA evidence after freshness merge\nf30643d Merge QA evidence freshness v0.1\neb98ed2 Update QA handoff after evidence freshness sprint"
   },
   "qa": {
     "smoke": {
       "status": "PASS",
-      "generatedAt": "2026-06-18T23:04:08.668Z",
+      "generatedAt": "2026-06-19T05:59:20.152Z",
       "appUrl": "http://localhost:3000",
       "appSource": "existing local app",
       "blockingStep": "",
@@ -19,72 +19,87 @@
         {
           "name": "reset demo state and open /world",
           "status": "PASS",
-          "durationMs": 1426
+          "durationMs": 1222
         },
         {
           "name": "select a claimable Sector A-01 land",
           "status": "PASS",
-          "durationMs": 361
+          "durationMs": 200
         },
         {
           "name": "claim selected land",
           "status": "PASS",
-          "durationMs": 575
+          "durationMs": 349
         },
         {
           "name": "dashboard recognizes claimed land",
           "status": "PASS",
-          "durationMs": 407
+          "durationMs": 313
         },
         {
           "name": "create settlement",
           "status": "PASS",
-          "durationMs": 1641
+          "durationMs": 2342
         },
         {
           "name": "build settlement core and establish trade",
           "status": "PASS",
-          "durationMs": 2065
+          "durationMs": 2001
         },
         {
           "name": "form alliance and found nation",
           "status": "PASS",
-          "durationMs": 6091
+          "durationMs": 6927
         },
         {
           "name": "attempt empire continuation path",
           "status": "PASS",
-          "durationMs": 1447
+          "durationMs": 1451
         },
         {
           "name": "create empire",
           "status": "PASS",
-          "durationMs": 1431
+          "durationMs": 1411
         }
       ],
       "passedSteps": 9,
       "totalSteps": 9,
       "path": "public/qa/latest/smoke-result.json",
-      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-18T23:04:08.668Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-19T05:59:20.152Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
     },
+    "publicQaIndexUrl": "https://pixel-nations.vercel.app/qa/latest/",
     "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
     "worldUrl": "https://pixel-nations.vercel.app/world",
     "publicHandoffTxtUrl": "https://pixel-nations.vercel.app/qa/latest/handoff.txt",
     "publicHandoffJsonUrl": "https://pixel-nations.vercel.app/qa/latest/handoff.json",
+    "publicManifestUrl": "https://pixel-nations.vercel.app/qa/latest/manifest.json",
     "localQaReportPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/report.html",
     "localHandoffTxtPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.txt",
     "localHandoffJsonPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.json"
   },
   "qaEvidenceFreshness": {
     "status": "FRESH",
-    "smokeGeneratedAt": "2026-06-18T23:04:08.668Z",
-    "reportModifiedAt": "2026-06-18T23:03:51.622Z",
-    "manifestModifiedAt": "2026-06-18T23:03:51.620Z",
-    "screenshotsNewestModifiedAt": "2026-06-18T23:03:51.462Z",
-    "screenshotsOldestModifiedAt": "2026-06-18T23:03:00.406Z",
+    "smokeGeneratedAt": "2026-06-19T05:59:20.152Z",
+    "reportModifiedAt": "2026-06-19T05:58:52.714Z",
+    "manifestModifiedAt": "2026-06-19T05:58:52.713Z",
+    "screenshotsNewestModifiedAt": "2026-06-19T05:58:52.573Z",
+    "screenshotsOldestModifiedAt": "2026-06-19T05:58:01.369Z",
     "screenshotsCount": 19,
     "toleranceMinutes": 2,
     "warnings": []
+  },
+  "publicEvidence": {
+    "localHandoffGeneratedAt": "2026-06-19T06:00:16.958Z",
+    "localReportGeneratedAt": "2026-06-19T05:58:52.711Z",
+    "expectedUrls": {
+      "index": "https://pixel-nations.vercel.app/qa/latest/",
+      "report": "https://pixel-nations.vercel.app/qa/latest/report.html",
+      "handoffTxt": "https://pixel-nations.vercel.app/qa/latest/handoff.txt",
+      "handoffJson": "https://pixel-nations.vercel.app/qa/latest/handoff.json",
+      "manifest": "https://pixel-nations.vercel.app/qa/latest/manifest.json"
+    },
+    "postDeployValidationRequired": true,
+    "validationNote": "After deploy, verify the public index, report, handoff TXT, and handoff JSON URLs are reachable and match the current QA evidence window."
   },
   "nextInstruction": "Upload public/qa/latest/handoff.txt to ChatGPT, paste the public handoff link, or type: raport gotowy."
 }
