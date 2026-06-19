@@ -13,7 +13,8 @@
     "pn:quick": "npm run qa:smoke && npm run pn:handoff",
     "pn:finish": "npm run build && npm run qa:smoke && npm run qa:screens && npm run qa:smoke && npm run pn:handoff",
     "lint": "eslint",
-    "pn:ops-report": "node scripts/pn-ops-report.mjs"
+    "pn:ops-report": "node scripts/pn-ops-report.mjs",
+    "pn:visual-gate": "node scripts/pn-visual-gate.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.40.0",

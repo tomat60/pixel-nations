@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T19:23:42.335Z",
+  "generatedAt": "2026-06-19T21:00:23.306Z",
   "branch": "main",
-  "isClean": true,
+  "isClean": false,
   "git": {
-    "statusSummary": "## main...origin/main",
-    "lastCommits": "b807266 Update QA evidence after landing map clipping merge\n3e86d41 Merge landing map frame clipping v0.1\n2df9d7d Fix landing map frame clipping\n322353f Document map geography continuity known issue\n07d2e51 Update QA handoff after Visual Gamefeel v0.4 push"
+    "statusSummary": "## main...origin/main\n M docs/QA_GOVERNANCE_PROTOCOL.md\n M package.json\n?? docs/CURSOR_BUDGET_RECOVERY_PLAN.md\n?? docs/PUBLIC_PREVIEW_QA_PROTOCOL.md\n?? docs/VISUAL_QA_AND_PROMPT_GATE_PROTOCOL.md\n?? public/qa/latest/visual-gate-report.md\n?? scripts/pn-visual-gate.mjs",
+    "lastCommits": "b90bb04 Update QA handoff after landing map clipping push\nb807266 Update QA evidence after landing map clipping merge\n3e86d41 Merge landing map frame clipping v0.1\n2df9d7d Fix landing map frame clipping\n322353f Document map geography continuity known issue"
   },
   "qa": {
     "smoke": {
@@ -80,16 +80,16 @@
   "qaEvidenceFreshness": {
     "status": "FRESH",
     "smokeGeneratedAt": "2026-06-19T19:23:36.641Z",
-    "reportModifiedAt": "2026-06-19T19:23:15.061Z",
-    "manifestModifiedAt": "2026-06-19T19:23:15.060Z",
-    "screenshotsNewestModifiedAt": "2026-06-19T19:23:15.016Z",
-    "screenshotsOldestModifiedAt": "2026-06-19T19:22:01.435Z",
+    "reportModifiedAt": "2026-06-19T20:42:21.516Z",
+    "manifestModifiedAt": "2026-06-19T20:42:21.516Z",
+    "screenshotsNewestModifiedAt": "2026-06-19T20:42:21.662Z",
+    "screenshotsOldestModifiedAt": "2026-06-19T20:15:29.730Z",
     "screenshotsCount": 23,
     "toleranceMinutes": 2,
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T19:23:42.335Z",
+    "localHandoffGeneratedAt": "2026-06-19T21:00:23.306Z",
     "localReportGeneratedAt": "2026-06-19T19:23:15.058Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
