@@ -1,39 +1,52 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T12:47:39.363Z
+Generated: 2026-06-19T13:09:54.530Z
 
-Branch: main
-Working tree: clean
+Branch: sprint/core-engine-v0-3-local-development-cycle
+Working tree: has changes
 
 Git status:
-  ## main...origin/main
+  ## sprint/core-engine-v0-3-local-development-cycle
+   M public/qa/latest/handoff.json
+   M public/qa/latest/handoff.txt
+   M public/qa/latest/index.html
+   M public/qa/latest/manifest.json
+   M public/qa/latest/report.html
+   M public/qa/latest/screenshots/desktop-home.png
+   M public/qa/latest/screenshots/desktop-world-sector.png
+   M public/qa/latest/screenshots/desktop-world.png
+   M public/qa/latest/screenshots/mobile-settlement.png
+   M public/qa/latest/screenshots/mobile-world-claim-tray.png
+   M public/qa/latest/screenshots/mobile-world-sector.png
+   M public/qa/latest/screenshots/mobile-world.png
+   M public/qa/latest/smoke-result.json
 
 Last 5 commits:
+  de4629c Add Core Engine v0.3 local development cycle
+  a061afe Update QA handoff after Core Engine strategy brief
   f9aa276 Add Core Engine v0.3 strategy brief
   8ea7712 Trigger Vercel redeploy for QA public evidence
   b5470b3 Update QA handoff files after operating system lock
-  0a795f8 Lock Pixel Nations operating system and budget governance
-  d09e282 Update QA evidence after public publishing merge
 
 QA:
 Smoke result: PASS
-Smoke generated: 2026-06-19T11:14:04.620Z
+Smoke generated: 2026-06-19T13:08:46.170Z
 Smoke app source: existing local app
 Smoke steps: 9/9 passed
 Smoke result path: public/qa/latest/smoke-result.json
 
 QA Evidence Freshness:
-Smoke generated: 2026-06-19T11:14:04.620Z
-Report modified: 2026-06-19T11:13:45.769Z
-Manifest modified: 2026-06-19T11:13:45.765Z
-Screenshots newest: 2026-06-19T11:13:45.623Z
-Screenshots oldest: 2026-06-19T11:12:51.303Z
+Smoke generated: 2026-06-19T13:08:46.170Z
+Report modified: 2026-06-19T13:08:19.306Z
+Manifest modified: 2026-06-19T13:08:19.302Z
+Screenshots newest: 2026-06-19T13:08:19.194Z
+Screenshots oldest: 2026-06-19T13:07:29.173Z
 Screenshots count: 19
 Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T12:47:39.363Z
-Local report generated: 2026-06-19T11:13:45.763Z
+Local handoff generated: 2026-06-19T13:09:54.530Z
+Local report generated: 2026-06-19T13:08:19.296Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
 Public handoff TXT: https://pixel-nations.vercel.app/qa/latest/handoff.txt
