@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-19T14:55:57.451Z",
+  "generatedAt": "2026-06-19T15:24:12.972Z",
   "branch": "main",
   "isClean": true,
   "git": {
-    "statusSummary": "## main...origin/main",
-    "lastCommits": "3dfb8f5 Update QA handoff after AI ops VPS pilot runbook\nd91ee64 Add AI ops VPS pilot runbook\n50080ef Update QA handoff after AI ops server architecture lock\n4e99744 Lock AI ops server architecture v0.2\n713e0bf Update QA handoff after ops report UX improvement"
+    "statusSummary": "## main...origin/main [ahead 1]",
+    "lastCommits": "833979b Add GitHub Actions ops report pilot\nab03f8d Update QA handoff after AI ops VPS pilot runbook\n3dfb8f5 Update QA handoff after AI ops VPS pilot runbook\nd91ee64 Add AI ops VPS pilot runbook\n50080ef Update QA handoff after AI ops server architecture lock"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-19T14:55:57.451Z",
+    "localHandoffGeneratedAt": "2026-06-19T15:24:12.972Z",
     "localReportGeneratedAt": "2026-06-19T13:30:43.615Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
