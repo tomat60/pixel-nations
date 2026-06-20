@@ -81,6 +81,12 @@ const MAP_ROUTES = [
   "M 52 180 C 168 148 286 176 398 132 S 562 88 708 118",
   "M 220 52 C 318 108 402 168 498 228 S 628 312 726 356",
 ];
+const LIVING_MAP_ROUTE_TARGETS = [
+  { id: "iron-coast", name: "Iron Coast", x: 112, y: 292, labelX: "17%", labelY: "58%" },
+  { id: "ember-basin", name: "Ember Basin", x: 528, y: 382, labelX: "69%", labelY: "78%" },
+  { id: "crownlands", name: "Crownlands", x: 610, y: 144, labelX: "78%", labelY: "30%" },
+];
+
 
 const MAP_RIVERS = [
   "M 404 38 C 388 112 420 168 386 230 S 328 330 366 430",
@@ -356,6 +362,38 @@ function buildTiles(): MapTile[] {
   });
 }
 
+function getTileSvgCenter(tile: Pick<MapTile, "x" | "y">) {
+  return {
+    x: ((tile.x + 0.5) / GRID_WIDTH) * 760,
+    y: ((tile.y + 0.5) / GRID_HEIGHT) * 484,
+  };
+}
+
+function getLivingMapRouteTarget(routeId?: string, destination?: string) {
+  const normalizedRoute = (routeId || "").toLowerCase();
+  const normalizedDestination = (destination || "").toLowerCase();
+
+  return (
+    LIVING_MAP_ROUTE_TARGETS.find(
+      (target) => normalizedRoute === target.id || normalizedDestination === target.name.toLowerCase(),
+    ) ?? null
+  );
+}
+
+function buildLivingMapRoutePath(from: { x: number; y: number }, to: { x: number; y: number }) {
+  const controlX = (from.x + to.x) / 2;
+  const controlY = Math.min(from.y, to.y) - 72;
+  return `M ${from.x.toFixed(1)} ${from.y.toFixed(1)} C ${controlX.toFixed(1)} ${controlY.toFixed(1)}, ${controlX.toFixed(1)} ${((controlY + to.y) / 2).toFixed(1)}, ${to.x.toFixed(1)} ${to.y.toFixed(1)}`;
+}
+
+function getInfluenceRadius(state: SettlementState) {
+  if (state.empireFounded) return 88;
+  if (state.nationFounded) return 72;
+  if (state.settlementFounded) return 54;
+  if (state.claimedLand) return 38;
+  return 0;
+}
+
 function getContinueRoute(state: SettlementState) {
   if (state.empireFounded) return "/empire";
   if (state.nationFounded) return "/nation";
@@ -430,6 +468,22 @@ export default function WorldPage() {
         ? "Unclaimed founder land"
         : "Unclaimed land";
   const continueRoute = getContinueRoute(demoState);
+  const claimedTile = demoState.claimedLandId
+    ? tiles.find((tile) => tile.id === demoState.claimedLandId) ?? null
+    : null;
+  const claimedTileCenter = claimedTile ? getTileSvgCenter(claimedTile) : null;
+  const influenceRadius = getInfluenceRadius(demoState);
+  const routeTarget = demoState.tradeRouteEstablished
+    ? getLivingMapRouteTarget(demoState.tradeRouteId, demoState.tradeRouteDestination)
+    : null;
+  const routePath = claimedTileCenter && routeTarget ? buildLivingMapRoutePath(claimedTileCenter, routeTarget) : "";
+  const worldActivitySummary = demoState.tradeRouteEstablished
+    ? `Trade route visible: ${demoState.tradeRouteDestination || "Regional route"}`
+    : demoState.settlementFounded
+      ? "Settlement influence visible"
+      : demoState.claimedLand
+        ? "Claimed land influence visible"
+        : "Choose land to wake the map";
 
   const selectedLandPanelRef = useRef<HTMLElement>(null);
   const playableSectorRef = useRef<HTMLElement>(null);
@@ -767,6 +821,30 @@ export default function WorldPage() {
                 </div>
               </div>
 
+              {demoState.claimedLand ? (
+                <div
+                  data-qa="world-activity-panel"
+                  className="mt-5 grid gap-2 border border-amber-500/12 bg-[#08080f]/78 p-3 text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:grid-cols-3"
+                >
+                  <div>
+                    <span className="block text-amber-100/80">World Activity</span>
+                    <span className="mt-1 block normal-case tracking-normal text-zinc-400">{worldActivitySummary}</span>
+                  </div>
+                  <div>
+                    <span className="block text-amber-100/80">Your Land</span>
+                    <span className="mt-1 block normal-case tracking-normal text-zinc-400">
+                      {claimedTile?.landName || demoState.claimedLandName || "Claimed land"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-amber-100/80">Map Layer</span>
+                    <span className="mt-1 block normal-case tracking-normal text-zinc-400">
+                      Influence {demoState.tradeRouteEstablished ? "+ route" : "pulse"}
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border border-amber-500/10 bg-[#08080f]/70 p-2 sm:hidden">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">
                   Default view fits Sector A-01. Zoom to inspect and pan.
@@ -898,6 +976,47 @@ export default function WorldPage() {
                         strokeWidth="2"
                       />
                     ))}
+                    {claimedTileCenter && influenceRadius > 0 ? (
+                      <g data-qa="world-owned-influence" opacity="0.92">
+                        <circle
+                          cx={claimedTileCenter.x}
+                          cy={claimedTileCenter.y}
+                          r={influenceRadius}
+                          fill="rgba(251,191,36,0.08)"
+                          stroke="rgba(251,191,36,0.24)"
+                          strokeDasharray="4 8"
+                          strokeWidth="1.5"
+                        />
+                        <circle
+                          className="animate-pulse"
+                          cx={claimedTileCenter.x}
+                          cy={claimedTileCenter.y}
+                          r={Math.max(12, influenceRadius * 0.42)}
+                          fill="rgba(251,191,36,0.14)"
+                        />
+                      </g>
+                    ) : null}
+                    {routePath && routeTarget ? (
+                      <g data-qa="world-trade-route" opacity="0.96">
+                        <path
+                          d={routePath}
+                          fill="none"
+                          stroke="rgba(251,191,36,0.72)"
+                          strokeDasharray="9 10"
+                          strokeLinecap="round"
+                          strokeWidth="3"
+                        />
+                        <path
+                          className="animate-pulse"
+                          d={routePath}
+                          fill="none"
+                          stroke="rgba(253,230,138,0.3)"
+                          strokeLinecap="round"
+                          strokeWidth="7"
+                        />
+                        <circle cx={routeTarget.x} cy={routeTarget.y} r="7" fill="rgba(253,230,138,0.75)" />
+                      </g>
+                    ) : null}
                   </svg>
                   <div
                     aria-hidden
@@ -916,6 +1035,15 @@ export default function WorldPage() {
                       {label.name}
                     </span>
                   ))}
+                  {routeTarget ? (
+                    <span
+                      data-qa="world-trade-route-label"
+                      className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 border border-amber-400/24 bg-[#030306]/76 px-2 py-1 font-[family-name:var(--font-syne)] text-[8px] font-bold uppercase tracking-[0.18em] text-amber-100/75 backdrop-blur-sm"
+                      style={{ left: routeTarget.labelX, top: routeTarget.labelY }}
+                    >
+                      Route - {routeTarget.name}
+                    </span>
+                  ) : null}
                   <div className="relative z-[12] grid grid-cols-[repeat(18,minmax(0,1fr))] gap-px bg-transparent p-px">
                     {tiles.map((tile) => {
                       const tileOwnedByYou = demoState.claimedLandId === tile.id && demoState.claimedLand;
@@ -976,17 +1104,23 @@ export default function WorldPage() {
                       );
                     })}
                   </div>
-                  <div className="relative z-20 mt-3 grid gap-2 border border-amber-500/10 bg-[#030306]/82 p-3 text-[9px] uppercase tracking-[0.18em] text-zinc-500 backdrop-blur-sm sm:grid-cols-5">
+                  <div className="relative z-20 mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border border-amber-500/10 bg-[#030306]/82 p-2 text-[8px] uppercase tracking-[0.14em] text-zinc-500 backdrop-blur-sm sm:grid-cols-5 sm:p-3 sm:text-[9px] sm:tracking-[0.18em]">
                     {[
-                      ["Founder land", "h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.6)]"],
-                      ["Resource-rich", "h-1 w-1 rounded-full bg-cyan-200/70"],
+                      ["Founder", "h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.6)]"],
+                      ["Resources", "h-1 w-1 rounded-full bg-cyan-200/70"],
                       ["Landmark", "h-1 w-1 rotate-45 bg-orange-200/80"],
-                      ["Ownership grid", "h-px w-3 bg-amber-400/40"],
-                      ["Routes / rivers", "h-px w-3 bg-slate-300/60"],
+                      ["Grid", "h-px w-3 bg-amber-400/40"],
+                      ["Routes", "h-px w-3 bg-slate-300/60"],
+                      ...(demoState.claimedLand
+                        ? [["Influence", "h-2 w-2 rounded-full border border-amber-300/50 bg-amber-300/20"]]
+                        : []),
+                      ...(demoState.tradeRouteEstablished
+                        ? [["Trade", "h-px w-4 bg-amber-300/80"]]
+                        : []),
                     ].map(([label, swatch]) => (
-                      <div key={label} className="flex items-center gap-2">
+                      <div key={label} className="flex min-w-0 items-center gap-1.5">
                         <span className={swatch} />
-                        <span>{label}</span>
+                        <span className="truncate">{label}</span>
                       </div>
                     ))}
                   </div>

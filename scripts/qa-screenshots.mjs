@@ -69,6 +69,17 @@ const QA_SETTLEMENT_DEVELOPMENT_STATE = {
   settlementFocusIdentity: "A welcoming settlement built to attract families, workers, and future citizens.",
 };
 
+const QA_LIVING_MAP_STATE = {
+  ...QA_SETTLEMENT_DEVELOPMENT_STATE,
+  tradeRouteEstablished: true,
+  tradeRouteDestination: "Iron Coast",
+  tradeRouteId: "iron-coast",
+  tradeRouteBonus: "+ Iron Flow",
+  tradeRouteResourceFlow: "Iron +15",
+  tradeRouteIdentity: "Iron Coast gives the city durable material flow and a stronger industrial base.",
+  tradeRoutes: 1,
+};
+
 const captures = [
   { filename: "mobile-home.png", route: "/", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-landing-hero.png", route: "/", viewport: "mobile", width: 390, height: 844 },
@@ -109,6 +120,26 @@ const captures = [
     width: 390,
     height: 844,
     selector: "[data-qa='playable-sector']",
+  },
+  {
+    filename: "mobile-world-living-map.png",
+    route: "/world",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    selector: "[data-qa='playable-sector']",
+    prepare: async (page) => {
+      await page.evaluate(
+        ({ key, state }) => {
+          localStorage.setItem(key, JSON.stringify(state));
+        },
+        { key: DEMO_STATE_KEY, state: QA_LIVING_MAP_STATE },
+      );
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+      await page.locator("[data-qa='world-trade-route']").waitFor({ state: "visible", timeout: 5000 });
+      await page.locator("[data-qa='world-owned-influence']").waitFor({ state: "visible", timeout: 5000 });
+    },
   },
   {
     filename: "mobile-world-selected-land-panel.png",
@@ -222,6 +253,26 @@ const captures = [
     width: 1440,
     height: 900,
     selector: "[data-qa='playable-sector']",
+  },
+  {
+    filename: "desktop-world-living-map.png",
+    route: "/world",
+    viewport: "desktop",
+    width: 1440,
+    height: 900,
+    selector: "[data-qa='playable-sector']",
+    prepare: async (page) => {
+      await page.evaluate(
+        ({ key, state }) => {
+          localStorage.setItem(key, JSON.stringify(state));
+        },
+        { key: DEMO_STATE_KEY, state: QA_LIVING_MAP_STATE },
+      );
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+      await page.locator("[data-qa='world-trade-route']").waitFor({ state: "visible", timeout: 5000 });
+      await page.locator("[data-qa='world-owned-influence']").waitFor({ state: "visible", timeout: 5000 });
+    },
   },
   {
     filename: "desktop-world-selected-land-panel.png",
