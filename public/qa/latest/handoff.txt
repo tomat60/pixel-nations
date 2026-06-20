@@ -1,5 +1,5 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-20T16:02:25.648Z
+Generated: 2026-06-20T16:48:29.922Z
 
 Branch: main
 Working tree: clean
@@ -8,11 +8,11 @@ Git status:
   ## main...origin/main
 
 Last 5 commits:
+  abd6cfd Align status with Production OS rails
+  271fd18 Add Production OS v1.0 strategy rails
+  5e6d273 Finalize clean QA handoff after map clarity patch
   9493cea Update QA handoff after map clarity patch
   442ffe0 Improve world map orientation clarity
-  bb58285 Add player confusion audit command
-  9a40b3f Include report handoff in status command
-  993563e Lock result package workflow
 
 QA:
 Smoke result: PASS
@@ -23,16 +23,16 @@ Smoke result path: public/qa/latest/smoke-result.json
 
 QA Evidence Freshness:
 Smoke generated: 2026-06-20T15:57:19.148Z
-Report modified: 2026-06-20T15:56:57.866Z
-Manifest modified: 2026-06-20T15:56:57.864Z
-Screenshots newest: 2026-06-20T15:56:57.781Z
-Screenshots oldest: 2026-06-20T15:55:19.687Z
+Report modified: 2026-06-20T16:41:15.685Z
+Manifest modified: 2026-06-20T16:41:15.684Z
+Screenshots newest: 2026-06-20T16:41:15.972Z
+Screenshots oldest: 2026-06-20T16:22:04.144Z
 Screenshots count: 29
 Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-20T16:02:25.648Z
+Local handoff generated: 2026-06-20T16:48:29.922Z
 Local report generated: 2026-06-20T15:56:57.862Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html

@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-20T16:02:25.648Z",
+  "generatedAt": "2026-06-20T16:48:29.922Z",
   "branch": "main",
   "isClean": true,
   "git": {
     "statusSummary": "## main...origin/main",
-    "lastCommits": "9493cea Update QA handoff after map clarity patch\n442ffe0 Improve world map orientation clarity\nbb58285 Add player confusion audit command\n9a40b3f Include report handoff in status command\n993563e Lock result package workflow"
+    "lastCommits": "abd6cfd Align status with Production OS rails\n271fd18 Add Production OS v1.0 strategy rails\n5e6d273 Finalize clean QA handoff after map clarity patch\n9493cea Update QA handoff after map clarity patch\n442ffe0 Improve world map orientation clarity"
   },
   "qa": {
     "smoke": {
@@ -80,16 +80,16 @@
   "qaEvidenceFreshness": {
     "status": "FRESH",
     "smokeGeneratedAt": "2026-06-20T15:57:19.148Z",
-    "reportModifiedAt": "2026-06-20T15:56:57.866Z",
-    "manifestModifiedAt": "2026-06-20T15:56:57.864Z",
-    "screenshotsNewestModifiedAt": "2026-06-20T15:56:57.781Z",
-    "screenshotsOldestModifiedAt": "2026-06-20T15:55:19.687Z",
+    "reportModifiedAt": "2026-06-20T16:41:15.685Z",
+    "manifestModifiedAt": "2026-06-20T16:41:15.684Z",
+    "screenshotsNewestModifiedAt": "2026-06-20T16:41:15.972Z",
+    "screenshotsOldestModifiedAt": "2026-06-20T16:22:04.144Z",
     "screenshotsCount": 29,
     "toleranceMinutes": 2,
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-20T16:02:25.648Z",
+    "localHandoffGeneratedAt": "2026-06-20T16:48:29.922Z",
     "localReportGeneratedAt": "2026-06-20T15:56:57.862Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
