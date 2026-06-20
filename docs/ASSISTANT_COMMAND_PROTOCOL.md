@@ -1,3 +1,24 @@
+# Assistant Start Gate — Project OS Cleanup v0.1
+
+Status: ACTIVE
+
+Every new Pixel Nations project session should start from:
+
+```bash
+npm run pn:status
+```
+
+Then read:
+
+1. `docs/PROJECT_CURRENT_STATE.md`
+2. `docs/README.md`
+3. `docs/PROJECT_OPERATING_SYSTEM.md`
+4. `docs/QA_GOVERNANCE_PROTOCOL.md`
+
+Do not rely on manual Vercel clicking, stale handoff assumptions, or old sprint briefs as current instructions. Cursor remains blocked until a scoped prompt passes review.
+
+---
+
 # Pixel Nations — Assistant Command Protocol v0.1
 
 Status: ACTIVE PROJECT RULE
