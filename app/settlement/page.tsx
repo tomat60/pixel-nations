@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
+import DemoObjectivePanel from "../components/DemoObjectivePanel";
 import {
   formatLandClaimHistory,
   getClaimedLandDisplay,
@@ -622,7 +623,7 @@ export default function SettlementPage() {
           </h1>
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">{originQuote}</p>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-200/70">
-            This city is the civic heart of your claimed land. Build its core, connect outward, then raise a nation.
+            Your settlement grows into a city core, then trade, alliance, nation, and empire. Each step builds on the last.
           </p>
 
           <div className="mt-8 grid gap-px border border-amber-500/15 bg-amber-500/10 sm:grid-cols-2 lg:grid-cols-4">
@@ -641,6 +642,15 @@ export default function SettlementPage() {
             ))}
           </div>
         </motion.header>
+
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.06, ease: "easeOut" }}
+          className="mt-10"
+        >
+          <DemoObjectivePanel state={settlementState} variant="compact" eyebrow="Settlement / Objective Spine" />
+        </motion.div>
 
         <motion.section
           initial={{ opacity: 0, y: 24 }}
@@ -821,6 +831,7 @@ export default function SettlementPage() {
 
         <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <motion.section
+            id="city-core"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.14, ease: "easeOut" }}

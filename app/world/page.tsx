@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getDemoObjective, getPostClaimGuidance } from "../lib/demo-objective";
 import {
   DEFAULT_SETTLEMENT_STATE,
   readSettlementState,
@@ -468,6 +469,8 @@ export default function WorldPage() {
         ? "Unclaimed founder land"
         : "Unclaimed land";
   const continueRoute = getContinueRoute(demoState);
+  const demoObjective = useMemo(() => getDemoObjective(demoState), [demoState]);
+  const postClaimGuidance = useMemo(() => getPostClaimGuidance(demoState), [demoState]);
   const claimedTile = demoState.claimedLandId
     ? tiles.find((tile) => tile.id === demoState.claimedLandId) ?? null
     : null;
@@ -608,21 +611,54 @@ export default function WorldPage() {
           data-qa="first-60-guidance"
           className="mt-6 grid gap-3 border border-amber-500/15 bg-amber-500/[0.035] p-4 text-sm text-zinc-400 sm:grid-cols-3 sm:p-5"
         >
-          {[
-            ["1", "Select land", "Scroll to Sector A-01 and click an available highlighted cell. The atlas is context only."],
-            ["2", "Claim it", "Confirm the free demo claim; this marks your first land and founder record."],
-            ["3", "Build upward", "Enter your command center; the claimed land becomes your first settlement."],
-          ].map(([step, title, copy]) => (
-            <div key={title} className="border-l border-amber-500/25 pl-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
-                Step {step}
-              </p>
-              <p className="mt-2 font-[family-name:var(--font-syne)] text-base font-bold text-amber-100">
-                {title}
-              </p>
-              <p className="mt-1 leading-6">{copy}</p>
-            </div>
-          ))}
+          {demoState.claimedLand ? (
+            <>
+              <div className="border-l border-amber-500/25 pl-4 sm:col-span-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
+                  Demo Spine Active
+                </p>
+                <p className="mt-2 font-[family-name:var(--font-syne)] text-base font-bold text-amber-100">
+                  {postClaimGuidance.headline}
+                </p>
+                <p className="mt-1 leading-6">{postClaimGuidance.description}</p>
+                <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                  {postClaimGuidance.spineLine}
+                </p>
+              </div>
+              {[
+                ["Land", demoState.claimedLandName || "Claimed", "complete"],
+                ["Settlement", demoState.settlementFounded ? demoState.settlementName || "Founded" : "Next", demoState.settlementFounded ? "complete" : "current"],
+                ["Empire", demoState.empireFounded ? demoState.empireName || "Founded" : "Future promise", demoState.empireFounded ? "complete" : "upcoming"],
+              ].map(([label, value, tone]) => (
+                <div key={label} className="border-l border-amber-500/25 pl-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">{label}</p>
+                  <p
+                    className={`mt-2 font-[family-name:var(--font-syne)] text-base font-bold ${
+                      tone === "complete" ? "text-emerald-100" : tone === "current" ? "text-amber-100" : "text-zinc-500"
+                    }`}
+                  >
+                    {value}
+                  </p>
+                </div>
+              ))}
+            </>
+          ) : (
+            [
+              ["1", "Select land", "Scroll to Sector A-01 and click an available highlighted cell. The atlas is context only."],
+              ["2", "Claim it", "Confirm the free demo claim; this marks your first land and founder record."],
+              ["3", "Build upward", "Enter your command center; the claimed land becomes your first settlement."],
+            ].map(([step, title, copy]) => (
+              <div key={title} className="border-l border-amber-500/25 pl-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
+                  Step {step}
+                </p>
+                <p className="mt-2 font-[family-name:var(--font-syne)] text-base font-bold text-amber-100">
+                  {title}
+                </p>
+                <p className="mt-1 leading-6">{copy}</p>
+              </div>
+            ))
+          )}
         </section>
 
         <section
@@ -842,23 +878,39 @@ export default function WorldPage() {
               {demoState.claimedLand ? (
                 <div
                   data-qa="world-activity-panel"
-                  className="mt-5 grid gap-2 border border-amber-500/12 bg-[#08080f]/78 p-3 text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:grid-cols-3"
+                  className="mt-5 border border-amber-500/12 bg-[#08080f]/78 p-3"
                 >
-                  <div>
-                    <span className="block text-amber-100/80">World Activity</span>
-                    <span className="mt-1 block normal-case tracking-normal text-zinc-400">{worldActivitySummary}</span>
+                  <div className="grid gap-3 text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:grid-cols-3">
+                    <div>
+                      <span className="block text-amber-100/80">World Activity</span>
+                      <span className="mt-1 block normal-case tracking-normal text-zinc-400">{worldActivitySummary}</span>
+                    </div>
+                    <div>
+                      <span className="block text-amber-100/80">Your Land</span>
+                      <span className="mt-1 block normal-case tracking-normal text-zinc-400">
+                        {claimedTile?.landName || demoState.claimedLandName || "Claimed land"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-amber-100/80">Map Layer</span>
+                      <span className="mt-1 block normal-case tracking-normal text-zinc-400">
+                        Influence {demoState.tradeRouteEstablished ? "+ route" : "pulse"}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="block text-amber-100/80">Your Land</span>
-                    <span className="mt-1 block normal-case tracking-normal text-zinc-400">
-                      {claimedTile?.landName || demoState.claimedLandName || "Claimed land"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="block text-amber-100/80">Map Layer</span>
-                    <span className="mt-1 block normal-case tracking-normal text-zinc-400">
-                      Influence {demoState.tradeRouteEstablished ? "+ route" : "pulse"}
-                    </span>
+                  <div className="mt-4 flex flex-col gap-3 border-t border-amber-500/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-500/75">Next Objective</p>
+                      <p className="mt-1 normal-case tracking-normal text-sm text-amber-100/90">
+                        {demoObjective.action.headline}
+                      </p>
+                    </div>
+                    <Link
+                      href={demoObjective.action.href}
+                      className="btn-primary shrink-0 rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-amber-100"
+                    >
+                      {demoObjective.action.cta}
+                    </Link>
                   </div>
                 </div>
               ) : null}
@@ -1196,10 +1248,10 @@ export default function WorldPage() {
               <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">Next Step</p>
               <p className="mt-2">
                 {ownedByYou
-                  ? "Enter your command center to turn this land into your first settlement."
+                  ? postClaimGuidance.description
                   : isUnavailable
                     ? "This parcel is already claimed in the preview. Pick another unclaimed cell in Sector A-01."
-                    : "Claim this land, then enter your command center to found the first settlement."}
+                    : "Claim this land, then enter your command center to begin the settlement spine."}
               </p>
             </div>
 
@@ -1311,15 +1363,18 @@ export default function WorldPage() {
                     Land Claimed.
                   </h3>
                   <p className="mx-auto mt-6 max-w-md text-base leading-8 text-zinc-400">
-                    You now control {selectedTile.landName}. Next, enter your command center and found the first settlement.
+                    You now control {selectedTile.landName}. Enter your command center to follow the demo spine toward settlement and empire.
                   </p>
                   <div
                     data-qa="post-claim-next-step"
                     className="mx-auto mt-6 max-w-md border border-amber-500/15 bg-amber-500/[0.045] p-4 text-left text-sm leading-7 text-zinc-400"
                   >
-                    <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">Step 3 / Command Center</p>
-                    <p className="mt-2">
-                      This is the bridge from land to settlement: enter your land, review the founder record, then create the first settlement.
+                    <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
+                      Step 2 / {postClaimGuidance.headline}
+                    </p>
+                    <p className="mt-2">{postClaimGuidance.description}</p>
+                    <p className="mt-3 text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                      {postClaimGuidance.spineLine}
                     </p>
                   </div>
                   <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
