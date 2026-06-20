@@ -1,39 +1,62 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-20T12:50:37.920Z
+Generated: 2026-06-20T15:50:18.962Z
 
 Branch: main
-Working tree: clean
+Working tree: has changes
 
 Git status:
   ## main...origin/main
+   M app/world/page.tsx
+   D public/qa/latest/handoff.json
+   D public/qa/latest/handoff.txt
+   M public/qa/latest/index.html
+   M public/qa/latest/manifest.json
+   M public/qa/latest/report.html
+   M public/qa/latest/screenshots/desktop-settlement-after-action.png
+   M public/qa/latest/screenshots/desktop-world-atlas.png
+   M public/qa/latest/screenshots/desktop-world-living-map.png
+   M public/qa/latest/screenshots/desktop-world-sector.png
+   M public/qa/latest/screenshots/desktop-world-selected-land-panel.png
+   M public/qa/latest/screenshots/desktop-world-top.png
+   M public/qa/latest/screenshots/desktop-world.png
+   M public/qa/latest/screenshots/mobile-settlement-after-action.png
+   M public/qa/latest/screenshots/mobile-world-atlas.png
+   M public/qa/latest/screenshots/mobile-world-claim-tray.png
+   M public/qa/latest/screenshots/mobile-world-living-map.png
+   M public/qa/latest/screenshots/mobile-world-sector.png
+   M public/qa/latest/screenshots/mobile-world-selected-land-panel.png
+   M public/qa/latest/screenshots/mobile-world-top.png
+   M public/qa/latest/screenshots/mobile-world.png
+   M public/qa/latest/smoke-result.json
+   D public/qa/latest/visual-gate-report.md
 
 Last 5 commits:
+  bb58285 Add player confusion audit command
+  9a40b3f Include report handoff in status command
+  993563e Lock result package workflow
+  b7be8f4 Update QA handoff after Project OS cleanup
   d83784a Add Project OS cleanup status command
-  ab9d222 Update QA handoff after public QA check command
-  a36b36f Add public QA check command
-  1ed0079 Trigger Vercel redeploy for clean public QA handoff
-  66fc354 Trigger Vercel redeploy for clean Continuity v0.6 QA handoff
 
 QA:
 Smoke result: PASS
-Smoke generated: 2026-06-20T09:11:53.404Z
+Smoke generated: 2026-06-20T15:50:18.299Z
 Smoke app source: existing local app
 Smoke steps: 9/9 passed
 Smoke result path: public/qa/latest/smoke-result.json
 
 QA Evidence Freshness:
-Smoke generated: 2026-06-20T09:11:53.404Z
-Report modified: 2026-06-20T11:22:02.222Z
-Manifest modified: 2026-06-20T11:22:02.221Z
-Screenshots newest: 2026-06-20T11:22:02.286Z
-Screenshots oldest: 2026-06-20T11:10:48.094Z
+Smoke generated: 2026-06-20T15:50:18.299Z
+Report modified: 2026-06-20T15:49:55.308Z
+Manifest modified: 2026-06-20T15:49:55.307Z
+Screenshots newest: 2026-06-20T15:49:55.256Z
+Screenshots oldest: 2026-06-20T15:48:22.751Z
 Screenshots count: 29
 Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-20T12:50:37.920Z
-Local report generated: 2026-06-20T09:11:31.425Z
+Local handoff generated: 2026-06-20T15:50:18.962Z
+Local report generated: 2026-06-20T15:49:55.305Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
 Public handoff TXT: https://pixel-nations.vercel.app/qa/latest/handoff.txt

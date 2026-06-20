@@ -575,7 +575,7 @@ export default function WorldPage() {
             CHOOSE YOUR FIRST LAND
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-400 sm:mt-5 sm:text-lg">
-            Step 1: choose one land in Sector A-01. Step 2: claim it. Step 3: enter your command center and found the first settlement.
+            Choose one land inside the highlighted Sector A-01. The atlas gives context; the playable grid below is where the demo begins.
           </p>
           <p className="mt-3 text-xs uppercase tracking-[0.26em] text-amber-500/75">
             Full world: 10,000 lands. Demo frontier: Aurelian Basin.
@@ -609,9 +609,9 @@ export default function WorldPage() {
           className="mt-6 grid gap-3 border border-amber-500/15 bg-amber-500/[0.035] p-4 text-sm text-zinc-400 sm:grid-cols-3 sm:p-5"
         >
           {[
-            ["1", "Select land", "Click an available land on the Aurelian Basin map."],
-            ["2", "Claim it", "Confirm the free demo claim and create your founder record."],
-            ["3", "Build upward", "Enter your command center and found the first settlement."],
+            ["1", "Select land", "Scroll to Sector A-01 and click an available highlighted cell. The atlas is context only."],
+            ["2", "Claim it", "Confirm the free demo claim; this marks your first land and founder record."],
+            ["3", "Build upward", "Enter your command center; the claimed land becomes your first settlement."],
           ].map(([step, title, copy]) => (
             <div key={title} className="border-l border-amber-500/25 pl-4">
               <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
@@ -639,11 +639,17 @@ export default function WorldPage() {
                 Full world: 10,000 lands.
               </h2>
               <p className="mt-4 text-sm leading-7 text-zinc-400">
-                The full world contains 10,000 lands across a 100 x 100 atlas.
+                The full world contains 10,000 lands across a 100 x 100 atlas. You are not choosing from the whole atlas yet.
               </p>
               <p className="mt-2 text-sm leading-7 text-amber-200/70">
-                Aurelian Basin is the first playable frontier. Sector code: A-01.
+                The highlighted A-01 window is the playable demo sector. Choose the actual land in the grid below.
               </p>
+              <a
+                href="#playable-sector"
+                className="mt-5 inline-flex rounded border border-amber-500/35 bg-amber-500/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-amber-100 transition-colors hover:border-amber-300/60"
+              >
+                Jump To Sector A-01
+              </a>
             </div>
             <div className="grid grid-cols-1 gap-px border border-amber-500/10 bg-amber-500/10 text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:grid-cols-3">
               <div className="bg-[#08080f]/95 p-3">
@@ -763,7 +769,7 @@ export default function WorldPage() {
                   Demo Origin
                 </p>
                 <p className="mt-2 whitespace-normal break-words text-xs leading-6 text-zinc-400">
-                  Sector A-01 is the first playable frontier.
+                  The glowing square shows where Sector A-01 sits inside the full world. Land selection happens below.
                 </p>
               </div>
             </div>
@@ -772,7 +778,7 @@ export default function WorldPage() {
                 Demo Origin
               </p>
               <p className="mt-2 text-xs leading-6 text-zinc-400">
-                Sector A-01 is the first playable frontier inside the wider atlas.
+                The glowing square is context only. Choose your actual land in the Sector A-01 grid below.
               </p>
             </div>
           </div>
@@ -799,10 +805,10 @@ export default function WorldPage() {
                     Aurelian Basin
                   </p>
                   <p className="mt-3 text-sm leading-7 text-zinc-400">
-                    Aurelian Basin is the demo frontier inside the 100 x 100 world atlas.
+                    This is the actual playable land layer for the demo, cut from the larger 100 x 100 world atlas.
                   </p>
                   <p className="mt-2 text-xs uppercase tracking-[0.22em] text-zinc-600">
-                    Choose one land and claim it. The full world contains 10,000 lands.
+                    Every clickable cell is a land parcel in Sector A-01. The painting behind the grid is terrain context, not a separate selection layer.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
@@ -819,6 +825,18 @@ export default function WorldPage() {
                     Claim one land
                   </span>
                 </div>
+              </div>
+
+              <div
+                data-qa="sector-orientation-note"
+                className="mt-5 border border-amber-500/12 bg-[#08080f]/78 p-3 text-sm leading-7 text-zinc-400"
+              >
+                <span className="font-[family-name:var(--font-syne)] text-xs font-bold uppercase tracking-[0.24em] text-amber-100/80">
+                  Actual Selection Area
+                </span>
+                <p className="mt-2">
+                  Click one visible cell in the A-01 grid. Terrain colors show plains, forests, mountains, coast and basin; the grid cells are the land parcels you can claim.
+                </p>
               </div>
 
               {demoState.claimedLand ? (
@@ -847,7 +865,7 @@ export default function WorldPage() {
 
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border border-amber-500/10 bg-[#08080f]/70 p-2 sm:hidden">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                  Default view fits Sector A-01. Zoom to inspect and pan.
+                  Default view fits the claimable Sector A-01 grid. Zoom to inspect land cells.
                 </p>
                 <div className="flex gap-1.5">
                   {mobileMapControls.map(({ label, action }) => (
@@ -1044,7 +1062,7 @@ export default function WorldPage() {
                       Route - {routeTarget.name}
                     </span>
                   ) : null}
-                  <div className="relative z-[12] grid grid-cols-[repeat(18,minmax(0,1fr))] gap-px bg-transparent p-px">
+                  <div data-qa="sector-claimable-grid" className="relative z-[12] grid grid-cols-[repeat(18,minmax(0,1fr))] gap-px bg-transparent p-px">
                     {tiles.map((tile) => {
                       const tileOwnedByYou = demoState.claimedLandId === tile.id && demoState.claimedLand;
                       const tileClaimed = tile.claimed || tileOwnedByYou;
@@ -1057,7 +1075,7 @@ export default function WorldPage() {
                           type="button"
                           onClick={() => selectTile(tile.id)}
                           aria-label={`${tile.landId}, ${tile.region}, ${toTerrainLabel(tile.terrain)}`}
-                          className={`relative aspect-square overflow-hidden border border-white/[0.018] bg-black/[0.025] transition-[border-color,box-shadow,background-color] duration-200 before:pointer-events-none before:absolute before:inset-0 before:opacity-90 after:pointer-events-none after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.04),transparent_42%)] ${
+                          className={`relative aspect-square overflow-hidden border border-white/[0.025] transition-[border-color,box-shadow,background-color] duration-200 before:pointer-events-none before:absolute before:inset-0 before:opacity-90 before:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.04),transparent_42%)] ${TERRAIN_TILE_SURFACE[tile.terrain]} ${TERRAIN_TINT[tile.terrain]} ${
                             tile.x === 0 || tile.x === GRID_WIDTH - 1 || tile.y === 0 || tile.y === GRID_HEIGHT - 1
                               ? "opacity-[0.72]"
                               : ""
@@ -1171,6 +1189,20 @@ export default function WorldPage() {
               <p className="mt-3 text-xs leading-6 text-zinc-500">{selectedTile.contextLine}</p>
             </div>
 
+            <div
+              data-qa="selected-land-next-step"
+              className="mt-5 border border-amber-500/15 bg-[#08080f]/80 p-4 text-sm leading-6 text-zinc-400"
+            >
+              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">Next Step</p>
+              <p className="mt-2">
+                {ownedByYou
+                  ? "Enter your command center to turn this land into your first settlement."
+                  : isUnavailable
+                    ? "This parcel is already claimed in the preview. Pick another unclaimed cell in Sector A-01."
+                    : "Claim this land, then enter your command center to found the first settlement."}
+              </p>
+            </div>
+
             <div className="mt-6">
               {ownedByYou ? (
                 <Link
@@ -1281,6 +1313,15 @@ export default function WorldPage() {
                   <p className="mx-auto mt-6 max-w-md text-base leading-8 text-zinc-400">
                     You now control {selectedTile.landName}. Next, enter your command center and found the first settlement.
                   </p>
+                  <div
+                    data-qa="post-claim-next-step"
+                    className="mx-auto mt-6 max-w-md border border-amber-500/15 bg-amber-500/[0.045] p-4 text-left text-sm leading-7 text-zinc-400"
+                  >
+                    <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">Step 3 / Command Center</p>
+                    <p className="mt-2">
+                      This is the bridge from land to settlement: enter your land, review the founder record, then create the first settlement.
+                    </p>
+                  </div>
                   <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
                     <Link
                       href="/dashboard"
