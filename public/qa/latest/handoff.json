@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-20T10:51:19.079Z",
+  "generatedAt": "2026-06-20T12:50:37.920Z",
   "branch": "main",
   "isClean": true,
   "git": {
     "statusSummary": "## main...origin/main",
-    "lastCommits": "a36b36f Add public QA check command\n1ed0079 Trigger Vercel redeploy for clean public QA handoff\n66fc354 Trigger Vercel redeploy for clean Continuity v0.6 QA handoff\nf71cad5 Trigger Vercel redeploy after Continuity v0.6\n8495d1b Update QA handoff after Continuity v0.6 push"
+    "lastCommits": "d83784a Add Project OS cleanup status command\nab9d222 Update QA handoff after public QA check command\na36b36f Add public QA check command\n1ed0079 Trigger Vercel redeploy for clean public QA handoff\n66fc354 Trigger Vercel redeploy for clean Continuity v0.6 QA handoff"
   },
   "qa": {
     "smoke": {
@@ -80,16 +80,16 @@
   "qaEvidenceFreshness": {
     "status": "FRESH",
     "smokeGeneratedAt": "2026-06-20T09:11:53.404Z",
-    "reportModifiedAt": "2026-06-20T09:11:31.428Z",
-    "manifestModifiedAt": "2026-06-20T09:11:31.426Z",
-    "screenshotsNewestModifiedAt": "2026-06-20T09:11:31.383Z",
-    "screenshotsOldestModifiedAt": "2026-06-20T09:09:56.913Z",
+    "reportModifiedAt": "2026-06-20T11:22:02.222Z",
+    "manifestModifiedAt": "2026-06-20T11:22:02.221Z",
+    "screenshotsNewestModifiedAt": "2026-06-20T11:22:02.286Z",
+    "screenshotsOldestModifiedAt": "2026-06-20T11:10:48.094Z",
     "screenshotsCount": 29,
     "toleranceMinutes": 2,
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-20T10:51:19.079Z",
+    "localHandoffGeneratedAt": "2026-06-20T12:50:37.920Z",
     "localReportGeneratedAt": "2026-06-20T09:11:31.425Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",

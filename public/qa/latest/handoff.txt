@@ -1,5 +1,5 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-20T10:51:19.079Z
+Generated: 2026-06-20T12:50:37.920Z
 
 Branch: main
 Working tree: clean
@@ -8,11 +8,11 @@ Git status:
   ## main...origin/main
 
 Last 5 commits:
+  d83784a Add Project OS cleanup status command
+  ab9d222 Update QA handoff after public QA check command
   a36b36f Add public QA check command
   1ed0079 Trigger Vercel redeploy for clean public QA handoff
   66fc354 Trigger Vercel redeploy for clean Continuity v0.6 QA handoff
-  f71cad5 Trigger Vercel redeploy after Continuity v0.6
-  8495d1b Update QA handoff after Continuity v0.6 push
 
 QA:
 Smoke result: PASS
@@ -23,16 +23,16 @@ Smoke result path: public/qa/latest/smoke-result.json
 
 QA Evidence Freshness:
 Smoke generated: 2026-06-20T09:11:53.404Z
-Report modified: 2026-06-20T09:11:31.428Z
-Manifest modified: 2026-06-20T09:11:31.426Z
-Screenshots newest: 2026-06-20T09:11:31.383Z
-Screenshots oldest: 2026-06-20T09:09:56.913Z
+Report modified: 2026-06-20T11:22:02.222Z
+Manifest modified: 2026-06-20T11:22:02.221Z
+Screenshots newest: 2026-06-20T11:22:02.286Z
+Screenshots oldest: 2026-06-20T11:10:48.094Z
 Screenshots count: 29
 Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-20T10:51:19.079Z
+Local handoff generated: 2026-06-20T12:50:37.920Z
 Local report generated: 2026-06-20T09:11:31.425Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
