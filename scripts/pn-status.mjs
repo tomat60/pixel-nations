@@ -85,3 +85,4 @@ console.log("Cursor default: GPT-5.5 without MAX.");
 console.log("MAX: blocked unless clearly justified.");
 console.log("Terminal: allowed for deterministic audits, QA, docs, and safe patches.");
 console.log("Coding: blocked until scope, files, validation, and stop condition are explicit.");
+console.log("Report handoff: run npm run pn:report to reveal/select a ZIP for ChatGPT upload.");
