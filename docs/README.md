@@ -88,3 +88,24 @@ Preferred cleanup order:
 2. Add one deterministic status command.
 3. Mark or archive historical docs only when repeated confusion appears.
 4. Avoid large doc moves unless there is a clear repeated failure.
+
+<!-- PN_REPORT_PACKAGE_WORKFLOW_V0_1 -->
+## Result Package Workflow
+
+Use this command whenever a result needs to be handed back to ChatGPT:
+
+```bash
+npm run pn:report
+```
+
+It writes a timestamped package to `reports/outbox/`, creates a ZIP, and reveals/selects the ZIP in Finder by default. Upload the ZIP instead of pasting terminal output or selecting the unpacked folder contents.
+
+Optional:
+
+```bash
+npm run pn:report -- --open-folder
+npm run pn:report -- --no-open
+```
+
+Use `--open-folder` only when you intentionally want the folder view instead of ZIP selection. Use `--no-open` for CI/headless runs.
+<!-- END_PN_REPORT_PACKAGE_WORKFLOW_V0_1 -->

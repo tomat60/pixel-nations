@@ -16,7 +16,9 @@
     "pn:ops-report": "node scripts/pn-ops-report.mjs",
     "pn:visual-gate": "node scripts/pn-visual-gate.mjs",
     "pn:public-check": "node scripts/pn-public-qa-check.mjs",
-    "pn:status": "node scripts/pn-status.mjs"
+    "pn:status": "node scripts/pn-status.mjs",
+    "pn:report": "node scripts/pn-report.mjs",
+    "pn:outbox": "node scripts/pn-report.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.40.0",

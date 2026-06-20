@@ -246,3 +246,54 @@ ChatGPT must also audit the AI Ops agent.
 
 If either side detects repeated user frustration, unclear process, stale evidence, needless manual file hunting, weak stop conditions, or unnecessary Cursor/model spend, the next action should be a process improvement or command-system improvement before another broad sprint.
 
+<!-- PN_FILE_FIRST_HANDOFF_V0_1 -->
+## File-First Handoff Workflow Lock
+
+Large terminal walls should not be the default handoff format.
+
+When the user needs to send results back to ChatGPT after terminal work, Cursor work, QA, audits, or sprint implementation, the preferred command is:
+
+```bash
+npm run pn:report
+```
+
+This creates a timestamped folder and ZIP under `reports/outbox/` and reveals/selects the ZIP in Finder by default.
+
+Assistant behavior:
+
+- Prefer sending implementation packages/files over long manual patch instructions when practical.
+- Prefer asking for a generated `pn:report` ZIP over asking the user to paste long logs.
+- The default upload target is the ZIP file, not the unpacked folder or pasted contents.
+- Keep manual terminal paste requests short and targeted.
+- Do not use result-package convenience as permission to run broad, vague, or expensive work.
+- Cursor remains blocked until a reviewed prompt exists.
+
+Large terminal walls should not be the default handoff format.
+
+When the user needs to send results back to ChatGPT after terminal work, Cursor work, QA, audits, or sprint implementation, the preferred command is:
+
+```bash
+npm run pn:report
+```
+
+This creates a timestamped folder and ZIP under `reports/outbox/`, opens the folder automatically, and tells the user which ZIP to upload.
+
+Assistant behavior:
+
+- Prefer sending implementation packages/files over long manual patch instructions when practical.
+- Prefer asking for a generated `pn:report` ZIP over asking the user to paste long logs.
+- Keep manual terminal paste requests short and targeted.
+- Do not use result-package convenience as permission to run broad, vague, or expensive work.
+- Cursor remains blocked until a reviewed prompt exists.
+
+<!-- PN_REPORT_PACKAGE_WORKFLOW_PROTOCOL_V0_1 -->
+## Result Package Handoff Rule
+
+When a terminal patch, Cursor run, QA run, audit, or project status result needs to be reviewed by ChatGPT, prefer a generated result package over pasted terminal output:
+
+```bash
+npm run pn:report
+```
+
+The expected handoff is the selected `pn-result-*.zip` from `reports/outbox/`. Do not ask the user to paste large terminal walls unless a command failed before the report package could be generated.
+<!-- END_PN_REPORT_PACKAGE_WORKFLOW_PROTOCOL_V0_1 -->

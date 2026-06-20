@@ -79,3 +79,17 @@ Project OS Cleanup v0.1 is complete when:
 - `npm run pn:status` exists.
 - `docs/ASSISTANT_COMMAND_PROTOCOL.md` points future sessions to `pn:status`.
 - repo is clean after handoff update.
+
+<!-- PN_REPORT_PACKAGE_WORKFLOW_CURRENT_STATE_V0_1 -->
+## Current handoff workflow
+
+Result handoffs should use:
+
+```bash
+npm run pn:report
+```
+
+The command creates `reports/outbox/pn-result-*.zip` and reveals/selects the ZIP in Finder on macOS. Upload that ZIP to ChatGPT instead of pasting large terminal output.
+
+This workflow is process infrastructure. It does not approve gameplay, visual quality, or product clarity.
+<!-- END_PN_REPORT_PACKAGE_WORKFLOW_CURRENT_STATE_V0_1 -->
