@@ -1,34 +1,18 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-20T04:18:19.917Z
+Generated: 2026-06-20T04:18:25.116Z
 
 Branch: main
-Working tree: has changes
+Working tree: clean
 
 Git status:
-  ## main...origin/main [ahead 5]
-   D public/qa/latest/handoff.json
-   D public/qa/latest/handoff.txt
-   M public/qa/latest/index.html
-   M public/qa/latest/manifest.json
-   M public/qa/latest/report.html
-   M public/qa/latest/screenshots/desktop-settlement-after-action.png
-   M public/qa/latest/screenshots/desktop-world-living-map.png
-   M public/qa/latest/screenshots/desktop-world-sector.png
-   M public/qa/latest/screenshots/desktop-world.png
-   M public/qa/latest/screenshots/mobile-settlement-after-action.png
-   M public/qa/latest/screenshots/mobile-world-claim-tray.png
-   M public/qa/latest/screenshots/mobile-world-living-map.png
-   M public/qa/latest/screenshots/mobile-world-sector.png
-   M public/qa/latest/screenshots/mobile-world.png
-   M public/qa/latest/smoke-result.json
-   M public/qa/latest/visual-gate-report.md
+  ## main...origin/main
 
 Last 5 commits:
+  a2f5097 Update QA evidence after Living Map v0.5 merge
   bd9944a Merge Living Map v0.5 first world activity
   699ce69 Update QA handoff after Living Map v0.5 mobile legend patch
   b3767dd Compact Living Map v0.5 mobile legend
   f95a395 Update QA handoff after Living Map v0.5 branch push
-  b34bebe Add Living Map v0.5 first world activity layer
 
 QA:
 Smoke result: PASS
@@ -48,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-20T04:18:19.917Z
+Local handoff generated: 2026-06-20T04:18:25.116Z
 Local report generated: 2026-06-20T04:17:56.831Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html

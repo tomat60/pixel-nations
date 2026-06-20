@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-20T04:18:19.917Z",
+  "generatedAt": "2026-06-20T04:18:25.116Z",
   "branch": "main",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## main...origin/main [ahead 5]\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-settlement-after-action.png\n M public/qa/latest/screenshots/desktop-world-living-map.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-settlement-after-action.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-living-map.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json\n M public/qa/latest/visual-gate-report.md",
-    "lastCommits": "bd9944a Merge Living Map v0.5 first world activity\n699ce69 Update QA handoff after Living Map v0.5 mobile legend patch\nb3767dd Compact Living Map v0.5 mobile legend\nf95a395 Update QA handoff after Living Map v0.5 branch push\nb34bebe Add Living Map v0.5 first world activity layer"
+    "statusSummary": "## main...origin/main",
+    "lastCommits": "a2f5097 Update QA evidence after Living Map v0.5 merge\nbd9944a Merge Living Map v0.5 first world activity\n699ce69 Update QA handoff after Living Map v0.5 mobile legend patch\nb3767dd Compact Living Map v0.5 mobile legend\nf95a395 Update QA handoff after Living Map v0.5 branch push"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-20T04:18:19.917Z",
+    "localHandoffGeneratedAt": "2026-06-20T04:18:25.116Z",
     "localReportGeneratedAt": "2026-06-20T04:17:56.831Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
