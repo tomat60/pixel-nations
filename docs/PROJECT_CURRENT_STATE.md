@@ -150,3 +150,25 @@ Active direction:
 
 Next strategic step remains Cloud Execution Plan v0.1, but it must now optimize for low-touch batch execution and exception-based user checkpoints.
 <!-- END_PN_LOW_TOUCH_AUTONOMOUS_CURRENT_STATE_V1_1 -->
+
+<!-- PN_CLOUD_HEADLESS_CURRENT_STATE_V0_1 -->
+## Cloud/headless execution bootstrap v0.1
+
+The project is moving away from local MacBook micro-execution toward controlled cloud/headless batches.
+
+Current active infrastructure target:
+
+- GitHub remains source of truth.
+- Cloud dev environment should use `.devcontainer/devcontainer.json`.
+- GitHub Actions should run build/smoke validation through `.github/workflows/pn-ci.yml`.
+- Future agent runs should use `docs/AUTONOMOUS_BATCH_EXECUTION_TEMPLATE.md`.
+- Future cloud/headless operations should follow `docs/CLOUD_HEADLESS_EXECUTION_RUNBOOK.md`.
+
+Next intended production step after this bootstrap:
+
+1. Confirm CI/devcontainer readiness.
+2. Prepare the first low-touch cloud/headless batch spec.
+3. Execute Core Game Loop v0.8.1 as a bounded batch, not as local micro-patches.
+
+User checkpoints should be minimized and reserved for critical product, cost, quality, security, or scope decisions.
+<!-- END_PN_CLOUD_HEADLESS_CURRENT_STATE_V0_1 -->

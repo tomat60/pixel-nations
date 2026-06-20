@@ -20,7 +20,8 @@
     "pn:report": "node scripts/pn-report.mjs",
     "pn:outbox": "node scripts/pn-report.mjs",
     "pn:confusion": "node scripts/pn-player-confusion.mjs",
-    "pn:player-confusion": "node scripts/pn-player-confusion.mjs"
+    "pn:player-confusion": "node scripts/pn-player-confusion.mjs",
+    "pn:cloud-ready": "node scripts/pn-cloud-readiness.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.40.0",

@@ -139,3 +139,20 @@ Purpose:
 
 This does not authorize a single unbounded “build the whole game” run. It authorizes bounded autonomous batches under Production OS rails.
 <!-- END_PN_LOW_TOUCH_AUTONOMOUS_RAILS_V1_1 -->
+
+<!-- PN_CLOUD_HEADLESS_BOOTSTRAP_V0_1 -->
+## Cloud/headless execution bootstrap
+
+Active cloud/headless execution docs:
+
+- `CLOUD_HEADLESS_EXECUTION_RUNBOOK.md` — how future work moves away from local MacBook execution.
+- `AUTONOMOUS_BATCH_EXECUTION_TEMPLATE.md` — standard format for low-touch agent batches.
+
+Active automation files:
+
+- `.devcontainer/devcontainer.json` — reproducible cloud dev environment.
+- `.github/workflows/pn-ci.yml` — GitHub CI build/smoke validation.
+- `scripts/pn-cloud-readiness.mjs` — readiness gate for cloud/headless execution.
+
+This bootstrap does not authorize unbounded autonomous work. It prepares controlled cloud batches under Production OS and Low-Touch Autonomous rails.
+<!-- END_PN_CLOUD_HEADLESS_BOOTSTRAP_V0_1 -->

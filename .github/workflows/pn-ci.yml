@@ -1,0 +1,67 @@
+name: Pixel Nations CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      validation:
+        description: "Validation depth"
+        required: true
+        default: core
+        type: choice
+        options:
+          - core
+          - full-screens
+
+concurrency:
+  group: pixel-nations-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Build and smoke validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cloud readiness gate
+        run: npm run pn:cloud-ready
+
+      - name: Build
+        run: npm run build
+
+      - name: Mechanical smoke
+        run: npm run qa:smoke
+
+      - name: Optional screenshot QA
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.validation == 'full-screens' }}
+        run: |
+          npx playwright install --with-deps chromium
+          npm run qa:screens
+          npm run qa:smoke
+
+      - name: Upload QA evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel-nations-qa-evidence
+          path: |
+            public/qa/latest/**
+            reports/latest-handoff.md
+          if-no-files-found: ignore
+          retention-days: 7
