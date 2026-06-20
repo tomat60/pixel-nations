@@ -299,3 +299,9 @@ Future features must align with this direction unless explicitly changed.
 See `docs/LIVING_MAP_LAYER_V0_5_STRATEGY_BRIEF.md`.
 
 The next strategic layer after Visual Gamefeel v0.4 is Living Map Layer v0.5: first visible trade routes, influence pulses, and readable land states without building the final 10,000-land geography engine yet.
+
+## Current Strategic Next Layer: Continuity v0.6
+
+See `docs/SETTLEMENT_NATION_EMPIRE_CONTINUITY_V0_6_STRATEGY_BRIEF.md`.
+
+After Living Map v0.5, the next layer is stronger continuity across settlement, trade, alliance, nation, and empire so earlier choices echo later in the player path.
