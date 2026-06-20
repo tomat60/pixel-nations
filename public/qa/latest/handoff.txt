@@ -1,39 +1,55 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-19T22:04:43.970Z
+Generated: 2026-06-20T04:18:19.917Z
 
-Branch: sprint/living-map-v0-5-first-world-activity
-Working tree: clean
+Branch: main
+Working tree: has changes
 
 Git status:
-  ## sprint/living-map-v0-5-first-world-activity...origin/sprint/living-map-v0-5-first-world-activity
+  ## main...origin/main [ahead 5]
+   D public/qa/latest/handoff.json
+   D public/qa/latest/handoff.txt
+   M public/qa/latest/index.html
+   M public/qa/latest/manifest.json
+   M public/qa/latest/report.html
+   M public/qa/latest/screenshots/desktop-settlement-after-action.png
+   M public/qa/latest/screenshots/desktop-world-living-map.png
+   M public/qa/latest/screenshots/desktop-world-sector.png
+   M public/qa/latest/screenshots/desktop-world.png
+   M public/qa/latest/screenshots/mobile-settlement-after-action.png
+   M public/qa/latest/screenshots/mobile-world-claim-tray.png
+   M public/qa/latest/screenshots/mobile-world-living-map.png
+   M public/qa/latest/screenshots/mobile-world-sector.png
+   M public/qa/latest/screenshots/mobile-world.png
+   M public/qa/latest/smoke-result.json
+   M public/qa/latest/visual-gate-report.md
 
 Last 5 commits:
+  bd9944a Merge Living Map v0.5 first world activity
+  699ce69 Update QA handoff after Living Map v0.5 mobile legend patch
   b3767dd Compact Living Map v0.5 mobile legend
   f95a395 Update QA handoff after Living Map v0.5 branch push
   b34bebe Add Living Map v0.5 first world activity layer
-  efce7c9 Update QA handoff after Living Map v0.5 implementation plan
-  01b2f09 Add Living Map v0.5 implementation plan
 
 QA:
 Smoke result: PASS
-Smoke generated: 2026-06-19T22:04:38.378Z
+Smoke generated: 2026-06-20T04:18:19.115Z
 Smoke app source: existing local app
 Smoke steps: 9/9 passed
 Smoke result path: public/qa/latest/smoke-result.json
 
 QA Evidence Freshness:
-Smoke generated: 2026-06-19T22:04:38.378Z
-Report modified: 2026-06-19T22:04:17.401Z
-Manifest modified: 2026-06-19T22:04:17.400Z
-Screenshots newest: 2026-06-19T22:04:17.288Z
-Screenshots oldest: 2026-06-19T22:02:51.590Z
+Smoke generated: 2026-06-20T04:18:19.115Z
+Report modified: 2026-06-20T04:17:56.834Z
+Manifest modified: 2026-06-20T04:17:56.833Z
+Screenshots newest: 2026-06-20T04:17:56.788Z
+Screenshots oldest: 2026-06-20T04:16:37.757Z
 Screenshots count: 25
 Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-19T22:04:43.970Z
-Local report generated: 2026-06-19T22:04:17.397Z
+Local handoff generated: 2026-06-20T04:18:19.917Z
+Local report generated: 2026-06-20T04:17:56.831Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
 Public handoff TXT: https://pixel-nations.vercel.app/qa/latest/handoff.txt
