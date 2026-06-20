@@ -18,7 +18,9 @@
     "pn:public-check": "node scripts/pn-public-qa-check.mjs",
     "pn:status": "node scripts/pn-status.mjs",
     "pn:report": "node scripts/pn-report.mjs",
-    "pn:outbox": "node scripts/pn-report.mjs"
+    "pn:outbox": "node scripts/pn-report.mjs",
+    "pn:confusion": "node scripts/pn-player-confusion.mjs",
+    "pn:player-confusion": "node scripts/pn-player-confusion.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.40.0",

@@ -41,3 +41,5 @@ yarn-error.log*
 next-env.d.ts
 # Pixel Nations local/report artifacts
 reports/outbox/
+reports/player-confusion-v0-7/
+reports/player-confusion/
