@@ -27,7 +27,7 @@ jobs:
   validate:
     name: Build and smoke validate
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -49,10 +49,12 @@ jobs:
         run: npm run build
 
       - name: Mechanical smoke
-        run: npm run qa:smoke
+        timeout-minutes: 4
+        run: timeout 210s npm run qa:smoke
 
       - name: Optional screenshot QA
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.validation == 'full-screens' }}
+        timeout-minutes: 8
         run: |
           npx playwright install --with-deps chromium
           npm run qa:screens
