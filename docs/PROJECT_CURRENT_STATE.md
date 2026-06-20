@@ -111,3 +111,26 @@ Active strategy rails:
 Current strategic priority: build the core game loop from claimed land toward settlement/city/nation/empire. Do not let map polish consume core-loop production unless it blocks first-impression comprehension.
 <!-- END_PN_PRODUCTION_OS_V1_0_CURRENT_STATE -->
 
+
+
+<!-- PN_PRODUCTION_OS_STATUS_ALIGNMENT_V1_0_1 -->
+## Production OS v1.0.1 status alignment
+
+Production OS v1.0 is accepted as the active strategy-to-execution rail.
+
+Current next strategic steps:
+
+1. Keep the repo clean and public QA green.
+2. Prepare Cloud Execution Plan v0.1 so future execution can move off the local MacBook.
+3. Build Core Game Loop v0.8.1 only under Production OS rails.
+4. Keep map/globe polish classified as visual debt unless it blocks first-impression comprehension.
+
+Agent/Cursor execution remains blocked until a reviewed execution spec exists with:
+
+- scope and allowed files,
+- forbidden actions,
+- validation commands,
+- cost mode and stop condition,
+- failure recovery path,
+- required result ZIP.
+<!-- END_PN_PRODUCTION_OS_STATUS_ALIGNMENT_V1_0_1 -->

@@ -76,8 +76,8 @@ if (dirty) {
 } else if (!publicPass) {
   console.log("BLOCKED FOR PRODUCT WORK: public QA check is not passing yet. Wait for deploy or inspect the mismatch.");
 } else {
-  console.log("ALLOWED: strategic planning or a scoped audit may proceed. Cursor remains blocked until a reviewed prompt exists.");
-  console.log("Recommended next product step: Demo Readiness v0.7 — Player Confusion Pass.");
+  console.log("ALLOWED: Production OS planning, cloud execution planning, or a scoped implementation may proceed after gate review. Cursor/agent remains blocked until a reviewed execution spec exists.");
+  console.log("Recommended next product step: Cloud Execution Plan v0.1, then Core Game Loop v0.8.1 under Production OS rails.");
 }
 
 section("Tool policy");
