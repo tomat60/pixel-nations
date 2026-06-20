@@ -123,3 +123,19 @@ These documents define the current strategy-to-execution system. They are active
 - `CLOUD_EXECUTION_PLAN.md` — migration path away from local MacBook execution.
 <!-- END_PN_PRODUCTION_OS_V1_0 -->
 
+
+<!-- PN_LOW_TOUCH_AUTONOMOUS_RAILS_V1_1 -->
+## Low-touch autonomous production rail
+
+`AUTONOMOUS_PRODUCTION_PROTOCOL.md` is an active source-of-truth rail for future cloud/headless agent execution.
+
+Purpose:
+
+- reduce user copy/paste busywork,
+- prefer batch execution over micro-checkpoints,
+- require user checkpoints only at critical product/cost/quality/security decisions,
+- stop agent loops before they waste time or budget,
+- preserve quality gates while allowing more autonomous execution.
+
+This does not authorize a single unbounded “build the whole game” run. It authorizes bounded autonomous batches under Production OS rails.
+<!-- END_PN_LOW_TOUCH_AUTONOMOUS_RAILS_V1_1 -->

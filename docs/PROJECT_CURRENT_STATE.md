@@ -134,3 +134,19 @@ Agent/Cursor execution remains blocked until a reviewed execution spec exists wi
 - failure recovery path,
 - required result ZIP.
 <!-- END_PN_PRODUCTION_OS_STATUS_ALIGNMENT_V1_0_1 -->
+
+<!-- PN_LOW_TOUCH_AUTONOMOUS_CURRENT_STATE_V1_1 -->
+## Low-touch autonomous production direction
+
+The user wants fewer micro-checkpoints and less manual report/command copying.
+
+Active direction:
+
+- move toward cloud/headless execution away from the local MacBook,
+- use larger autonomous batches with strict stop conditions,
+- checkpoint the user only for critical product, cost, quality, security, or scope decisions,
+- preserve Production OS rails and public QA gates,
+- avoid unbounded “build everything” prompts.
+
+Next strategic step remains Cloud Execution Plan v0.1, but it must now optimize for low-touch batch execution and exception-based user checkpoints.
+<!-- END_PN_LOW_TOUCH_AUTONOMOUS_CURRENT_STATE_V1_1 -->
