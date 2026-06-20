@@ -172,3 +172,7 @@ Next intended production step after this bootstrap:
 
 User checkpoints should be minimized and reserved for critical product, cost, quality, security, or scope decisions.
 <!-- END_PN_CLOUD_HEADLESS_CURRENT_STATE_V0_1 -->
+
+## Hybrid Agent Rails v1.2
+
+Current execution strategy: combine GitHub-native agents/Actions for governance and PR workflow with Cursor CLI/headless as the preferred scoped implementation executor in cloud environments. The next implementation batch is Cloud Batch 0.8.1 — Core Game Loop Spine. Local MacBook execution is fallback only.

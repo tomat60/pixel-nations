@@ -156,3 +156,9 @@ Active automation files:
 
 This bootstrap does not authorize unbounded autonomous work. It prepares controlled cloud batches under Production OS and Low-Touch Autonomous rails.
 <!-- END_PN_CLOUD_HEADLESS_BOOTSTRAP_V0_1 -->
+
+## Hybrid cloud agent rails
+
+- `HYBRID_AGENT_EXECUTION_ARCHITECTURE.md` — active source of truth for combining GitHub agents, CI, Codespaces, Cursor CLI/headless, ChatGPT, and human review.
+- `AGENT_ROLE_MATRIX.md` — active tool/team role matrix and decision tree.
+- `CLOUD_BATCH_0_8_1_SPEC.md` — next cloud implementation batch spec for the core game loop spine.
