@@ -9,6 +9,7 @@ import {
   getClaimedLandDisplay,
   getNationOriginQuote,
 } from "../lib/claimed-land";
+import { getContinuitySummary } from "../lib/continuity";
 import { DEFAULT_SETTLEMENT_STATE, readSettlementState, type SettlementState } from "../lib/settlement-state";
 
 const FALLBACK = {
@@ -35,6 +36,7 @@ export default function NationPage() {
   }, []);
 
   const claimedLand = useMemo(() => getClaimedLandDisplay(state), [state]);
+  const continuity = useMemo(() => getContinuitySummary(state), [state]);
 
   const nation = useMemo(
     () => ({
@@ -126,6 +128,28 @@ export default function NationPage() {
               </p>
             </article>
           ))}
+        </motion.section>
+
+        <motion.section
+          data-qa="continuity-path-memory"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.11, ease: "easeOut" }}
+          className="mt-10 border border-amber-500/20 bg-[#06060c]/88 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">Path Memory</p>
+          <h2 className="mt-4 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100 sm:text-3xl">
+            {continuity.trait}
+          </h2>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-400">{continuity.meaning}</p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {continuity.signals.map((signal) => (
+              <div key={signal.label} className="border border-amber-500/10 bg-[#08080f]/75 p-3">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">{signal.label}</p>
+                <p className="mt-2 text-sm font-semibold text-zinc-200">{signal.value}</p>
+              </div>
+            ))}
+          </div>
         </motion.section>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">

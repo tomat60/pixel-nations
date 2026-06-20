@@ -11,6 +11,7 @@ import {
   getDashboardTerrainQuote,
   getOriginAdvantageLine,
 } from "../lib/claimed-land";
+import { getContinuitySummary } from "../lib/continuity";
 import { DEFAULT_SETTLEMENT_STATE, clearSettlementState, readSettlementState } from "../lib/settlement-state";
 
 const founderBenefits = [
@@ -118,6 +119,7 @@ export default function DashboardPage() {
       };
 
   const claimedLand = useMemo(() => getClaimedLandDisplay(settlementState), [settlementState]);
+  const continuity = useMemo(() => getContinuitySummary(settlementState), [settlementState]);
   const heroTitle = useMemo(() => getDashboardHeroTitle(settlementState), [settlementState]);
   const originQuote = getDashboardTerrainQuote(claimedLand.terrain, claimedLand.hasClaimedLand);
   const originAdvantage = getOriginAdvantageLine(claimedLand.terrain);
@@ -197,6 +199,54 @@ export default function DashboardPage() {
           >
             {nextMilestone.cta}
           </Link>
+        </section>
+
+        <section
+          data-qa="continuity-path-memory"
+          className="mt-8 border border-amber-500/20 bg-[#06060c]/88 p-5 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-6"
+        >
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
+                Your Realm's Path
+              </p>
+              <h2 className="mt-4 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100 sm:text-3xl">
+                {continuity.trait}
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-400">{continuity.subtitle}</p>
+            </div>
+            <div className="border border-amber-500/10 bg-[#08080f]/80 p-4 lg:max-w-sm">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">Next Continuity Signal</p>
+              <p className="mt-3 text-sm leading-7 text-amber-100/80">{continuity.recommendation}</p>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {continuity.signals.map((signal) => (
+              <div key={signal.label} className="border border-amber-500/10 bg-[#08080f]/75 p-3">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">{signal.label}</p>
+                <p className="mt-2 text-sm font-semibold text-zinc-200">{signal.value}</p>
+              </div>
+            ))}
+          </div>
+
+          <ol className="mt-6 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+            {continuity.pathSteps.map((step) => (
+              <li
+                key={step.id}
+                className={
+                  step.active
+                    ? "border border-amber-400/25 bg-amber-400/[0.07] p-3"
+                    : "border border-zinc-800 bg-[#08080f]/60 p-3"
+                }
+              >
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">{step.label}</p>
+                <p className={step.active ? "mt-2 text-xs font-bold text-amber-100" : "mt-2 text-xs text-zinc-500"}>
+                  {step.value}
+                </p>
+              </li>
+            ))}
+          </ol>
         </section>
 
         <section className="mt-8 border border-amber-500/15 bg-[#06060c]/85 p-5 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-6">

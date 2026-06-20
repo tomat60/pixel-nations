@@ -1,39 +1,39 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-20T07:47:47.252Z
+Generated: 2026-06-20T08:47:49.005Z
 
-Branch: main
+Branch: sprint/continuity-v0-6-path-memory
 Working tree: clean
 
 Git status:
-  ## main...origin/main
+  ## sprint/continuity-v0-6-path-memory...origin/sprint/continuity-v0-6-path-memory
 
 Last 5 commits:
+  501b699 Fix Continuity v0.6 recommendation order
+  390288d Update QA handoff after Continuity v0.6 path memory branch push
+  2f75052 Add Continuity v0.6 path memory layer
+  dd5a4c9 Update QA handoff after Continuity v0.6 brief
   7a213c5 Add Continuity v0.6 strategy brief
-  20d83b4 Trigger Vercel redeploy after Living Map v0.5
-  bfdfbcb Update QA handoff after Living Map v0.5 push
-  a2f5097 Update QA evidence after Living Map v0.5 merge
-  bd9944a Merge Living Map v0.5 first world activity
 
 QA:
 Smoke result: PASS
-Smoke generated: 2026-06-20T04:18:19.115Z
+Smoke generated: 2026-06-20T08:47:43.449Z
 Smoke app source: existing local app
 Smoke steps: 9/9 passed
 Smoke result path: public/qa/latest/smoke-result.json
 
 QA Evidence Freshness:
-Smoke generated: 2026-06-20T04:18:19.115Z
-Report modified: 2026-06-20T04:17:56.834Z
-Manifest modified: 2026-06-20T04:17:56.833Z
-Screenshots newest: 2026-06-20T04:17:56.788Z
-Screenshots oldest: 2026-06-20T04:16:37.757Z
-Screenshots count: 25
+Smoke generated: 2026-06-20T08:47:43.449Z
+Report modified: 2026-06-20T08:47:22.266Z
+Manifest modified: 2026-06-20T08:47:22.264Z
+Screenshots newest: 2026-06-20T08:47:22.223Z
+Screenshots oldest: 2026-06-20T08:45:48.677Z
+Screenshots count: 29
 Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-20T07:47:47.252Z
-Local report generated: 2026-06-20T04:17:56.831Z
+Local handoff generated: 2026-06-20T08:47:49.005Z
+Local report generated: 2026-06-20T08:47:22.263Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
 Public handoff TXT: https://pixel-nations.vercel.app/qa/latest/handoff.txt

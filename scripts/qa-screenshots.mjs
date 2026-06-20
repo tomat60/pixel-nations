@@ -80,6 +80,38 @@ const QA_LIVING_MAP_STATE = {
   tradeRoutes: 1,
 };
 
+const QA_CONTINUITY_STATE = {
+  ...QA_LIVING_MAP_STATE,
+  regionalAllianceFormed: true,
+  allianceName: "Aurelian Pact",
+  alliancePartners: ["Iron Coast", "North Road"],
+  allianceStrategy: "Regional Support",
+  allianceBonus: "+ Diplomatic Reach",
+  allianceIdentity: "The alliance gives Aurelia enough support to raise a national banner.",
+  diplomaticReach: 2,
+  politicalStatus: "Empire Founder",
+  nationFounded: true,
+  nationName: "The Aurelian Crown",
+  nationIdeology: "Crown Rule",
+  nationDoctrineId: "civic-mandate",
+  nationDoctrine: "Civic Mandate",
+  nationDoctrineBonus: "+ Civic Stability",
+  nationDoctrineIdentity: "The nation grows from its capital city, civic institutions, and the first promise of homeland.",
+  landsControlled: 7,
+  bordersExpanded: true,
+  expandedLands: ["North Road", "Iron Ridge", "Amber Fields"],
+  empireFounded: true,
+  empireName: "Aurelian Empire",
+  empireDoctrine: "Golden Crown",
+  empireDirectionId: "crown-empire",
+  empireDirection: "Crown Empire",
+  empireDirectionBonus: "+ Imperial Legitimacy",
+  empireDirectionIdentity: "The empire expands through law, banners, ceremonies, and controlled succession of power.",
+  imperialReach: "Lawful authority across the first imperial provinces",
+  cities: 3,
+};
+
+
 const captures = [
   { filename: "mobile-home.png", route: "/", viewport: "mobile", width: 390, height: 844 },
   { filename: "mobile-landing-hero.png", route: "/", viewport: "mobile", width: 390, height: 844 },
@@ -177,11 +209,30 @@ const captures = [
         ({ key, state }) => {
           localStorage.setItem(key, JSON.stringify(state));
         },
-        { key: DEMO_STATE_KEY, state: QA_CLAIMED_DEMO_STATE },
+        { key: DEMO_STATE_KEY, state: QA_CONTINUITY_STATE },
       );
       await page.reload({ waitUntil: "domcontentloaded" });
       await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
       await page.waitForTimeout(700);
+    },
+  },
+  {
+    filename: "mobile-dashboard-continuity.png",
+    route: "/dashboard",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    selector: "[data-qa='continuity-path-memory']",
+    prepare: async (page) => {
+      await page.evaluate(
+        ({ key, state }) => {
+          localStorage.setItem(key, JSON.stringify(state));
+        },
+        { key: DEMO_STATE_KEY, state: QA_CONTINUITY_STATE },
+      );
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+      await page.locator("[data-qa='continuity-path-memory']").waitFor({ state: "visible", timeout: 5000 });
     },
   },
   {
@@ -224,9 +275,100 @@ const captures = [
       await page.locator("[data-qa='settlement-development']").waitFor({ state: "visible", timeout: 5000 });
     },
   },
-  { filename: "mobile-nation.png", route: "/nation", viewport: "mobile", width: 390, height: 844 },
-  { filename: "mobile-empire.png", route: "/empire", viewport: "mobile", width: 390, height: 844 },
+  {
+    filename: "mobile-nation.png",
+    route: "/nation",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    prepare: async (page) => {
+      await page.evaluate(
+        ({ key, state }) => {
+          localStorage.setItem(key, JSON.stringify(state));
+        },
+        { key: DEMO_STATE_KEY, state: QA_CONTINUITY_STATE },
+      );
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+      await page.locator("[data-qa='continuity-path-memory']").waitFor({ state: "visible", timeout: 5000 });
+    },
+  },
+  {
+    filename: "mobile-empire.png",
+    route: "/empire",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    prepare: async (page) => {
+      await page.evaluate(
+        ({ key, state }) => {
+          localStorage.setItem(key, JSON.stringify(state));
+        },
+        { key: DEMO_STATE_KEY, state: QA_CONTINUITY_STATE },
+      );
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+      await page.locator("[data-qa='continuity-path-memory']").waitFor({ state: "visible", timeout: 5000 });
+    },
+  },
   { filename: "desktop-home.png", route: "/", viewport: "desktop", width: 1440, height: 900 },
+  {
+    filename: "desktop-dashboard-continuity.png",
+    route: "/dashboard",
+    viewport: "desktop",
+    width: 1440,
+    height: 900,
+    selector: "[data-qa='continuity-path-memory']",
+    prepare: async (page) => {
+      await page.evaluate(
+        ({ key, state }) => {
+          localStorage.setItem(key, JSON.stringify(state));
+        },
+        { key: DEMO_STATE_KEY, state: QA_CONTINUITY_STATE },
+      );
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+      await page.locator("[data-qa='continuity-path-memory']").waitFor({ state: "visible", timeout: 5000 });
+    },
+  },
+  {
+    filename: "desktop-nation-continuity.png",
+    route: "/nation",
+    viewport: "desktop",
+    width: 1440,
+    height: 900,
+    selector: "[data-qa='continuity-path-memory']",
+    prepare: async (page) => {
+      await page.evaluate(
+        ({ key, state }) => {
+          localStorage.setItem(key, JSON.stringify(state));
+        },
+        { key: DEMO_STATE_KEY, state: QA_CONTINUITY_STATE },
+      );
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+      await page.locator("[data-qa='continuity-path-memory']").waitFor({ state: "visible", timeout: 5000 });
+    },
+  },
+  {
+    filename: "desktop-empire-continuity.png",
+    route: "/empire",
+    viewport: "desktop",
+    width: 1440,
+    height: 900,
+    selector: "[data-qa='continuity-path-memory']",
+    prepare: async (page) => {
+      await page.evaluate(
+        ({ key, state }) => {
+          localStorage.setItem(key, JSON.stringify(state));
+        },
+        { key: DEMO_STATE_KEY, state: QA_CONTINUITY_STATE },
+      );
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+      await page.locator("[data-qa='continuity-path-memory']").waitFor({ state: "visible", timeout: 5000 });
+    },
+  },
   {
     filename: "desktop-landing-map-preview.png",
     route: "/",

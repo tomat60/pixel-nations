@@ -9,6 +9,7 @@ import {
   getClaimedLandDisplay,
   getEmpireHeroQuote,
 } from "../lib/claimed-land";
+import { getContinuitySummary } from "../lib/continuity";
 import { DEFAULT_SETTLEMENT_STATE, readSettlementState, type SettlementState } from "../lib/settlement-state";
 
 const FALLBACK = {
@@ -33,6 +34,7 @@ export default function EmpirePage() {
   }, []);
 
   const claimedLand = useMemo(() => getClaimedLandDisplay(state), [state]);
+  const continuity = useMemo(() => getContinuitySummary(state), [state]);
 
   const empire = useMemo(
     () => ({
@@ -122,6 +124,37 @@ export default function EmpirePage() {
               </p>
             </article>
           ))}
+        </motion.section>
+
+        <motion.section
+          data-qa="continuity-path-memory"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.11, ease: "easeOut" }}
+          className="mt-10 border border-amber-500/20 bg-[#06060c]/88 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">Continuity Verdict</p>
+          <h2 className="mt-4 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100 sm:text-3xl">
+            {continuity.trait}
+          </h2>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-400">{continuity.meaning}</p>
+          <ol className="mt-6 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+            {continuity.pathSteps.map((step) => (
+              <li
+                key={step.id}
+                className={
+                  step.active
+                    ? "border border-amber-400/25 bg-amber-400/[0.07] p-3"
+                    : "border border-zinc-800 bg-[#08080f]/60 p-3"
+                }
+              >
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">{step.label}</p>
+                <p className={step.active ? "mt-2 text-xs font-bold text-amber-100" : "mt-2 text-xs text-zinc-500"}>
+                  {step.value}
+                </p>
+              </li>
+            ))}
+          </ol>
         </motion.section>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
