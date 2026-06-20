@@ -1,16 +1,16 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-20T15:50:18.962Z",
+  "generatedAt": "2026-06-20T15:57:19.861Z",
   "branch": "main",
   "isClean": false,
   "git": {
-    "statusSummary": "## main...origin/main\n M app/world/page.tsx\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-settlement-after-action.png\n M public/qa/latest/screenshots/desktop-world-atlas.png\n M public/qa/latest/screenshots/desktop-world-living-map.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world-selected-land-panel.png\n M public/qa/latest/screenshots/desktop-world-top.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-settlement-after-action.png\n M public/qa/latest/screenshots/mobile-world-atlas.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-living-map.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world-selected-land-panel.png\n M public/qa/latest/screenshots/mobile-world-top.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json\n D public/qa/latest/visual-gate-report.md",
-    "lastCommits": "bb58285 Add player confusion audit command\n9a40b3f Include report handoff in status command\n993563e Lock result package workflow\nb7be8f4 Update QA handoff after Project OS cleanup\nd83784a Add Project OS cleanup status command"
+    "statusSummary": "## main...origin/main\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-settlement-after-action.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-settlement-after-action.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-living-map.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
+    "lastCommits": "442ffe0 Improve world map orientation clarity\nbb58285 Add player confusion audit command\n9a40b3f Include report handoff in status command\n993563e Lock result package workflow\nb7be8f4 Update QA handoff after Project OS cleanup"
   },
   "qa": {
     "smoke": {
       "status": "PASS",
-      "generatedAt": "2026-06-20T15:50:18.299Z",
+      "generatedAt": "2026-06-20T15:57:19.148Z",
       "appUrl": "http://localhost:3000",
       "appSource": "existing local app",
       "blockingStep": "",
@@ -19,53 +19,53 @@
         {
           "name": "reset demo state and open /world",
           "status": "PASS",
-          "durationMs": 1139
+          "durationMs": 1121
         },
         {
           "name": "select a claimable Sector A-01 land",
           "status": "PASS",
-          "durationMs": 178
+          "durationMs": 186
         },
         {
           "name": "claim selected land",
           "status": "PASS",
-          "durationMs": 371
+          "durationMs": 647
         },
         {
           "name": "dashboard recognizes claimed land",
           "status": "PASS",
-          "durationMs": 242
+          "durationMs": 348
         },
         {
           "name": "create settlement",
           "status": "PASS",
-          "durationMs": 1712
+          "durationMs": 1899
         },
         {
           "name": "build settlement core and establish trade",
           "status": "PASS",
-          "durationMs": 4482
+          "durationMs": 4128
         },
         {
           "name": "form alliance and found nation",
           "status": "PASS",
-          "durationMs": 8590
+          "durationMs": 8511
         },
         {
           "name": "attempt empire continuation path",
           "status": "PASS",
-          "durationMs": 1450
+          "durationMs": 1443
         },
         {
           "name": "create empire",
           "status": "PASS",
-          "durationMs": 2458
+          "durationMs": 1437
         }
       ],
       "passedSteps": 9,
       "totalSteps": 9,
       "path": "public/qa/latest/smoke-result.json",
-      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-20T15:50:18.299Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-20T15:57:19.148Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
     },
     "publicQaIndexUrl": "https://pixel-nations.vercel.app/qa/latest/",
     "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
@@ -79,18 +79,18 @@
   },
   "qaEvidenceFreshness": {
     "status": "FRESH",
-    "smokeGeneratedAt": "2026-06-20T15:50:18.299Z",
-    "reportModifiedAt": "2026-06-20T15:49:55.308Z",
-    "manifestModifiedAt": "2026-06-20T15:49:55.307Z",
-    "screenshotsNewestModifiedAt": "2026-06-20T15:49:55.256Z",
-    "screenshotsOldestModifiedAt": "2026-06-20T15:48:22.751Z",
+    "smokeGeneratedAt": "2026-06-20T15:57:19.148Z",
+    "reportModifiedAt": "2026-06-20T15:56:57.866Z",
+    "manifestModifiedAt": "2026-06-20T15:56:57.864Z",
+    "screenshotsNewestModifiedAt": "2026-06-20T15:56:57.781Z",
+    "screenshotsOldestModifiedAt": "2026-06-20T15:55:19.687Z",
     "screenshotsCount": 29,
     "toleranceMinutes": 2,
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-20T15:50:18.962Z",
-    "localReportGeneratedAt": "2026-06-20T15:49:55.305Z",
+    "localHandoffGeneratedAt": "2026-06-20T15:57:19.861Z",
+    "localReportGeneratedAt": "2026-06-20T15:56:57.862Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
       "report": "https://pixel-nations.vercel.app/qa/latest/report.html",
