@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-20T15:57:19.861Z",
+  "generatedAt": "2026-06-20T16:02:25.648Z",
   "branch": "main",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## main...origin/main\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-settlement-after-action.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-settlement-after-action.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-living-map.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
-    "lastCommits": "442ffe0 Improve world map orientation clarity\nbb58285 Add player confusion audit command\n9a40b3f Include report handoff in status command\n993563e Lock result package workflow\nb7be8f4 Update QA handoff after Project OS cleanup"
+    "statusSummary": "## main...origin/main",
+    "lastCommits": "9493cea Update QA handoff after map clarity patch\n442ffe0 Improve world map orientation clarity\nbb58285 Add player confusion audit command\n9a40b3f Include report handoff in status command\n993563e Lock result package workflow"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-20T15:57:19.861Z",
+    "localHandoffGeneratedAt": "2026-06-20T16:02:25.648Z",
     "localReportGeneratedAt": "2026-06-20T15:56:57.862Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
