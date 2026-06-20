@@ -16,8 +16,11 @@ on:
           - core
           - full-screens
 
+permissions:
+  contents: read
+
 concurrency:
-  group: pixel-nations-ci-${{ github.ref }}
+  group: pixel-nations-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -56,7 +59,8 @@ jobs:
           npm run qa:smoke
 
       - name: Upload QA evidence artifact
-        if: always()
+        if: ${{ always() && github.event_name == 'workflow_dispatch' }}
+        timeout-minutes: 3
         uses: actions/upload-artifact@v4
         with:
           name: pixel-nations-qa-evidence
