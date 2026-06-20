@@ -96,14 +96,28 @@ function pickRealmTrait(state: SettlementState) {
 }
 
 function getRecommendation(state: SettlementState) {
+  if (state.empireFounded) {
+    return "First arc complete. Future systems should deepen geography, diplomacy, economy, and rival powers.";
+  }
+
+  if (state.nationFounded) {
+    return "Declare empire to complete the first land-to-empire arc.";
+  }
+
+  if (state.regionalAllianceFormed) {
+    return "Found the nation so earlier city choices become doctrine.";
+  }
+
+  if (state.tradeRouteEstablished) {
+    return "Form a regional alliance to give the city political reach.";
+  }
+
+  if (state.townHallBuilt || state.settlementFounded) {
+    return "Create a trade route so the city can affect the region.";
+  }
+
   if (!state.claimedLand) return "Claim land to create your origin.";
-  if (!state.settlementFounded) return "Found a settlement so the land has people, purpose, and memory.";
-  if (!state.townHallBuilt) return "Build the Town Hall to turn the settlement into a civic center.";
-  if (!state.tradeRouteEstablished) return "Create a trade route so the city can affect the region.";
-  if (!state.regionalAllianceFormed) return "Form a regional alliance to give the city political reach.";
-  if (!state.nationFounded) return "Found the nation so earlier city choices become doctrine.";
-  if (!state.empireFounded) return "Declare empire to complete the first land-to-empire arc.";
-  return "First arc complete. Future systems should deepen geography, diplomacy, economy, and rival powers.";
+  return "Found a settlement so the land has people, purpose, and memory.";
 }
 
 export function getContinuitySummary(state: SettlementState): ContinuitySummary {
