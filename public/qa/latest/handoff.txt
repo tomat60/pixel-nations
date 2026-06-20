@@ -1,20 +1,18 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-20T07:47:44.203Z
+Generated: 2026-06-20T07:47:47.252Z
 
 Branch: main
-Working tree: has changes
+Working tree: clean
 
 Git status:
   ## main...origin/main
-   M docs/GAME_VISION_MASTER_PLAN_V0_1.md
-  ?? docs/SETTLEMENT_NATION_EMPIRE_CONTINUITY_V0_6_STRATEGY_BRIEF.md
 
 Last 5 commits:
+  7a213c5 Add Continuity v0.6 strategy brief
   20d83b4 Trigger Vercel redeploy after Living Map v0.5
   bfdfbcb Update QA handoff after Living Map v0.5 push
   a2f5097 Update QA evidence after Living Map v0.5 merge
   bd9944a Merge Living Map v0.5 first world activity
-  699ce69 Update QA handoff after Living Map v0.5 mobile legend patch
 
 QA:
 Smoke result: PASS
@@ -34,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-20T07:47:44.203Z
+Local handoff generated: 2026-06-20T07:47:47.252Z
 Local report generated: 2026-06-20T04:17:56.831Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html

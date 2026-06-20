@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-20T07:47:44.203Z",
+  "generatedAt": "2026-06-20T07:47:47.252Z",
   "branch": "main",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## main...origin/main\n M docs/GAME_VISION_MASTER_PLAN_V0_1.md\n?? docs/SETTLEMENT_NATION_EMPIRE_CONTINUITY_V0_6_STRATEGY_BRIEF.md",
-    "lastCommits": "20d83b4 Trigger Vercel redeploy after Living Map v0.5\nbfdfbcb Update QA handoff after Living Map v0.5 push\na2f5097 Update QA evidence after Living Map v0.5 merge\nbd9944a Merge Living Map v0.5 first world activity\n699ce69 Update QA handoff after Living Map v0.5 mobile legend patch"
+    "statusSummary": "## main...origin/main",
+    "lastCommits": "7a213c5 Add Continuity v0.6 strategy brief\n20d83b4 Trigger Vercel redeploy after Living Map v0.5\nbfdfbcb Update QA handoff after Living Map v0.5 push\na2f5097 Update QA evidence after Living Map v0.5 merge\nbd9944a Merge Living Map v0.5 first world activity"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-20T07:47:44.203Z",
+    "localHandoffGeneratedAt": "2026-06-20T07:47:47.252Z",
     "localReportGeneratedAt": "2026-06-20T04:17:56.831Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
