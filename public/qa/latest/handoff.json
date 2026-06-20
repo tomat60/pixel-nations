@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-20T09:11:59.183Z",
+  "generatedAt": "2026-06-20T10:51:19.079Z",
   "branch": "main",
   "isClean": true,
   "git": {
     "statusSummary": "## main...origin/main",
-    "lastCommits": "e20bb80 Update QA evidence after Continuity v0.6 merge\n21c4e71 Merge Continuity v0.6 path memory\nf9789af Update QA handoff after Continuity v0.6 recommendation fix\n501b699 Fix Continuity v0.6 recommendation order\n390288d Update QA handoff after Continuity v0.6 path memory branch push"
+    "lastCommits": "a36b36f Add public QA check command\n1ed0079 Trigger Vercel redeploy for clean public QA handoff\n66fc354 Trigger Vercel redeploy for clean Continuity v0.6 QA handoff\nf71cad5 Trigger Vercel redeploy after Continuity v0.6\n8495d1b Update QA handoff after Continuity v0.6 push"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-20T09:11:59.183Z",
+    "localHandoffGeneratedAt": "2026-06-20T10:51:19.079Z",
     "localReportGeneratedAt": "2026-06-20T09:11:31.425Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
