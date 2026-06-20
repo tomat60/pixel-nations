@@ -1,5 +1,5 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-20T17:15:19.740Z
+Generated: 2026-06-20T17:51:48.482Z
 
 Branch: main
 Working tree: clean
@@ -8,11 +8,11 @@ Git status:
   ## main...origin/main [ahead 1]
 
 Last 5 commits:
+  5bab18c Add hybrid cloud agent execution rails
+  51da10b Update clean QA handoff after cloud bootstrap
   4e1ca14 Refresh QA evidence after cloud bootstrap
   b5aef3b Update QA handoff after cloud bootstrap
   67d2ce3 Update smoke evidence after cloud bootstrap
-  91ee9d9 Add cloud headless execution bootstrap
-  1f57e4b Update QA handoff after low-touch autonomous protocol
 
 QA:
 Smoke result: PASS
@@ -32,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-20T17:15:19.740Z
+Local handoff generated: 2026-06-20T17:51:48.482Z
 Local report generated: 2026-06-20T17:14:57.372Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html

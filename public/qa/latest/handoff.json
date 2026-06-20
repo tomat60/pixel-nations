@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-20T17:15:19.740Z",
+  "generatedAt": "2026-06-20T17:51:48.482Z",
   "branch": "main",
   "isClean": true,
   "git": {
     "statusSummary": "## main...origin/main [ahead 1]",
-    "lastCommits": "4e1ca14 Refresh QA evidence after cloud bootstrap\nb5aef3b Update QA handoff after cloud bootstrap\n67d2ce3 Update smoke evidence after cloud bootstrap\n91ee9d9 Add cloud headless execution bootstrap\n1f57e4b Update QA handoff after low-touch autonomous protocol"
+    "lastCommits": "5bab18c Add hybrid cloud agent execution rails\n51da10b Update clean QA handoff after cloud bootstrap\n4e1ca14 Refresh QA evidence after cloud bootstrap\nb5aef3b Update QA handoff after cloud bootstrap\n67d2ce3 Update smoke evidence after cloud bootstrap"
   },
   "qa": {
     "smoke": {
@@ -89,7 +89,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-20T17:15:19.740Z",
+    "localHandoffGeneratedAt": "2026-06-20T17:51:48.482Z",
     "localReportGeneratedAt": "2026-06-20T17:14:57.372Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
