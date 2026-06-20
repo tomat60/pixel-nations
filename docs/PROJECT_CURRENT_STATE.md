@@ -93,3 +93,21 @@ The command creates `reports/outbox/pn-result-*.zip` and reveals/selects the ZIP
 
 This workflow is process infrastructure. It does not approve gameplay, visual quality, or product clarity.
 <!-- END_PN_REPORT_PACKAGE_WORKFLOW_CURRENT_STATE_V0_1 -->
+
+<!-- PN_PRODUCTION_OS_V1_0_CURRENT_STATE -->
+## Production OS v1.0 strategic rail
+
+Production OS v1.0 is the next strategic layer after Project OS cleanup and map clarity recovery.
+
+Active strategy rails:
+
+- `docs/FINAL_PRODUCT_TARGET.md`
+- `docs/GAME_STRATEGY_MASTER_PLAN.md`
+- `docs/IMPLEMENTATION_ROADMAP.md`
+- `docs/SPRINT_DEPENDENCY_GRAPH.md`
+- `docs/AGENT_EXECUTION_GOVERNANCE.md`
+- `docs/CLOUD_EXECUTION_PLAN.md`
+
+Current strategic priority: build the core game loop from claimed land toward settlement/city/nation/empire. Do not let map polish consume core-loop production unless it blocks first-impression comprehension.
+<!-- END_PN_PRODUCTION_OS_V1_0_CURRENT_STATE -->
+

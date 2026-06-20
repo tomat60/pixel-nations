@@ -109,3 +109,17 @@ npm run pn:report -- --no-open
 
 Use `--open-folder` only when you intentionally want the folder view instead of ZIP selection. Use `--no-open` for CI/headless runs.
 <!-- END_PN_REPORT_PACKAGE_WORKFLOW_V0_1 -->
+
+<!-- PN_PRODUCTION_OS_V1_0 -->
+## Production OS v1.0 strategy rails
+
+These documents define the current strategy-to-execution system. They are active source-of-truth rails and should be read before major implementation or agent/cloud work:
+
+- `FINAL_PRODUCT_TARGET.md` — target for the first strong playable version.
+- `GAME_STRATEGY_MASTER_PLAN.md` — product pillars, core loop, map strategy, monetization guardrails.
+- `IMPLEMENTATION_ROADMAP.md` — phase order from current demo to first final playable version.
+- `SPRINT_DEPENDENCY_GRAPH.md` — what must be complete before each sprint can start.
+- `AGENT_EXECUTION_GOVERNANCE.md` — how Cursor/headless/cloud agents may execute work.
+- `CLOUD_EXECUTION_PLAN.md` — migration path away from local MacBook execution.
+<!-- END_PN_PRODUCTION_OS_V1_0 -->
+
