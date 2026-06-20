@@ -7,6 +7,9 @@ const APP_URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const OUTPUT_DIR = "public/qa/latest";
 const RESULT_PATH = `${OUTPUT_DIR}/smoke-result.json`;
 
+// Maximum internal smoke duration in ms (default 12 minutes).
+const SMOKE_TIMEOUT_MS = parseInt(process.env.SMOKE_TIMEOUT_MS || "720000");
+
 class SmokeError extends Error {
   constructor(step, message) {
     super(message);
@@ -284,12 +287,33 @@ async function main() {
   const { startedProcess, appSource } = await ensureApp();
   result.appSource = appSource;
 
+  // Install handlers to ensure we kill started processes on CI signal termination.
+  process.on("SIGINT", () => {
+    if (startedProcess) startedProcess.kill();
+    process.exit(130);
+  });
+  process.on("SIGTERM", () => {
+    if (startedProcess) startedProcess.kill();
+    process.exit(143);
+  });
+  process.on("uncaughtException", (err) => {
+    console.error("uncaughtException", err);
+    if (startedProcess) startedProcess.kill();
+    process.exit(1);
+  });
+
   let browser;
   try {
     browser = await chromium.launch();
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
-    await runSmoke(page);
+
+    // Bound the overall smoke via Promise.race so we guarantee a hard internal timeout.
+    await Promise.race([
+      (async () => { await runSmoke(page); })(),
+      new Promise((_, reject) => setTimeout(() => reject(new SmokeError("smoke timeout", "Smoke exceeded internal time limit")), SMOKE_TIMEOUT_MS)),
+    ]);
+
     await context.close();
     await writeResult("PASS");
     console.log(`Mechanical smoke PASS. Result written to ${RESULT_PATH}`);
@@ -300,7 +324,9 @@ async function main() {
     process.exitCode = 1;
   } finally {
     if (browser) await browser.close();
-    if (startedProcess) startedProcess.kill();
+    if (startedProcess) {
+      try { startedProcess.kill(); } catch {}
+    }
   }
 }
 
