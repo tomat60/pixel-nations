@@ -1,0 +1,105 @@
+{
+  "project": "Pixel Nations",
+  "generatedAt": "2026-06-20T17:15:19.740Z",
+  "branch": "main",
+  "isClean": true,
+  "git": {
+    "statusSummary": "## main...origin/main [ahead 1]",
+    "lastCommits": "4e1ca14 Refresh QA evidence after cloud bootstrap\nb5aef3b Update QA handoff after cloud bootstrap\n67d2ce3 Update smoke evidence after cloud bootstrap\n91ee9d9 Add cloud headless execution bootstrap\n1f57e4b Update QA handoff after low-touch autonomous protocol"
+  },
+  "qa": {
+    "smoke": {
+      "status": "PASS",
+      "generatedAt": "2026-06-20T17:15:18.240Z",
+      "appUrl": "http://localhost:3000",
+      "appSource": "existing local app",
+      "blockingStep": "",
+      "error": "",
+      "steps": [
+        {
+          "name": "reset demo state and open /world",
+          "status": "PASS",
+          "durationMs": 1186
+        },
+        {
+          "name": "select a claimable Sector A-01 land",
+          "status": "PASS",
+          "durationMs": 185
+        },
+        {
+          "name": "claim selected land",
+          "status": "PASS",
+          "durationMs": 375
+        },
+        {
+          "name": "dashboard recognizes claimed land",
+          "status": "PASS",
+          "durationMs": 292
+        },
+        {
+          "name": "create settlement",
+          "status": "PASS",
+          "durationMs": 1561
+        },
+        {
+          "name": "build settlement core and establish trade",
+          "status": "PASS",
+          "durationMs": 3924
+        },
+        {
+          "name": "form alliance and found nation",
+          "status": "PASS",
+          "durationMs": 7924
+        },
+        {
+          "name": "attempt empire continuation path",
+          "status": "PASS",
+          "durationMs": 1457
+        },
+        {
+          "name": "create empire",
+          "status": "PASS",
+          "durationMs": 2425
+        }
+      ],
+      "passedSteps": 9,
+      "totalSteps": 9,
+      "path": "public/qa/latest/smoke-result.json",
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-20T17:15:18.240Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+    },
+    "publicQaIndexUrl": "https://pixel-nations.vercel.app/qa/latest/",
+    "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
+    "worldUrl": "https://pixel-nations.vercel.app/world",
+    "publicHandoffTxtUrl": "https://pixel-nations.vercel.app/qa/latest/handoff.txt",
+    "publicHandoffJsonUrl": "https://pixel-nations.vercel.app/qa/latest/handoff.json",
+    "publicManifestUrl": "https://pixel-nations.vercel.app/qa/latest/manifest.json",
+    "localQaReportPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/report.html",
+    "localHandoffTxtPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.txt",
+    "localHandoffJsonPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.json"
+  },
+  "qaEvidenceFreshness": {
+    "status": "FRESH",
+    "smokeGeneratedAt": "2026-06-20T17:15:18.240Z",
+    "reportModifiedAt": "2026-06-20T17:14:57.375Z",
+    "manifestModifiedAt": "2026-06-20T17:14:57.374Z",
+    "screenshotsNewestModifiedAt": "2026-06-20T17:14:57.326Z",
+    "screenshotsOldestModifiedAt": "2026-06-20T17:13:24.831Z",
+    "screenshotsCount": 29,
+    "toleranceMinutes": 2,
+    "warnings": []
+  },
+  "publicEvidence": {
+    "localHandoffGeneratedAt": "2026-06-20T17:15:19.740Z",
+    "localReportGeneratedAt": "2026-06-20T17:14:57.372Z",
+    "expectedUrls": {
+      "index": "https://pixel-nations.vercel.app/qa/latest/",
+      "report": "https://pixel-nations.vercel.app/qa/latest/report.html",
+      "handoffTxt": "https://pixel-nations.vercel.app/qa/latest/handoff.txt",
+      "handoffJson": "https://pixel-nations.vercel.app/qa/latest/handoff.json",
+      "manifest": "https://pixel-nations.vercel.app/qa/latest/manifest.json"
+    },
+    "postDeployValidationRequired": true,
+    "validationNote": "After deploy, verify the public index, report, handoff TXT, and handoff JSON URLs are reachable and match the current QA evidence window."
+  },
+  "nextInstruction": "Upload public/qa/latest/handoff.txt to ChatGPT, paste the public handoff link, or type: raport gotowy."
+}
