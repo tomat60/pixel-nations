@@ -1,16 +1,16 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-20T07:47:47.252Z",
-  "branch": "main",
-  "isClean": true,
+  "generatedAt": "2026-06-20T08:34:27.362Z",
+  "branch": "sprint/continuity-v0-6-path-memory",
+  "isClean": false,
   "git": {
-    "statusSummary": "## main...origin/main",
-    "lastCommits": "7a213c5 Add Continuity v0.6 strategy brief\n20d83b4 Trigger Vercel redeploy after Living Map v0.5\nbfdfbcb Update QA handoff after Living Map v0.5 push\na2f5097 Update QA evidence after Living Map v0.5 merge\nbd9944a Merge Living Map v0.5 first world activity"
+    "statusSummary": "## sprint/continuity-v0-6-path-memory\n M app/dashboard/page.tsx\n M app/empire/page.tsx\n M app/nation/page.tsx\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-settlement-after-action.png\n M public/qa/latest/screenshots/desktop-world-living-map.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-empire.png\n M public/qa/latest/screenshots/mobile-nation.png\n M public/qa/latest/screenshots/mobile-settlement-after-action.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-living-map.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json\n M public/qa/latest/visual-gate-report.md\n M scripts/qa-screenshots.mjs\n?? app/lib/continuity.ts\n?? public/qa/latest/screenshots/desktop-dashboard-continuity.png\n?? public/qa/latest/screenshots/desktop-empire-continuity.png\n?? public/qa/latest/screenshots/desktop-nation-continuity.png\n?? public/qa/latest/screenshots/mobile-dashboard-continuity.png",
+    "lastCommits": "dd5a4c9 Update QA handoff after Continuity v0.6 brief\n7a213c5 Add Continuity v0.6 strategy brief\n20d83b4 Trigger Vercel redeploy after Living Map v0.5\nbfdfbcb Update QA handoff after Living Map v0.5 push\na2f5097 Update QA evidence after Living Map v0.5 merge"
   },
   "qa": {
     "smoke": {
       "status": "PASS",
-      "generatedAt": "2026-06-20T04:18:19.115Z",
+      "generatedAt": "2026-06-20T08:34:26.661Z",
       "appUrl": "http://localhost:3000",
       "appSource": "existing local app",
       "blockingStep": "",
@@ -19,53 +19,53 @@
         {
           "name": "reset demo state and open /world",
           "status": "PASS",
-          "durationMs": 1441
+          "durationMs": 1516
         },
         {
           "name": "select a claimable Sector A-01 land",
           "status": "PASS",
-          "durationMs": 211
+          "durationMs": 197
         },
         {
           "name": "claim selected land",
           "status": "PASS",
-          "durationMs": 431
+          "durationMs": 511
         },
         {
           "name": "dashboard recognizes claimed land",
           "status": "PASS",
-          "durationMs": 314
+          "durationMs": 356
         },
         {
           "name": "create settlement",
           "status": "PASS",
-          "durationMs": 2507
+          "durationMs": 1683
         },
         {
           "name": "build settlement core and establish trade",
           "status": "PASS",
-          "durationMs": 3319
+          "durationMs": 3787
         },
         {
           "name": "form alliance and found nation",
           "status": "PASS",
-          "durationMs": 8841
+          "durationMs": 8500
         },
         {
           "name": "attempt empire continuation path",
           "status": "PASS",
-          "durationMs": 1442
+          "durationMs": 1433
         },
         {
           "name": "create empire",
           "status": "PASS",
-          "durationMs": 1420
+          "durationMs": 2454
         }
       ],
       "passedSteps": 9,
       "totalSteps": 9,
       "path": "public/qa/latest/smoke-result.json",
-      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-20T04:18:19.115Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-20T08:34:26.661Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
     },
     "publicQaIndexUrl": "https://pixel-nations.vercel.app/qa/latest/",
     "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
@@ -79,18 +79,18 @@
   },
   "qaEvidenceFreshness": {
     "status": "FRESH",
-    "smokeGeneratedAt": "2026-06-20T04:18:19.115Z",
-    "reportModifiedAt": "2026-06-20T04:17:56.834Z",
-    "manifestModifiedAt": "2026-06-20T04:17:56.833Z",
-    "screenshotsNewestModifiedAt": "2026-06-20T04:17:56.788Z",
-    "screenshotsOldestModifiedAt": "2026-06-20T04:16:37.757Z",
-    "screenshotsCount": 25,
+    "smokeGeneratedAt": "2026-06-20T08:34:26.661Z",
+    "reportModifiedAt": "2026-06-20T08:34:03.464Z",
+    "manifestModifiedAt": "2026-06-20T08:34:03.462Z",
+    "screenshotsNewestModifiedAt": "2026-06-20T08:34:03.386Z",
+    "screenshotsOldestModifiedAt": "2026-06-20T08:32:25.450Z",
+    "screenshotsCount": 29,
     "toleranceMinutes": 2,
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-20T07:47:47.252Z",
-    "localReportGeneratedAt": "2026-06-20T04:17:56.831Z",
+    "localHandoffGeneratedAt": "2026-06-20T08:34:27.362Z",
+    "localReportGeneratedAt": "2026-06-20T08:34:03.460Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
       "report": "https://pixel-nations.vercel.app/qa/latest/report.html",
