@@ -9,12 +9,14 @@
 
 ## Validation summary
 - Mechanical smoke status: pending CI
+- Previous run showed smoke-result PASS but smoke job failure, likely from process timeout or nonzero runner exit after successful evidence generation.
 - Smoke blocking step: n/a
 - Smoke error: n/a
 
 ## Changed files
 - .github/workflows/pn-ci.yml
 - scripts/qa-smoke.mjs
+- scripts/pn-smoke-result-gate.mjs
 - scripts/pn-agent-report.mjs
 - scripts/pn-agent-finalize.mjs
 - reports/agent/agent-report-sample.md
@@ -33,4 +35,5 @@
 - The CI workflow was updated in PR #3.
 - Build, bounded smoke, and manual screenshot QA are now separate jobs.
 - The smoke job has a shell-level timeout.
+- A smoke result gate accepts bounded smoke only when `public/qa/latest/smoke-result.json` says PASS.
 - Screenshot QA is gated behind manual workflow dispatch.
