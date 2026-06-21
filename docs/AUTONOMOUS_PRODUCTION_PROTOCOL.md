@@ -194,3 +194,27 @@ The long-term goal remains the strongest possible Pixel Nations first playable p
 land → settlement/city → nation → empire
 
 The agent should not optimize for “more code.” It should optimize for a better game.
+
+## AM/PM Low-touch Review Protocol (agent v1.3)
+
+Purpose: allow multi-hour autonomous batches to run with minimal human intervention and leave durable, GitHub-visible reports.
+
+Agent responsibilities:
+
+- Start a batch and run production steps on a feature branch.
+- Open or update a pull request with code changes.
+- Run CI: build + bounded smoke. Full screenshot QA is gated/manual.
+- Generate a durable report under `reports/agent/` via `scripts/pn-agent-report.mjs`.
+- Attempt to commit/push the report back to the branch via `scripts/pn-agent-finalize.mjs`; if push is blocked, the report should remain available in the workspace/artifact and the blocker must be recorded.
+
+Human responsibilities:
+
+- Morning/evening reviewer inspects the PR and `reports/agent/*` only when asked by ChatGPT or when a checkpoint is ready.
+- Avoid pasting terminal logs into PRs. Use committed reports and artifacts.
+- The user should not monitor Copilot chat continuously.
+
+Notes:
+
+- The agent will not merge PR #1.
+- Infrastructure-only follow-ups to CI are recorded under the Owner-only workflow follow-up section of the report.
+- If report-push is blocked, the report must state the permission blocker instead of requesting secrets or tokens.

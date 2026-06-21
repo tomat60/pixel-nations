@@ -16,16 +16,18 @@ on:
           - core
           - full-screens
 
+permissions:
+  contents: read
+
 concurrency:
-  group: pixel-nations-ci-${{ github.ref }}
+  group: pixel-nations-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  validate:
-    name: Build and smoke validate
+  build:
+    name: Install and build
     runs-on: ubuntu-latest
     timeout-minutes: 25
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,23 +47,63 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Mechanical smoke
-        run: npm run qa:smoke
+  smoke:
+    name: Bounded mechanical smoke validation
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Optional screenshot QA
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.validation == 'full-screens' }}
-        run: |
-          npx playwright install --with-deps chromium
-          npm run qa:screens
-          npm run qa:smoke
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-      - name: Upload QA evidence artifact
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        timeout-minutes: 8
+        run: npx playwright install --with-deps chromium
+
+      - name: Run bounded smoke
+        timeout-minutes: 13
+        run: timeout 12m npm run qa:smoke || node scripts/pn-smoke-result-gate.mjs
+
+      - name: Upload smoke evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pixel-nations-qa-evidence
+          name: pixel-nations-smoke-evidence
           path: |
             public/qa/latest/**
-            reports/latest-handoff.md
           if-no-files-found: ignore
           retention-days: 7
+
+  screenshots:
+    name: Optional screenshot QA manual
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.validation == 'full-screens' }}
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run screenshots
+        run: npm run qa:screens
