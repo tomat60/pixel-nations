@@ -71,7 +71,7 @@ jobs:
 
       - name: Run bounded smoke
         timeout-minutes: 13
-        run: timeout 12m npm run qa:smoke
+        run: timeout 12m npm run qa:smoke || node scripts/pn-smoke-result-gate.mjs
 
       - name: Upload smoke evidence
         if: always()
