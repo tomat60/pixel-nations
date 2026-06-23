@@ -141,3 +141,21 @@ Deliverables:
 Acceptance:
 
 - agent cannot push broken or ungated changes to main
+
+## Operational status alignment — pipeline before product depth
+
+Production pipeline v1.3 was intentionally completed before Phase 1 finished. This does not change the product order above.
+
+Interpretation:
+
+- Phase 1 remains the active product phase.
+- Pipeline v1.3 is an enabling safety rail, not permission to skip to Phase 8 product scope.
+- CI/reporting/low-touch automation may be maintained when it directly reduces blocker risk.
+- New automation should not delay Core Loop Recovery unless it removes an immediate repeated blocker.
+
+Current next sprint:
+
+Core Loop Recovery v0.8.1.1
+
+Goal:
+Recover the objective spine and core-loop clarity from the stale PR #1 onto fresh `main`, without carrying over obsolete workflow changes.
