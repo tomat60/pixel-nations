@@ -176,3 +176,61 @@ User checkpoints should be minimized and reserved for critical product, cost, qu
 ## Hybrid Agent Rails v1.2
 
 Current execution strategy: combine GitHub-native agents/Actions for governance and PR workflow with Cursor CLI/headless as the preferred scoped implementation executor in cloud environments. The next implementation batch is Cloud Batch 0.8.1 — Core Game Loop Spine. Local MacBook execution is fallback only.
+
+<!-- PN_PIPELINE_V1_3_CURRENT_STATE -->
+## Production pipeline v1.3 accepted
+
+Status: ACCEPTED / MERGED TO MAIN
+
+PR #3 — Autonomous Production Pipeline v1.3 — is merged into `main`.
+
+Accepted production capability now includes:
+
+- GitHub Actions CI split into build, bounded smoke, and manual screenshot QA.
+- Durable agent reports under `reports/agent/`.
+- Smoke result gate for mechanical CI recovery.
+- AM/PM low-touch review protocol.
+- Branch/PR workflow as the default production path.
+
+This resolves the immediate pipeline blocker that prevented safe continuation of Core Game Loop v0.8.1.
+
+## Current active product priority
+
+The next product sprint is:
+
+Core Loop Recovery v0.8.1.1
+
+Goal:
+Recover the gameplay/core-loop work from PR #1 onto the fresh `main` after PR #3, while preserving the accepted pipeline and excluding stale workflow changes.
+
+Current PR #1 status:
+
+- PR #1 remains a historical gameplay batch/draft.
+- It is stale after PR #3 and must not be merged directly.
+- It should be used as a source/reference for gameplay/core-loop files only.
+
+Allowed next work:
+
+- restore the objective spine and core-loop gameplay clarity,
+- keep the player path land → settlement/city → nation → empire understandable,
+- validate with build, bounded smoke, and PR CI.
+
+Forbidden next work:
+
+- workflow rewrites,
+- map/globe polish unless a severe comprehension blocker appears,
+- backend/database/auth/payment/crypto/wallet/token/NFT,
+- new dependencies unless separately justified.
+
+## User involvement model
+
+The user remains product owner and creative/product reviewer, but should not be used as terminal operator or micro-click executor except where tool permissions or safeguards make a click unavoidable.
+
+Default operating mode:
+
+- ChatGPT leads strategy, QA, scope, cost, and tool choice.
+- Cursor/agent executes only scoped prompts.
+- GitHub remains source of truth.
+- User reviews milestone outcomes, product feel, and direction at low frequency.
+- Non-blocking polish notes may be collected and fixed at a later consolidation point if they do not block further product development.
+<!-- END_PN_PIPELINE_V1_3_CURRENT_STATE -->
