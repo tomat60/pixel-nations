@@ -4,6 +4,16 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getDemoObjective, getPostClaimGuidance } from "../lib/demo-objective";
 import {
+  buildCityCoreFromWorld,
+  claimLand as claimGameLand,
+  ensureClaimedLandIdentity,
+  establishTradeSeedFromWorld,
+  foundSettlementFromWorld,
+  getNextWorldGameAction,
+  type GameLand,
+  type WorldGameActionId,
+} from "../lib/game-state";
+import {
   DEFAULT_SETTLEMENT_STATE,
   readSettlementState,
   type SettlementState,
@@ -88,38 +98,8 @@ const LIVING_MAP_ROUTE_TARGETS = [
   { id: "crownlands", name: "Crownlands", x: 610, y: 144, labelX: "78%", labelY: "30%" },
 ];
 
-const MAP_FOUNDED_SETTLEMENT = {
-  focusId: "map-founder",
-  focus: "Founder Charter",
-  focusBonus: "+ Direct map progression",
-  focusIdentity: "Founded from the claimed land on the world map.",
-  population: 32,
-  influence: 4,
-  level: "Founder Outpost",
-};
-
-const MAP_CITY_CORE = {
-  population: 72,
-  influence: 9,
-  level: "Town Hall Core",
-  identity: "The claimed land now has a civic center.",
-};
-
-const MAP_TRADE_SEED = {
-  id: "iron-coast",
-  name: "Iron Coast",
-  bonus: "+ Iron Flow",
-  resourceFlow: "Iron +15",
-  identity: "Iron Coast gives the city durable material flow.",
-  population: 96,
-  influence: 14,
-  level: "Iron Route City",
-};
-
-type WorldActionStep = "settlement" | "city-core" | "trade";
-
 type WorldAction = {
-  step: WorldActionStep;
+  id: WorldGameActionId;
   eyebrow: string;
   headline: string;
   detail: string;
@@ -427,6 +407,18 @@ function getLivingMapRouteTarget(routeId?: string, destination?: string) {
   );
 }
 
+function toGameLand(tile: MapTile): GameLand {
+  return {
+    id: tile.id,
+    pnId: tile.landId,
+    name: tile.landName,
+    coordinates: tile.coordinates,
+    region: tile.region,
+    terrain: toTerrainLabel(tile.terrain),
+    resources: tile.resources,
+  };
+}
+
 function buildLivingMapRoutePath(from: { x: number; y: number }, to: { x: number; y: number }) {
   const controlX = (from.x + to.x) / 2;
   const controlY = Math.min(from.y, to.y) - 72;
@@ -450,11 +442,10 @@ function getContinueRoute(state: SettlementState) {
 }
 
 function getWorldAction(state: SettlementState): WorldAction | null {
-  if (!state.claimedLand) return null;
-
-  if (!state.settlementFounded) {
+  const nextAction = getNextWorldGameAction(state);
+  if (nextAction === "settlement") {
     return {
-      step: "settlement",
+      id: "settlement",
       eyebrow: "Map Action / Settlement",
       headline: "Found first settlement",
       detail: "Turn your claimed land into a living place.",
@@ -463,9 +454,9 @@ function getWorldAction(state: SettlementState): WorldAction | null {
     };
   }
 
-  if (!state.townHallBuilt) {
+  if (nextAction === "city-core") {
     return {
-      step: "city-core",
+      id: "city-core",
       eyebrow: "Map Action / City Core",
       headline: "Build city core",
       detail: "Raise the Town Hall on your claimed land.",
@@ -474,9 +465,9 @@ function getWorldAction(state: SettlementState): WorldAction | null {
     };
   }
 
-  if (!state.tradeRouteEstablished) {
+  if (nextAction === "trade") {
     return {
-      step: "trade",
+      id: "trade",
       eyebrow: "Map Action / Trade",
       headline: "Establish trade seed",
       detail: "Connect the city core to the first regional route.",
@@ -486,13 +477,6 @@ function getWorldAction(state: SettlementState): WorldAction | null {
   }
 
   return null;
-}
-
-function getMapSettlementName(state: SettlementState) {
-  if (state.settlementName) return state.settlementName;
-  const region = state.claimedLandRegion || state.region || "Aurelia";
-  const firstRegionWord = region.split(" ")[0] || "Aurelia";
-  return `${firstRegionWord} Outpost`;
 }
 
 export default function WorldPage() {
@@ -510,16 +494,7 @@ export default function WorldPage() {
 
     if (state.claimedLand && !state.claimedLandId) {
       const fallbackTile = tiles.find((tile) => tile.starter && !tile.claimed) ?? tiles[0];
-      normalizedState = {
-        ...state,
-        claimedLandId: fallbackTile.id,
-        claimedLandPnId: fallbackTile.landId,
-        claimedLandName: fallbackTile.landName,
-        claimedLandCoordinates: fallbackTile.coordinates,
-        claimedLandRegion: fallbackTile.region,
-        claimedLandTerrain: toTerrainLabel(fallbackTile.terrain),
-        claimedLandResources: fallbackTile.resources.join(", "),
-      };
+      normalizedState = ensureClaimedLandIdentity(state, toGameLand(fallbackTile));
       writeSettlementState(normalizedState);
     }
 
@@ -655,20 +630,7 @@ export default function WorldPage() {
   };
 
   const claimLand = () => {
-    const nextState: SettlementState = {
-      ...demoState,
-      claimedLand: true,
-      founderBadgeEarned: true,
-      claimedLandId: selectedTile.id,
-      claimedLandPnId: selectedTile.landId,
-      claimedLandName: selectedTile.landName,
-      claimedLandCoordinates: selectedTile.coordinates,
-      claimedLandRegion: selectedTile.region,
-      claimedLandTerrain: toTerrainLabel(selectedTile.terrain),
-      claimedLandResources: selectedTile.resources.join(", "),
-      region: selectedTile.region,
-      coordinates: selectedTile.coordinates,
-    };
+    const nextState = claimGameLand(demoState, toGameLand(selectedTile));
 
     writeSettlementState(nextState);
     setDemoState(nextState);
@@ -679,129 +641,16 @@ export default function WorldPage() {
   const runWorldAction = () => {
     if (!worldAction || !demoState.claimedLand) return;
 
-    const landRegion = demoState.claimedLandRegion || demoState.region || selectedTile.region;
-    const landCoordinates = demoState.claimedLandCoordinates || demoState.coordinates || selectedTile.coordinates;
-    const settlementName = getMapSettlementName(demoState);
-    let nextState: SettlementState;
-    let feedback: string;
+    const result =
+      worldAction.id === "settlement"
+        ? foundSettlementFromWorld(demoState)
+        : worldAction.id === "city-core"
+          ? buildCityCoreFromWorld(demoState)
+          : establishTradeSeedFromWorld(demoState);
 
-    if (worldAction.step === "settlement") {
-      nextState = {
-        ...demoState,
-        claimedLand: true,
-        founderBadgeEarned: true,
-        settlementFounded: true,
-        settlementName,
-        population: Math.max(demoState.population, MAP_FOUNDED_SETTLEMENT.population),
-        influence: Math.max(demoState.influence, MAP_FOUNDED_SETTLEMENT.influence),
-        region: landRegion,
-        coordinates: landCoordinates,
-        founder: demoState.founder || "You",
-        townHallBuilt: false,
-        settlementLevel: MAP_FOUNDED_SETTLEMENT.level,
-        settlementFocusId: demoState.settlementFocusId || MAP_FOUNDED_SETTLEMENT.focusId,
-        settlementFocus: demoState.settlementFocus || MAP_FOUNDED_SETTLEMENT.focus,
-        settlementFocusBonus: demoState.settlementFocusBonus || MAP_FOUNDED_SETTLEMENT.focusBonus,
-        settlementFocusIdentity: MAP_FOUNDED_SETTLEMENT.focusIdentity,
-        tradeRouteEstablished: false,
-        tradeRouteDestination: "",
-        tradeRouteId: "",
-        tradeRouteBonus: "",
-        tradeRouteResourceFlow: "",
-        tradeRouteIdentity: "",
-        tradeRoutes: 0,
-        regionalAllianceFormed: false,
-        allianceName: "",
-        alliancePartners: [],
-        politicalStatus: "",
-        nationFounded: false,
-        nationName: "",
-        nationIdeology: "",
-        landsControlled: 1,
-        bordersExpanded: false,
-        expandedLands: [],
-        empireFounded: false,
-        empireName: "",
-        empireDoctrine: "",
-        cities: 1,
-      };
-      feedback = "Settlement founded on the claimed land.";
-    } else if (worldAction.step === "city-core") {
-      nextState = {
-        ...demoState,
-        settlementFounded: true,
-        settlementName,
-        population: Math.max(demoState.population, MAP_CITY_CORE.population),
-        influence: Math.max(demoState.influence, MAP_CITY_CORE.influence),
-        region: landRegion,
-        coordinates: landCoordinates,
-        founder: demoState.founder || "You",
-        townHallBuilt: true,
-        settlementLevel: MAP_CITY_CORE.level,
-        settlementFocusIdentity: MAP_CITY_CORE.identity,
-        tradeRouteEstablished: false,
-        tradeRouteDestination: "",
-        tradeRouteId: "",
-        tradeRouteBonus: "",
-        tradeRouteResourceFlow: "",
-        tradeRouteIdentity: "",
-        tradeRoutes: 0,
-        regionalAllianceFormed: false,
-        allianceName: "",
-        alliancePartners: [],
-        politicalStatus: "",
-        nationFounded: false,
-        nationName: "",
-        nationIdeology: "",
-        landsControlled: 1,
-        bordersExpanded: false,
-        expandedLands: [],
-        empireFounded: false,
-        empireName: "",
-        empireDoctrine: "",
-        cities: 1,
-      };
-      feedback = "City core built on the world map.";
-    } else {
-      nextState = {
-        ...demoState,
-        settlementFounded: true,
-        settlementName,
-        population: Math.max(demoState.population, MAP_TRADE_SEED.population),
-        influence: Math.max(demoState.influence, MAP_TRADE_SEED.influence),
-        region: landRegion,
-        coordinates: landCoordinates,
-        founder: demoState.founder || "You",
-        townHallBuilt: true,
-        settlementLevel: MAP_TRADE_SEED.level,
-        tradeRouteEstablished: true,
-        tradeRouteDestination: MAP_TRADE_SEED.name,
-        tradeRouteId: MAP_TRADE_SEED.id,
-        tradeRouteBonus: MAP_TRADE_SEED.bonus,
-        tradeRouteResourceFlow: MAP_TRADE_SEED.resourceFlow,
-        tradeRouteIdentity: MAP_TRADE_SEED.identity,
-        tradeRoutes: 1,
-        regionalAllianceFormed: false,
-        allianceName: "",
-        alliancePartners: [MAP_TRADE_SEED.name],
-        politicalStatus: "",
-        nationFounded: false,
-        nationName: "",
-        nationIdeology: "",
-        landsControlled: 1,
-        bordersExpanded: false,
-        expandedLands: [],
-        empireFounded: false,
-        empireName: "",
-        empireDoctrine: "",
-        cities: 1,
-      };
-      feedback = "Trade seed established toward Iron Coast.";
-    }
-
-    writeSettlementState(nextState);
-    setDemoState(nextState);
-    setWorldActionFeedback(feedback);
+    writeSettlementState(result.state);
+    setDemoState(result.state);
+    setWorldActionFeedback(result.feedback);
   };
 
   return (

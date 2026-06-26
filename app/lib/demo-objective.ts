@@ -1,6 +1,11 @@
+import {
+  getCurrentProgressionStepId,
+  getGameProgression,
+  type GameProgressionStatus,
+} from "./game-state";
 import type { SettlementState } from "./settlement-state";
 
-export type ObjectiveStepStatus = "complete" | "current" | "upcoming";
+export type ObjectiveStepStatus = GameProgressionStatus;
 
 export type ObjectiveStep = {
   id: string;
@@ -28,22 +33,6 @@ export type DemoObjective = {
 };
 
 const SPINE_LINE = "Land → Settlement → City Core → Trade → Alliance/Nation → Empire";
-
-function stepStatus(complete: boolean, current: boolean): ObjectiveStepStatus {
-  if (complete) return "complete";
-  if (current) return "current";
-  return "upcoming";
-}
-
-function resolveCurrentStepId(state: SettlementState): string {
-  if (!state.claimedLand) return "land";
-  if (!state.settlementFounded) return "settlement";
-  if (!state.townHallBuilt) return "city-core";
-  if (!state.tradeRouteEstablished) return "trade";
-  if (!state.nationFounded) return "alliance-nation";
-  if (!state.empireFounded) return "empire";
-  return "complete";
-}
 
 function resolveAction(state: SettlementState, currentStepId: string): DemoObjectiveAction {
   const landName = state.claimedLandName || "your land";
@@ -145,14 +134,11 @@ function resolveAction(state: SettlementState, currentStepId: string): DemoObjec
 }
 
 export function getDemoObjective(state: SettlementState): DemoObjective {
-  const currentStepId = resolveCurrentStepId(state);
+  const currentStepId = getCurrentProgressionStepId(state);
+  const progressionById = new Map(getGameProgression(state).map((step) => [step.id, step.status]));
 
-  const landDone = state.claimedLand;
-  const settlementDone = state.settlementFounded;
   const cityCoreDone = state.townHallBuilt;
-  const tradeDone = state.tradeRouteEstablished;
   const nationDone = state.nationFounded;
-  const empireDone = state.empireFounded;
 
   const allianceNationValue = nationDone
     ? state.nationName || "First nation"
@@ -165,42 +151,42 @@ export function getDemoObjective(state: SettlementState): DemoObjective {
       id: "land",
       label: "Land",
       detail: "Claim origin parcel",
-      status: stepStatus(landDone, currentStepId === "land"),
+      status: progressionById.get("land") ?? "upcoming",
       value: state.claimedLandName || undefined,
     },
     {
       id: "settlement",
       label: "Settlement",
       detail: "Name and focus",
-      status: stepStatus(settlementDone, currentStepId === "settlement"),
+      status: progressionById.get("settlement") ?? "upcoming",
       value: state.settlementName || undefined,
     },
     {
       id: "city-core",
       label: "City Core",
       detail: "Build Town Hall",
-      status: stepStatus(cityCoreDone, currentStepId === "city-core"),
+      status: progressionById.get("city-core") ?? "upcoming",
       value: cityCoreDone ? state.settlementLevel || "City seed" : undefined,
     },
     {
       id: "trade",
       label: "Trade",
       detail: "Connect outward",
-      status: stepStatus(tradeDone, currentStepId === "trade"),
+      status: progressionById.get("trade") ?? "upcoming",
       value: state.tradeRouteDestination || undefined,
     },
     {
       id: "alliance-nation",
       label: "Alliance / Nation",
       detail: "Political direction",
-      status: stepStatus(nationDone, currentStepId === "alliance-nation"),
+      status: progressionById.get("alliance-nation") ?? "upcoming",
       value: allianceNationValue,
     },
     {
       id: "empire",
       label: "Empire",
       detail: "Complete the arc",
-      status: stepStatus(empireDone, currentStepId === "empire"),
+      status: progressionById.get("empire") ?? "upcoming",
       value: state.empireName || undefined,
     },
   ];
