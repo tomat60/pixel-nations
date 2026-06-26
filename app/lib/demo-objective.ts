@@ -81,7 +81,7 @@ function resolveAction(state: SettlementState, currentStepId: string): DemoObjec
       description: `${settlementName} is founded. Raise the Town Hall to turn the outpost into a city seed with civic power.`,
       progress: "0 / 1 Core Building",
       cta: "View Settlement",
-      href: "/settlement#city-core",
+      href: "/settlement",
     };
   }
 
