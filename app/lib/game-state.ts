@@ -1,4 +1,4 @@
-import type { SettlementState } from "./settlement-state";
+import { DEFAULT_SETTLEMENT_STATE, type SettlementState } from "./settlement-state";
 
 export type GameLand = {
   id: string;
@@ -63,6 +63,27 @@ export type WorldGameActionId = "settlement" | "city-core" | "trade";
 export type WorldGameActionResult = {
   state: SettlementState;
   feedback: string;
+};
+
+export type SettlementCreationFocus = {
+  id: string;
+  title: string;
+  bonus: string;
+  identity: string;
+  population: number;
+  influence: number;
+  settlementLevel: string;
+};
+
+export type SettlementCreationLand = {
+  region: string;
+  coordinates: string;
+};
+
+export type SettlementCreationInput = {
+  name: string;
+  focus: SettlementCreationFocus;
+  land: SettlementCreationLand;
 };
 
 const MAP_FOUNDED_SETTLEMENT: Omit<GameSettlement, "name" | "region" | "coordinates" | "founder"> = {
@@ -250,6 +271,37 @@ export function foundSettlementFromWorld(state: SettlementState): WorldGameActio
     state: nextState,
     feedback: "Settlement founded on the claimed land.",
   };
+}
+
+export function foundSettlementFromRoute(
+  state: SettlementState,
+  input: SettlementCreationInput,
+): SettlementState {
+  const baseState = {
+    ...DEFAULT_SETTLEMENT_STATE,
+    ...state,
+  };
+
+  return resetPoliticalArc(
+    resetTradeSeed({
+      ...baseState,
+      claimedLand: true,
+      founderBadgeEarned: true,
+      settlementFounded: true,
+      settlementName: input.name,
+      population: input.focus.population,
+      influence: input.focus.influence,
+      region: input.land.region,
+      coordinates: input.land.coordinates,
+      founder: "You",
+      townHallBuilt: false,
+      settlementLevel: input.focus.settlementLevel,
+      settlementFocusId: input.focus.id,
+      settlementFocus: input.focus.title,
+      settlementFocusBonus: input.focus.bonus,
+      settlementFocusIdentity: input.focus.identity,
+    }),
+  );
 }
 
 export function buildCityCoreFromWorld(state: SettlementState): WorldGameActionResult {

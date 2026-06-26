@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import { getClaimedLandDisplay } from "../../lib/claimed-land";
+import { foundSettlementFromRoute } from "../../lib/game-state";
 import {
   DEFAULT_SETTLEMENT_STATE,
   readSettlementState,
@@ -112,42 +113,12 @@ export default function SettlementCreatePage() {
     setSettlementName(normalizedName);
     const existingState = readSettlementState();
     const land = getClaimedLandDisplay(existingState);
-    writeSettlementState({
-      ...DEFAULT_SETTLEMENT_STATE,
-      ...existingState,
-      claimedLand: true,
-      founderBadgeEarned: true,
-      settlementFounded: true,
-      settlementName: normalizedName,
-      population: selectedFocus.population,
-      influence: selectedFocus.influence,
-      region: land.region,
-      coordinates: land.coordinates,
-      founder: "You",
-      townHallBuilt: false,
-      settlementLevel: selectedFocus.settlementLevel,
-      settlementFocusId: selectedFocus.id,
-      settlementFocus: selectedFocus.title,
-      settlementFocusBonus: selectedFocus.bonus,
-      settlementFocusIdentity: selectedFocus.identity,
-      tradeRouteEstablished: false,
-      tradeRouteDestination: "",
-      tradeRoutes: 0,
-      regionalAllianceFormed: false,
-      allianceName: "",
-      alliancePartners: [],
-      politicalStatus: "",
-      nationFounded: false,
-      nationName: "",
-      nationIdeology: "",
-      landsControlled: 1,
-      bordersExpanded: false,
-      expandedLands: [],
-      empireFounded: false,
-      empireName: "",
-      empireDoctrine: "",
-      cities: 1,
+    const nextState = foundSettlementFromRoute(existingState, {
+      name: normalizedName,
+      focus: selectedFocus,
+      land,
     });
+    writeSettlementState(nextState);
     setIsFounded(true);
   };
 
