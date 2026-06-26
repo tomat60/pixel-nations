@@ -50,6 +50,19 @@ Do **not** start with vague exploration across the whole repo unless the prompt 
 
 ---
 
+## Pull request output contract
+
+When a sprint asks an agent to open a PR:
+
+- Open the PR against `main` as **ready for review**, not as a draft.
+- Do **not** create draft PRs unless the issue explicitly says `draft: true` or asks for a draft.
+- Do **not** merge your own PR.
+- Use a clean conventional PR title matching the commit, for example `feat: add minimal game state engine`.
+- Include summary, changed files, validation, and known debt in the PR body or sprint report.
+- If validation passes but a ready PR cannot be opened, comment on the issue with the blocker instead of opening a draft PR.
+
+---
+
 ## Reporting
 
 Keep reports **short and concrete**:
