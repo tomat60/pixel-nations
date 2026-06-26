@@ -483,6 +483,7 @@ export default function WorldPage() {
     : null;
   const claimedTileCenter = claimedTile ? getTileSvgCenter(claimedTile) : null;
   const claimedTileMapPosition = claimedTile ? getTileCssCenter(claimedTile) : null;
+  const selectedTileMapPosition = selectedTile ? getTileCssCenter(selectedTile) : null;
   const influenceRadius = getInfluenceRadius(demoState);
   const routeTarget = demoState.tradeRouteEstablished
     ? getLivingMapRouteTarget(demoState.tradeRouteId, demoState.tradeRouteDestination)
@@ -932,6 +933,42 @@ export default function WorldPage() {
                 </div>
               ) : null}
 
+              <div
+                data-qa={ownedByYou ? "world-claim-feedback" : "world-selection-feedback"}
+                className={`mt-5 border p-3 transition-[border-color,background-color,box-shadow] duration-300 ${
+                  ownedByYou
+                    ? "border-amber-300/28 bg-amber-400/[0.055] shadow-[inset_0_0_22px_rgba(251,191,36,0.06)]"
+                    : isUnavailable
+                      ? "border-zinc-700/45 bg-zinc-900/35"
+                      : "border-amber-500/14 bg-[#08080f]/72"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    aria-hidden
+                    className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
+                      ownedByYou
+                        ? "animate-world-tile-selected-glow bg-amber-200 shadow-[0_0_14px_rgba(253,230,138,0.72)] motion-reduce:animate-none"
+                        : isUnavailable
+                          ? "bg-zinc-500/70"
+                          : "animate-world-tile-selected-glow border border-amber-200/70 bg-amber-300/24 motion-reduce:animate-none"
+                    }`}
+                  />
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
+                      Map Response
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-zinc-400">
+                      {ownedByYou
+                        ? `${selectedTile.landName} is now lit as your first controlled land.`
+                        : isUnavailable
+                          ? "This claimed parcel stays subdued so unclaimed founder land remains readable."
+                          : `${selectedTile.landName} is highlighted on the sector map.`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border border-amber-500/10 bg-[#08080f]/70 p-2 sm:hidden">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">
                   Default view fits the claimable Sector A-01 grid. Zoom to inspect land cells.
@@ -1101,6 +1138,14 @@ export default function WorldPage() {
                           strokeLinecap="round"
                           strokeWidth="7"
                         />
+                        <circle
+                          data-qa="world-trade-route-pulse"
+                          className="animate-pulse motion-reduce:animate-none"
+                          cx={routeTarget.x}
+                          cy={routeTarget.y}
+                          r="12"
+                          fill="rgba(253,230,138,0.16)"
+                        />
                         <circle cx={routeTarget.x} cy={routeTarget.y} r="7" fill="rgba(253,230,138,0.75)" />
                       </g>
                     ) : null}
@@ -1131,21 +1176,39 @@ export default function WorldPage() {
                       Route - {routeTarget.name}
                     </span>
                   ) : null}
+                  {selectedTileMapPosition ? (
+                    <div className="pointer-events-none absolute inset-3 z-[20]" aria-hidden>
+                      <span
+                        key={selectedTile.id}
+                        data-qa="world-selected-land-feedback"
+                        className="absolute h-7 w-7 -translate-x-1/2 -translate-y-1/2 border border-amber-100/45 bg-amber-300/[0.035] shadow-[0_0_20px_rgba(251,191,36,0.2),inset_0_0_12px_rgba(251,191,36,0.13)] animate-world-tile-selected-glow motion-reduce:animate-none"
+                        style={selectedTileMapPosition}
+                      />
+                    </div>
+                  ) : null}
                   {claimedTileMapPosition ? (
                     <div className="pointer-events-none absolute inset-3 z-[21]" aria-hidden>
                       <span
                         data-qa="world-claimed-land-marker"
-                        className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-200/70 bg-amber-400/18 shadow-[0_0_22px_rgba(251,191,36,0.42),inset_0_0_10px_rgba(251,191,36,0.2)]"
+                        className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-200/70 bg-amber-400/18 shadow-[0_0_22px_rgba(251,191,36,0.42),inset_0_0_10px_rgba(251,191,36,0.2)] transition-[box-shadow,background-color] duration-300"
                         style={claimedTileMapPosition}
                       >
+                        <span
+                          data-qa="world-claimed-land-pulse"
+                          className="absolute left-1/2 top-1/2 h-7 w-7 rounded-full border border-amber-200/30 bg-amber-300/10 animate-world-marker-pulse motion-reduce:animate-none"
+                        />
                         <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-100 shadow-[0_0_12px_rgba(253,230,138,0.9)]" />
                       </span>
                       {demoState.settlementFounded ? (
                         <span
                           data-qa="world-settlement-marker"
-                          className="absolute h-8 w-8 -translate-x-1/2 -translate-y-[72%] border border-emerald-200/55 bg-emerald-300/12 shadow-[0_0_20px_rgba(110,231,183,0.22),inset_0_0_14px_rgba(110,231,183,0.14)]"
+                          className="absolute h-8 w-8 -translate-x-1/2 -translate-y-[72%] border border-emerald-200/55 bg-emerald-300/12 shadow-[0_0_20px_rgba(110,231,183,0.22),inset_0_0_14px_rgba(110,231,183,0.14)] transition-[box-shadow,background-color] duration-300"
                           style={claimedTileMapPosition}
                         >
+                          <span
+                            data-qa="world-settlement-marker-pulse"
+                            className="absolute left-1/2 top-1/2 h-9 w-9 rounded-full border border-emerald-200/24 bg-emerald-300/8 animate-world-marker-pulse motion-reduce:animate-none"
+                          />
                           <span className="absolute bottom-1 left-1/2 h-2.5 w-5 -translate-x-1/2 border border-emerald-100/45 bg-[#07120d]/90" />
                           <span className="absolute bottom-3 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-emerald-100/55 bg-emerald-200/18" />
                         </span>
@@ -1153,9 +1216,13 @@ export default function WorldPage() {
                       {demoState.townHallBuilt ? (
                         <span
                           data-qa="world-town-hall-marker"
-                          className="absolute h-10 w-10 -translate-x-1/2 -translate-y-[88%] border border-amber-100/70 bg-amber-300/14 shadow-[0_0_28px_rgba(251,191,36,0.34),inset_0_0_16px_rgba(251,191,36,0.16)]"
+                          className="absolute h-10 w-10 -translate-x-1/2 -translate-y-[88%] border border-amber-100/70 bg-amber-300/14 shadow-[0_0_28px_rgba(251,191,36,0.34),inset_0_0_16px_rgba(251,191,36,0.16)] transition-[box-shadow,background-color] duration-300"
                           style={claimedTileMapPosition}
                         >
+                          <span
+                            data-qa="world-town-hall-marker-pulse"
+                            className="absolute left-1/2 top-1/2 h-11 w-11 rounded-full border border-amber-100/24 bg-amber-200/8 animate-world-marker-pulse motion-reduce:animate-none"
+                          />
                           <span className="absolute bottom-1.5 left-1/2 h-3 w-5 -translate-x-1/2 border border-amber-100/55 bg-[#130d04]/95" />
                           <span className="absolute bottom-4 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-l border-t border-amber-100/65 bg-amber-200/18" />
                           <span className="absolute left-1/2 top-1 h-2.5 w-px -translate-x-1/2 bg-amber-100/80" />
@@ -1185,17 +1252,17 @@ export default function WorldPage() {
                           }
                           data-map-state={tileOwnedByYou ? "owned" : tileUnavailable ? "claimed" : "neutral"}
                           data-land-id={tile.landId}
-                          className={`relative aspect-square overflow-hidden border border-white/[0.025] transition-[border-color,box-shadow,background-color] duration-200 before:pointer-events-none before:absolute before:inset-0 before:opacity-90 before:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.04),transparent_42%)] ${TERRAIN_TILE_SURFACE[tile.terrain]} ${TERRAIN_TINT[tile.terrain]} ${
+                          className={`relative aspect-square overflow-hidden border border-white/[0.025] transition-[border-color,box-shadow,background-color,filter] duration-300 before:pointer-events-none before:absolute before:inset-0 before:opacity-90 before:transition-opacity before:duration-300 before:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.04),transparent_42%)] ${TERRAIN_TILE_SURFACE[tile.terrain]} ${TERRAIN_TINT[tile.terrain]} ${
                             tile.x === 0 || tile.x === GRID_WIDTH - 1 || tile.y === 0 || tile.y === GRID_HEIGHT - 1
                               ? "opacity-[0.72]"
                               : ""
                           } ${
                             isSelected
-                              ? "z-[14] border-amber-100/95 shadow-[inset_0_0_18px_rgba(251,191,36,0.28),inset_0_0_0_1px_rgba(251,191,36,0.18),0_0_0_1px_rgba(251,191,36,0.42)]"
+                              ? "z-[14] border-amber-100/95 shadow-[inset_0_0_22px_rgba(251,191,36,0.34),inset_0_0_0_1px_rgba(251,191,36,0.22),0_0_0_1px_rgba(251,191,36,0.48),0_0_18px_rgba(251,191,36,0.2)] before:opacity-100"
                               : "hover:border-amber-300/40 hover:bg-black/15"
                           } ${
                             tileOwnedByYou
-                              ? "border-amber-100/90 bg-amber-400/20 shadow-[inset_0_0_20px_rgba(251,191,36,0.28),inset_0_0_0_1px_rgba(253,230,138,0.22),0_0_18px_rgba(251,191,36,0.24)]"
+                              ? "border-amber-100/90 bg-amber-400/20 shadow-[inset_0_0_24px_rgba(251,191,36,0.34),inset_0_0_0_1px_rgba(253,230,138,0.26),0_0_20px_rgba(251,191,36,0.28)]"
                               : tileUnavailable
                                 ? "opacity-[0.42] saturate-[0.48] shadow-[inset_0_0_0_1px_rgba(113,113,122,0.26),inset_0_0_16px_rgba(0,0,0,0.42)]"
                                 : ""
@@ -1218,10 +1285,17 @@ export default function WorldPage() {
                             <span className="pointer-events-none absolute right-1 top-1 h-1 w-1 rounded-full bg-cyan-200/70" />
                           ) : null}
                           {isSelected ? (
-                            <span
-                              aria-hidden
-                              className="pointer-events-none absolute inset-0 bg-amber-300/[0.06] animate-world-tile-selected-glow"
-                            />
+                            <>
+                              <span
+                                aria-hidden
+                                className="pointer-events-none absolute inset-0 bg-amber-300/[0.06] animate-world-tile-selected-glow motion-reduce:animate-none"
+                              />
+                              <span
+                                aria-hidden
+                                data-qa="world-selected-tile-response"
+                                className="pointer-events-none absolute inset-[3px] border border-amber-100/45 shadow-[inset_0_0_10px_rgba(253,230,138,0.16)]"
+                              />
+                            </>
                           ) : null}
                           {tileOwnedByYou ? (
                             <>
