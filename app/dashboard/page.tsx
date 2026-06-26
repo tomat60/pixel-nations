@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import DemoObjectivePanel from "../components/DemoObjectivePanel";
 import {
   formatLandClaimHistory,
   getClaimedLandDisplay,
@@ -76,48 +77,6 @@ export default function DashboardPage() {
     [settlementState],
   );
 
-  const nextMilestone = settlementState.settlementFounded
-    ? settlementState.empireFounded
-      ? {
-          title: "First Demo Arc Complete",
-          progress: "Empire Founded",
-          cta: "View Empire",
-          href: "/empire",
-        }
-      : settlementState.nationFounded
-        ? {
-            title: "Declare the First Empire",
-            progress: "Nation Founded",
-            cta: "Continue To Nation",
-            href: "/nation",
-          }
-        : settlementState.regionalAllianceFormed
-          ? {
-              title: "Found the First Nation",
-              progress: "0 / 1 Nation",
-              cta: "View Settlement",
-              href: "/settlement",
-            }
-          : settlementState.tradeRouteEstablished
-            ? {
-                title: "Form Regional Alliance",
-                progress: "0 / 1 Alliance",
-                cta: "View Settlement",
-                href: "/settlement",
-              }
-            : {
-                title: "Build Your City",
-                progress: settlementState.townHallBuilt ? "0 / 1 Trade Route" : "0 / 1 Core Building",
-                cta: "View Settlement",
-                href: "/settlement",
-              }
-    : {
-        title: "Found the First Settlement",
-        progress: "0 / 1 Settlement",
-        cta: "Found Settlement",
-        href: "/settlement/create",
-      };
-
   const claimedLand = useMemo(() => getClaimedLandDisplay(settlementState), [settlementState]);
   const continuity = useMemo(() => getContinuitySummary(settlementState), [settlementState]);
   const heroTitle = useMemo(() => getDashboardHeroTitle(settlementState), [settlementState]);
@@ -176,30 +135,15 @@ export default function DashboardPage() {
 
           <p className="mt-6 text-base leading-8 text-zinc-400 sm:text-lg">{originQuote}</p>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-200/70">
-            This command center tracks your rise after claiming land. Your land becomes the origin of a settlement, a nation, and an empire.
+            Your command center after claim. Follow the spine: land becomes settlement, city core, trade, alliance, nation, and empire.
           </p>
         </header>
 
-        <section
-          data-qa="dashboard-next-action"
-          className="mt-8 border border-amber-500/25 bg-amber-500/[0.045] p-5 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-6"
-        >
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
-            Step 3 / Next Action
-          </p>
-          <h2 className="mt-4 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-4xl">
-            {nextMilestone.title}
-          </h2>
-          <p className="mt-3 text-sm leading-7 text-zinc-400">
-            Your land is claimed. The demo continues upward: settlement → nation → empire.
-          </p>
-          <Link
-            href={nextMilestone.href}
-            className="btn-primary mt-6 inline-flex rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
-          >
-            {nextMilestone.cta}
-          </Link>
-        </section>
+        <DemoObjectivePanel
+          state={settlementState}
+          eyebrow="Founder Command Center / Objective Spine"
+          className="mt-8"
+        />
 
         <section
           data-qa="continuity-path-memory"
@@ -306,29 +250,6 @@ export default function DashboardPage() {
             </ul>
           </section>
         </div>
-
-        <section className="mt-10 border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">
-            Your Next Milestone
-          </p>
-          <p className="mt-4 text-sm leading-7 text-zinc-500">
-            Demo path: claim land -&gt; settlement -&gt; nation -&gt; empire.
-          </p>
-          <h2 className="mt-6 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            {nextMilestone.title}
-          </h2>
-          <div className="mt-6 flex flex-col gap-7">
-            <p className="text-sm uppercase tracking-[0.24em] text-zinc-500">
-              Progress: {nextMilestone.progress}
-            </p>
-            <Link
-              href={nextMilestone.href}
-              className="btn-primary inline-flex w-fit rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
-            >
-              {nextMilestone.cta}
-            </Link>
-          </div>
-        </section>
 
         <section className="mt-10 border border-amber-500/15 bg-[#06060c]/85 p-6 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">Founder History</p>
