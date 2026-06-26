@@ -34,7 +34,7 @@ Read `docs/PROJECT_OPERATING_RULES.md` and `AGENTS.md` before non-trivial work.
 - Docs-only tasks: commit without build when no code/config changed.
 - When a sprint asks for a PR, open it against `main` as **ready for review**, not as a draft.
 - Do **not** create draft PRs unless the issue explicitly says `draft: true` or asks for a draft.
-- If a ready PR cannot be opened, comment on the issue with the blocker instead of opening a draft PR.
+- If a ready PR cannot be opened, do **not** open a draft PR. Push the branch and comment on the issue with the branch name, head commit SHA, validation result, and blocker so ChatGPT/control-plane can open or merge the PR.
 - Do not merge your own PR.
 - Use short conventional titles, for example `feat: add minimal game state engine`.
 
