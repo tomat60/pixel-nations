@@ -35,6 +35,19 @@ Copy should be cinematic but short — kingdom map, founder record, strategic wo
 3. **Stay in scope** — do not redesign unrelated pages (landing, dashboard, settlement, nation, empire) unless the prompt explicitly requires it or routing compatibility demands it.
 4. **Cost control** — avoid broad repo exploration, repeated weak iterations, unnecessary `npm run qa:screens`, and dependency installs without justification.
 5. **Ask for scope only when truly blocked** — if the goal, files, and acceptance criteria are defined in the prompt or docs, execute; do not re-litigate product strategy.
+6. **PR output contract** — when a sprint asks for a pull request, open the PR as ready for review, not as a draft. Do not leave human-only finalization work unless the prompt explicitly asks for a draft. Use a clean title matching the commit, include validation results, and do not merge.
+
+## PR output contract
+
+All coding agents, including Cursor Automation, must follow this output contract:
+
+- Open PRs against `main` as **ready for review** by default.
+- Do **not** create draft PRs unless the issue explicitly says `draft: true` or asks for a draft.
+- Do **not** merge your own PR.
+- Keep PR titles short and conventional, for example `feat: add minimal game state engine`.
+- Keep PR descriptions concrete: summary, changed files, validation, known debt.
+- If validation passes but you cannot open a ready PR, comment on the issue with the blocker instead of opening a draft PR.
+- Do not commit `public/qa/latest/*` artifacts unless the issue explicitly requires public QA evidence updates.
 
 ## Key files (reference)
 
