@@ -28,10 +28,15 @@ Read `docs/PROJECT_OPERATING_RULES.md` and `AGENTS.md` before non-trivial work.
 - No crypto / NFT / wallet / token / mint / ETH language.
 - Cursor executes scoped handoffs; do not re-litigate product strategy when spec is clear.
 
-## Commits
+## Commits and pull requests
 
 - Commit/push only when the prompt asks or when code build (+ required QA) passes.
 - Docs-only tasks: commit without build when no code/config changed.
+- When a sprint asks for a PR, open it against `main` as **ready for review**, not as a draft.
+- Do **not** create draft PRs unless the issue explicitly says `draft: true` or asks for a draft.
+- If a ready PR cannot be opened, comment on the issue with the blocker instead of opening a draft PR.
+- Do not merge your own PR.
+- Use short conventional titles, for example `feat: add minimal game state engine`.
 
 ## Reporting (concise)
 
