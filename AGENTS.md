@@ -46,7 +46,7 @@ All coding agents, including Cursor Automation, must follow this output contract
 - Do **not** merge your own PR.
 - Keep PR titles short and conventional, for example `feat: add minimal game state engine`.
 - Keep PR descriptions concrete: summary, changed files, validation, known debt.
-- If validation passes but you cannot open a ready PR, comment on the issue with the blocker instead of opening a draft PR.
+- If validation passes but a ready PR cannot be opened, do **not** open a draft PR. Push the branch, then comment on the issue with the branch name, head commit SHA, validation result, and the blocker. ChatGPT/control-plane will open or merge the PR from that branch.
 - Do not commit `public/qa/latest/*` artifacts unless the issue explicitly requires public QA evidence updates.
 
 ## Key files (reference)
