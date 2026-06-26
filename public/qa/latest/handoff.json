@@ -1,16 +1,16 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-20T17:51:48.482Z",
-  "branch": "main",
-  "isClean": true,
+  "generatedAt": "2026-06-26T10:46:23.523Z",
+  "branch": "agent/map-interaction-foundation-v0.9",
+  "isClean": false,
   "git": {
-    "statusSummary": "## main...origin/main [ahead 1]",
-    "lastCommits": "5bab18c Add hybrid cloud agent execution rails\n51da10b Update clean QA handoff after cloud bootstrap\n4e1ca14 Refresh QA evidence after cloud bootstrap\nb5aef3b Update QA handoff after cloud bootstrap\n67d2ce3 Update smoke evidence after cloud bootstrap"
+    "statusSummary": "## agent/map-interaction-foundation-v0.9...origin/main\n M app/world/page.tsx\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-dashboard-continuity.png\n M public/qa/latest/screenshots/desktop-empire-continuity.png\n M public/qa/latest/screenshots/desktop-home.png\n M public/qa/latest/screenshots/desktop-landing-map-preview.png\n M public/qa/latest/screenshots/desktop-nation-continuity.png\n M public/qa/latest/screenshots/desktop-settlement-after-action.png\n M public/qa/latest/screenshots/desktop-settlement.png\n M public/qa/latest/screenshots/desktop-world-atlas.png\n M public/qa/latest/screenshots/desktop-world-living-map.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world-selected-land-panel.png\n M public/qa/latest/screenshots/desktop-world-top.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-dashboard-continuity.png\n M public/qa/latest/screenshots/mobile-dashboard.png\n M public/qa/latest/screenshots/mobile-empire.png\n M public/qa/latest/screenshots/mobile-home.png\n M public/qa/latest/screenshots/mobile-landing-hero.png\n M public/qa/latest/screenshots/mobile-landing-map-preview.png\n M public/qa/latest/screenshots/mobile-nation.png\n M public/qa/latest/screenshots/mobile-settlement-after-action.png\n M public/qa/latest/screenshots/mobile-settlement.png\n M public/qa/latest/screenshots/mobile-world-atlas.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-living-map.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world-selected-land-panel.png\n M public/qa/latest/screenshots/mobile-world-top.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
+    "lastCommits": "9cb1e24 Core Loop Recovery v0.8.1.1 — Objective Spine\nd0f346f reports: start core loop recovery v0.8.1.1\n0b620aa docs: clarify roadmap after pipeline v1.3\n5be5e22 docs: align current state after pipeline v1.3 merge\n741ed64 Autonomous production v1.3 (#3)"
   },
   "qa": {
     "smoke": {
       "status": "PASS",
-      "generatedAt": "2026-06-20T17:15:18.240Z",
+      "generatedAt": "2026-06-26T10:34:37.921Z",
       "appUrl": "http://localhost:3000",
       "appSource": "existing local app",
       "blockingStep": "",
@@ -19,53 +19,53 @@
         {
           "name": "reset demo state and open /world",
           "status": "PASS",
-          "durationMs": 1186
+          "durationMs": 756
         },
         {
           "name": "select a claimable Sector A-01 land",
           "status": "PASS",
-          "durationMs": 185
+          "durationMs": 120
         },
         {
           "name": "claim selected land",
           "status": "PASS",
-          "durationMs": 375
+          "durationMs": 119
         },
         {
           "name": "dashboard recognizes claimed land",
           "status": "PASS",
-          "durationMs": 292
+          "durationMs": 159
         },
         {
           "name": "create settlement",
           "status": "PASS",
-          "durationMs": 1561
+          "durationMs": 1314
         },
         {
           "name": "build settlement core and establish trade",
           "status": "PASS",
-          "durationMs": 3924
+          "durationMs": 4065
         },
         {
           "name": "form alliance and found nation",
           "status": "PASS",
-          "durationMs": 7924
+          "durationMs": 4368
         },
         {
           "name": "attempt empire continuation path",
           "status": "PASS",
-          "durationMs": 1457
+          "durationMs": 1420
         },
         {
           "name": "create empire",
           "status": "PASS",
-          "durationMs": 2425
+          "durationMs": 2280
         }
       ],
       "passedSteps": 9,
       "totalSteps": 9,
       "path": "public/qa/latest/smoke-result.json",
-      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-20T17:15:18.240Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-26T10:34:37.921Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
     },
     "publicQaIndexUrl": "https://pixel-nations.vercel.app/qa/latest/",
     "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
@@ -73,24 +73,24 @@
     "publicHandoffTxtUrl": "https://pixel-nations.vercel.app/qa/latest/handoff.txt",
     "publicHandoffJsonUrl": "https://pixel-nations.vercel.app/qa/latest/handoff.json",
     "publicManifestUrl": "https://pixel-nations.vercel.app/qa/latest/manifest.json",
-    "localQaReportPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/report.html",
-    "localHandoffTxtPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.txt",
-    "localHandoffJsonPath": "/Users/tomchuck/Desktop/pixel-nations/public/qa/latest/handoff.json"
+    "localQaReportPath": "/workspace/public/qa/latest/report.html",
+    "localHandoffTxtPath": "/workspace/public/qa/latest/handoff.txt",
+    "localHandoffJsonPath": "/workspace/public/qa/latest/handoff.json"
   },
   "qaEvidenceFreshness": {
     "status": "FRESH",
-    "smokeGeneratedAt": "2026-06-20T17:15:18.240Z",
-    "reportModifiedAt": "2026-06-20T17:14:57.375Z",
-    "manifestModifiedAt": "2026-06-20T17:14:57.374Z",
-    "screenshotsNewestModifiedAt": "2026-06-20T17:14:57.326Z",
-    "screenshotsOldestModifiedAt": "2026-06-20T17:13:24.831Z",
+    "smokeGeneratedAt": "2026-06-26T10:34:37.921Z",
+    "reportModifiedAt": "2026-06-26T10:34:08.827Z",
+    "manifestModifiedAt": "2026-06-26T10:34:08.823Z",
+    "screenshotsNewestModifiedAt": "2026-06-26T10:34:08.799Z",
+    "screenshotsOldestModifiedAt": "2026-06-26T10:32:54.576Z",
     "screenshotsCount": 29,
     "toleranceMinutes": 2,
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-20T17:51:48.482Z",
-    "localReportGeneratedAt": "2026-06-20T17:14:57.372Z",
+    "localHandoffGeneratedAt": "2026-06-26T10:46:23.523Z",
+    "localReportGeneratedAt": "2026-06-26T10:34:08.827Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
       "report": "https://pixel-nations.vercel.app/qa/latest/report.html",
