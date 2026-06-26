@@ -5,23 +5,19 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  establishTradeRouteFromRoute,
+  type TradeRouteCreationDestination,
+} from "../../lib/game-state";
+import {
   DEFAULT_SETTLEMENT_STATE,
   type SettlementState,
   readSettlementState,
   writeSettlementState,
 } from "../../lib/settlement-state";
 
-type Destination = {
-  id: string;
-  name: string;
+type Destination = TradeRouteCreationDestination & {
   type: string;
-  bonus: string;
   distance: string;
-  resourceFlow: string;
-  population: number;
-  influence: number;
-  settlementLevel: string;
-  identity: string;
 };
 
 const DESTINATIONS: Destination[] = [
@@ -92,39 +88,7 @@ export default function TradeCreatePage() {
   const confirmTradeRoute = () => {
     if (isRouteEstablished) return;
 
-    const nextState: SettlementState = {
-      ...settlementState,
-      settlementFounded: true,
-      settlementName,
-      region,
-      coordinates: settlementState.coordinates || "X19 / Y12",
-      founder: settlementState.founder || "You",
-      townHallBuilt: true,
-      tradeRouteEstablished: true,
-      tradeRouteDestination: selectedDestination.name,
-      tradeRouteId: selectedDestination.id,
-      tradeRouteBonus: selectedDestination.bonus,
-      tradeRouteResourceFlow: selectedDestination.resourceFlow,
-      tradeRouteIdentity: selectedDestination.identity,
-      tradeRoutes: 1,
-      population: selectedDestination.population,
-      influence: selectedDestination.influence,
-      settlementLevel: selectedDestination.settlementLevel,
-      regionalAllianceFormed: false,
-      allianceName: "",
-      alliancePartners: [selectedDestination.name],
-      politicalStatus: "",
-      nationFounded: false,
-      nationName: "",
-      nationIdeology: "",
-      landsControlled: 1,
-      bordersExpanded: false,
-      expandedLands: [],
-      empireFounded: false,
-      empireName: "",
-      empireDoctrine: "",
-      cities: 1,
-    };
+    const nextState = establishTradeRouteFromRoute(settlementState, selectedDestination);
 
     setSettlementState(nextState);
     writeSettlementState(nextState);

@@ -42,6 +42,17 @@ export type GameTradeSeed = {
   level: string;
 };
 
+export type TradeRouteCreationDestination = {
+  id: string;
+  name: string;
+  bonus: string;
+  resourceFlow: string;
+  identity: string;
+  population: number;
+  influence: number;
+  settlementLevel: string;
+};
+
 export type GameProgressionStepId =
   | "land"
   | "settlement"
@@ -354,5 +365,33 @@ export function establishTradeSeedFromWorld(state: SettlementState): WorldGameAc
   return {
     state: nextState,
     feedback: "Trade seed established toward Iron Coast.",
+  };
+}
+
+export function establishTradeRouteFromRoute(
+  state: SettlementState,
+  destination: TradeRouteCreationDestination,
+): SettlementState {
+  return {
+    ...resetPoliticalArc({
+      ...state,
+      settlementFounded: true,
+      settlementName: state.settlementName || "Aurelia Prime",
+      region: state.region || DEFAULT_SETTLEMENT_STATE.region,
+      coordinates: state.coordinates || DEFAULT_SETTLEMENT_STATE.coordinates,
+      founder: state.founder || DEFAULT_SETTLEMENT_STATE.founder,
+      townHallBuilt: true,
+      tradeRouteEstablished: true,
+      tradeRouteDestination: destination.name,
+      tradeRouteId: destination.id,
+      tradeRouteBonus: destination.bonus,
+      tradeRouteResourceFlow: destination.resourceFlow,
+      tradeRouteIdentity: destination.identity,
+      tradeRoutes: 1,
+      population: destination.population,
+      influence: destination.influence,
+      settlementLevel: destination.settlementLevel,
+    }),
+    alliancePartners: [destination.name],
   };
 }
