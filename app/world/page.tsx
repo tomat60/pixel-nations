@@ -370,6 +370,13 @@ function getTileSvgCenter(tile: Pick<MapTile, "x" | "y">) {
   };
 }
 
+function getTileCssCenter(tile: Pick<MapTile, "x" | "y">) {
+  return {
+    left: `${((tile.x + 0.5) / GRID_WIDTH) * 100}%`,
+    top: `${((tile.y + 0.5) / GRID_HEIGHT) * 100}%`,
+  };
+}
+
 function getLivingMapRouteTarget(routeId?: string, destination?: string) {
   const normalizedRoute = (routeId || "").toLowerCase();
   const normalizedDestination = (destination || "").toLowerCase();
@@ -475,6 +482,7 @@ export default function WorldPage() {
     ? tiles.find((tile) => tile.id === demoState.claimedLandId) ?? null
     : null;
   const claimedTileCenter = claimedTile ? getTileSvgCenter(claimedTile) : null;
+  const claimedTileMapPosition = claimedTile ? getTileCssCenter(claimedTile) : null;
   const influenceRadius = getInfluenceRadius(demoState);
   const routeTarget = demoState.tradeRouteEstablished
     ? getLivingMapRouteTarget(demoState.tradeRouteId, demoState.tradeRouteDestination)
@@ -482,11 +490,22 @@ export default function WorldPage() {
   const routePath = claimedTileCenter && routeTarget ? buildLivingMapRoutePath(claimedTileCenter, routeTarget) : "";
   const worldActivitySummary = demoState.tradeRouteEstablished
     ? `Trade route visible: ${demoState.tradeRouteDestination || "Regional route"}`
+    : demoState.townHallBuilt
+      ? "City core visible on your claimed land"
     : demoState.settlementFounded
-      ? "Settlement influence visible"
+      ? "Settlement marker visible on your claimed land"
       : demoState.claimedLand
-        ? "Claimed land influence visible"
+        ? "Claimed land marker visible"
         : "Choose land to wake the map";
+  const activeMapLayer = demoState.tradeRouteEstablished
+    ? "Claim + settlement + city core + trade"
+    : demoState.townHallBuilt
+      ? "Claim + settlement + city core"
+      : demoState.settlementFounded
+        ? "Claim + settlement"
+        : demoState.claimedLand
+          ? "Claim marker"
+          : "Selection";
 
   const selectedLandPanelRef = useRef<HTMLElement>(null);
   const playableSectorRef = useRef<HTMLElement>(null);
@@ -893,9 +912,7 @@ export default function WorldPage() {
                     </div>
                     <div>
                       <span className="block text-amber-100/80">Map Layer</span>
-                      <span className="mt-1 block normal-case tracking-normal text-zinc-400">
-                        Influence {demoState.tradeRouteEstablished ? "+ route" : "pulse"}
-                      </span>
+                      <span className="mt-1 block normal-case tracking-normal text-zinc-400">{activeMapLayer}</span>
                     </div>
                   </div>
                   <div className="mt-4 flex flex-col gap-3 border-t border-amber-500/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1114,6 +1131,38 @@ export default function WorldPage() {
                       Route - {routeTarget.name}
                     </span>
                   ) : null}
+                  {claimedTileMapPosition ? (
+                    <div className="pointer-events-none absolute inset-3 z-[21]" aria-hidden>
+                      <span
+                        data-qa="world-claimed-land-marker"
+                        className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-200/70 bg-amber-400/18 shadow-[0_0_22px_rgba(251,191,36,0.42),inset_0_0_10px_rgba(251,191,36,0.2)]"
+                        style={claimedTileMapPosition}
+                      >
+                        <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-100 shadow-[0_0_12px_rgba(253,230,138,0.9)]" />
+                      </span>
+                      {demoState.settlementFounded ? (
+                        <span
+                          data-qa="world-settlement-marker"
+                          className="absolute h-8 w-8 -translate-x-1/2 -translate-y-[72%] border border-emerald-200/55 bg-emerald-300/12 shadow-[0_0_20px_rgba(110,231,183,0.22),inset_0_0_14px_rgba(110,231,183,0.14)]"
+                          style={claimedTileMapPosition}
+                        >
+                          <span className="absolute bottom-1 left-1/2 h-2.5 w-5 -translate-x-1/2 border border-emerald-100/45 bg-[#07120d]/90" />
+                          <span className="absolute bottom-3 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-emerald-100/55 bg-emerald-200/18" />
+                        </span>
+                      ) : null}
+                      {demoState.townHallBuilt ? (
+                        <span
+                          data-qa="world-town-hall-marker"
+                          className="absolute h-10 w-10 -translate-x-1/2 -translate-y-[88%] border border-amber-100/70 bg-amber-300/14 shadow-[0_0_28px_rgba(251,191,36,0.34),inset_0_0_16px_rgba(251,191,36,0.16)]"
+                          style={claimedTileMapPosition}
+                        >
+                          <span className="absolute bottom-1.5 left-1/2 h-3 w-5 -translate-x-1/2 border border-amber-100/55 bg-[#130d04]/95" />
+                          <span className="absolute bottom-4 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-l border-t border-amber-100/65 bg-amber-200/18" />
+                          <span className="absolute left-1/2 top-1 h-2.5 w-px -translate-x-1/2 bg-amber-100/80" />
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
                   <div data-qa="sector-claimable-grid" className="relative z-[12] grid grid-cols-[repeat(18,minmax(0,1fr))] gap-px bg-transparent p-px">
                     {tiles.map((tile) => {
                       const tileOwnedByYou = demoState.claimedLandId === tile.id && demoState.claimedLand;
@@ -1127,6 +1176,15 @@ export default function WorldPage() {
                           type="button"
                           onClick={() => selectTile(tile.id)}
                           aria-label={`${tile.landId}, ${tile.region}, ${toTerrainLabel(tile.terrain)}`}
+                          data-qa={
+                            tileOwnedByYou
+                              ? "world-owned-land-tile"
+                              : tileUnavailable
+                                ? "world-claimed-land-tile"
+                                : "world-neutral-land-tile"
+                          }
+                          data-map-state={tileOwnedByYou ? "owned" : tileUnavailable ? "claimed" : "neutral"}
+                          data-land-id={tile.landId}
                           className={`relative aspect-square overflow-hidden border border-white/[0.025] transition-[border-color,box-shadow,background-color] duration-200 before:pointer-events-none before:absolute before:inset-0 before:opacity-90 before:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.04),transparent_42%)] ${TERRAIN_TILE_SURFACE[tile.terrain]} ${TERRAIN_TINT[tile.terrain]} ${
                             tile.x === 0 || tile.x === GRID_WIDTH - 1 || tile.y === 0 || tile.y === GRID_HEIGHT - 1
                               ? "opacity-[0.72]"
@@ -1137,9 +1195,9 @@ export default function WorldPage() {
                               : "hover:border-amber-300/40 hover:bg-black/15"
                           } ${
                             tileOwnedByYou
-                              ? "border-amber-200/75 shadow-[inset_0_0_12px_rgba(251,191,36,0.2)]"
+                              ? "border-amber-100/90 bg-amber-400/20 shadow-[inset_0_0_20px_rgba(251,191,36,0.28),inset_0_0_0_1px_rgba(253,230,138,0.22),0_0_18px_rgba(251,191,36,0.24)]"
                               : tileUnavailable
-                                ? "opacity-[0.34] saturate-[0.55]"
+                                ? "opacity-[0.42] saturate-[0.48] shadow-[inset_0_0_0_1px_rgba(113,113,122,0.26),inset_0_0_16px_rgba(0,0,0,0.42)]"
                                 : ""
                           } ${
                             tile.starter && !tileClaimed
@@ -1166,9 +1224,15 @@ export default function WorldPage() {
                             />
                           ) : null}
                           {tileOwnedByYou ? (
-                            <span className="absolute inset-0 flex items-center justify-center bg-amber-500/10 text-[7px] font-bold uppercase tracking-[0.18em] text-amber-100">
-                              You
-                            </span>
+                            <>
+                              <span className="absolute inset-0 flex items-center justify-center bg-amber-500/14 text-[7px] font-bold uppercase tracking-[0.18em] text-amber-100">
+                                You
+                              </span>
+                              <span className="pointer-events-none absolute inset-[3px] border border-amber-100/35" />
+                            </>
+                          ) : null}
+                          {tileUnavailable ? (
+                            <span className="pointer-events-none absolute inset-x-1 top-1 h-px bg-zinc-300/35 shadow-[0_3px_0_rgba(212,212,216,0.18)]" />
                           ) : null}
                         </button>
                       );
@@ -1182,7 +1246,13 @@ export default function WorldPage() {
                       ["Grid", "h-px w-3 bg-amber-400/40"],
                       ["Routes", "h-px w-3 bg-slate-300/60"],
                       ...(demoState.claimedLand
-                        ? [["Influence", "h-2 w-2 rounded-full border border-amber-300/50 bg-amber-300/20"]]
+                        ? [["Owned", "h-2 w-2 rounded-full border border-amber-300/60 bg-amber-300/24"]]
+                        : []),
+                      ...(demoState.settlementFounded
+                        ? [["Settlement", "h-2 w-2 border border-emerald-200/60 bg-emerald-300/20"]]
+                        : []),
+                      ...(demoState.townHallBuilt
+                        ? [["City Core", "h-2 w-2 border border-amber-100/70 bg-amber-200/24"]]
                         : []),
                       ...(demoState.tradeRouteEstablished
                         ? [["Trade", "h-px w-4 bg-amber-300/80"]]
