@@ -53,6 +53,22 @@ export type TradeRouteCreationDestination = {
   settlementLevel: string;
 };
 
+export type AllianceFormationOutcome = {
+  strategy: string;
+  bonus: string;
+  identity: string;
+  population: number;
+  influence: number;
+  diplomaticReach: number;
+  politicalStatus: string;
+};
+
+export type AllianceFormationInput = {
+  name: string;
+  partners: string[];
+  outcome: AllianceFormationOutcome;
+};
+
 export type GameProgressionStepId =
   | "land"
   | "settlement"
@@ -393,5 +409,44 @@ export function establishTradeRouteFromRoute(
       settlementLevel: destination.settlementLevel,
     }),
     alliancePartners: [destination.name],
+  };
+}
+
+export function formAllianceFromRoute(
+  state: SettlementState,
+  input: AllianceFormationInput,
+): SettlementState {
+  return {
+    ...state,
+    settlementFounded: true,
+    settlementName: state.settlementName || "Aurelia Prime",
+    region: state.region || DEFAULT_SETTLEMENT_STATE.region,
+    coordinates: state.coordinates || DEFAULT_SETTLEMENT_STATE.coordinates,
+    founder: state.founder || DEFAULT_SETTLEMENT_STATE.founder,
+    townHallBuilt: true,
+    tradeRouteEstablished: true,
+    tradeRouteDestination: state.tradeRouteDestination || "Iron Coast",
+    tradeRoutes: 1,
+    regionalAllianceFormed: true,
+    allianceName: input.name,
+    alliancePartners: input.partners,
+    allianceStrategy: input.outcome.strategy,
+    allianceBonus: input.outcome.bonus,
+    allianceIdentity: input.outcome.identity,
+    diplomaticReach: input.outcome.diplomaticReach,
+    population: input.outcome.population,
+    influence: input.outcome.influence,
+    settlementLevel: "Regional Power",
+    politicalStatus: input.outcome.politicalStatus,
+    nationFounded: false,
+    nationName: "",
+    nationIdeology: "",
+    landsControlled: 1,
+    bordersExpanded: false,
+    expandedLands: [],
+    empireFounded: false,
+    empireName: "",
+    empireDoctrine: "",
+    cities: 1,
   };
 }

@@ -5,6 +5,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import {
+  formAllianceFromRoute,
+  type AllianceFormationOutcome,
+} from "../../lib/game-state";
+import {
   DEFAULT_SETTLEMENT_STATE,
   type SettlementState,
   readSettlementState,
@@ -69,7 +73,7 @@ function getAllianceNameError(value: string) {
   return "";
 }
 
-function getAllianceOutcome(partners: AlliancePartner[]) {
+function getAllianceOutcome(partners: AlliancePartner[]): AllianceFormationOutcome {
   const ids = partners.map((partner) => partner.id);
   const hasIron = ids.includes("iron-coast");
   const hasEmber = ids.includes("ember-basin");
@@ -211,39 +215,11 @@ export default function AllianceCreatePage() {
       .map((id) => PARTNERS.find((partner) => partner.id === id)?.name)
       .filter((value): value is string => Boolean(value));
 
-    const nextState: SettlementState = {
-      ...settlementState,
-      settlementFounded: true,
-      settlementName,
-      region,
-      coordinates: settlementState.coordinates || "X19 / Y12",
-      founder: settlementState.founder || "You",
-      townHallBuilt: true,
-      tradeRouteEstablished: true,
-      tradeRouteDestination: settlementState.tradeRouteDestination || "Iron Coast",
-      tradeRoutes: 1,
-      regionalAllianceFormed: true,
-      allianceName: normalizedName,
-      alliancePartners: partnerNames,
-      allianceStrategy: allianceOutcome.strategy,
-      allianceBonus: allianceOutcome.bonus,
-      allianceIdentity: allianceOutcome.identity,
-      diplomaticReach: allianceOutcome.diplomaticReach,
-      population: allianceOutcome.population,
-      influence: allianceOutcome.influence,
-      settlementLevel: "Regional Power",
-      politicalStatus: allianceOutcome.politicalStatus,
-      nationFounded: false,
-      nationName: "",
-      nationIdeology: "",
-      landsControlled: 1,
-      bordersExpanded: false,
-      expandedLands: [],
-      empireFounded: false,
-      empireName: "",
-      empireDoctrine: "",
-      cities: 1,
-    };
+    const nextState = formAllianceFromRoute(settlementState, {
+      name: normalizedName,
+      partners: partnerNames,
+      outcome: allianceOutcome,
+    });
 
     setAllianceName(normalizedName);
     setSettlementState(nextState);
