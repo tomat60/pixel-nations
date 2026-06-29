@@ -28,15 +28,17 @@ Read `docs/PROJECT_OPERATING_RULES.md` and `AGENTS.md` before non-trivial work.
 - No crypto / NFT / wallet / token / mint / ETH language.
 - Cursor executes scoped handoffs; do not re-litigate product strategy when spec is clear.
 
-## Commits and pull requests
+## Commits and branch handoff
 
 - Commit/push only when the prompt asks or when code build (+ required QA) passes.
 - Docs-only tasks: commit without build when no code/config changed.
-- When a sprint asks for a PR, open it against `main` as **ready for review**, not as a draft.
-- Do **not** create draft PRs unless the issue explicitly says `draft: true` or asks for a draft.
-- If a ready PR cannot be opened, do **not** open a draft PR. Push the branch and comment on the issue with the branch name, head commit SHA, validation result, and blocker so ChatGPT/control-plane can open or merge the PR.
-- Do not merge your own PR.
-- Use short conventional titles, for example `feat: add minimal game state engine`.
+- Cursor Automation must **not** open pull requests directly.
+- Cursor Automation must **not** create draft pull requests.
+- Push the requested branch after validation passes.
+- Comment on the issue with branch name, head commit SHA, validation result, changed files, and any blocker/status.
+- Do not merge your own work.
+- ChatGPT/control-plane will open the PR as ready for review, review CI/diff, and merge only when accepted.
+- Use short conventional commit titles, for example `feat: add minimal game state engine`.
 
 ## Reporting (concise)
 
