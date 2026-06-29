@@ -50,9 +50,25 @@ Do **not** start with vague exploration across the whole repo unless the prompt 
 
 ---
 
-## Pull request output contract
+## Cursor Automation branch-only output contract
 
-When a sprint asks an agent to open a PR:
+Cursor Automation repeatedly created draft PRs even when instructed to open ready PRs. To prevent recurring human-only cleanup work, Cursor Automation must use branch-only handoff.
+
+Cursor Automation must:
+
+- Push the requested branch after validation passes.
+- Comment on the issue with branch name, head commit SHA, validation result, changed files, and any blocker/status.
+- Do **not** open pull requests directly.
+- Do **not** create draft pull requests.
+- Do **not** merge.
+
+ChatGPT/control-plane is responsible for opening the PR as ready for review through the GitHub connector, checking CI, reviewing the diff, and merging only when accepted.
+
+---
+
+## Pull request output contract for non-Cursor agents
+
+When a non-Cursor coding agent is asked to open a PR:
 
 - Open the PR against `main` as **ready for review**, not as a draft.
 - Do **not** create draft PRs unless the issue explicitly says `draft: true` or asks for a draft.
