@@ -102,12 +102,20 @@ export default function DashboardPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-600/75">
               Founder Command Center
             </p>
-            <Link
-              href="/world"
-              className="btn-secondary rounded border border-zinc-800 bg-[#08080f]/80 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400"
-            >
-              Back To World
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/play"
+                className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-amber-100"
+              >
+                Play Command
+              </Link>
+              <Link
+                href="/world"
+                className="btn-secondary rounded border border-zinc-800 bg-[#08080f]/80 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400"
+              >
+                Back To World
+              </Link>
+            </div>
           </div>
 
           <h1 className="mt-8 break-words font-[family-name:var(--font-syne)] text-4xl font-extrabold tracking-tight text-amber-100 sm:text-5xl md:text-6xl">
