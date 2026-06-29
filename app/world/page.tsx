@@ -435,6 +435,13 @@ function getTileCssCenter(tile: Pick<MapTile, "x" | "y">) {
   };
 }
 
+function getOnMapMenuTransform(tile: Pick<MapTile, "x" | "y">) {
+  if (tile.y <= 2) return "translate(-50%, 2.25rem)";
+  if (tile.x >= GRID_WIDTH - 4) return "translate(calc(-100% - 1.25rem), -50%)";
+  if (tile.x <= 3) return "translate(1.25rem, -50%)";
+  return "translate(-50%, calc(-100% - 1.75rem))";
+}
+
 function getLivingMapRouteTarget(routeId?: string, destination?: string) {
   const normalizedRoute = (routeId || "").toLowerCase();
   const normalizedDestination = (destination || "").toLowerCase();
@@ -587,6 +594,7 @@ export default function WorldPage() {
   const [worldActionFeedback, setWorldActionFeedback] = useState("");
   const [playableState, setPlayableState] = useState<PlayableState | null>(null);
   const [playableNow, setPlayableNow] = useState(0);
+  const [onMapActionsOpen, setOnMapActionsOpen] = useState(false);
 
   useEffect(() => {
     const state = readSettlementState();
@@ -604,6 +612,7 @@ export default function WorldPage() {
       const claimedTile = tiles.find((tile) => tile.id === normalizedState.claimedLandId);
       if (claimedTile) {
         setSelectedTileId(claimedTile.id);
+        setOnMapActionsOpen(true);
         return;
       }
     }
@@ -646,6 +655,7 @@ export default function WorldPage() {
     tiles.find((tile) => tile.id === selectedTileId) ??
     tiles.find((tile) => tile.starter && !tile.claimed) ??
     tiles[0];
+  const selectedTileMapPosition = getTileCssCenter(selectedTile);
 
   const ownedByYou = demoState.claimedLand && demoState.claimedLandId === selectedTile.id;
   const isUnavailable = selectedTile.claimed && !ownedByYou;
@@ -668,6 +678,7 @@ export default function WorldPage() {
   const influenceRadius = getInfluenceRadius(demoState);
   const worldAction = useMemo(() => getWorldAction(demoState), [demoState]);
   const activePlayableOrder = playableState?.queue[0];
+  const activeOrderProgress = activePlayableOrder ? getQueueProgress(activePlayableOrder, playableNow) : 0;
   const routeTarget =
     demoState.tradeRouteEstablished || (playableState && playableState.tradeLevel > 0)
       ? getLivingMapRouteTarget(demoState.tradeRouteId || "iron-coast", demoState.tradeRouteDestination || "Iron Coast")
@@ -686,6 +697,7 @@ export default function WorldPage() {
   const visibleGrowthRingCount = playableState
     ? Math.min(4, Math.max(0, playableState.settlementLevel - 1) + Math.min(2, playableState.housingLevel))
     : 0;
+  const onMapPlayableActions = WORLD_PLAYABLE_ACTIONS.slice(0, 5);
   const worldActivitySummary = getWorldActivitySummary(demoState, playableState);
   const activeMapLayer = getActiveMapLayer(demoState, playableState);
 
@@ -699,6 +711,7 @@ export default function WorldPage() {
   const selectTile = (tileId: string) => {
     setSelectedTileId(tileId);
     setHasUserSelectedTile(true);
+    if (demoState.claimedLandId !== tileId) setOnMapActionsOpen(false);
   };
 
   const fitMobileMap = () => setMobileMapZoom(1);
@@ -754,6 +767,7 @@ export default function WorldPage() {
 
     writeSettlementState(nextState);
     setDemoState(nextState);
+    setOnMapActionsOpen(true);
     setClaimSuccess(true);
     setWorldActionFeedback("Land claimed. Settlement action ready.");
   };
@@ -786,14 +800,14 @@ export default function WorldPage() {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#020204] px-5 py-8 pb-28 text-white sm:px-10 sm:py-14 lg:pb-14">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-[1600px]">
         <header className="border-b border-amber-500/15 pb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.45em] text-amber-600/75">World Map</p>
           <h1 className="mt-5 font-[family-name:var(--font-syne)] text-4xl font-extrabold tracking-tight text-amber-100 sm:text-6xl md:text-7xl">
-            CHOOSE YOUR FIRST LAND
+            COMMAND THE WORLD MAP
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-400 sm:mt-5 sm:text-lg">
-            Choose one land inside the highlighted Sector A-01. The atlas gives context; the playable grid below is where the demo begins.
+            Sector A-01 is the playable canvas. Claim land, grow the marker, and launch orders directly from the map.
           </p>
           <p className="mt-3 text-xs uppercase tracking-[0.26em] text-amber-500/75">
             Full world: 10,000 lands. Demo frontier: Aurelian Basin.
@@ -1035,7 +1049,7 @@ export default function WorldPage() {
           </div>
         </section>
 
-        <section className="mt-8 grid gap-6 lg:mt-10 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="mt-8 grid gap-6 lg:mt-10">
           <article
             ref={playableSectorRef}
             id="playable-sector"
@@ -1080,7 +1094,7 @@ export default function WorldPage() {
 
               <div
                 data-qa="sector-orientation-note"
-                className="mt-5 border border-amber-500/12 bg-[#08080f]/78 p-3 text-sm leading-7 text-zinc-400"
+                className="mt-5 border border-amber-500/12 bg-[#08080f]/78 p-3 text-sm leading-7 text-zinc-400 lg:hidden"
               >
                 <span className="font-[family-name:var(--font-syne)] text-xs font-bold uppercase tracking-[0.24em] text-amber-100/80">
                   Actual Selection Area
@@ -1093,7 +1107,7 @@ export default function WorldPage() {
               {demoState.claimedLand ? (
                 <div
                   data-qa="world-activity-panel"
-                  className="mt-5 border border-amber-500/12 bg-[#08080f]/78 p-3"
+                  className="mt-5 border border-amber-500/12 bg-[#08080f]/78 p-3 lg:hidden"
                 >
                   <div
                     data-qa="world-playable-hud"
@@ -1280,7 +1294,7 @@ export default function WorldPage() {
 
               <div className="mt-4 overflow-x-auto pb-2 sm:mt-5">
                 <div
-                  className="world-sector-canvas relative w-full min-w-0 overflow-hidden border border-amber-500/25 bg-contain bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)] transition-[width] duration-200 sm:min-w-[680px] sm:bg-cover sm:p-3"
+                  className="world-sector-canvas relative w-full min-w-0 overflow-hidden border border-amber-500/25 bg-contain bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)] transition-[width] duration-200 sm:min-w-[680px] sm:bg-cover sm:p-3 lg:min-w-[980px]"
                   style={{
                     width: `${Math.round(mobileMapZoom * 100)}%`,
                     backgroundImage:
@@ -1344,6 +1358,59 @@ export default function WorldPage() {
                   >
                     Full world: 10,000 lands
                   </div>
+                  {demoState.claimedLand ? (
+                    <div
+                      data-qa="world-map-top-hud"
+                      className="pointer-events-none absolute left-5 right-5 top-5 z-[29] hidden grid-cols-[minmax(0,1fr)_auto] gap-3 lg:grid"
+                    >
+                      <div className="border border-amber-500/18 bg-[#030306]/78 p-3 shadow-[0_16px_54px_rgba(0,0,0,0.42)] backdrop-blur-md">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-500/75">
+                          World HUD / {worldMarkerStage}
+                        </p>
+                        <p className="mt-1 line-clamp-2 text-sm leading-6 text-amber-100/90">
+                          {currentPlayableObjective}
+                        </p>
+                        <div className="mt-3 grid gap-px border border-amber-500/10 bg-amber-500/10 text-[9px] uppercase tracking-[0.16em] text-zinc-500 sm:grid-cols-6">
+                          <div className="bg-[#08080f]/95 p-2">
+                            <span className="block">Pop</span>
+                            <span className="mt-1 block font-[family-name:var(--font-syne)] text-base font-bold text-amber-100">
+                              {playableState?.population ?? "-"}
+                            </span>
+                          </div>
+                          {WORLD_RESOURCE_LABELS.map((resource) => (
+                            <div key={resource.key} className="bg-[#08080f]/95 p-2">
+                              <span className="block">{resource.label}</span>
+                              <span className="mt-1 block font-[family-name:var(--font-syne)] text-base font-bold text-amber-100">
+                                {playableState?.resources[resource.key] ?? "-"}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div
+                        data-qa="world-map-active-order"
+                        className="w-80 border border-amber-500/18 bg-[#030306]/78 p-3 shadow-[0_16px_54px_rgba(0,0,0,0.42)] backdrop-blur-md"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-500/75">
+                            Active Order
+                          </p>
+                          <p className="text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                            {activePlayableOrder ? formatDuration(activePlayableOrder.endsAt - playableNow) : "Idle"}
+                          </p>
+                        </div>
+                        <p className="mt-2 text-sm font-semibold text-amber-100/90">
+                          {getWorldOrderLabel(activePlayableOrder)}
+                        </p>
+                        <div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-950">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-amber-800 to-amber-300 transition-[width]"
+                            style={{ width: `${activeOrderProgress}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
                   <svg
                     aria-hidden
                     className="pointer-events-none absolute inset-3 z-[8] h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)]"
@@ -1559,6 +1626,172 @@ export default function WorldPage() {
                       ) : null}
                     </div>
                   ) : null}
+                  {claimedTileMapPosition && claimedTile ? (
+                    <div className="pointer-events-none absolute inset-3 z-[30]">
+                      <button
+                        type="button"
+                        data-qa="world-claimed-land-action-anchor"
+                        onClick={() => {
+                          setSelectedTileId(claimedTile.id);
+                          setHasUserSelectedTile(true);
+                          setOnMapActionsOpen((open) => !open);
+                        }}
+                        className="pointer-events-auto absolute h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-100/75 bg-[#130d04]/88 p-1 shadow-[0_0_34px_rgba(251,191,36,0.46),inset_0_0_18px_rgba(251,191,36,0.22)] transition-[border-color,box-shadow] hover:border-amber-50 hover:shadow-[0_0_44px_rgba(251,191,36,0.58),inset_0_0_20px_rgba(251,191,36,0.26)]"
+                        style={claimedTileMapPosition}
+                        aria-label={`Open map actions for ${claimedTile.landName}`}
+                        aria-expanded={onMapActionsOpen}
+                      >
+                        <span
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            background: `conic-gradient(rgba(251,191,36,0.96) ${activeOrderProgress * 3.6}deg, rgba(251,191,36,0.13) 0deg)`,
+                          }}
+                        />
+                        <span className="absolute inset-[5px] rounded-full border border-black/80 bg-[#050509]" />
+                        <span className="absolute inset-[9px] rounded-full border border-amber-200/45 bg-amber-400/20" />
+                        <span className="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-100 shadow-[0_0_14px_rgba(253,230,138,0.95)]" />
+                        {playableState && playableState.housingLevel > 0 ? (
+                          <>
+                            <span className="absolute left-[13px] top-[17px] h-1.5 w-1.5 rounded-sm bg-emerald-200/80 shadow-[0_0_8px_rgba(110,231,183,0.45)]" />
+                            <span className="absolute bottom-[15px] right-[13px] h-1.5 w-1.5 rounded-sm bg-emerald-200/80 shadow-[0_0_8px_rgba(110,231,183,0.45)]" />
+                          </>
+                        ) : null}
+                        {playableState && playableState.settlementLevel >= 2 ? (
+                          <span className="absolute left-1/2 top-[11px] h-2 w-2 -translate-x-1/2 rotate-45 border-l border-t border-amber-100/70 bg-amber-200/35" />
+                        ) : null}
+                        {playableState && playableState.tradeLevel > 0 ? (
+                          <span className="absolute bottom-[8px] left-1/2 h-px w-8 -translate-x-1/2 bg-amber-200/80 shadow-[0_0_10px_rgba(251,191,36,0.68)]" />
+                        ) : null}
+                      </button>
+
+                      {onMapActionsOpen ? (
+                        <div
+                          data-qa="world-on-map-action-layer"
+                          className="pointer-events-auto absolute w-[min(21rem,calc(100vw-3rem))] border border-amber-500/28 bg-[#030306]/92 p-3 text-left shadow-[0_24px_90px_rgba(0,0,0,0.72),0_0_44px_rgba(201,169,98,0.12)] backdrop-blur-md"
+                          style={{
+                            ...claimedTileMapPosition,
+                            transform: getOnMapMenuTransform(claimedTile),
+                          }}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-500/75">
+                                {worldMarkerStage}
+                              </p>
+                              <p className="mt-1 font-[family-name:var(--font-syne)] text-lg font-extrabold leading-tight text-amber-100">
+                                {claimedTile.landName}
+                              </p>
+                              <p className="mt-1 text-xs leading-5 text-zinc-400">{worldActivitySummary}</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setOnMapActionsOpen(false)}
+                              className="shrink-0 rounded border border-amber-500/15 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-zinc-500 hover:border-amber-400/40 hover:text-amber-100"
+                              aria-label="Close on-map actions"
+                            >
+                              Close
+                            </button>
+                          </div>
+
+                          <div className="mt-3 border border-amber-500/12 bg-[#08080f]/82 p-2">
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-500/75">
+                                Active Order
+                              </p>
+                              <p className="text-[9px] uppercase tracking-[0.16em] text-zinc-500">
+                                {activePlayableOrder ? formatDuration(activePlayableOrder.endsAt - playableNow) : "Idle"}
+                              </p>
+                            </div>
+                            <p className="mt-1 text-xs font-semibold text-amber-100/90">
+                              {getWorldOrderLabel(activePlayableOrder)}
+                            </p>
+                            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-zinc-950">
+                              <div
+                                className="h-full rounded-full bg-gradient-to-r from-amber-800 to-amber-300 transition-[width]"
+                                style={{ width: `${activeOrderProgress}%` }}
+                              />
+                            </div>
+                          </div>
+
+                          {worldAction ? (
+                            <button
+                              type="button"
+                              data-qa={`world-on-map-${worldAction.qa}`}
+                              onClick={runWorldAction}
+                              className="btn-primary mt-3 w-full rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-100"
+                            >
+                              {worldAction.cta}
+                            </button>
+                          ) : (
+                            <Link
+                              href={demoObjective.action.href}
+                              data-qa="world-on-map-next-link"
+                              className="btn-primary mt-3 block w-full rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-3 py-2 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-amber-100"
+                            >
+                              {demoObjective.action.cta}
+                            </Link>
+                          )}
+
+                          <div className="mt-3 grid gap-2">
+                            {onMapPlayableActions.map((action) => {
+                              const enabled = playableState ? canQueuePlayableAction(playableState, action.id) : false;
+
+                              return (
+                                <button
+                                  key={action.id}
+                                  type="button"
+                                  data-qa={`world-on-map-action-${action.id}`}
+                                  disabled={!enabled}
+                                  onClick={() => queueWorldPlayableAction(action)}
+                                  className={
+                                    enabled
+                                      ? "btn-primary flex items-center justify-between gap-2 rounded border border-amber-500/35 bg-amber-500/[0.08] px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-amber-100"
+                                      : "flex cursor-not-allowed items-center justify-between gap-2 rounded border border-zinc-800 bg-zinc-950/70 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-600"
+                                  }
+                                >
+                                  <span>{action.label}</span>
+                                  <span className="font-normal text-zinc-500">{enabled ? "Queue" : "Needs resources"}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div className="pointer-events-none absolute inset-3 z-[30]">
+                      <div
+                        data-qa="world-selected-land-map-card"
+                        className="pointer-events-auto absolute w-[min(19rem,calc(100vw-3rem))] border border-amber-500/24 bg-[#030306]/90 p-3 shadow-[0_20px_70px_rgba(0,0,0,0.68)] backdrop-blur-md"
+                        style={{
+                          ...selectedTileMapPosition,
+                          transform: getOnMapMenuTransform(selectedTile),
+                        }}
+                      >
+                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-500/75">
+                          Selected Land
+                        </p>
+                        <p className="mt-1 font-[family-name:var(--font-syne)] text-base font-extrabold leading-tight text-amber-100">
+                          {selectedTile.landName}
+                        </p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.16em] text-zinc-500">
+                          {selectedTile.landId} / {toTerrainLabel(selectedTile.terrain)}
+                        </p>
+                        <button
+                          type="button"
+                          disabled={isUnavailable}
+                          onClick={openClaimModal}
+                          className={
+                            isUnavailable
+                              ? "mt-3 w-full cursor-not-allowed rounded border border-zinc-800 bg-zinc-950/70 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-600"
+                              : "btn-primary mt-3 w-full rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-100"
+                          }
+                        >
+                          {isUnavailable ? "Already Claimed" : "Claim From Map"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   <div data-qa="sector-claimable-grid" className="relative z-[12] grid grid-cols-[repeat(18,minmax(0,1fr))] gap-px bg-transparent p-px">
                     {tiles.map((tile) => {
                       const tileOwnedByYou = demoState.claimedLandId === tile.id && demoState.claimedLand;
