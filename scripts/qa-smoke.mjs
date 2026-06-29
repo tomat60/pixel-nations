@@ -195,9 +195,19 @@ async function runSmoke(page) {
     );
   });
 
+  await step("queue playable order from world map", async () => {
+    await clickButton(page, /^Return To Map$/i, "queue playable order from world map");
+    await page.locator("[data-qa='world-playable-hud']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("queue playable order from world map", "World playable HUD did not render after claim");
+    });
+    await page.locator("[data-qa='world-playable-action-gather-food']").first().click();
+    await page.locator("[data-qa='world-active-order']").getByText("Gather Food").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("queue playable order from world map", "Gather Food did not enter the world active queue");
+    });
+  });
+
   await step("dashboard recognizes claimed land", async () => {
-    const dialog = page.getByRole("dialog").first();
-    await dialog.getByRole("link", { name: /^Enter Your Land$/i }).click();
+    await page.getByRole("link", { name: /^Enter Your Land$/i }).first().click();
     await page.waitForURL("**/dashboard", { timeout: 5000 });
     await expectText(page, "PN-0499", "dashboard recognizes claimed land");
     const bodyText = await page.locator("body").innerText();
