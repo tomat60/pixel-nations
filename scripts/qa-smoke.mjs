@@ -145,6 +145,25 @@ async function expectState(page, stepName, predicate, message) {
 }
 
 async function runSmoke(page) {
+  await step("playable command center route", async () => {
+    await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
+    await page.evaluate(() => localStorage.clear());
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    await expectText(page, "Settlement command center", "playable command center route");
+    await page.locator("[data-qa='play-resource-counters']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("playable command center route", "Playable resource counters did not render");
+    });
+    await page.locator("[data-qa='play-action-list']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("playable command center route", "Playable action list did not render");
+    });
+    await page.locator("[data-qa='play-action-gather-food']").first().click();
+    await expectText(page, "Gather Food", "playable command center route");
+    await page.locator("[data-qa='play-active-queue']").getByText("Gather Food").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("playable command center route", "Gather Food did not enter the active queue");
+    });
+  });
+
   await step("reset demo state and open /world", async () => {
     await page.goto(`${APP_URL}/world`, { waitUntil: "domcontentloaded" });
     await page.evaluate(() => localStorage.clear());
