@@ -810,26 +810,26 @@ export default function WorldPage() {
   };
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#020204] px-5 py-8 pb-28 text-white sm:px-10 sm:py-14 lg:pb-14">
-      <div className="mx-auto max-w-[1600px]">
-        <header className="border-b border-amber-500/15 pb-8">
+    <main className="min-h-screen overflow-x-hidden bg-[#020204] px-3 py-3 pb-28 text-white sm:px-5 sm:py-5 lg:px-6 lg:py-6 lg:pb-10">
+      <div className="mx-auto flex max-w-[1800px] flex-col">
+        <header className="order-2 mt-6 border border-amber-500/12 bg-[#050509]/80 p-4 sm:p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.45em] text-amber-600/75">World Map</p>
-          <h1 className="mt-5 font-[family-name:var(--font-syne)] text-4xl font-extrabold tracking-tight text-amber-100 sm:text-6xl md:text-7xl">
-            COMMAND THE WORLD MAP
+          <h1 className="mt-3 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-4xl md:text-5xl">
+            Sector A-01 is live.
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-400 sm:mt-5 sm:text-lg">
-            Sector A-01 is the playable canvas. Claim land, grow the marker, and launch orders directly from the map.
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-400 sm:text-base">
+            Claim land, grow the marker, and launch orders from the first playable window into the 10,000-land world.
           </p>
           <p className="mt-3 text-xs uppercase tracking-[0.26em] text-amber-500/75">
-            Full world: 10,000 lands. Demo frontier: Aurelian Basin.
+            Full world: 10,000 lands. Playable frontier: Aurelian Basin.
           </p>
           {hasProgress ? (
-            <p className="mt-4 text-xs uppercase tracking-[0.22em] text-amber-300/80">
+            <p className="mt-3 text-xs uppercase tracking-[0.22em] text-amber-300/80">
               Demo progress found. Continue your rise.
             </p>
           ) : null}
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/"
               className="btn-secondary w-full rounded border border-zinc-800 bg-[#08080f]/80 px-6 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-zinc-300 sm:w-auto"
@@ -850,7 +850,7 @@ export default function WorldPage() {
 
         <section
           data-qa="first-60-guidance"
-          className="mt-6 grid gap-3 border border-amber-500/15 bg-amber-500/[0.035] p-4 text-sm text-zinc-400 sm:grid-cols-3 sm:p-5"
+          className="order-3 mt-6 grid gap-3 border border-amber-500/15 bg-amber-500/[0.035] p-4 text-sm text-zinc-400 sm:grid-cols-3 sm:p-5"
         >
           {demoState.claimedLand ? (
             <>
@@ -885,9 +885,9 @@ export default function WorldPage() {
             </>
           ) : (
             [
-              ["1", "Select land", "Scroll to Sector A-01 and click an available highlighted cell. The atlas is context only."],
-              ["2", "Claim it", "Confirm the free demo claim; this marks your first land and founder record."],
-              ["3", "Build upward", "Use on-map actions; the claimed land becomes your first settlement."],
+              ["1", "Select land", "Click an available cell in Sector A-01."],
+              ["2", "Claim it", "Confirm the demo claim to mark your founder record."],
+              ["3", "Build upward", "Use on-map actions from your claimed land."],
             ].map(([step, title, copy]) => (
               <div key={title} className="border-l border-amber-500/25 pl-4">
                 <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
@@ -905,27 +905,24 @@ export default function WorldPage() {
         <section
           id="world-atlas"
           data-qa="world-atlas"
-          className="mt-6 overflow-hidden border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.5)] sm:mt-8 sm:p-6"
+          className="order-4 mt-6 overflow-hidden border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.5)] sm:mt-8 sm:p-6"
         >
-          <div className="mb-5 grid gap-5 border-b border-amber-500/10 pb-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
+          <div className="mb-5 grid gap-5 border-b border-amber-500/10 pb-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div className="max-w-3xl">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200/80">
                 World Atlas
               </p>
-              <h2 className="mt-4 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-5xl">
-                Full world: 10,000 lands.
+              <h2 className="mt-3 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100 sm:text-4xl">
+                The full world beyond A-01.
               </h2>
-              <p className="mt-4 text-sm leading-7 text-zinc-400">
-                The full world contains 10,000 lands across a 100 x 100 atlas. You are not choosing from the whole atlas yet.
-              </p>
-              <p className="mt-2 text-sm leading-7 text-amber-200/70">
-                The highlighted A-01 window is the playable demo sector. Choose the actual land in the grid below.
+              <p className="mt-3 text-sm leading-7 text-zinc-400">
+                The atlas holds 10,000 lands across a 100 x 100 world. Sector A-01 is the playable window above.
               </p>
               <a
                 href="#playable-sector"
-                className="mt-5 inline-flex rounded border border-amber-500/35 bg-amber-500/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-amber-100 transition-colors hover:border-amber-300/60"
+                className="mt-4 inline-flex rounded border border-amber-500/35 bg-amber-500/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-amber-100 transition-colors hover:border-amber-300/60"
               >
-                Jump To Sector A-01
+                Return To Sector A-01
               </a>
             </div>
             <div className="grid grid-cols-1 gap-px border border-amber-500/10 bg-amber-500/10 text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:grid-cols-3">
@@ -1046,7 +1043,7 @@ export default function WorldPage() {
                   Demo Origin
                 </p>
                 <p className="mt-2 whitespace-normal break-words text-xs leading-6 text-zinc-400">
-                  The glowing square shows where Sector A-01 sits inside the full world. Land selection happens below.
+                  The glowing square shows where Sector A-01 sits inside the full world.
                 </p>
               </div>
             </div>
@@ -1055,37 +1052,34 @@ export default function WorldPage() {
                 Demo Origin
               </p>
               <p className="mt-2 text-xs leading-6 text-zinc-400">
-                The glowing square is context only. Choose your actual land in the Sector A-01 grid below.
+                The glowing square is context only. Your game screen is the Sector A-01 grid above.
               </p>
             </div>
           </div>
         </section>
 
-        <section className="mt-8 grid gap-6 lg:mt-10">
+        <section className="order-1 grid gap-4 lg:min-h-[calc(100vh-3rem)]">
           <article
             ref={playableSectorRef}
             id="playable-sector"
             data-qa="playable-sector"
-            className="relative overflow-hidden border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_30px_120px_rgba(0,0,0,0.6)] sm:p-6"
+            className="relative overflow-hidden border border-amber-500/18 bg-[#050509]/90 p-2 shadow-[0_30px_120px_rgba(0,0,0,0.68)] sm:p-4 lg:min-h-[calc(100vh-3rem)]"
           >
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_18%,rgba(201,169,98,0.1),transparent_34%),radial-gradient(ellipse_at_88%_76%,rgba(201,169,98,0.05),transparent_40%)]"
             />
             <div className="relative">
-              <div className="flex flex-col justify-between gap-4 border-b border-amber-500/10 pb-5 sm:flex-row sm:items-end">
+              <div className="flex flex-col justify-between gap-3 border-b border-amber-500/10 pb-3 sm:flex-row sm:items-end lg:hidden">
                 <div className="max-w-xl">
                   <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-amber-600/80">
-                    First Playable Sector / Sector Code A-01
+                    Game Screen / Sector A-01
                   </p>
-                  <p className="mt-2 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100 sm:text-3xl">
+                  <p className="mt-2 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100">
                     Aurelian Basin
                   </p>
                   <p className="mt-3 text-sm leading-7 text-zinc-400">
-                    This is the actual playable land layer for the demo, cut from the larger 100 x 100 world atlas.
-                  </p>
-                  <p className="mt-2 text-xs uppercase tracking-[0.22em] text-zinc-600">
-                    Every clickable cell is a land parcel in Sector A-01. The painting behind the grid is terrain context, not a separate selection layer.
+                    216 visible lands, cut from the larger 100 x 100 world atlas.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
@@ -1306,9 +1300,9 @@ export default function WorldPage() {
                 </div>
               </div>
 
-              <div className="mt-4 overflow-x-auto pb-2 sm:mt-5">
+              <div className="mt-4 overflow-x-auto pb-2 lg:mt-0">
                 <div
-                  className="world-sector-canvas relative w-full min-w-0 overflow-hidden border border-amber-500/25 bg-contain bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)] transition-[width] duration-200 sm:min-w-[680px] sm:bg-cover sm:p-3 lg:min-w-[980px]"
+                  className="world-sector-canvas relative w-full min-w-0 overflow-hidden border border-amber-500/25 bg-contain bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)] transition-[width] duration-200 sm:min-w-[680px] sm:bg-cover sm:p-3 lg:min-h-[calc(100vh-5rem)] lg:min-w-[980px]"
                   style={{
                     width: `${Math.round(mobileMapZoom * 100)}%`,
                     backgroundImage:
@@ -1361,25 +1355,27 @@ export default function WorldPage() {
                     />
                   ))}
                   <div
-                    aria-hidden
-                    className="pointer-events-none absolute left-6 top-6 z-[23] border border-amber-500/20 bg-[#030306]/75 px-2 py-1 font-[family-name:var(--font-syne)] text-[8px] font-bold uppercase tracking-[0.22em] text-amber-100/65 backdrop-blur-sm"
+                    data-qa="world-map-top-hud"
+                    className="pointer-events-none absolute left-5 right-5 top-5 z-[29] hidden grid-cols-[minmax(0,1fr)_auto] gap-3 lg:grid"
                   >
-                    Sector A-01 / 216 lands
-                  </div>
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute bottom-6 right-6 z-[23] hidden border border-amber-500/15 bg-[#030306]/70 px-2 py-1 text-[8px] uppercase tracking-[0.2em] text-zinc-500 backdrop-blur-sm sm:block"
-                  >
-                    Full world: 10,000 lands
-                  </div>
-                  {demoState.claimedLand ? (
-                    <div
-                      data-qa="world-map-top-hud"
-                      className="pointer-events-none absolute left-5 right-5 top-5 z-[29] hidden grid-cols-[minmax(0,1fr)_auto] gap-3 lg:grid"
-                    >
-                      <div className="border border-amber-500/18 bg-[#030306]/78 p-3 shadow-[0_16px_54px_rgba(0,0,0,0.42)] backdrop-blur-md">
+                    <div className="border border-amber-500/18 bg-[#030306]/78 p-3 shadow-[0_16px_54px_rgba(0,0,0,0.42)] backdrop-blur-md">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-500/75">
+                            Sector A-01 / 216 visible lands
+                          </p>
+                          <p className="mt-1 font-[family-name:var(--font-syne)] text-xl font-extrabold tracking-tight text-amber-100">
+                            Aurelian Basin
+                          </p>
+                        </div>
+                        <div className="border border-amber-500/15 bg-amber-500/[0.06] px-3 py-2 text-right text-[9px] uppercase tracking-[0.16em] text-zinc-500">
+                          <span className="block text-amber-100/80">Full world</span>
+                          <span className="mt-1 block">10,000 lands</span>
+                        </div>
+                      </div>
+                      <div className="mt-3 border-t border-amber-500/10 pt-3">
                         <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-500/75">
-                          World HUD / {worldMarkerStage}
+                          Objective / {worldMarkerStage}
                         </p>
                         <p className="mt-1 line-clamp-2 text-sm leading-6 text-amber-100/90">
                           {currentPlayableObjective}
@@ -1401,10 +1397,11 @@ export default function WorldPage() {
                           ))}
                         </div>
                       </div>
-                      <div
-                        data-qa="world-map-active-order"
-                        className="w-80 border border-amber-500/18 bg-[#030306]/78 p-3 shadow-[0_16px_54px_rgba(0,0,0,0.42)] backdrop-blur-md"
-                      >
+                    </div>
+                    <div
+                      data-qa="world-map-active-order"
+                      className="w-80 border border-amber-500/18 bg-[#030306]/78 p-3 shadow-[0_16px_54px_rgba(0,0,0,0.42)] backdrop-blur-md"
+                    >
                         <div className="flex items-center justify-between gap-3">
                           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-500/75">
                             Active Order
@@ -1422,9 +1419,12 @@ export default function WorldPage() {
                             style={{ width: `${activeOrderProgress}%` }}
                           />
                         </div>
+                        <div className="mt-3 border-t border-amber-500/10 pt-3 text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                          <span className="block text-amber-100/80">Map Layer</span>
+                          <span className="mt-1 block normal-case tracking-normal text-zinc-400">{activeMapLayer}</span>
+                        </div>
                       </div>
                     </div>
-                  ) : null}
                   <svg
                     aria-hidden
                     className="pointer-events-none absolute inset-3 z-[8] h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)]"

@@ -166,7 +166,7 @@ async function runSmoke(page) {
     await page.evaluate(() => localStorage.clear());
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await expectText(page, "COMMAND THE WORLD MAP", "reset demo state and open /world");
+    await expectText(page, "Sector A-01 is live", "reset demo state and open /world");
   });
 
   await step("select a claimable Sector A-01 land", async () => {
