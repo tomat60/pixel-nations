@@ -25,7 +25,7 @@
 
 - `npm run build`: PASS after installing existing locked dependencies with `npm ci`.
 - `npm run qa:smoke`: PASS after installing the missing Playwright Chromium browser with `npx playwright install chromium`.
-- `npm run pn:status`: completed with exit code 0 before commit; public QA checker reported the expected dirty working tree while this branch was still being packaged.
+- `npm run pn:status`: completed with exit code 0 after commit; internal `PUBLIC_QA_CHECK=FAIL` remains because the existing public handoff reports `Working tree: has changes` for `agent/map-interaction-foundation-v0.9`.
 
 ## Product verdict
 
@@ -35,6 +35,7 @@ Accepted for scoped map-first integration if validation passes: `/world` now exp
 
 - `/world` and `/play` still use separate UI layouts over the same local engine; a future pass can centralize shared HUD/action rendering if duplication grows.
 - Settlement route progression and playable engine progression are connected visually on `/world`, but not fully reconciled into one canonical progression model.
+- Public QA handoff status is stale/outside this sprint and still reports a dirty working tree despite this feature branch being clean after commit.
 
 ## Next recommended sprint
 
