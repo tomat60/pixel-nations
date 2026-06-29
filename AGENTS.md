@@ -35,11 +35,22 @@ Copy should be cinematic but short — kingdom map, founder record, strategic wo
 3. **Stay in scope** — do not redesign unrelated pages (landing, dashboard, settlement, nation, empire) unless the prompt explicitly requires it or routing compatibility demands it.
 4. **Cost control** — avoid broad repo exploration, repeated weak iterations, unnecessary `npm run qa:screens`, and dependency installs without justification.
 5. **Ask for scope only when truly blocked** — if the goal, files, and acceptance criteria are defined in the prompt or docs, execute; do not re-litigate product strategy.
-6. **PR output contract** — when a sprint asks for a pull request, open the PR as ready for review, not as a draft. Do not leave human-only finalization work unless the prompt explicitly asks for a draft. Use a clean title matching the commit, include validation results, and do not merge.
+6. **PR output contract** — Cursor Automation must not open PRs directly. Push the branch and comment with branch name, head SHA, validation result, and blocker/status. ChatGPT/control-plane opens the PR as ready for review through the GitHub connector.
 
-## PR output contract
+## Cursor Automation output contract
 
-All coding agents, including Cursor Automation, must follow this output contract:
+Cursor Automation repeatedly created draft PRs even when prompted otherwise. To prevent recurring human-only cleanup work, Cursor Automation must follow this branch-only contract:
+
+- Do **not** open pull requests.
+- Do **not** create draft pull requests.
+- Push the requested branch after validation passes.
+- Comment on the issue with branch name, head commit SHA, validation result, changed files, and any blocker.
+- Do **not** merge.
+- ChatGPT/control-plane is responsible for opening the PR as ready for review, reviewing CI/diff, and merging when accepted.
+
+## PR output contract for non-Cursor agents
+
+All non-Cursor coding agents must follow this output contract:
 
 - Open PRs against `main` as **ready for review** by default.
 - Do **not** create draft PRs unless the issue explicitly says `draft: true` or asks for a draft.
