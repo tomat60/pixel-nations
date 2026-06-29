@@ -14,6 +14,25 @@ import {
   type WorldGameActionId,
 } from "../lib/game-state";
 import {
+  PLAYABLE_ACTIONS,
+  canQueuePlayableAction,
+  formatDuration,
+  getCurrentObjective,
+  getQueueProgress,
+  getSettlementLevelLabel,
+  queuePlayableAction,
+  tickPlayableState,
+  type PlayableActionDefinition,
+  type PlayableActionId,
+  type PlayableResourceKey,
+  type PlayableState,
+  type QueuedPlayableAction,
+} from "../lib/playable-engine";
+import {
+  readPlayableState,
+  writePlayableState,
+} from "../lib/playable-state";
+import {
   DEFAULT_SETTLEMENT_STATE,
   readSettlementState,
   type SettlementState,
@@ -106,6 +125,26 @@ type WorldAction = {
   cta: string;
   qa: string;
 };
+
+const WORLD_PLAYABLE_ACTION_IDS: PlayableActionId[] = [
+  "gather-food",
+  "quarry-materials",
+  "build-housing",
+  "upgrade-core",
+  "scout-land",
+];
+
+const WORLD_RESOURCE_LABELS: Array<{ key: PlayableResourceKey; label: string }> = [
+  { key: "food", label: "Food" },
+  { key: "materials", label: "Materials" },
+  { key: "treasury", label: "Treasury" },
+  { key: "influence", label: "Influence" },
+  { key: "stability", label: "Stability" },
+];
+
+const WORLD_PLAYABLE_ACTIONS = WORLD_PLAYABLE_ACTION_IDS
+  .map((actionId) => PLAYABLE_ACTIONS.find((action) => action.id === actionId))
+  .filter((action): action is PlayableActionDefinition => Boolean(action));
 
 
 const MAP_RIVERS = [
@@ -433,6 +472,65 @@ function getInfluenceRadius(state: SettlementState) {
   return 0;
 }
 
+function getPlayableInfluenceRadius(state: PlayableState | null) {
+  if (!state) return 0;
+  return Math.min(88, 38 + state.settlementLevel * 7 + state.tradeLevel * 4 + state.landsSurveyed * 2);
+}
+
+function getWorldMarkerStage(playableState: PlayableState | null, demoState: SettlementState) {
+  if (!demoState.claimedLand) return "Unclaimed";
+  if (!playableState) {
+    if (demoState.nationFounded) return "Nation Influence";
+    if (demoState.tradeRouteEstablished) return "Trade City";
+    if (demoState.townHallBuilt) return "City Core";
+    if (demoState.settlementFounded) return "Outpost";
+    return "Claimed Land";
+  }
+
+  if (playableState.nationProgress >= 100 || demoState.nationFounded) return "Nation Influence";
+  if (playableState.tradeLevel > 0 || demoState.tradeRouteEstablished) return "Trade Route";
+  if (playableState.settlementLevel >= 3) return "Town Core";
+  if (playableState.settlementLevel >= 2 || demoState.townHallBuilt) return "Village Core";
+  if (playableState.housingLevel > 0 || demoState.settlementFounded) return "Outpost";
+  return "Claimed Land";
+}
+
+function getWorldRecentConsequence(playableState: PlayableState | null, fallback: string) {
+  const latest = playableState?.log[0];
+  if (!latest) return fallback;
+  return `${latest.title}: ${latest.body}`;
+}
+
+function getWorldOrderLabel(activeOrder?: QueuedPlayableAction) {
+  return activeOrder ? activeOrder.label : "No active order";
+}
+
+function getWorldActivitySummary(demoState: SettlementState, playableState: PlayableState | null) {
+  if (demoState.tradeRouteEstablished) return `Trade route visible: ${demoState.tradeRouteDestination || "Regional route"}`;
+  if (playableState && playableState.tradeLevel > 0) return `Trade pressure visible: level ${playableState.tradeLevel}`;
+  if (playableState && playableState.landsSurveyed > 0) {
+    return `Scout marks visible: ${playableState.landsSurveyed} nearby lands surveyed`;
+  }
+  if (playableState && playableState.settlementLevel > 1) {
+    return `${getSettlementLevelLabel(playableState.settlementLevel)} visible on your claimed land`;
+  }
+  if (demoState.townHallBuilt) return "City core visible on your claimed land";
+  if (demoState.settlementFounded) return "Settlement marker visible on your claimed land";
+  if (demoState.claimedLand) return "Claimed land marker visible";
+  return "Choose land to wake the map";
+}
+
+function getActiveMapLayer(demoState: SettlementState, playableState: PlayableState | null) {
+  if (demoState.tradeRouteEstablished) return "Claim + settlement + city core + trade";
+  if (playableState && playableState.tradeLevel > 0) return "Claim + core + trade pressure";
+  if (playableState && playableState.landsSurveyed > 0) return "Claim + core + surveyed frontier";
+  if (playableState && playableState.settlementLevel > 1) return "Claim + upgraded core";
+  if (demoState.townHallBuilt) return "Claim + settlement + city core";
+  if (demoState.settlementFounded) return "Claim + settlement";
+  if (demoState.claimedLand) return "Claim marker";
+  return "Selection";
+}
+
 function getContinueRoute(state: SettlementState) {
   if (state.empireFounded) return "/empire";
   if (state.nationFounded) return "/nation";
@@ -487,6 +585,8 @@ export default function WorldPage() {
   const [claimSuccess, setClaimSuccess] = useState(false);
   const [mobileMapZoom, setMobileMapZoom] = useState(1);
   const [worldActionFeedback, setWorldActionFeedback] = useState("");
+  const [playableState, setPlayableState] = useState<PlayableState | null>(null);
+  const [playableNow, setPlayableNow] = useState(0);
 
   useEffect(() => {
     const state = readSettlementState();
@@ -511,6 +611,27 @@ export default function WorldPage() {
     const starterTile = tiles.find((tile) => tile.starter && !tile.claimed);
     if (starterTile) setSelectedTileId(starterTile.id);
   }, [tiles]);
+
+  useEffect(() => {
+    const current = Date.now();
+    const loaded = readPlayableState(current);
+    writePlayableState(loaded);
+    setPlayableState(loaded);
+    setPlayableNow(current);
+
+    const interval = window.setInterval(() => {
+      const tickNow = Date.now();
+      setPlayableNow(tickNow);
+      setPlayableState((currentState) => {
+        if (!currentState) return currentState;
+        const next = tickPlayableState(currentState, tickNow);
+        writePlayableState(next);
+        return next;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, []);
 
   const hasProgress = useMemo(
     () =>
@@ -545,29 +666,28 @@ export default function WorldPage() {
   const claimedTileCenter = claimedTile ? getTileSvgCenter(claimedTile) : null;
   const claimedTileMapPosition = claimedTile ? getTileCssCenter(claimedTile) : null;
   const influenceRadius = getInfluenceRadius(demoState);
-  const routeTarget = demoState.tradeRouteEstablished
-    ? getLivingMapRouteTarget(demoState.tradeRouteId, demoState.tradeRouteDestination)
-    : null;
-  const routePath = claimedTileCenter && routeTarget ? buildLivingMapRoutePath(claimedTileCenter, routeTarget) : "";
   const worldAction = useMemo(() => getWorldAction(demoState), [demoState]);
-  const worldActivitySummary = demoState.tradeRouteEstablished
-    ? `Trade route visible: ${demoState.tradeRouteDestination || "Regional route"}`
-    : demoState.townHallBuilt
-      ? "City core visible on your claimed land"
-    : demoState.settlementFounded
-      ? "Settlement marker visible on your claimed land"
-      : demoState.claimedLand
-        ? "Claimed land marker visible"
-        : "Choose land to wake the map";
-  const activeMapLayer = demoState.tradeRouteEstablished
-    ? "Claim + settlement + city core + trade"
-    : demoState.townHallBuilt
-      ? "Claim + settlement + city core"
-      : demoState.settlementFounded
-        ? "Claim + settlement"
-        : demoState.claimedLand
-          ? "Claim marker"
-          : "Selection";
+  const activePlayableOrder = playableState?.queue[0];
+  const routeTarget =
+    demoState.tradeRouteEstablished || (playableState && playableState.tradeLevel > 0)
+      ? getLivingMapRouteTarget(demoState.tradeRouteId || "iron-coast", demoState.tradeRouteDestination || "Iron Coast")
+      : null;
+  const routePath = claimedTileCenter && routeTarget ? buildLivingMapRoutePath(claimedTileCenter, routeTarget) : "";
+  const currentPlayableObjective = playableState
+    ? getCurrentObjective(playableState)
+    : "Claim land to start the local settlement clock.";
+  const worldMarkerStage = getWorldMarkerStage(playableState, demoState);
+  const playableInfluenceRadius = getPlayableInfluenceRadius(playableState);
+  const combinedInfluenceRadius = Math.max(influenceRadius, demoState.claimedLand ? playableInfluenceRadius : 0);
+  const recentConsequence = getWorldRecentConsequence(
+    playableState,
+    worldActionFeedback || "No world consequence yet.",
+  );
+  const visibleGrowthRingCount = playableState
+    ? Math.min(4, Math.max(0, playableState.settlementLevel - 1) + Math.min(2, playableState.housingLevel))
+    : 0;
+  const worldActivitySummary = getWorldActivitySummary(demoState, playableState);
+  const activeMapLayer = getActiveMapLayer(demoState, playableState);
 
   const selectedLandPanelRef = useRef<HTMLElement>(null);
   const playableSectorRef = useRef<HTMLElement>(null);
@@ -651,6 +771,17 @@ export default function WorldPage() {
     writeSettlementState(result.state);
     setDemoState(result.state);
     setWorldActionFeedback(result.feedback);
+  };
+
+  const queueWorldPlayableAction = (action: PlayableActionDefinition) => {
+    const actionNow = Date.now();
+    setPlayableNow(actionNow);
+    setPlayableState((currentState) => {
+      const next = queuePlayableAction(currentState ?? readPlayableState(actionNow), action.id, actionNow);
+      writePlayableState(next);
+      setWorldActionFeedback(`${action.label} queued from the world map.`);
+      return next;
+    });
   };
 
   return (
@@ -964,7 +1095,72 @@ export default function WorldPage() {
                   data-qa="world-activity-panel"
                   className="mt-5 border border-amber-500/12 bg-[#08080f]/78 p-3"
                 >
-                  <div className="grid gap-3 text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:grid-cols-3">
+                  <div
+                    data-qa="world-playable-hud"
+                    className="grid gap-3 border border-amber-500/12 bg-[#030306]/70 p-3"
+                  >
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-500/75">
+                          World HUD / Local Clock
+                        </p>
+                        <p className="mt-1 text-sm leading-6 text-amber-100/90">{currentPlayableObjective}</p>
+                      </div>
+                      <div className="shrink-0 border border-amber-500/15 bg-amber-500/[0.06] px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-zinc-400">
+                        <span className="block text-amber-100/80">Marker Stage</span>
+                        <span className="mt-1 block normal-case tracking-normal">{worldMarkerStage}</span>
+                      </div>
+                    </div>
+                    <div className="grid gap-px border border-amber-500/10 bg-amber-500/10 sm:grid-cols-3 lg:grid-cols-6">
+                      <div className="bg-[#08080f]/95 p-3">
+                        <p className="text-[9px] uppercase tracking-[0.2em] text-zinc-600">Population</p>
+                        <p className="mt-2 font-[family-name:var(--font-syne)] text-xl font-extrabold text-amber-100">
+                          {playableState?.population ?? "-"}
+                        </p>
+                      </div>
+                      {WORLD_RESOURCE_LABELS.map((resource) => (
+                        <div key={resource.key} className="bg-[#08080f]/95 p-3">
+                          <p className="text-[9px] uppercase tracking-[0.2em] text-zinc-600">{resource.label}</p>
+                          <p className="mt-2 font-[family-name:var(--font-syne)] text-xl font-extrabold text-amber-100">
+                            {playableState?.resources[resource.key] ?? "-"}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                      <div data-qa="world-active-order" className="border border-amber-500/10 bg-[#08080f]/82 p-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-500/75">
+                            Active Order
+                          </p>
+                          <p className="text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                            {activePlayableOrder ? formatDuration(activePlayableOrder.endsAt - playableNow) : "Idle"}
+                          </p>
+                        </div>
+                        <p className="mt-2 text-sm font-semibold text-amber-100/90">
+                          {getWorldOrderLabel(activePlayableOrder)}
+                        </p>
+                        <div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-950">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-amber-800 to-amber-300 transition-[width]"
+                            style={{ width: `${activePlayableOrder ? getQueueProgress(activePlayableOrder, playableNow) : 0}%` }}
+                          />
+                        </div>
+                        {playableState && playableState.queue.length > 1 ? (
+                          <p className="mt-2 text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                            {playableState.queue.length - 1} more queued
+                          </p>
+                        ) : null}
+                      </div>
+                      <div data-qa="world-recent-consequence" className="border border-amber-500/10 bg-[#08080f]/82 p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-500/75">
+                          Recent Consequence
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-zinc-400">{recentConsequence}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 grid gap-3 text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:grid-cols-3">
                     <div>
                       <span className="block text-amber-100/80">World Activity</span>
                       <span className="mt-1 block normal-case tracking-normal text-zinc-400">{worldActivitySummary}</span>
@@ -1021,6 +1217,45 @@ export default function WorldPage() {
                         {demoObjective.action.cta}
                       </Link>
                     )}
+                  </div>
+                  <div
+                    data-qa="world-map-action-list"
+                    className="mt-4 grid gap-3 border-t border-amber-500/10 pt-4 md:grid-cols-2 xl:grid-cols-5"
+                  >
+                    {WORLD_PLAYABLE_ACTIONS.map((action) => {
+                      const currentPlayableState = playableState;
+                      const enabled = currentPlayableState
+                        ? canQueuePlayableAction(currentPlayableState, action.id)
+                        : false;
+                      return (
+                        <article key={action.id} className="border border-zinc-800 bg-[#030306]/72 p-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="font-[family-name:var(--font-syne)] text-sm font-bold text-amber-100">
+                                {action.label}
+                              </p>
+                              <p className="mt-1 text-xs leading-5 text-zinc-500">{action.produces}</p>
+                            </div>
+                            <span className="shrink-0 text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+                              {action.durationSeconds}s
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            data-qa={`world-playable-action-${action.id}`}
+                            disabled={!enabled}
+                            onClick={() => queueWorldPlayableAction(action)}
+                            className={
+                              enabled
+                                ? "btn-primary mt-3 w-full rounded border border-amber-500/45 bg-gradient-to-b from-amber-400/20 to-amber-800/12 px-3 py-2 text-[9px] font-bold uppercase tracking-[0.16em] text-amber-100"
+                                : "mt-3 w-full cursor-not-allowed rounded border border-zinc-800 bg-zinc-950/70 px-3 py-2 text-[9px] font-bold uppercase tracking-[0.16em] text-zinc-600"
+                            }
+                          >
+                            {enabled ? "Queue On Map" : "Needs Resources"}
+                          </button>
+                        </article>
+                      );
+                    })}
                   </div>
                 </div>
               ) : null}
@@ -1156,12 +1391,12 @@ export default function WorldPage() {
                         strokeWidth="2"
                       />
                     ))}
-                    {claimedTileCenter && influenceRadius > 0 ? (
+                    {claimedTileCenter && combinedInfluenceRadius > 0 ? (
                       <g data-qa="world-owned-influence" opacity="0.92">
                         <circle
                           cx={claimedTileCenter.x}
                           cy={claimedTileCenter.y}
-                          r={influenceRadius}
+                          r={combinedInfluenceRadius}
                           fill="rgba(251,191,36,0.08)"
                           stroke="rgba(251,191,36,0.24)"
                           strokeDasharray="4 8"
@@ -1171,9 +1406,22 @@ export default function WorldPage() {
                           className="animate-pulse"
                           cx={claimedTileCenter.x}
                           cy={claimedTileCenter.y}
-                          r={Math.max(12, influenceRadius * 0.42)}
+                          r={Math.max(12, combinedInfluenceRadius * 0.42)}
                           fill="rgba(251,191,36,0.14)"
                         />
+                        {playableState && playableState.nationProgress > 0 ? (
+                          <circle
+                            data-qa="world-nation-progress-ring"
+                            cx={claimedTileCenter.x}
+                            cy={claimedTileCenter.y}
+                            r={Math.min(96, 32 + playableState.nationProgress * 0.45)}
+                            fill="none"
+                            stroke="rgba(253,230,138,0.2)"
+                            strokeDasharray="1 9"
+                            strokeLinecap="round"
+                            strokeWidth="2"
+                          />
+                        ) : null}
                       </g>
                     ) : null}
                     {routePath && routeTarget ? (
@@ -1226,6 +1474,41 @@ export default function WorldPage() {
                   ) : null}
                   {claimedTileMapPosition ? (
                     <div className="pointer-events-none absolute inset-3 z-[21]" aria-hidden>
+                      {playableState && playableState.landsSurveyed > 0 ? (
+                        <div data-qa="world-surveyed-land-markers" className="absolute inset-0">
+                          {tiles
+                            .filter(
+                              (tile) =>
+                                claimedTile &&
+                                Math.abs(tile.x - claimedTile.x) + Math.abs(tile.y - claimedTile.y) <=
+                                  Math.min(4, playableState.landsSurveyed + 1) &&
+                                tile.id !== claimedTile.id,
+                            )
+                            .slice(0, playableState.landsSurveyed * 2)
+                            .map((tile) => (
+                              <span
+                                key={tile.id}
+                                className="absolute h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-100/40 bg-cyan-200/40 shadow-[0_0_10px_rgba(165,243,252,0.24)]"
+                                style={getTileCssCenter(tile)}
+                              />
+                            ))}
+                        </div>
+                      ) : null}
+                      {visibleGrowthRingCount > 0 ? (
+                        <div data-qa="world-growth-rings" className="absolute inset-0">
+                          {Array.from({ length: visibleGrowthRingCount }, (_, index) => (
+                            <span
+                              key={index}
+                              className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-200/25 bg-emerald-300/[0.03]"
+                              style={{
+                                ...claimedTileMapPosition,
+                                height: `${34 + index * 11}px`,
+                                width: `${34 + index * 11}px`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      ) : null}
                       <span
                         data-qa="world-claimed-land-marker"
                         className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-200/70 bg-amber-400/18 shadow-[0_0_22px_rgba(251,191,36,0.42),inset_0_0_10px_rgba(251,191,36,0.2)]"
@@ -1243,6 +1526,16 @@ export default function WorldPage() {
                           <span className="absolute bottom-3 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-emerald-100/55 bg-emerald-200/18" />
                         </span>
                       ) : null}
+                      {playableState && playableState.housingLevel > 0 && !demoState.settlementFounded ? (
+                        <span
+                          data-qa="world-outpost-marker"
+                          className="absolute h-7 w-7 -translate-x-1/2 -translate-y-[70%] border border-emerald-200/45 bg-emerald-300/10 shadow-[0_0_18px_rgba(110,231,183,0.18),inset_0_0_12px_rgba(110,231,183,0.1)]"
+                          style={claimedTileMapPosition}
+                        >
+                          <span className="absolute bottom-1 left-1/2 h-2 w-4 -translate-x-1/2 border border-emerald-100/35 bg-[#07120d]/90" />
+                          <span className="absolute bottom-2.5 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border-l border-t border-emerald-100/45 bg-emerald-200/14" />
+                        </span>
+                      ) : null}
                       {demoState.townHallBuilt ? (
                         <span
                           data-qa="world-town-hall-marker"
@@ -1252,6 +1545,16 @@ export default function WorldPage() {
                           <span className="absolute bottom-1.5 left-1/2 h-3 w-5 -translate-x-1/2 border border-amber-100/55 bg-[#130d04]/95" />
                           <span className="absolute bottom-4 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-l border-t border-amber-100/65 bg-amber-200/18" />
                           <span className="absolute left-1/2 top-1 h-2.5 w-px -translate-x-1/2 bg-amber-100/80" />
+                        </span>
+                      ) : null}
+                      {playableState && playableState.settlementLevel >= 2 && !demoState.townHallBuilt ? (
+                        <span
+                          data-qa="world-playable-core-marker"
+                          className="absolute h-9 w-9 -translate-x-1/2 -translate-y-[84%] border border-amber-100/58 bg-amber-300/12 shadow-[0_0_24px_rgba(251,191,36,0.28),inset_0_0_14px_rgba(251,191,36,0.14)]"
+                          style={claimedTileMapPosition}
+                        >
+                          <span className="absolute bottom-1.5 left-1/2 h-2.5 w-5 -translate-x-1/2 border border-amber-100/45 bg-[#130d04]/95" />
+                          <span className="absolute bottom-3.5 left-1/2 h-3.5 w-3.5 -translate-x-1/2 rotate-45 border-l border-t border-amber-100/55 bg-amber-200/16" />
                         </span>
                       ) : null}
                     </div>
