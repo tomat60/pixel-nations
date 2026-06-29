@@ -5,6 +5,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import {
+  foundNationFromRoute,
+  type NationFoundingDoctrine,
+} from "../../lib/game-state";
+import {
   DEFAULT_SETTLEMENT_STATE,
   type SettlementState,
   readSettlementState,
@@ -23,16 +27,8 @@ type Ideology = {
   style: string;
 };
 
-type GoverningDoctrine = {
-  id: string;
-  title: string;
+type GoverningDoctrine = NationFoundingDoctrine & {
   type: string;
-  bonus: string;
-  identity: string;
-  populationGain: number;
-  influenceGain: number;
-  landGain: number;
-  politicalStatus: string;
 };
 
 const IDEOLOGIES: Ideology[] = [
@@ -199,42 +195,11 @@ export default function NationCreatePage() {
     const validationError = getNationNameError(normalizedName);
     if (validationError) return;
 
-    const finalGain = getNationGain(settlementState, selectedDoctrine);
-
-    const nextState: SettlementState = {
-      ...settlementState,
-      settlementFounded: true,
-      settlementName,
-      region: settlementState.region || "Aurelia",
-      coordinates: settlementState.coordinates || "X19 / Y12",
-      founder: settlementState.founder || "You",
-      townHallBuilt: true,
-      tradeRouteEstablished: true,
-      tradeRouteDestination: settlementState.tradeRouteDestination || "Iron Coast",
-      tradeRoutes: 1,
-      regionalAllianceFormed: true,
-      allianceName,
-      alliancePartners:
-        settlementState.alliancePartners.length > 0 ? settlementState.alliancePartners : ["Iron Coast"],
-      nationFounded: true,
-      nationName: normalizedName,
-      nationIdeology: selectedIdeology.title,
-      nationDoctrineId: selectedDoctrine.id,
-      nationDoctrine: selectedDoctrine.title,
-      nationDoctrineBonus: selectedDoctrine.bonus,
-      nationDoctrineIdentity: selectedDoctrine.identity,
-      population: finalGain.population,
-      influence: finalGain.influence,
-      landsControlled: finalGain.landsControlled,
-      settlementLevel: "Capital City",
-      politicalStatus: finalGain.politicalStatus,
-      bordersExpanded: false,
-      expandedLands: [],
-      empireFounded: false,
-      empireName: "",
-      empireDoctrine: "",
-      cities: 1,
-    };
+    const nextState = foundNationFromRoute(settlementState, {
+      name: normalizedName,
+      ideology: selectedIdeology.title,
+      doctrine: selectedDoctrine,
+    });
 
     setNationName(normalizedName);
     setSettlementState(nextState);

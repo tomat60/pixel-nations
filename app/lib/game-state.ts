@@ -69,6 +69,23 @@ export type AllianceFormationInput = {
   outcome: AllianceFormationOutcome;
 };
 
+export type NationFoundingDoctrine = {
+  id: string;
+  title: string;
+  bonus: string;
+  identity: string;
+  populationGain: number;
+  influenceGain: number;
+  landGain: number;
+  politicalStatus: string;
+};
+
+export type NationFoundingInput = {
+  name: string;
+  ideology: string;
+  doctrine: NationFoundingDoctrine;
+};
+
 export type GameProgressionStepId =
   | "land"
   | "settlement"
@@ -442,6 +459,49 @@ export function formAllianceFromRoute(
     nationName: "",
     nationIdeology: "",
     landsControlled: 1,
+    bordersExpanded: false,
+    expandedLands: [],
+    empireFounded: false,
+    empireName: "",
+    empireDoctrine: "",
+    cities: 1,
+  };
+}
+
+export function foundNationFromRoute(
+  state: SettlementState,
+  input: NationFoundingInput,
+): SettlementState {
+  const basePopulation = state.population > 0 ? state.population : 140;
+  const baseInfluence = state.influence > 0 ? state.influence : 20;
+  const baseLands = state.landsControlled > 0 ? state.landsControlled : 1;
+
+  return {
+    ...state,
+    settlementFounded: true,
+    settlementName: state.settlementName || "Aurelia Prime",
+    region: state.region || DEFAULT_SETTLEMENT_STATE.region,
+    coordinates: state.coordinates || DEFAULT_SETTLEMENT_STATE.coordinates,
+    founder: state.founder || DEFAULT_SETTLEMENT_STATE.founder,
+    townHallBuilt: true,
+    tradeRouteEstablished: true,
+    tradeRouteDestination: state.tradeRouteDestination || "Iron Coast",
+    tradeRoutes: 1,
+    regionalAllianceFormed: true,
+    allianceName: state.allianceName || "Aurelian Pact",
+    alliancePartners: state.alliancePartners.length > 0 ? state.alliancePartners : ["Iron Coast"],
+    nationFounded: true,
+    nationName: input.name,
+    nationIdeology: input.ideology,
+    nationDoctrineId: input.doctrine.id,
+    nationDoctrine: input.doctrine.title,
+    nationDoctrineBonus: input.doctrine.bonus,
+    nationDoctrineIdentity: input.doctrine.identity,
+    population: basePopulation + input.doctrine.populationGain,
+    influence: baseInfluence + input.doctrine.influenceGain,
+    landsControlled: Math.max(5, baseLands + input.doctrine.landGain),
+    settlementLevel: "Capital City",
+    politicalStatus: input.doctrine.politicalStatus,
     bordersExpanded: false,
     expandedLands: [],
     empireFounded: false,
