@@ -169,7 +169,7 @@ async function runSmoke(page) {
     await page.evaluate(() => localStorage.clear());
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await expectText(page, "CHOOSE YOUR FIRST LAND", "reset demo state and open /world");
+    await expectText(page, "COMMAND THE WORLD MAP", "reset demo state and open /world");
   });
 
   await step("select a claimable Sector A-01 land", async () => {
@@ -184,25 +184,37 @@ async function runSmoke(page) {
   });
 
   await step("claim selected land", async () => {
-    await clickButton(page, /^Claim This Land$/i, "claim selected land");
+    await page.locator("[data-qa='world-selected-land-map-card']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("claim selected land", "On-map selected land card did not render");
+    });
+    await clickButton(page, /^Claim From Map$/i, "claim selected land");
     await clickButton(page, /^Claim Land$/i, "claim selected land");
-    await expectText(page, "Land Claimed", "claim selected land");
     await expectState(
       page,
       "claim selected land",
       (state) => state?.claimedLand === true && state?.claimedLandPnId === "PN-0499",
       "Claim did not persist selected land PN-0499",
     );
+    await page.locator("[data-qa='post-claim-next-step']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("claim selected land", "Claim success step did not render after persisted claim");
+    });
   });
 
   await step("queue playable order from world map", async () => {
     await clickButton(page, /^Return To Map$/i, "queue playable order from world map");
-    await page.locator("[data-qa='world-playable-hud']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("queue playable order from world map", "World playable HUD did not render after claim");
+    await page.locator("[data-qa='world-map-top-hud']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("queue playable order from world map", "World map HUD did not render after claim");
     });
-    await page.locator("[data-qa='world-playable-action-gather-food']").first().click();
-    await page.locator("[data-qa='world-active-order']").getByText("Gather Food").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("queue playable order from world map", "Gather Food did not enter the world active queue");
+    const onMapActionLayer = page.locator("[data-qa='world-on-map-action-layer']").first();
+    if (!(await onMapActionLayer.isVisible().catch(() => false))) {
+      await page.locator("[data-qa='world-claimed-land-action-anchor']").first().click();
+    }
+    await onMapActionLayer.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("queue playable order from world map", "On-map action layer did not open from claimed marker");
+    });
+    await page.locator("[data-qa='world-on-map-action-gather-food']").first().click();
+    await page.locator("[data-qa='world-map-active-order']").getByText("Gather Food").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("queue playable order from world map", "Gather Food did not enter the map active order HUD");
     });
   });
 
