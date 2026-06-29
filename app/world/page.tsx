@@ -538,14 +538,6 @@ function getActiveMapLayer(demoState: SettlementState, playableState: PlayableSt
   return "Selection";
 }
 
-function getContinueRoute(state: SettlementState) {
-  if (state.empireFounded) return "/empire";
-  if (state.nationFounded) return "/nation";
-  if (state.settlementFounded) return "/settlement";
-  if (state.claimedLand) return "/dashboard";
-  return "/world";
-}
-
 function getWorldAction(state: SettlementState): WorldAction | null {
   const nextAction = getNextWorldGameAction(state);
   if (nextAction === "settlement") {
@@ -667,7 +659,6 @@ export default function WorldPage() {
       : selectedTile.starter && !selectedTile.claimed
         ? "Unclaimed founder land"
         : "Unclaimed land";
-  const continueRoute = getContinueRoute(demoState);
   const demoObjective = useMemo(() => getDemoObjective(demoState), [demoState]);
   const postClaimGuidance = useMemo(() => getPostClaimGuidance(demoState), [demoState]);
   const claimedTile = demoState.claimedLandId
@@ -722,6 +713,26 @@ export default function WorldPage() {
     { label: "Zoom Out", action: zoomMobileMapOut },
     { label: "Zoom In", action: zoomMobileMapIn },
   ];
+
+  const focusWorldMap = () => {
+    if (claimedTile) {
+      setSelectedTileId(claimedTile.id);
+      setHasUserSelectedTile(true);
+      setOnMapActionsOpen(true);
+    }
+
+    setWorldActionFeedback(
+      demoState.claimedLand
+        ? "Progress continues from your claimed land on the world map."
+        : "Choose a land in Sector A-01 to begin.",
+    );
+    playableSectorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const closeClaimModalToMap = () => {
+    setIsClaimModalOpen(false);
+    window.setTimeout(focusWorldMap, 0);
+  };
 
   useEffect(() => {
     setMobileTrayDismissed(false);
@@ -826,12 +837,13 @@ export default function WorldPage() {
               Back To Landing
             </Link>
             {hasProgress ? (
-              <Link
-                href={continueRoute}
+              <button
+                type="button"
+                onClick={focusWorldMap}
                 className="btn-primary w-full rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-6 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-amber-100 sm:w-auto"
               >
-                Continue Demo
-              </Link>
+                Continue On Map
+              </button>
             ) : null}
           </div>
         </header>
@@ -875,7 +887,7 @@ export default function WorldPage() {
             [
               ["1", "Select land", "Scroll to Sector A-01 and click an available highlighted cell. The atlas is context only."],
               ["2", "Claim it", "Confirm the free demo claim; this marks your first land and founder record."],
-              ["3", "Build upward", "Enter your command center; the claimed land becomes your first settlement."],
+              ["3", "Build upward", "Use on-map actions; the claimed land becomes your first settlement."],
             ].map(([step, title, copy]) => (
               <div key={title} className="border-l border-amber-500/25 pl-4">
                 <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-500/75">
@@ -1223,13 +1235,15 @@ export default function WorldPage() {
                         {worldAction.cta}
                       </button>
                     ) : (
-                      <Link
-                        href={demoObjective.action.href}
-                        data-qa="world-action-next-link"
-                        className="btn-primary shrink-0 rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-amber-100"
+                      <button
+                        type="button"
+                        disabled
+                        data-qa="world-action-map-message"
+                        className="shrink-0 cursor-not-allowed rounded border border-zinc-800 bg-zinc-950/70 px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-600"
+                        title={`${demoObjective.action.headline}: ${demoObjective.action.description}`}
                       >
-                        {demoObjective.action.cta}
-                      </Link>
+                        Map Layer Pending
+                      </button>
                     )}
                   </div>
                   <div
@@ -1723,13 +1737,17 @@ export default function WorldPage() {
                               {worldAction.cta}
                             </button>
                           ) : (
-                            <Link
-                              href={demoObjective.action.href}
-                              data-qa="world-on-map-next-link"
-                              className="btn-primary mt-3 block w-full rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-3 py-2 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-amber-100"
+                            <div
+                              data-qa="world-on-map-progress-message"
+                              className="mt-3 border border-amber-500/15 bg-amber-500/[0.045] p-3"
                             >
-                              {demoObjective.action.cta}
-                            </Link>
+                              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-500/75">
+                                Map Layer Pending
+                              </p>
+                              <p className="mt-1 text-xs leading-5 text-zinc-400">
+                                {demoObjective.action.headline} remains recorded here until the next political map layer opens.
+                              </p>
+                            </div>
                           )}
 
                           <div className="mt-3 grid gap-2">
@@ -1950,18 +1968,19 @@ export default function WorldPage() {
                   ? postClaimGuidance.description
                   : isUnavailable
                     ? "This parcel is already claimed in the preview. Pick another unclaimed cell in Sector A-01."
-                    : "Claim this land, then enter your command center to begin the settlement spine."}
+                    : "Claim this land, then use on-map actions to begin the settlement spine."}
               </p>
             </div>
 
             <div className="mt-6">
               {ownedByYou ? (
-                <Link
-                  href="/dashboard"
+                <button
+                  type="button"
+                  onClick={focusWorldMap}
                   className="btn-primary block w-full rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-5 py-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
                 >
-                  Enter Your Land
-                </Link>
+                  Open Map Actions
+                </button>
               ) : isUnavailable ? (
                 <button
                   type="button"
@@ -2013,12 +2032,13 @@ export default function WorldPage() {
             </div>
             <div className="mt-3">
               {ownedByYou ? (
-                <Link
-                  href="/dashboard"
+                <button
+                  type="button"
+                  onClick={focusWorldMap}
                   className="btn-primary block w-full rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-4 py-2.5 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-amber-100"
                 >
-                  Enter Your Land
-                </Link>
+                  Open Map Actions
+                </button>
               ) : isUnavailable ? (
                 <button
                   type="button"
@@ -2062,7 +2082,7 @@ export default function WorldPage() {
                     Land Claimed.
                   </h3>
                   <p className="mx-auto mt-6 max-w-md text-base leading-8 text-zinc-400">
-                    You now control {selectedTile.landName}. Enter your command center to follow the demo spine toward settlement and empire.
+                    You now control {selectedTile.landName}. Continue on the world map to grow the marker toward settlement and empire.
                   </p>
                   <div
                     data-qa="post-claim-next-step"
@@ -2077,15 +2097,16 @@ export default function WorldPage() {
                     </p>
                   </div>
                   <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-                    <Link
-                      href="/dashboard"
-                      className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
-                    >
-                      Enter Your Land
-                    </Link>
                     <button
                       type="button"
-                      onClick={() => setIsClaimModalOpen(false)}
+                      onClick={closeClaimModalToMap}
+                      className="btn-primary rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-100"
+                    >
+                      Continue On Map
+                    </button>
+                    <button
+                      type="button"
+                      onClick={closeClaimModalToMap}
                       className="btn-secondary rounded border border-zinc-800 bg-[#08080f]/80 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-zinc-400"
                     >
                       Return To Map

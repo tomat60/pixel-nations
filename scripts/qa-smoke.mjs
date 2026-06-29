@@ -112,20 +112,8 @@ async function clickByRole(page, role, options, stepName) {
   await locator.click();
 }
 
-async function clickLink(page, name, stepName) {
-  await clickByRole(page, "link", { name }, stepName);
-}
-
 async function clickButton(page, name, stepName) {
   await clickByRole(page, "button", { name }, stepName);
-}
-
-async function fillInput(page, label, value, stepName) {
-  const input = page.getByLabel(label).first();
-  await input.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-    throw new SmokeError(stepName, `Could not find input: ${label}`);
-  });
-  await input.fill(value);
 }
 
 async function readDemoState(page, stepName) {
@@ -142,6 +130,15 @@ async function expectState(page, stepName, predicate, message) {
   if (!predicate(state)) {
     throw new SmokeError(stepName, `${message}. Current state: ${JSON.stringify(state)}`);
   }
+}
+
+async function closeBrowserSafely(browser) {
+  if (!browser) return;
+
+  await Promise.race([
+    browser.close(),
+    new Promise((resolve) => setTimeout(resolve, 3000)),
+  ]).catch(() => {});
 }
 
 async function runSmoke(page) {
@@ -218,109 +215,62 @@ async function runSmoke(page) {
     });
   });
 
-  await step("dashboard recognizes claimed land", async () => {
-    await page.getByRole("link", { name: /^Enter Your Land$/i }).first().click();
-    await page.waitForURL("**/dashboard", { timeout: 5000 });
-    await expectText(page, "PN-0499", "dashboard recognizes claimed land");
-    const bodyText = await page.locator("body").innerText();
-    if (bodyText.includes("Awaiting Claim")) {
-      throw new SmokeError("dashboard recognizes claimed land", "Dashboard still shows Awaiting Claim after claim");
-    }
-  });
-
-  await step("create settlement", async () => {
-    await clickLink(page, /^Found Settlement$/i, "create settlement");
-    await page.waitForURL("**/settlement/create", { timeout: 5000 });
-    await fillInput(page, "Settlement Name", "Aurelia Prime", "create settlement");
-    await clickButton(page, /^Confirm Settlement$/i, "create settlement");
-    await expectText(page, "First Settlement Founded", "create settlement");
-    await clickLink(page, /^Return To Dashboard$/i, "create settlement");
-    await page.waitForURL("**/dashboard", { timeout: 5000 });
-    await expectState(page, "create settlement", (state) => state?.settlementFounded === true, "Settlement was not persisted");
-  });
-
-  await step("build settlement core and establish trade", async () => {
-    await clickLink(page, /^View Settlement$/i, "build settlement core and establish trade");
-    await page.waitForURL("**/settlement", { timeout: 5000 });
-    await clickButton(page, /^Build Farms/i, "build settlement core and establish trade");
-    await expectText(page, "Farms expanded along the river edge", "build settlement core and establish trade");
-    await expectState(
-      page,
-      "build settlement core and establish trade",
-      (state) => state?.developmentCycle === 2 && state?.food === 24 && state?.materials === 10,
-      "Settlement development action was not persisted",
-    );
-    await clickButton(page, /^Build Town Hall$/i, "build settlement core and establish trade");
-    await expectText(page, "Establish Trade Route", "build settlement core and establish trade");
-    await clickLink(page, /^Establish Trade Route$/i, "build settlement core and establish trade");
-    await page.waitForURL("**/trade/create", { timeout: 5000 });
-    await clickButton(page, /^Confirm Trade Route$/i, "build settlement core and establish trade");
-    await expectText(page, "First Trade Route Established", "build settlement core and establish trade");
-    await clickLink(page, /^Return To Settlement$/i, "build settlement core and establish trade");
-    await page.waitForURL("**/settlement", { timeout: 5000 });
-    await expectState(
-      page,
-      "build settlement core and establish trade",
-      (state) => state?.townHallBuilt === true && state?.tradeRouteEstablished === true,
-      "Town hall/trade route state was not persisted",
-    );
-  });
-
-  await step("form alliance and found nation", async () => {
-    await clickLink(page, /^Form Regional Alliance$/i, "form alliance and found nation");
-    await page.waitForURL("**/alliance/create", { timeout: 5000 });
-    await fillInput(page, "Alliance Name", "Aurelian Pact", "form alliance and found nation");
-    await clickButton(page, /^Confirm Alliance$/i, "form alliance and found nation");
-    await expectText(page, "Regional Alliance Formed", "form alliance and found nation");
-    await clickLink(page, /^Return To Settlement$/i, "form alliance and found nation");
-    await page.waitForURL("**/settlement", { timeout: 5000 });
-    await clickLink(page, /^Found First Nation$/i, "form alliance and found nation");
-    await page.waitForURL("**/nation/create", { timeout: 5000 });
-    await fillInput(page, "Nation Name", "The Aurelian Crown", "form alliance and found nation");
-    await clickButton(page, /^Found Nation$/i, "form alliance and found nation");
-    await expectText(page, "First Nation Founded", "form alliance and found nation");
-    await clickLink(page, /^Enter Nation$/i, "form alliance and found nation");
-    await page.waitForURL("**/nation", { timeout: 5000 });
-    await expectState(page, "form alliance and found nation", (state) => state?.nationFounded === true, "Nation was not persisted");
-  });
-
-  await step("attempt empire continuation path", async () => {
-    const enabledNextLinks = await page.locator('a[href="/expansion/create"], a[href="/empire/create"]').count();
-    if (enabledNextLinks > 0) {
-      await page.locator('a[href="/expansion/create"], a[href="/empire/create"]').first().click();
-      return;
-    }
-
-    const disabledExpansion = await page.getByRole("button", { name: /Expansion Coming Soon/i }).count();
-    if (disabledExpansion > 0) {
+  await step("world map has no primary progression route links", async () => {
+    const routeLinks = await page
+      .locator('a[href="/dashboard"], a[href="/settlement"], a[href="/settlement/create"], a[href="/nation"], a[href="/nation/create"], a[href="/alliance/create"], a[href="/empire"], a[href="/empire/create"]')
+      .count();
+    if (routeLinks > 0) {
       throw new SmokeError(
-        "attempt empire continuation path",
-        "Nation page blocks empire continuation: found disabled 'Expansion Coming Soon' and no enabled /expansion/create or /empire/create link",
+        "world map has no primary progression route links",
+        `Found ${routeLinks} route link(s) on /world after claim`,
       );
     }
+  });
 
-    throw new SmokeError(
-      "attempt empire continuation path",
-      "Nation page has no reachable continuation toward expansion or empire",
+  await step("advance core progression on world map", async () => {
+    const continueOnMap = page.getByRole("button", { name: /^Continue On Map$/i }).first();
+    if (await continueOnMap.isVisible().catch(() => false)) {
+      await continueOnMap.click();
+    } else {
+      await clickButton(page, /^Return To Map$/i, "advance core progression on world map");
+    }
+    await page.locator("[data-qa='world-on-map-action-layer']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("advance core progression on world map", "On-map action layer did not remain available after claim");
+    });
+
+    await page.locator("[data-qa='world-on-map-world-action-found-settlement']").first().click();
+    await expectState(
+      page,
+      "advance core progression on world map",
+      (state) => state?.settlementFounded === true,
+      "Settlement was not founded from the world map",
+    );
+
+    await page.locator("[data-qa='world-on-map-world-action-build-city-core']").first().click();
+    await expectState(
+      page,
+      "advance core progression on world map",
+      (state) => state?.townHallBuilt === true,
+      "City core was not built from the world map",
+    );
+
+    await page.locator("[data-qa='world-on-map-world-action-establish-trade']").first().click();
+    await expectState(
+      page,
+      "advance core progression on world map",
+      (state) => state?.tradeRouteEstablished === true && state?.tradeRouteDestination === "Iron Coast",
+      "Trade seed was not established from the world map",
     );
   });
 
-  await step("create empire", async () => {
-    if (page.url().endsWith("/expansion/create")) {
-      await clickButton(page, /^Confirm Expansion$/i, "create empire");
-      await expectText(page, "Borders Expanded", "create empire");
-      await clickLink(page, /^Return To Nation$/i, "create empire");
-      await page.waitForURL("**/nation", { timeout: 5000 });
-      await clickLink(page, /^Create Empire$/i, "create empire");
-    }
-
-    await page.waitForURL("**/empire/create", { timeout: 5000 });
-    await fillInput(page, "Empire Name", "Aurelian Empire", "create empire");
-    await clickButton(page, /^Create Empire$/i, "create empire");
-    await expectText(page, "First Empire Created", "create empire");
-    await clickLink(page, /^Enter Empire$/i, "create empire");
-    await page.waitForURL("**/empire", { timeout: 5000 });
-    await expectState(page, "create empire", (state) => state?.empireFounded === true, "Empire was not persisted");
+  await step("political progression stays on map as pending layer", async () => {
+    const progressMessage = page.locator("[data-qa='world-on-map-progress-message']").first();
+    await progressMessage.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("political progression stays on map as pending layer", "Missing on-map pending political layer message");
+    });
+    await progressMessage.getByText("Map Layer Pending", { exact: false }).waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("political progression stays on map as pending layer", "Pending layer message did not include Map Layer Pending");
+    });
   });
 }
 
@@ -356,6 +306,8 @@ async function main() {
     ]);
 
     await context.close();
+    await closeBrowserSafely(browser);
+    browser = null;
     await writeResult("PASS");
     console.log(`Mechanical smoke PASS. Result written to ${RESULT_PATH}`);
   } catch (error) {
@@ -364,11 +316,13 @@ async function main() {
     console.error(`Result written to ${RESULT_PATH}`);
     process.exitCode = 1;
   } finally {
-    if (browser) await browser.close();
+    await closeBrowserSafely(browser);
     if (startedProcess) {
       try { startedProcess.kill(); } catch {}
     }
   }
+
+  process.exit(process.exitCode ?? 0);
 }
 
 main().catch(async (error) => {
