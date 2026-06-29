@@ -19,9 +19,9 @@
 
 ## Validation results
 
-- `npm run build`: first attempt blocked by missing `node_modules`; PASS after restoring locked dependencies with `npm ci`.
-- `npm run qa:smoke`: first attempt blocked by missing Playwright Chromium; PASS after the allowed `npx playwright install chromium`.
-- `npm run pn:status`: ran with exit code 0; output reported `PUBLIC_QA_CHECK=FAIL` because the sprint working tree had local changes during implementation.
+- `npm run build`: first retry attempt blocked by missing `node_modules`; PASS after restoring locked dependencies with `npm ci`.
+- `npm run qa:smoke`: first retry attempt blocked by missing Playwright Chromium; PASS after the allowed `npx playwright install chromium`. The generated `public/qa/latest/smoke-result.json` artifact was reverted.
+- `npm run pn:status`: ran with exit code 0 after artifact cleanup; output still reports `PUBLIC_QA_CHECK=FAIL` because the existing public QA handoff metadata says `Working tree: has changes`.
 - `npm run qa:screens`: skipped; no UI change.
 
 ## Product verdict
