@@ -810,9 +810,9 @@ export default function WorldPage() {
   };
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#020204] px-3 py-3 pb-28 text-white sm:px-5 sm:py-5 lg:px-6 lg:py-6 lg:pb-10">
+    <main className="min-h-[100svh] overflow-x-hidden bg-[#020204] px-0 py-0 pb-28 text-white sm:px-5 sm:py-5 lg:min-h-screen lg:px-6 lg:py-6 lg:pb-10">
       <div className="mx-auto flex max-w-[1800px] flex-col">
-        <header className="order-2 mt-6 border border-amber-500/12 bg-[#050509]/80 p-4 sm:p-5">
+        <header className="order-2 mx-3 mt-6 border border-amber-500/12 bg-[#050509]/80 p-4 sm:mx-0 sm:p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.45em] text-amber-600/75">World Map</p>
           <h1 className="mt-3 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-4xl md:text-5xl">
             Sector A-01 is live.
@@ -850,7 +850,7 @@ export default function WorldPage() {
 
         <section
           data-qa="first-60-guidance"
-          className="order-3 mt-6 grid gap-3 border border-amber-500/15 bg-amber-500/[0.035] p-4 text-sm text-zinc-400 sm:grid-cols-3 sm:p-5"
+          className="order-3 mx-3 mt-6 grid gap-3 border border-amber-500/15 bg-amber-500/[0.035] p-4 text-sm text-zinc-400 sm:mx-0 sm:grid-cols-3 sm:p-5"
         >
           {demoState.claimedLand ? (
             <>
@@ -905,7 +905,7 @@ export default function WorldPage() {
         <section
           id="world-atlas"
           data-qa="world-atlas"
-          className="order-4 mt-6 overflow-hidden border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.5)] sm:mt-8 sm:p-6"
+          className="order-4 mx-3 mt-6 overflow-hidden border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.5)] sm:mx-0 sm:mt-8 sm:p-6"
         >
           <div className="mb-5 grid gap-5 border-b border-amber-500/10 pb-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div className="max-w-3xl">
@@ -1058,31 +1058,31 @@ export default function WorldPage() {
           </div>
         </section>
 
-        <section className="order-1 grid gap-4 lg:min-h-[calc(100vh-3rem)]">
+        <section className="order-1 grid min-h-[100svh] gap-0 lg:min-h-[calc(100vh-3rem)] lg:gap-4">
           <article
             ref={playableSectorRef}
             id="playable-sector"
             data-qa="playable-sector"
-            className="relative overflow-hidden border border-amber-500/18 bg-[#050509]/90 p-2 shadow-[0_30px_120px_rgba(0,0,0,0.68)] sm:p-4 lg:min-h-[calc(100vh-3rem)]"
+            className="relative flex h-[100svh] min-h-[100svh] flex-col overflow-hidden border-b border-amber-500/18 bg-[#050509]/90 p-2 pt-[max(0.5rem,env(safe-area-inset-top))] shadow-[0_30px_120px_rgba(0,0,0,0.68)] sm:h-auto sm:min-h-0 sm:border sm:p-4 lg:block lg:min-h-[calc(100vh-3rem)]"
           >
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_18%,rgba(201,169,98,0.1),transparent_34%),radial-gradient(ellipse_at_88%_76%,rgba(201,169,98,0.05),transparent_40%)]"
             />
-            <div className="relative">
-              <div className="flex flex-col justify-between gap-3 border-b border-amber-500/10 pb-3 sm:flex-row sm:items-end lg:hidden">
+            <div className="relative flex min-h-0 flex-1 flex-col lg:block">
+              <div className="shrink-0 border border-amber-500/12 bg-[#030306]/78 p-3 shadow-[0_12px_40px_rgba(0,0,0,0.38)] backdrop-blur-md sm:flex sm:flex-col sm:justify-between sm:gap-3 sm:border-b sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-0 lg:hidden">
                 <div className="max-w-xl">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-amber-600/80">
-                    Game Screen / Sector A-01
+                  <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-amber-600/80 sm:text-[10px] sm:tracking-[0.28em]">
+                    Sector A-01 / App Shell
                   </p>
-                  <p className="mt-2 font-[family-name:var(--font-syne)] text-2xl font-extrabold tracking-tight text-amber-100">
+                  <p className="mt-1 font-[family-name:var(--font-syne)] text-xl font-extrabold tracking-tight text-amber-100 sm:mt-2 sm:text-2xl">
                     Aurelian Basin
                   </p>
-                  <p className="mt-3 text-sm leading-7 text-zinc-400">
-                    216 visible lands, cut from the larger 100 x 100 world atlas.
+                  <p className="mt-1 text-xs leading-5 text-zinc-400 sm:mt-3 sm:text-sm sm:leading-7">
+                    216 visible lands. Pick a cell, then act from the map.
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                <div className="mt-3 grid grid-cols-2 gap-1.5 text-[9px] uppercase tracking-[0.16em] text-zinc-500 sm:flex sm:flex-wrap sm:gap-2 sm:text-[10px] sm:tracking-[0.2em]">
                   <span className="border border-amber-500/15 bg-[#08080f]/80 px-2.5 py-1.5 text-amber-100/80">
                     216 visible lands
                   </span>
@@ -1100,20 +1100,20 @@ export default function WorldPage() {
 
               <div
                 data-qa="sector-orientation-note"
-                className="mt-5 border border-amber-500/12 bg-[#08080f]/78 p-3 text-sm leading-7 text-zinc-400 lg:hidden"
+                className="mt-2 shrink-0 border border-amber-500/12 bg-[#08080f]/78 p-2 text-xs leading-5 text-zinc-500 sm:mt-5 sm:p-3 sm:text-sm sm:leading-7 lg:hidden"
               >
                 <span className="font-[family-name:var(--font-syne)] text-xs font-bold uppercase tracking-[0.24em] text-amber-100/80">
-                  Actual Selection Area
+                  Touch Map
                 </span>
-                <p className="mt-2">
-                  Click one visible cell in the A-01 grid. Terrain colors show plains, forests, mountains, coast and basin; the grid cells are the land parcels you can claim.
+                <p className="mt-1 sm:mt-2">
+                  Tap a visible cell. The bottom tray keeps claim and map actions within thumb reach.
                 </p>
               </div>
 
               {demoState.claimedLand ? (
                 <div
                   data-qa="world-activity-panel"
-                  className="mt-5 border border-amber-500/12 bg-[#08080f]/78 p-3 lg:hidden"
+                  className="mt-2 max-h-[30svh] shrink-0 overflow-y-auto border border-amber-500/12 bg-[#08080f]/78 p-3 sm:mt-5 sm:max-h-none lg:hidden"
                 >
                   <div
                     data-qa="world-playable-hud"
@@ -1282,9 +1282,9 @@ export default function WorldPage() {
                 </div>
               ) : null}
 
-              <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border border-amber-500/10 bg-[#08080f]/70 p-2 sm:hidden">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                  Default view fits the claimable Sector A-01 grid. Zoom to inspect land cells.
+              <div className="mt-2 flex shrink-0 flex-wrap items-center justify-between gap-2 border border-amber-500/10 bg-[#08080f]/70 p-2 sm:hidden">
+                <p className="text-[9px] uppercase tracking-[0.16em] text-zinc-500">
+                  Map pane only: drag inside to inspect cells.
                 </p>
                 <div className="flex gap-1.5">
                   {mobileMapControls.map(({ label, action }) => (
@@ -1300,9 +1300,9 @@ export default function WorldPage() {
                 </div>
               </div>
 
-              <div className="mt-4 overflow-x-auto pb-2 lg:mt-0">
+              <div className="mt-2 min-h-0 flex-1 overflow-auto overscroll-contain pb-2 sm:mt-4 lg:mt-0 lg:min-h-0">
                 <div
-                  className="world-sector-canvas relative w-full min-w-0 overflow-hidden border border-amber-500/25 bg-contain bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)] transition-[width] duration-200 sm:min-w-[680px] sm:bg-cover sm:p-3 lg:min-h-[calc(100vh-5rem)] lg:min-w-[980px]"
+                  className="world-sector-canvas relative min-h-[58svh] w-full min-w-[620px] overflow-hidden border border-amber-500/25 bg-cover bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)] transition-[width] duration-200 sm:min-h-[620px] sm:min-w-[680px] sm:p-3 lg:min-h-[calc(100vh-5rem)] lg:min-w-[980px]"
                   style={{
                     width: `${Math.round(mobileMapZoom * 100)}%`,
                     backgroundImage:
@@ -2006,9 +2006,10 @@ export default function WorldPage() {
       {showMobileClaimTray ? (
         <div
           data-qa="mobile-claim-tray"
-          className="fixed inset-x-0 bottom-0 z-40 box-border w-full max-w-[100vw] border-t border-amber-500/25 bg-[#06060c]/96 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-16px_48px_rgba(0,0,0,0.7),0_0_40px_rgba(201,169,98,0.08)] backdrop-blur-md lg:hidden"
+          className="fixed inset-x-3 bottom-3 z-40 box-border max-w-[calc(100vw-1.5rem)] border border-amber-500/25 bg-[#06060c]/96 px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-16px_48px_rgba(0,0,0,0.7),0_0_40px_rgba(201,169,98,0.08)] backdrop-blur-md lg:hidden"
         >
-          <div className="mx-auto w-full max-w-md">
+          <div className="mx-auto w-full max-w-lg">
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-amber-500/25" aria-hidden />
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <p className="break-words font-[family-name:var(--font-syne)] text-sm font-extrabold leading-tight tracking-tight text-amber-100 sm:text-base">
@@ -2017,9 +2018,19 @@ export default function WorldPage() {
                 <p className="mt-1 break-words text-[10px] uppercase tracking-[0.18em] text-zinc-500">
                   {selectedTile.region} · {toTerrainLabel(selectedTile.terrain)}
                 </p>
-                <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-amber-500/70">
-                  {mobileTrayStatus}
-                </p>
+                <div className="mt-2 flex flex-wrap gap-1.5 text-[9px] uppercase tracking-[0.14em] text-zinc-500">
+                  <span className="border border-amber-500/15 bg-amber-500/[0.06] px-2 py-1 text-amber-100/75">
+                    {selectedTile.landId}
+                  </span>
+                  <span className="border border-amber-500/15 bg-[#08080f]/80 px-2 py-1">
+                    {mobileTrayStatus}
+                  </span>
+                  {ownedByYou ? (
+                    <span className="border border-emerald-300/20 bg-emerald-300/[0.06] px-2 py-1 text-emerald-100/75">
+                      Actions ready
+                    </span>
+                  ) : null}
+                </div>
               </div>
               <button
                 type="button"
@@ -2030,15 +2041,34 @@ export default function WorldPage() {
                 Dismiss
               </button>
             </div>
-            <div className="mt-3">
+            <div className="mt-3 grid gap-2">
               {ownedByYou ? (
-                <button
-                  type="button"
-                  onClick={focusWorldMap}
-                  className="btn-primary block w-full rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-4 py-2.5 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-amber-100"
-                >
-                  Open Map Actions
-                </button>
+                <>
+                  {worldAction ? (
+                    <button
+                      type="button"
+                      onClick={runWorldAction}
+                      className="btn-primary w-full rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-100"
+                    >
+                      {worldAction.cta}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="w-full cursor-not-allowed rounded border border-zinc-800 bg-[#08080f]/70 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500"
+                    >
+                      Map Layer Pending
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={focusWorldMap}
+                    className="btn-secondary block w-full rounded border border-amber-500/20 bg-[#08080f]/80 px-4 py-2.5 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-amber-100/75"
+                  >
+                    Open Map Actions
+                  </button>
+                </>
               ) : isUnavailable ? (
                 <button
                   type="button"
