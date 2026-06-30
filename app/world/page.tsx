@@ -126,12 +126,21 @@ type WorldAction = {
   qa: string;
 };
 
+type WorldDecisionMarker = {
+  id: string;
+  label: string;
+  className: string;
+  style: ReturnType<typeof getTileCssCenter>;
+  pending: boolean;
+};
+
 const WORLD_PLAYABLE_ACTION_IDS: PlayableActionId[] = [
   "gather-food",
-  "quarry-materials",
   "build-housing",
-  "upgrade-core",
+  "improve-fields",
+  "quarry-materials",
   "scout-land",
+  "open-trade",
 ];
 
 const WORLD_RESOURCE_LABELS: Array<{ key: PlayableResourceKey; label: string }> = [
@@ -435,8 +444,15 @@ function getTileCssCenter(tile: Pick<MapTile, "x" | "y">) {
   };
 }
 
+function getOffsetTileCssCenter(tile: Pick<MapTile, "x" | "y">, dx: number, dy: number) {
+  return getTileCssCenter({
+    x: Math.min(GRID_WIDTH - 1, Math.max(0, tile.x + dx)),
+    y: Math.min(GRID_HEIGHT - 1, Math.max(0, tile.y + dy)),
+  });
+}
+
 function getOnMapMenuTransform(tile: Pick<MapTile, "x" | "y">) {
-  if (tile.y <= 2) return "translate(-50%, 2.25rem)";
+  if (tile.y <= 6) return "translate(-50%, 2.25rem)";
   if (tile.x >= GRID_WIDTH - 4) return "translate(calc(-100% - 1.25rem), -50%)";
   if (tile.x <= 3) return "translate(1.25rem, -50%)";
   return "translate(-50%, calc(-100% - 1.75rem))";
@@ -515,6 +531,9 @@ function getWorldOrderLabel(activeOrder?: QueuedPlayableAction) {
 function getWorldActivitySummary(demoState: SettlementState, playableState: PlayableState | null) {
   if (demoState.tradeRouteEstablished) return `Trade route visible: ${demoState.tradeRouteDestination || "Regional route"}`;
   if (playableState && playableState.tradeLevel > 0) return `Trade pressure visible: level ${playableState.tradeLevel}`;
+  if (playableState && playableState.fieldsLevel > 1) return `Field plots visible: level ${playableState.fieldsLevel}`;
+  if (playableState && playableState.quarryLevel > 1) return `Quarry cuts visible: level ${playableState.quarryLevel}`;
+  if (playableState && playableState.housingLevel > 0) return `Housing pixels visible: level ${playableState.housingLevel}`;
   if (playableState && playableState.landsSurveyed > 0) {
     return `Scout marks visible: ${playableState.landsSurveyed} nearby lands surveyed`;
   }
@@ -531,6 +550,9 @@ function getActiveMapLayer(demoState: SettlementState, playableState: PlayableSt
   if (demoState.tradeRouteEstablished) return "Claim + settlement + city core + trade";
   if (playableState && playableState.tradeLevel > 0) return "Claim + core + trade pressure";
   if (playableState && playableState.landsSurveyed > 0) return "Claim + core + surveyed frontier";
+  if (playableState && playableState.fieldsLevel > 1) return "Claim + fields + food plots";
+  if (playableState && playableState.quarryLevel > 1) return "Claim + quarry cuts";
+  if (playableState && playableState.housingLevel > 0) return "Claim + housing pixels";
   if (playableState && playableState.settlementLevel > 1) return "Claim + upgraded core";
   if (demoState.townHallBuilt) return "Claim + settlement + city core";
   if (demoState.settlementFounded) return "Claim + settlement";
@@ -574,6 +596,129 @@ function getWorldAction(state: SettlementState): WorldAction | null {
   }
 
   return null;
+}
+
+function hasQueuedPlayableAction(state: PlayableState | null, actionId: PlayableActionId) {
+  return Boolean(state?.queue.some((queued) => queued.actionId === actionId));
+}
+
+function hasPlayableLogTitle(state: PlayableState | null, title: string) {
+  return Boolean(state?.log.some((entry) => entry.title === title));
+}
+
+function buildWorldDecisionMarkers(
+  claimedTile: MapTile,
+  playableState: PlayableState | null,
+  tradeSeedEstablished: boolean,
+) {
+  const markers: WorldDecisionMarker[] = [];
+  const addMarker = (
+    id: string,
+    label: string,
+    dx: number,
+    dy: number,
+    className: string,
+    pending: boolean,
+  ) => {
+    markers.push({
+      id,
+      label,
+      className,
+      style: getOffsetTileCssCenter(claimedTile, dx, dy),
+      pending,
+    });
+  };
+
+  const housingPending = hasQueuedPlayableAction(playableState, "build-housing");
+  const fieldsPending = hasQueuedPlayableAction(playableState, "improve-fields");
+  const quarryPending = hasQueuedPlayableAction(playableState, "quarry-materials");
+  const scoutPending = hasQueuedPlayableAction(playableState, "scout-land");
+  const tradePending = hasQueuedPlayableAction(playableState, "open-trade");
+  const gatherPending = hasQueuedPlayableAction(playableState, "gather-food");
+
+  if (gatherPending) {
+    addMarker(
+      "supplies-pending",
+      "supplies",
+      -1,
+      0,
+      "h-2.5 w-2.5 rounded-full border border-amber-100/55 bg-amber-200/45 shadow-[0_0_14px_rgba(251,191,36,0.28)]",
+      true,
+    );
+  }
+
+  if ((playableState?.housingLevel ?? 0) > 0 || housingPending) {
+    addMarker(
+      "housing-pixels",
+      housingPending ? "housing pending" : "housing",
+      0,
+      -1,
+      "h-5 w-5 border border-emerald-100/55 bg-emerald-300/18 shadow-[0_0_18px_rgba(110,231,183,0.24)]",
+      housingPending,
+    );
+  }
+
+  if ((playableState?.fieldsLevel ?? 1) > 1 || fieldsPending) {
+    addMarker(
+      "field-west",
+      fieldsPending ? "fields pending" : "fields",
+      -1,
+      1,
+      "h-3 w-7 rounded-sm border border-lime-100/45 bg-lime-300/18 shadow-[0_0_14px_rgba(190,242,100,0.2)]",
+      fieldsPending,
+    );
+    addMarker(
+      "field-east",
+      "fields",
+      1,
+      1,
+      "h-3 w-7 rounded-sm border border-lime-100/35 bg-lime-300/12 shadow-[0_0_12px_rgba(190,242,100,0.16)]",
+      fieldsPending,
+    );
+  }
+
+  if ((playableState?.quarryLevel ?? 1) > 1 || hasPlayableLogTitle(playableState, "Materials quarried") || quarryPending) {
+    addMarker(
+      "quarry-cut",
+      quarryPending ? "quarry pending" : "quarry",
+      1,
+      0,
+      "h-4 w-4 rotate-45 border border-slate-100/45 bg-slate-300/18 shadow-[0_0_16px_rgba(203,213,225,0.18)]",
+      quarryPending,
+    );
+  }
+
+  if ((playableState?.landsSurveyed ?? 0) > 0 || scoutPending) {
+    addMarker(
+      "scout-point-north",
+      scoutPending ? "scout pending" : "scout point",
+      -1,
+      -1,
+      "h-3.5 w-3.5 rounded-full border border-cyan-100/55 bg-cyan-200/18 shadow-[0_0_16px_rgba(165,243,252,0.22)]",
+      scoutPending,
+    );
+    addMarker(
+      "scout-point-east",
+      "scout point",
+      2,
+      -1,
+      "h-2.5 w-2.5 rounded-full border border-cyan-100/40 bg-cyan-200/12 shadow-[0_0_12px_rgba(165,243,252,0.16)]",
+      scoutPending,
+    );
+  }
+
+  if ((playableState?.tradeLevel ?? 0) > 0 || tradePending || tradeSeedEstablished) {
+    addMarker(
+      "trade-prep",
+      tradePending ? "trade pending" : "trade prep",
+      2,
+      1,
+      "h-1.5 w-9 rounded-full border border-amber-100/45 bg-amber-200/32 shadow-[0_0_18px_rgba(251,191,36,0.24)]",
+      tradePending,
+    );
+  }
+
+  return markers;
 }
 
 export default function WorldPage() {
@@ -688,7 +833,11 @@ export default function WorldPage() {
   const visibleGrowthRingCount = playableState
     ? Math.min(4, Math.max(0, playableState.settlementLevel - 1) + Math.min(2, playableState.housingLevel))
     : 0;
-  const onMapPlayableActions = WORLD_PLAYABLE_ACTIONS.slice(0, 5);
+  const onMapPlayableActions = WORLD_PLAYABLE_ACTIONS;
+  const worldDecisionMarkers =
+    claimedTile && demoState.claimedLand
+      ? buildWorldDecisionMarkers(claimedTile, playableState, demoState.tradeRouteEstablished)
+      : [];
   const worldActivitySummary = getWorldActivitySummary(demoState, playableState);
   const activeMapLayer = getActiveMapLayer(demoState, playableState);
 
@@ -802,9 +951,14 @@ export default function WorldPage() {
     const actionNow = Date.now();
     setPlayableNow(actionNow);
     setPlayableState((currentState) => {
-      const next = queuePlayableAction(currentState ?? readPlayableState(actionNow), action.id, actionNow);
+      const baseState = currentState ?? readPlayableState(actionNow);
+      const next = queuePlayableAction(baseState, action.id, actionNow);
       writePlayableState(next);
-      setWorldActionFeedback(`${action.label} queued from the world map.`);
+      setWorldActionFeedback(
+        next.actionCounter > baseState.actionCounter
+          ? `${action.label} queued from the world map.`
+          : `${action.label} needs more resources before it can be queued.`,
+      );
       return next;
     });
   };
@@ -1590,6 +1744,22 @@ export default function WorldPage() {
                           ))}
                         </div>
                       ) : null}
+                      {worldDecisionMarkers.length > 0 ? (
+                        <div data-qa="world-building-decision-markers" className="absolute inset-0">
+                          {worldDecisionMarkers.map((marker) => (
+                            <span
+                              key={marker.id}
+                              title={marker.label}
+                              className={`absolute -translate-x-1/2 -translate-y-1/2 ${marker.className} ${
+                                marker.pending ? "animate-pulse" : ""
+                              }`}
+                              style={marker.style}
+                            >
+                              <span className="sr-only">{marker.label}</span>
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
                       <span
                         data-qa="world-claimed-land-marker"
                         className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-200/70 bg-amber-400/18 shadow-[0_0_22px_rgba(251,191,36,0.42),inset_0_0_10px_rgba(251,191,36,0.2)]"
@@ -1727,6 +1897,16 @@ export default function WorldPage() {
                             </div>
                           </div>
 
+                          <div
+                            data-qa="world-on-map-recent-consequence"
+                            className="mt-3 border border-amber-500/12 bg-[#08080f]/82 p-2"
+                          >
+                            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-500/75">
+                              Recent Consequence
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-zinc-400">{recentConsequence}</p>
+                          </div>
+
                           {worldAction ? (
                             <button
                               type="button"
@@ -1750,6 +1930,15 @@ export default function WorldPage() {
                             </div>
                           )}
 
+                          <div className="mt-3 border-t border-amber-500/10 pt-3">
+                            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-500/75">
+                              Early Map Decisions
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-zinc-500">
+                              Housing, fields, quarry work, scouting, and trade prep place visible marks around your land.
+                            </p>
+                          </div>
+
                           <div className="mt-3 grid gap-2">
                             {onMapPlayableActions.map((action) => {
                               const enabled = playableState ? canQueuePlayableAction(playableState, action.id) : false;
@@ -1767,8 +1956,15 @@ export default function WorldPage() {
                                       : "flex cursor-not-allowed items-center justify-between gap-2 rounded border border-zinc-800 bg-zinc-950/70 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-600"
                                   }
                                 >
-                                  <span>{action.label}</span>
-                                  <span className="font-normal text-zinc-500">{enabled ? "Queue" : "Needs resources"}</span>
+                                  <span>
+                                    <span className="block">{action.label}</span>
+                                    <span className="mt-0.5 block text-[9px] font-normal normal-case tracking-normal text-zinc-500">
+                                      {action.produces}
+                                    </span>
+                                  </span>
+                                  <span className="shrink-0 font-normal text-zinc-500">
+                                    {enabled ? "Queue" : "Needs resources"}
+                                  </span>
                                 </button>
                               );
                             })}
