@@ -582,7 +582,6 @@ export default function WorldPage() {
   const [selectedTileId, setSelectedTileId] = useState<string>(tiles[0].id);
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState(false);
-  const [mobileMapZoom, setMobileMapZoom] = useState(1);
   const [worldActionFeedback, setWorldActionFeedback] = useState("");
   const [playableState, setPlayableState] = useState<PlayableState | null>(null);
   const [playableNow, setPlayableNow] = useState(0);
@@ -705,15 +704,6 @@ export default function WorldPage() {
     if (demoState.claimedLandId !== tileId) setOnMapActionsOpen(false);
   };
 
-  const fitMobileMap = () => setMobileMapZoom(1);
-  const zoomMobileMapIn = () => setMobileMapZoom((current) => Math.min(1.5, current + 0.25));
-  const zoomMobileMapOut = () => setMobileMapZoom((current) => Math.max(1, current - 0.25));
-  const mobileMapControls = [
-    { label: "Fit", action: fitMobileMap },
-    { label: "Zoom Out", action: zoomMobileMapOut },
-    { label: "Zoom In", action: zoomMobileMapIn },
-  ];
-
   const focusWorldMap = () => {
     if (claimedTile) {
       setSelectedTileId(claimedTile.id);
@@ -737,6 +727,37 @@ export default function WorldPage() {
   useEffect(() => {
     setMobileTrayDismissed(false);
   }, [selectedTileId]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 639px)");
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlOverflow = html.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyHeight = body.style.height;
+
+    const syncMobileScrollLock = () => {
+      if (mediaQuery.matches) {
+        html.style.overflow = "hidden";
+        body.style.overflow = "hidden";
+        body.style.height = "100dvh";
+      } else {
+        html.style.overflow = previousHtmlOverflow;
+        body.style.overflow = previousBodyOverflow;
+        body.style.height = previousBodyHeight;
+      }
+    };
+
+    syncMobileScrollLock();
+    mediaQuery.addEventListener("change", syncMobileScrollLock);
+
+    return () => {
+      mediaQuery.removeEventListener("change", syncMobileScrollLock);
+      html.style.overflow = previousHtmlOverflow;
+      body.style.overflow = previousBodyOverflow;
+      body.style.height = previousBodyHeight;
+    };
+  }, []);
 
   useEffect(() => {
     const panel = selectedLandPanelRef.current;
@@ -810,9 +831,9 @@ export default function WorldPage() {
   };
 
   return (
-    <main className="min-h-[100svh] overflow-x-hidden bg-[#020204] px-0 py-0 pb-28 text-white sm:px-5 sm:py-5 lg:min-h-screen lg:px-6 lg:py-6 lg:pb-10">
-      <div className="mx-auto flex max-w-[1800px] flex-col">
-        <header className="order-2 mx-3 mt-6 border border-amber-500/12 bg-[#050509]/80 p-4 sm:mx-0 sm:p-5">
+    <main className="fixed inset-0 h-[100dvh] w-[100dvw] overflow-hidden bg-[#020204] text-white sm:static sm:h-auto sm:min-h-[100svh] sm:w-auto sm:overflow-x-hidden sm:px-5 sm:py-5 sm:pb-28 lg:min-h-screen lg:px-6 lg:py-6 lg:pb-10">
+      <div className="mx-auto flex h-full max-w-[1800px] flex-col sm:h-auto">
+        <header className="order-2 mx-3 mt-6 hidden border border-amber-500/12 bg-[#050509]/80 p-4 sm:mx-0 sm:block sm:p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.45em] text-amber-600/75">World Map</p>
           <h1 className="mt-3 font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100 sm:text-4xl md:text-5xl">
             Sector A-01 is live.
@@ -850,7 +871,7 @@ export default function WorldPage() {
 
         <section
           data-qa="first-60-guidance"
-          className="order-3 mx-3 mt-6 grid gap-3 border border-amber-500/15 bg-amber-500/[0.035] p-4 text-sm text-zinc-400 sm:mx-0 sm:grid-cols-3 sm:p-5"
+          className="order-3 mx-3 mt-6 hidden gap-3 border border-amber-500/15 bg-amber-500/[0.035] p-4 text-sm text-zinc-400 sm:mx-0 sm:grid sm:grid-cols-3 sm:p-5"
         >
           {demoState.claimedLand ? (
             <>
@@ -905,7 +926,7 @@ export default function WorldPage() {
         <section
           id="world-atlas"
           data-qa="world-atlas"
-          className="order-4 mx-3 mt-6 overflow-hidden border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.5)] sm:mx-0 sm:mt-8 sm:p-6"
+          className="order-4 mx-3 mt-6 hidden overflow-hidden border border-amber-500/15 bg-[#050509]/90 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.5)] sm:mx-0 sm:mt-8 sm:block sm:p-6"
         >
           <div className="mb-5 grid gap-5 border-b border-amber-500/10 pb-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div className="max-w-3xl">
@@ -1058,31 +1079,31 @@ export default function WorldPage() {
           </div>
         </section>
 
-        <section className="order-1 grid min-h-[100svh] gap-0 lg:min-h-[calc(100vh-3rem)] lg:gap-4">
+        <section className="order-1 grid h-full min-h-0 gap-0 sm:min-h-[100svh] lg:min-h-[calc(100vh-3rem)] lg:gap-4">
           <article
             ref={playableSectorRef}
             id="playable-sector"
             data-qa="playable-sector"
-            className="relative flex h-[100svh] min-h-[100svh] flex-col overflow-hidden border-b border-amber-500/18 bg-[#050509]/90 p-2 pt-[max(0.5rem,env(safe-area-inset-top))] shadow-[0_30px_120px_rgba(0,0,0,0.68)] sm:h-auto sm:min-h-0 sm:border sm:p-4 lg:block lg:min-h-[calc(100vh-3rem)]"
+            className="fixed inset-0 h-[100dvh] w-[100dvw] overflow-hidden bg-[#050509]/90 shadow-[0_30px_120px_rgba(0,0,0,0.68)] sm:relative sm:h-auto sm:min-h-0 sm:w-auto sm:border sm:border-amber-500/18 sm:p-4 lg:block lg:min-h-[calc(100vh-3rem)]"
           >
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_18%,rgba(201,169,98,0.1),transparent_34%),radial-gradient(ellipse_at_88%_76%,rgba(201,169,98,0.05),transparent_40%)]"
             />
-            <div className="relative flex min-h-0 flex-1 flex-col lg:block">
-              <div className="shrink-0 border border-amber-500/12 bg-[#030306]/78 p-3 shadow-[0_12px_40px_rgba(0,0,0,0.38)] backdrop-blur-md sm:flex sm:flex-col sm:justify-between sm:gap-3 sm:border-b sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-0 lg:hidden">
+            <div className="relative h-full min-h-0 w-full overflow-hidden lg:block">
+              <div className="pointer-events-none absolute inset-x-2 top-[max(0.5rem,env(safe-area-inset-top))] z-[35] border border-amber-500/12 bg-[#030306]/76 p-2 shadow-[0_12px_40px_rgba(0,0,0,0.38)] backdrop-blur-md sm:pointer-events-auto sm:relative sm:inset-auto sm:flex sm:flex-col sm:justify-between sm:gap-3 sm:border-b sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-0 lg:hidden">
                 <div className="max-w-xl">
                   <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-amber-600/80 sm:text-[10px] sm:tracking-[0.28em]">
-                    Sector A-01 / App Shell
+                    Sector A-01 / Live Shell
                   </p>
-                  <p className="mt-1 font-[family-name:var(--font-syne)] text-xl font-extrabold tracking-tight text-amber-100 sm:mt-2 sm:text-2xl">
+                  <p className="mt-1 font-[family-name:var(--font-syne)] text-lg font-extrabold tracking-tight text-amber-100 sm:mt-2 sm:text-2xl">
                     Aurelian Basin
                   </p>
-                  <p className="mt-1 text-xs leading-5 text-zinc-400 sm:mt-3 sm:text-sm sm:leading-7">
+                  <p className="mt-1 text-[11px] leading-4 text-zinc-400 sm:mt-3 sm:text-sm sm:leading-7">
                     216 visible lands. Pick a cell, then act from the map.
                   </p>
                 </div>
-                <div className="mt-3 grid grid-cols-2 gap-1.5 text-[9px] uppercase tracking-[0.16em] text-zinc-500 sm:flex sm:flex-wrap sm:gap-2 sm:text-[10px] sm:tracking-[0.2em]">
+                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[8px] uppercase tracking-[0.14em] text-zinc-500 sm:flex sm:flex-wrap sm:gap-2 sm:text-[10px] sm:tracking-[0.2em]">
                   <span className="border border-amber-500/15 bg-[#08080f]/80 px-2.5 py-1.5 text-amber-100/80">
                     216 visible lands
                   </span>
@@ -1098,26 +1119,14 @@ export default function WorldPage() {
                 </div>
               </div>
 
-              <div
-                data-qa="sector-orientation-note"
-                className="mt-2 shrink-0 border border-amber-500/12 bg-[#08080f]/78 p-2 text-xs leading-5 text-zinc-500 sm:mt-5 sm:p-3 sm:text-sm sm:leading-7 lg:hidden"
-              >
-                <span className="font-[family-name:var(--font-syne)] text-xs font-bold uppercase tracking-[0.24em] text-amber-100/80">
-                  Touch Map
-                </span>
-                <p className="mt-1 sm:mt-2">
-                  Tap a visible cell. The bottom tray keeps claim and map actions within thumb reach.
-                </p>
-              </div>
-
               {demoState.claimedLand ? (
                 <div
                   data-qa="world-activity-panel"
-                  className="mt-2 max-h-[30svh] shrink-0 overflow-y-auto border border-amber-500/12 bg-[#08080f]/78 p-3 sm:mt-5 sm:max-h-none lg:hidden"
+                  className="pointer-events-none absolute inset-x-2 top-[calc(max(0.5rem,env(safe-area-inset-top))+8.25rem)] z-[35] max-h-[32dvh] overflow-hidden border border-amber-500/12 bg-[#08080f]/70 p-2 shadow-[0_14px_44px_rgba(0,0,0,0.42)] backdrop-blur-md sm:pointer-events-auto sm:relative sm:inset-auto sm:mt-5 sm:max-h-none sm:overflow-y-auto sm:p-3 lg:hidden"
                 >
                   <div
                     data-qa="world-playable-hud"
-                    className="grid gap-3 border border-amber-500/12 bg-[#030306]/70 p-3"
+                    className="grid gap-2 border border-amber-500/12 bg-[#030306]/70 p-2 sm:gap-3 sm:p-3"
                   >
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                       <div>
@@ -1131,17 +1140,17 @@ export default function WorldPage() {
                         <span className="mt-1 block normal-case tracking-normal">{worldMarkerStage}</span>
                       </div>
                     </div>
-                    <div className="grid gap-px border border-amber-500/10 bg-amber-500/10 sm:grid-cols-3 lg:grid-cols-6">
-                      <div className="bg-[#08080f]/95 p-3">
-                        <p className="text-[9px] uppercase tracking-[0.2em] text-zinc-600">Population</p>
-                        <p className="mt-2 font-[family-name:var(--font-syne)] text-xl font-extrabold text-amber-100">
+                    <div className="grid grid-cols-6 gap-px border border-amber-500/10 bg-amber-500/10 sm:grid-cols-3 lg:grid-cols-6">
+                      <div className="bg-[#08080f]/95 p-1.5 sm:p-3">
+                        <p className="text-[7px] uppercase tracking-[0.12em] text-zinc-600 sm:text-[9px] sm:tracking-[0.2em]">Population</p>
+                        <p className="mt-1 font-[family-name:var(--font-syne)] text-sm font-extrabold text-amber-100 sm:mt-2 sm:text-xl">
                           {playableState?.population ?? "-"}
                         </p>
                       </div>
                       {WORLD_RESOURCE_LABELS.map((resource) => (
-                        <div key={resource.key} className="bg-[#08080f]/95 p-3">
-                          <p className="text-[9px] uppercase tracking-[0.2em] text-zinc-600">{resource.label}</p>
-                          <p className="mt-2 font-[family-name:var(--font-syne)] text-xl font-extrabold text-amber-100">
+                        <div key={resource.key} className="bg-[#08080f]/95 p-1.5 sm:p-3">
+                          <p className="truncate text-[7px] uppercase tracking-[0.12em] text-zinc-600 sm:text-[9px] sm:tracking-[0.2em]">{resource.label}</p>
+                          <p className="mt-1 font-[family-name:var(--font-syne)] text-sm font-extrabold text-amber-100 sm:mt-2 sm:text-xl">
                             {playableState?.resources[resource.key] ?? "-"}
                           </p>
                         </div>
@@ -1198,7 +1207,7 @@ export default function WorldPage() {
                   </div>
                   <div
                     data-qa="world-action-layer"
-                    className="mt-4 flex flex-col gap-3 border-t border-amber-500/10 pt-4 sm:flex-row sm:items-center sm:justify-between"
+                    className="mt-4 hidden flex-col gap-3 border-t border-amber-500/10 pt-4 sm:flex sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-500/75">
@@ -1242,7 +1251,7 @@ export default function WorldPage() {
                   </div>
                   <div
                     data-qa="world-map-action-list"
-                    className="mt-4 grid gap-3 border-t border-amber-500/10 pt-4 md:grid-cols-2 xl:grid-cols-5"
+                    className="mt-4 hidden gap-3 border-t border-amber-500/10 pt-4 sm:grid md:grid-cols-2 xl:grid-cols-5"
                   >
                     {WORLD_PLAYABLE_ACTIONS.map((action) => {
                       const currentPlayableState = playableState;
@@ -1282,29 +1291,10 @@ export default function WorldPage() {
                 </div>
               ) : null}
 
-              <div className="mt-2 flex shrink-0 flex-wrap items-center justify-between gap-2 border border-amber-500/10 bg-[#08080f]/70 p-2 sm:hidden">
-                <p className="text-[9px] uppercase tracking-[0.16em] text-zinc-500">
-                  Map pane only: drag inside to inspect cells.
-                </p>
-                <div className="flex gap-1.5">
-                  {mobileMapControls.map(({ label, action }) => (
-                    <button
-                      key={label}
-                      type="button"
-                      onClick={action}
-                      className="rounded border border-amber-500/18 bg-[#030306]/80 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-amber-100/75"
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-2 min-h-0 flex-1 overflow-auto overscroll-contain pb-2 sm:mt-4 lg:mt-0 lg:min-h-0">
+              <div className="absolute inset-0 z-10 overflow-auto overscroll-contain sm:relative sm:mt-4 sm:min-h-0 sm:pb-2 lg:mt-0 lg:min-h-0">
                 <div
-                  className="world-sector-canvas relative min-h-[58svh] w-full min-w-[620px] overflow-hidden border border-amber-500/25 bg-cover bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)] transition-[width] duration-200 sm:min-h-[620px] sm:min-w-[680px] sm:p-3 lg:min-h-[calc(100vh-5rem)] lg:min-w-[980px]"
+                  className="world-sector-canvas relative h-full min-h-[100dvh] w-[150dvh] min-w-[760px] overflow-hidden border-0 bg-cover bg-center bg-no-repeat p-2 shadow-[inset_0_0_120px_rgba(0,0,0,0.78)] sm:min-h-[620px] sm:w-full sm:min-w-[680px] sm:border sm:border-amber-500/25 sm:p-3 sm:shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)] lg:min-h-[calc(100vh-5rem)] lg:min-w-[980px]"
                   style={{
-                    width: `${Math.round(mobileMapZoom * 100)}%`,
                     backgroundImage:
                       "linear-gradient(180deg, rgba(2,2,4,0.08), rgba(2,2,4,0.42)), url('/assets/world-map/aurelian-basin-v1.png')",
                   }}
@@ -1920,7 +1910,7 @@ export default function WorldPage() {
             ref={selectedLandPanelRef}
             id="selected-land-panel"
             data-qa="selected-land-panel"
-            className="border border-amber-500/15 bg-[#06060c]/90 p-5 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:p-6 lg:sticky lg:top-6 lg:self-start"
+            className="hidden border border-amber-500/15 bg-[#06060c]/90 p-5 shadow-[0_20px_90px_rgba(0,0,0,0.45)] sm:block sm:p-6 lg:sticky lg:top-6 lg:self-start"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-600/75">Step 1 / Selected Land</p>
             <p className="mt-3 break-words font-[family-name:var(--font-syne)] text-3xl font-extrabold tracking-tight text-amber-100">
@@ -2006,7 +1996,7 @@ export default function WorldPage() {
       {showMobileClaimTray ? (
         <div
           data-qa="mobile-claim-tray"
-          className="fixed inset-x-3 bottom-3 z-40 box-border max-w-[calc(100vw-1.5rem)] border border-amber-500/25 bg-[#06060c]/96 px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-16px_48px_rgba(0,0,0,0.7),0_0_40px_rgba(201,169,98,0.08)] backdrop-blur-md lg:hidden"
+          className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 box-border max-w-[calc(100vw-1.5rem)] border border-amber-500/25 bg-[#06060c]/96 px-3 py-3 shadow-[0_-16px_48px_rgba(0,0,0,0.7),0_0_40px_rgba(201,169,98,0.08)] backdrop-blur-md lg:hidden"
         >
           <div className="mx-auto w-full max-w-lg">
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-amber-500/25" aria-hidden />
