@@ -111,6 +111,82 @@ const QA_CONTINUITY_STATE = {
   cities: 3,
 };
 
+async function reloadWithClearedDemoState(page) {
+  await page.evaluate(({ demoKey }) => {
+    localStorage.removeItem(demoKey);
+    localStorage.removeItem("pixelNations.playableState.v1");
+  }, { demoKey: DEMO_STATE_KEY });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(500);
+}
+
+async function clickVisibleButton(page, name) {
+  const buttons = page.getByRole("button", { name });
+  const count = await buttons.count();
+
+  for (let index = 0; index < count; index += 1) {
+    const button = buttons.nth(index);
+    if (await button.isVisible().catch(() => false)) {
+      await button.click();
+      return;
+    }
+  }
+
+  await buttons.first().waitFor({ state: "visible", timeout: 5000 });
+  await buttons.first().click();
+}
+
+async function claimQaWorldLand(page) {
+  await reloadWithClearedDemoState(page);
+  const sector = page.locator("[data-qa='playable-sector']").first();
+  await sector.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(350);
+
+  const tile = page.getByLabel(/^PN-0499\b/).first();
+  await tile.waitFor({ state: "visible", timeout: 5000 });
+  const selectedCard = page.locator("[data-qa='world-selected-land-map-card']").first();
+  const pn0499AlreadySelected = await selectedCard.getByText("PN-0499").isVisible().catch(() => false);
+  if (!pn0499AlreadySelected) {
+    await tile.click();
+    await page.waitForTimeout(350);
+  }
+
+  if (await page.getByRole("button", { name: /^Claim This Land$/i }).first().isVisible().catch(() => false)) {
+    await clickVisibleButton(page, /^Claim This Land$/i);
+  } else {
+    await clickVisibleButton(page, /^Claim From Map$/i);
+  }
+
+  await page.getByRole("dialog").waitFor({ state: "visible", timeout: 5000 });
+  await clickVisibleButton(page, /^Claim Land$/i);
+  await page.locator("[data-qa='post-claim-next-step']").waitFor({ state: "visible", timeout: 5000 });
+  await page.waitForTimeout(350);
+}
+
+async function queueGatherFoodFromWorldMap(page) {
+  await claimQaWorldLand(page);
+  await page.getByRole("dialog").getByRole("button", { name: /^Continue On Map$/i }).click();
+  const sector = page.locator("[data-qa='playable-sector']").first();
+  await sector.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+
+  const actionLayer = page.locator("[data-qa='world-on-map-action-layer']").first();
+  if (!(await actionLayer.isVisible().catch(() => false))) {
+    if (await page.getByRole("button", { name: /^Open Map Actions$/i }).first().isVisible().catch(() => false)) {
+      await clickVisibleButton(page, /^Open Map Actions$/i);
+    } else {
+      const anchor = page.locator("[data-qa='world-claimed-land-action-anchor']").first();
+      await anchor.waitFor({ state: "visible", timeout: 5000 });
+      await anchor.click();
+    }
+  }
+
+  await actionLayer.waitFor({ state: "visible", timeout: 5000 });
+  await page.locator("[data-qa='world-on-map-action-gather-food']").first().click();
+  await actionLayer.getByText("Gather Food").first().waitFor({ state: "visible", timeout: 5000 });
+}
+
 
 const captures = [
   { filename: "mobile-home.png", route: "/", viewport: "mobile", width: 390, height: 844 },
@@ -131,6 +207,20 @@ const captures = [
     viewport: "mobile",
     width: 390,
     height: 844,
+    prepare: async (page) => {
+      await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+      await page.waitForTimeout(300);
+      await page.locator("[data-qa='mobile-claim-tray']").waitFor({ state: "hidden", timeout: 2000 });
+    },
+  },
+  {
+    filename: "mobile-world-first-viewport.png",
+    route: "/world",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    viewportOnly: true,
+    evidence: "world-mobile-first-viewport",
     prepare: async (page) => {
       await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
       await page.waitForTimeout(300);
@@ -197,6 +287,34 @@ const captures = [
       await page.waitForTimeout(400);
       await page.locator("[data-qa='mobile-claim-tray']").waitFor({ state: "visible", timeout: 5000 });
     },
+  },
+  {
+    filename: "mobile-world-after-claim.png",
+    route: "/world",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    viewportOnly: true,
+    evidence: "world-mobile-after-claim",
+    prepare: async (page) => {
+      await claimQaWorldLand(page);
+    },
+  },
+  {
+    route: "/world",
+    viewport: "mobile",
+    width: 390,
+    height: 844,
+    selector: "[data-qa='playable-sector']",
+    evidence: "world-mobile-queued-action-motion-sample",
+    prepare: async (page) => {
+      await queueGatherFoodFromWorldMap(page);
+    },
+    samples: [
+      { filename: "mobile-world-motion-queued-action-00.png", delayMs: 0 },
+      { filename: "mobile-world-motion-queued-action-01.png", delayMs: 1000 },
+      { filename: "mobile-world-motion-queued-action-02.png", delayMs: 1000 },
+    ],
   },
   {
     filename: "mobile-dashboard.png",
@@ -381,6 +499,19 @@ const captures = [
   { filename: "desktop-world.png", route: "/world", viewport: "desktop", width: 1440, height: 900, fullPage: true },
   { filename: "desktop-world-top.png", route: "/world", viewport: "desktop", width: 1440, height: 900 },
   {
+    filename: "desktop-world-first-viewport.png",
+    route: "/world",
+    viewport: "desktop",
+    width: 1440,
+    height: 900,
+    viewportOnly: true,
+    evidence: "world-desktop-first-viewport",
+    prepare: async (page) => {
+      await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+      await page.waitForTimeout(300);
+    },
+  },
+  {
     filename: "desktop-world-atlas.png",
     route: "/world",
     viewport: "desktop",
@@ -554,6 +685,9 @@ function buildReport({ generatedAt, appSource, screenshots }) {
               <span>${escapeHtml(shot.route)}</span>
             </div>
             <h3>${escapeHtml(shot.filename)}</h3>
+            ${shot.evidence ? `<p>Evidence: <code>${escapeHtml(shot.evidence)}</code></p>` : "<!-- no required evidence label -->"}
+            <p>Captured: <code>${escapeHtml(shot.capturedAt)}</code></p>
+            <p>Path: <code>${escapeHtml(shot.path)}</code></p>
             <a href="./screenshots/${encodeURIComponent(shot.filename)}"><img src="./screenshots/${encodeURIComponent(shot.filename)}" alt="${escapeHtml(shot.filename)}" /></a>
           </article>`,
         )
@@ -602,6 +736,16 @@ function buildReport({ generatedAt, appSource, screenshots }) {
     <section>
       <h2>Captured Routes</h2>
       <ul>${routes.map((route) => `<li><code>${escapeHtml(route)}</code></li>`).join("")}</ul>
+    </section>
+
+    <section>
+      <h2>/world Evidence Required by Issue #38</h2>
+      <ul>
+        <li>Desktop first viewport: <code>public/qa/latest/screenshots/desktop-world-first-viewport.png</code></li>
+        <li>Mobile first viewport: <code>public/qa/latest/screenshots/mobile-world-first-viewport.png</code></li>
+        <li>Mobile after claim: <code>public/qa/latest/screenshots/mobile-world-after-claim.png</code></li>
+        <li>Queued action / marker motion samples: <code>mobile-world-motion-queued-action-00.png</code>, <code>01.png</code>, <code>02.png</code></li>
+      </ul>
     </section>
 
     <section>
@@ -680,6 +824,33 @@ function buildIndex({ generatedAt, screenshots }) {
 </html>`;
 }
 
+async function takeScreenshot(page, capture, filename) {
+  const path = `${SCREENSHOT_DIR}/${filename}`;
+
+  if (capture.viewportOnly) {
+    await page.screenshot({ path });
+  } else if (capture.selector) {
+    const locator = page.locator(capture.selector).first();
+    await locator.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(350);
+    if (capture.assertLandingMapSafeArea) {
+      await assertLandingMapSafeArea(page, capture.assertLandingMapSafeArea);
+    }
+    await locator.screenshot({ path });
+  } else {
+    await page.screenshot({ path, fullPage: Boolean(capture.fullPage) });
+  }
+
+  return {
+    filename,
+    path,
+    route: capture.route,
+    viewport: capture.viewport,
+    evidence: capture.evidence ?? "",
+    capturedAt: new Date().toISOString(),
+  };
+}
+
 async function gotoAndCapture(page, capture) {
   await page.setViewportSize({ width: capture.width, height: capture.height });
   await page.goto(`${APP_URL}${capture.route}`, { waitUntil: "domcontentloaded" });
@@ -692,23 +863,16 @@ async function gotoAndCapture(page, capture) {
     await capture.prepare(page);
   }
 
-  if (capture.viewportOnly) {
-    await page.screenshot({ path: `${SCREENSHOT_DIR}/${capture.filename}` });
-    return;
-  }
-
-  if (capture.selector) {
-    const locator = page.locator(capture.selector).first();
-    await locator.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(350);
-    if (capture.assertLandingMapSafeArea) {
-      await assertLandingMapSafeArea(page, capture.assertLandingMapSafeArea);
+  if (capture.samples) {
+    const samples = [];
+    for (const sample of capture.samples) {
+      await page.waitForTimeout(sample.delayMs ?? 0);
+      samples.push(await takeScreenshot(page, { ...capture, ...sample }, sample.filename));
     }
-    await locator.screenshot({ path: `${SCREENSHOT_DIR}/${capture.filename}` });
-    return;
+    return samples;
   }
 
-  await page.screenshot({ path: `${SCREENSHOT_DIR}/${capture.filename}`, fullPage: Boolean(capture.fullPage) });
+  return [await takeScreenshot(page, capture, capture.filename)];
 }
 
 async function main() {
@@ -718,6 +882,7 @@ async function main() {
 
   const { startedProcess, appSource } = await ensureApp();
   let browser;
+  const screenshots = [];
 
   try {
     browser = await chromium.launch();
@@ -729,7 +894,7 @@ async function main() {
         isMobile: capture.viewport === "mobile",
       });
       const page = await context.newPage();
-      await gotoAndCapture(page, capture);
+      screenshots.push(...await gotoAndCapture(page, capture));
       await context.close();
     }
   } finally {
@@ -738,10 +903,17 @@ async function main() {
   }
 
   const generatedAt = new Date().toISOString();
-  const screenshots = captures.map(({ filename, route, viewport }) => ({ filename, route, viewport }));
   const manifest = {
     generatedAt,
     screenshots,
+    requiredWorldEvidence: [
+      "public/qa/latest/screenshots/desktop-world-first-viewport.png",
+      "public/qa/latest/screenshots/mobile-world-first-viewport.png",
+      "public/qa/latest/screenshots/mobile-world-after-claim.png",
+      "public/qa/latest/screenshots/mobile-world-motion-queued-action-00.png",
+      "public/qa/latest/screenshots/mobile-world-motion-queued-action-01.png",
+      "public/qa/latest/screenshots/mobile-world-motion-queued-action-02.png",
+    ],
     notes: "Public QA screenshots for product/design review. Commit this folder and deploy to make /qa/latest/report.html available.",
   };
 

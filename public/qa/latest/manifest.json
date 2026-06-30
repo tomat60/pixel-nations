@@ -1,151 +1,294 @@
 {
-  "generatedAt": "2026-06-26T10:34:08.827Z",
+  "generatedAt": "2026-06-30T21:39:50.530Z",
   "screenshots": [
     {
       "filename": "mobile-home.png",
+      "path": "public/qa/latest/screenshots/mobile-home.png",
       "route": "/",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:38:17.572Z"
     },
     {
       "filename": "mobile-landing-hero.png",
+      "path": "public/qa/latest/screenshots/mobile-landing-hero.png",
       "route": "/",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:38:19.802Z"
     },
     {
       "filename": "mobile-landing-map-preview.png",
+      "path": "public/qa/latest/screenshots/mobile-landing-map-preview.png",
       "route": "/",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:38:22.277Z"
     },
     {
       "filename": "mobile-world.png",
+      "path": "public/qa/latest/screenshots/mobile-world.png",
       "route": "/world",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:38:24.814Z"
     },
     {
       "filename": "mobile-world-top.png",
+      "path": "public/qa/latest/screenshots/mobile-world-top.png",
       "route": "/world",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:38:27.366Z"
+    },
+    {
+      "filename": "mobile-world-first-viewport.png",
+      "path": "public/qa/latest/screenshots/mobile-world-first-viewport.png",
+      "route": "/world",
+      "viewport": "mobile",
+      "evidence": "world-mobile-first-viewport",
+      "capturedAt": "2026-06-30T21:38:29.881Z"
     },
     {
       "filename": "mobile-world-atlas.png",
+      "path": "public/qa/latest/screenshots/mobile-world-atlas.png",
       "route": "/world",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:38:32.136Z"
     },
     {
       "filename": "mobile-world-sector.png",
+      "path": "public/qa/latest/screenshots/mobile-world-sector.png",
       "route": "/world",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:38:34.811Z"
     },
     {
       "filename": "mobile-world-living-map.png",
+      "path": "public/qa/latest/screenshots/mobile-world-living-map.png",
       "route": "/world",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:38:37.765Z"
     },
     {
       "filename": "mobile-world-selected-land-panel.png",
+      "path": "public/qa/latest/screenshots/mobile-world-selected-land-panel.png",
       "route": "/world",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:38:39.993Z"
     },
     {
       "filename": "mobile-world-claim-tray.png",
+      "path": "public/qa/latest/screenshots/mobile-world-claim-tray.png",
       "route": "/world",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:38:43.062Z"
+    },
+    {
+      "filename": "mobile-world-after-claim.png",
+      "path": "public/qa/latest/screenshots/mobile-world-after-claim.png",
+      "route": "/world",
+      "viewport": "mobile",
+      "evidence": "world-mobile-after-claim",
+      "capturedAt": "2026-06-30T21:38:46.764Z"
+    },
+    {
+      "filename": "mobile-world-motion-queued-action-00.png",
+      "path": "public/qa/latest/screenshots/mobile-world-motion-queued-action-00.png",
+      "route": "/world",
+      "viewport": "mobile",
+      "evidence": "world-mobile-queued-action-motion-sample",
+      "capturedAt": "2026-06-30T21:38:54.075Z"
+    },
+    {
+      "filename": "mobile-world-motion-queued-action-01.png",
+      "path": "public/qa/latest/screenshots/mobile-world-motion-queued-action-01.png",
+      "route": "/world",
+      "viewport": "mobile",
+      "evidence": "world-mobile-queued-action-motion-sample",
+      "capturedAt": "2026-06-30T21:38:55.792Z"
+    },
+    {
+      "filename": "mobile-world-motion-queued-action-02.png",
+      "path": "public/qa/latest/screenshots/mobile-world-motion-queued-action-02.png",
+      "route": "/world",
+      "viewport": "mobile",
+      "evidence": "world-mobile-queued-action-motion-sample",
+      "capturedAt": "2026-06-30T21:38:57.506Z"
     },
     {
       "filename": "mobile-dashboard.png",
+      "path": "public/qa/latest/screenshots/mobile-dashboard.png",
       "route": "/dashboard",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:00.421Z"
     },
     {
       "filename": "mobile-dashboard-continuity.png",
+      "path": "public/qa/latest/screenshots/mobile-dashboard-continuity.png",
       "route": "/dashboard",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:03.084Z"
     },
     {
       "filename": "mobile-settlement.png",
+      "path": "public/qa/latest/screenshots/mobile-settlement.png",
       "route": "/settlement",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:05.924Z"
     },
     {
       "filename": "mobile-settlement-after-action.png",
+      "path": "public/qa/latest/screenshots/mobile-settlement-after-action.png",
       "route": "/settlement",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:11.363Z"
     },
     {
       "filename": "mobile-nation.png",
+      "path": "public/qa/latest/screenshots/mobile-nation.png",
       "route": "/nation",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:13.496Z"
     },
     {
       "filename": "mobile-empire.png",
+      "path": "public/qa/latest/screenshots/mobile-empire.png",
       "route": "/empire",
-      "viewport": "mobile"
+      "viewport": "mobile",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:15.629Z"
     },
     {
       "filename": "desktop-home.png",
+      "path": "public/qa/latest/screenshots/desktop-home.png",
       "route": "/",
-      "viewport": "desktop"
+      "viewport": "desktop",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:17.428Z"
     },
     {
       "filename": "desktop-dashboard-continuity.png",
+      "path": "public/qa/latest/screenshots/desktop-dashboard-continuity.png",
       "route": "/dashboard",
-      "viewport": "desktop"
+      "viewport": "desktop",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:20.028Z"
     },
     {
       "filename": "desktop-nation-continuity.png",
+      "path": "public/qa/latest/screenshots/desktop-nation-continuity.png",
       "route": "/nation",
-      "viewport": "desktop"
+      "viewport": "desktop",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:22.616Z"
     },
     {
       "filename": "desktop-empire-continuity.png",
+      "path": "public/qa/latest/screenshots/desktop-empire-continuity.png",
       "route": "/empire",
-      "viewport": "desktop"
+      "viewport": "desktop",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:25.164Z"
     },
     {
       "filename": "desktop-landing-map-preview.png",
+      "path": "public/qa/latest/screenshots/desktop-landing-map-preview.png",
       "route": "/",
-      "viewport": "desktop"
+      "viewport": "desktop",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:27.408Z"
     },
     {
       "filename": "desktop-world.png",
+      "path": "public/qa/latest/screenshots/desktop-world.png",
       "route": "/world",
-      "viewport": "desktop"
+      "viewport": "desktop",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:29.676Z"
     },
     {
       "filename": "desktop-world-top.png",
+      "path": "public/qa/latest/screenshots/desktop-world-top.png",
       "route": "/world",
-      "viewport": "desktop"
+      "viewport": "desktop",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:31.557Z"
+    },
+    {
+      "filename": "desktop-world-first-viewport.png",
+      "path": "public/qa/latest/screenshots/desktop-world-first-viewport.png",
+      "route": "/world",
+      "viewport": "desktop",
+      "evidence": "world-desktop-first-viewport",
+      "capturedAt": "2026-06-30T21:39:33.707Z"
     },
     {
       "filename": "desktop-world-atlas.png",
+      "path": "public/qa/latest/screenshots/desktop-world-atlas.png",
       "route": "/world",
-      "viewport": "desktop"
+      "viewport": "desktop",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:35.994Z"
     },
     {
       "filename": "desktop-world-sector.png",
+      "path": "public/qa/latest/screenshots/desktop-world-sector.png",
       "route": "/world",
-      "viewport": "desktop"
+      "viewport": "desktop",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:38.409Z"
     },
     {
       "filename": "desktop-world-living-map.png",
+      "path": "public/qa/latest/screenshots/desktop-world-living-map.png",
       "route": "/world",
-      "viewport": "desktop"
+      "viewport": "desktop",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:41.344Z"
     },
     {
       "filename": "desktop-world-selected-land-panel.png",
+      "path": "public/qa/latest/screenshots/desktop-world-selected-land-panel.png",
       "route": "/world",
-      "viewport": "desktop"
+      "viewport": "desktop",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:43.468Z"
     },
     {
       "filename": "desktop-settlement.png",
+      "path": "public/qa/latest/screenshots/desktop-settlement.png",
       "route": "/settlement",
-      "viewport": "desktop"
+      "viewport": "desktop",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:46.241Z"
     },
     {
       "filename": "desktop-settlement-after-action.png",
+      "path": "public/qa/latest/screenshots/desktop-settlement-after-action.png",
       "route": "/settlement",
-      "viewport": "desktop"
+      "viewport": "desktop",
+      "evidence": "",
+      "capturedAt": "2026-06-30T21:39:50.489Z"
     }
+  ],
+  "requiredWorldEvidence": [
+    "public/qa/latest/screenshots/desktop-world-first-viewport.png",
+    "public/qa/latest/screenshots/mobile-world-first-viewport.png",
+    "public/qa/latest/screenshots/mobile-world-after-claim.png",
+    "public/qa/latest/screenshots/mobile-world-motion-queued-action-00.png",
+    "public/qa/latest/screenshots/mobile-world-motion-queued-action-01.png",
+    "public/qa/latest/screenshots/mobile-world-motion-queued-action-02.png"
   ],
   "notes": "Public QA screenshots for product/design review. Commit this folder and deploy to make /qa/latest/report.html available."
 }

@@ -1,39 +1,25 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-26T10:46:23.523Z
+Generated: 2026-06-30T21:39:53.343Z
 
-Branch: agent/map-interaction-foundation-v0.9
+Branch: agent/visual-motion-qa-evidence-v0.13.1
 Working tree: has changes
 
 Git status:
-  ## agent/map-interaction-foundation-v0.9...origin/main
-   M app/world/page.tsx
+  ## agent/visual-motion-qa-evidence-v0.13.1...origin/main
    D public/qa/latest/handoff.json
    D public/qa/latest/handoff.txt
    M public/qa/latest/index.html
    M public/qa/latest/manifest.json
    M public/qa/latest/report.html
-   M public/qa/latest/screenshots/desktop-dashboard-continuity.png
-   M public/qa/latest/screenshots/desktop-empire-continuity.png
    M public/qa/latest/screenshots/desktop-home.png
-   M public/qa/latest/screenshots/desktop-landing-map-preview.png
-   M public/qa/latest/screenshots/desktop-nation-continuity.png
-   M public/qa/latest/screenshots/desktop-settlement-after-action.png
-   M public/qa/latest/screenshots/desktop-settlement.png
    M public/qa/latest/screenshots/desktop-world-atlas.png
    M public/qa/latest/screenshots/desktop-world-living-map.png
    M public/qa/latest/screenshots/desktop-world-sector.png
    M public/qa/latest/screenshots/desktop-world-selected-land-panel.png
    M public/qa/latest/screenshots/desktop-world-top.png
    M public/qa/latest/screenshots/desktop-world.png
-   M public/qa/latest/screenshots/mobile-dashboard-continuity.png
    M public/qa/latest/screenshots/mobile-dashboard.png
-   M public/qa/latest/screenshots/mobile-empire.png
-   M public/qa/latest/screenshots/mobile-home.png
-   M public/qa/latest/screenshots/mobile-landing-hero.png
-   M public/qa/latest/screenshots/mobile-landing-map-preview.png
-   M public/qa/latest/screenshots/mobile-nation.png
    M public/qa/latest/screenshots/mobile-settlement-after-action.png
-   M public/qa/latest/screenshots/mobile-settlement.png
    M public/qa/latest/screenshots/mobile-world-atlas.png
    M public/qa/latest/screenshots/mobile-world-claim-tray.png
    M public/qa/latest/screenshots/mobile-world-living-map.png
@@ -42,34 +28,42 @@ Git status:
    M public/qa/latest/screenshots/mobile-world-top.png
    M public/qa/latest/screenshots/mobile-world.png
    M public/qa/latest/smoke-result.json
+   M scripts/qa-screenshots.mjs
+  ?? public/qa/latest/screenshots/desktop-world-first-viewport.png
+  ?? public/qa/latest/screenshots/mobile-world-after-claim.png
+  ?? public/qa/latest/screenshots/mobile-world-first-viewport.png
+  ?? public/qa/latest/screenshots/mobile-world-motion-queued-action-00.png
+  ?? public/qa/latest/screenshots/mobile-world-motion-queued-action-01.png
+  ?? public/qa/latest/screenshots/mobile-world-motion-queued-action-02.png
+  ?? reports/agent/visual-motion-qa-evidence-v0.13.1.md
 
 Last 5 commits:
-  9cb1e24 Core Loop Recovery v0.8.1.1 — Objective Spine
-  d0f346f reports: start core loop recovery v0.8.1.1
-  0b620aa docs: clarify roadmap after pipeline v1.3
-  5be5e22 docs: align current state after pipeline v1.3 merge
-  741ed64 Autonomous production v1.3 (#3)
+  4f7553f feat: improve mobile world touch shell (#33)
+  09f6e72 feat: make world map fullscreen game shell (#30)
+  2d62ca9 Merge pull request #28 from tomat60/agent/world-route-consolidation-v0.11.1
+  442373a docs: add world route consolidation report
+  0b5faee feat: consolidate world progression on map
 
 QA:
 Smoke result: PASS
-Smoke generated: 2026-06-26T10:34:37.921Z
+Smoke generated: 2026-06-30T21:39:53.242Z
 Smoke app source: existing local app
-Smoke steps: 9/9 passed
+Smoke steps: 8/8 passed
 Smoke result path: public/qa/latest/smoke-result.json
 
 QA Evidence Freshness:
-Smoke generated: 2026-06-26T10:34:37.921Z
-Report modified: 2026-06-26T10:34:08.827Z
-Manifest modified: 2026-06-26T10:34:08.823Z
-Screenshots newest: 2026-06-26T10:34:08.799Z
-Screenshots oldest: 2026-06-26T10:32:54.576Z
-Screenshots count: 29
+Smoke generated: 2026-06-30T21:39:53.242Z
+Report modified: 2026-06-30T21:39:50.530Z
+Manifest modified: 2026-06-30T21:39:50.530Z
+Screenshots newest: 2026-06-30T21:39:50.486Z
+Screenshots oldest: 2026-06-30T21:38:17.570Z
+Screenshots count: 35
 Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-26T10:46:23.523Z
-Local report generated: 2026-06-26T10:34:08.827Z
+Local handoff generated: 2026-06-30T21:39:53.343Z
+Local report generated: 2026-06-30T21:39:50.530Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
 Public handoff TXT: https://pixel-nations.vercel.app/qa/latest/handoff.txt

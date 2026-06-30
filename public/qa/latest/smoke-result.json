@@ -1,55 +1,50 @@
 {
   "status": "PASS",
-  "generatedAt": "2026-06-26T10:34:37.921Z",
+  "generatedAt": "2026-06-30T21:39:53.242Z",
   "appUrl": "http://localhost:3000",
   "appSource": "existing local app",
   "blockingStep": "",
   "error": "",
   "steps": [
     {
+      "name": "playable command center route",
+      "status": "PASS",
+      "durationMs": 709
+    },
+    {
       "name": "reset demo state and open /world",
       "status": "PASS",
-      "durationMs": 756
+      "durationMs": 570
     },
     {
       "name": "select a claimable Sector A-01 land",
       "status": "PASS",
-      "durationMs": 120
+      "durationMs": 89
     },
     {
       "name": "claim selected land",
       "status": "PASS",
-      "durationMs": 119
+      "durationMs": 109
     },
     {
-      "name": "dashboard recognizes claimed land",
+      "name": "queue playable order from world map",
       "status": "PASS",
-      "durationMs": 159
+      "durationMs": 209
     },
     {
-      "name": "create settlement",
+      "name": "world map has no primary progression route links",
       "status": "PASS",
-      "durationMs": 1314
+      "durationMs": 3
     },
     {
-      "name": "build settlement core and establish trade",
+      "name": "advance core progression on world map",
       "status": "PASS",
-      "durationMs": 4065
+      "durationMs": 493
     },
     {
-      "name": "form alliance and found nation",
+      "name": "political progression stays on map as pending layer",
       "status": "PASS",
-      "durationMs": 4368
-    },
-    {
-      "name": "attempt empire continuation path",
-      "status": "PASS",
-      "durationMs": 1420
-    },
-    {
-      "name": "create empire",
-      "status": "PASS",
-      "durationMs": 2280
+      "durationMs": 3
     }
   ]
 }
