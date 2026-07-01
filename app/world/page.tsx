@@ -1152,7 +1152,7 @@ export default function WorldPage() {
               <div className="shrink-0 border border-amber-500/12 bg-[#030306]/78 p-3 shadow-[0_12px_40px_rgba(0,0,0,0.38)] backdrop-blur-md sm:flex sm:flex-col sm:justify-between sm:gap-3 sm:border-b sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-0 lg:hidden">
                 <div className="max-w-xl">
                   <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-amber-600/80 sm:text-[10px] sm:tracking-[0.28em]">
-                    Sector A-01 / App Shell
+                    Sector A-01 is live / App Shell
                   </p>
                   <p className="mt-1 font-[family-name:var(--font-syne)] text-xl font-extrabold tracking-tight text-amber-100 sm:mt-2 sm:text-2xl">
                     Aurelian Basin
@@ -1441,7 +1441,7 @@ export default function WorldPage() {
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-500/75">
-                            Sector A-01 / 216 visible lands
+                            Sector A-01 is live / 216 visible lands
                           </p>
                           <p className="mt-1 font-[family-name:var(--font-syne)] text-xl font-extrabold tracking-tight text-amber-100">
                             Aurelian Basin
