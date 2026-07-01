@@ -1,39 +1,24 @@
 Pixel Nations Handoff Report
-Generated: 2026-06-26T10:46:23.523Z
+Generated: 2026-07-01T09:49:22.768Z
 
-Branch: agent/map-interaction-foundation-v0.9
+Branch: agent/vision-gameplay-slice-v0.14
 Working tree: has changes
 
 Git status:
-  ## agent/map-interaction-foundation-v0.9...origin/main
-   M app/world/page.tsx
+  ## agent/vision-gameplay-slice-v0.14...origin/agent/vision-gameplay-slice-v0.14
    D public/qa/latest/handoff.json
    D public/qa/latest/handoff.txt
    M public/qa/latest/index.html
    M public/qa/latest/manifest.json
    M public/qa/latest/report.html
-   M public/qa/latest/screenshots/desktop-dashboard-continuity.png
-   M public/qa/latest/screenshots/desktop-empire-continuity.png
-   M public/qa/latest/screenshots/desktop-home.png
-   M public/qa/latest/screenshots/desktop-landing-map-preview.png
-   M public/qa/latest/screenshots/desktop-nation-continuity.png
-   M public/qa/latest/screenshots/desktop-settlement-after-action.png
-   M public/qa/latest/screenshots/desktop-settlement.png
    M public/qa/latest/screenshots/desktop-world-atlas.png
    M public/qa/latest/screenshots/desktop-world-living-map.png
    M public/qa/latest/screenshots/desktop-world-sector.png
    M public/qa/latest/screenshots/desktop-world-selected-land-panel.png
    M public/qa/latest/screenshots/desktop-world-top.png
    M public/qa/latest/screenshots/desktop-world.png
-   M public/qa/latest/screenshots/mobile-dashboard-continuity.png
    M public/qa/latest/screenshots/mobile-dashboard.png
-   M public/qa/latest/screenshots/mobile-empire.png
-   M public/qa/latest/screenshots/mobile-home.png
-   M public/qa/latest/screenshots/mobile-landing-hero.png
-   M public/qa/latest/screenshots/mobile-landing-map-preview.png
-   M public/qa/latest/screenshots/mobile-nation.png
    M public/qa/latest/screenshots/mobile-settlement-after-action.png
-   M public/qa/latest/screenshots/mobile-settlement.png
    M public/qa/latest/screenshots/mobile-world-atlas.png
    M public/qa/latest/screenshots/mobile-world-claim-tray.png
    M public/qa/latest/screenshots/mobile-world-living-map.png
@@ -44,32 +29,32 @@ Git status:
    M public/qa/latest/smoke-result.json
 
 Last 5 commits:
-  9cb1e24 Core Loop Recovery v0.8.1.1 — Objective Spine
-  d0f346f reports: start core loop recovery v0.8.1.1
-  0b620aa docs: clarify roadmap after pipeline v1.3
-  5be5e22 docs: align current state after pipeline v1.3 merge
-  741ed64 Autonomous production v1.3 (#3)
+  b4f4682 fix: restore world smoke heading
+  b0fa085 fix: keep world map tiles clickable
+  56dc11f feat: add world vision gameplay slice
+  4f7553f feat: improve mobile world touch shell (#33)
+  09f6e72 feat: make world map fullscreen game shell (#30)
 
 QA:
 Smoke result: PASS
-Smoke generated: 2026-06-26T10:34:37.921Z
+Smoke generated: 2026-07-01T09:49:22.659Z
 Smoke app source: existing local app
-Smoke steps: 9/9 passed
+Smoke steps: 8/8 passed
 Smoke result path: public/qa/latest/smoke-result.json
 
 QA Evidence Freshness:
-Smoke generated: 2026-06-26T10:34:37.921Z
-Report modified: 2026-06-26T10:34:08.827Z
-Manifest modified: 2026-06-26T10:34:08.823Z
-Screenshots newest: 2026-06-26T10:34:08.799Z
-Screenshots oldest: 2026-06-26T10:32:54.576Z
+Smoke generated: 2026-07-01T09:49:22.659Z
+Report modified: 2026-07-01T09:49:15.463Z
+Manifest modified: 2026-07-01T09:49:15.463Z
+Screenshots newest: 2026-07-01T09:49:15.423Z
+Screenshots oldest: 2026-07-01T09:47:59.860Z
 Screenshots count: 29
 Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-06-26T10:46:23.523Z
-Local report generated: 2026-06-26T10:34:08.827Z
+Local handoff generated: 2026-07-01T09:49:22.768Z
+Local report generated: 2026-07-01T09:49:15.465Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
 Public handoff TXT: https://pixel-nations.vercel.app/qa/latest/handoff.txt

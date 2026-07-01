@@ -1,71 +1,66 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-06-26T10:46:23.523Z",
-  "branch": "agent/map-interaction-foundation-v0.9",
+  "generatedAt": "2026-07-01T09:49:22.768Z",
+  "branch": "agent/vision-gameplay-slice-v0.14",
   "isClean": false,
   "git": {
-    "statusSummary": "## agent/map-interaction-foundation-v0.9...origin/main\n M app/world/page.tsx\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-dashboard-continuity.png\n M public/qa/latest/screenshots/desktop-empire-continuity.png\n M public/qa/latest/screenshots/desktop-home.png\n M public/qa/latest/screenshots/desktop-landing-map-preview.png\n M public/qa/latest/screenshots/desktop-nation-continuity.png\n M public/qa/latest/screenshots/desktop-settlement-after-action.png\n M public/qa/latest/screenshots/desktop-settlement.png\n M public/qa/latest/screenshots/desktop-world-atlas.png\n M public/qa/latest/screenshots/desktop-world-living-map.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world-selected-land-panel.png\n M public/qa/latest/screenshots/desktop-world-top.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-dashboard-continuity.png\n M public/qa/latest/screenshots/mobile-dashboard.png\n M public/qa/latest/screenshots/mobile-empire.png\n M public/qa/latest/screenshots/mobile-home.png\n M public/qa/latest/screenshots/mobile-landing-hero.png\n M public/qa/latest/screenshots/mobile-landing-map-preview.png\n M public/qa/latest/screenshots/mobile-nation.png\n M public/qa/latest/screenshots/mobile-settlement-after-action.png\n M public/qa/latest/screenshots/mobile-settlement.png\n M public/qa/latest/screenshots/mobile-world-atlas.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-living-map.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world-selected-land-panel.png\n M public/qa/latest/screenshots/mobile-world-top.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
-    "lastCommits": "9cb1e24 Core Loop Recovery v0.8.1.1 — Objective Spine\nd0f346f reports: start core loop recovery v0.8.1.1\n0b620aa docs: clarify roadmap after pipeline v1.3\n5be5e22 docs: align current state after pipeline v1.3 merge\n741ed64 Autonomous production v1.3 (#3)"
+    "statusSummary": "## agent/vision-gameplay-slice-v0.14...origin/agent/vision-gameplay-slice-v0.14\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-world-atlas.png\n M public/qa/latest/screenshots/desktop-world-living-map.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world-selected-land-panel.png\n M public/qa/latest/screenshots/desktop-world-top.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-dashboard.png\n M public/qa/latest/screenshots/mobile-settlement-after-action.png\n M public/qa/latest/screenshots/mobile-world-atlas.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-living-map.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world-selected-land-panel.png\n M public/qa/latest/screenshots/mobile-world-top.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
+    "lastCommits": "b4f4682 fix: restore world smoke heading\nb0fa085 fix: keep world map tiles clickable\n56dc11f feat: add world vision gameplay slice\n4f7553f feat: improve mobile world touch shell (#33)\n09f6e72 feat: make world map fullscreen game shell (#30)"
   },
   "qa": {
     "smoke": {
       "status": "PASS",
-      "generatedAt": "2026-06-26T10:34:37.921Z",
+      "generatedAt": "2026-07-01T09:49:22.659Z",
       "appUrl": "http://localhost:3000",
       "appSource": "existing local app",
       "blockingStep": "",
       "error": "",
       "steps": [
         {
+          "name": "playable command center route",
+          "status": "PASS",
+          "durationMs": 689
+        },
+        {
           "name": "reset demo state and open /world",
           "status": "PASS",
-          "durationMs": 756
+          "durationMs": 687
         },
         {
           "name": "select a claimable Sector A-01 land",
           "status": "PASS",
-          "durationMs": 120
+          "durationMs": 86
         },
         {
           "name": "claim selected land",
           "status": "PASS",
-          "durationMs": 119
+          "durationMs": 113
         },
         {
-          "name": "dashboard recognizes claimed land",
+          "name": "queue playable order from world map",
           "status": "PASS",
-          "durationMs": 159
+          "durationMs": 217
         },
         {
-          "name": "create settlement",
+          "name": "world map has no primary progression route links",
           "status": "PASS",
-          "durationMs": 1314
+          "durationMs": 3
         },
         {
-          "name": "build settlement core and establish trade",
+          "name": "advance core progression on world map",
           "status": "PASS",
-          "durationMs": 4065
+          "durationMs": 502
         },
         {
-          "name": "form alliance and found nation",
+          "name": "political progression stays on map as pending layer",
           "status": "PASS",
-          "durationMs": 4368
-        },
-        {
-          "name": "attempt empire continuation path",
-          "status": "PASS",
-          "durationMs": 1420
-        },
-        {
-          "name": "create empire",
-          "status": "PASS",
-          "durationMs": 2280
+          "durationMs": 10
         }
       ],
-      "passedSteps": 9,
-      "totalSteps": 9,
+      "passedSteps": 8,
+      "totalSteps": 8,
       "path": "public/qa/latest/smoke-result.json",
-      "summary": "Smoke result: PASS\nSmoke generated: 2026-06-26T10:34:37.921Z\nSmoke app source: existing local app\nSmoke steps: 9/9 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-07-01T09:49:22.659Z\nSmoke app source: existing local app\nSmoke steps: 8/8 passed\nSmoke result path: public/qa/latest/smoke-result.json"
     },
     "publicQaIndexUrl": "https://pixel-nations.vercel.app/qa/latest/",
     "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
@@ -79,18 +74,18 @@
   },
   "qaEvidenceFreshness": {
     "status": "FRESH",
-    "smokeGeneratedAt": "2026-06-26T10:34:37.921Z",
-    "reportModifiedAt": "2026-06-26T10:34:08.827Z",
-    "manifestModifiedAt": "2026-06-26T10:34:08.823Z",
-    "screenshotsNewestModifiedAt": "2026-06-26T10:34:08.799Z",
-    "screenshotsOldestModifiedAt": "2026-06-26T10:32:54.576Z",
+    "smokeGeneratedAt": "2026-07-01T09:49:22.659Z",
+    "reportModifiedAt": "2026-07-01T09:49:15.463Z",
+    "manifestModifiedAt": "2026-07-01T09:49:15.463Z",
+    "screenshotsNewestModifiedAt": "2026-07-01T09:49:15.423Z",
+    "screenshotsOldestModifiedAt": "2026-07-01T09:47:59.860Z",
     "screenshotsCount": 29,
     "toleranceMinutes": 2,
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-06-26T10:46:23.523Z",
-    "localReportGeneratedAt": "2026-06-26T10:34:08.827Z",
+    "localHandoffGeneratedAt": "2026-07-01T09:49:22.768Z",
+    "localReportGeneratedAt": "2026-07-01T09:49:15.465Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
       "report": "https://pixel-nations.vercel.app/qa/latest/report.html",
