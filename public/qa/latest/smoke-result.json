@@ -1,55 +1,26 @@
 {
-  "status": "PASS",
-  "generatedAt": "2026-06-26T10:34:37.921Z",
+  "status": "FAIL",
+  "generatedAt": "2026-07-01T09:46:11.715Z",
   "appUrl": "http://localhost:3000",
   "appSource": "existing local app",
-  "blockingStep": "",
-  "error": "",
+  "blockingStep": "select a claimable Sector A-01 land",
+  "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByLabel(/PN-0499/).first()\n    - locator resolved to <button type=\"button\" data-land-id=\"PN-0499\" data-map-state=\"neutral\" data-qa=\"world-neutral-land-tile\" aria-label=\"PN-0499, Aurelia, Forest\" class=\"relative aspect-square overflow-hidden border border-white/[0.025] transition-[border-color,box-shadow,background-color] duration-200 before:pointer-events-none before:absolute before:inset-0 before:opacity-90 before:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.04),trans…>…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div data-qa=\"world-selected-land-map-card\" class=\"pointer-events-auto absolute w-[min(19rem,calc(100vw-3rem))] border border-amber-500/24 bg-[#030306]/90 p-3 shadow-[0_20px_70px_rgba(0,0,0,0.68)] backdrop-blur-md\">…</div> from <div class=\"pointer-events-none absolute inset-3 z-[30]\">…</div> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div data-qa=\"world-selected-land-map-card\" class=\"pointer-events-auto absolute w-[min(19rem,calc(100vw-3rem))] border border-amber-500/24 bg-[#030306]/90 p-3 shadow-[0_20px_70px_rgba(0,0,0,0.68)] backdrop-blur-md\">…</div> from <div class=\"pointer-events-none absolute inset-3 z-[30]\">…</div> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    - waiting for element to be visible, enabled and stable\n    - element is not stable\n  55 × retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div data-qa=\"world-selected-land-map-card\" class=\"pointer-events-auto absolute w-[min(19rem,calc(100vw-3rem))] border border-amber-500/24 bg-[#030306]/90 p-3 shadow-[0_20px_70px_rgba(0,0,0,0.68)] backdrop-blur-md\">…</div> from <div class=\"pointer-events-none absolute inset-3 z-[30]\">…</div> subtree intercepts pointer events\n  - retrying click action\n    - waiting 500ms\n",
   "steps": [
+    {
+      "name": "playable command center route",
+      "status": "PASS",
+      "durationMs": 753
+    },
     {
       "name": "reset demo state and open /world",
       "status": "PASS",
-      "durationMs": 756
+      "durationMs": 715
     },
     {
       "name": "select a claimable Sector A-01 land",
-      "status": "PASS",
-      "durationMs": 120
-    },
-    {
-      "name": "claim selected land",
-      "status": "PASS",
-      "durationMs": 119
-    },
-    {
-      "name": "dashboard recognizes claimed land",
-      "status": "PASS",
-      "durationMs": 159
-    },
-    {
-      "name": "create settlement",
-      "status": "PASS",
-      "durationMs": 1314
-    },
-    {
-      "name": "build settlement core and establish trade",
-      "status": "PASS",
-      "durationMs": 4065
-    },
-    {
-      "name": "form alliance and found nation",
-      "status": "PASS",
-      "durationMs": 4368
-    },
-    {
-      "name": "attempt empire continuation path",
-      "status": "PASS",
-      "durationMs": 1420
-    },
-    {
-      "name": "create empire",
-      "status": "PASS",
-      "durationMs": 2280
+      "status": "FAIL",
+      "durationMs": 30059,
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByLabel(/PN-0499/).first()\n    - locator resolved to <button type=\"button\" data-land-id=\"PN-0499\" data-map-state=\"neutral\" data-qa=\"world-neutral-land-tile\" aria-label=\"PN-0499, Aurelia, Forest\" class=\"relative aspect-square overflow-hidden border border-white/[0.025] transition-[border-color,box-shadow,background-color] duration-200 before:pointer-events-none before:absolute before:inset-0 before:opacity-90 before:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.04),trans…>…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div data-qa=\"world-selected-land-map-card\" class=\"pointer-events-auto absolute w-[min(19rem,calc(100vw-3rem))] border border-amber-500/24 bg-[#030306]/90 p-3 shadow-[0_20px_70px_rgba(0,0,0,0.68)] backdrop-blur-md\">…</div> from <div class=\"pointer-events-none absolute inset-3 z-[30]\">…</div> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div data-qa=\"world-selected-land-map-card\" class=\"pointer-events-auto absolute w-[min(19rem,calc(100vw-3rem))] border border-amber-500/24 bg-[#030306]/90 p-3 shadow-[0_20px_70px_rgba(0,0,0,0.68)] backdrop-blur-md\">…</div> from <div class=\"pointer-events-none absolute inset-3 z-[30]\">…</div> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    - waiting for element to be visible, enabled and stable\n    - element is not stable\n  55 × retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div data-qa=\"world-selected-land-map-card\" class=\"pointer-events-auto absolute w-[min(19rem,calc(100vw-3rem))] border border-amber-500/24 bg-[#030306]/90 p-3 shadow-[0_20px_70px_rgba(0,0,0,0.68)] backdrop-blur-md\">…</div> from <div class=\"pointer-events-none absolute inset-3 z-[30]\">…</div> subtree intercepts pointer events\n  - retrying click action\n    - waiting 500ms\n"
     }
   ]
 }

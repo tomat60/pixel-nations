@@ -1938,7 +1938,7 @@ export default function WorldPage() {
                     <div className="pointer-events-none absolute inset-3 z-[30]">
                       <div
                         data-qa="world-selected-land-map-card"
-                        className="pointer-events-auto absolute w-[min(19rem,calc(100vw-3rem))] border border-amber-500/24 bg-[#030306]/90 p-3 shadow-[0_20px_70px_rgba(0,0,0,0.68)] backdrop-blur-md"
+                        className="pointer-events-none absolute w-[min(19rem,calc(100vw-3rem))] border border-amber-500/24 bg-[#030306]/90 p-3 shadow-[0_20px_70px_rgba(0,0,0,0.68)] backdrop-blur-md"
                         style={{
                           ...selectedTileMapPosition,
                           transform: getOnMapMenuTransform(selectedTile),
@@ -1959,8 +1959,8 @@ export default function WorldPage() {
                           onClick={openClaimModal}
                           className={
                             isUnavailable
-                              ? "mt-3 w-full cursor-not-allowed rounded border border-zinc-800 bg-zinc-950/70 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-600"
-                              : "btn-primary mt-3 w-full rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-100"
+                              ? "pointer-events-auto mt-3 w-full cursor-not-allowed rounded border border-zinc-800 bg-zinc-950/70 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-600"
+                              : "btn-primary pointer-events-auto mt-3 w-full rounded border border-amber-500/55 bg-gradient-to-b from-amber-400/25 to-amber-800/15 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-100"
                           }
                         >
                           {isUnavailable ? "Already Claimed" : "Claim From Map"}
