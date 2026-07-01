@@ -126,11 +126,23 @@ type WorldAction = {
   qa: string;
 };
 
+type PlacementMarkerKind = "housing" | "field" | "quarry";
+
+type PlacementMarker = {
+  id: string;
+  kind: PlacementMarkerKind;
+  label: string;
+  dx: number;
+  dy: number;
+};
+
 const WORLD_PLAYABLE_ACTION_IDS: PlayableActionId[] = [
   "gather-food",
   "quarry-materials",
   "build-housing",
+  "improve-fields",
   "upgrade-core",
+  "open-trade",
   "scout-land",
 ];
 
@@ -145,6 +157,21 @@ const WORLD_RESOURCE_LABELS: Array<{ key: PlayableResourceKey; label: string }> 
 const WORLD_PLAYABLE_ACTIONS = WORLD_PLAYABLE_ACTION_IDS
   .map((actionId) => PLAYABLE_ACTIONS.find((action) => action.id === actionId))
   .filter((action): action is PlayableActionDefinition => Boolean(action));
+
+const WORLD_PLACEMENT_MARKERS: PlacementMarker[] = [
+  { id: "housing-west", kind: "housing", label: "Housing", dx: -1, dy: 0 },
+  { id: "housing-south", kind: "housing", label: "Housing", dx: 0, dy: 1 },
+  { id: "field-east", kind: "field", label: "Field", dx: 1, dy: 0 },
+  { id: "field-southeast", kind: "field", label: "Field", dx: 1, dy: 1 },
+  { id: "quarry-northwest", kind: "quarry", label: "Quarry", dx: -1, dy: -1 },
+  { id: "quarry-north", kind: "quarry", label: "Quarry", dx: 0, dy: -1 },
+];
+
+const PLACEMENT_KIND_STYLES: Record<PlacementMarkerKind, string> = {
+  housing: "border-emerald-200/45 bg-emerald-300/[0.11] shadow-[0_0_18px_rgba(110,231,183,0.20)]",
+  field: "border-lime-200/40 bg-lime-300/[0.10] shadow-[0_0_16px_rgba(190,242,100,0.16)]",
+  quarry: "border-slate-200/38 bg-slate-300/[0.10] shadow-[0_0_16px_rgba(203,213,225,0.14)]",
+};
 
 
 const MAP_RIVERS = [
@@ -435,6 +462,13 @@ function getTileCssCenter(tile: Pick<MapTile, "x" | "y">) {
   };
 }
 
+function getOffsetTileCssCenter(tile: Pick<MapTile, "x" | "y">, dx: number, dy: number) {
+  return getTileCssCenter({
+    x: Math.min(GRID_WIDTH - 1, Math.max(0, tile.x + dx)),
+    y: Math.min(GRID_HEIGHT - 1, Math.max(0, tile.y + dy)),
+  });
+}
+
 function getOnMapMenuTransform(tile: Pick<MapTile, "x" | "y">) {
   if (tile.y <= 2) return "translate(-50%, 2.25rem)";
   if (tile.x >= GRID_WIDTH - 4) return "translate(calc(-100% - 1.25rem), -50%)";
@@ -469,6 +503,14 @@ function buildLivingMapRoutePath(from: { x: number; y: number }, to: { x: number
   const controlX = (from.x + to.x) / 2;
   const controlY = Math.min(from.y, to.y) - 72;
   return `M ${from.x.toFixed(1)} ${from.y.toFixed(1)} C ${controlX.toFixed(1)} ${controlY.toFixed(1)}, ${controlX.toFixed(1)} ${((controlY + to.y) / 2).toFixed(1)}, ${to.x.toFixed(1)} ${to.y.toFixed(1)}`;
+}
+
+function buildScoutPatrolPath(from: { x: number; y: number }) {
+  const scoutX = Math.min(720, from.x + 96);
+  const scoutY = Math.max(54, from.y - 62);
+  const returnX = Math.max(40, from.x - 74);
+  const returnY = Math.min(444, from.y + 54);
+  return `M ${from.x.toFixed(1)} ${from.y.toFixed(1)} C ${scoutX.toFixed(1)} ${scoutY.toFixed(1)}, ${scoutX.toFixed(1)} ${returnY.toFixed(1)}, ${returnX.toFixed(1)} ${returnY.toFixed(1)} S ${from.x.toFixed(1)} ${scoutY.toFixed(1)}, ${from.x.toFixed(1)} ${from.y.toFixed(1)}`;
 }
 
 function getInfluenceRadius(state: SettlementState) {
@@ -536,6 +578,39 @@ function getActiveMapLayer(demoState: SettlementState, playableState: PlayableSt
   if (demoState.settlementFounded) return "Claim + settlement";
   if (demoState.claimedLand) return "Claim marker";
   return "Selection";
+}
+
+function getSettlementGrowthStage(playableState: PlayableState | null, demoState: SettlementState) {
+  if (demoState.tradeRouteEstablished || (playableState && playableState.tradeLevel > 0)) return "Trade outpost";
+  if (demoState.townHallBuilt || (playableState && playableState.settlementLevel >= 2)) return "Village core";
+  if (demoState.settlementFounded || (playableState && playableState.housingLevel > 0)) return "First homes";
+  if (demoState.claimedLand) return "Camp stake";
+  return "Placement preview";
+}
+
+function getVisiblePlacementMarkers(playableState: PlayableState | null) {
+  if (!playableState) return WORLD_PLACEMENT_MARKERS.slice(0, 3);
+
+  const housingCount = Math.min(2, playableState.housingLevel);
+  const fieldCount = Math.min(2, playableState.fieldsLevel);
+  const quarryCount = Math.min(2, playableState.quarryLevel);
+
+  return [
+    ...WORLD_PLACEMENT_MARKERS.filter((marker) => marker.kind === "housing").slice(0, housingCount),
+    ...WORLD_PLACEMENT_MARKERS.filter((marker) => marker.kind === "field").slice(0, fieldCount),
+    ...WORLD_PLACEMENT_MARKERS.filter((marker) => marker.kind === "quarry").slice(0, quarryCount),
+  ];
+}
+
+function getActivePlacementGhost(activeOrder?: QueuedPlayableAction): PlacementMarker | null {
+  if (!activeOrder) return null;
+  if (activeOrder.actionId === "build-housing") return WORLD_PLACEMENT_MARKERS[0];
+  if (activeOrder.actionId === "improve-fields") return WORLD_PLACEMENT_MARKERS[2];
+  if (activeOrder.actionId === "quarry-materials") return WORLD_PLACEMENT_MARKERS[4];
+  if (activeOrder.actionId === "upgrade-core") {
+    return { id: "core-ghost", kind: "housing", label: "Core Ghost", dx: 0, dy: 0 };
+  }
+  return null;
 }
 
 function getWorldAction(state: SettlementState): WorldAction | null {
@@ -675,10 +750,12 @@ export default function WorldPage() {
       ? getLivingMapRouteTarget(demoState.tradeRouteId || "iron-coast", demoState.tradeRouteDestination || "Iron Coast")
       : null;
   const routePath = claimedTileCenter && routeTarget ? buildLivingMapRoutePath(claimedTileCenter, routeTarget) : "";
+  const scoutPatrolPath = claimedTileCenter ? buildScoutPatrolPath(claimedTileCenter) : "";
   const currentPlayableObjective = playableState
     ? getCurrentObjective(playableState)
     : "Claim land to start the local settlement clock.";
   const worldMarkerStage = getWorldMarkerStage(playableState, demoState);
+  const settlementGrowthStage = getSettlementGrowthStage(playableState, demoState);
   const playableInfluenceRadius = getPlayableInfluenceRadius(playableState);
   const combinedInfluenceRadius = Math.max(influenceRadius, demoState.claimedLand ? playableInfluenceRadius : 0);
   const recentConsequence = getWorldRecentConsequence(
@@ -688,7 +765,9 @@ export default function WorldPage() {
   const visibleGrowthRingCount = playableState
     ? Math.min(4, Math.max(0, playableState.settlementLevel - 1) + Math.min(2, playableState.housingLevel))
     : 0;
-  const onMapPlayableActions = WORLD_PLAYABLE_ACTIONS.slice(0, 5);
+  const visiblePlacementMarkers = getVisiblePlacementMarkers(playableState);
+  const activePlacementGhost = getActivePlacementGhost(activePlayableOrder);
+  const onMapPlayableActions = WORLD_PLAYABLE_ACTIONS.slice(0, 7);
   const worldActivitySummary = getWorldActivitySummary(demoState, playableState);
   const activeMapLayer = getActiveMapLayer(demoState, playableState);
 
@@ -1423,6 +1502,12 @@ export default function WorldPage() {
                           <span className="block text-amber-100/80">Map Layer</span>
                           <span className="mt-1 block normal-case tracking-normal text-zinc-400">{activeMapLayer}</span>
                         </div>
+                        <div className="mt-3 border-t border-amber-500/10 pt-3 text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                          <span className="block text-amber-100/80">Growth Stage</span>
+                          <span data-qa="world-settlement-growth-stage" className="mt-1 block normal-case tracking-normal text-zinc-400">
+                            {settlementGrowthStage}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   <svg
@@ -1524,6 +1609,29 @@ export default function WorldPage() {
                           strokeWidth="7"
                         />
                         <circle cx={routeTarget.x} cy={routeTarget.y} r="7" fill="rgba(253,230,138,0.75)" />
+                        <circle data-qa="world-trade-route-motion" r="4.5" fill="rgba(253,230,138,0.92)">
+                          <animateMotion dur="5.5s" repeatCount="indefinite" path={routePath} />
+                        </circle>
+                      </g>
+                    ) : null}
+                    {claimedTileCenter && scoutPatrolPath ? (
+                      <g data-qa="world-scout-route-motion" opacity="0.88">
+                        <path
+                          d={scoutPatrolPath}
+                          fill="none"
+                          stroke="rgba(165,243,252,0.28)"
+                          strokeDasharray="3 9"
+                          strokeLinecap="round"
+                          strokeWidth="2"
+                        />
+                        <circle r="3.5" fill="rgba(165,243,252,0.9)">
+                          <animateMotion dur="6.2s" repeatCount="indefinite" path={scoutPatrolPath} />
+                        </circle>
+                        <g data-qa="world-first-troop-marker">
+                          <animateMotion dur="7.4s" repeatCount="indefinite" path={scoutPatrolPath} />
+                          <circle r="6" fill="rgba(251,191,36,0.82)" stroke="rgba(254,243,199,0.72)" strokeWidth="1.5" />
+                          <path d="M 0 -8 L 0 -17 L 9 -13 L 0 -10" fill="rgba(253,230,138,0.78)" />
+                        </g>
                       </g>
                     ) : null}
                   </svg>
@@ -1553,6 +1661,21 @@ export default function WorldPage() {
                       Route - {routeTarget.name}
                     </span>
                   ) : null}
+                  {!demoState.claimedLand && !isUnavailable ? (
+                    <div className="pointer-events-none absolute inset-3 z-[21]" aria-hidden>
+                      <span
+                        data-qa="world-building-placement-ghost"
+                        className="absolute h-11 w-11 -translate-x-1/2 -translate-y-[74%] border border-dashed border-amber-100/58 bg-amber-300/[0.08] shadow-[0_0_24px_rgba(251,191,36,0.26),inset_0_0_14px_rgba(251,191,36,0.12)]"
+                        style={selectedTileMapPosition}
+                      >
+                        <span className="absolute bottom-1.5 left-1/2 h-3 w-6 -translate-x-1/2 border border-amber-100/42 bg-[#130d04]/82" />
+                        <span className="absolute bottom-4 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-l border-t border-amber-100/52 bg-amber-200/14" />
+                        <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap border border-amber-500/18 bg-[#030306]/78 px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-[0.16em] text-amber-100/70">
+                          Hall Ghost
+                        </span>
+                      </span>
+                    </div>
+                  ) : null}
                   {claimedTileMapPosition ? (
                     <div className="pointer-events-none absolute inset-3 z-[21]" aria-hidden>
                       {playableState && playableState.landsSurveyed > 0 ? (
@@ -1575,6 +1698,32 @@ export default function WorldPage() {
                             ))}
                         </div>
                       ) : null}
+                      <div data-qa="world-placement-markers" className="absolute inset-0">
+                        {visiblePlacementMarkers.map((marker) => (
+                          <span
+                            key={marker.id}
+                            className={`absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 border ${PLACEMENT_KIND_STYLES[marker.kind]}`}
+                            style={claimedTile ? getOffsetTileCssCenter(claimedTile, marker.dx, marker.dy) : claimedTileMapPosition}
+                          >
+                            <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-100/80" />
+                            <span className="absolute -bottom-4 left-1/2 hidden -translate-x-1/2 whitespace-nowrap text-[7px] font-bold uppercase tracking-[0.14em] text-amber-100/60 sm:block">
+                              {marker.label}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                      {activePlacementGhost && claimedTile ? (
+                        <span
+                          data-qa="world-active-placement-ghost"
+                          className={`absolute h-10 w-10 -translate-x-1/2 -translate-y-1/2 animate-pulse border border-dashed ${PLACEMENT_KIND_STYLES[activePlacementGhost.kind]}`}
+                          style={getOffsetTileCssCenter(claimedTile, activePlacementGhost.dx, activePlacementGhost.dy)}
+                        >
+                          <span className="absolute inset-1 border border-amber-100/24" />
+                          <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap border border-amber-500/18 bg-[#030306]/82 px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-[0.14em] text-amber-100/72">
+                            {activePlacementGhost.label}
+                          </span>
+                        </span>
+                      ) : null}
                       {visibleGrowthRingCount > 0 ? (
                         <div data-qa="world-growth-rings" className="absolute inset-0">
                           {Array.from({ length: visibleGrowthRingCount }, (_, index) => (
@@ -1590,6 +1739,15 @@ export default function WorldPage() {
                           ))}
                         </div>
                       ) : null}
+                      <span
+                        data-qa="world-settlement-growth-cluster"
+                        className="absolute h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-300/12 bg-amber-300/[0.025]"
+                        style={claimedTileMapPosition}
+                      >
+                        <span className="absolute -right-2 top-1 h-3 w-3 rounded-sm border border-emerald-200/30 bg-emerald-300/12" />
+                        <span className="absolute bottom-1 left-0 h-2.5 w-5 border border-lime-200/24 bg-lime-300/10" />
+                        <span className="absolute -top-1 left-2 h-2.5 w-2.5 rotate-45 border border-slate-200/24 bg-slate-300/10" />
+                      </span>
                       <span
                         data-qa="world-claimed-land-marker"
                         className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-200/70 bg-amber-400/18 shadow-[0_0_22px_rgba(251,191,36,0.42),inset_0_0_10px_rgba(251,191,36,0.2)]"
@@ -1892,8 +2050,15 @@ export default function WorldPage() {
                       ["Landmark", "h-1 w-1 rotate-45 bg-orange-200/80"],
                       ["Grid", "h-px w-3 bg-amber-400/40"],
                       ["Routes", "h-px w-3 bg-slate-300/60"],
+                      ["Ghost", "h-2 w-2 border border-dashed border-amber-100/60 bg-amber-300/10"],
                       ...(demoState.claimedLand
-                        ? [["Owned", "h-2 w-2 rounded-full border border-amber-300/60 bg-amber-300/24"]]
+                        ? [
+                            ["Owned", "h-2 w-2 rounded-full border border-amber-300/60 bg-amber-300/24"],
+                            ["Housing", "h-2 w-2 border border-emerald-200/45 bg-emerald-300/16"],
+                            ["Fields", "h-2 w-2 border border-lime-200/40 bg-lime-300/14"],
+                            ["Quarry", "h-2 w-2 border border-slate-200/38 bg-slate-300/14"],
+                            ["Troop", "h-2 w-2 rounded-full border border-amber-100/70 bg-amber-300/70"],
+                          ]
                         : []),
                       ...(demoState.settlementFounded
                         ? [["Settlement", "h-2 w-2 border border-emerald-200/60 bg-emerald-300/20"]]
