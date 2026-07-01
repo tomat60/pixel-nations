@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-07-01T09:49:22.768Z",
+  "generatedAt": "2026-07-01T09:49:58.002Z",
   "branch": "agent/vision-gameplay-slice-v0.14",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## agent/vision-gameplay-slice-v0.14...origin/agent/vision-gameplay-slice-v0.14\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-world-atlas.png\n M public/qa/latest/screenshots/desktop-world-living-map.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world-selected-land-panel.png\n M public/qa/latest/screenshots/desktop-world-top.png\n M public/qa/latest/screenshots/desktop-world.png\n M public/qa/latest/screenshots/mobile-dashboard.png\n M public/qa/latest/screenshots/mobile-settlement-after-action.png\n M public/qa/latest/screenshots/mobile-world-atlas.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-living-map.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world-selected-land-panel.png\n M public/qa/latest/screenshots/mobile-world-top.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
-    "lastCommits": "b4f4682 fix: restore world smoke heading\nb0fa085 fix: keep world map tiles clickable\n56dc11f feat: add world vision gameplay slice\n4f7553f feat: improve mobile world touch shell (#33)\n09f6e72 feat: make world map fullscreen game shell (#30)"
+    "statusSummary": "## agent/vision-gameplay-slice-v0.14...origin/agent/vision-gameplay-slice-v0.14",
+    "lastCommits": "0987d77 test: add vision gameplay QA evidence\nb4f4682 fix: restore world smoke heading\nb0fa085 fix: keep world map tiles clickable\n56dc11f feat: add world vision gameplay slice\n4f7553f feat: improve mobile world touch shell (#33)"
   },
   "qa": {
     "smoke": {
@@ -84,7 +84,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-07-01T09:49:22.768Z",
+    "localHandoffGeneratedAt": "2026-07-01T09:49:58.002Z",
     "localReportGeneratedAt": "2026-07-01T09:49:15.465Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",

@@ -1,39 +1,18 @@
 Pixel Nations Handoff Report
-Generated: 2026-07-01T09:49:22.768Z
+Generated: 2026-07-01T09:49:58.002Z
 
 Branch: agent/vision-gameplay-slice-v0.14
-Working tree: has changes
+Working tree: clean
 
 Git status:
   ## agent/vision-gameplay-slice-v0.14...origin/agent/vision-gameplay-slice-v0.14
-   D public/qa/latest/handoff.json
-   D public/qa/latest/handoff.txt
-   M public/qa/latest/index.html
-   M public/qa/latest/manifest.json
-   M public/qa/latest/report.html
-   M public/qa/latest/screenshots/desktop-world-atlas.png
-   M public/qa/latest/screenshots/desktop-world-living-map.png
-   M public/qa/latest/screenshots/desktop-world-sector.png
-   M public/qa/latest/screenshots/desktop-world-selected-land-panel.png
-   M public/qa/latest/screenshots/desktop-world-top.png
-   M public/qa/latest/screenshots/desktop-world.png
-   M public/qa/latest/screenshots/mobile-dashboard.png
-   M public/qa/latest/screenshots/mobile-settlement-after-action.png
-   M public/qa/latest/screenshots/mobile-world-atlas.png
-   M public/qa/latest/screenshots/mobile-world-claim-tray.png
-   M public/qa/latest/screenshots/mobile-world-living-map.png
-   M public/qa/latest/screenshots/mobile-world-sector.png
-   M public/qa/latest/screenshots/mobile-world-selected-land-panel.png
-   M public/qa/latest/screenshots/mobile-world-top.png
-   M public/qa/latest/screenshots/mobile-world.png
-   M public/qa/latest/smoke-result.json
 
 Last 5 commits:
+  0987d77 test: add vision gameplay QA evidence
   b4f4682 fix: restore world smoke heading
   b0fa085 fix: keep world map tiles clickable
   56dc11f feat: add world vision gameplay slice
   4f7553f feat: improve mobile world touch shell (#33)
-  09f6e72 feat: make world map fullscreen game shell (#30)
 
 QA:
 Smoke result: PASS
@@ -53,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-07-01T09:49:22.768Z
+Local handoff generated: 2026-07-01T09:49:58.002Z
 Local report generated: 2026-07-01T09:49:15.465Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
