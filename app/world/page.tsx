@@ -1142,14 +1142,14 @@ export default function WorldPage() {
             ref={playableSectorRef}
             id="playable-sector"
             data-qa="playable-sector"
-            className="relative flex h-[100svh] min-h-[100svh] flex-col overflow-hidden border-b border-amber-500/18 bg-[#050509]/90 p-2 pt-[max(0.5rem,env(safe-area-inset-top))] shadow-[0_30px_120px_rgba(0,0,0,0.68)] sm:h-auto sm:min-h-0 sm:border sm:p-4 lg:block lg:min-h-[calc(100vh-3rem)]"
+            className="relative flex h-[100svh] min-h-[100svh] flex-col overflow-x-hidden overflow-y-auto border-b border-amber-500/18 bg-[#050509]/90 p-2 pt-[max(0.5rem,env(safe-area-inset-top))] shadow-[0_30px_120px_rgba(0,0,0,0.68)] sm:h-auto sm:min-h-0 sm:border sm:p-4 lg:block lg:min-h-[calc(100vh-3rem)] lg:overflow-hidden"
           >
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_18%,rgba(201,169,98,0.1),transparent_34%),radial-gradient(ellipse_at_88%_76%,rgba(201,169,98,0.05),transparent_40%)]"
             />
             <div className="relative flex min-h-0 flex-1 flex-col lg:block">
-              <div className="shrink-0 border border-amber-500/12 bg-[#030306]/78 p-3 shadow-[0_12px_40px_rgba(0,0,0,0.38)] backdrop-blur-md sm:flex sm:flex-col sm:justify-between sm:gap-3 sm:border-b sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-0 lg:hidden">
+              <div className="order-2 mt-3 shrink-0 border border-amber-500/12 bg-[#030306]/78 p-3 shadow-[0_12px_40px_rgba(0,0,0,0.38)] backdrop-blur-md sm:flex sm:flex-col sm:justify-between sm:gap-3 sm:border-b sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-0 lg:hidden">
                 <div className="max-w-xl">
                   <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-amber-600/80 sm:text-[10px] sm:tracking-[0.28em]">
                     Sector A-01 is live / App Shell
@@ -1179,7 +1179,7 @@ export default function WorldPage() {
 
               <div
                 data-qa="sector-orientation-note"
-                className="mt-2 shrink-0 border border-amber-500/12 bg-[#08080f]/78 p-2 text-xs leading-5 text-zinc-500 sm:mt-5 sm:p-3 sm:text-sm sm:leading-7 lg:hidden"
+                className="order-3 mt-2 shrink-0 border border-amber-500/12 bg-[#08080f]/78 p-2 text-xs leading-5 text-zinc-500 sm:mt-5 sm:p-3 sm:text-sm sm:leading-7 lg:hidden"
               >
                 <span className="font-[family-name:var(--font-syne)] text-xs font-bold uppercase tracking-[0.24em] text-amber-100/80">
                   Touch Map
@@ -1192,7 +1192,7 @@ export default function WorldPage() {
               {demoState.claimedLand ? (
                 <div
                   data-qa="world-activity-panel"
-                  className="mt-2 max-h-[30svh] shrink-0 overflow-y-auto border border-amber-500/12 bg-[#08080f]/78 p-3 sm:mt-5 sm:max-h-none lg:hidden"
+                  className="order-4 mt-2 max-h-[30svh] shrink-0 overflow-y-auto border border-amber-500/12 bg-[#08080f]/78 p-3 sm:mt-5 sm:max-h-none lg:hidden"
                 >
                   <div
                     data-qa="world-playable-hud"
@@ -1361,7 +1361,7 @@ export default function WorldPage() {
                 </div>
               ) : null}
 
-              <div className="mt-2 flex shrink-0 flex-wrap items-center justify-between gap-2 border border-amber-500/10 bg-[#08080f]/70 p-2 sm:hidden">
+              <div className="hidden">
                 <p className="text-[9px] uppercase tracking-[0.16em] text-zinc-500">
                   Map pane only: drag inside to inspect cells.
                 </p>
@@ -1379,9 +1379,9 @@ export default function WorldPage() {
                 </div>
               </div>
 
-              <div className="mt-2 min-h-0 flex-1 overflow-auto overscroll-contain pb-2 sm:mt-4 lg:mt-0 lg:min-h-0">
+              <div className="order-1 mt-0 h-[calc(100svh-1rem)] min-h-0 flex-none overflow-auto overscroll-contain pb-2 sm:mt-4 sm:h-auto sm:flex-1 lg:mt-0 lg:min-h-0">
                 <div
-                  className="world-sector-canvas relative min-h-[58svh] w-full min-w-[620px] overflow-hidden border border-amber-500/25 bg-cover bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)] transition-[width] duration-200 sm:min-h-[620px] sm:min-w-[680px] sm:p-3 lg:min-h-[calc(100vh-5rem)] lg:min-w-[980px]"
+                  className="world-sector-canvas relative min-h-[calc(100svh-1.5rem)] w-full min-w-[620px] overflow-hidden border border-amber-500/25 bg-cover bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.45),inset_0_0_90px_rgba(0,0,0,0.68)] transition-[width] duration-200 sm:min-h-[620px] sm:min-w-[680px] sm:p-3 lg:min-h-[calc(100vh-5rem)] lg:min-w-[980px]"
                   style={{
                     width: `${Math.round(mobileMapZoom * 100)}%`,
                     backgroundImage:
@@ -1413,6 +1413,39 @@ export default function WorldPage() {
                     aria-hidden
                     className="pointer-events-none absolute bottom-3 right-3 z-[24] h-5 w-5 border-b border-r border-amber-200/35"
                   />
+                  <div className="pointer-events-none absolute left-3 right-3 top-3 z-[29] sm:hidden">
+                    <div className="border border-amber-500/18 bg-[#030306]/78 p-2 shadow-[0_16px_54px_rgba(0,0,0,0.42)] backdrop-blur-md">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-amber-500/75">
+                            Sector A-01 / Map Surface
+                          </p>
+                          <p className="mt-1 truncate font-[family-name:var(--font-syne)] text-base font-extrabold text-amber-100">
+                            Aurelian Basin
+                          </p>
+                        </div>
+                        <div className="shrink-0 border border-amber-500/15 bg-amber-500/[0.06] px-2 py-1 text-right text-[8px] uppercase tracking-[0.14em] text-zinc-500">
+                          <span className="block text-amber-100/80">216 lands</span>
+                          <span className="mt-0.5 block">A-01</span>
+                        </div>
+                      </div>
+                      <p className="mt-2 line-clamp-2 text-[11px] leading-5 text-amber-100/82">
+                        {currentPlayableObjective}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pointer-events-auto absolute bottom-3 right-3 z-[31] flex gap-1.5 sm:hidden">
+                    {mobileMapControls.map(({ label, action }) => (
+                      <button
+                        key={label}
+                        type="button"
+                        onClick={action}
+                        className="rounded border border-amber-500/22 bg-[#030306]/86 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-amber-100/80 shadow-[0_10px_28px_rgba(0,0,0,0.45)] backdrop-blur-md"
+                      >
+                        {label === "Zoom Out" ? "-" : label === "Zoom In" ? "+" : label}
+                      </button>
+                    ))}
+                  </div>
                   <div
                     aria-hidden
                     className="pointer-events-none absolute inset-3 z-[4] bg-[radial-gradient(ellipse_at_52%_48%,rgba(201,169,98,0.12),transparent_58%)]"
