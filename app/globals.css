@@ -259,16 +259,43 @@ html {
     box-shadow 0.35s ease;
 }
 
-.claim-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(201, 169, 98, 0.35);
-  box-shadow: 0 16px 56px rgba(0, 0, 0, 0.45);
-}
+@media (max-width: 639px) {
+  html:has([data-qa="playable-sector"]),
+  body:has([data-qa="playable-sector"]) {
+    height: 100%;
+    overflow: hidden;
+  }
 
-@media (max-width: 767px) {
-  [data-nextjs-dev-tools-button],
-  [data-nextjs-dev-tools-indicator],
-  button[aria-label*="Next.js"] {
+  body:has([data-qa="playable-sector"]) main {
+    position: fixed;
+    inset: 0;
+    height: 100dvh;
+    width: 100dvw;
+    overflow: hidden;
+    padding: 0 !important;
+  }
+
+  body:has([data-qa="playable-sector"]) main > div {
+    height: 100%;
+    max-width: none;
+  }
+
+  body:has([data-qa="playable-sector"]) main header,
+  body:has([data-qa="playable-sector"]) [data-qa="first-60-guidance"],
+  body:has([data-qa="playable-sector"]) [data-qa="world-atlas"] {
     display: none !important;
+  }
+
+  body:has([data-qa="playable-sector"]) [data-qa="playable-sector"] {
+    order: 1;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh;
+    margin: 0 !important;
+    border-width: 0 !important;
+  }
+
+  body:has([data-qa="playable-sector"]) [data-qa="playable-sector"] > div {
+    height: 100% !important;
   }
 }
