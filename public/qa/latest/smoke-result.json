@@ -1,45 +1,45 @@
 {
   "status": "PASS",
-  "generatedAt": "2026-07-02T06:35:48.334Z",
+  "generatedAt": "2026-07-02T15:42:20.316Z",
   "appUrl": "http://localhost:3000",
-  "appSource": "existing local app",
+  "appSource": "temporary next start",
   "blockingStep": "",
   "error": "",
   "steps": [
     {
       "name": "playable command center route",
       "status": "PASS",
-      "durationMs": 698
+      "durationMs": 730
     },
     {
       "name": "reset demo state and open /world",
       "status": "PASS",
-      "durationMs": 671
+      "durationMs": 687
     },
     {
       "name": "select a claimable Sector A-01 land",
       "status": "PASS",
-      "durationMs": 81
+      "durationMs": 88
     },
     {
       "name": "claim selected land",
       "status": "PASS",
-      "durationMs": 120
+      "durationMs": 111
     },
     {
       "name": "queue playable order from world map",
       "status": "PASS",
-      "durationMs": 243
+      "durationMs": 213
     },
     {
       "name": "world map has no primary progression route links",
       "status": "PASS",
-      "durationMs": 5
+      "durationMs": 2
     },
     {
       "name": "advance core progression on world map",
       "status": "PASS",
-      "durationMs": 498
+      "durationMs": 489
     },
     {
       "name": "political progression stays on map as pending layer",

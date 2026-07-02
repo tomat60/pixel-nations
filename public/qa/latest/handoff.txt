@@ -1,5 +1,5 @@
 Pixel Nations Handoff Report
-Generated: 2026-07-02T06:35:48.446Z
+Generated: 2026-07-02T15:42:20.427Z
 
 Branch: agent/vision-gameplay-slice-v0.14
 Working tree: has changes
@@ -12,41 +12,45 @@ Git status:
    M public/qa/latest/manifest.json
    M public/qa/latest/report.html
    M public/qa/latest/screenshots/desktop-home.png
+   M public/qa/latest/screenshots/desktop-world-living-map.png
    M public/qa/latest/screenshots/desktop-world-sector.png
+   M public/qa/latest/screenshots/desktop-world.png
+   D public/qa/latest/screenshots/mobile-world-atlas.png
    M public/qa/latest/screenshots/mobile-world-claim-tray.png
    M public/qa/latest/screenshots/mobile-world-living-map.png
    M public/qa/latest/screenshots/mobile-world-sector.png
+   M public/qa/latest/screenshots/mobile-world-selected-land-panel.png
    M public/qa/latest/screenshots/mobile-world-top.png
    M public/qa/latest/screenshots/mobile-world.png
    M public/qa/latest/smoke-result.json
 
 Last 5 commits:
+  1d7d902 fix: reduce mobile world HUD clutter
+  4de1412 fix: force mobile world game shell
+  28d16fe test: refresh vision gameplay mobile evidence
   534d2ff fix: prioritize mobile world map viewport
   306f7f6 docs: refresh vision gameplay handoff
-  0987d77 test: add vision gameplay QA evidence
-  b4f4682 fix: restore world smoke heading
-  b0fa085 fix: keep world map tiles clickable
 
 QA:
 Smoke result: PASS
-Smoke generated: 2026-07-02T06:35:48.334Z
-Smoke app source: existing local app
+Smoke generated: 2026-07-02T15:42:20.316Z
+Smoke app source: temporary next start
 Smoke steps: 8/8 passed
 Smoke result path: public/qa/latest/smoke-result.json
 
 QA Evidence Freshness:
-Smoke generated: 2026-07-02T06:35:48.334Z
-Report modified: 2026-07-02T06:35:45.434Z
-Manifest modified: 2026-07-02T06:35:45.434Z
-Screenshots newest: 2026-07-02T06:35:45.394Z
-Screenshots oldest: 2026-07-02T06:34:28.598Z
-Screenshots count: 29
+Smoke generated: 2026-07-02T15:42:20.316Z
+Report modified: 2026-07-02T15:41:57.397Z
+Manifest modified: 2026-07-02T15:41:57.397Z
+Screenshots newest: 2026-07-02T15:41:57.365Z
+Screenshots oldest: 2026-07-02T15:40:44.364Z
+Screenshots count: 28
 Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-07-02T06:35:48.446Z
-Local report generated: 2026-07-02T06:35:45.439Z
+Local handoff generated: 2026-07-02T15:42:20.427Z
+Local report generated: 2026-07-02T15:41:57.400Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
 Public handoff TXT: https://pixel-nations.vercel.app/qa/latest/handoff.txt

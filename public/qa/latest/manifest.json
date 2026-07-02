@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-02T06:35:45.439Z",
+  "generatedAt": "2026-07-02T15:41:57.400Z",
   "screenshots": [
     {
       "filename": "mobile-home.png",
@@ -27,11 +27,6 @@
       "viewport": "mobile"
     },
     {
-      "filename": "mobile-world-atlas.png",
-      "route": "/world",
-      "viewport": "mobile"
-    },
-    {
       "filename": "mobile-world-sector.png",
       "route": "/world",
       "viewport": "mobile"
@@ -43,11 +38,6 @@
     },
     {
       "filename": "mobile-world-selected-land-panel.png",
-      "route": "/world",
-      "viewport": "mobile"
-    },
-    {
-      "filename": "mobile-world-claim-tray.png",
       "route": "/world",
       "viewport": "mobile"
     },

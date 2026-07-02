@@ -1,55 +1,55 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-07-02T06:35:48.446Z",
+  "generatedAt": "2026-07-02T15:42:20.427Z",
   "branch": "agent/vision-gameplay-slice-v0.14",
   "isClean": false,
   "git": {
-    "statusSummary": "## agent/vision-gameplay-slice-v0.14...origin/agent/vision-gameplay-slice-v0.14\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-home.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-living-map.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world-top.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
-    "lastCommits": "534d2ff fix: prioritize mobile world map viewport\n306f7f6 docs: refresh vision gameplay handoff\n0987d77 test: add vision gameplay QA evidence\nb4f4682 fix: restore world smoke heading\nb0fa085 fix: keep world map tiles clickable"
+    "statusSummary": "## agent/vision-gameplay-slice-v0.14...origin/agent/vision-gameplay-slice-v0.14\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-home.png\n M public/qa/latest/screenshots/desktop-world-living-map.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n D public/qa/latest/screenshots/mobile-world-atlas.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-living-map.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world-selected-land-panel.png\n M public/qa/latest/screenshots/mobile-world-top.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
+    "lastCommits": "1d7d902 fix: reduce mobile world HUD clutter\n4de1412 fix: force mobile world game shell\n28d16fe test: refresh vision gameplay mobile evidence\n534d2ff fix: prioritize mobile world map viewport\n306f7f6 docs: refresh vision gameplay handoff"
   },
   "qa": {
     "smoke": {
       "status": "PASS",
-      "generatedAt": "2026-07-02T06:35:48.334Z",
+      "generatedAt": "2026-07-02T15:42:20.316Z",
       "appUrl": "http://localhost:3000",
-      "appSource": "existing local app",
+      "appSource": "temporary next start",
       "blockingStep": "",
       "error": "",
       "steps": [
         {
           "name": "playable command center route",
           "status": "PASS",
-          "durationMs": 698
+          "durationMs": 730
         },
         {
           "name": "reset demo state and open /world",
           "status": "PASS",
-          "durationMs": 671
+          "durationMs": 687
         },
         {
           "name": "select a claimable Sector A-01 land",
           "status": "PASS",
-          "durationMs": 81
+          "durationMs": 88
         },
         {
           "name": "claim selected land",
           "status": "PASS",
-          "durationMs": 120
+          "durationMs": 111
         },
         {
           "name": "queue playable order from world map",
           "status": "PASS",
-          "durationMs": 243
+          "durationMs": 213
         },
         {
           "name": "world map has no primary progression route links",
           "status": "PASS",
-          "durationMs": 5
+          "durationMs": 2
         },
         {
           "name": "advance core progression on world map",
           "status": "PASS",
-          "durationMs": 498
+          "durationMs": 489
         },
         {
           "name": "political progression stays on map as pending layer",
@@ -60,7 +60,7 @@
       "passedSteps": 8,
       "totalSteps": 8,
       "path": "public/qa/latest/smoke-result.json",
-      "summary": "Smoke result: PASS\nSmoke generated: 2026-07-02T06:35:48.334Z\nSmoke app source: existing local app\nSmoke steps: 8/8 passed\nSmoke result path: public/qa/latest/smoke-result.json"
+      "summary": "Smoke result: PASS\nSmoke generated: 2026-07-02T15:42:20.316Z\nSmoke app source: temporary next start\nSmoke steps: 8/8 passed\nSmoke result path: public/qa/latest/smoke-result.json"
     },
     "publicQaIndexUrl": "https://pixel-nations.vercel.app/qa/latest/",
     "publicQaReportUrl": "https://pixel-nations.vercel.app/qa/latest/report.html",
@@ -74,18 +74,18 @@
   },
   "qaEvidenceFreshness": {
     "status": "FRESH",
-    "smokeGeneratedAt": "2026-07-02T06:35:48.334Z",
-    "reportModifiedAt": "2026-07-02T06:35:45.434Z",
-    "manifestModifiedAt": "2026-07-02T06:35:45.434Z",
-    "screenshotsNewestModifiedAt": "2026-07-02T06:35:45.394Z",
-    "screenshotsOldestModifiedAt": "2026-07-02T06:34:28.598Z",
-    "screenshotsCount": 29,
+    "smokeGeneratedAt": "2026-07-02T15:42:20.316Z",
+    "reportModifiedAt": "2026-07-02T15:41:57.397Z",
+    "manifestModifiedAt": "2026-07-02T15:41:57.397Z",
+    "screenshotsNewestModifiedAt": "2026-07-02T15:41:57.365Z",
+    "screenshotsOldestModifiedAt": "2026-07-02T15:40:44.364Z",
+    "screenshotsCount": 28,
     "toleranceMinutes": 2,
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-07-02T06:35:48.446Z",
-    "localReportGeneratedAt": "2026-07-02T06:35:45.439Z",
+    "localHandoffGeneratedAt": "2026-07-02T15:42:20.427Z",
+    "localReportGeneratedAt": "2026-07-02T15:41:57.400Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",
       "report": "https://pixel-nations.vercel.app/qa/latest/report.html",
