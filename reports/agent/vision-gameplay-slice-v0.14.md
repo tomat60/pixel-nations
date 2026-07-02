@@ -14,6 +14,8 @@
 - Added settlement growth stage/readout and visible growth cluster markers.
 - Added scout route motion, trade route motion, and first troop marker movement without combat systems.
 - Expanded on-map playable actions to include fields and trade orders already present in the local engine.
+- Updated the mobile-first `/world` viewport so the initial screen opens on the map canvas as the primary game surface.
+- Moved longer mobile guidance/activity panels below the map-first surface and added compact in-map HUD/zoom controls.
 - Kept claim flow, local storage persistence, and dashboard identity helpers unchanged.
 
 ## Evidence hooks
@@ -28,10 +30,11 @@
 
 ## Validation
 - `npm run build` — PASS
-- `npm run qa:smoke` — PASS after installing missing Playwright Chromium and restarting a stale local `next start`
-- `npm run qa:screens` — PASS, 29 fresh screenshots
+- `npm run qa:smoke` — PASS after installing missing Playwright Chromium and stopping the stale failed-smoke `next start`
+- `npm run qa:screens` — PASS, 29 fresh screenshots regenerated
+- `npm run qa:smoke` — PASS after screenshots
 - `npm run pn:handoff` — PASS, local evidence fresh
-- `npm run pn:status` — command exited 0; public QA check still reports the deployed public handoff is older than local evidence
+- `npm run pn:status` — command exited 0; public QA check still reports deployed public handoff is older than local evidence
 
 ## PR status
-- PR not opened per issue instruction: "Do not open PR or merge."
+- PR not opened per latest issue comment: "Do not open another PR or merge."
