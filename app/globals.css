@@ -282,7 +282,9 @@ html {
 
   body:has([data-qa="playable-sector"]) main header,
   body:has([data-qa="playable-sector"]) [data-qa="first-60-guidance"],
-  body:has([data-qa="playable-sector"]) [data-qa="world-atlas"] {
+  body:has([data-qa="playable-sector"]) [data-qa="world-atlas"],
+  body:has([data-qa="playable-sector"]) [data-qa="sector-orientation-note"],
+  body:has([data-qa="playable-sector"]) [data-qa="playable-sector"] > div:not([aria-hidden]) > div:first-child {
     display: none !important;
   }
 
@@ -293,9 +295,39 @@ html {
     max-height: 100dvh;
     margin: 0 !important;
     border-width: 0 !important;
+    padding: 0 !important;
   }
 
   body:has([data-qa="playable-sector"]) [data-qa="playable-sector"] > div {
     height: 100% !important;
+  }
+
+  body:has([data-qa="playable-sector"]) [data-qa="playable-sector"] > div:not([aria-hidden]) > div:has(.world-sector-canvas) {
+    height: 100dvh !important;
+    padding-bottom: 0 !important;
+  }
+
+  body:has([data-qa="playable-sector"]) .world-sector-canvas {
+    min-height: 100dvh !important;
+    padding: 0.5rem !important;
+  }
+
+  body:has([data-qa="playable-sector"]) .world-sector-canvas > div[class*="left-3"][class*="right-3"][class*="top-3"] {
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+    top: 0.5rem !important;
+  }
+
+  body:has([data-qa="playable-sector"]) .world-sector-canvas > div[class*="left-3"][class*="right-3"][class*="top-3"] > div {
+    padding: 0.45rem 0.55rem !important;
+  }
+
+  body:has([data-qa="playable-sector"]) .world-sector-canvas > div[class*="left-3"][class*="right-3"][class*="top-3"] p:last-child {
+    display: none !important;
+  }
+
+  body:has([data-qa="playable-sector"]) [data-qa="world-selected-land-map-card"],
+  body:has([data-qa="playable-sector"]) [data-qa="world-on-map-action-layer"] {
+    max-width: min(18rem, calc(100dvw - 1rem)) !important;
   }
 }
