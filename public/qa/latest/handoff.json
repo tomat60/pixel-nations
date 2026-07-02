@@ -1,11 +1,11 @@
 {
   "project": "Pixel Nations",
-  "generatedAt": "2026-07-02T15:42:20.427Z",
+  "generatedAt": "2026-07-02T15:43:24.421Z",
   "branch": "agent/vision-gameplay-slice-v0.14",
-  "isClean": false,
+  "isClean": true,
   "git": {
-    "statusSummary": "## agent/vision-gameplay-slice-v0.14...origin/agent/vision-gameplay-slice-v0.14\n D public/qa/latest/handoff.json\n D public/qa/latest/handoff.txt\n M public/qa/latest/index.html\n M public/qa/latest/manifest.json\n M public/qa/latest/report.html\n M public/qa/latest/screenshots/desktop-home.png\n M public/qa/latest/screenshots/desktop-world-living-map.png\n M public/qa/latest/screenshots/desktop-world-sector.png\n M public/qa/latest/screenshots/desktop-world.png\n D public/qa/latest/screenshots/mobile-world-atlas.png\n M public/qa/latest/screenshots/mobile-world-claim-tray.png\n M public/qa/latest/screenshots/mobile-world-living-map.png\n M public/qa/latest/screenshots/mobile-world-sector.png\n M public/qa/latest/screenshots/mobile-world-selected-land-panel.png\n M public/qa/latest/screenshots/mobile-world-top.png\n M public/qa/latest/screenshots/mobile-world.png\n M public/qa/latest/smoke-result.json",
-    "lastCommits": "1d7d902 fix: reduce mobile world HUD clutter\n4de1412 fix: force mobile world game shell\n28d16fe test: refresh vision gameplay mobile evidence\n534d2ff fix: prioritize mobile world map viewport\n306f7f6 docs: refresh vision gameplay handoff"
+    "statusSummary": "## agent/vision-gameplay-slice-v0.14...origin/agent/vision-gameplay-slice-v0.14 [ahead 1]",
+    "lastCommits": "ad35aea test: refresh vision gameplay evidence\n1d7d902 fix: reduce mobile world HUD clutter\n4de1412 fix: force mobile world game shell\n28d16fe test: refresh vision gameplay mobile evidence\n534d2ff fix: prioritize mobile world map viewport"
   },
   "qa": {
     "smoke": {
@@ -84,7 +84,7 @@
     "warnings": []
   },
   "publicEvidence": {
-    "localHandoffGeneratedAt": "2026-07-02T15:42:20.427Z",
+    "localHandoffGeneratedAt": "2026-07-02T15:43:24.421Z",
     "localReportGeneratedAt": "2026-07-02T15:41:57.400Z",
     "expectedUrls": {
       "index": "https://pixel-nations.vercel.app/qa/latest/",

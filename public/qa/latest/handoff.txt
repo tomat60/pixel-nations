@@ -1,35 +1,18 @@
 Pixel Nations Handoff Report
-Generated: 2026-07-02T15:42:20.427Z
+Generated: 2026-07-02T15:43:24.421Z
 
 Branch: agent/vision-gameplay-slice-v0.14
-Working tree: has changes
+Working tree: clean
 
 Git status:
-  ## agent/vision-gameplay-slice-v0.14...origin/agent/vision-gameplay-slice-v0.14
-   D public/qa/latest/handoff.json
-   D public/qa/latest/handoff.txt
-   M public/qa/latest/index.html
-   M public/qa/latest/manifest.json
-   M public/qa/latest/report.html
-   M public/qa/latest/screenshots/desktop-home.png
-   M public/qa/latest/screenshots/desktop-world-living-map.png
-   M public/qa/latest/screenshots/desktop-world-sector.png
-   M public/qa/latest/screenshots/desktop-world.png
-   D public/qa/latest/screenshots/mobile-world-atlas.png
-   M public/qa/latest/screenshots/mobile-world-claim-tray.png
-   M public/qa/latest/screenshots/mobile-world-living-map.png
-   M public/qa/latest/screenshots/mobile-world-sector.png
-   M public/qa/latest/screenshots/mobile-world-selected-land-panel.png
-   M public/qa/latest/screenshots/mobile-world-top.png
-   M public/qa/latest/screenshots/mobile-world.png
-   M public/qa/latest/smoke-result.json
+  ## agent/vision-gameplay-slice-v0.14...origin/agent/vision-gameplay-slice-v0.14 [ahead 1]
 
 Last 5 commits:
+  ad35aea test: refresh vision gameplay evidence
   1d7d902 fix: reduce mobile world HUD clutter
   4de1412 fix: force mobile world game shell
   28d16fe test: refresh vision gameplay mobile evidence
   534d2ff fix: prioritize mobile world map viewport
-  306f7f6 docs: refresh vision gameplay handoff
 
 QA:
 Smoke result: PASS
@@ -49,7 +32,7 @@ Evidence status: FRESH
 Evidence warning: none
 
 Public QA Evidence:
-Local handoff generated: 2026-07-02T15:42:20.427Z
+Local handoff generated: 2026-07-02T15:43:24.421Z
 Local report generated: 2026-07-02T15:41:57.400Z
 Public QA index: https://pixel-nations.vercel.app/qa/latest/
 Public QA report: https://pixel-nations.vercel.app/qa/latest/report.html
