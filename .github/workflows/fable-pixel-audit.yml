@@ -44,7 +44,7 @@ on:
 
 permissions:
   contents: read
-  issues: read
+  issues: write
 
 concurrency:
   group: fable-pixel-audit-${{ github.ref }}
