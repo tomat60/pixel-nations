@@ -209,7 +209,7 @@ function extractText(data) {
     .trim();
 }
 
-async function callAnthropic({ apiKey, model, prompt, maxOutputTokens, temperature }) {
+async function callAnthropic({ apiKey, model, prompt, maxOutputTokens }) {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -220,7 +220,6 @@ async function callAnthropic({ apiKey, model, prompt, maxOutputTokens, temperatu
     body: JSON.stringify({
       model,
       max_tokens: maxOutputTokens,
-      temperature,
       messages: [{ role: 'user', content: prompt }],
     }),
   });
@@ -245,13 +244,12 @@ async function main() {
     throw new Error(`Invalid FABLE_TASK_TYPE=${taskType}. Allowed: ${Array.from(TASKS).join(', ')}`);
   }
 
-  const model = env('ANTHROPIC_MODEL', 'claude-fable-5-latest');
+  const model = env('ANTHROPIC_MODEL', 'claude-fable-5');
   const maxInputTokens = intEnv('MAX_INPUT_TOKENS', taskType === 'weak_prompt' ? 8000 : 25000);
   const maxOutputTokens = intEnv('MAX_OUTPUT_TOKENS', taskType === 'cursor_prompts' ? 6000 : taskType === 'repo_audit' ? 5000 : 4000);
   const inputPricePerMillion = numberEnv('INPUT_PRICE_PER_MILLION_USD', 10);
   const outputPricePerMillion = numberEnv('OUTPUT_PRICE_PER_MILLION_USD', 50);
   const maxEstimatedCost = numberEnv('MAX_ESTIMATED_COST_USD', taskType === 'weak_prompt' ? 0.35 : 0.75);
-  const temperature = numberEnv('TEMPERATURE', 0.2);
   const apiKey = requiredEnv('ANTHROPIC_API_KEY');
 
   const prompt = await buildPrompt(taskType);
@@ -271,7 +269,7 @@ async function main() {
     throw new Error(`Estimated max cost $${estimatedMaxCost.toFixed(4)} exceeds cap $${maxEstimatedCost.toFixed(4)}`);
   }
 
-  const data = await callAnthropic({ apiKey, model, prompt, maxOutputTokens, temperature });
+  const data = await callAnthropic({ apiKey, model, prompt, maxOutputTokens });
   const outputText = extractText(data);
   if (!outputText) throw new Error('Anthropic returned no text content.');
 
