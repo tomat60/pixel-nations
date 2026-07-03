@@ -88,6 +88,23 @@ jobs:
           OUTPUT_PRICE_PER_MILLION_USD: "50"
         run: node scripts/fable-pixel-audit.mjs
 
+      - name: Post Fable result to issue
+        if: success() && github.event_name != 'workflow_dispatch'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const p = 'fable-output/fable-pixel-audit.md';
+            if (!fs.existsSync(p)) return;
+            const text = fs.readFileSync(p, 'utf8');
+            const safe = text.length > 60000 ? text.slice(0, 60000) + '\n\n[truncated]' : text;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '## Fable Pixel Audit Result\n\n' + safe,
+            });
+
       - name: Upload Fable artifact
         if: always()
         uses: actions/upload-artifact@v4
