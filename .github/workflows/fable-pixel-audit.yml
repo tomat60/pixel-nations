@@ -39,12 +39,10 @@ on:
         type: string
   issues:
     types: [opened, edited]
-  issue_comment:
-    types: [created, edited]
 
 permissions:
   contents: read
-  issues: write
+  issues: read
 
 concurrency:
   group: fable-pixel-audit-${{ github.ref }}
@@ -59,10 +57,7 @@ jobs:
     name: Fable Pixel Audit
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'issues' && github.event.issue.user.login == 'tomat60' && startsWith(github.event.issue.title, 'FABLE RUN:')) ||
-      (github.event_name == 'issue_comment' && github.event.issue.user.login == 'tomat60' && github.event.comment.user.login == 'tomat60' && startsWith(github.event.issue.title, 'FABLE RUN:') && contains(github.event.comment.body, '/fable') && !contains(github.event.comment.body, 'Fable Pixel Audit Result'))
+    if: github.event_name != 'issues' || (github.event.issue.user.login == 'tomat60' && startsWith(github.event.issue.title, 'FABLE RUN:'))
 
     steps:
       - name: Checkout repository read-only
@@ -78,38 +73,21 @@ jobs:
       - name: Run cost-capped Fable audit
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          FABLE_TASK_TYPE: ${{ github.event_name != 'workflow_dispatch' && (contains(github.event.issue.title, 'cursor_prompts') && 'cursor_prompts' || contains(github.event.issue.title, 'weak_prompt') && 'weak_prompt' || 'repo_audit') || inputs.task_type }}
+          FABLE_TASK_TYPE: ${{ github.event_name == 'issues' && (contains(github.event.issue.title, 'cursor_prompts') && 'cursor_prompts' || contains(github.event.issue.title, 'weak_prompt') && 'weak_prompt' || 'repo_audit') || inputs.task_type }}
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model || 'claude-fable-5' }}
           MAX_INPUT_TOKENS: ${{ inputs.max_input_tokens || '25000' }}
-          MAX_OUTPUT_TOKENS: ${{ github.event_name != 'workflow_dispatch' && (contains(github.event.issue.title, 'cursor_prompts') && '6000' || '5000') || inputs.max_output_tokens || '5000' }}
+          MAX_OUTPUT_TOKENS: ${{ github.event_name == 'issues' && (contains(github.event.issue.title, 'cursor_prompts') && '6000' || '5000') || inputs.max_output_tokens || '5000' }}
           MAX_ESTIMATED_COST_USD: ${{ inputs.max_estimated_cost_usd || '0.75' }}
           TEMPERATURE: ${{ inputs.temperature || '0.2' }}
           INPUT_PRICE_PER_MILLION_USD: "10"
           OUTPUT_PRICE_PER_MILLION_USD: "50"
         run: node scripts/fable-pixel-audit.mjs
 
-      - name: Post Fable result to issue
-        if: success() && github.event_name != 'workflow_dispatch'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const p = 'fable-output/fable-pixel-audit.md';
-            if (!fs.existsSync(p)) return;
-            const text = fs.readFileSync(p, 'utf8');
-            const safe = text.length > 60000 ? text.slice(0, 60000) + '\n\n[truncated]' : text;
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: '## Fable Pixel Audit Result\n\n' + safe,
-            });
-
       - name: Upload Fable artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: fable-pixel-audit-${{ github.event_name != 'workflow_dispatch' && (contains(github.event.issue.title, 'cursor_prompts') && 'cursor_prompts' || contains(github.event.issue.title, 'weak_prompt') && 'weak_prompt' || 'repo_audit') || inputs.task_type || 'repo_audit' }}
+          name: fable-pixel-audit-${{ github.event_name == 'issues' && (contains(github.event.issue.title, 'cursor_prompts') && 'cursor_prompts' || contains(github.event.issue.title, 'weak_prompt') && 'weak_prompt' || 'repo_audit') || inputs.task_type || 'repo_audit' }}
           path: |
             fable-output/fable-pixel-audit.md
             fable-output/fable-pixel-audit-meta.json
