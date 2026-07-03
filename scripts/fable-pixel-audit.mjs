@@ -94,6 +94,31 @@ async function readAllowedFile(filePath, maxChars = 60000) {
   return `\n\n--- FILE: ${filePath}${truncated ? ' (TRUNCATED)' : ''} ---\n${safeContent}\n`;
 }
 
+async function readIssueEventContext(maxChars = 45000) {
+  const eventPath = process.env.GITHUB_EVENT_PATH;
+  if (!eventPath) return '';
+
+  let event;
+  try {
+    const raw = await fs.readFile(eventPath, 'utf8');
+    event = JSON.parse(raw);
+  } catch (error) {
+    return `\n\n--- GITHUB EVENT CONTEXT ---\n[unreadable event payload: ${error.message}]\n`;
+  }
+
+  const issue = event?.issue;
+  if (!issue || typeof issue !== 'object') return '';
+
+  const title = typeof issue.title === 'string' ? issue.title : '';
+  const body = typeof issue.body === 'string' ? issue.body : '';
+  if (!title && !body) return '';
+
+  const truncated = body.length > maxChars;
+  const safeBody = truncated ? body.slice(0, maxChars) : body;
+
+  return `\n\n--- GITHUB ISSUE CONTEXT ---\nTitle: ${title}\n\nBody:\n${safeBody}${truncated ? '\n\n[issue body truncated]' : ''}\n`;
+}
+
 function weakPrompt() {
   return `Create the best possible first playable version of Pixel Nations.
 
@@ -193,8 +218,14 @@ async function buildPrompt(taskType) {
   const files = ALLOWLIST[taskType];
   const chunks = [];
   for (const file of files) chunks.push(await readAllowedFile(file));
+
+  const issueContext = await readIssueEventContext();
+  if (issueContext) chunks.push(issueContext);
+
   const context = chunks.join('\n');
-  if (taskType === 'weak_prompt') return weakPrompt();
+  if (taskType === 'weak_prompt') {
+    return issueContext ? `${weakPrompt()}\n\nAdditional issue context:\n${issueContext}` : weakPrompt();
+  }
   if (taskType === 'repo_audit') return repoAuditPrompt(context);
   if (taskType === 'cursor_prompts') return cursorPromptSynthesis(context);
   throw new Error(`Unsupported task type: ${taskType}`);
@@ -283,6 +314,7 @@ async function main() {
     usage: data.usage ?? null,
     createdAt: new Date().toISOString(),
     allowedFiles: ALLOWLIST[taskType],
+    includedIssueContext: Boolean(process.env.GITHUB_EVENT_PATH),
   };
 
   const report = `# Fable 5 Pixel Nations Audit\n\n` +
