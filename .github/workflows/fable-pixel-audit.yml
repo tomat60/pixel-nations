@@ -42,7 +42,8 @@ on:
 
 permissions:
   contents: read
-  issues: read
+  issues: write
+  actions: read
 
 concurrency:
   group: fable-pixel-audit-${{ github.ref }}
@@ -93,3 +94,37 @@ jobs:
             fable-output/fable-pixel-audit-meta.json
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Comment run link on Fable issue
+        if: always() && github.event_name == 'issues'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const title = context.payload.issue?.title || '';
+            const taskType = title.includes('cursor_prompts')
+              ? 'cursor_prompts'
+              : title.includes('weak_prompt')
+                ? 'weak_prompt'
+                : 'repo_audit';
+            const artifactName = `fable-pixel-audit-${taskType}`;
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const artifactsApiUrl = `${context.apiUrl}/repos/${owner}/${repo}/actions/runs/${context.runId}/artifacts`;
+            const body = [
+              '### Fable Pixel Audit run',
+              '',
+              `Status: ${{ job.status }}`,
+              `Task: ${taskType}`,
+              `Run: ${runUrl}`,
+              `Artifact name: ${artifactName}`,
+              `Artifacts API: ${artifactsApiUrl}`,
+              '',
+              'This workflow remains artifact-first. Use the run URL or artifacts API to retrieve the report.'
+            ].join('\n');
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: context.payload.issue.number,
+              body,
+            });
