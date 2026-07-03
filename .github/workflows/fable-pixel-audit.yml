@@ -13,9 +13,9 @@ on:
           - repo_audit
           - cursor_prompts
       anthropic_model:
-        description: "Anthropic model ID from console; update if Fable API name differs"
+        description: "Anthropic model ID"
         required: true
-        default: "claude-fable-5-latest"
+        default: "claude-fable-5"
         type: string
       max_input_tokens:
         description: "Abort if estimated input tokens exceed this cap"
