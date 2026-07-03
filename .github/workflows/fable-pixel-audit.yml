@@ -33,13 +33,21 @@ on:
         default: "0.35"
         type: string
       temperature:
-        description: "Model temperature"
+        description: "Deprecated for Fable; kept only for UI compatibility and ignored by script"
         required: true
         default: "0.2"
         type: string
+  schedule:
+    # Weekly automatic Pixel Nations repo-aware Fable audit.
+    # Cost-capped by the script before the API call.
+    - cron: "17 8 * * 1"
 
 permissions:
   contents: read
+
+concurrency:
+  group: fable-pixel-audit-${{ github.ref }}
+  cancel-in-progress: false
 
 defaults:
   run:
@@ -47,7 +55,7 @@ defaults:
 
 jobs:
   fable-pixel-audit:
-    name: Manual Fable Pixel Audit
+    name: Fable Pixel Audit
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -65,12 +73,12 @@ jobs:
       - name: Run cost-capped Fable audit
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          FABLE_TASK_TYPE: ${{ inputs.task_type }}
-          ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
-          MAX_INPUT_TOKENS: ${{ inputs.max_input_tokens }}
-          MAX_OUTPUT_TOKENS: ${{ inputs.max_output_tokens }}
-          MAX_ESTIMATED_COST_USD: ${{ inputs.max_estimated_cost_usd }}
-          TEMPERATURE: ${{ inputs.temperature }}
+          FABLE_TASK_TYPE: ${{ github.event_name == 'schedule' && 'repo_audit' || inputs.task_type }}
+          ANTHROPIC_MODEL: ${{ inputs.anthropic_model || 'claude-fable-5' }}
+          MAX_INPUT_TOKENS: ${{ inputs.max_input_tokens || '25000' }}
+          MAX_OUTPUT_TOKENS: ${{ github.event_name == 'schedule' && '5000' || inputs.max_output_tokens || '4000' }}
+          MAX_ESTIMATED_COST_USD: ${{ github.event_name == 'schedule' && '0.75' || inputs.max_estimated_cost_usd || '0.35' }}
+          TEMPERATURE: ${{ inputs.temperature || '0.2' }}
           INPUT_PRICE_PER_MILLION_USD: "10"
           OUTPUT_PRICE_PER_MILLION_USD: "50"
         run: node scripts/fable-pixel-audit.mjs
@@ -79,9 +87,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: fable-pixel-audit-${{ inputs.task_type }}
+          name: fable-pixel-audit-${{ github.event_name == 'schedule' && 'repo_audit' || inputs.task_type || 'repo_audit' }}
           path: |
             fable-output/fable-pixel-audit.md
             fable-output/fable-pixel-audit-meta.json
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 14
