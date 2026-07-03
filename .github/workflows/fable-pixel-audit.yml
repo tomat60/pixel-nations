@@ -1,0 +1,87 @@
+name: Fable Pixel Audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      task_type:
+        description: "Fable test to run"
+        required: true
+        default: "weak_prompt"
+        type: choice
+        options:
+          - weak_prompt
+          - repo_audit
+          - cursor_prompts
+      anthropic_model:
+        description: "Anthropic model ID from console; update if Fable API name differs"
+        required: true
+        default: "claude-fable-5-latest"
+        type: string
+      max_input_tokens:
+        description: "Abort if estimated input tokens exceed this cap"
+        required: true
+        default: "25000"
+        type: string
+      max_output_tokens:
+        description: "Max tokens returned by model"
+        required: true
+        default: "4000"
+        type: string
+      max_estimated_cost_usd:
+        description: "Abort before API call if estimated max cost exceeds this"
+        required: true
+        default: "0.35"
+        type: string
+      temperature:
+        description: "Model temperature"
+        required: true
+        default: "0.2"
+        type: string
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  fable-pixel-audit:
+    name: Manual Fable Pixel Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository read-only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run cost-capped Fable audit
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FABLE_TASK_TYPE: ${{ inputs.task_type }}
+          ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
+          MAX_INPUT_TOKENS: ${{ inputs.max_input_tokens }}
+          MAX_OUTPUT_TOKENS: ${{ inputs.max_output_tokens }}
+          MAX_ESTIMATED_COST_USD: ${{ inputs.max_estimated_cost_usd }}
+          TEMPERATURE: ${{ inputs.temperature }}
+          INPUT_PRICE_PER_MILLION_USD: "10"
+          OUTPUT_PRICE_PER_MILLION_USD: "50"
+        run: node scripts/fable-pixel-audit.mjs
+
+      - name: Upload Fable artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fable-pixel-audit-${{ inputs.task_type }}
+          path: |
+            fable-output/fable-pixel-audit.md
+            fable-output/fable-pixel-audit-meta.json
+          if-no-files-found: warn
+          retention-days: 7
