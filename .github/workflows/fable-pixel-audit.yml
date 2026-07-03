@@ -6,7 +6,7 @@ on:
       task_type:
         description: "Fable test to run"
         required: true
-        default: "weak_prompt"
+        default: "repo_audit"
         type: choice
         options:
           - weak_prompt
@@ -25,25 +25,24 @@ on:
       max_output_tokens:
         description: "Max tokens returned by model"
         required: true
-        default: "4000"
+        default: "5000"
         type: string
       max_estimated_cost_usd:
         description: "Abort before API call if estimated max cost exceeds this"
         required: true
-        default: "0.35"
+        default: "0.75"
         type: string
       temperature:
         description: "Deprecated for Fable; kept only for UI compatibility and ignored by script"
         required: true
         default: "0.2"
         type: string
-  schedule:
-    # Weekly automatic Pixel Nations repo-aware Fable audit.
-    # Cost-capped by the script before the API call.
-    - cron: "17 8 * * 1"
+  issues:
+    types: [opened, edited]
 
 permissions:
   contents: read
+  issues: read
 
 concurrency:
   group: fable-pixel-audit-${{ github.ref }}
@@ -58,6 +57,7 @@ jobs:
     name: Fable Pixel Audit
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    if: github.event_name != 'issues' || (github.event.issue.user.login == 'tomat60' && startsWith(github.event.issue.title, 'FABLE RUN:'))
 
     steps:
       - name: Checkout repository read-only
@@ -73,11 +73,11 @@ jobs:
       - name: Run cost-capped Fable audit
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          FABLE_TASK_TYPE: ${{ github.event_name == 'schedule' && 'repo_audit' || inputs.task_type }}
+          FABLE_TASK_TYPE: ${{ github.event_name == 'issues' && (contains(github.event.issue.title, 'cursor_prompts') && 'cursor_prompts' || contains(github.event.issue.title, 'weak_prompt') && 'weak_prompt' || 'repo_audit') || inputs.task_type }}
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model || 'claude-fable-5' }}
           MAX_INPUT_TOKENS: ${{ inputs.max_input_tokens || '25000' }}
-          MAX_OUTPUT_TOKENS: ${{ github.event_name == 'schedule' && '5000' || inputs.max_output_tokens || '4000' }}
-          MAX_ESTIMATED_COST_USD: ${{ github.event_name == 'schedule' && '0.75' || inputs.max_estimated_cost_usd || '0.35' }}
+          MAX_OUTPUT_TOKENS: ${{ github.event_name == 'issues' && (contains(github.event.issue.title, 'cursor_prompts') && '6000' || '5000') || inputs.max_output_tokens || '5000' }}
+          MAX_ESTIMATED_COST_USD: ${{ inputs.max_estimated_cost_usd || '0.75' }}
           TEMPERATURE: ${{ inputs.temperature || '0.2' }}
           INPUT_PRICE_PER_MILLION_USD: "10"
           OUTPUT_PRICE_PER_MILLION_USD: "50"
@@ -87,7 +87,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: fable-pixel-audit-${{ github.event_name == 'schedule' && 'repo_audit' || inputs.task_type || 'repo_audit' }}
+          name: fable-pixel-audit-${{ github.event_name == 'issues' && (contains(github.event.issue.title, 'cursor_prompts') && 'cursor_prompts' || contains(github.event.issue.title, 'weak_prompt') && 'weak_prompt' || 'repo_audit') || inputs.task_type || 'repo_audit' }}
           path: |
             fable-output/fable-pixel-audit.md
             fable-output/fable-pixel-audit-meta.json
