@@ -96,8 +96,27 @@ Final report:
 | **Cursor Composer / Auto** | Default executor | Scoped UI, bugfixes, docs in repo, single-feature passes | Vague “make it better” loops |
 | **Local AI** | Ollama / LM Studio / private stack | Docs drafts, repo Q&A, tiny patches, analysis | Large multi-file refactors without review |
 | **Cursor GPT / Codex / frontier** | Higher-cost models | Hard debugging, complex logic, one-shot critical fixes | Routine polish, broad exploration |
+| **Fable / frontier moonshot** | Artifact-only strategic board | Directional breakthroughs, Play redesigns, product deadlocks, benchmark thinking | Routine implementation, repeated reruns, merge authority |
 
 **Default:** Composer with MAX **OFF**. Escalate model tier only when the handoff is clear and the cheaper path already failed once with a concrete blocker.
+
+---
+
+## Bounded moonshot exception
+
+Use a frontier moonshot when cautious micro-iterations are unlikely to discover the product answer.
+
+This is allowed when all conditions are true:
+
+1. The blocker is strategic, not cosmetic: core fun, Play direction, first-session loop, or architecture of a major surface.
+2. The run is artifact-only or branch/draft-only, with no merge/write authority over production code.
+3. The prompt includes rich context, hard constraints, rejection criteria, and an explicit decision line.
+4. Cost is capped before the API call.
+5. The output can be rejected without damaging `main`.
+
+Rule of thumb: **bounded moonshot > endless cautious micro-iterations** when the project is stuck on what the game should be, not how many pixels to move.
+
+Do not use this exception to justify repeated expensive attempts. One strong moonshot, then product-lead synthesis, then one scoped implementation sprint.
 
 ---
 
