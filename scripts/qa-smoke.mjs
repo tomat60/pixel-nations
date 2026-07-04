@@ -184,7 +184,7 @@ async function runSmoke(page) {
     );
     await expectStorageState(
       page,
-      "pixelNations.settlementState.v1",
+      "pixelNations.demoState.v1",
       "choose and claim first age land",
       (state) => state?.claimedLand === true && state?.claimedLandPnId === "PN-0401",
       "Compatibility settlement state did not persist claimed land PN-0401",
