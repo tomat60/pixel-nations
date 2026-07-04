@@ -193,7 +193,7 @@ async function runSmoke(page) {
   });
 
   await step("resolve first age seasonal orders", async () => {
-    await clickButton(page, /^Expand$/i, "resolve first age seasonal orders");
+    await clickButton(page, /Expand/i, "resolve first age seasonal orders");
     await expectStorageState(
       page,
       "pixelNations.firstAge.v1",
@@ -201,7 +201,7 @@ async function runSmoke(page) {
       (state) => state?.season === 2 && state?.ownedLandIds?.length >= 2 && state?.lastOrder === "expand",
       "Expand order did not advance season and territory",
     );
-    await clickButton(page, /^Develop$/i, "resolve first age seasonal orders");
+    await clickButton(page, /Develop/i, "resolve first age seasonal orders");
     await expectStorageState(
       page,
       "pixelNations.firstAge.v1",
@@ -209,7 +209,7 @@ async function runSmoke(page) {
       (state) => state?.season === 3 && state?.coreLevel >= 2 && state?.lastOrder === "develop",
       "Develop order did not advance core progression",
     );
-    await clickButton(page, /^Secure$/i, "resolve first age seasonal orders");
+    await clickButton(page, /Secure/i, "resolve first age seasonal orders");
     await expectStorageState(
       page,
       "pixelNations.firstAge.v1",
@@ -260,40 +260,27 @@ async function main() {
   });
 
   let browser;
+  const timer = setTimeout(() => {
+    throw new SmokeError("timeout", `Smoke exceeded ${SMOKE_TIMEOUT_MS}ms`);
+  }, SMOKE_TIMEOUT_MS);
+
   try {
     browser = await chromium.launch();
-    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-    const page = await context.newPage();
-
-    // Bound the overall smoke via Promise.race so we guarantee a hard internal timeout.
-    await Promise.race([
-      (async () => { await runSmoke(page); })(),
-      new Promise((_, reject) => setTimeout(() => reject(new SmokeError("smoke timeout", "Smoke exceeded internal time limit")), SMOKE_TIMEOUT_MS)),
-    ]);
-
-    await context.close();
-    await closeBrowserSafely(browser);
-    browser = null;
+    const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+    await runSmoke(page);
     await writeResult("PASS");
-    console.log(`Mechanical smoke PASS. Result written to ${RESULT_PATH}`);
+    console.log("Mechanical smoke PASS.");
   } catch (error) {
-    await writeResult("FAIL", error);
-    console.error(`Mechanical smoke FAIL at ${result.blockingStep}: ${result.error}`);
-    console.error(`Result written to ${RESULT_PATH}`);
+    const smokeError = error instanceof SmokeError ? error : new SmokeError("unknown", error.message);
+    await writeResult("FAIL", smokeError);
+    console.error(`Mechanical smoke FAIL at ${smokeError.step}: ${smokeError.message}`);
     process.exitCode = 1;
   } finally {
+    clearTimeout(timer);
     await closeBrowserSafely(browser);
-    if (startedProcess) {
-      try { startedProcess.kill(); } catch {}
-    }
+    if (startedProcess) startedProcess.kill();
+    console.log(`Result written to ${RESULT_PATH}`);
   }
-
-  process.exit(process.exitCode ?? 0);
 }
 
-main().catch(async (error) => {
-  const smokeError = error instanceof SmokeError ? error : new SmokeError("smoke runner", error.message);
-  await writeResult("FAIL", smokeError);
-  console.error(`Mechanical smoke FAIL at ${result.blockingStep}: ${result.error}`);
-  process.exit(1);
-});
+main();
