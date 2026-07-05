@@ -116,22 +116,6 @@ async function clickButton(page, name, stepName) {
   await clickByRole(page, "button", { name }, stepName);
 }
 
-async function readDemoState(page, stepName) {
-  return page.evaluate(() => {
-    const raw = localStorage.getItem("pixelNations.demoState.v1");
-    return raw ? JSON.parse(raw) : null;
-  }).catch((error) => {
-    throw new SmokeError(stepName, `Could not read demo state: ${error.message}`);
-  });
-}
-
-async function expectState(page, stepName, predicate, message) {
-  const state = await readDemoState(page, stepName);
-  if (!predicate(state)) {
-    throw new SmokeError(stepName, `${message}. Current state: ${JSON.stringify(state)}`);
-  }
-}
-
 async function closeBrowserSafely(browser) {
   if (!browser) return;
 
@@ -142,132 +126,61 @@ async function closeBrowserSafely(browser) {
 }
 
 async function runSmoke(page) {
-  await step("unified fullscreen play prototype route", async () => {
+  await step("open unified fullscreen play prototype", async () => {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
     await page.evaluate(() => localStorage.clear());
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await expectText(page, "First Age", "unified fullscreen play prototype route");
-    await expectText(page, "Aurelian Basin", "unified fullscreen play prototype route");
-    await expectText(page, "World Map", "unified fullscreen play prototype route");
-    await clickButton(page, /^Orders$/i, "unified fullscreen play prototype route");
-    await expectText(page, "Season Orders", "unified fullscreen play prototype route");
-    await clickButton(page, /^Expand$/i, "unified fullscreen play prototype route");
-    await expectText(page, "3/12", "unified fullscreen play prototype route");
-    await clickButton(page, /^Nation$/i, "unified fullscreen play prototype route");
-    await expectText(page, "Nation Layer", "unified fullscreen play prototype route");
+    await expectText(page, "Pixel Nations", "open unified fullscreen play prototype");
+    await expectText(page, "Aurelian Basin", "open unified fullscreen play prototype");
+    await expectText(page, "30-parcel Basin", "open unified fullscreen play prototype");
+    await expectText(page, "1/12", "open unified fullscreen play prototype");
+    await expectText(page, "0/30", "open unified fullscreen play prototype");
   });
 
-  await step("reset demo state and open /world", async () => {
-    await page.goto(`${APP_URL}/world`, { waitUntil: "domcontentloaded" });
-    await page.evaluate(() => localStorage.clear());
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await expectText(page, "Sector A-01 is live", "reset demo state and open /world");
+  await step("claim starter land from play map", async () => {
+    await clickButton(page, /^Choose this land$/i, "claim starter land from play map");
+    await expectText(page, "2/12", "claim starter land from play map");
+    await expectText(page, "1/30", "claim starter land from play map");
+    await expectText(page, "settlement phase", "claim starter land from play map");
   });
 
-  await step("select a claimable Sector A-01 land", async () => {
-    const sector = page.locator("[data-qa='playable-sector']").first();
-    await sector.scrollIntoViewIfNeeded();
-    const tile = page.getByLabel(/PN-0499/).first();
-    await tile.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("select a claimable Sector A-01 land", "Could not find claimable test tile PN-0499");
-    });
-    await tile.click();
-    await expectText(page, "Aurelia", "select a claimable Sector A-01 land");
+  await step("orders change visible season and realm state", async () => {
+    await clickButton(page, /^Orders$/i, "orders change visible season and realm state");
+    await expectText(page, "Season Orders", "orders change visible season and realm state");
+    await clickButton(page, /^Expand$/i, "orders change visible season and realm state");
+    await expectText(page, "3/12", "orders change visible season and realm state");
+    await expectText(page, "2/30", "orders change visible season and realm state");
+    await clickButton(page, /^Develop$/i, "orders change visible season and realm state");
+    await expectText(page, "4/12", "orders change visible season and realm state");
+    await clickButton(page, /^Secure$/i, "orders change visible season and realm state");
+    await expectText(page, "5/12", "orders change visible season and realm state");
   });
 
-  await step("claim selected land", async () => {
-    await page.locator("[data-qa='world-selected-land-map-card']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("claim selected land", "On-map selected land card did not render");
-    });
-    await clickButton(page, /^Claim From Map$/i, "claim selected land");
-    await clickButton(page, /^Claim Land$/i, "claim selected land");
-    await expectState(
-      page,
-      "claim selected land",
-      (state) => state?.claimedLand === true && state?.claimedLandPnId === "PN-0499",
-      "Claim did not persist selected land PN-0499",
-    );
-    await page.locator("[data-qa='post-claim-next-step']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("claim selected land", "Claim success step did not render after persisted claim");
-    });
+  await step("bottom dock keeps game layers inside play", async () => {
+    await clickButton(page, /^Map$/i, "bottom dock keeps game layers inside play");
+    await expectText(page, "30-parcel Basin", "bottom dock keeps game layers inside play");
+    await clickButton(page, /^Age$/i, "bottom dock keeps game layers inside play");
+    await expectText(page, "Age Layer", "bottom dock keeps game layers inside play");
+    await clickButton(page, /^Banner$/i, "bottom dock keeps game layers inside play");
+    await expectText(page, "Your age is written", "bottom dock keeps game layers inside play");
+    await clickButton(page, /^Profile$/i, "bottom dock keeps game layers inside play");
+    await expectText(page, "World Atlas Layer", "bottom dock keeps game layers inside play");
   });
 
-  await step("queue playable order from world map", async () => {
-    await clickButton(page, /^Return To Map$/i, "queue playable order from world map");
-    await page.locator("[data-qa='world-map-top-hud']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("queue playable order from world map", "World map HUD did not render after claim");
+  await step("play shell remains fullscreen framed", async () => {
+    const shell = page.locator("[data-qa='play-shell']").first();
+    await shell.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("play shell remains fullscreen framed", "Missing play shell QA marker");
     });
-    const onMapActionLayer = page.locator("[data-qa='world-on-map-action-layer']").first();
-    if (!(await onMapActionLayer.isVisible().catch(() => false))) {
-      await page.locator("[data-qa='world-claimed-land-action-anchor']").first().click();
+    const position = await shell.evaluate((element) => getComputedStyle(element).position);
+    const overflow = await shell.evaluate((element) => getComputedStyle(element).overflow);
+    if (position !== "fixed") {
+      throw new SmokeError("play shell remains fullscreen framed", `Expected fixed shell, got ${position}`);
     }
-    await onMapActionLayer.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("queue playable order from world map", "On-map action layer did not open from claimed marker");
-    });
-    await page.locator("[data-qa='world-on-map-action-gather-food']").first().click();
-    await page.locator("[data-qa='world-map-active-order']").getByText("Gather Food").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("queue playable order from world map", "Gather Food did not enter the map active order HUD");
-    });
-  });
-
-  await step("world map has no primary progression route links", async () => {
-    const routeLinks = await page
-      .locator('a[href="/dashboard"], a[href="/settlement"], a[href="/settlement/create"], a[href="/nation"], a[href="/nation/create"], a[href="/alliance/create"], a[href="/empire"], a[href="/empire/create"]')
-      .count();
-    if (routeLinks > 0) {
-      throw new SmokeError(
-        "world map has no primary progression route links",
-        `Found ${routeLinks} route link(s) on /world after claim`,
-      );
+    if (overflow !== "hidden") {
+      throw new SmokeError("play shell remains fullscreen framed", `Expected hidden overflow, got ${overflow}`);
     }
-  });
-
-  await step("advance core progression on world map", async () => {
-    const continueOnMap = page.getByRole("button", { name: /^Continue On Map$/i }).first();
-    if (await continueOnMap.isVisible().catch(() => false)) {
-      await continueOnMap.click();
-    } else {
-      await clickButton(page, /^Return To Map$/i, "advance core progression on world map");
-    }
-    await page.locator("[data-qa='world-on-map-action-layer']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("advance core progression on world map", "On-map action layer did not remain available after claim");
-    });
-
-    await page.locator("[data-qa='world-on-map-world-action-found-settlement']").first().click();
-    await expectState(
-      page,
-      "advance core progression on world map",
-      (state) => state?.settlementFounded === true,
-      "Settlement was not founded from the world map",
-    );
-
-    await page.locator("[data-qa='world-on-map-world-action-build-city-core']").first().click();
-    await expectState(
-      page,
-      "advance core progression on world map",
-      (state) => state?.townHallBuilt === true,
-      "City core was not built from the world map",
-    );
-
-    await page.locator("[data-qa='world-on-map-world-action-establish-trade']").first().click();
-    await expectState(
-      page,
-      "advance core progression on world map",
-      (state) => state?.tradeRouteEstablished === true && state?.tradeRouteDestination === "Iron Coast",
-      "Trade seed was not established from the world map",
-    );
-  });
-
-  await step("political progression stays on map as pending layer", async () => {
-    const progressMessage = page.locator("[data-qa='world-on-map-progress-message']").first();
-    await progressMessage.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("political progression stays on map as pending layer", "Missing on-map pending political layer message");
-    });
-    await progressMessage.getByText("Map Layer Pending", { exact: false }).waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("political progression stays on map as pending layer", "Pending layer message did not include Map Layer Pending");
-    });
   });
 }
 
