@@ -42,7 +42,6 @@ async function dispatchDomClick(page, selector) {
     }, selector),
     3_000,
   );
-
   if (!clicked) throw new Error(`Could not find ${selector}`);
 }
 
@@ -59,59 +58,40 @@ async function clickButtonByText(page, pattern) {
     }, pattern.source),
     3_000,
   );
-
   if (!clicked) throw new Error(`Could not find button matching ${pattern}`);
 }
 
 const steps = [
   {
     id: "01-initial-map",
-    label: "Initial /play load",
-    note: "The player should immediately understand this is Aurelian Basin, one fullscreen map game, and that glowing starter lands are clickable.",
+    label: "Initial fullscreen map",
+    note: "The player should immediately read this as a fullscreen game map, not a dashboard.",
   },
   {
-    id: "02-selected-starter",
-    label: "Starter selected",
-    note: "Selecting a starter should update the selected parcel panel and make the next action obvious.",
+    id: "02-selected-riverbend",
+    label: "Organic plot selected",
+    note: "Selecting another land should update the land sheet and selected ring.",
     run: async (page) => {
-      await dispatchDomClick(page, "[data-qa='parcel-greenvale']");
+      await dispatchDomClick(page, "[data-qa='plot-riverbend']");
       await page.waitForTimeout(450);
     },
   },
   {
     id: "03-after-claim",
     label: "After claim",
-    note: "The map should visibly show owned land, capital seed, influence ring, and objective should push the player to Orders.",
+    note: "Claim should create a visible owned banner/outline and update season/land counts.",
     run: async (page) => {
-      await clickButtonByText(page, /claim this land|choose this land/);
+      await clickButtonByText(page, /choose this land/);
       await page.waitForTimeout(600);
     },
   },
   {
-    id: "04-orders-open",
-    label: "Orders open",
-    note: "Orders should read as decision cards with clear consequences, not generic buttons.",
+    id: "04-layer-preview",
+    label: "Layer preview stays over map",
+    note: "A non-map layer should remain a light overlay, keeping the map as the game surface.",
     run: async (page) => {
-      await clickButtonByText(page, /orders/);
+      await clickButtonByText(page, /settlement/);
       await page.waitForTimeout(500);
-    },
-  },
-  {
-    id: "05-after-expand",
-    label: "After Expand order",
-    note: "Issuing Expand should create a visible owned-parcel consequence and update latest consequence/chronicle direction.",
-    run: async (page) => {
-      await clickButtonByText(page, /expand/);
-      await page.waitForTimeout(650);
-    },
-  },
-  {
-    id: "06-after-develop",
-    label: "After Develop order",
-    note: "Develop should raise the capital marker so progression is visible on-map.",
-    run: async (page) => {
-      await clickButtonByText(page, /develop/);
-      await page.waitForTimeout(650);
     },
   },
 ];
@@ -147,9 +127,7 @@ function startAppIfNeeded() {
 }
 
 async function ensureApp() {
-  if (await isAppRunning()) {
-    return { startedProcess: null, appSource: "existing app" };
-  }
+  if (await isAppRunning()) return { startedProcess: null, appSource: "existing app" };
 
   const startedProcess = startAppIfNeeded();
   startedProcess.stdout?.on("data", (data) => process.stdout.write(data));
@@ -160,13 +138,9 @@ async function ensureApp() {
 
 function stopApp(startedProcess) {
   if (!startedProcess) return;
-
   try {
-    if (process.platform !== "win32") {
-      process.kill(-startedProcess.pid, "SIGTERM");
-    } else {
-      startedProcess.kill("SIGTERM");
-    }
+    if (process.platform !== "win32") process.kill(-startedProcess.pid, "SIGTERM");
+    else startedProcess.kill("SIGTERM");
   } catch {}
 }
 
@@ -180,168 +154,93 @@ function escapeHtml(value) {
 
 function buildReport({ generatedAt, appSource, shots, videos, interactionLog }) {
   const videoCards = videos.length
-    ? videos
-        .map(
-          (video) => `<article class="card">
-            <div class="meta"><span>${escapeHtml(video.viewport)}</span><span>first-minute video</span></div>
-            <h3>${escapeHtml(video.filename)}</h3>
-            <video controls src="./videos/${encodeURIComponent(video.filename)}"></video>
-          </article>`,
-        )
-        .join("\n")
+    ? videos.map((video) => `<article class="card"><div class="meta"><span>${escapeHtml(video.viewport)}</span><span>milestone video</span></div><h3>${escapeHtml(video.filename)}</h3><video controls src="./videos/${encodeURIComponent(video.filename)}"></video></article>`).join("\n")
     : `<p class="error-text">No video evidence generated.</p>`;
 
-  const screenshotCards = shots
-    .map(
-      (shot) => `<article class="card ${shot.error ? "error" : ""}">
-        <div class="meta"><span>${escapeHtml(shot.viewport)}</span><span>${escapeHtml(shot.stepLabel)}</span></div>
-        <h3>${escapeHtml(shot.filename)}</h3>
-        <p>${escapeHtml(shot.note)}</p>
-        ${shot.error ? `<p class="error-text"><strong>Interaction warning:</strong> ${escapeHtml(shot.error)}</p>` : ""}
-        <a href="./screenshots/${encodeURIComponent(shot.filename)}"><img src="./screenshots/${encodeURIComponent(shot.filename)}" alt="${escapeHtml(shot.filename)}" /></a>
-      </article>`,
-    )
-    .join("\n");
+  const screenshotCards = shots.map((shot) => `<article class="card ${shot.error ? "error" : ""}"><div class="meta"><span>${escapeHtml(shot.viewport)}</span><span>${escapeHtml(shot.stepLabel)}</span></div><h3>${escapeHtml(shot.filename)}</h3><p>${escapeHtml(shot.note)}</p>${shot.error ? `<p class="error-text"><strong>Interaction warning:</strong> ${escapeHtml(shot.error)}</p>` : ""}<a href="./screenshots/${encodeURIComponent(shot.filename)}"><img src="./screenshots/${encodeURIComponent(shot.filename)}" alt="${escapeHtml(shot.filename)}" /></a></article>`).join("\n");
 
-  const logItems = interactionLog
-    .map(
-      (item) => `<li><code>${escapeHtml(item.viewport)}</code> / <code>${escapeHtml(item.stepId)}</code> — ${escapeHtml(item.status)}${item.error ? `: ${escapeHtml(item.error)}` : ""}</li>`,
-    )
-    .join("\n");
+  const logItems = interactionLog.map((item) => `<li><code>${escapeHtml(item.viewport)}</code> / <code>${escapeHtml(item.stepId)}</code> — ${escapeHtml(item.status)}${item.error ? `: ${escapeHtml(item.error)}` : ""}</li>`).join("\n");
 
-  return `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pixel Nations /play QA</title>
-  <style>
-    :root { color-scheme: dark; --bg: #020204; --gold: #c9a962; --muted: #9ca3af; --border: rgba(201, 169, 98, 0.18); --bad: #f97373; }
-    body { margin: 0; background: var(--bg); color: #f8f5ed; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    main { max-width: 1280px; margin: 0 auto; padding: 40px 20px 64px; }
-    header, .card, section { border: 1px solid var(--border); background: linear-gradient(180deg, rgba(201,169,98,0.05), rgba(255,255,255,0.015)); padding: 18px; margin-bottom: 18px; }
-    .card.error { border-color: rgba(249, 115, 115, .55); }
-    h1 { margin: 0 0 12px; font-size: clamp(2rem, 5vw, 4rem); letter-spacing: -0.04em; }
-    h2, h3 { color: #f5deb3; }
-    p, li { color: var(--muted); line-height: 1.65; }
-    .error-text { color: var(--bad); }
-    .eyebrow, .meta { color: var(--gold); text-transform: uppercase; letter-spacing: 0.18em; font-size: .72rem; font-weight: 800; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
-    img, video { width: 100%; height: auto; display: block; border: 1px solid rgba(255,255,255,0.08); background: #000; }
-    code { color: #f5deb3; }
-  </style>
-</head>
-<body>
-  <main>
-    <header>
-      <p class="eyebrow">Pixel Nations /play Visual QA</p>
-      <h1>First Minute Gameplay Evidence</h1>
-      <p>Generated: <code>${escapeHtml(generatedAt)}</code></p>
-      <p>App source: <code>${escapeHtml(appSource)}</code></p>
-      <p>This report captures /play with video, screenshots, and interaction warnings. Video is required for motion/game-feel; screenshots are required for layout/composition.</p>
-    </header>
-    <section>
-      <h2>Manual verdict required</h2>
-      <ul>
-        <li>Does the first screen feel like a game, not a website?</li>
-        <li>Is the first clickable land obvious without explanation?</li>
-        <li>After claim, are owned land/capital/influence visible on-map?</li>
-        <li>Do Orders feel like decisions with consequences?</li>
-        <li>Do motion, timing, and transitions support the fantasy of land → empire?</li>
-      </ul>
-    </section>
-    <section>
-      <h2>Gameplay videos</h2>
-      <div class="grid">${videoCards}</div>
-    </section>
-    <section>
-      <h2>Interaction log</h2>
-      <ul>${logItems}</ul>
-    </section>
-    <section>
-      <h2>Screenshots</h2>
-      <div class="grid">${screenshotCards}</div>
-    </section>
-  </main>
-</body>
-</html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Pixel Nations /play Milestone QA</title><style>:root{color-scheme:dark;--bg:#020204;--gold:#c9a962;--muted:#9ca3af;--border:rgba(201,169,98,.18);--bad:#f97373}body{margin:0;background:var(--bg);color:#f8f5ed;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:1280px;margin:0 auto;padding:40px 20px 64px}header,.card,section{border:1px solid var(--border);background:linear-gradient(180deg,rgba(201,169,98,.05),rgba(255,255,255,.015));padding:18px;margin-bottom:18px}.card.error{border-color:rgba(249,115,115,.55)}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,4rem);letter-spacing:-.04em}h2,h3{color:#f5deb3}p,li{color:var(--muted);line-height:1.65}.error-text{color:var(--bad)}.eyebrow,.meta{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;font-weight:800}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}img,video{width:100%;height:auto;display:block;border:1px solid rgba(255,255,255,.08);background:#000}code{color:#f5deb3}</style></head><body><main><header><p class="eyebrow">Pixel Nations /play Visual QA</p><h1>Fullscreen Map Milestone Evidence</h1><p>Generated: <code>${escapeHtml(generatedAt)}</code></p><p>App source: <code>${escapeHtml(appSource)}</code></p><p>This report captures Milestone 1 only: fullscreen map, plot selection, claim, and lightweight layer overlay.</p></header><section><h2>Manual verdict required</h2><ul><li>Does the first screen feel like a game map, not a dashboard?</li><li>Are organic land plots clear and clickable?</li><li>After claim, is owned land visibly marked on the map?</li><li>Does the UI remain HUD-like instead of taking over the map?</li></ul></section><section><h2>Gameplay videos</h2><div class="grid">${videoCards}</div></section><section><h2>Interaction log</h2><ul>${logItems}</ul></section><section><h2>Screenshots</h2><div class="grid">${screenshotCards}</div></section></main></body></html>`;
 }
 
-async function captureStep(page, viewport, step, shots, interactionLog) {
-  let error = null;
-  try {
-    if (step.run) await timeoutPromise(`${viewport.viewport} ${step.id}`, step.run(page), 10_000);
-  } catch (caught) {
-    error = caught instanceof Error ? caught.message : String(caught);
+async function saveVideo(page, viewport) {
+  const video = page.video();
+  if (!video) return null;
+  const videoPath = await video.path().catch(() => null);
+  if (!videoPath) return null;
+  await mkdir(VIDEO_DIR, { recursive: true });
+  const filename = `${viewport}-fullscreen-map-milestone.webm`;
+  await copyFile(videoPath, `${VIDEO_DIR}/${filename}`);
+  return { viewport, filename };
+}
+
+async function runViewport(config) {
+  const context = await chromium.launchPersistentContext("", {
+    viewport: { width: config.width, height: config.height },
+    deviceScaleFactor: config.deviceScaleFactor,
+    isMobile: config.isMobile,
+    recordVideo: config.recordVideo ? { dir: VIDEO_DIR, size: { width: config.width, height: config.height } } : undefined,
+  });
+
+  const page = context.pages()[0] ?? await context.newPage();
+  const shots = [];
+  const interactionLog = [];
+
+  await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+
+  for (const step of steps) {
+    let error = "";
+    try {
+      if (step.run) await step.run(page);
+      interactionLog.push({ viewport: config.viewport, stepId: step.id, status: "ok" });
+    } catch (err) {
+      error = err instanceof Error ? err.message : String(err);
+      interactionLog.push({ viewport: config.viewport, stepId: step.id, status: "warning", error });
+    }
+
+    const filename = `${config.viewport}-play-${step.id}.png`;
+    await page.screenshot({ path: `${SCREENSHOT_DIR}/${filename}`, fullPage: true });
+    shots.push({ viewport: config.viewport, filename, stepId: step.id, stepLabel: step.label, note: step.note, error });
   }
 
-  const filename = `${viewport.viewport}-play-${step.id}${error ? "-warning" : ""}.png`;
-  await timeoutPromise(`Screenshot ${filename}`, page.screenshot({ path: `${SCREENSHOT_DIR}/${filename}` }), 8_000);
-
-  shots.push({ filename, viewport: viewport.viewport, stepId: step.id, stepLabel: step.label, note: step.note, error });
-  interactionLog.push({ viewport: viewport.viewport, stepId: step.id, label: step.label, status: error ? "warning" : "ok", error });
-}
-
-async function saveVideo(page, viewport, videos) {
-  if (!viewport.recordVideo) return;
-  const video = page.video();
-  if (!video) return;
-
-  const sourcePath = await video.path();
-  const filename = `${viewport.viewport}-first-minute.webm`;
-  await copyFile(sourcePath, `${VIDEO_DIR}/${filename}`);
-  videos.push({ viewport: viewport.viewport, filename });
+  await context.close();
+  const savedVideo = config.recordVideo ? await saveVideo(page, config.viewport).catch(() => null) : null;
+  return { shots, interactionLog, video: savedVideo };
 }
 
 async function main() {
   await rm(OUTPUT_DIR, { recursive: true, force: true });
   await mkdir(SCREENSHOT_DIR, { recursive: true });
   await mkdir(VIDEO_DIR, { recursive: true });
-  await writeFile(`${SCREENSHOT_DIR}/.gitkeep`, "");
-  await writeFile(`${VIDEO_DIR}/.gitkeep`, "");
 
   const { startedProcess, appSource } = await ensureApp();
-  let browser;
-  const shots = [];
-  const videos = [];
-  const interactionLog = [];
+  const generatedAt = new Date().toISOString();
+  const allShots = [];
+  const allVideos = [];
+  const fullInteractionLog = [];
 
   try {
-    browser = await chromium.launch();
     for (const viewport of viewports) {
-      const context = await browser.newContext({
-        viewport: { width: viewport.width, height: viewport.height },
-        deviceScaleFactor: viewport.deviceScaleFactor,
-        isMobile: viewport.isMobile,
-        recordVideo: viewport.recordVideo ? { dir: VIDEO_DIR, size: { width: viewport.width, height: viewport.height } } : undefined,
-      });
-      context.setDefaultTimeout(8_000);
-      const page = await context.newPage();
-      await timeoutPromise(`${viewport.viewport} goto /play`, page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" }), 12_000);
-      await page.waitForLoadState("networkidle", { timeout: 5_000 }).catch(() => {});
-      await page.locator("[data-qa='play-shell']").waitFor({ state: "visible", timeout: 8_000 });
-      await page.waitForTimeout(700);
-
-      for (const step of steps) {
-        await captureStep(page, viewport, step, shots, interactionLog);
-      }
-
-      await context.close();
-      await saveVideo(page, viewport, videos);
+      const result = await runViewport(viewport);
+      allShots.push(...result.shots);
+      fullInteractionLog.push(...result.interactionLog);
+      if (result.video) allVideos.push(result.video);
     }
+
+    const manifest = { generatedAt, appUrl: APP_URL, appSource, screenshots: allShots, videos: allVideos };
+    await writeFile(MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`);
+    await writeFile(INTERACTION_LOG_PATH, `${JSON.stringify(fullInteractionLog, null, 2)}\n`);
+    await writeFile(REPORT_PATH, buildReport({ generatedAt, appSource, shots: allShots, videos: allVideos, interactionLog: fullInteractionLog }));
+
+    const warnings = fullInteractionLog.filter((item) => item.status !== "ok");
+    if (warnings.length) throw new Error(`Play visual QA completed with ${warnings.length} interaction warning(s). See ${INTERACTION_LOG_PATH}`);
+    console.log(`Play visual QA evidence written to ${OUTPUT_DIR}`);
   } finally {
-    if (browser) await browser.close().catch(() => {});
     stopApp(startedProcess);
+    clearTimeout(globalTimeout);
   }
-
-  const generatedAt = new Date().toISOString();
-  await writeFile(INTERACTION_LOG_PATH, `${JSON.stringify(interactionLog, null, 2)}\n`);
-  await writeFile(MANIFEST_PATH, `${JSON.stringify({ generatedAt, appSource, route: "/play", shots, videos, interactionLog }, null, 2)}\n`);
-  await writeFile(REPORT_PATH, buildReport({ generatedAt, appSource, shots, videos, interactionLog }));
-
-  console.log(`Pixel Nations /play QA report written to ${REPORT_PATH}`);
-  console.log(`Pixel Nations /play screenshots saved to ${SCREENSHOT_DIR}`);
-  console.log(`Pixel Nations /play videos saved to ${VIDEO_DIR}`);
 }
 
 main().catch((error) => {

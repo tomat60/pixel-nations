@@ -6,8 +6,6 @@ import { spawn } from "node:child_process";
 const APP_URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const OUTPUT_DIR = "public/qa/latest";
 const RESULT_PATH = `${OUTPUT_DIR}/smoke-result.json`;
-
-// Maximum internal smoke duration in ms (default 12 minutes).
 const SMOKE_TIMEOUT_MS = parseInt(process.env.SMOKE_TIMEOUT_MS || "720000");
 
 class SmokeError extends Error {
@@ -88,12 +86,7 @@ async function step(name, action) {
     result.steps.push({ name, status: "PASS", durationMs: Date.now() - startedAt });
   } catch (error) {
     const smokeError = error instanceof SmokeError ? error : new SmokeError(name, error.message);
-    result.steps.push({
-      name,
-      status: "FAIL",
-      durationMs: Date.now() - startedAt,
-      error: smokeError.message,
-    });
+    result.steps.push({ name, status: "FAIL", durationMs: Date.now() - startedAt, error: smokeError.message });
     throw smokeError;
   }
 }
@@ -113,68 +106,47 @@ async function expectText(page, text, stepName) {
   throw new SmokeError(stepName, `Expected visible text: ${text}`);
 }
 
-async function clickByRole(page, role, options, stepName) {
-  const locator = page.getByRole(role, options).first();
+async function clickButton(page, name, stepName) {
+  const locator = page.getByRole("button", { name }).first();
   await locator.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-    throw new SmokeError(stepName, `Could not find ${role}: ${options.name}`);
+    throw new SmokeError(stepName, `Could not find button: ${name}`);
   });
   await locator.click();
 }
 
-async function clickButton(page, name, stepName) {
-  await clickByRole(page, "button", { name }, stepName);
-}
-
 async function closeBrowserSafely(browser) {
   if (!browser) return;
-
-  await Promise.race([
-    browser.close(),
-    new Promise((resolve) => setTimeout(resolve, 3000)),
-  ]).catch(() => {});
+  await Promise.race([browser.close(), new Promise((resolve) => setTimeout(resolve, 3000))]).catch(() => {});
 }
 
 async function runSmoke(page) {
-  await step("open unified fullscreen play prototype", async () => {
+  await step("open fullscreen map milestone", async () => {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
-    await page.evaluate(() => localStorage.clear());
-    await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await expectText(page, "Pixel Nations", "open unified fullscreen play prototype");
-    await expectText(page, "Aurelian Basin", "open unified fullscreen play prototype");
-    await expectText(page, "30-parcel Basin", "open unified fullscreen play prototype");
-    await expectText(page, "1/12", "open unified fullscreen play prototype");
-    await expectText(page, "0/30", "open unified fullscreen play prototype");
+    await expectText(page, "Pixel Nations", "open fullscreen map milestone");
+    await expectText(page, "Aurelian Basin", "open fullscreen map milestone");
+    await expectText(page, "Fullscreen map foundation", "open fullscreen map milestone");
+    await expectText(page, "1/12", "open fullscreen map milestone");
+    await expectText(page, "0/24", "open fullscreen map milestone");
   });
 
-  await step("claim starter land from play map", async () => {
-    await clickButton(page, /^Choose this land$/i, "claim starter land from play map");
-    await expectText(page, "2/12", "claim starter land from play map");
-    await expectText(page, "1/30", "claim starter land from play map");
-    await expectText(page, "settlement phase", "claim starter land from play map");
+  await step("select another organic plot", async () => {
+    await page.locator("[data-qa='plot-riverbend']").click({ timeout: 5000 });
+    await expectText(page, "Riverbend", "select another organic plot");
   });
 
-  await step("orders change visible season and realm state", async () => {
-    await clickButton(page, /^Orders$/i, "orders change visible season and realm state");
-    await expectText(page, "Season Orders", "orders change visible season and realm state");
-    await clickButton(page, /Expand/i, "orders change visible season and realm state");
-    await expectText(page, "3/12", "orders change visible season and realm state");
-    await expectText(page, "2/30", "orders change visible season and realm state");
-    await clickButton(page, /Develop/i, "orders change visible season and realm state");
-    await expectText(page, "4/12", "orders change visible season and realm state");
-    await clickButton(page, /Secure/i, "orders change visible season and realm state");
-    await expectText(page, "5/12", "orders change visible season and realm state");
+  await step("claim selected land and show banner state", async () => {
+    await clickButton(page, /^Choose this land$/i, "claim selected land and show banner state");
+    await expectText(page, "2/12", "claim selected land and show banner state");
+    await expectText(page, "1/24", "claim selected land and show banner state");
+    await expectText(page, "settlement phase", "claim selected land and show banner state");
   });
 
-  await step("bottom dock keeps game layers inside play", async () => {
-    await clickButton(page, /^Map$/i, "bottom dock keeps game layers inside play");
-    await expectText(page, "30-parcel Basin", "bottom dock keeps game layers inside play");
-    await clickButton(page, /^Age$/i, "bottom dock keeps game layers inside play");
-    await expectText(page, "Age Layer", "bottom dock keeps game layers inside play");
-    await clickButton(page, /^Banner$/i, "bottom dock keeps game layers inside play");
-    await expectText(page, "Your age is written", "bottom dock keeps game layers inside play");
-    await clickButton(page, /^Profile$/i, "bottom dock keeps game layers inside play");
-    await expectText(page, "World Atlas Layer", "bottom dock keeps game layers inside play");
+  await step("bottom dock stays inside play shell", async () => {
+    await clickButton(page, /^Settlement$/i, "bottom dock stays inside play shell");
+    await expectText(page, "Layer preview", "bottom dock stays inside play shell");
+    await clickButton(page, /^Map$/i, "bottom dock stays inside play shell");
+    await expectText(page, "Fullscreen map foundation", "bottom dock stays inside play shell");
   });
 
   await step("play shell remains fullscreen framed", async () => {
@@ -184,12 +156,8 @@ async function runSmoke(page) {
     });
     const position = await shell.evaluate((element) => getComputedStyle(element).position);
     const overflow = await shell.evaluate((element) => getComputedStyle(element).overflow);
-    if (position !== "fixed") {
-      throw new SmokeError("play shell remains fullscreen framed", `Expected fixed shell, got ${position}`);
-    }
-    if (overflow !== "hidden") {
-      throw new SmokeError("play shell remains fullscreen framed", `Expected hidden overflow, got ${overflow}`);
-    }
+    if (position !== "fixed") throw new SmokeError("play shell remains fullscreen framed", `Expected fixed shell, got ${position}`);
+    if (overflow !== "hidden") throw new SmokeError("play shell remains fullscreen framed", `Expected hidden overflow, got ${overflow}`);
   });
 }
 
@@ -197,20 +165,9 @@ async function main() {
   const { startedProcess, appSource } = await ensureApp();
   result.appSource = appSource;
 
-  // Install handlers to ensure we kill started processes on CI signal termination.
-  process.on("SIGINT", () => {
-    if (startedProcess) startedProcess.kill();
-    process.exit(130);
-  });
-  process.on("SIGTERM", () => {
-    if (startedProcess) startedProcess.kill();
-    process.exit(143);
-  });
-  process.on("uncaughtException", (err) => {
-    console.error("uncaughtException", err);
-    if (startedProcess) startedProcess.kill();
-    process.exit(1);
-  });
+  process.on("SIGINT", () => { if (startedProcess) startedProcess.kill(); process.exit(130); });
+  process.on("SIGTERM", () => { if (startedProcess) startedProcess.kill(); process.exit(143); });
+  process.on("uncaughtException", (err) => { console.error("uncaughtException", err); if (startedProcess) startedProcess.kill(); process.exit(1); });
 
   let browser;
   try {
@@ -218,7 +175,6 @@ async function main() {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
 
-    // Bound the overall smoke via Promise.race so we guarantee a hard internal timeout.
     await Promise.race([
       (async () => { await runSmoke(page); })(),
       new Promise((_, reject) => setTimeout(() => reject(new SmokeError("smoke timeout", "Smoke exceeded internal time limit")), SMOKE_TIMEOUT_MS)),
