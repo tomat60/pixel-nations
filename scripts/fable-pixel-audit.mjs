@@ -277,7 +277,7 @@ async function main() {
 
   const model = env('ANTHROPIC_MODEL', 'claude-fable-5');
   const maxInputTokens = intEnv('MAX_INPUT_TOKENS', taskType === 'weak_prompt' ? 8000 : 25000);
-  const maxOutputTokens = intEnv('MAX_OUTPUT_TOKENS', taskType === 'cursor_prompts' ? 6000 : taskType === 'repo_audit' ? 5000 : 4000);
+  const maxOutputTokens = intEnv('MAX_OUTPUT_TOKENS', taskType === 'weak_prompt' ? 4000 : 5000);
   const inputPricePerMillion = numberEnv('INPUT_PRICE_PER_MILLION_USD', 10);
   const outputPricePerMillion = numberEnv('OUTPUT_PRICE_PER_MILLION_USD', 50);
   const maxEstimatedCost = numberEnv('MAX_ESTIMATED_COST_USD', taskType === 'weak_prompt' ? 0.35 : 0.75);
