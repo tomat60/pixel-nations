@@ -12,6 +12,7 @@ on:
           - weak_prompt
           - repo_audit
           - cursor_prompts
+          - full_play_redesign
       anthropic_model:
         description: "Anthropic model ID"
         required: true
@@ -44,10 +45,6 @@ permissions:
   contents: read
   issues: read
 
-concurrency:
-  group: fable-pixel-audit-${{ github.ref }}
-  cancel-in-progress: false
-
 defaults:
   run:
     shell: bash
@@ -61,10 +58,12 @@ jobs:
       github.event_name != 'issues' ||
       (
         github.event.issue.user.login == 'tomat60' &&
+        startsWith(github.event.issue.title, 'FABLE RUN:') &&
         (
-          github.event.issue.title == 'FABLE RUN: repo_audit' ||
-          github.event.issue.title == 'FABLE RUN: cursor_prompts' ||
-          github.event.issue.title == 'FABLE RUN: weak_prompt'
+          contains(github.event.issue.title, 'repo_audit') ||
+          contains(github.event.issue.title, 'cursor_prompts') ||
+          contains(github.event.issue.title, 'weak_prompt') ||
+          contains(github.event.issue.title, 'full_play')
         )
       )
 
@@ -82,11 +81,11 @@ jobs:
       - name: Run cost-capped Fable audit
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          FABLE_TASK_TYPE: ${{ github.event_name == 'issues' && (github.event.issue.title == 'FABLE RUN: cursor_prompts' && 'cursor_prompts' || github.event.issue.title == 'FABLE RUN: weak_prompt' && 'weak_prompt' || 'repo_audit') || inputs.task_type }}
+          FABLE_TASK_TYPE: ${{ github.event_name == 'issues' && (contains(github.event.issue.title, 'full_play') && 'full_play_redesign' || contains(github.event.issue.title, 'cursor_prompts') && 'cursor_prompts' || contains(github.event.issue.title, 'weak_prompt') && 'weak_prompt' || 'repo_audit') || inputs.task_type }}
           ANTHROPIC_MODEL: ${{ inputs.anthropic_model || 'claude-fable-5' }}
-          MAX_INPUT_TOKENS: ${{ inputs.max_input_tokens || '25000' }}
-          MAX_OUTPUT_TOKENS: ${{ inputs.max_output_tokens || '5000' }}
-          MAX_ESTIMATED_COST_USD: ${{ inputs.max_estimated_cost_usd || '0.75' }}
+          MAX_INPUT_TOKENS: ${{ github.event_name == 'issues' && contains(github.event.issue.title, 'full_play') && '110000' || inputs.max_input_tokens || '25000' }}
+          MAX_OUTPUT_TOKENS: ${{ github.event_name == 'issues' && contains(github.event.issue.title, 'full_play') && '12000' || inputs.max_output_tokens || '5000' }}
+          MAX_ESTIMATED_COST_USD: ${{ github.event_name == 'issues' && contains(github.event.issue.title, 'full_play') && '2.25' || inputs.max_estimated_cost_usd || '0.75' }}
           TEMPERATURE: ${{ inputs.temperature || '0.2' }}
           INPUT_PRICE_PER_MILLION_USD: "10"
           OUTPUT_PRICE_PER_MILLION_USD: "50"
@@ -96,7 +95,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: fable-pixel-audit-${{ github.event_name == 'issues' && (github.event.issue.title == 'FABLE RUN: cursor_prompts' && 'cursor_prompts' || github.event.issue.title == 'FABLE RUN: weak_prompt' && 'weak_prompt' || 'repo_audit') || inputs.task_type || 'repo_audit' }}
+          name: fable-pixel-audit-${{ github.event_name == 'issues' && (contains(github.event.issue.title, 'full_play') && 'full_play_redesign' || contains(github.event.issue.title, 'cursor_prompts') && 'cursor_prompts' || contains(github.event.issue.title, 'weak_prompt') && 'weak_prompt' || 'repo_audit') || inputs.task_type || 'repo_audit' }}
           path: |
             fable-output/fable-pixel-audit.md
             fable-output/fable-pixel-audit-meta.json
