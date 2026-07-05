@@ -148,12 +148,12 @@ async function runSmoke(page) {
   await step("orders change visible season and realm state", async () => {
     await clickButton(page, /^Orders$/i, "orders change visible season and realm state");
     await expectText(page, "Season Orders", "orders change visible season and realm state");
-    await clickButton(page, /^Expand$/i, "orders change visible season and realm state");
+    await clickButton(page, /Expand/i, "orders change visible season and realm state");
     await expectText(page, "3/12", "orders change visible season and realm state");
     await expectText(page, "2/30", "orders change visible season and realm state");
-    await clickButton(page, /^Develop$/i, "orders change visible season and realm state");
+    await clickButton(page, /Develop/i, "orders change visible season and realm state");
     await expectText(page, "4/12", "orders change visible season and realm state");
-    await clickButton(page, /^Secure$/i, "orders change visible season and realm state");
+    await clickButton(page, /Secure/i, "orders change visible season and realm state");
     await expectText(page, "5/12", "orders change visible season and realm state");
   });
 
