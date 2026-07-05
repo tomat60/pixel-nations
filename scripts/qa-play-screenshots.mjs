@@ -1,40 +1,64 @@
 import { chromium } from "playwright";
 import { existsSync } from "node:fs";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 
 const APP_URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const OUTPUT_DIR = "public/qa/play-latest";
 const SCREENSHOT_DIR = `${OUTPUT_DIR}/screenshots`;
+const VIDEO_DIR = `${OUTPUT_DIR}/videos`;
 const REPORT_PATH = `${OUTPUT_DIR}/report.html`;
 const MANIFEST_PATH = `${OUTPUT_DIR}/manifest.json`;
+const INTERACTION_LOG_PATH = `${OUTPUT_DIR}/interaction-log.json`;
+const GLOBAL_TIMEOUT_MS = 120_000;
+
+const globalTimeout = setTimeout(() => {
+  console.error(`Play visual QA exceeded ${GLOBAL_TIMEOUT_MS}ms global timeout.`);
+  process.exit(124);
+}, GLOBAL_TIMEOUT_MS);
+globalTimeout.unref();
 
 const viewports = [
-  { viewport: "mobile", width: 390, height: 844, deviceScaleFactor: 3, isMobile: true },
-  { viewport: "tablet", width: 768, height: 1024, deviceScaleFactor: 1, isMobile: false },
-  { viewport: "desktop", width: 1440, height: 900, deviceScaleFactor: 1, isMobile: false },
+  { viewport: "mobile", width: 390, height: 844, deviceScaleFactor: 3, isMobile: true, recordVideo: true },
+  { viewport: "tablet", width: 768, height: 1024, deviceScaleFactor: 1, isMobile: false, recordVideo: false },
+  { viewport: "desktop", width: 1440, height: 900, deviceScaleFactor: 1, isMobile: false, recordVideo: true },
 ];
 
+function timeoutPromise(label, promise, timeoutMs = 8_000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`${label} timed out after ${timeoutMs}ms`)), timeoutMs)),
+  ]);
+}
+
 async function dispatchDomClick(page, selector) {
-  const clicked = await page.evaluate((targetSelector) => {
-    const element = document.querySelector(targetSelector);
-    if (!element) return false;
-    element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
-    return true;
-  }, selector);
+  const clicked = await timeoutPromise(
+    `DOM click ${selector}`,
+    page.evaluate((targetSelector) => {
+      const element = document.querySelector(targetSelector);
+      if (!element) return false;
+      element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+      return true;
+    }, selector),
+    3_000,
+  );
 
   if (!clicked) throw new Error(`Could not find ${selector}`);
 }
 
 async function clickButtonByText(page, pattern) {
-  const clicked = await page.evaluate((source) => {
-    const regex = new RegExp(source, "i");
-    const buttons = Array.from(document.querySelectorAll("button"));
-    const button = buttons.find((item) => regex.test(item.textContent ?? ""));
-    if (!button) return false;
-    button.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
-    return true;
-  }, pattern.source);
+  const clicked = await timeoutPromise(
+    `Button click ${pattern}`,
+    page.evaluate((source) => {
+      const regex = new RegExp(source, "i");
+      const buttons = Array.from(document.querySelectorAll("button"));
+      const button = buttons.find((item) => regex.test(item.textContent ?? ""));
+      if (!button) return false;
+      button.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+      return true;
+    }, pattern.source),
+    3_000,
+  );
 
   if (!clicked) throw new Error(`Could not find button matching ${pattern}`);
 }
@@ -103,7 +127,7 @@ async function isAppRunning() {
 
 async function waitForApp() {
   const started = Date.now();
-  while (Date.now() - started < 30000) {
+  while (Date.now() - started < 30_000) {
     if (await isAppRunning()) return;
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
@@ -118,6 +142,7 @@ function startAppIfNeeded() {
   return spawn("npm", command, {
     stdio: "pipe",
     shell: process.platform === "win32",
+    detached: process.platform !== "win32",
   });
 }
 
@@ -133,6 +158,18 @@ async function ensureApp() {
   return { startedProcess, appSource: existsSync(".next") ? "temporary next start" : "temporary next dev" };
 }
 
+function stopApp(startedProcess) {
+  if (!startedProcess) return;
+
+  try {
+    if (process.platform !== "win32") {
+      process.kill(-startedProcess.pid, "SIGTERM");
+    } else {
+      startedProcess.kill("SIGTERM");
+    }
+  } catch {}
+}
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -141,8 +178,20 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
-function buildReport({ generatedAt, appSource, shots }) {
-  const cards = shots
+function buildReport({ generatedAt, appSource, shots, videos, interactionLog }) {
+  const videoCards = videos.length
+    ? videos
+        .map(
+          (video) => `<article class="card">
+            <div class="meta"><span>${escapeHtml(video.viewport)}</span><span>first-minute video</span></div>
+            <h3>${escapeHtml(video.filename)}</h3>
+            <video controls src="./videos/${encodeURIComponent(video.filename)}"></video>
+          </article>`,
+        )
+        .join("\n")
+    : `<p class="error-text">No video evidence generated.</p>`;
+
+  const screenshotCards = shots
     .map(
       (shot) => `<article class="card ${shot.error ? "error" : ""}">
         <div class="meta"><span>${escapeHtml(shot.viewport)}</span><span>${escapeHtml(shot.stepLabel)}</span></div>
@@ -151,6 +200,12 @@ function buildReport({ generatedAt, appSource, shots }) {
         ${shot.error ? `<p class="error-text"><strong>Interaction warning:</strong> ${escapeHtml(shot.error)}</p>` : ""}
         <a href="./screenshots/${encodeURIComponent(shot.filename)}"><img src="./screenshots/${encodeURIComponent(shot.filename)}" alt="${escapeHtml(shot.filename)}" /></a>
       </article>`,
+    )
+    .join("\n");
+
+  const logItems = interactionLog
+    .map(
+      (item) => `<li><code>${escapeHtml(item.viewport)}</code> / <code>${escapeHtml(item.stepId)}</code> — ${escapeHtml(item.status)}${item.error ? `: ${escapeHtml(item.error)}` : ""}</li>`,
     )
     .join("\n");
 
@@ -172,7 +227,7 @@ function buildReport({ generatedAt, appSource, shots }) {
     .error-text { color: var(--bad); }
     .eyebrow, .meta { color: var(--gold); text-transform: uppercase; letter-spacing: 0.18em; font-size: .72rem; font-weight: 800; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
-    img { width: 100%; height: auto; display: block; border: 1px solid rgba(255,255,255,0.08); background: #000; }
+    img, video { width: 100%; height: auto; display: block; border: 1px solid rgba(255,255,255,0.08); background: #000; }
     code { color: #f5deb3; }
   </style>
 </head>
@@ -180,48 +235,76 @@ function buildReport({ generatedAt, appSource, shots }) {
   <main>
     <header>
       <p class="eyebrow">Pixel Nations /play Visual QA</p>
-      <h1>First Minute Screenshot Evidence</h1>
+      <h1>First Minute Gameplay Evidence</h1>
       <p>Generated: <code>${escapeHtml(generatedAt)}</code></p>
       <p>App source: <code>${escapeHtml(appSource)}</code></p>
-      <p>This report captures the /play first-minute sequence across mobile, tablet, and desktop. Interaction warnings are part of the verdict: if a step needs forced DOM interaction, the UX is not yet proven.</p>
+      <p>This report captures /play with video, screenshots, and interaction warnings. Video is required for motion/game-feel; screenshots are required for layout/composition.</p>
     </header>
     <section>
       <h2>Manual verdict required</h2>
       <ul>
         <li>Does the first screen feel like a game, not a website?</li>
-        <li>Is the first clickable land obvious?</li>
-        <li>After claim, is owned land/capital/influence visible without explanation?</li>
-        <li>Do Orders feel like decisions with map consequences?</li>
-        <li>Does the map inspire “I want to grow this land”?</li>
+        <li>Is the first clickable land obvious without explanation?</li>
+        <li>After claim, are owned land/capital/influence visible on-map?</li>
+        <li>Do Orders feel like decisions with consequences?</li>
+        <li>Do motion, timing, and transitions support the fantasy of land → empire?</li>
       </ul>
     </section>
-    <div class="grid">${cards}</div>
+    <section>
+      <h2>Gameplay videos</h2>
+      <div class="grid">${videoCards}</div>
+    </section>
+    <section>
+      <h2>Interaction log</h2>
+      <ul>${logItems}</ul>
+    </section>
+    <section>
+      <h2>Screenshots</h2>
+      <div class="grid">${screenshotCards}</div>
+    </section>
   </main>
 </body>
 </html>`;
 }
 
-async function captureStep(page, viewport, step, shots) {
+async function captureStep(page, viewport, step, shots, interactionLog) {
   let error = null;
   try {
-    if (step.run) await step.run(page);
+    if (step.run) await timeoutPromise(`${viewport.viewport} ${step.id}`, step.run(page), 10_000);
   } catch (caught) {
     error = caught instanceof Error ? caught.message : String(caught);
   }
 
   const filename = `${viewport.viewport}-play-${step.id}${error ? "-warning" : ""}.png`;
-  await page.screenshot({ path: `${SCREENSHOT_DIR}/${filename}` });
-  shots.push({ filename, viewport: viewport.viewport, stepLabel: step.label, note: step.note, error });
+  await timeoutPromise(`Screenshot ${filename}`, page.screenshot({ path: `${SCREENSHOT_DIR}/${filename}` }), 8_000);
+
+  shots.push({ filename, viewport: viewport.viewport, stepId: step.id, stepLabel: step.label, note: step.note, error });
+  interactionLog.push({ viewport: viewport.viewport, stepId: step.id, label: step.label, status: error ? "warning" : "ok", error });
+}
+
+async function saveVideo(page, viewport, videos) {
+  if (!viewport.recordVideo) return;
+  const video = page.video();
+  if (!video) return;
+
+  const sourcePath = await video.path();
+  const filename = `${viewport.viewport}-first-minute.webm`;
+  await copyFile(sourcePath, `${VIDEO_DIR}/${filename}`);
+  videos.push({ viewport: viewport.viewport, filename });
 }
 
 async function main() {
   await rm(OUTPUT_DIR, { recursive: true, force: true });
   await mkdir(SCREENSHOT_DIR, { recursive: true });
+  await mkdir(VIDEO_DIR, { recursive: true });
   await writeFile(`${SCREENSHOT_DIR}/.gitkeep`, "");
+  await writeFile(`${VIDEO_DIR}/.gitkeep`, "");
 
   const { startedProcess, appSource } = await ensureApp();
   let browser;
   const shots = [];
+  const videos = [];
+  const interactionLog = [];
 
   try {
     browser = await chromium.launch();
@@ -230,29 +313,35 @@ async function main() {
         viewport: { width: viewport.width, height: viewport.height },
         deviceScaleFactor: viewport.deviceScaleFactor,
         isMobile: viewport.isMobile,
+        recordVideo: viewport.recordVideo ? { dir: VIDEO_DIR, size: { width: viewport.width, height: viewport.height } } : undefined,
       });
+      context.setDefaultTimeout(8_000);
       const page = await context.newPage();
-      await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
-      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-      await page.locator("[data-qa='play-shell']").waitFor({ state: "visible", timeout: 8000 });
+      await timeoutPromise(`${viewport.viewport} goto /play`, page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" }), 12_000);
+      await page.waitForLoadState("networkidle", { timeout: 5_000 }).catch(() => {});
+      await page.locator("[data-qa='play-shell']").waitFor({ state: "visible", timeout: 8_000 });
       await page.waitForTimeout(700);
 
       for (const step of steps) {
-        await captureStep(page, viewport, step, shots);
+        await captureStep(page, viewport, step, shots, interactionLog);
       }
+
       await context.close();
+      await saveVideo(page, viewport, videos);
     }
   } finally {
-    if (browser) await browser.close();
-    if (startedProcess) startedProcess.kill();
+    if (browser) await browser.close().catch(() => {});
+    stopApp(startedProcess);
   }
 
   const generatedAt = new Date().toISOString();
-  await writeFile(MANIFEST_PATH, `${JSON.stringify({ generatedAt, appSource, route: "/play", shots }, null, 2)}\n`);
-  await writeFile(REPORT_PATH, buildReport({ generatedAt, appSource, shots }));
+  await writeFile(INTERACTION_LOG_PATH, `${JSON.stringify(interactionLog, null, 2)}\n`);
+  await writeFile(MANIFEST_PATH, `${JSON.stringify({ generatedAt, appSource, route: "/play", shots, videos, interactionLog }, null, 2)}\n`);
+  await writeFile(REPORT_PATH, buildReport({ generatedAt, appSource, shots, videos, interactionLog }));
 
   console.log(`Pixel Nations /play QA report written to ${REPORT_PATH}`);
   console.log(`Pixel Nations /play screenshots saved to ${SCREENSHOT_DIR}`);
+  console.log(`Pixel Nations /play videos saved to ${VIDEO_DIR}`);
 }
 
 main().catch((error) => {
