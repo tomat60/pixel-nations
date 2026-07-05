@@ -3,16 +3,36 @@ import type { Objective, Phase } from "./play-state";
 
 export function ObjectiveRibbon({ objective, lastEvent }: { objective: Objective; lastEvent: string }) {
   return (
-    <div data-qa="objective-ribbon" className="mt-3 grid gap-2 rounded-3xl border border-amber-200/20 bg-black/42 p-3 shadow-xl backdrop-blur-md md:grid-cols-[1fr_1fr]">
-      <div>
-        <p className="text-[10px] uppercase tracking-[0.28em] text-amber-200/70">{objective.eyebrow}</p>
-        <h2 className="text-base font-black md:text-xl">{objective.title}</h2>
-        <p className="mt-1 text-xs leading-relaxed text-amber-50/70">{objective.body}</p>
-      </div>
+    <div data-qa="objective-ribbon" className="mt-3 grid gap-2 rounded-3xl border border-amber-200/25 bg-black/50 p-3 shadow-xl shadow-black/25 backdrop-blur-md lg:grid-cols-[1.15fr_.85fr]">
       <div className="rounded-2xl border border-amber-100/15 bg-amber-100/8 p-3">
-        <p className="text-[10px] uppercase tracking-[0.26em] text-amber-200/65">Latest consequence</p>
-        <p className="mt-1 text-sm font-bold leading-relaxed text-amber-50/80">{lastEvent}</p>
+        <p className="text-[10px] uppercase tracking-[0.28em] text-amber-200/70">{objective.eyebrow}</p>
+        <div className="mt-1 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2 className="text-base font-black md:text-xl">{objective.title}</h2>
+            <p className="mt-1 text-xs leading-relaxed text-amber-50/72">{objective.body}</p>
+          </div>
+          <p className="rounded-full border border-amber-200/25 bg-amber-300/12 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-amber-100">Next click matters</p>
+        </div>
+        <div className="mt-3 grid grid-cols-4 gap-1 text-center text-[9px] font-black uppercase tracking-wide text-amber-50/55">
+          <LoopPip label="Land" active />
+          <LoopPip label="Claim" active={objective.title !== "Choose one starter land"} />
+          <LoopPip label="Orders" active={objective.title !== "Choose one starter land" && objective.title !== "Open Orders"} />
+          <LoopPip label="Map change" active={objective.eyebrow !== "First decision" && objective.eyebrow !== "Next action"} />
+        </div>
       </div>
+      <div className="rounded-2xl border border-amber-100/15 bg-black/28 p-3">
+        <p className="text-[10px] uppercase tracking-[0.26em] text-amber-200/65">Latest consequence</p>
+        <p className="mt-1 text-sm font-bold leading-relaxed text-amber-50/82">{lastEvent}</p>
+        <p className="mt-2 text-[10px] uppercase tracking-[0.22em] text-amber-200/55">Every season must leave a mark on the map.</p>
+      </div>
+    </div>
+  );
+}
+
+function LoopPip({ label, active }: { label: string; active: boolean }) {
+  return (
+    <div className={`rounded-full border px-2 py-1 ${active ? "border-amber-300/45 bg-amber-300/20 text-amber-50" : "border-white/10 bg-white/[0.04] text-amber-50/35"}`}>
+      {label}
     </div>
   );
 }
@@ -50,7 +70,7 @@ export function Chronicle({ entries }: { entries: string[] }) {
 
 export function OrderButton({ label, onClick, disabled }: { label: string; onClick: () => void; disabled?: boolean }) {
   return (
-    <button disabled={disabled} onClick={onClick} className={`rounded-2xl border px-2 py-3 text-[10px] font-black uppercase tracking-wide ${disabled ? "border-white/5 bg-white/5 text-white/25" : "border-amber-100/20 bg-amber-100/10 text-amber-50 hover:bg-amber-300 hover:text-stone-950"}`}>
+    <button disabled={disabled} onClick={onClick} className={`rounded-2xl border px-2 py-3 text-[10px] font-black uppercase tracking-wide transition ${disabled ? "cursor-not-allowed border-white/5 bg-white/5 text-white/25" : "border-amber-100/20 bg-amber-100/10 text-amber-50 hover:bg-amber-300 hover:text-stone-950"}`}>
       {label}
     </button>
   );
