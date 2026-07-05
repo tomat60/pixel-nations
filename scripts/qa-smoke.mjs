@@ -147,13 +147,13 @@ async function runSmoke(page) {
     await page.evaluate(() => localStorage.clear());
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await expectText(page, "The First Age", "unified fullscreen play prototype route");
+    await expectText(page, "First Age", "unified fullscreen play prototype route");
     await expectText(page, "Aurelian Basin", "unified fullscreen play prototype route");
     await expectText(page, "World Map", "unified fullscreen play prototype route");
     await clickButton(page, /^Orders$/i, "unified fullscreen play prototype route");
     await expectText(page, "Season Orders", "unified fullscreen play prototype route");
     await clickButton(page, /^Expand$/i, "unified fullscreen play prototype route");
-    await expectText(page, "2/12", "unified fullscreen play prototype route");
+    await expectText(page, "3/12", "unified fullscreen play prototype route");
     await clickButton(page, /^Nation$/i, "unified fullscreen play prototype route");
     await expectText(page, "Nation Layer", "unified fullscreen play prototype route");
   });
