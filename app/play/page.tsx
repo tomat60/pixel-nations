@@ -53,11 +53,11 @@ const parcels: Parcel[] = [
 ];
 
 const views: { id: View; label: string }[] = [
-  { id: "map", label: "Map" },
   { id: "orders", label: "Orders" },
-  { id: "realm", label: "Realm" },
-  { id: "chronicle", label: "Chronicle" },
-  { id: "world", label: "World" },
+  { id: "map", label: "Map" },
+  { id: "realm", label: "Age" },
+  { id: "chronicle", label: "Banner" },
+  { id: "world", label: "Profile" },
 ];
 
 const terrainFill: Record<Terrain, string> = {
@@ -146,13 +146,17 @@ export default function PlayPrototypePage() {
   }
 
   return (
-    <main data-qa="play-shell" className="fixed inset-0 overflow-hidden bg-[#0c1411] text-[#f7ead2]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(250,204,21,.20),transparent_28%),radial-gradient(circle_at_78%_22%,rgba(56,189,248,.16),transparent_31%),linear-gradient(180deg,#10231d_0%,#080f0d_100%)]" />
-      <section className="relative z-10 grid h-full grid-rows-[auto_1fr_auto] p-3 md:p-6">
-        <header className="flex items-center justify-between rounded-3xl border border-amber-200/20 bg-black/35 px-4 py-3 shadow-2xl backdrop-blur-md">
+    <main data-qa="play-shell" className="fixed inset-0 overflow-hidden bg-[#06090a] text-[#f7ead2]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(250,204,21,.20),transparent_28%),radial-gradient(circle_at_78%_22%,rgba(56,189,248,.16),transparent_31%),linear-gradient(180deg,#101711_0%,#050807_100%)]" />
+      <section className="relative z-10 grid h-full grid-rows-[auto_1fr_auto] p-3 md:p-5">
+        <header className="flex items-center justify-between rounded-3xl border border-amber-200/20 bg-black/45 px-4 py-3 shadow-2xl backdrop-blur-md">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.32em] text-amber-200/70">Pixel Nations / Sector A-01</p>
+            <p className="text-[10px] uppercase tracking-[0.38em] text-amber-200/70">Pixel Nations</p>
             <h1 className="text-xl font-black tracking-tight md:text-3xl">Aurelian Basin</h1>
+          </div>
+          <div className="hidden text-center md:block">
+            <p className="text-[10px] uppercase tracking-[0.34em] text-amber-200/65">From Land to Empire</p>
+            <p className="mt-1 text-sm text-amber-50/70">One fullscreen map game</p>
           </div>
           <div className="flex items-center gap-2 text-right">
             <StatusChip label="Season" value={`${season}/12`} />
@@ -160,91 +164,97 @@ export default function PlayPrototypePage() {
           </div>
         </header>
 
-        <div data-qa="map-stage" className="relative my-3 min-h-0 overflow-hidden rounded-[2rem] border border-amber-200/20 bg-[#1d2d23] shadow-[0_30px_90px_rgba(0,0,0,.45)]">
-          <svg viewBox="0 0 1000 760" className="absolute inset-0 h-full w-full" role="img" aria-label="Aurelian Basin 30 parcel strategy map">
-            <defs>
-              <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="18" stdDeviation="16" floodColor="#000" floodOpacity="0.42" />
-              </filter>
-              <linearGradient id="sea" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0%" stopColor="#16374a" />
-                <stop offset="100%" stopColor="#0d5868" />
-              </linearGradient>
-            </defs>
-            <rect width="1000" height="760" fill="url(#sea)" />
-            <path d="M0 530 C 110 468 190 520 276 489 C 408 441 520 472 620 438 C 776 385 862 444 1000 374 L1000 760 L0 760 Z" fill="#0b5264" opacity="0.78" />
-            <path d="M86 210 C 167 70 322 43 482 64 C 628 83 777 123 898 267 C 1017 409 931 632 802 716 C 673 799 411 755 256 731 C 101 707 25 591 39 451 C 48 356 48 276 86 210 Z" fill="#a78a4d" filter="url(#softShadow)" opacity="0.48" />
+        <div className="my-3 grid min-h-0 gap-3 xl:grid-cols-[282px_minmax(0,1fr)_282px]">
+          <CoreLoopRail selected={selected} phase={phase} ownedCount={owned.length} onClaim={claimSelected} isRival={Boolean(selected.rival)} />
 
-            {parcels.map((parcel) => {
-              const active = parcel.id === selectedId;
-              const isOwned = owned.includes(parcel.id);
-              const isScouted = scouted.includes(parcel.id) || isOwned || parcel.starter;
-              return (
-                <g key={parcel.id} data-qa={`parcel-${parcel.id}`} onClick={() => setSelectedId(parcel.id)} className="cursor-pointer">
-                  <path d={parcel.d} fill={terrainFill[parcel.terrain]} opacity={isScouted ? 0.92 : 0.46} stroke={active ? "#fff2ad" : "#382a1a"} strokeWidth={active ? 6 : 2.3} />
-                  {parcel.rival && <path d={parcel.d} fill="#5f6670" opacity="0.28" stroke="#cbd5e1" strokeWidth="2" />}
-                  {parcel.starter && phase === "unclaimed" && <circle cx={parcel.cx} cy={parcel.cy} r="36" fill="none" stroke="#ffe39a" strokeWidth="5" opacity="0.6" />}
-                  {isOwned && <path d={parcel.d} fill="#f8d36d" opacity="0.20" stroke="#ffe39a" strokeWidth="6" />}
-                  {capital?.id === parcel.id && (
-                    <>
-                      <circle cx={parcel.cx} cy={parcel.cy} r={influenceRadius} fill="#f8d36d" opacity="0.13" stroke="#ffe39a" strokeWidth="4" />
-                      <DevelopmentMarker x={parcel.cx} y={parcel.cy - 18} level={developmentLevel} />
-                    </>
-                  )}
-                  {parcel.rival && <RivalBanner x={parcel.cx} y={parcel.cy - 22} />}
-                  {isScouted && (
-                    <text x={parcel.cx} y={parcel.cy + 24} textAnchor="middle" fontSize="16" fontWeight="800" fill="#24180d" stroke="#f7ead2" strokeWidth="3" paintOrder="stroke">
-                      {parcel.name}
-                    </text>
-                  )}
-                </g>
-              );
-            })}
+          <div data-qa="map-stage" className="relative min-h-0 overflow-hidden rounded-[2rem] border border-amber-200/20 bg-[#1d2d23] shadow-[0_30px_90px_rgba(0,0,0,.45)]">
+            <svg viewBox="0 0 1000 760" className="absolute inset-0 h-full w-full" role="img" aria-label="Aurelian Basin 30 parcel strategy map">
+              <defs>
+                <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="18" stdDeviation="16" floodColor="#000" floodOpacity="0.42" />
+                </filter>
+                <linearGradient id="sea" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#16374a" />
+                  <stop offset="100%" stopColor="#0d5868" />
+                </linearGradient>
+              </defs>
+              <rect width="1000" height="760" fill="url(#sea)" />
+              <path d="M0 530 C 110 468 190 520 276 489 C 408 441 520 472 620 438 C 776 385 862 444 1000 374 L1000 760 L0 760 Z" fill="#0b5264" opacity="0.78" />
+              <path d="M86 210 C 167 70 322 43 482 64 C 628 83 777 123 898 267 C 1017 409 931 632 802 716 C 673 799 411 755 256 731 C 101 707 25 591 39 451 C 48 356 48 276 86 210 Z" fill="#a78a4d" filter="url(#softShadow)" opacity="0.48" />
 
-            <path d="M470 78 C 438 170 520 244 487 344 C 461 433 397 512 430 724" fill="none" stroke="#65d8ff" strokeWidth="18" strokeLinecap="round" opacity="0.58" />
-            <path d="M506 81 C 478 177 548 244 526 350 C 501 464 438 536 468 724" fill="none" stroke="#d4f8ff" strokeWidth="5" strokeLinecap="round" opacity="0.78" />
-            <path d="M138 444 C 302 399 520 408 866 612" fill="none" stroke="#3b2d1d" strokeWidth="8" strokeDasharray="14 16" opacity={phase === "unclaimed" ? 0.22 : 0.54} />
-            {tradeRoute && capital && <path d={`M${capital.cx} ${capital.cy} C 530 420 650 466 866 612`} fill="none" stroke="#ffe39a" strokeWidth="7" strokeDasharray="18 12" opacity="0.88" />}
-            <path d="M598 145 L632 75 L672 162 L704 100 L754 216 Z" fill="#6b5d4f" />
-            <path d="M608 141 L632 75 L657 141 Z M690 148 L704 100 L732 198 Z" fill="#f8eed9" opacity="0.78" />
-            <path d="M212 275 q33 -62 76 0 q-42 -22 -76 0Z M248 323 q36 -72 86 0 q-44 -26 -86 0Z M168 366 q41 -80 94 0 q-48 -28 -94 0Z" fill="#1f6b42" opacity="0.9" />
-          </svg>
+              {parcels.map((parcel) => {
+                const active = parcel.id === selectedId;
+                const isOwned = owned.includes(parcel.id);
+                const isScouted = scouted.includes(parcel.id) || isOwned || parcel.starter;
+                return (
+                  <g key={parcel.id} data-qa={`parcel-${parcel.id}`} onClick={() => setSelectedId(parcel.id)} className="cursor-pointer">
+                    <path d={parcel.d} fill={terrainFill[parcel.terrain]} opacity={isScouted ? 0.92 : 0.46} stroke={active ? "#fff2ad" : "#382a1a"} strokeWidth={active ? 6 : 2.3} />
+                    {parcel.rival && <path d={parcel.d} fill="#5f6670" opacity="0.28" stroke="#cbd5e1" strokeWidth="2" />}
+                    {parcel.starter && phase === "unclaimed" && <circle cx={parcel.cx} cy={parcel.cy} r="36" fill="none" stroke="#ffe39a" strokeWidth="5" opacity="0.6" />}
+                    {isOwned && <path d={parcel.d} fill="#f8d36d" opacity="0.20" stroke="#ffe39a" strokeWidth="6" />}
+                    {capital?.id === parcel.id && (
+                      <>
+                        <circle cx={parcel.cx} cy={parcel.cy} r={influenceRadius} fill="#f8d36d" opacity="0.13" stroke="#ffe39a" strokeWidth="4" />
+                        <DevelopmentMarker x={parcel.cx} y={parcel.cy - 18} level={developmentLevel} />
+                      </>
+                    )}
+                    {parcel.rival && <RivalBanner x={parcel.cx} y={parcel.cy - 22} />}
+                    {isScouted && (
+                      <text x={parcel.cx} y={parcel.cy + 24} textAnchor="middle" fontSize="16" fontWeight="800" fill="#24180d" stroke="#f7ead2" strokeWidth="3" paintOrder="stroke">
+                        {parcel.name}
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
 
-          <div className="absolute left-4 top-4 max-w-[286px] rounded-3xl border border-amber-100/20 bg-black/40 p-4 backdrop-blur-md md:left-6 md:top-6">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-amber-200/70">Selected parcel</p>
-            <h2 className="mt-1 text-2xl font-black">{selected.name}</h2>
-            <p className="mt-1 text-sm text-amber-50/80">{selected.region} - {selected.terrain}</p>
-            <p className="mt-2 text-xs leading-relaxed text-amber-50/65">{terrainLine[selected.terrain]}</p>
-            {phase === "unclaimed" ? (
-              <button data-qa="claim-button" onClick={claimSelected} className="mt-3 rounded-2xl bg-amber-300 px-4 py-2 text-sm font-black text-stone-950 shadow-lg shadow-black/30">
-                {selected.rival ? "Rival banner here" : "Claim this land"}
-              </button>
-            ) : (
-              <p className="mt-3 rounded-2xl bg-amber-100/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-amber-100">{phase} phase</p>
-            )}
-          </div>
+              <path d="M470 78 C 438 170 520 244 487 344 C 461 433 397 512 430 724" fill="none" stroke="#65d8ff" strokeWidth="18" strokeLinecap="round" opacity="0.58" />
+              <path d="M506 81 C 478 177 548 244 526 350 C 501 464 438 536 468 724" fill="none" stroke="#d4f8ff" strokeWidth="5" strokeLinecap="round" opacity="0.78" />
+              <path d="M138 444 C 302 399 520 408 866 612" fill="none" stroke="#3b2d1d" strokeWidth="8" strokeDasharray="14 16" opacity={phase === "unclaimed" ? 0.22 : 0.54} />
+              {tradeRoute && capital && <path d={`M${capital.cx} ${capital.cy} C 530 420 650 466 866 612`} fill="none" stroke="#ffe39a" strokeWidth="7" strokeDasharray="18 12" opacity="0.88" />}
+              <path d="M598 145 L632 75 L672 162 L704 100 L754 216 Z" fill="#6b5d4f" />
+              <path d="M608 141 L632 75 L657 141 Z M690 148 L704 100 L732 198 Z" fill="#f8eed9" opacity="0.78" />
+              <path d="M212 275 q33 -62 76 0 q-42 -22 -76 0Z M248 323 q36 -72 86 0 q-44 -26 -86 0Z M168 366 q41 -80 94 0 q-48 -28 -94 0Z" fill="#1f6b42" opacity="0.9" />
+            </svg>
 
-          <div className="absolute bottom-4 left-4 right-4 rounded-3xl border border-amber-100/20 bg-black/48 p-3 backdrop-blur-md md:bottom-6 md:left-auto md:right-6 md:w-[390px]">
-            {view === "map" && <Panel title="30-parcel Basin" body="This is now a real authored sector prototype: starter lands, rival banners, scouted labels, roads, river, coast, mountains, ruins and owned influence on the map." />}
-            {view === "orders" && (
-              <div>
-                <Panel title="Season Orders" body="Every order changes a visible map state: land, marker, influence ring, scouting label, or trade route." />
-                <div className="mt-3 grid grid-cols-5 gap-2">
-                  <OrderButton label="Expand" onClick={() => issueOrder("expand")} disabled={!capital} />
-                  <OrderButton label="Develop" onClick={() => issueOrder("develop")} disabled={!capital} />
-                  <OrderButton label="Secure" onClick={() => issueOrder("secure")} disabled={!capital} />
-                  <OrderButton label="Scout" onClick={() => issueOrder("scout")} disabled={!capital} />
-                  <OrderButton label="Trade" onClick={() => issueOrder("trade")} disabled={!capital || developmentLevel < 3} />
+            <div className="absolute left-4 top-4 max-w-[286px] rounded-3xl border border-amber-100/20 bg-black/40 p-4 backdrop-blur-md xl:hidden">
+              <p className="text-[10px] uppercase tracking-[0.25em] text-amber-200/70">Selected parcel</p>
+              <h2 className="mt-1 text-2xl font-black">{selected.name}</h2>
+              <p className="mt-1 text-sm text-amber-50/80">{selected.region} - {selected.terrain}</p>
+              <p className="mt-2 text-xs leading-relaxed text-amber-50/65">{terrainLine[selected.terrain]}</p>
+              {phase === "unclaimed" ? (
+                <button data-qa="claim-button" onClick={claimSelected} className="mt-3 rounded-2xl bg-amber-300 px-4 py-2 text-sm font-black text-stone-950 shadow-lg shadow-black/30">
+                  {selected.rival ? "Rival banner here" : "Claim this land"}
+                </button>
+              ) : (
+                <p className="mt-3 rounded-2xl bg-amber-100/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-amber-100">{phase} phase</p>
+              )}
+            </div>
+
+            <div className="absolute bottom-4 left-4 right-4 rounded-3xl border border-amber-100/20 bg-black/48 p-3 backdrop-blur-md md:bottom-6 md:left-auto md:right-6 md:w-[390px]">
+              {view === "map" && <Panel title="30-parcel Basin" body="This is now a real authored sector prototype: starter lands, rival banners, scouted labels, roads, river, coast, mountains, ruins and owned influence on the map." />}
+              {view === "orders" && (
+                <div>
+                  <Panel title="Season Orders" body="Every order changes a visible map state: land, marker, influence ring, scouting label, or trade route." />
+                  <div className="mt-3 grid grid-cols-5 gap-2">
+                    <OrderButton label="Expand" onClick={() => issueOrder("expand")} disabled={!capital} />
+                    <OrderButton label="Develop" onClick={() => issueOrder("develop")} disabled={!capital} />
+                    <OrderButton label="Secure" onClick={() => issueOrder("secure")} disabled={!capital} />
+                    <OrderButton label="Scout" onClick={() => issueOrder("scout")} disabled={!capital} />
+                    <OrderButton label="Trade" onClick={() => issueOrder("trade")} disabled={!capital || developmentLevel < 3} />
+                  </div>
                 </div>
-              </div>
-            )}
-            {view === "realm" && <Panel title="Realm Layer" body={`Phase: ${phase}. Capital marker level ${developmentLevel}/5. Owned parcels: ${owned.length}. This replaces dashboard and settlement as one in-game sheet.`} />}
-            {view === "chronicle" && <Chronicle entries={chronicle} />}
-            {view === "world" && <Panel title="World Atlas Layer" body="A-01 is only one basin in a 10,000-land world. The big game stays visible, but the demo remains one focused sector." />}
+              )}
+              {view === "realm" && <Panel title="Age Layer" body={`Phase: ${phase}. Capital marker level ${developmentLevel}/5. Owned parcels: ${owned.length}. This replaces dashboard and settlement as one in-game sheet.`} />}
+              {view === "chronicle" && <Chronicle entries={chronicle} />}
+              {view === "world" && <Panel title="World Atlas Layer" body="A-01 is only one basin in a 10,000-land world. The big game stays visible, but the demo remains one focused sector." />}
+            </div>
           </div>
+
+          <LayerStack phase={phase} ownedCount={owned.length} developmentLevel={developmentLevel} />
         </div>
 
-        <nav className="grid grid-cols-5 gap-2 rounded-3xl border border-amber-200/20 bg-black/40 p-2 backdrop-blur-md">
+        <nav className="grid grid-cols-5 gap-2 rounded-3xl border border-amber-200/20 bg-black/45 p-2 backdrop-blur-md">
           {views.map((item) => (
             <button key={item.id} onClick={() => setView(item.id)} className={`rounded-2xl px-2 py-3 text-xs font-black uppercase tracking-wide transition md:text-sm ${view === item.id ? "bg-amber-300 text-stone-950" : "bg-white/5 text-amber-50/70"}`}>
               {item.label}
@@ -253,6 +263,75 @@ export default function PlayPrototypePage() {
         </nav>
       </section>
     </main>
+  );
+}
+
+function CoreLoopRail({ selected, phase, ownedCount, onClaim, isRival }: { selected: Parcel; phase: string; ownedCount: number; onClaim: () => void; isRival: boolean }) {
+  return (
+    <aside className="hidden min-h-0 overflow-hidden rounded-[1.75rem] border border-amber-200/20 bg-black/42 p-4 shadow-2xl backdrop-blur-md xl:block">
+      <p className="text-[10px] uppercase tracking-[0.3em] text-amber-200/70">The core loop</p>
+      <div className="mt-4 space-y-3">
+        <LoopStep n="1" title="Choose your land" body="Strategic start with visible tradeoffs." active={phase === "unclaimed"} />
+        <LoopStep n="2" title="Claim your land" body="Your banner becomes the capital." active={ownedCount > 0} />
+        <LoopStep n="3" title="Issue orders" body="One meaningful order per season." active={ownedCount > 0} />
+        <LoopStep n="4" title="Map consequences" body="Every choice changes the world." active={ownedCount > 1} />
+      </div>
+      <div className="mt-4 rounded-3xl border border-amber-100/15 bg-amber-100/8 p-4">
+        <p className="text-[10px] uppercase tracking-[0.24em] text-amber-200/65">Selected parcel</p>
+        <h2 className="mt-1 text-2xl font-black">{selected.name}</h2>
+        <p className="mt-1 text-sm text-amber-50/75">{selected.region} - {selected.terrain}</p>
+        <p className="mt-2 text-xs leading-relaxed text-amber-50/60">{selected.resources.join(" / ")}</p>
+        {phase === "unclaimed" ? (
+          <button data-qa="claim-button" onClick={onClaim} className="mt-4 w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-black/30">
+            {isRival ? "Rival banner here" : "Choose this land"}
+          </button>
+        ) : (
+          <p className="mt-4 rounded-2xl bg-amber-100/10 px-4 py-3 text-center text-xs font-bold uppercase tracking-[0.18em] text-amber-100">{phase} phase</p>
+        )}
+      </div>
+    </aside>
+  );
+}
+
+function LayerStack({ phase, ownedCount, developmentLevel }: { phase: string; ownedCount: number; developmentLevel: number }) {
+  return (
+    <aside className="hidden min-h-0 overflow-hidden rounded-[1.75rem] border border-amber-200/20 bg-black/42 p-4 shadow-2xl backdrop-blur-md xl:block">
+      <p className="text-[10px] uppercase tracking-[0.3em] text-amber-200/70">One fullscreen map game</p>
+      <div className="mt-4 rounded-3xl border border-amber-100/15 bg-amber-100/8 p-4">
+        <h3 className="text-lg font-black">Layers, not pages</h3>
+        <p className="mt-2 text-xs leading-relaxed text-amber-50/65">Settlement, Nation and Empire remain on this same map. The player never leaves the world.</p>
+      </div>
+      <div className="mt-4 space-y-3">
+        <LayerNote title="Settlement" value={phase === "unclaimed" ? "Locked" : `Level ${developmentLevel}`} body="Your city and its first lands." />
+        <LayerNote title="Nation" value={developmentLevel >= 4 ? "Emerging" : `${Math.min(ownedCount, 6)}/6 lands`} body="Your realm becomes political." />
+        <LayerNote title="Empire" value={developmentLevel >= 5 ? "Foreshadowed" : "Later"} body="Your legacy spans generations." />
+      </div>
+      <div className="mt-4 rounded-3xl border border-amber-100/15 bg-black/30 p-4">
+        <p className="text-[10px] uppercase tracking-[0.24em] text-amber-200/65">Product target</p>
+        <p className="mt-2 text-sm font-bold leading-relaxed">A premium strategy shell: one living world, clear choices, visible consequences, no page hopping.</p>
+      </div>
+    </aside>
+  );
+}
+
+function LoopStep({ n, title, body, active }: { n: string; title: string; body: string; active: boolean }) {
+  return (
+    <div className={`rounded-2xl border p-3 ${active ? "border-amber-300/45 bg-amber-300/12" : "border-white/10 bg-white/[0.04]"}`}>
+      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-amber-200/70">{n}. {title}</p>
+      <p className="mt-1 text-xs leading-relaxed text-amber-50/62">{body}</p>
+    </div>
+  );
+}
+
+function LayerNote({ title, value, body }: { title: string; value: string; body: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-black">{title}</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-200/70">{value}</p>
+      </div>
+      <p className="mt-1 text-xs leading-relaxed text-amber-50/62">{body}</p>
+    </div>
   );
 }
 
