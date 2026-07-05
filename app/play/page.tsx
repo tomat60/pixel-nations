@@ -54,17 +54,19 @@ export default function PlayPrototypePage() {
               )}
             </div>
 
-            <div className="absolute bottom-4 left-4 right-4 rounded-3xl border border-amber-100/20 bg-black/48 p-3 backdrop-blur-md md:bottom-6 md:left-auto md:right-6 md:w-[390px]">
+            <div className="absolute bottom-4 left-4 right-4 rounded-3xl border border-amber-100/20 bg-black/48 p-3 backdrop-blur-md md:bottom-6 md:left-auto md:right-6 md:w-[430px]">
               {state.view === "map" && <Panel title="30-parcel Basin" body="This is now a real authored sector prototype: starter lands, rival banners, scouted labels, roads, river, coast, mountains, ruins and owned influence on the map." />}
               {state.view === "orders" && (
                 <div>
-                  <Panel title="Season Orders" body="Every order changes a visible map state: land, marker, influence ring, scouting label, or trade route." />
-                  <div className="mt-3 grid grid-cols-5 gap-2">
-                    <OrderButton label="Expand" onClick={() => dispatch({ type: "order", order: "expand" })} disabled={!capital} />
-                    <OrderButton label="Develop" onClick={() => dispatch({ type: "order", order: "develop" })} disabled={!capital} />
-                    <OrderButton label="Secure" onClick={() => dispatch({ type: "order", order: "secure" })} disabled={!capital} />
-                    <OrderButton label="Scout" onClick={() => dispatch({ type: "order", order: "scout" })} disabled={!capital} />
-                    <OrderButton label="Trade" onClick={() => dispatch({ type: "order", order: "trade" })} disabled={!capital || state.developmentLevel < 3} />
+                  <Panel title="Season Orders" body="Choose one order. A good order must create a visible consequence on the map this season." />
+                  <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <OrderButton label="Expand" body="Claim one safe parcel and widen the realm." result="new owned land" onClick={() => dispatch({ type: "order", order: "expand" })} disabled={!capital} />
+                    <OrderButton label="Develop" body="Raise the capital marker toward a town." result="marker level up" onClick={() => dispatch({ type: "order", order: "develop" })} disabled={!capital} />
+                    <OrderButton label="Secure" body="Push your influence ring across the basin." result="larger influence" onClick={() => dispatch({ type: "order", order: "secure" })} disabled={!capital} />
+                    <OrderButton label="Scout" body="Reveal one more parcel and future choice." result="new map label" onClick={() => dispatch({ type: "order", order: "scout" })} disabled={!capital} />
+                    <div className="sm:col-span-2">
+                      <OrderButton label="Trade" body="Draw a route toward the Iron Coast once your capital can support it." result="nation pressure" onClick={() => dispatch({ type: "order", order: "trade" })} disabled={!capital || state.developmentLevel < 3} />
+                    </div>
                   </div>
                 </div>
               )}
