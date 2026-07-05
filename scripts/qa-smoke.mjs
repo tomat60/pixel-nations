@@ -99,9 +99,18 @@ async function step(name, action) {
 }
 
 async function expectText(page, text, stepName) {
-  await page.getByText(text, { exact: false }).first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-    throw new SmokeError(stepName, `Expected visible text: ${text}`);
-  });
+  const locator = page.getByText(text, { exact: false });
+  const deadline = Date.now() + 5000;
+
+  while (Date.now() < deadline) {
+    const count = await locator.count().catch(() => 0);
+    for (let index = 0; index < count; index += 1) {
+      if (await locator.nth(index).isVisible().catch(() => false)) return;
+    }
+    await page.waitForTimeout(100);
+  }
+
+  throw new SmokeError(stepName, `Expected visible text: ${text}`);
 }
 
 async function clickByRole(page, role, options, stepName) {
