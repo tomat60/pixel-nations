@@ -35,6 +35,23 @@ const ALLOWLIST = {
     'app/page.tsx',
     'docs/ai/FABLE5_PIXEL_NATIONS_EXPERIMENT_PLAN.md',
   ],
+  full_play_redesign: [
+    'README.md',
+    'package.json',
+    'app/page.tsx',
+    'app/world/page.tsx',
+    'app/dashboard/page.tsx',
+    'app/settlement/page.tsx',
+    'app/nation/page.tsx',
+    'app/empire/page.tsx',
+    'app/lib/game-state.ts',
+    'app/lib/settlement-state.ts',
+    'docs/product/ONE_PAGE_PRODUCT_BRIEF.md',
+    'docs/product/PRODUCT_SIMPLICITY_DOCTRINE.md',
+    'docs/product/PRODUCT_SCOPE_CUT.md',
+    'docs/world/WORLD_MAP_V7_SPEC.md',
+    'docs/ai/AI_COST_CONTROL_CODEX.md',
+  ],
 };
 
 const TASKS = new Set(Object.keys(ALLOWLIST));
@@ -214,6 +231,59 @@ Repository context:
 ${context}`;
 }
 
+function fullPlayRedesignPrompt(context) {
+  return `You are the elite AI-native game director, product lead, UX architect, art director, frontend strategist, QA lead, and scope cutter for Pixel Nations.
+
+Important correction:
+PR #50 proved a First Age loop, but failed the target. It created a fullscreen shell, yet the map felt like an abstract command board instead of an illustrated world. The product target is NOT separate pages with a map page. The target is one fullscreen game where the map is the primary play surface.
+
+Core fantasy:
+One land can become an empire. The world has 10,000 finite lands. The current demo focuses on Sector A-01 / Aurelian Basin. Simple first. Deep later.
+
+Target experience:
+- One fullscreen illustrated map game.
+- The player chooses and claims a land on a beautiful, readable strategy map.
+- The player issues one meaningful order per season.
+- The map visibly changes as land is claimed, developed, secured, and expanded.
+- Dashboard, settlement, nation, and empire are not primary separate experiences. They should become modes, panels, overlays, drawers, tabs, or sub-states inside the fullscreen map game shell.
+- The experience should look closer to a premium mobile strategy game mockup than a website dashboard.
+
+Visual north star:
+A rich stylized strategy map with landmass, rivers, mountains, forests, coast, ruins, roads/paths, owned region outlines, banner identity, bottom navigation, order cards, log/consequences, and clear next action.
+
+Hard constraints:
+- No crypto, wallet, token, mint, NFT, payment, or pay-to-win direction.
+- No backend dependency for this sprint.
+- No multiplayer requirement.
+- No complex city builder yet.
+- No combat system yet.
+- No huge asset pipeline.
+- Prefer deterministic mock/local state.
+- Bold prototype is allowed, but it must be bounded and shippable as a branch/PR.
+
+Output required:
+1. Brutal product verdict on current direction and PR #50.
+2. Final Play architecture for one fullscreen map game.
+3. How /dashboard, /settlement, /nation, and /empire should be absorbed into the map shell.
+4. Map art direction: layout, terrain, visual hierarchy, regions, icons, interaction states.
+5. First 10-minute player experience, step by step.
+6. The smallest playable loop that actually feels like a game.
+7. State model for the prototype.
+8. What to salvage from existing repo and PR #50.
+9. What to delete, ignore, or postpone.
+10. Safe sprint: narrow implementation that should pass quickly.
+11. Bold sprint: the largest implementation move worth risking now.
+12. One implementation prompt for Cursor/Codex that can build the next branch without strategic freedom.
+13. QA acceptance criteria, including mobile no-scroll, real map feel, and route absorption checks.
+14. Cost-control advice: where to spend AI effort and where not to.
+
+At the end write exactly one decision line:
+DECISION: BUILD_BOLD_FULLSCREEN_MAP / BUILD_SAFE_MAP_POLISH / HOLD_FOR_HUMAN_REVIEW / REJECT_CURRENT_DIRECTION
+
+Repository context:
+${context}`;
+}
+
 async function buildPrompt(taskType) {
   const files = ALLOWLIST[taskType];
   const chunks = [];
@@ -228,6 +298,7 @@ async function buildPrompt(taskType) {
   }
   if (taskType === 'repo_audit') return repoAuditPrompt(context);
   if (taskType === 'cursor_prompts') return cursorPromptSynthesis(context);
+  if (taskType === 'full_play_redesign') return fullPlayRedesignPrompt(context);
   throw new Error(`Unsupported task type: ${taskType}`);
 }
 
@@ -276,11 +347,11 @@ async function main() {
   }
 
   const model = env('ANTHROPIC_MODEL', 'claude-fable-5');
-  const maxInputTokens = intEnv('MAX_INPUT_TOKENS', taskType === 'weak_prompt' ? 8000 : 25000);
-  const maxOutputTokens = intEnv('MAX_OUTPUT_TOKENS', taskType === 'weak_prompt' ? 4000 : 5000);
+  const maxInputTokens = intEnv('MAX_INPUT_TOKENS', taskType === 'weak_prompt' ? 8000 : taskType === 'full_play_redesign' ? 110000 : 25000);
+  const maxOutputTokens = intEnv('MAX_OUTPUT_TOKENS', taskType === 'weak_prompt' ? 4000 : taskType === 'full_play_redesign' ? 12000 : 5000);
   const inputPricePerMillion = numberEnv('INPUT_PRICE_PER_MILLION_USD', 10);
   const outputPricePerMillion = numberEnv('OUTPUT_PRICE_PER_MILLION_USD', 50);
-  const maxEstimatedCost = numberEnv('MAX_ESTIMATED_COST_USD', taskType === 'weak_prompt' ? 0.35 : 0.75);
+  const maxEstimatedCost = numberEnv('MAX_ESTIMATED_COST_USD', taskType === 'weak_prompt' ? 0.35 : taskType === 'full_play_redesign' ? 2.25 : 0.75);
   const apiKey = requiredEnv('ANTHROPIC_API_KEY');
 
   const prompt = await buildPrompt(taskType);
