@@ -142,23 +142,20 @@ async function closeBrowserSafely(browser) {
 }
 
 async function runSmoke(page) {
-  await step("playable command center route", async () => {
+  await step("unified fullscreen play prototype route", async () => {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
     await page.evaluate(() => localStorage.clear());
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await expectText(page, "Settlement command center", "playable command center route");
-    await page.locator("[data-qa='play-resource-counters']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("playable command center route", "Playable resource counters did not render");
-    });
-    await page.locator("[data-qa='play-action-list']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("playable command center route", "Playable action list did not render");
-    });
-    await page.locator("[data-qa='play-action-gather-food']").first().click();
-    await expectText(page, "Gather Food", "playable command center route");
-    await page.locator("[data-qa='play-active-queue']").getByText("Gather Food").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("playable command center route", "Gather Food did not enter the active queue");
-    });
+    await expectText(page, "The First Age", "unified fullscreen play prototype route");
+    await expectText(page, "Aurelian Basin", "unified fullscreen play prototype route");
+    await expectText(page, "World Map", "unified fullscreen play prototype route");
+    await clickButton(page, /^Orders$/i, "unified fullscreen play prototype route");
+    await expectText(page, "Season Orders", "unified fullscreen play prototype route");
+    await clickButton(page, /^Expand$/i, "unified fullscreen play prototype route");
+    await expectText(page, "2/12", "unified fullscreen play prototype route");
+    await clickButton(page, /^Nation$/i, "unified fullscreen play prototype route");
+    await expectText(page, "Nation Layer", "unified fullscreen play prototype route");
   });
 
   await step("reset demo state and open /world", async () => {
