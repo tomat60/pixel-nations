@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useReducer } from "react";
 
 type View = "map" | "orders" | "realm" | "chronicle" | "world";
 type Terrain = "plains" | "forest" | "mountain" | "coast" | "basin" | "ruins" | "marsh";
@@ -18,6 +18,22 @@ type Parcel = {
 };
 
 type OrderId = "expand" | "develop" | "secure" | "scout" | "trade";
+type PlayState = {
+  view: View;
+  selectedId: string;
+  season: number;
+  owned: string[];
+  scouted: string[];
+  developmentLevel: number;
+  influenceRadius: number;
+  tradeRoute: boolean;
+  chronicle: string[];
+};
+type PlayAction =
+  | { type: "select"; parcelId: string }
+  | { type: "setView"; view: View }
+  | { type: "claim"; parcelId: string }
+  | { type: "order"; order: OrderId };
 
 const parcels: Parcel[] = [
   { id: "ironstrand", name: "Ironstrand", region: "Iron Coast", terrain: "coast", resources: ["Fish", "Ore"], d: "M70 248 L155 220 L206 288 L164 358 L78 345 Z", cx: 134, cy: 292, rival: true },
@@ -60,6 +76,18 @@ const views: { id: View; label: string }[] = [
   { id: "world", label: "Profile" },
 ];
 
+const initialPlayState: PlayState = {
+  view: "map",
+  selectedId: "greenvale",
+  season: 1,
+  owned: [],
+  scouted: ["greenvale", "newaurelia", "riverbend"],
+  developmentLevel: 0,
+  influenceRadius: 38,
+  tradeRoute: false,
+  chronicle: ["The basin waits. Choose the first land."],
+};
+
 const terrainFill: Record<Terrain, string> = {
   plains: "#c8a55c",
   forest: "#3f7a45",
@@ -80,70 +108,94 @@ const terrainLine: Record<Terrain, string> = {
   marsh: "Useful, dangerous, and never fully still.",
 };
 
+function unique(values: string[]) {
+  return Array.from(new Set(values));
+}
+
+function withChronicle(state: PlayState, line: string): PlayState {
+  return {
+    ...state,
+    chronicle: [`Season ${state.season}: ${line}`, ...state.chronicle].slice(0, 8),
+  };
+}
+
+function playReducer(state: PlayState, action: PlayAction): PlayState {
+  if (action.type === "select") return { ...state, selectedId: action.parcelId };
+  if (action.type === "setView") return { ...state, view: action.view };
+
+  if (action.type === "claim") {
+    const parcel = parcels.find((item) => item.id === action.parcelId);
+    if (!parcel) return state;
+    if (parcel.rival) return withChronicle(state, `${parcel.name} already flies a rival banner.`);
+    return {
+      ...state,
+      selectedId: parcel.id,
+      season: 2,
+      owned: [parcel.id],
+      scouted: unique([...state.scouted, parcel.id]),
+      developmentLevel: 1,
+      influenceRadius: 48,
+      chronicle: [`Season 1: Banner planted at ${parcel.name}. Campfires mark the first claim.`, "The basin waits. Choose the first land."],
+    };
+  }
+
+  if (action.type === "order") {
+    const capital = parcels.find((parcel) => parcel.id === state.owned[0]);
+    if (!capital) return state;
+    const advanced = { ...state, season: Math.min(12, state.season + 1) };
+
+    if (action.order === "expand") {
+      const next = parcels.find((parcel) => !advanced.owned.includes(parcel.id) && !parcel.rival);
+      if (!next) return withChronicle(advanced, "No open neighboring claim is ready this season.");
+      return withChronicle({
+        ...advanced,
+        owned: unique([...advanced.owned, next.id]),
+        scouted: unique([...advanced.scouted, next.id]),
+        influenceRadius: Math.min(120, advanced.influenceRadius + 10),
+      }, `${next.name} accepts your border stones. The realm grows.`);
+    }
+
+    if (action.order === "develop") {
+      return withChronicle({
+        ...advanced,
+        developmentLevel: Math.min(5, advanced.developmentLevel + 1),
+        influenceRadius: Math.min(130, advanced.influenceRadius + 8),
+      }, "Roofs rise around the banner. The settlement marker changes on the map.");
+    }
+
+    if (action.order === "secure") {
+      return withChronicle({
+        ...advanced,
+        influenceRadius: Math.min(150, advanced.influenceRadius + 16),
+      }, "Watchfires mark the roads. Your influence ring strengthens.");
+    }
+
+    if (action.order === "scout") {
+      const nextScout = parcels.find((parcel) => !advanced.scouted.includes(parcel.id));
+      if (!nextScout) return withChronicle(advanced, "Your scouts already know the whole basin prototype.");
+      return withChronicle({
+        ...advanced,
+        scouted: [...advanced.scouted, nextScout.id],
+      }, `${nextScout.name} is scouted. A new label appears on the map.`);
+    }
+
+    if (action.order === "trade") {
+      return withChronicle({
+        ...advanced,
+        tradeRoute: true,
+        developmentLevel: Math.max(advanced.developmentLevel, 4),
+      }, "A trade route burns bright toward the Iron Coast. Nationhood feels possible.");
+    }
+  }
+
+  return state;
+}
+
 export default function PlayPrototypePage() {
-  const [view, setView] = useState<View>("map");
-  const [selectedId, setSelectedId] = useState("greenvale");
-  const [season, setSeason] = useState(1);
-  const [owned, setOwned] = useState<string[]>([]);
-  const [scouted, setScouted] = useState<string[]>(["greenvale", "newaurelia", "riverbend"]);
-  const [developmentLevel, setDevelopmentLevel] = useState(0);
-  const [influenceRadius, setInfluenceRadius] = useState(38);
-  const [tradeRoute, setTradeRoute] = useState(false);
-  const [chronicle, setChronicle] = useState<string[]>(["The basin waits. Choose the first land."]);
-
-  const selected = useMemo(() => parcels.find((parcel) => parcel.id === selectedId) ?? parcels[12], [selectedId]);
-  const capital = useMemo(() => parcels.find((parcel) => parcel.id === owned[0]) ?? null, [owned]);
-  const phase = owned.length === 0 ? "unclaimed" : developmentLevel >= 5 ? "empire" : developmentLevel >= 4 ? "nation" : "settlement";
-  const nextUnowned = parcels.find((parcel) => !owned.includes(parcel.id) && !parcel.rival);
-
-  function addChronicle(line: string) {
-    setChronicle((current) => [`Season ${season}: ${line}`, ...current].slice(0, 8));
-  }
-
-  function claimSelected() {
-    if (selected.rival) {
-      addChronicle(`${selected.name} already flies a rival banner.`);
-      return;
-    }
-    setOwned([selected.id]);
-    setScouted((current) => Array.from(new Set([...current, selected.id])));
-    setDevelopmentLevel(1);
-    setInfluenceRadius(48);
-    setSeason(2);
-    setChronicle([`Season 1: Banner planted at ${selected.name}. Campfires mark the first claim.`, "The basin waits. Choose the first land."]);
-  }
-
-  function issueOrder(order: OrderId) {
-    if (!capital) return;
-    setSeason((current) => Math.min(12, current + 1));
-    if (order === "expand" && nextUnowned) {
-      setOwned((current) => Array.from(new Set([...current, nextUnowned.id])));
-      setScouted((current) => Array.from(new Set([...current, nextUnowned.id])));
-      setInfluenceRadius((current) => Math.min(120, current + 10));
-      addChronicle(`${nextUnowned.name} accepts your border stones. The realm grows.`);
-    }
-    if (order === "develop") {
-      setDevelopmentLevel((current) => Math.min(5, current + 1));
-      setInfluenceRadius((current) => Math.min(130, current + 8));
-      addChronicle("Roofs rise around the banner. The settlement marker changes on the map.");
-    }
-    if (order === "secure") {
-      setInfluenceRadius((current) => Math.min(150, current + 16));
-      addChronicle("Watchfires mark the roads. Your influence ring strengthens.");
-    }
-    if (order === "scout") {
-      const nextScout = parcels.find((parcel) => !scouted.includes(parcel.id));
-      if (nextScout) {
-        setScouted((current) => [...current, nextScout.id]);
-        addChronicle(`${nextScout.name} is scouted. A new label appears on the map.`);
-      }
-    }
-    if (order === "trade") {
-      setTradeRoute(true);
-      setDevelopmentLevel((current) => Math.max(current, 4));
-      addChronicle("A trade route burns bright toward the Iron Coast. Nationhood feels possible.");
-    }
-  }
+  const [state, dispatch] = useReducer(playReducer, initialPlayState);
+  const selected = useMemo(() => parcels.find((parcel) => parcel.id === state.selectedId) ?? parcels[12], [state.selectedId]);
+  const capital = useMemo(() => parcels.find((parcel) => parcel.id === state.owned[0]) ?? null, [state.owned]);
+  const phase = state.owned.length === 0 ? "unclaimed" : state.developmentLevel >= 5 ? "empire" : state.developmentLevel >= 4 ? "nation" : "settlement";
 
   return (
     <main data-qa="play-shell" className="fixed inset-0 overflow-hidden bg-[#06090a] text-[#f7ead2]">
@@ -159,13 +211,13 @@ export default function PlayPrototypePage() {
             <p className="mt-1 text-sm text-amber-50/70">One fullscreen map game</p>
           </div>
           <div className="flex items-center gap-2 text-right">
-            <StatusChip label="Season" value={`${season}/12`} />
-            <StatusChip label="Lands" value={`${owned.length}/30`} />
+            <StatusChip label="Season" value={`${state.season}/12`} />
+            <StatusChip label="Lands" value={`${state.owned.length}/30`} />
           </div>
         </header>
 
         <div className="my-3 grid min-h-0 gap-3 xl:grid-cols-[282px_minmax(0,1fr)_282px]">
-          <CoreLoopRail selected={selected} phase={phase} ownedCount={owned.length} onClaim={claimSelected} isRival={Boolean(selected.rival)} />
+          <CoreLoopRail selected={selected} phase={phase} ownedCount={state.owned.length} onClaim={() => dispatch({ type: "claim", parcelId: selected.id })} isRival={Boolean(selected.rival)} />
 
           <div data-qa="map-stage" className="relative min-h-0 overflow-hidden rounded-[2rem] border border-amber-200/20 bg-[#1d2d23] shadow-[0_30px_90px_rgba(0,0,0,.45)]">
             <svg viewBox="0 0 1000 760" className="absolute inset-0 h-full w-full" role="img" aria-label="Aurelian Basin 30 parcel strategy map">
@@ -183,19 +235,19 @@ export default function PlayPrototypePage() {
               <path d="M86 210 C 167 70 322 43 482 64 C 628 83 777 123 898 267 C 1017 409 931 632 802 716 C 673 799 411 755 256 731 C 101 707 25 591 39 451 C 48 356 48 276 86 210 Z" fill="#a78a4d" filter="url(#softShadow)" opacity="0.48" />
 
               {parcels.map((parcel) => {
-                const active = parcel.id === selectedId;
-                const isOwned = owned.includes(parcel.id);
-                const isScouted = scouted.includes(parcel.id) || isOwned || parcel.starter;
+                const active = parcel.id === state.selectedId;
+                const isOwned = state.owned.includes(parcel.id);
+                const isScouted = state.scouted.includes(parcel.id) || isOwned || parcel.starter;
                 return (
-                  <g key={parcel.id} data-qa={`parcel-${parcel.id}`} onClick={() => setSelectedId(parcel.id)} className="cursor-pointer">
+                  <g key={parcel.id} data-qa={`parcel-${parcel.id}`} onClick={() => dispatch({ type: "select", parcelId: parcel.id })} className="cursor-pointer">
                     <path d={parcel.d} fill={terrainFill[parcel.terrain]} opacity={isScouted ? 0.92 : 0.46} stroke={active ? "#fff2ad" : "#382a1a"} strokeWidth={active ? 6 : 2.3} />
                     {parcel.rival && <path d={parcel.d} fill="#5f6670" opacity="0.28" stroke="#cbd5e1" strokeWidth="2" />}
                     {parcel.starter && phase === "unclaimed" && <circle cx={parcel.cx} cy={parcel.cy} r="36" fill="none" stroke="#ffe39a" strokeWidth="5" opacity="0.6" />}
                     {isOwned && <path d={parcel.d} fill="#f8d36d" opacity="0.20" stroke="#ffe39a" strokeWidth="6" />}
                     {capital?.id === parcel.id && (
                       <>
-                        <circle cx={parcel.cx} cy={parcel.cy} r={influenceRadius} fill="#f8d36d" opacity="0.13" stroke="#ffe39a" strokeWidth="4" />
-                        <DevelopmentMarker x={parcel.cx} y={parcel.cy - 18} level={developmentLevel} />
+                        <circle cx={parcel.cx} cy={parcel.cy} r={state.influenceRadius} fill="#f8d36d" opacity="0.13" stroke="#ffe39a" strokeWidth="4" />
+                        <DevelopmentMarker x={parcel.cx} y={parcel.cy - 18} level={state.developmentLevel} />
                       </>
                     )}
                     {parcel.rival && <RivalBanner x={parcel.cx} y={parcel.cy - 22} />}
@@ -211,7 +263,7 @@ export default function PlayPrototypePage() {
               <path d="M470 78 C 438 170 520 244 487 344 C 461 433 397 512 430 724" fill="none" stroke="#65d8ff" strokeWidth="18" strokeLinecap="round" opacity="0.58" />
               <path d="M506 81 C 478 177 548 244 526 350 C 501 464 438 536 468 724" fill="none" stroke="#d4f8ff" strokeWidth="5" strokeLinecap="round" opacity="0.78" />
               <path d="M138 444 C 302 399 520 408 866 612" fill="none" stroke="#3b2d1d" strokeWidth="8" strokeDasharray="14 16" opacity={phase === "unclaimed" ? 0.22 : 0.54} />
-              {tradeRoute && capital && <path d={`M${capital.cx} ${capital.cy} C 530 420 650 466 866 612`} fill="none" stroke="#ffe39a" strokeWidth="7" strokeDasharray="18 12" opacity="0.88" />}
+              {state.tradeRoute && capital && <path d={`M${capital.cx} ${capital.cy} C 530 420 650 466 866 612`} fill="none" stroke="#ffe39a" strokeWidth="7" strokeDasharray="18 12" opacity="0.88" />}
               <path d="M598 145 L632 75 L672 162 L704 100 L754 216 Z" fill="#6b5d4f" />
               <path d="M608 141 L632 75 L657 141 Z M690 148 L704 100 L732 198 Z" fill="#f8eed9" opacity="0.78" />
               <path d="M212 275 q33 -62 76 0 q-42 -22 -76 0Z M248 323 q36 -72 86 0 q-44 -26 -86 0Z M168 366 q41 -80 94 0 q-48 -28 -94 0Z" fill="#1f6b42" opacity="0.9" />
@@ -223,7 +275,7 @@ export default function PlayPrototypePage() {
               <p className="mt-1 text-sm text-amber-50/80">{selected.region} - {selected.terrain}</p>
               <p className="mt-2 text-xs leading-relaxed text-amber-50/65">{terrainLine[selected.terrain]}</p>
               {phase === "unclaimed" ? (
-                <button data-qa="claim-button" onClick={claimSelected} className="mt-3 rounded-2xl bg-amber-300 px-4 py-2 text-sm font-black text-stone-950 shadow-lg shadow-black/30">
+                <button data-qa="claim-button" onClick={() => dispatch({ type: "claim", parcelId: selected.id })} className="mt-3 rounded-2xl bg-amber-300 px-4 py-2 text-sm font-black text-stone-950 shadow-lg shadow-black/30">
                   {selected.rival ? "Rival banner here" : "Claim this land"}
                 </button>
               ) : (
@@ -232,31 +284,31 @@ export default function PlayPrototypePage() {
             </div>
 
             <div className="absolute bottom-4 left-4 right-4 rounded-3xl border border-amber-100/20 bg-black/48 p-3 backdrop-blur-md md:bottom-6 md:left-auto md:right-6 md:w-[390px]">
-              {view === "map" && <Panel title="30-parcel Basin" body="This is now a real authored sector prototype: starter lands, rival banners, scouted labels, roads, river, coast, mountains, ruins and owned influence on the map." />}
-              {view === "orders" && (
+              {state.view === "map" && <Panel title="30-parcel Basin" body="This is now a real authored sector prototype: starter lands, rival banners, scouted labels, roads, river, coast, mountains, ruins and owned influence on the map." />}
+              {state.view === "orders" && (
                 <div>
                   <Panel title="Season Orders" body="Every order changes a visible map state: land, marker, influence ring, scouting label, or trade route." />
                   <div className="mt-3 grid grid-cols-5 gap-2">
-                    <OrderButton label="Expand" onClick={() => issueOrder("expand")} disabled={!capital} />
-                    <OrderButton label="Develop" onClick={() => issueOrder("develop")} disabled={!capital} />
-                    <OrderButton label="Secure" onClick={() => issueOrder("secure")} disabled={!capital} />
-                    <OrderButton label="Scout" onClick={() => issueOrder("scout")} disabled={!capital} />
-                    <OrderButton label="Trade" onClick={() => issueOrder("trade")} disabled={!capital || developmentLevel < 3} />
+                    <OrderButton label="Expand" onClick={() => dispatch({ type: "order", order: "expand" })} disabled={!capital} />
+                    <OrderButton label="Develop" onClick={() => dispatch({ type: "order", order: "develop" })} disabled={!capital} />
+                    <OrderButton label="Secure" onClick={() => dispatch({ type: "order", order: "secure" })} disabled={!capital} />
+                    <OrderButton label="Scout" onClick={() => dispatch({ type: "order", order: "scout" })} disabled={!capital} />
+                    <OrderButton label="Trade" onClick={() => dispatch({ type: "order", order: "trade" })} disabled={!capital || state.developmentLevel < 3} />
                   </div>
                 </div>
               )}
-              {view === "realm" && <Panel title="Age Layer" body={`Phase: ${phase}. Capital marker level ${developmentLevel}/5. Owned parcels: ${owned.length}. This replaces dashboard and settlement as one in-game sheet.`} />}
-              {view === "chronicle" && <Chronicle entries={chronicle} />}
-              {view === "world" && <Panel title="World Atlas Layer" body="A-01 is only one basin in a 10,000-land world. The big game stays visible, but the demo remains one focused sector." />}
+              {state.view === "realm" && <Panel title="Age Layer" body={`Phase: ${phase}. Capital marker level ${state.developmentLevel}/5. Owned parcels: ${state.owned.length}. This replaces dashboard and settlement as one in-game sheet.`} />}
+              {state.view === "chronicle" && <Chronicle entries={state.chronicle} />}
+              {state.view === "world" && <Panel title="World Atlas Layer" body="A-01 is only one basin in a 10,000-land world. The big game stays visible, but the demo remains one focused sector." />}
             </div>
           </div>
 
-          <LayerStack phase={phase} ownedCount={owned.length} developmentLevel={developmentLevel} />
+          <LayerStack phase={phase} ownedCount={state.owned.length} developmentLevel={state.developmentLevel} />
         </div>
 
         <nav className="grid grid-cols-5 gap-2 rounded-3xl border border-amber-200/20 bg-black/45 p-2 backdrop-blur-md">
           {views.map((item) => (
-            <button key={item.id} onClick={() => setView(item.id)} className={`rounded-2xl px-2 py-3 text-xs font-black uppercase tracking-wide transition md:text-sm ${view === item.id ? "bg-amber-300 text-stone-950" : "bg-white/5 text-amber-50/70"}`}>
+            <button key={item.id} onClick={() => dispatch({ type: "setView", view: item.id })} className={`rounded-2xl px-2 py-3 text-xs font-black uppercase tracking-wide transition md:text-sm ${state.view === item.id ? "bg-amber-300 text-stone-950" : "bg-white/5 text-amber-50/70"}`}>
               {item.label}
             </button>
           ))}
