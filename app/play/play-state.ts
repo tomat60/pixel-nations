@@ -37,7 +37,7 @@ export const initialPlayState: PlayState = {
   influenceRadius: 38,
   tradeRoute: false,
   chronicle: ["The basin waits. Choose the first land."],
-  lastEvent: "No banner yet. The first decision is still yours.",
+  lastEvent: "No banner yet. Pick a land and begin the realm.",
 };
 
 export function getPhase(state: PlayState): Phase {
@@ -51,42 +51,42 @@ export function getObjective(state: PlayState, phase: Phase): Objective {
   if (state.owned.length === 0) {
     return {
       eyebrow: "First decision",
-      title: "Choose one starter land",
-      body: "Click a glowing starter parcel, read the tradeoff, then plant your first banner.",
+      title: "Pick a homeland",
+      body: "Choose one glowing starter land. This parcel becomes the seed of your empire.",
     };
   }
   if (state.view !== "orders") {
     return {
-      eyebrow: "Next action",
+      eyebrow: "Next click",
       title: "Open Orders",
-      body: "The world changes when you issue a seasonal order from the bottom dock.",
+      body: "Your banner is planted. Use Orders to make the map change this season.",
     };
   }
   if (state.owned.length < 3) {
     return {
-      eyebrow: "Grow the realm",
+      eyebrow: "First age order",
       title: "Expand or Scout",
-      body: "Add territory or reveal the basin. The map should visibly react to your choice.",
+      body: "Take a neighboring parcel or reveal more of the basin. Growth must be visible.",
     };
   }
   if (state.developmentLevel < 4) {
     return {
-      eyebrow: "Build toward nationhood",
-      title: "Develop the capital",
-      body: "Raise the marker level until the settlement starts feeling political.",
+      eyebrow: "Build the capital",
+      title: "Develop",
+      body: "Raise the capital marker. A camp should become a settlement, then a nation seed.",
     };
   }
   if (phase !== "empire") {
     return {
-      eyebrow: "Declare your path",
-      title: "Secure trade and influence",
-      body: "Use trade or security to turn the settlement layer into a nation layer.",
+      eyebrow: "Nation pressure",
+      title: "Secure or Trade",
+      body: "Strengthen influence or draw a route. The realm should start feeling political.",
     };
   }
   return {
-    eyebrow: "Future promise",
-    title: "Empire is visible, not built yet",
-    body: "This prototype stops at the promise. Deeper systems come after the first loop is excellent.",
+    eyebrow: "Empire promise",
+    title: "The next age is calling",
+    body: "The demo stops at the promise. Deeper systems come only after this loop feels excellent.",
   };
 }
 
@@ -111,7 +111,7 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
     if (!parcel) return state;
     if (parcel.rival) return withChronicle(state, `${parcel.name} already flies a rival banner.`);
 
-    const claimLine = `Banner planted at ${parcel.name}. Campfires mark the first claim.`;
+    const claimLine = `Banner planted at ${parcel.name}. This land is now the capital seed.`;
     return {
       ...state,
       selectedId: parcel.id,
@@ -138,7 +138,7 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
         owned: unique([...advanced.owned, next.id]),
         scouted: unique([...advanced.scouted, next.id]),
         influenceRadius: Math.min(120, advanced.influenceRadius + 10),
-      }, `${next.name} accepts your border stones. The realm grows.`);
+      }, `${next.name} joins the realm. A new parcel lights up under your banner.`);
     }
 
     if (action.order === "develop") {
@@ -146,14 +146,14 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
         ...advanced,
         developmentLevel: Math.min(5, advanced.developmentLevel + 1),
         influenceRadius: Math.min(130, advanced.influenceRadius + 8),
-      }, "Roofs rise around the banner. The settlement marker changes on the map.");
+      }, "The capital marker rises. Camp becomes settlement pressure.");
     }
 
     if (action.order === "secure") {
       return withChronicle({
         ...advanced,
         influenceRadius: Math.min(150, advanced.influenceRadius + 16),
-      }, "Watchfires mark the roads. Your influence ring strengthens.");
+      }, "Watchfires widen your influence ring across the basin.");
     }
 
     if (action.order === "scout") {
@@ -162,7 +162,7 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       return withChronicle({
         ...advanced,
         scouted: [...advanced.scouted, nextScout.id],
-      }, `${nextScout.name} is scouted. A new label appears on the map.`);
+      }, `${nextScout.name} is revealed. The map gives you one more decision.`);
     }
 
     if (action.order === "trade") {
@@ -170,7 +170,7 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
         ...advanced,
         tradeRoute: true,
         developmentLevel: Math.max(advanced.developmentLevel, 4),
-      }, "A trade route burns bright toward the Iron Coast. Nationhood feels possible.");
+      }, "A trade route burns toward the Iron Coast. Nationhood is now visible.");
     }
   }
 
