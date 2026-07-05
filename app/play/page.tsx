@@ -65,8 +65,17 @@ export default function PlayPrototypePage() {
             <div className="absolute bottom-3 left-3 right-3 rounded-2xl border border-amber-100/20 bg-black/52 p-2.5 shadow-xl backdrop-blur-md md:bottom-6 md:left-auto md:right-6 md:w-[430px] md:rounded-3xl md:p-3">
               {state.view === "map" && (
                 <div>
-                  <Panel title="30-parcel Basin" body="Starter lands, rivals, roads, river, coast and owned influence now live on one map." />
-                  <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-200/55 md:hidden">Tap a glowing land. Claim it. Then open Orders.</p>
+                  <div className="md:hidden">
+                    <p className="text-[8px] font-black uppercase tracking-[0.22em] text-amber-200/60">Game layer</p>
+                    <div className="mt-1 flex items-center justify-between gap-3">
+                      <p className="text-sm font-black">Map-first basin</p>
+                      <p className="rounded-full bg-amber-300 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-stone-950">Tap land</p>
+                    </div>
+                    <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-200/58">Claim → Orders → visible map change</p>
+                  </div>
+                  <div className="hidden md:block">
+                    <Panel title="30-parcel Basin" body="Starter lands, rivals, roads, river, coast and owned influence now live on one map." />
+                  </div>
                 </div>
               )}
               {state.view === "orders" && (
