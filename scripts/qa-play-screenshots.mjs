@@ -15,6 +15,30 @@ const viewports = [
   { viewport: "desktop", width: 1440, height: 900, deviceScaleFactor: 1, isMobile: false },
 ];
 
+async function dispatchDomClick(page, selector) {
+  const clicked = await page.evaluate((targetSelector) => {
+    const element = document.querySelector(targetSelector);
+    if (!element) return false;
+    element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+    return true;
+  }, selector);
+
+  if (!clicked) throw new Error(`Could not find ${selector}`);
+}
+
+async function clickButtonByText(page, pattern) {
+  const clicked = await page.evaluate((source) => {
+    const regex = new RegExp(source, "i");
+    const buttons = Array.from(document.querySelectorAll("button"));
+    const button = buttons.find((item) => regex.test(item.textContent ?? ""));
+    if (!button) return false;
+    button.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+    return true;
+  }, pattern.source);
+
+  if (!clicked) throw new Error(`Could not find button matching ${pattern}`);
+}
+
 const steps = [
   {
     id: "01-initial-map",
@@ -26,7 +50,7 @@ const steps = [
     label: "Starter selected",
     note: "Selecting a starter should update the selected parcel panel and make the next action obvious.",
     run: async (page) => {
-      await page.locator("[data-qa='parcel-greenvale']").click();
+      await dispatchDomClick(page, "[data-qa='parcel-greenvale']");
       await page.waitForTimeout(450);
     },
   },
@@ -35,7 +59,7 @@ const steps = [
     label: "After claim",
     note: "The map should visibly show owned land, capital seed, influence ring, and objective should push the player to Orders.",
     run: async (page) => {
-      await page.locator("[data-qa='claim-button']").click();
+      await clickButtonByText(page, /claim this land|choose this land/);
       await page.waitForTimeout(600);
     },
   },
@@ -44,7 +68,7 @@ const steps = [
     label: "Orders open",
     note: "Orders should read as decision cards with clear consequences, not generic buttons.",
     run: async (page) => {
-      await page.getByRole("button", { name: /Orders/i }).click();
+      await clickButtonByText(page, /orders/);
       await page.waitForTimeout(500);
     },
   },
@@ -53,7 +77,7 @@ const steps = [
     label: "After Expand order",
     note: "Issuing Expand should create a visible owned-parcel consequence and update latest consequence/chronicle direction.",
     run: async (page) => {
-      await page.getByRole("button", { name: /Expand/i }).first().click();
+      await clickButtonByText(page, /expand/);
       await page.waitForTimeout(650);
     },
   },
@@ -62,7 +86,7 @@ const steps = [
     label: "After Develop order",
     note: "Develop should raise the capital marker so progression is visible on-map.",
     run: async (page) => {
-      await page.getByRole("button", { name: /Develop/i }).first().click();
+      await clickButtonByText(page, /develop/);
       await page.waitForTimeout(650);
     },
   },
@@ -120,10 +144,11 @@ function escapeHtml(value) {
 function buildReport({ generatedAt, appSource, shots }) {
   const cards = shots
     .map(
-      (shot) => `<article class="card">
+      (shot) => `<article class="card ${shot.error ? "error" : ""}">
         <div class="meta"><span>${escapeHtml(shot.viewport)}</span><span>${escapeHtml(shot.stepLabel)}</span></div>
         <h3>${escapeHtml(shot.filename)}</h3>
         <p>${escapeHtml(shot.note)}</p>
+        ${shot.error ? `<p class="error-text"><strong>Interaction warning:</strong> ${escapeHtml(shot.error)}</p>` : ""}
         <a href="./screenshots/${encodeURIComponent(shot.filename)}"><img src="./screenshots/${encodeURIComponent(shot.filename)}" alt="${escapeHtml(shot.filename)}" /></a>
       </article>`,
     )
@@ -136,13 +161,15 @@ function buildReport({ generatedAt, appSource, shots }) {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pixel Nations /play QA</title>
   <style>
-    :root { color-scheme: dark; --bg: #020204; --gold: #c9a962; --muted: #9ca3af; --border: rgba(201, 169, 98, 0.18); }
+    :root { color-scheme: dark; --bg: #020204; --gold: #c9a962; --muted: #9ca3af; --border: rgba(201, 169, 98, 0.18); --bad: #f97373; }
     body { margin: 0; background: var(--bg); color: #f8f5ed; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     main { max-width: 1280px; margin: 0 auto; padding: 40px 20px 64px; }
     header, .card, section { border: 1px solid var(--border); background: linear-gradient(180deg, rgba(201,169,98,0.05), rgba(255,255,255,0.015)); padding: 18px; margin-bottom: 18px; }
+    .card.error { border-color: rgba(249, 115, 115, .55); }
     h1 { margin: 0 0 12px; font-size: clamp(2rem, 5vw, 4rem); letter-spacing: -0.04em; }
     h2, h3 { color: #f5deb3; }
     p, li { color: var(--muted); line-height: 1.65; }
+    .error-text { color: var(--bad); }
     .eyebrow, .meta { color: var(--gold); text-transform: uppercase; letter-spacing: 0.18em; font-size: .72rem; font-weight: 800; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
     img { width: 100%; height: auto; display: block; border: 1px solid rgba(255,255,255,0.08); background: #000; }
@@ -156,7 +183,7 @@ function buildReport({ generatedAt, appSource, shots }) {
       <h1>First Minute Screenshot Evidence</h1>
       <p>Generated: <code>${escapeHtml(generatedAt)}</code></p>
       <p>App source: <code>${escapeHtml(appSource)}</code></p>
-      <p>This report captures the actual /play first-minute sequence across mobile, tablet, and desktop. It does not approve art direction by itself; it creates evidence for manual visual/gameplay verdict.</p>
+      <p>This report captures the /play first-minute sequence across mobile, tablet, and desktop. Interaction warnings are part of the verdict: if a step needs forced DOM interaction, the UX is not yet proven.</p>
     </header>
     <section>
       <h2>Manual verdict required</h2>
@@ -175,10 +202,16 @@ function buildReport({ generatedAt, appSource, shots }) {
 }
 
 async function captureStep(page, viewport, step, shots) {
-  if (step.run) await step.run(page);
-  const filename = `${viewport.viewport}-play-${step.id}.png`;
+  let error = null;
+  try {
+    if (step.run) await step.run(page);
+  } catch (caught) {
+    error = caught instanceof Error ? caught.message : String(caught);
+  }
+
+  const filename = `${viewport.viewport}-play-${step.id}${error ? "-warning" : ""}.png`;
   await page.screenshot({ path: `${SCREENSHOT_DIR}/${filename}` });
-  shots.push({ filename, viewport: viewport.viewport, stepLabel: step.label, note: step.note });
+  shots.push({ filename, viewport: viewport.viewport, stepLabel: step.label, note: step.note, error });
 }
 
 async function main() {
