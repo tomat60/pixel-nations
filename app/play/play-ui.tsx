@@ -15,9 +15,9 @@ export function ObjectiveRibbon({ objective, lastEvent }: { objective: Objective
         </div>
         <div className="mt-3 grid grid-cols-4 gap-1 text-center text-[9px] font-black uppercase tracking-wide text-amber-50/55">
           <LoopPip label="Land" active />
-          <LoopPip label="Claim" active={objective.title !== "Choose one starter land"} />
-          <LoopPip label="Orders" active={objective.title !== "Choose one starter land" && objective.title !== "Open Orders"} />
-          <LoopPip label="Map change" active={objective.eyebrow !== "First decision" && objective.eyebrow !== "Next action"} />
+          <LoopPip label="Claim" active={objective.title !== "Pick a homeland"} />
+          <LoopPip label="Orders" active={objective.title !== "Pick a homeland" && objective.title !== "Open Orders"} />
+          <LoopPip label="Map change" active={objective.eyebrow !== "First decision" && objective.eyebrow !== "Next click"} />
         </div>
       </div>
       <div className="rounded-2xl border border-amber-100/15 bg-black/28 p-3">
@@ -68,10 +68,15 @@ export function Chronicle({ entries }: { entries: string[] }) {
   );
 }
 
-export function OrderButton({ label, onClick, disabled }: { label: string; onClick: () => void; disabled?: boolean }) {
+export function OrderButton({ label, body, result, onClick, disabled }: { label: string; body?: string; result?: string; onClick: () => void; disabled?: boolean }) {
   return (
-    <button disabled={disabled} onClick={onClick} className={`rounded-2xl border px-2 py-3 text-[10px] font-black uppercase tracking-wide transition ${disabled ? "cursor-not-allowed border-white/5 bg-white/5 text-white/25" : "border-amber-100/20 bg-amber-100/10 text-amber-50 hover:bg-amber-300 hover:text-stone-950"}`}>
-      {label}
+    <button disabled={disabled} onClick={onClick} className={`group rounded-2xl border p-3 text-left transition ${disabled ? "cursor-not-allowed border-white/5 bg-white/5 text-white/25" : "border-amber-100/20 bg-amber-100/10 text-amber-50 hover:border-amber-300/60 hover:bg-amber-300 hover:text-stone-950"}`}>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[11px] font-black uppercase tracking-[0.18em]">{label}</p>
+        <span className="text-xs opacity-55 transition group-hover:opacity-90">→</span>
+      </div>
+      {body && <p className="mt-2 text-xs font-medium leading-snug opacity-70">{body}</p>}
+      {result && <p className="mt-2 rounded-full border border-current/15 px-2 py-1 text-[9px] font-black uppercase tracking-[0.16em] opacity-75">{result}</p>}
     </button>
   );
 }
