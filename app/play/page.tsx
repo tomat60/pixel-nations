@@ -80,14 +80,31 @@ export default function PlayPrototypePage() {
               )}
               {state.view === "orders" && (
                 <div>
-                  <Panel title="Season Orders" body="Choose one order. A good order must create a visible consequence on the map this season." />
-                  <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    <OrderButton label="Expand" body="Claim one safe parcel and widen the realm." result="new owned land" onClick={() => dispatch({ type: "order", order: "expand" })} disabled={!capital} />
-                    <OrderButton label="Develop" body="Raise the capital marker toward a town." result="marker level up" onClick={() => dispatch({ type: "order", order: "develop" })} disabled={!capital} />
-                    <OrderButton label="Secure" body="Push your influence ring across the basin." result="larger influence" onClick={() => dispatch({ type: "order", order: "secure" })} disabled={!capital} />
-                    <OrderButton label="Scout" body="Reveal one more parcel and future choice." result="new map label" onClick={() => dispatch({ type: "order", order: "scout" })} disabled={!capital} />
-                    <div className="sm:col-span-2">
-                      <OrderButton label="Trade" body="Draw a route toward the Iron Coast once your capital can support it." result="nation pressure" onClick={() => dispatch({ type: "order", order: "trade" })} disabled={!capital || state.developmentLevel < 3} />
+                  <div className="md:hidden">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[8px] font-black uppercase tracking-[0.22em] text-amber-200/60">Season Orders</p>
+                        <h3 className="mt-1 text-sm font-black">One order. One map change.</h3>
+                      </div>
+                      <p className="rounded-full border border-amber-200/25 bg-amber-300/14 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-amber-100">Season {state.season}</p>
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-1.5">
+                      <button disabled={!capital} onClick={() => dispatch({ type: "order", order: "expand" })} className="rounded-xl border border-amber-100/20 bg-amber-100/10 px-2.5 py-2 text-left text-[10px] font-black uppercase tracking-[0.14em] text-amber-50 disabled:opacity-30">Expand <span className="block pt-1 text-[8px] text-amber-200/55">+ land</span></button>
+                      <button disabled={!capital} onClick={() => dispatch({ type: "order", order: "develop" })} className="rounded-xl border border-amber-100/20 bg-amber-100/10 px-2.5 py-2 text-left text-[10px] font-black uppercase tracking-[0.14em] text-amber-50 disabled:opacity-30">Develop <span className="block pt-1 text-[8px] text-amber-200/55">+ marker</span></button>
+                      <button disabled={!capital} onClick={() => dispatch({ type: "order", order: "secure" })} className="rounded-xl border border-amber-100/20 bg-amber-100/10 px-2.5 py-2 text-left text-[10px] font-black uppercase tracking-[0.14em] text-amber-50 disabled:opacity-30">Secure <span className="block pt-1 text-[8px] text-amber-200/55">+ influence</span></button>
+                      <button disabled={!capital} onClick={() => dispatch({ type: "order", order: "scout" })} className="rounded-xl border border-amber-100/20 bg-amber-100/10 px-2.5 py-2 text-left text-[10px] font-black uppercase tracking-[0.14em] text-amber-50 disabled:opacity-30">Scout <span className="block pt-1 text-[8px] text-amber-200/55">+ label</span></button>
+                    </div>
+                  </div>
+                  <div className="hidden md:block">
+                    <Panel title="Season Orders" body="Choose one order. A good order must create a visible consequence on the map this season." />
+                    <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <OrderButton label="Expand" body="Claim one safe parcel and widen the realm." result="new owned land" onClick={() => dispatch({ type: "order", order: "expand" })} disabled={!capital} />
+                      <OrderButton label="Develop" body="Raise the capital marker toward a town." result="marker level up" onClick={() => dispatch({ type: "order", order: "develop" })} disabled={!capital} />
+                      <OrderButton label="Secure" body="Push your influence ring across the basin." result="larger influence" onClick={() => dispatch({ type: "order", order: "secure" })} disabled={!capital} />
+                      <OrderButton label="Scout" body="Reveal one more parcel and future choice." result="new map label" onClick={() => dispatch({ type: "order", order: "scout" })} disabled={!capital} />
+                      <div className="sm:col-span-2">
+                        <OrderButton label="Trade" body="Draw a route toward the Iron Coast once your capital can support it." result="nation pressure" onClick={() => dispatch({ type: "order", order: "trade" })} disabled={!capital || state.developmentLevel < 3} />
+                      </div>
                     </div>
                   </div>
                 </div>
