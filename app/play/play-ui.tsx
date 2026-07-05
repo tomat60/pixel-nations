@@ -39,9 +39,9 @@ function LoopPip({ label, active }: { label: string; active: boolean }) {
 
 export function StatusChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-amber-200/20 bg-amber-100/10 px-3 py-2">
-      <p className="text-[10px] uppercase tracking-[0.22em] text-amber-200/60">{label}</p>
-      <p className="text-xl font-black">{value}</p>
+    <div className="rounded-2xl border border-amber-200/20 bg-amber-100/10 px-2 py-1.5 md:px-3 md:py-2">
+      <p className="text-[8px] uppercase tracking-[0.2em] text-amber-200/60 md:text-[10px] md:tracking-[0.22em]">{label}</p>
+      <p className="text-base font-black md:text-xl">{value}</p>
     </div>
   );
 }
