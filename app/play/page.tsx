@@ -16,46 +16,59 @@ export default function PlayPrototypePage() {
   return (
     <main data-qa="play-shell" className="fixed inset-0 overflow-hidden bg-[#06090a] text-[#f7ead2]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(250,204,21,.20),transparent_28%),radial-gradient(circle_at_78%_22%,rgba(56,189,248,.16),transparent_31%),linear-gradient(180deg,#101711_0%,#050807_100%)]" />
-      <section className="relative z-10 grid h-full grid-rows-[auto_auto_1fr_auto] p-3 md:p-5">
-        <header className="flex items-center justify-between rounded-3xl border border-amber-200/20 bg-black/45 px-4 py-3 shadow-2xl backdrop-blur-md">
+      <section className="relative z-10 grid h-full grid-rows-[auto_1fr_auto] gap-2 p-2 md:grid-rows-[auto_auto_1fr_auto] md:gap-3 md:p-5">
+        <header className="flex items-center justify-between rounded-3xl border border-amber-200/20 bg-black/45 px-3 py-2 shadow-2xl backdrop-blur-md md:px-4 md:py-3">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.38em] text-amber-200/70">Pixel Nations</p>
-            <h1 className="text-xl font-black tracking-tight md:text-3xl">Aurelian Basin</h1>
+            <p className="text-[9px] uppercase tracking-[0.34em] text-amber-200/70 md:text-[10px] md:tracking-[0.38em]">Pixel Nations</p>
+            <h1 className="text-lg font-black tracking-tight md:text-3xl">Aurelian Basin</h1>
           </div>
           <div className="hidden text-center md:block">
             <p className="text-[10px] uppercase tracking-[0.34em] text-amber-200/65">From Land to Empire</p>
             <p className="mt-1 text-sm text-amber-50/70">One fullscreen map game</p>
           </div>
-          <div className="flex items-center gap-2 text-right">
+          <div className="flex items-center gap-1.5 text-right md:gap-2">
             <StatusChip label="Season" value={`${state.season}/12`} />
             <StatusChip label="Lands" value={`${state.owned.length}/30`} />
           </div>
         </header>
 
-        <ObjectiveRibbon objective={objective} lastEvent={state.lastEvent} />
+        <div className="hidden md:block">
+          <ObjectiveRibbon objective={objective} lastEvent={state.lastEvent} />
+        </div>
 
-        <div className="my-3 grid min-h-0 gap-3 xl:grid-cols-[282px_minmax(0,1fr)_282px]">
+        <div className="grid min-h-0 gap-3 xl:grid-cols-[282px_minmax(0,1fr)_282px]">
           <CoreLoopRail selected={selected} phase={phase} ownedCount={state.owned.length} onClaim={() => dispatch({ type: "claim", parcelId: selected.id })} isRival={Boolean(selected.rival)} />
 
-          <div data-qa="map-stage" className="relative min-h-0 overflow-hidden rounded-[2rem] border border-amber-200/20 bg-[#1d2d23] shadow-[0_30px_90px_rgba(0,0,0,.45)]">
+          <div data-qa="map-stage" className="relative min-h-0 overflow-hidden rounded-[1.5rem] border border-amber-200/20 bg-[#1d2d23] shadow-[0_30px_90px_rgba(0,0,0,.45)] md:rounded-[2rem]">
             <PlayMapStage state={state} phase={phase} capitalId={capital?.id} dispatch={dispatch} />
 
-            <div className="absolute left-4 top-4 max-w-[286px] rounded-3xl border border-amber-100/20 bg-black/40 p-4 backdrop-blur-md xl:hidden">
-              <p className="text-[10px] uppercase tracking-[0.25em] text-amber-200/70">Selected parcel</p>
-              <h2 className="mt-1 text-2xl font-black">{selected.name}</h2>
-              <p className="mt-1 text-sm text-amber-50/80">{selected.region} - {selected.terrain}</p>
-              <p className="mt-2 text-xs leading-relaxed text-amber-50/65">{terrainLine[selected.terrain]}</p>
+            <div className="absolute left-3 top-3 max-w-[172px] rounded-2xl border border-amber-100/20 bg-black/42 p-2.5 shadow-xl backdrop-blur-md md:left-4 md:top-4 md:max-w-[286px] md:rounded-3xl md:p-4 xl:hidden">
+              <p className="text-[8px] uppercase tracking-[0.22em] text-amber-200/70 md:text-[10px] md:tracking-[0.25em]">Selected parcel</p>
+              <h2 className="mt-1 text-base font-black leading-tight md:text-2xl">{selected.name}</h2>
+              <p className="mt-1 text-[10px] text-amber-50/80 md:text-sm">{selected.region} - {selected.terrain}</p>
+              <p className="mt-2 hidden text-xs leading-relaxed text-amber-50/65 md:block">{terrainLine[selected.terrain]}</p>
               {phase === "unclaimed" ? (
-                <button onClick={() => dispatch({ type: "claim", parcelId: selected.id })} className="mt-3 rounded-2xl bg-amber-300 px-4 py-2 text-sm font-black text-stone-950 shadow-lg shadow-black/30">
-                  {selected.rival ? "Rival banner here" : "Claim this land"}
+                <button onClick={() => dispatch({ type: "claim", parcelId: selected.id })} className="mt-2 rounded-xl bg-amber-300 px-3 py-2 text-[11px] font-black text-stone-950 shadow-lg shadow-black/30 md:mt-3 md:rounded-2xl md:px-4 md:text-sm">
+                  {selected.rival ? "Rival banner" : "Claim land"}
                 </button>
               ) : (
-                <p className="mt-3 rounded-2xl bg-amber-100/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-amber-100">{phase} phase</p>
+                <p className="mt-2 rounded-xl bg-amber-100/10 px-3 py-2 text-[9px] font-bold uppercase tracking-[0.16em] text-amber-100 md:mt-3 md:rounded-2xl md:px-4 md:text-xs">{phase} phase</p>
               )}
             </div>
 
-            <div className="absolute bottom-4 left-4 right-4 rounded-3xl border border-amber-100/20 bg-black/48 p-3 backdrop-blur-md md:bottom-6 md:left-auto md:right-6 md:w-[430px]">
-              {state.view === "map" && <Panel title="30-parcel Basin" body="This is now a real authored sector prototype: starter lands, rival banners, scouted labels, roads, river, coast, mountains, ruins and owned influence on the map." />}
+            <div className="absolute right-3 top-3 max-w-[170px] rounded-2xl border border-amber-100/20 bg-black/38 p-2.5 text-right shadow-xl backdrop-blur-md md:hidden">
+              <p className="text-[8px] uppercase tracking-[0.22em] text-amber-200/65">{objective.eyebrow}</p>
+              <p className="mt-1 text-xs font-black leading-tight text-amber-50">{objective.title}</p>
+              <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-amber-50/65">{objective.body}</p>
+            </div>
+
+            <div className="absolute bottom-3 left-3 right-3 rounded-2xl border border-amber-100/20 bg-black/52 p-2.5 shadow-xl backdrop-blur-md md:bottom-6 md:left-auto md:right-6 md:w-[430px] md:rounded-3xl md:p-3">
+              {state.view === "map" && (
+                <div>
+                  <Panel title="30-parcel Basin" body="Starter lands, rivals, roads, river, coast and owned influence now live on one map." />
+                  <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-200/55 md:hidden">Tap a glowing land. Claim it. Then open Orders.</p>
+                </div>
+              )}
               {state.view === "orders" && (
                 <div>
                   <Panel title="Season Orders" body="Choose one order. A good order must create a visible consequence on the map this season." />
@@ -79,9 +92,9 @@ export default function PlayPrototypePage() {
           <LayerStack phase={phase} ownedCount={state.owned.length} developmentLevel={state.developmentLevel} />
         </div>
 
-        <nav className="grid grid-cols-5 gap-2 rounded-3xl border border-amber-200/20 bg-black/45 p-2 backdrop-blur-md">
+        <nav className="grid grid-cols-5 gap-1.5 rounded-3xl border border-amber-200/20 bg-black/45 p-1.5 backdrop-blur-md md:gap-2 md:p-2">
           {views.map((item) => (
-            <button key={item.id} onClick={() => dispatch({ type: "setView", view: item.id })} className={`rounded-2xl px-2 py-3 text-xs font-black uppercase tracking-wide transition md:text-sm ${state.view === item.id ? "bg-amber-300 text-stone-950" : "bg-white/5 text-amber-50/70"}`}>
+            <button key={item.id} onClick={() => dispatch({ type: "setView", view: item.id })} className={`rounded-2xl px-1.5 py-2 text-[10px] font-black uppercase tracking-wide transition md:px-2 md:py-3 md:text-sm ${state.view === item.id ? "bg-amber-300 text-stone-950" : "bg-white/5 text-amber-50/70"}`}>
               {item.label}
             </button>
           ))}
