@@ -26,7 +26,7 @@ export function OrdersPanel({ state, dispatch }: { state: PlayState; dispatch: (
       </div>
 
       {nextRouteOrder && (
-        <button data-qa="order-open-market-priority" onClick={() => dispatch({ type: "runOrder", orderId: nextRouteOrder.id })} className="mt-3 w-full rounded-2xl border border-amber-200/45 bg-amber-300 px-3 py-3 text-left text-stone-950 shadow-lg shadow-black/30 transition hover:bg-amber-200">
+        <button aria-label={nextRouteOrder.label} data-qa="order-open-market-priority" onClick={() => dispatch({ type: "runOrder", orderId: nextRouteOrder.id })} className="mt-3 w-full rounded-2xl border border-amber-200/45 bg-amber-300 px-3 py-3 text-left text-stone-950 shadow-lg shadow-black/30 transition hover:bg-amber-200">
           <p className="text-sm font-black">{nextRouteOrder.label}</p>
           <p className="mt-1 text-xs font-semibold leading-relaxed text-stone-800">{nextRouteOrder.short}</p>
         </button>
@@ -34,7 +34,7 @@ export function OrdersPanel({ state, dispatch }: { state: PlayState; dispatch: (
 
       <div className="mt-3 max-h-[220px] space-y-2 overflow-auto pr-1 md:max-h-[300px]">
         {visibleOrders.filter((order) => order.id !== nextRouteOrder?.id).map((order) => (
-          <button key={order.id} data-qa={`order-${order.id}`} onClick={() => dispatch({ type: "runOrder", orderId: order.id })} className="w-full rounded-2xl border border-amber-100/16 bg-amber-100/8 p-3 text-left transition hover:border-amber-200/40 hover:bg-amber-100/14">
+          <button key={order.id} aria-label={order.label} data-qa={`order-${order.id}`} onClick={() => dispatch({ type: "runOrder", orderId: order.id })} className="w-full rounded-2xl border border-amber-100/16 bg-amber-100/8 p-3 text-left transition hover:border-amber-200/40 hover:bg-amber-100/14">
             <p className="text-sm font-black text-amber-50">{order.label}</p>
             <p className="mt-1 text-xs leading-relaxed text-amber-50/62">{order.short}</p>
           </button>
