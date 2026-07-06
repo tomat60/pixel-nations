@@ -19,10 +19,10 @@ export default function PlayPrototypePage() {
           <MapStage state={state} dispatch={dispatch} />
           <TopBar state={state} />
 
-          <div className="absolute right-3 top-[5.9rem] z-20 max-w-[180px] rounded-2xl border border-amber-100/20 bg-black/42 p-2.5 text-right shadow-xl backdrop-blur-md md:right-5 md:top-[6.8rem] md:max-w-[340px] md:p-3">
-            <p className="text-[8px] uppercase tracking-[0.22em] text-amber-200/65 md:text-[10px] md:tracking-[0.26em]">Milestone 1</p>
-            <p className="mt-1 text-xs font-black leading-tight text-amber-50 md:text-base">Fullscreen map foundation</p>
-            <p className="mt-1 text-[10px] leading-snug text-amber-50/65 md:text-xs">Pick a land, claim it, and see the first banner appear on the map.</p>
+          <div className="pointer-events-none absolute right-3 top-[5.9rem] z-20 max-w-[192px] rounded-2xl border border-amber-100/20 bg-black/42 p-2.5 text-right shadow-xl backdrop-blur-md md:right-5 md:top-[6.8rem] md:max-w-[360px] md:p-3">
+            <p className="text-[8px] uppercase tracking-[0.22em] text-amber-200/65 md:text-[10px] md:tracking-[0.26em]">Milestone A</p>
+            <p className="mt-1 text-xs font-black leading-tight text-amber-50 md:text-base">Map, camera, claim</p>
+            <p className="mt-1 text-[10px] leading-snug text-amber-50/65 md:text-xs">Drag the basin, inspect near and far lands, claim one homeland, and see your first camp.</p>
             <p className="mt-2 hidden text-[10px] font-black uppercase tracking-[0.2em] text-amber-200/55 md:block">{state.lastEvent}</p>
           </div>
 
@@ -30,9 +30,9 @@ export default function PlayPrototypePage() {
 
           {state.view !== "map" && (
             <div className="absolute bottom-[4.7rem] right-3 z-20 hidden w-[360px] rounded-3xl border border-amber-100/20 bg-black/55 p-4 shadow-2xl backdrop-blur-md md:block">
-              <p className="text-[10px] uppercase tracking-[0.24em] text-amber-200/65">Layer preview</p>
-              <h3 className="mt-1 text-xl font-black">{state.view}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-amber-50/68">This layer stays intentionally lightweight in Milestone 1. The map remains the game surface.</p>
+              <p className="text-[10px] uppercase tracking-[0.24em] text-amber-200/65">{state.view} panel</p>
+              <h3 className="mt-1 text-xl font-black">Still on the map</h3>
+              <p className="mt-2 text-sm leading-relaxed text-amber-50/68">Panels explain the realm without leaving `/play`. Season orders and visible consequences unlock in Milestone B.</p>
             </div>
           )}
 
