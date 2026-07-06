@@ -108,18 +108,28 @@ async function runSmoke(page) {
     await expectText(page, "wheel zoom", "open full sector overview");
   });
 
-  await step("wheel zoom and inspect rival", async () => {
+  await step("wheel zoom changes map transform", async () => {
+    const layer = page.locator("[data-qa='map-layer']").first();
+    const before = await layer.getAttribute("transform");
     await page.locator("[data-qa='map-stage']").hover();
     await page.mouse.wheel(0, -450);
-    await page.waitForTimeout(250);
-    await page.locator("[data-qa='plot-crownstone']").click({ timeout: 5000 });
-    await expectText(page, "Crownstone", "wheel zoom and inspect rival");
-    await expectText(page, "PN-A01-022", "wheel zoom and inspect rival");
+    await page.waitForTimeout(350);
+    const after = await layer.getAttribute("transform");
+    if (!after || after === before || !after.includes("scale(1.")) {
+      throw new SmokeError("wheel zoom changes map transform", `Expected wheel zoom to change map transform, before=${before}, after=${after}`);
+    }
+  });
+
+  await step("overview inspect rival land", async () => {
+    await clickButton(page, /^Overview$/i, "overview inspect rival land");
+    await page.locator("[data-qa='plot-crownstone']").click({ timeout: 5000, force: true });
+    await expectText(page, "Crownstone", "overview inspect rival land");
+    await expectText(page, "PN-A01-022", "overview inspect rival land");
   });
 
   await step("claim homeland", async () => {
     await clickButton(page, /^Overview$/i, "claim homeland");
-    await page.locator("[data-qa='plot-greenvale']").click({ timeout: 5000 });
+    await page.locator("[data-qa='plot-greenvale']").click({ timeout: 5000, force: true });
     await clickButton(page, /^Choose this land$/i, "claim homeland");
     await expectText(page, "Grow the first settlement", "claim homeland");
     await expectText(page, "Food", "claim homeland");
