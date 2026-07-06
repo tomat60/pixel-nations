@@ -116,7 +116,7 @@ export function MapStage({ state, dispatch }: MapStageProps) {
         </defs>
 
         <rect width="1000" height="900" fill="url(#seaV3)" />
-        <g ref={layerRef}>
+        <g ref={layerRef} data-qa="map-layer">
           <path d="M0 0 H214 C150 136 104 246 92 360 C76 510 116 692 62 900 H0 Z" fill="#0f4b5c" opacity="0.92" />
           <path d="M82 190 C162 60 328 28 492 54 C702 88 866 238 914 432 C972 666 812 842 612 884 C402 928 184 810 104 612 C42 460 24 286 82 190 Z" fill="#a98b4d" opacity="0.48" filter="url(#v3SoftShadow)" />
           <path d="M150 194 C246 72 432 52 608 108 C782 164 878 318 872 486 C864 720 676 846 476 824 C270 800 132 650 116 480 C104 342 98 260 150 194 Z" fill="#78613d" opacity="0.22" />
