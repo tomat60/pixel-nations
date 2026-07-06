@@ -13,7 +13,7 @@ export function LandSheet({ selected, state, dispatch }: { selected: Plot; state
           <h2 className="mt-1 text-xl font-black md:text-3xl">{selected.name}</h2>
           <p className="mt-1 text-xs text-amber-50/72 md:text-sm">{selected.region} - {selected.terrain}</p>
         </div>
-        {owned ? <Tag label="Owned" tone="gold" /> : selected.rival ? <Tag label="Rival" tone="slate" /> : selected.trade ? <Tag label="Route" tone="blue" /> : null}
+        {owned ? <Tag label={phase} tone="gold" /> : selected.rival ? <Tag label="Rival" tone="slate" /> : selected.trade ? <Tag label="Route" tone="blue" /> : null}
       </div>
 
       <p className="mt-2 text-xs leading-relaxed text-amber-50/66 md:text-sm">{terrainLine[selected.terrain]}</p>
@@ -25,8 +25,10 @@ export function LandSheet({ selected, state, dispatch }: { selected: Plot; state
         <button data-qa="claim-button" onClick={() => dispatch({ type: "claim", plotId: selected.id })} className="mt-3 w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-black/30 transition hover:bg-amber-200">
           Choose this land
         </button>
+      ) : owned ? (
+        <p className="mt-3 rounded-2xl border border-amber-100/20 bg-amber-100/10 px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-amber-100">{state.completedOrders.length} orders complete · settlement is changing on map</p>
       ) : (
-        <p className="mt-3 rounded-2xl border border-amber-100/20 bg-amber-100/10 px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-amber-100">first camp founded · orders unlock next</p>
+        <p className="mt-3 rounded-2xl border border-amber-100/20 bg-amber-100/10 px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-amber-100">inspect target · claim already chosen</p>
       )}
     </aside>
   );

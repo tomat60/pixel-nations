@@ -24,92 +24,78 @@ const viewports = [
   { viewport: "desktop", width: 1440, height: 900, deviceScaleFactor: 1, isMobile: false, recordVideo: true },
 ];
 
-function timeoutPromise(label, promise, timeoutMs = 8_000) {
-  return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error(`${label} timed out after ${timeoutMs}ms`)), timeoutMs))]);
-}
-
-async function dispatchDomClick(page, selector) {
-  const clicked = await timeoutPromise(
-    `DOM click ${selector}`,
-    page.evaluate((targetSelector) => {
-      const element = document.querySelector(targetSelector);
-      if (!element) return false;
-      element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
-      return true;
-    }, selector),
-    3_000,
-  );
-  if (!clicked) throw new Error(`Could not find ${selector}`);
-}
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function clickButtonByText(page, pattern) {
-  const clicked = await timeoutPromise(
-    `Button click ${pattern}`,
-    page.evaluate((source) => {
-      const regex = new RegExp(source, "i");
-      const buttons = Array.from(document.querySelectorAll("button"));
-      const button = buttons.find((item) => regex.test(item.textContent ?? ""));
-      if (!button) return false;
-      button.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
-      return true;
-    }, pattern.source),
-    3_000,
-  );
-  if (!clicked) throw new Error(`Could not find button matching ${pattern}`);
+  const button = page.getByRole("button", { name: pattern }).first();
+  await button.waitFor({ state: "visible", timeout: 5000 });
+  await button.click();
+}
+
+async function clickDom(page, selector) {
+  const locator = page.locator(selector).first();
+  await locator.waitFor({ state: "visible", timeout: 5000 });
+  await locator.click({ force: true });
 }
 
 async function dragMap(page) {
   const box = await page.locator("[data-qa='map-stage']").boundingBox();
   if (!box) throw new Error("No map-stage box");
-  await page.mouse.move(box.x + box.width * 0.62, box.y + box.height * 0.45);
+  await page.mouse.move(box.x + box.width * 0.60, box.y + box.height * 0.50);
   await page.mouse.down();
-  await page.mouse.move(box.x + box.width * 0.50, box.y + box.height * 0.55, { steps: 8 });
+  await page.mouse.move(box.x + box.width * 0.48, box.y + box.height * 0.58, { steps: 12 });
   await page.mouse.up();
 }
 
 const steps = [
+  { id: "01-full-sector-overview", label: "Full sector overview", note: "Default view should show the full local sector, not an awkward cropped slice." },
   {
-    id: "01-initial-sector-map",
-    label: "Initial sector map",
-    note: "The player should see Sector A-01 as a charted slice of a 10,000-land world, not a random 24/30 cell map.",
-  },
-  {
-    id: "02-zoom-and-pan",
-    label: "Zoom and pan",
-    note: "The map should feel movable and inspectable, with a clear Near/Sector camera model.",
+    id: "02-wheel-zoom-drag",
+    label: "Wheel zoom and drag",
+    note: "Trackpad/mouse wheel zoom and drag should feel like strategy-map navigation.",
     run: async (page) => {
-      await clickButtonByText(page, /near/);
+      await page.locator("[data-qa='map-stage']").hover();
+      await page.mouse.wheel(0, -520);
+      await sleep(300);
       await dragMap(page);
-      await page.waitForTimeout(500);
+      await sleep(350);
     },
   },
   {
-    id: "03-far-rival-inspect",
-    label: "Far rival inspected",
-    note: "Distant rival lands should explain future diplomacy, pressure, conquest or alliance possibilities without building those systems yet.",
+    id: "03-claim-homeland",
+    label: "Claim homeland",
+    note: "Claim should open the post-claim order loop, not leave the player staring at the map.",
     run: async (page) => {
-      await dispatchDomClick(page, "[data-qa='plot-crownstone']");
-      await page.waitForTimeout(500);
+      await clickButtonByText(page, /Overview/i);
+      await clickDom(page, "[data-qa='plot-greenvale']");
+      await clickButtonByText(page, /Choose this land/i);
+      await sleep(550);
     },
   },
   {
-    id: "04-after-claim-camp",
-    label: "After claim camp",
-    note: "Claim should create visible ownership: border, banner and first camp on the map.",
+    id: "04-three-orders",
+    label: "Three seasonal orders",
+    note: "Video must show claim -> multiple orders -> visible settlement growth.",
     run: async (page) => {
-      await clickButtonByText(page, /sector/);
-      await dispatchDomClick(page, "[data-qa='plot-greenvale']");
-      await clickButtonByText(page, /choose this land/);
-      await page.waitForTimeout(700);
+      await clickButtonByText(page, /Raise Shelter/i);
+      await sleep(250);
+      await clickButtonByText(page, /Gather Food/i);
+      await sleep(250);
+      await clickButtonByText(page, /Cut Timber/i);
+      await sleep(350);
     },
   },
   {
-    id: "05-panel-over-map",
-    label: "Panel over map",
-    note: "Realm panels should stay over the map and explain that orders/empire progression comes next.",
+    id: "05-visible-map-change",
+    label: "Visible map consequences",
+    note: "Scout and market actions should visibly affect the map with scouted lands and a route line.",
     run: async (page) => {
-      await clickButtonByText(page, /settlement/);
-      await page.waitForTimeout(500);
+      await clickButtonByText(page, /Scout Nearby Land/i);
+      await sleep(350);
+      await clickButtonByText(page, /Build Storehouse/i);
+      await sleep(350);
+      await clickButtonByText(page, /Open Market Path/i);
+      await sleep(550);
     },
   },
 ];
@@ -125,9 +111,9 @@ async function isAppRunning() {
 
 async function waitForApp() {
   const started = Date.now();
-  while (Date.now() - started < 30_000) {
+  while (Date.now() - started < 30000) {
     if (await isAppRunning()) return;
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await sleep(500);
   }
   throw new Error(`Timed out waiting for ${APP_URL}`);
 }
@@ -159,10 +145,10 @@ function escapeHtml(value) {
 }
 
 function buildReport({ generatedAt, appSource, shots, videos, interactionLog }) {
-  const videoCards = videos.length ? videos.map((video) => `<article class="card"><div class="meta"><span>${escapeHtml(video.viewport)}</span><span>milestone video</span></div><h3>${escapeHtml(video.filename)}</h3><video controls src="./videos/${encodeURIComponent(video.filename)}"></video></article>`).join("\n") : `<p class="error-text">No video evidence generated.</p>`;
-  const screenshotCards = shots.map((shot) => `<article class="card ${shot.error ? "error" : ""}"><div class="meta"><span>${escapeHtml(shot.viewport)}</span><span>${escapeHtml(shot.stepLabel)}</span></div><h3>${escapeHtml(shot.filename)}</h3><p>${escapeHtml(shot.note)}</p>${shot.error ? `<p class="error-text"><strong>Interaction warning:</strong> ${escapeHtml(shot.error)}</p>` : ""}<a href="./screenshots/${encodeURIComponent(shot.filename)}"><img src="./screenshots/${encodeURIComponent(shot.filename)}" alt="${escapeHtml(shot.filename)}" /></a></article>`).join("\n");
+  const videoCards = videos.map((video) => `<article class="card"><h3>${escapeHtml(video.filename)}</h3><video controls src="./videos/${encodeURIComponent(video.filename)}"></video></article>`).join("\n") || `<p class="error-text">No video evidence generated.</p>`;
+  const screenshotCards = shots.map((shot) => `<article class="card ${shot.error ? "error" : ""}"><p class="meta">${escapeHtml(shot.viewport)} / ${escapeHtml(shot.stepLabel)}</p><h3>${escapeHtml(shot.filename)}</h3><p>${escapeHtml(shot.note)}</p>${shot.error ? `<p class="error-text">${escapeHtml(shot.error)}</p>` : ""}<a href="./screenshots/${encodeURIComponent(shot.filename)}"><img src="./screenshots/${encodeURIComponent(shot.filename)}" /></a></article>`).join("\n");
   const logItems = interactionLog.map((item) => `<li><code>${escapeHtml(item.viewport)}</code> / <code>${escapeHtml(item.stepId)}</code> — ${escapeHtml(item.status)}${item.error ? `: ${escapeHtml(item.error)}` : ""}</li>`).join("\n");
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Pixel Nations /play Milestone A QA</title><style>:root{color-scheme:dark;--bg:#020204;--gold:#c9a962;--muted:#9ca3af;--border:rgba(201,169,98,.18);--bad:#f97373}body{margin:0;background:var(--bg);color:#f8f5ed;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:1280px;margin:0 auto;padding:40px 20px 64px}header,.card,section{border:1px solid var(--border);background:linear-gradient(180deg,rgba(201,169,98,.05),rgba(255,255,255,.015));padding:18px;margin-bottom:18px}.card.error{border-color:rgba(249,115,115,.55)}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,4rem);letter-spacing:-.04em}h2,h3{color:#f5deb3}p,li{color:var(--muted);line-height:1.65}.error-text{color:var(--bad)}.eyebrow,.meta{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;font-weight:800}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}img,video{width:100%;height:auto;display:block;border:1px solid rgba(255,255,255,.08);background:#000}code{color:#f5deb3}</style></head><body><main><header><p class="eyebrow">Pixel Nations /play Visual QA</p><h1>Milestone A: Map, Camera, Claim</h1><p>Generated: <code>${escapeHtml(generatedAt)}</code></p><p>App source: <code>${escapeHtml(appSource)}</code></p><p>This report captures sector scale, pan/zoom, far land inspect, first claim and panels over the map.</p></header><section><h2>Manual verdict required</h2><ul><li>Does the sector feel like a readable local slice of a larger world?</li><li>Does pan/zoom make the map feel inspectable?</li><li>Are local expansion lands, far rivals and trade endpoints distinguishable?</li><li>After claim, is the first camp/banner clearly visible?</li></ul></section><section><h2>Gameplay videos</h2><div class="grid">${videoCards}</div></section><section><h2>Interaction log</h2><ul>${logItems}</ul></section><section><h2>Screenshots</h2><div class="grid">${screenshotCards}</div></section></main></body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Pixel Nations Camera Loop Recovery QA</title><style>:root{color-scheme:dark;--bg:#020204;--gold:#c9a962;--muted:#9ca3af;--border:rgba(201,169,98,.18);--bad:#f97373}body{margin:0;background:var(--bg);color:#f8f5ed;font-family:Inter,system-ui,sans-serif}main{max-width:1280px;margin:0 auto;padding:40px 20px 64px}header,.card,section{border:1px solid var(--border);background:rgba(255,255,255,.035);padding:18px;margin-bottom:18px}.error{border-color:rgba(249,115,115,.55)}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,4rem);letter-spacing:-.04em}h2,h3{color:#f5deb3}p,li{color:var(--muted);line-height:1.65}.error-text{color:var(--bad)}.meta,.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;font-weight:800}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}img,video{width:100%;display:block;border:1px solid rgba(255,255,255,.08);background:#000}code{color:#f5deb3}</style></head><body><main><header><p class="eyebrow">Pixel Nations /play QA</p><h1>Camera + post-claim loop recovery</h1><p>Generated: <code>${escapeHtml(generatedAt)}</code></p><p>App source: <code>${escapeHtml(appSource)}</code></p><p>This evidence must prove full overview, wheel zoom, claim, seasonal orders and visible map consequences.</p></header><section><h2>Manual verdict required</h2><ul><li>Does the map default to a useful full-sector overview?</li><li>Does wheel/trackpad zoom feel natural in video?</li><li>After claim, can the player immediately perform meaningful orders?</li><li>Do orders visibly change the settlement/map?</li></ul></section><section><h2>Videos</h2><div class="grid">${videoCards}</div></section><section><h2>Interaction log</h2><ul>${logItems}</ul></section><section><h2>Screenshots</h2><div class="grid">${screenshotCards}</div></section></main></body></html>`;
 }
 
 async function saveVideo(page, viewport) {
@@ -171,7 +157,7 @@ async function saveVideo(page, viewport) {
   const videoPath = await video.path().catch(() => null);
   if (!videoPath) return null;
   await mkdir(VIDEO_DIR, { recursive: true });
-  const filename = `${viewport}-map-camera-claim.webm`;
+  const filename = `${viewport}-camera-loop-recovery.webm`;
   await copyFile(videoPath, `${VIDEO_DIR}/${filename}`);
   return { viewport, filename };
 }
@@ -217,8 +203,7 @@ async function main() {
       fullInteractionLog.push(...result.interactionLog);
       if (result.video) allVideos.push(result.video);
     }
-    const manifest = { generatedAt, appUrl: APP_URL, appSource, screenshots: allShots, videos: allVideos };
-    await writeFile(MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`);
+    await writeFile(MANIFEST_PATH, `${JSON.stringify({ generatedAt, appUrl: APP_URL, appSource, screenshots: allShots, videos: allVideos }, null, 2)}\n`);
     await writeFile(INTERACTION_LOG_PATH, `${JSON.stringify(fullInteractionLog, null, 2)}\n`);
     await writeFile(REPORT_PATH, buildReport({ generatedAt, appSource, shots: allShots, videos: allVideos, interactionLog: fullInteractionLog }));
     const warnings = fullInteractionLog.filter((item) => item.status !== "ok");

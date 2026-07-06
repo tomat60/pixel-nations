@@ -100,37 +100,59 @@ async function closeBrowserSafely(browser) {
 }
 
 async function runSmoke(page) {
-  await step("open sector map with world scale", async () => {
+  await step("open full sector overview", async () => {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await expectText(page, "Pixel Nations", "open sector map with world scale");
-    await expectText(page, "Aurelian Basin", "open sector map with world scale");
-    await expectText(page, "30 charted of 10,000 lands", "open sector map with world scale");
-    await expectText(page, "0/30", "open sector map with world scale");
+    await expectText(page, "30 charted of 10,000 lands", "open full sector overview");
+    await expectText(page, "Overview", "open full sector overview");
+    await expectText(page, "wheel zoom", "open full sector overview");
   });
 
-  await step("zoom and inspect far rival land", async () => {
-    await clickButton(page, /^Near$/i, "zoom and inspect far rival land");
-    await page.locator("[data-qa='plot-crownstone']").click({ timeout: 5000 });
-    await expectText(page, "Crownstone", "zoom and inspect far rival land");
-    await expectText(page, "PN-A01-022", "zoom and inspect far rival land");
-    await expectText(page, "Rival", "zoom and inspect far rival land");
+  await step("wheel zoom changes map transform", async () => {
+    const layer = page.locator("[data-qa='map-layer']").first();
+    const before = await layer.getAttribute("transform");
+    await page.locator("[data-qa='map-stage']").hover();
+    await page.mouse.wheel(0, -450);
+    await page.waitForTimeout(350);
+    const after = await layer.getAttribute("transform");
+    if (!after || after === before || !after.includes("scale(1.")) {
+      throw new SmokeError("wheel zoom changes map transform", `Expected wheel zoom to change map transform, before=${before}, after=${after}`);
+    }
   });
 
-  await step("return to starter and claim camp", async () => {
-    await clickButton(page, /^Sector$/i, "return to starter and claim camp");
-    await page.locator("[data-qa='plot-greenvale']").click({ timeout: 5000 });
-    await clickButton(page, /^Choose this land$/i, "return to starter and claim camp");
-    await expectText(page, "2/12", "return to starter and claim camp");
-    await expectText(page, "1/30", "return to starter and claim camp");
-    await expectText(page, "first camp founded", "return to starter and claim camp");
+  await step("overview inspect rival land", async () => {
+    await clickButton(page, /^Overview$/i, "overview inspect rival land");
+    await page.locator("[data-qa='plot-crownstone']").click({ timeout: 5000, force: true });
+    await expectText(page, "Crownstone", "overview inspect rival land");
+    await expectText(page, "PN-A01-022", "overview inspect rival land");
   });
 
-  await step("bottom panels stay inside play shell", async () => {
-    await clickButton(page, /^Settlement$/i, "bottom panels stay inside play shell");
-    await expectText(page, "Still on the map", "bottom panels stay inside play shell");
-    await clickButton(page, /^Map$/i, "bottom panels stay inside play shell");
-    await expectText(page, "Map, camera, claim", "bottom panels stay inside play shell");
+  await step("claim homeland", async () => {
+    await clickButton(page, /^Overview$/i, "claim homeland");
+    await page.locator("[data-qa='plot-greenvale']").click({ timeout: 5000, force: true });
+    await clickButton(page, /^Choose this land$/i, "claim homeland");
+    await expectText(page, "Grow the first settlement", "claim homeland");
+    await expectText(page, "Food", "claim homeland");
+  });
+
+  await step("run five post claim orders", async () => {
+    for (const order of [/Raise Shelter/i, /Gather Food/i, /Cut Timber/i, /Scout Nearby Land/i, /Build Storehouse/i]) {
+      await clickButton(page, order, "run five post claim orders");
+      await page.waitForTimeout(120);
+    }
+    await expectText(page, "5 orders complete", "run five post claim orders");
+    await expectText(page, "Storehouse built", "run five post claim orders");
+  });
+
+  await step("map shows visible consequences", async () => {
+    const marker = page.locator("[data-qa='settlement-marker']").first();
+    await marker.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("map shows visible consequences", "Missing settlement marker after orders");
+    });
+    await clickButton(page, /^Open Market Path$/i, "map shows visible consequences");
+    await page.locator("[data-qa='market-route']").waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new SmokeError("map shows visible consequences", "Missing market route after order");
+    });
   });
 
   await step("play shell remains fullscreen framed", async () => {
