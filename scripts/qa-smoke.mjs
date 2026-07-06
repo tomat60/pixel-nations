@@ -16,15 +16,7 @@ class SmokeError extends Error {
   }
 }
 
-const result = {
-  status: "RUNNING",
-  generatedAt: "",
-  appUrl: APP_URL,
-  appSource: "",
-  blockingStep: "",
-  error: "",
-  steps: [],
-};
+const result = { status: "RUNNING", generatedAt: "", appUrl: APP_URL, appSource: "", blockingStep: "", error: "", steps: [] };
 
 async function isAppRunning() {
   try {
@@ -45,21 +37,12 @@ async function waitForApp() {
 }
 
 function startAppIfNeeded() {
-  const command = existsSync(".next")
-    ? ["run", "start", "--", "-p", "3000", "-H", "127.0.0.1"]
-    : ["run", "dev", "--", "-p", "3000", "-H", "127.0.0.1"];
-
-  return spawn("npm", command, {
-    stdio: "pipe",
-    shell: process.platform === "win32",
-  });
+  const command = existsSync(".next") ? ["run", "start", "--", "-p", "3000", "-H", "127.0.0.1"] : ["run", "dev", "--", "-p", "3000", "-H", "127.0.0.1"];
+  return spawn("npm", command, { stdio: "pipe", shell: process.platform === "win32" });
 }
 
 async function ensureApp() {
-  if (await isAppRunning()) {
-    return { startedProcess: null, appSource: "existing local app" };
-  }
-
+  if (await isAppRunning()) return { startedProcess: null, appSource: "existing local app" };
   const startedProcess = startAppIfNeeded();
   startedProcess.stdout?.on("data", (data) => process.stdout.write(data));
   startedProcess.stderr?.on("data", (data) => process.stderr.write(data));
@@ -74,7 +57,6 @@ async function writeResult(status, error) {
     result.blockingStep = error.step ?? "unknown";
     result.error = error.message;
   }
-
   await mkdir(OUTPUT_DIR, { recursive: true });
   await writeFile(RESULT_PATH, `${JSON.stringify(result, null, 2)}\n`);
 }
@@ -94,7 +76,6 @@ async function step(name, action) {
 async function expectText(page, text, stepName) {
   const locator = page.getByText(text, { exact: false });
   const deadline = Date.now() + 5000;
-
   while (Date.now() < deadline) {
     const count = await locator.count().catch(() => 0);
     for (let index = 0; index < count; index += 1) {
@@ -102,7 +83,6 @@ async function expectText(page, text, stepName) {
     }
     await page.waitForTimeout(100);
   }
-
   throw new SmokeError(stepName, `Expected visible text: ${text}`);
 }
 
@@ -120,33 +100,37 @@ async function closeBrowserSafely(browser) {
 }
 
 async function runSmoke(page) {
-  await step("open fullscreen map milestone", async () => {
+  await step("open sector map with world scale", async () => {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await expectText(page, "Pixel Nations", "open fullscreen map milestone");
-    await expectText(page, "Aurelian Basin", "open fullscreen map milestone");
-    await expectText(page, "Fullscreen map foundation", "open fullscreen map milestone");
-    await expectText(page, "1/12", "open fullscreen map milestone");
-    await expectText(page, "0/24", "open fullscreen map milestone");
+    await expectText(page, "Pixel Nations", "open sector map with world scale");
+    await expectText(page, "Aurelian Basin", "open sector map with world scale");
+    await expectText(page, "30 charted of 10,000 lands", "open sector map with world scale");
+    await expectText(page, "0/30", "open sector map with world scale");
   });
 
-  await step("select another organic plot", async () => {
-    await page.locator("[data-qa='plot-riverbend']").click({ timeout: 5000 });
-    await expectText(page, "Riverbend", "select another organic plot");
+  await step("zoom and inspect far rival land", async () => {
+    await clickButton(page, /^Near$/i, "zoom and inspect far rival land");
+    await page.locator("[data-qa='plot-crownstone']").click({ timeout: 5000 });
+    await expectText(page, "Crownstone", "zoom and inspect far rival land");
+    await expectText(page, "PN-A01-022", "zoom and inspect far rival land");
+    await expectText(page, "Rival", "zoom and inspect far rival land");
   });
 
-  await step("claim selected land and show banner state", async () => {
-    await clickButton(page, /^Choose this land$/i, "claim selected land and show banner state");
-    await expectText(page, "2/12", "claim selected land and show banner state");
-    await expectText(page, "1/24", "claim selected land and show banner state");
-    await expectText(page, "settlement phase", "claim selected land and show banner state");
+  await step("return to starter and claim camp", async () => {
+    await clickButton(page, /^Sector$/i, "return to starter and claim camp");
+    await page.locator("[data-qa='plot-greenvale']").click({ timeout: 5000 });
+    await clickButton(page, /^Choose this land$/i, "return to starter and claim camp");
+    await expectText(page, "2/12", "return to starter and claim camp");
+    await expectText(page, "1/30", "return to starter and claim camp");
+    await expectText(page, "first camp founded", "return to starter and claim camp");
   });
 
-  await step("bottom dock stays inside play shell", async () => {
-    await clickButton(page, /^Settlement$/i, "bottom dock stays inside play shell");
-    await expectText(page, "Layer preview", "bottom dock stays inside play shell");
-    await clickButton(page, /^Map$/i, "bottom dock stays inside play shell");
-    await expectText(page, "Fullscreen map foundation", "bottom dock stays inside play shell");
+  await step("bottom panels stay inside play shell", async () => {
+    await clickButton(page, /^Settlement$/i, "bottom panels stay inside play shell");
+    await expectText(page, "Still on the map", "bottom panels stay inside play shell");
+    await clickButton(page, /^Map$/i, "bottom panels stay inside play shell");
+    await expectText(page, "Map, camera, claim", "bottom panels stay inside play shell");
   });
 
   await step("play shell remains fullscreen framed", async () => {
@@ -164,22 +148,15 @@ async function runSmoke(page) {
 async function main() {
   const { startedProcess, appSource } = await ensureApp();
   result.appSource = appSource;
-
   process.on("SIGINT", () => { if (startedProcess) startedProcess.kill(); process.exit(130); });
   process.on("SIGTERM", () => { if (startedProcess) startedProcess.kill(); process.exit(143); });
   process.on("uncaughtException", (err) => { console.error("uncaughtException", err); if (startedProcess) startedProcess.kill(); process.exit(1); });
-
   let browser;
   try {
     browser = await chromium.launch();
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
-
-    await Promise.race([
-      (async () => { await runSmoke(page); })(),
-      new Promise((_, reject) => setTimeout(() => reject(new SmokeError("smoke timeout", "Smoke exceeded internal time limit")), SMOKE_TIMEOUT_MS)),
-    ]);
-
+    await Promise.race([(async () => { await runSmoke(page); })(), new Promise((_, reject) => setTimeout(() => reject(new SmokeError("smoke timeout", "Smoke exceeded internal time limit")), SMOKE_TIMEOUT_MS))]);
     await context.close();
     await closeBrowserSafely(browser);
     browser = null;
@@ -196,7 +173,6 @@ async function main() {
       try { startedProcess.kill(); } catch {}
     }
   }
-
   process.exit(process.exitCode ?? 0);
 }
 
