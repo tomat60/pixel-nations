@@ -120,6 +120,16 @@ async function closeBrowserSafely(browser) {
 }
 
 async function runSmoke(page) {
+  await step("root routes primary demo entry to play", async () => {
+    await page.goto(APP_URL, { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    await expectText(page, "through /play", "root routes primary demo entry to play");
+    await clickButton(page, /^Claim Your First Land$/i, "root routes primary demo entry to play");
+    await page.waitForURL("**/play", { timeout: 5000 }).catch(() => {
+      throw new SmokeError("root routes primary demo entry to play", `Expected root CTA to navigate to /play, got ${page.url()}`);
+    });
+  });
+
   await step("open fullscreen map milestone", async () => {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
