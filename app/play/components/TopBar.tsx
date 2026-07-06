@@ -1,3 +1,4 @@
+import { chartedLands, worldLands } from "../lib/map-data";
 import type { PlayState } from "../lib/play-state";
 
 export function TopBar({ state }: { state: PlayState }) {
@@ -8,12 +9,12 @@ export function TopBar({ state }: { state: PlayState }) {
         <h1 className="text-lg font-black tracking-tight md:text-3xl">Aurelian Basin</h1>
       </div>
       <div className="hidden text-center md:block">
-        <p className="text-[10px] uppercase tracking-[0.34em] text-amber-200/65">Sector A-01</p>
-        <p className="mt-1 text-sm text-amber-50/70">One land can become an empire</p>
+        <p className="text-[10px] uppercase tracking-[0.34em] text-amber-200/65">Sector A-01 · {chartedLands} charted of {worldLands.toLocaleString()} lands</p>
+        <p className="mt-1 text-sm text-amber-50/70">Local village ring, wider rivals, future routes</p>
       </div>
       <div className="flex items-center gap-1.5 text-right md:gap-2">
         <HudChip label="Season" value={`${state.season}/12`} />
-        <HudChip label="Lands" value={`${state.ownedPlotIds.length}/24`} />
+        <HudChip label="Claimed" value={`${state.ownedPlotIds.length}/${chartedLands}`} />
       </div>
     </header>
   );
