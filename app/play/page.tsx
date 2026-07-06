@@ -19,7 +19,7 @@ export default function PlayPrototypePage() {
           <MapStage state={state} dispatch={dispatch} />
           <TopBar state={state} />
 
-          <div className="absolute right-3 top-[5.9rem] z-20 max-w-[192px] rounded-2xl border border-amber-100/20 bg-black/42 p-2.5 text-right shadow-xl backdrop-blur-md md:right-5 md:top-[6.8rem] md:max-w-[360px] md:p-3">
+          <div className="pointer-events-none absolute right-3 top-[5.9rem] z-20 max-w-[192px] rounded-2xl border border-amber-100/20 bg-black/42 p-2.5 text-right shadow-xl backdrop-blur-md md:right-5 md:top-[6.8rem] md:max-w-[360px] md:p-3">
             <p className="text-[8px] uppercase tracking-[0.22em] text-amber-200/65 md:text-[10px] md:tracking-[0.26em]">Milestone A</p>
             <p className="mt-1 text-xs font-black leading-tight text-amber-50 md:text-base">Map, camera, claim</p>
             <p className="mt-1 text-[10px] leading-snug text-amber-50/65 md:text-xs">Drag the basin, inspect near and far lands, claim one homeland, and see your first camp.</p>
