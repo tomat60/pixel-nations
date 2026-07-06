@@ -48,7 +48,7 @@ export function MapStage({ state, dispatch }: MapStageProps) {
 
   return (
     <div className="absolute inset-0 touch-none">
-      <div className="absolute right-3 top-[12.1rem] z-20 flex flex-col gap-2 md:right-5 md:top-[11.4rem]">
+      <div className="absolute left-3 top-[6.8rem] z-30 flex flex-col gap-2 md:left-5 md:top-[7.2rem]">
         <button data-qa="zoom-near" onClick={() => setZoom(1.35)} className="rounded-2xl border border-amber-100/20 bg-black/48 px-3 py-2 text-xs font-black text-amber-50 shadow-xl backdrop-blur-md hover:bg-black/60">Near</button>
         <button data-qa="zoom-sector" onClick={() => setZoom(1)} className="rounded-2xl border border-amber-100/20 bg-black/48 px-3 py-2 text-xs font-black text-amber-50 shadow-xl backdrop-blur-md hover:bg-black/60">Sector</button>
       </div>
