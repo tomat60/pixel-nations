@@ -98,7 +98,12 @@ export function MapStage({ state, dispatch }: MapStageProps) {
             const selected = state.selectedPlotId === plot.id;
             const owned = state.ownedPlotIds.includes(plot.id);
             const scouted = state.scoutedPlotIds.includes(plot.id);
-            return <g key={plot.id} data-qa={`plot-group-${plot.id}`} onClick={(event) => { event.stopPropagation(); dispatch({ type: "select", plotId: plot.id }); }} className="cursor-pointer"><path data-qa={`plot-${plot.id}`} d={plot.d} fill={terrainFill[plot.terrain]} opacity={owned ? 0.98 : scouted ? 0.96 : 0.82} stroke={selected ? "#fff4bf" : owned ? "#ffe39a" : scouted ? "#bef264" : plot.rival ? "#cbd5e1" : plot.trade ? "#7dd3fc" : "#2f2214"} strokeWidth={selected ? 7 : owned ? 5 : scouted ? 4 : plot.rival || plot.trade ? 3 : 2.2} strokeDasharray={plot.trade && !owned ? "9 7" : undefined} />{selected && <path d={plot.d} fill="none" stroke="#fffbe3" strokeWidth="12" opacity="0.34" />}{owned && <path d={plot.d} fill="#f8d36d" opacity="0.22" stroke="#fff1a8" strokeWidth="6" />}{scouted && !owned && <path d={plot.d} fill="#bef264" opacity="0.16" stroke="#ecfccb" strokeWidth="4" strokeDasharray="8 8" />}{plot.rival && <path d={plot.d} fill="#64748b" opacity="0.18" stroke="#e2e8f0" strokeWidth="2" strokeDasharray="10 8" />}</g>;
+            const selectPlot = (event: React.PointerEvent<SVGGElement> | React.MouseEvent<SVGGElement>) => {
+              event.stopPropagation();
+              cameraRef.current.dragging = false;
+              dispatch({ type: "select", plotId: plot.id });
+            };
+            return <g key={plot.id} data-qa={`plot-group-${plot.id}`} onPointerDown={selectPlot} onClick={selectPlot} className="cursor-pointer"><path data-qa={`plot-${plot.id}`} d={plot.d} fill={terrainFill[plot.terrain]} opacity={owned ? 0.98 : scouted ? 0.96 : 0.82} stroke={selected ? "#fff4bf" : owned ? "#ffe39a" : scouted ? "#bef264" : plot.rival ? "#cbd5e1" : plot.trade ? "#7dd3fc" : "#2f2214"} strokeWidth={selected ? 7 : owned ? 5 : scouted ? 4 : plot.rival || plot.trade ? 3 : 2.2} strokeDasharray={plot.trade && !owned ? "9 7" : undefined} />{selected && <path d={plot.d} fill="none" stroke="#fffbe3" strokeWidth="12" opacity="0.34" />}{owned && <path d={plot.d} fill="#f8d36d" opacity="0.22" stroke="#fff1a8" strokeWidth="6" />}{scouted && !owned && <path d={plot.d} fill="#bef264" opacity="0.16" stroke="#ecfccb" strokeWidth="4" strokeDasharray="8 8" />}{plot.rival && <path d={plot.d} fill="#64748b" opacity="0.18" stroke="#e2e8f0" strokeWidth="2" strokeDasharray="10 8" />}</g>;
           })}
           {plots.map((plot) => {
             const selected = state.selectedPlotId === plot.id;
