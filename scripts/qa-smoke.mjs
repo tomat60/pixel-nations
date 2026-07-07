@@ -94,17 +94,12 @@ async function clickButton(page, name, stepName) {
   await locator.click();
 }
 
-async function closeBrowserSafely(browser) {
-  if (!browser) return;
-  await Promise.race([browser.close(), new Promise((resolve) => setTimeout(resolve, 3000))]).catch(() => {});
-}
-
 async function getMapViewBox(page) {
   return page.locator("svg[aria-label='Aurelian Basin fullscreen map']").first().getAttribute("viewBox");
 }
 
-async function pinchZoom(page, selector) {
-  await page.locator(selector).evaluate((node) => {
+async function pinchZoom(page) {
+  await page.locator("svg[aria-label='Aurelian Basin fullscreen map']").evaluate((node) => {
     node.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -180, clientX: 720, clientY: 450 }));
   });
 }
@@ -118,70 +113,64 @@ async function dragMap(page) {
   await page.mouse.up();
 }
 
+async function runOneOrder(page, orderName) {
+  await clickButton(page, /^Develop next$/i, "run order open orders");
+  await clickButton(page, orderName, "run order");
+  await page.waitForTimeout(120);
+}
+
 async function runSmoke(page) {
-  await step("open full sector overview", async () => {
+  await step("open game shell overview", async () => {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await expectText(page, "30 charted of 10,000 lands", "open full sector overview");
-    await expectText(page, "Reset view", "open full sector overview");
-    await expectText(page, "pinch zoom", "open full sector overview");
+    await expectText(page, "30 charted of 10,000 lands", "open game shell overview");
+    await expectText(page, "Map · Village · Orders · World · Council", "open game shell overview");
+    await expectText(page, "Reset view", "open game shell overview");
   });
 
-  await step("pinch zoom changes bounded viewbox", async () => {
+  await step("pinch zoom and drag still work", async () => {
     const before = await getMapViewBox(page);
-    await pinchZoom(page, "svg[aria-label='Aurelian Basin fullscreen map']");
-    await page.waitForTimeout(350);
-    const after = await getMapViewBox(page);
-    if (!before || !after || before === after || !after.includes(".")) throw new SmokeError("pinch zoom changes bounded viewbox", `Expected viewBox change, before=${before}, after=${after}`);
-  });
-
-  await step("drag map after zoom changes viewbox", async () => {
-    const before = await getMapViewBox(page);
+    await pinchZoom(page);
+    await page.waitForTimeout(250);
+    const zoomed = await getMapViewBox(page);
+    if (!before || !zoomed || before === zoomed) throw new SmokeError("pinch zoom and drag still work", "Zoom did not change viewBox");
     await dragMap(page);
     await page.waitForTimeout(250);
-    const after = await getMapViewBox(page);
-    if (!before || !after || before === after) throw new SmokeError("drag map after zoom changes viewbox", `Expected drag to change viewBox, before=${before}, after=${after}`);
+    const dragged = await getMapViewBox(page);
+    if (!dragged || dragged === zoomed) throw new SmokeError("pinch zoom and drag still work", "Drag did not change viewBox");
   });
 
-  await step("overview inspect rival land", async () => {
-    await clickButton(page, /^Reset view$/i, "overview inspect rival land");
-    await page.locator("[data-qa='plot-crownstone']").click({ timeout: 5000, force: true });
-    await expectText(page, "Crownstone", "overview inspect rival land");
-    await expectText(page, "PN-A01-022", "overview inspect rival land");
-  });
-
-  await step("claim homeland", async () => {
-    await clickButton(page, /^Reset view$/i, "claim homeland");
+  await step("claim opens village interior", async () => {
+    await clickButton(page, /^Reset view$/i, "claim opens village interior");
     await page.locator("[data-qa='plot-greenvale']").click({ timeout: 5000, force: true });
-    await clickButton(page, /^Choose this land$/i, "claim homeland");
-    await expectText(page, "Grow the first settlement", "claim homeland");
-    await expectText(page, "Food", "claim homeland");
+    await clickButton(page, /^Choose this land$/i, "claim opens village interior");
+    await page.locator("[data-qa='village-panel']").waitFor({ state: "visible", timeout: 5000 });
+    await expectText(page, "Village interior", "claim opens village interior");
+    await expectText(page, "Campfire Core", "claim opens village interior");
   });
 
-  await step("run five post claim orders", async () => {
+  await step("develop village through orders", async () => {
     for (const order of [/Raise Shelter/i, /Gather Food/i, /Cut Timber/i, /Scout Nearby Land/i, /Build Storehouse/i]) {
-      await clickButton(page, order, "run five post claim orders");
-      await page.waitForTimeout(120);
+      await runOneOrder(page, order);
     }
-    await expectText(page, "5 orders complete", "run five post claim orders");
-    await expectText(page, "Storehouse built", "run five post claim orders");
+    await expectText(page, "Storehouse", "develop village through orders");
+    await page.locator("[data-qa='district-storehouse']").waitFor({ state: "visible", timeout: 5000 });
   });
 
-  await step("map shows visible consequences", async () => {
-    await page.locator("[data-qa='settlement-marker']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("map shows visible consequences", "Missing settlement marker after orders");
-    });
-    await clickButton(page, /^Open Market Path$/i, "map shows visible consequences");
-    await page.locator("[data-qa='market-route']").waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("map shows visible consequences", "Missing market route after order");
-    });
+  await step("world and council sections exist", async () => {
+    await clickButton(page, /^World$/i, "world and council sections exist");
+    await page.locator("[data-qa='world-panel']").waitFor({ state: "visible", timeout: 5000 });
+    await expectText(page, "10,000 lands", "world and council sections exist");
+    await expectText(page, "Rival pressure", "world and council sections exist");
+    await clickButton(page, /^Council$/i, "world and council sections exist");
+    await page.locator("[data-qa='council-panel']").waitFor({ state: "visible", timeout: 5000 });
+    await expectText(page, "From land to empire", "world and council sections exist");
   });
 
-  await step("panel switching avoids overlap", async () => {
-    await clickButton(page, /^Banner$/i, "panel switching avoids overlap");
-    await page.locator("[data-qa='chronicle-panel']").waitFor({ state: "visible", timeout: 5000 });
-    const ordersVisible = await page.locator("[data-qa='orders-panel']").isVisible().catch(() => false);
-    if (ordersVisible) throw new SmokeError("panel switching avoids overlap", "Orders panel remained visible while Chronicle was open");
+  await step("market route remains visible consequence", async () => {
+    await clickButton(page, /^Orders$/i, "market route remains visible consequence");
+    await clickButton(page, /^Open Market Path$/i, "market route remains visible consequence");
+    await page.locator("[data-qa='market-route']").waitFor({ state: "visible", timeout: 5000 });
   });
 
   await step("play shell remains fullscreen framed", async () => {
@@ -192,6 +181,11 @@ async function runSmoke(page) {
     if (position !== "fixed") throw new SmokeError("play shell remains fullscreen framed", `Expected fixed shell, got ${position}`);
     if (overflow !== "hidden") throw new SmokeError("play shell remains fullscreen framed", `Expected hidden overflow, got ${overflow}`);
   });
+}
+
+async function closeBrowserSafely(browser) {
+  if (!browser) return;
+  await Promise.race([browser.close(), new Promise((resolve) => setTimeout(resolve, 3000))]).catch(() => {});
 }
 
 async function main() {
