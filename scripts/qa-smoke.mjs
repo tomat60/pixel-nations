@@ -8,22 +8,9 @@ const OUTPUT_DIR = "public/qa/latest";
 const RESULT_PATH = `${OUTPUT_DIR}/smoke-result.json`;
 const result = { status: "RUNNING", generatedAt: "", appUrl: APP_URL, blockingStep: "", error: "", steps: [] };
 
-class SmokeError extends Error {
-  constructor(step, message) {
-    super(message);
-    this.step = step;
-  }
-}
+class SmokeError extends Error { constructor(step, message) { super(message); this.step = step; } }
 
-async function appRunning() {
-  try {
-    const res = await fetch(APP_URL, { signal: AbortSignal.timeout(1500) });
-    return res.ok || res.status < 500;
-  } catch {
-    return false;
-  }
-}
-
+async function appRunning() { try { const res = await fetch(APP_URL, { signal: AbortSignal.timeout(1500) }); return res.ok || res.status < 500; } catch { return false; } }
 async function ensureApp() {
   if (await appRunning()) return null;
   const command = existsSync(".next") ? ["run", "start", "--", "-p", "3000", "-H", "127.0.0.1"] : ["run", "dev", "--", "-p", "3000", "-H", "127.0.0.1"];
@@ -31,119 +18,29 @@ async function ensureApp() {
   proc.stdout?.on("data", (data) => process.stdout.write(data));
   proc.stderr?.on("data", (data) => process.stderr.write(data));
   const started = Date.now();
-  while (Date.now() - started < 30000) {
-    if (await appRunning()) return proc;
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
+  while (Date.now() - started < 30000) { if (await appRunning()) return proc; await new Promise((resolve) => setTimeout(resolve, 500)); }
   throw new SmokeError("boot app", `Timed out waiting for ${APP_URL}`);
 }
-
-async function writeResult(status, error) {
-  result.status = status;
-  result.generatedAt = new Date().toISOString();
-  if (error) {
-    result.blockingStep = error.step ?? "unknown";
-    result.error = error.message;
-  }
-  await mkdir(OUTPUT_DIR, { recursive: true });
-  await writeFile(RESULT_PATH, `${JSON.stringify(result, null, 2)}\n`);
-}
-
-async function step(name, fn) {
-  const started = Date.now();
-  try {
-    await fn();
-    result.steps.push({ name, status: "PASS", durationMs: Date.now() - started });
-  } catch (err) {
-    const error = err instanceof SmokeError ? err : new SmokeError(name, err.message);
-    result.steps.push({ name, status: "FAIL", durationMs: Date.now() - started, error: error.message });
-    throw error;
-  }
-}
-
-async function expectText(page, text, stepName) {
-  await page.getByText(text, { exact: false }).first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-    throw new SmokeError(stepName, `Expected visible text: ${text}`);
-  });
-}
-
-async function clickButton(page, name, stepName) {
-  await page.getByRole("button", { name }).first().click({ timeout: 5000 }).catch(() => {
-    throw new SmokeError(stepName, `Could not click button: ${name}`);
-  });
-}
-
-async function runOneOrder(page, name) {
-  await clickButton(page, /^Develop next$/i, "open orders");
-  await clickButton(page, name, "run order");
-  await page.waitForTimeout(100);
-}
+async function writeResult(status, error) { result.status = status; result.generatedAt = new Date().toISOString(); if (error) { result.blockingStep = error.step ?? "unknown"; result.error = error.message; } await mkdir(OUTPUT_DIR, { recursive: true }); await writeFile(RESULT_PATH, `${JSON.stringify(result, null, 2)}\n`); }
+async function step(name, fn) { const started = Date.now(); try { await fn(); result.steps.push({ name, status: "PASS", durationMs: Date.now() - started }); } catch (err) { const error = err instanceof SmokeError ? err : new SmokeError(name, err.message); result.steps.push({ name, status: "FAIL", durationMs: Date.now() - started, error: error.message }); throw error; } }
+async function expectText(page, text, stepName) { await page.getByText(text, { exact: false }).first().waitFor({ state: "visible", timeout: 5000 }).catch(() => { throw new SmokeError(stepName, `Expected visible text: ${text}`); }); }
+async function clickButton(page, name, stepName) { await page.getByRole("button", { name }).first().click({ timeout: 5000 }).catch(() => { throw new SmokeError(stepName, `Could not click button: ${name}`); }); }
+async function readPlotStates(page) { return page.locator('[data-qa="village-plot"]').evaluateAll((nodes) => nodes.map((node) => `${node.getAttribute("data-qa-id")}:${node.getAttribute("data-qa-state")}`)); }
+async function runOneOrder(page, name) { await clickButton(page, /^Issue next order$/i, "open orders from village scene"); await clickButton(page, name, "run order"); await page.waitForTimeout(100); }
 
 async function runSmoke(page) {
-  await step("open shell", async () => {
-    await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
-    await expectText(page, "Map · Village · Orders · World · Council", "open shell");
-    await expectText(page, "30 charted of 10,000 lands", "open shell");
-  });
+  await step("open shell", async () => { await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" }); await expectText(page, "Map · Village · Orders · World · Council", "open shell"); await expectText(page, "30 charted of 10,000 lands", "open shell"); });
 
-  await step("camera viewbox still changes", async () => {
-    const svg = page.locator("svg[aria-label='Aurelian Basin fullscreen map']").first();
-    const before = await svg.getAttribute("viewBox");
-    await svg.evaluate((node) => node.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -180, clientX: 720, clientY: 450 })));
-    await page.waitForTimeout(200);
-    const after = await svg.getAttribute("viewBox");
-    if (!before || !after || before === after) throw new SmokeError("camera viewbox still changes", "viewBox did not change");
-  });
+  await step("camera viewbox still changes", async () => { const svg = page.locator("svg[aria-label='Aurelian Basin fullscreen map']").first(); const before = await svg.getAttribute("viewBox"); await svg.evaluate((node) => node.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -180, clientX: 720, clientY: 450 }))); await page.waitForTimeout(200); const after = await svg.getAttribute("viewBox"); if (!before || !after || before === after) throw new SmokeError("camera viewbox still changes", "viewBox did not change"); });
 
-  await step("claim opens village", async () => {
-    await clickButton(page, /^Reset view$/i, "claim opens village");
-    await page.locator("[data-qa='plot-greenvale']").click({ timeout: 5000, force: true });
-    await clickButton(page, /^Choose this land$/i, "claim opens village");
-    await page.locator("[data-qa='village-panel']").waitFor({ state: "visible", timeout: 5000 });
-    await expectText(page, "Village interior", "claim opens village");
-  });
+  await step("claim opens real village scene", async () => { await clickButton(page, /^Reset view$/i, "claim opens real village scene"); await page.locator("[data-qa='plot-greenvale']").click({ timeout: 5000, force: true }); await clickButton(page, /^Choose this land$/i, "claim opens real village scene"); await page.locator("[data-qa='village-scene']").waitFor({ state: "visible", timeout: 5000 }); const plotCount = await page.locator('[data-qa="village-plot"]').count(); if (plotCount < 6) throw new SmokeError("claim opens real village scene", `Expected village scene plots, got ${plotCount}`); await expectText(page, "Village scene", "claim opens real village scene"); });
 
-  await step("orders grow village", async () => {
-    for (const order of [/Raise Shelter/i, /Gather Food/i, /Cut Timber/i, /Scout Nearby Land/i, /Build Storehouse/i]) await runOneOrder(page, order);
-    await page.locator("[data-qa='district-storehouse']").waitFor({ state: "visible", timeout: 5000 });
-  });
+  await step("order visibly changes village scene", async () => { const before = await readPlotStates(page); await runOneOrder(page, /^Raise Shelter$/i); const after = await readPlotStates(page); if (before.join("|") === after.join("|")) throw new SmokeError("order visibly changes village scene", "No village-plot data-qa-state changed after order"); await page.locator('[data-qa="village-plot"][data-qa-id="shelter"][data-qa-state="built"]').waitFor({ state: "visible", timeout: 5000 }); });
 
-  await step("procedural world exists", async () => {
-    await clickButton(page, /^World$/i, "procedural world exists");
-    await page.locator("[data-qa='world-panel']").waitFor({ state: "visible", timeout: 5000 });
-    await expectText(page, "Procedural world engine", "procedural world exists");
-    await expectText(page, "Generated sectors", "procedural world exists");
-    await expectText(page, "Generated land samples", "procedural world exists");
-  });
+  await step("procedural world exists", async () => { await clickButton(page, /^World$/i, "procedural world exists"); await page.locator("[data-qa='world-panel']").waitFor({ state: "visible", timeout: 5000 }); await expectText(page, "Procedural world engine", "procedural world exists"); await expectText(page, "Generated sectors", "procedural world exists"); await expectText(page, "Generated land samples", "procedural world exists"); });
 
-  await step("council and market route exist", async () => {
-    await clickButton(page, /^Council$/i, "council exists");
-    await page.locator("[data-qa='council-panel']").waitFor({ state: "visible", timeout: 5000 });
-    await expectText(page, "From land to empire", "council exists");
-    await clickButton(page, /^Orders$/i, "market route exists");
-    await clickButton(page, /^Open Market Path$/i, "market route exists");
-    await page.locator("[data-qa='market-route']").waitFor({ state: "visible", timeout: 5000 });
-  });
+  await step("council and market route exist", async () => { await clickButton(page, /^Council$/i, "council exists"); await page.locator("[data-qa='council-panel']").waitFor({ state: "visible", timeout: 5000 }); await expectText(page, "From land to empire", "council exists"); await clickButton(page, /^Orders$/i, "market route exists"); await clickButton(page, /^Open Market Path$/i, "market route exists"); await page.locator("[data-qa='market-route']").waitFor({ state: "visible", timeout: 5000 }); });
 }
 
-async function main() {
-  const proc = await ensureApp();
-  let browser;
-  try {
-    browser = await chromium.launch();
-    const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
-    await runSmoke(page);
-    await writeResult("PASS");
-    console.log(`Mechanical smoke PASS. Result written to ${RESULT_PATH}`);
-  } catch (err) {
-    await writeResult("FAIL", err);
-    console.error(`Mechanical smoke FAIL at ${result.blockingStep}: ${result.error}`);
-    process.exitCode = 1;
-  } finally {
-    await browser?.close().catch(() => {});
-    proc?.kill();
-  }
-  process.exit(process.exitCode ?? 0);
-}
-
+async function main() { const proc = await ensureApp(); let browser; try { browser = await chromium.launch(); const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage(); await runSmoke(page); await writeResult("PASS"); console.log(`Mechanical smoke PASS. Result written to ${RESULT_PATH}`); } catch (err) { await writeResult("FAIL", err); console.error(`Mechanical smoke FAIL at ${result.blockingStep}: ${result.error}`); process.exitCode = 1; } finally { await browser?.close().catch(() => {}); proc?.kill(); } process.exit(process.exitCode ?? 0); }
 main();
