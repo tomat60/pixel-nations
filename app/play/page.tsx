@@ -6,13 +6,13 @@ import { LandSheet } from "./components/LandSheet";
 import { MapStage } from "./components/MapStage";
 import { OrdersPanel } from "./components/OrdersPanel";
 import { TopBar } from "./components/TopBar";
-import { getSelectedPlot, initialPlayState, playReducer } from "./lib/play-state";
+import { getSelectedPlot, initialPlayState, playReducer, type PlayState } from "./lib/play-state";
 
 export default function PlayPrototypePage() {
   const [state, dispatch] = useReducer(playReducer, initialPlayState);
   const selected = useMemo(() => getSelectedPlot(state), [state]);
   const showOrders = state.ownedPlotIds.length > 0 && state.view === "orders";
-  const showChronicle = state.view === "chronicle";
+  const showChronicle = state.view === "chronicle" || state.view === "banner";
   const showLandSheet = !showOrders && !showChronicle;
 
   return (
@@ -41,7 +41,7 @@ export default function PlayPrototypePage() {
   );
 }
 
-function ChroniclePanel({ state }: { state: typeof initialPlayState }) {
+function ChroniclePanel({ state }: { state: PlayState }) {
   return (
     <div data-qa="chronicle-panel" className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-11rem)] w-[min(390px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/60 p-4 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5">
       <p className="text-[10px] uppercase tracking-[0.24em] text-amber-200/65">Chronicle</p>
