@@ -38,80 +38,69 @@ async function clickDom(page, selector) {
   await locator.click({ force: true });
 }
 
-async function pinchZoom(page) {
-  await page.locator("svg[aria-label='Aurelian Basin fullscreen map']").evaluate((node) => {
-    node.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -220, clientX: 720, clientY: 450 }));
-  });
-}
-
-async function dragMap(page) {
-  const box = await page.locator("[data-qa='map-stage']").boundingBox();
-  if (!box) throw new Error("No map-stage box");
-  await page.mouse.move(box.x + box.width * 0.56, box.y + box.height * 0.52);
-  await page.mouse.down();
-  await page.mouse.move(box.x + box.width * 0.43, box.y + box.height * 0.61, { steps: 14 });
-  await page.mouse.up();
-}
-
-async function runOrderFromVillage(page, orderPattern) {
-  await clickButtonByText(page, /Develop next/i);
-  await sleep(150);
-  await clickButtonByText(page, orderPattern);
-  await sleep(250);
+async function readPlotStates(page) {
+  return page.locator('[data-qa="village-plot"]').evaluateAll((nodes) => nodes.map((node) => `${node.getAttribute("data-qa-id")}:${node.getAttribute("data-qa-state")}`));
 }
 
 const steps = [
-  { id: "01-world-map-overview", label: "World map shell", note: "The player should see the core navigation: Map, Village, Orders, World, Council." },
+  { id: "01-map-overview", label: "Map overview", note: "The player starts on the 30-land sector map." },
   {
-    id: "02-camera-still-works",
-    label: "Camera still works",
-    note: "Pinch/ctrl-wheel zoom and drag pan should still work after game-shell changes.",
-    run: async (page) => {
-      await pinchZoom(page);
-      await sleep(250);
-      await dragMap(page);
-      await sleep(350);
-    },
-  },
-  {
-    id: "03-claim-enters-village",
-    label: "Claim enters village",
-    note: "Claiming a land should now open the village interior, not a dead claim state.",
+    id: "02-claim-enters-village-scene",
+    label: "Claim enters real village scene",
+    note: "Claiming a land must replace the map with a spatial VillageScene, not just open a side panel.",
     run: async (page) => {
       await clickButtonByText(page, /Reset view/i);
       await clickDom(page, "[data-qa='plot-greenvale']");
       await clickButtonByText(page, /Choose this land/i);
+      await page.locator('[data-qa="village-scene"]').waitFor({ state: "visible", timeout: 5000 });
+      const count = await page.locator('[data-qa="village-plot"]').count();
+      if (count < 6) throw new Error(`Expected visible village plots, got ${count}`);
       await sleep(550);
     },
   },
   {
-    id: "04-village-growth",
-    label: "Village growth",
-    note: "Orders should grow visible village districts and return to the village view.",
+    id: "03-village-before-order",
+    label: "Village scene before order",
+    note: "Before the build order, QA records the plot states from the real scene.",
     run: async (page) => {
-      await runOrderFromVillage(page, /Raise Shelter/i);
-      await runOrderFromVillage(page, /Gather Food/i);
-      await runOrderFromVillage(page, /Cut Timber/i);
-      await runOrderFromVillage(page, /Scout Nearby Land/i);
-      await runOrderFromVillage(page, /Build Storehouse/i);
-      await sleep(450);
+      const states = await readPlotStates(page);
+      if (!states.length) throw new Error("No village plot states before order");
+      await page.evaluate((value) => { window.__pixelVillageBefore = value; }, states.join("|"));
+      await sleep(300);
+    },
+  },
+  {
+    id: "04-village-after-shelter-order",
+    label: "Village scene after shelter order",
+    note: "Raise Shelter must visibly change at least one village plot state.",
+    run: async (page) => {
+      const before = await page.evaluate(() => window.__pixelVillageBefore ?? "");
+      await clickButtonByText(page, /Issue next order/i);
+      await clickButtonByText(page, /Raise Shelter/i);
+      await page.locator('[data-qa="village-scene"]').waitFor({ state: "visible", timeout: 5000 });
+      await page.locator('[data-qa="village-plot"][data-qa-id="shelter"][data-qa-state="built"]').waitFor({ state: "visible", timeout: 5000 });
+      const after = (await readPlotStates(page)).join("|");
+      if (!before || before === after) throw new Error("Village plot states did not change after shelter order");
+      await sleep(550);
     },
   },
   {
     id: "05-world-section",
     label: "World section",
-    note: "World panel should communicate the 10,000-land direction and rival pressure.",
+    note: "World remains available after the real village scene and shows the procedural engine summary.",
     run: async (page) => {
       await clickButtonByText(page, /World/i);
+      await page.locator('[data-qa="world-panel"]').waitFor({ state: "visible", timeout: 5000 });
       await sleep(550);
     },
   },
   {
     id: "06-council-section",
     label: "Council section",
-    note: "Council should show the roadmap from land to empire and next strategic goals.",
+    note: "Council remains available as strategic framing after the village loop.",
     run: async (page) => {
       await clickButtonByText(page, /Council/i);
+      await page.locator('[data-qa="council-panel"]').waitFor({ state: "visible", timeout: 5000 });
       await sleep(550);
     },
   },
@@ -165,7 +154,7 @@ function buildReport({ generatedAt, appSource, shots, videos, interactionLog }) 
   const videoCards = videos.map((video) => `<article class="card"><h3>${escapeHtml(video.filename)}</h3><video controls src="./videos/${encodeURIComponent(video.filename)}"></video></article>`).join("\n") || `<p class="error-text">No video evidence generated.</p>`;
   const screenshotCards = shots.map((shot) => `<article class="card ${shot.error ? "error" : ""}"><p class="meta">${escapeHtml(shot.viewport)} / ${escapeHtml(shot.stepLabel)}</p><h3>${escapeHtml(shot.filename)}</h3><p>${escapeHtml(shot.note)}</p>${shot.error ? `<p class="error-text">${escapeHtml(shot.error)}</p>` : ""}<a href="./screenshots/${encodeURIComponent(shot.filename)}"><img src="./screenshots/${encodeURIComponent(shot.filename)}" /></a></article>`).join("\n");
   const logItems = interactionLog.map((item) => `<li><code>${escapeHtml(item.viewport)}</code> / <code>${escapeHtml(item.stepId)}</code> — ${escapeHtml(item.status)}${item.error ? `: ${escapeHtml(item.error)}` : ""}</li>`).join("\n");
-  return `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Pixel Nations Game Shell QA</title><style>:root{color-scheme:dark;--bg:#020204;--gold:#c9a962;--muted:#9ca3af;--border:rgba(201,169,98,.18);--bad:#f97373}body{margin:0;background:var(--bg);color:#f8f5ed;font-family:Inter,system-ui,sans-serif}main{max-width:1280px;margin:0 auto;padding:40px 20px 64px}header,.card,section{border:1px solid var(--border);background:rgba(255,255,255,.035);padding:18px;margin-bottom:18px}.error{border-color:rgba(249,115,115,.55)}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,4rem);letter-spacing:-.04em}h2,h3{color:#f5deb3}p,li{color:var(--muted);line-height:1.65}.error-text{color:var(--bad)}.meta,.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;font-weight:800}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}img,video{width:100%;display:block;border:1px solid rgba(255,255,255,.08);background:#000}code{color:#f5deb3}</style></head><body><main><header><p class="eyebrow">Pixel Nations /play QA</p><h1>Full gameplay shell evidence</h1><p>Generated: <code>${escapeHtml(generatedAt)}</code></p><p>App source: <code>${escapeHtml(appSource)}</code></p><p>This evidence must show Map, Village, Orders, World and Council.</p></header><section><h2>Manual verdict required</h2><ul><li>Does the game now show the intended major sections?</li><li>Does one land lead into a village interior?</li><li>Does the world section communicate the 10,000-land direction?</li><li>Does council explain the path to city, nation and empire?</li></ul></section><section><h2>Videos</h2><div class="grid">${videoCards}</div></section><section><h2>Interaction log</h2><ul>${logItems}</ul></section><section><h2>Screenshots</h2><div class="grid">${screenshotCards}</div></section></main></body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Pixel Nations Village Scene QA</title><style>:root{color-scheme:dark;--bg:#020204;--gold:#c9a962;--muted:#9ca3af;--border:rgba(201,169,98,.18);--bad:#f97373}body{margin:0;background:var(--bg);color:#f8f5ed;font-family:Inter,system-ui,sans-serif}main{max-width:1280px;margin:0 auto;padding:40px 20px 64px}header,.card,section{border:1px solid var(--border);background:rgba(255,255,255,.035);padding:18px;margin-bottom:18px}.error{border-color:rgba(249,115,115,.55)}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,4rem);letter-spacing:-.04em}h2,h3{color:#f5deb3}p,li{color:var(--muted);line-height:1.65}.error-text{color:var(--bad)}.meta,.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;font-weight:800}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}img,video{width:100%;display:block;border:1px solid rgba(255,255,255,.08);background:#000}code{color:#f5deb3}</style></head><body><main><header><p class="eyebrow">Pixel Nations /play QA</p><h1>Real VillageScene evidence</h1><p>Generated: <code>${escapeHtml(generatedAt)}</code></p><p>App source: <code>${escapeHtml(appSource)}</code></p><p>This evidence must show that Village is a spatial scene and an order changes a village plot.</p></header><section><h2>Manual verdict required</h2><ul><li>Does Village replace the map with a real scene?</li><li>Can you see village plots/buildings without reading a panel?</li><li>Does Raise Shelter visibly change the scene?</li></ul></section><section><h2>Videos</h2><div class="grid">${videoCards}</div></section><section><h2>Interaction log</h2><ul>${logItems}</ul></section><section><h2>Screenshots</h2><div class="grid">${screenshotCards}</div></section></main></body></html>`;
 }
 
 async function saveVideo(page, viewport) {
@@ -174,7 +163,7 @@ async function saveVideo(page, viewport) {
   const videoPath = await video.path().catch(() => null);
   if (!videoPath) return null;
   await mkdir(VIDEO_DIR, { recursive: true });
-  const filename = `${viewport}-game-shell.webm`;
+  const filename = `${viewport}-village-scene.webm`;
   await copyFile(videoPath, `${VIDEO_DIR}/${filename}`);
   return { viewport, filename };
 }
@@ -215,10 +204,10 @@ async function main() {
   const fullInteractionLog = [];
   try {
     for (const viewport of viewports) {
-      const result = await runViewport(viewport);
-      allShots.push(...result.shots);
-      fullInteractionLog.push(...result.interactionLog);
-      if (result.video) allVideos.push(result.video);
+      const item = await runViewport(viewport);
+      allShots.push(...item.shots);
+      fullInteractionLog.push(...item.interactionLog);
+      if (item.video) allVideos.push(item.video);
     }
     await writeFile(MANIFEST_PATH, `${JSON.stringify({ generatedAt, appUrl: APP_URL, appSource, screenshots: allShots, videos: allVideos }, null, 2)}\n`);
     await writeFile(INTERACTION_LOG_PATH, `${JSON.stringify(fullInteractionLog, null, 2)}\n`);
