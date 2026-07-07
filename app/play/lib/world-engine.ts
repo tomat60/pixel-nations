@@ -2,6 +2,8 @@ export const WORLD_SEED = "AURELIAN-001";
 export const WORLD_LANDS = 10000;
 export const SECTOR_COUNT = 100;
 export const LANDS_PER_SECTOR = 100;
+export const SECTOR_GRID_WIDTH = 10;
+export const LOCAL_GRID_WIDTH = 10;
 
 export type WorldBiome = "basin" | "forest" | "coast" | "highland" | "marsh" | "steppe" | "ruins" | "riverlands";
 export type WorldFaction = "free" | "player" | "crownstone" | "iron-coast" | "crowmere" | "stormcap" | "veil-harbor";
@@ -21,6 +23,7 @@ export type WorldLand = {
   influence: number;
   x: number;
   y: number;
+  neighbors: number[];
 };
 
 export type WorldSector = {
@@ -32,6 +35,9 @@ export type WorldSector = {
   danger: number;
   trade: number;
   lands: number;
+  x: number;
+  y: number;
+  neighbors: string[];
 };
 
 const biomes: WorldBiome[] = ["basin", "forest", "coast", "highland", "marsh", "steppe", "ruins", "riverlands"];
@@ -58,9 +64,9 @@ function score(seed: string, min = 0, max = 100) {
   return min + (hashNumber(seed) % (span + 1));
 }
 
-function sectorId(index: number) {
-  const row = String.fromCharCode(65 + Math.floor(index / 10));
-  const col = String((index % 10) + 1).padStart(2, "0");
+function toSectorId(index: number) {
+  const row = String.fromCharCode(65 + Math.floor(index / SECTOR_GRID_WIDTH));
+  const col = String((index % SECTOR_GRID_WIDTH) + 1).padStart(2, "0");
   return `${row}-${col}`;
 }
 
@@ -74,9 +80,34 @@ function landName(id: number) {
   return `${a} ${b}`;
 }
 
+export function getSectorCoordinates(index: number) {
+  const safeIndex = Math.max(0, Math.min(SECTOR_COUNT - 1, index));
+  return { x: safeIndex % SECTOR_GRID_WIDTH, y: Math.floor(safeIndex / SECTOR_GRID_WIDTH) };
+}
+
+export function getSectorIndexFromId(id: string) {
+  const row = id.charCodeAt(0) - 65;
+  const col = Number(id.slice(2)) - 1;
+  return Math.max(0, Math.min(SECTOR_COUNT - 1, row * SECTOR_GRID_WIDTH + col));
+}
+
+export function getSectorNeighborIds(index: number) {
+  const { x, y } = getSectorCoordinates(index);
+  const candidates = [
+    { x: x - 1, y },
+    { x: x + 1, y },
+    { x, y: y - 1 },
+    { x, y: y + 1 },
+  ];
+  return candidates
+    .filter((item) => item.x >= 0 && item.x < SECTOR_GRID_WIDTH && item.y >= 0 && item.y < SECTOR_GRID_WIDTH)
+    .map((item) => toSectorId(item.y * SECTOR_GRID_WIDTH + item.x));
+}
+
 export function getWorldSector(index: number): WorldSector {
   const safeIndex = Math.max(0, Math.min(SECTOR_COUNT - 1, index));
-  const id = sectorId(safeIndex);
+  const id = toSectorId(safeIndex);
+  const coords = getSectorCoordinates(safeIndex);
   const biome = safeIndex === 0 ? "basin" : pick(biomes, `${WORLD_SEED}:sector-biome:${safeIndex}`);
   const faction = safeIndex === 0 ? "player" : pick(factions, `${WORLD_SEED}:sector-faction:${safeIndex}`);
   return {
@@ -88,13 +119,37 @@ export function getWorldSector(index: number): WorldSector {
     danger: safeIndex === 0 ? 12 : score(`${id}:danger`, 8, 82),
     trade: safeIndex === 0 ? 42 : score(`${id}:trade`, 5, 88),
     lands: LANDS_PER_SECTOR,
+    x: coords.x,
+    y: coords.y,
+    neighbors: getSectorNeighborIds(safeIndex),
   };
+}
+
+export function getLandCoordinates(id: number) {
+  const safeId = Math.max(1, Math.min(WORLD_LANDS, id));
+  const sectorIndex = Math.floor((safeId - 1) / LANDS_PER_SECTOR);
+  const localIndex = (safeId - 1) % LANDS_PER_SECTOR;
+  return { sectorIndex, localIndex, x: localIndex % LOCAL_GRID_WIDTH, y: Math.floor(localIndex / LOCAL_GRID_WIDTH) };
+}
+
+export function getLandNeighborIds(id: number) {
+  const safeId = Math.max(1, Math.min(WORLD_LANDS, id));
+  const { sectorIndex, x, y } = getLandCoordinates(safeId);
+  const sectorStart = sectorIndex * LANDS_PER_SECTOR + 1;
+  const candidates = [
+    { x: x - 1, y },
+    { x: x + 1, y },
+    { x, y: y - 1 },
+    { x, y: y + 1 },
+  ];
+  return candidates
+    .filter((item) => item.x >= 0 && item.x < LOCAL_GRID_WIDTH && item.y >= 0 && item.y < LOCAL_GRID_WIDTH)
+    .map((item) => sectorStart + item.y * LOCAL_GRID_WIDTH + item.x);
 }
 
 export function getWorldLand(id: number): WorldLand {
   const safeId = Math.max(1, Math.min(WORLD_LANDS, id));
-  const sectorIndex = Math.floor((safeId - 1) / LANDS_PER_SECTOR);
-  const localIndex = (safeId - 1) % LANDS_PER_SECTOR;
+  const { sectorIndex, localIndex, x, y } = getLandCoordinates(safeId);
   const sector = getWorldSector(sectorIndex);
   const playerCore = sectorIndex === 0 && localIndex < 3;
   const tradeLane = localIndex % 17 === 0 || localIndex === 12;
@@ -113,8 +168,9 @@ export function getWorldLand(id: number): WorldLand {
     fertility: score(`${safeId}:fertility`, 0, 100),
     trade: role === "trade" ? score(`${safeId}:trade`, 55, 100) : score(`${safeId}:trade`, 0, 70),
     influence: role === "rival-border" ? score(`${safeId}:influence`, 45, 100) : score(`${safeId}:influence`, 0, 85),
-    x: localIndex % 10,
-    y: Math.floor(localIndex / 10),
+    x,
+    y,
+    neighbors: getLandNeighborIds(safeId),
   };
 }
 
