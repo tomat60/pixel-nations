@@ -1,4 +1,6 @@
+import { canClaimSector, expansionBlockedMessage, expansionInfluenceCost, getOwnedSectorIds, homelandSectorId, nationSectorThreshold } from "./expansion-state";
 import { plots, starterPlotId, type Plot } from "./map-data";
+import { getSectorIndexFromId, getWorldSector } from "./world-engine";
 
 export type ViewId = "map" | "village" | "orders" | "world" | "council";
 export type OrderId = "raise-shelter" | "gather-food" | "cut-timber" | "scout-nearby" | "build-storehouse" | "open-market" | "form-council" | "fortify-watch";
@@ -11,6 +13,7 @@ export type DevelopmentOrder = { id: OrderId; label: string; short: string; requ
 export type PlayState = {
   selectedPlotId: string;
   ownedPlotIds: string[];
+  ownedSectorIds: string[];
   season: number;
   view: ViewId;
   lastEvent: string;
@@ -24,10 +27,12 @@ export type PlayState = {
 export type PlayAction =
   | { type: "select"; plotId: string }
   | { type: "claim"; plotId: string }
+  | { type: "claimSector"; sectorId: string }
   | { type: "runOrder"; orderId: OrderId }
   | { type: "setView"; view: ViewId }
   | { type: "reset" };
 
+export { canClaimSector, expansionInfluenceCost, getClaimableSectorIds, getNationReady, getOwnedSectorIds, nationSectorThreshold } from "./expansion-state";
 export const playV1StorageKey = "pixelNations.play.v1";
 
 export const developmentOrders: DevelopmentOrder[] = [
@@ -44,6 +49,7 @@ export const developmentOrders: DevelopmentOrder[] = [
 export const initialPlayState: PlayState = {
   selectedPlotId: starterPlotId,
   ownedPlotIds: [],
+  ownedSectorIds: [],
   season: 1,
   view: "map",
   lastEvent: "Choose one land. A nation begins when the map changes.",
@@ -72,11 +78,11 @@ export function getPhase(state: PlayState): "unclaimed" | "camp" | "hamlet" | "v
 
 export function getPopulation(state: PlayState) {
   if (state.ownedPlotIds.length === 0) return 0;
-  return 18 + state.completedOrders.length * 9 + state.settlementMarkers.length * 7;
+  return 18 + state.completedOrders.length * 9 + state.settlementMarkers.length * 7 + Math.max(0, getOwnedSectorIds(state).length - 1) * 11;
 }
 
 export function getDevelopmentScore(state: PlayState) {
-  return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3;
+  return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5;
 }
 
 export function getRivalPressure(state: PlayState) {
@@ -87,8 +93,7 @@ export function getRivalPressure(state: PlayState) {
 }
 
 export function getWorldClaimedCount(state: PlayState) {
-  if (state.ownedPlotIds.length === 0) return 0;
-  return Math.max(state.ownedPlotIds.length, state.completedOrders.includes("open-market") ? 2 : 1);
+  return getOwnedSectorIds(state).length;
 }
 
 function hasOrder(state: PlayState, orderId: OrderId) {
@@ -125,7 +130,15 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
     case "claim": {
       if (state.ownedPlotIds.includes(action.plotId)) return state;
       const plot = plots.find((item) => item.id === action.plotId);
-      return { ...state, selectedPlotId: action.plotId, ownedPlotIds: [action.plotId], season: 2, view: "village", settlementMarkers: ["camp"], resources: { food: 3, timber: 2, stone: 0, influence: 1 }, chronicle: pushChronicle(state, "First banner raised", `${plot?.name ?? "A land"} became the first claimed homeland.`), lastEvent: `${plot?.name ?? "A land"} is claimed. Enter Village, then choose Orders.` };
+      return { ...state, selectedPlotId: action.plotId, ownedPlotIds: [action.plotId], ownedSectorIds: [homelandSectorId], season: 2, view: "village", settlementMarkers: ["camp"], resources: { food: 3, timber: 2, stone: 0, influence: 1 }, chronicle: pushChronicle(state, "First banner raised", `${plot?.name ?? "A land"} became the first claimed homeland.`), lastEvent: `${plot?.name ?? "A land"} is claimed. Enter Village, then choose Orders.` };
+    }
+    case "claimSector": {
+      const sector = getWorldSector(getSectorIndexFromId(action.sectorId));
+      const status = canClaimSector(state, sector.id);
+      if (!status.ok) return { ...state, lastEvent: expansionBlockedMessage(status.reason), view: "world" };
+      const ownedSectorIds = [...status.ownedSectorIds, sector.id];
+      const nationLine = ownedSectorIds.length >= nationSectorThreshold ? " The council can now found a nation." : " Expand to 3 sectors to unlock nation scale.";
+      return { ...state, ownedSectorIds, resources: { ...state.resources, influence: Math.max(0, state.resources.influence - expansionInfluenceCost) }, season: Math.min(12, state.season + 1), view: "world", chronicle: pushChronicle(state, "Sector claimed", `${sector.id} ${sector.name} joined the border ring.${nationLine}`), lastEvent: `${sector.id} claimed. Borders now hold ${ownedSectorIds.length} sectors.${nationLine}` };
     }
     case "runOrder": {
       const result = orderResult(state, action.orderId);
