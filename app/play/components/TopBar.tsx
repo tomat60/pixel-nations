@@ -11,9 +11,11 @@ export function TopBar({ state }: { state: PlayState }) {
       <div className="hidden text-center md:block">
         <p className="text-[10px] uppercase tracking-[0.34em] text-amber-200/65">Sector A-01 · {chartedLands} charted of {worldLands.toLocaleString()} lands</p>
         <p className="mt-1 text-sm text-amber-50/70">Local village ring, wider rivals, future routes</p>
+        {state.ownedPlotIds.length > 0 ? <p className="mt-1 text-xs font-black text-amber-100/75">{state.completedOrders.length} orders complete</p> : null}
       </div>
       <div className="flex items-center gap-1.5 text-right md:gap-2">
         <HudChip label="Season" value={`${state.season}/12`} />
+        <HudChip label="Orders" value={`${state.completedOrders.length}/8`} />
         <HudChip label="Claimed" value={`${state.ownedPlotIds.length}/${chartedLands}`} />
       </div>
     </header>
