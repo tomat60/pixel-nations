@@ -112,7 +112,7 @@ async function waitForApp() {
 
 function startAppIfNeeded() {
   const command = existsSync(".next") ? ["run", "start", "--", "-p", "3000", "-H", "127.0.0.1"] : ["run", "dev", "--", "-p", "3000", "-H", "127.0.0.1"];
-  return spawn("npm", command, { stdio: "pipe", shell: process.platform === "win32", detached: process.platform !== "win32" });
+  return spawn("npm", command, { stdio: "pipe", shell: process.platform === "win32" });
 }
 
 async function ensureApp() {
