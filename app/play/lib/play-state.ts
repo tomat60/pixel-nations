@@ -4,25 +4,9 @@ export type ViewId = "map" | "village" | "orders" | "world" | "council";
 export type OrderId = "raise-shelter" | "gather-food" | "cut-timber" | "scout-nearby" | "build-storehouse" | "open-market" | "form-council" | "fortify-watch";
 export type SettlementMarker = "camp" | "shelter" | "storehouse" | "market" | "council" | "watch";
 
-export type Resources = {
-  food: number;
-  timber: number;
-  stone: number;
-  influence: number;
-};
-
-export type ChronicleEntry = {
-  season: number;
-  title: string;
-  body: string;
-};
-
-export type DevelopmentOrder = {
-  id: OrderId;
-  label: string;
-  short: string;
-  requiresClaim?: boolean;
-};
+export type Resources = { food: number; timber: number; stone: number; influence: number };
+export type ChronicleEntry = { season: number; title: string; body: string };
+export type DevelopmentOrder = { id: OrderId; label: string; short: string; requiresClaim?: boolean };
 
 export type PlayState = {
   selectedPlotId: string;
@@ -103,6 +87,7 @@ export function getRivalPressure(state: PlayState) {
 }
 
 export function getWorldClaimedCount(state: PlayState) {
+  if (state.ownedPlotIds.length === 0) return 0;
   return Math.max(state.ownedPlotIds.length, state.completedOrders.includes("open-market") ? 2 : 1);
 }
 
@@ -120,35 +105,23 @@ function addMarker(markers: SettlementMarker[], marker: SettlementMarker): Settl
 
 function orderResult(state: PlayState, orderId: OrderId): Partial<PlayState> | null {
   if (state.ownedPlotIds.length === 0 || hasOrder(state, orderId)) return null;
-
   switch (orderId) {
-    case "raise-shelter":
-      return { resources: { ...state.resources, timber: Math.max(0, state.resources.timber - 1), influence: state.resources.influence + 1 }, settlementMarkers: addMarker(state.settlementMarkers, "shelter"), chronicle: pushChronicle(state, "Shelter raised", "The first camp became a visible home base inside the village view."), lastEvent: "Shelter raised. Enter Village to see the first district." };
-    case "gather-food":
-      return { resources: { ...state.resources, food: state.resources.food + 3 }, chronicle: pushChronicle(state, "Food stores secured", "Food stores can now support more people and longer seasonal planning."), lastEvent: "Food secured. Population can grow." };
-    case "cut-timber":
-      return { resources: { ...state.resources, timber: state.resources.timber + 3 }, chronicle: pushChronicle(state, "Timber cut", "Timber unlocks early buildings and palisades inside the village."), lastEvent: "Timber cut. Building choices are stronger." };
-    case "scout-nearby":
-      return { scoutedPlotIds: ["meadowrun", "old-road", "glasswater", "wolfpine"].filter((id) => !state.scoutedPlotIds.includes(id)).concat(state.scoutedPlotIds), resources: { ...state.resources, influence: state.resources.influence + 1 }, chronicle: pushChronicle(state, "Nearby lands scouted", "Scouts marked the expansion ring and revealed where rivals may pressure the basin."), lastEvent: "Scouting opened the expansion ring." };
-    case "build-storehouse":
-      return { resources: { food: state.resources.food + 1, timber: Math.max(0, state.resources.timber - 2), stone: state.resources.stone, influence: state.resources.influence + 1 }, settlementMarkers: addMarker(state.settlementMarkers, "storehouse"), chronicle: pushChronicle(state, "Storehouse built", "The settlement can hold surplus and starts to look permanent."), lastEvent: "Storehouse built. Village permanence rises." };
-    case "open-market":
-      return { resources: { ...state.resources, influence: state.resources.influence + 2 }, settlementMarkers: addMarker(state.settlementMarkers, "market"), scoutedPlotIds: Array.from(new Set([...state.scoutedPlotIds, "old-road", "glasswater", "eastfold"])), chronicle: pushChronicle(state, "Market path opened", "The first trade route connects the settlement to the wider world economy."), lastEvent: "Market path opened. World view now has a trade lane." };
-    case "form-council":
-      return { resources: { ...state.resources, influence: state.resources.influence + 3 }, settlementMarkers: addMarker(state.settlementMarkers, "council"), chronicle: pushChronicle(state, "Council formed", "The civic core can now set goals toward village, city, nation and empire."), lastEvent: "Council formed. Strategy view unlocked." };
-    case "fortify-watch":
-      return { resources: { ...state.resources, timber: Math.max(0, state.resources.timber - 1), stone: state.resources.stone + 1, influence: state.resources.influence + 1 }, settlementMarkers: addMarker(state.settlementMarkers, "watch"), chronicle: pushChronicle(state, "Watch fortified", "A watch marker warns rivals that the homeland is defended."), lastEvent: "Watch fortified. Rival pressure falls." };
-    default:
-      return null;
+    case "raise-shelter": return { resources: { ...state.resources, timber: Math.max(0, state.resources.timber - 1), influence: state.resources.influence + 1 }, settlementMarkers: addMarker(state.settlementMarkers, "shelter"), chronicle: pushChronicle(state, "Shelter raised", "The first camp became a visible home base inside the village view."), lastEvent: "Shelter raised. Enter Village to see the first district." };
+    case "gather-food": return { resources: { ...state.resources, food: state.resources.food + 3 }, chronicle: pushChronicle(state, "Food stores secured", "Food stores can now support more people and longer seasonal planning."), lastEvent: "Food secured. Population can grow." };
+    case "cut-timber": return { resources: { ...state.resources, timber: state.resources.timber + 3 }, chronicle: pushChronicle(state, "Timber cut", "Timber unlocks early buildings and palisades inside the village."), lastEvent: "Timber cut. Building choices are stronger." };
+    case "scout-nearby": return { scoutedPlotIds: ["meadowrun", "old-road", "glasswater", "wolfpine"].filter((id) => !state.scoutedPlotIds.includes(id)).concat(state.scoutedPlotIds), resources: { ...state.resources, influence: state.resources.influence + 1 }, chronicle: pushChronicle(state, "Nearby lands scouted", "Scouts marked the expansion ring and revealed where rivals may pressure the basin."), lastEvent: "Scouting opened the expansion ring." };
+    case "build-storehouse": return { resources: { food: state.resources.food + 1, timber: Math.max(0, state.resources.timber - 2), stone: state.resources.stone, influence: state.resources.influence + 1 }, settlementMarkers: addMarker(state.settlementMarkers, "storehouse"), chronicle: pushChronicle(state, "Storehouse built", "The settlement can hold surplus and starts to look permanent."), lastEvent: "Storehouse built. Village permanence rises." };
+    case "open-market": return { resources: { ...state.resources, influence: state.resources.influence + 2 }, settlementMarkers: addMarker(state.settlementMarkers, "market"), scoutedPlotIds: Array.from(new Set([...state.scoutedPlotIds, "old-road", "glasswater", "eastfold"])), chronicle: pushChronicle(state, "Market path opened", "The first trade route connects the settlement to the wider world economy."), lastEvent: "Market path opened. World view now has a trade lane." };
+    case "form-council": return { resources: { ...state.resources, influence: state.resources.influence + 3 }, settlementMarkers: addMarker(state.settlementMarkers, "council"), chronicle: pushChronicle(state, "Council formed", "The civic core can now set goals toward village, city, nation and empire."), lastEvent: "Council formed. Strategy view unlocked." };
+    case "fortify-watch": return { resources: { ...state.resources, timber: Math.max(0, state.resources.timber - 1), stone: state.resources.stone + 1, influence: state.resources.influence + 1 }, settlementMarkers: addMarker(state.settlementMarkers, "watch"), chronicle: pushChronicle(state, "Watch fortified", "A watch marker warns rivals that the homeland is defended."), lastEvent: "Watch fortified. Rival pressure falls." };
+    default: return null;
   }
 }
 
 export function playReducer(state: PlayState, action: PlayAction): PlayState {
   switch (action.type) {
-    case "select":
-      return { ...state, selectedPlotId: action.plotId, view: state.view === "village" ? "map" : state.view };
-    case "setView":
-      return { ...state, view: action.view };
+    case "select": return { ...state, selectedPlotId: action.plotId, view: state.view === "village" ? "map" : state.view };
+    case "setView": return { ...state, view: action.view };
     case "claim": {
       if (state.ownedPlotIds.includes(action.plotId)) return state;
       const plot = plots.find((item) => item.id === action.plotId);
@@ -159,9 +132,7 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       if (!result) return { ...state, lastEvent: "That order is already resolved or needs a claimed land." };
       return { ...state, ...result, season: Math.min(12, state.season + 1), completedOrders: [...state.completedOrders, action.orderId], view: "village" };
     }
-    case "reset":
-      return initialPlayState;
-    default:
-      return state;
+    case "reset": return initialPlayState;
+    default: return state;
   }
 }
