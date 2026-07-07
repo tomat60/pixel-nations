@@ -12,7 +12,7 @@ export default function PlayPrototypePage() {
   const [state, dispatch] = useReducer(playReducer, initialPlayState);
   const selected = useMemo(() => getSelectedPlot(state), [state]);
   const showOrders = state.ownedPlotIds.length > 0 && state.view === "orders";
-  const showChronicle = state.view === "chronicle" || state.view === "banner";
+  const showChronicle = state.view === "chronicle";
   const showLandSheet = !showOrders && !showChronicle;
 
   return (
