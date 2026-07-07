@@ -20,7 +20,7 @@ const kindClasses: Record<SectorKind, string> = {
   frontier: "border-emerald-100/20 bg-emerald-400/10 text-emerald-50",
 };
 
-export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch: (action: PlayAction) => void }) {
+export function WorldMapScene({ dispatch }: { state: PlayState; dispatch: (action: PlayAction) => void }) {
   const model = useMemo(() => buildWorldMapModel(), []);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const selected = model.sectors[selectedIndex] ?? model.sectors[0];
@@ -28,7 +28,7 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
 
   return (
     <section data-qa="world-map-scene" className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(251,191,36,.14),transparent_26%),linear-gradient(180deg,#07111b_0%,#030708_100%)]">
-      <div data-qa="world-panel" className="absolute inset-0" />
+      <div data-qa="world-panel" className="pointer-events-none absolute inset-0" />
       <div className="absolute left-4 right-4 top-[5.7rem] z-10 flex flex-col gap-3 md:left-6 md:right-6 md:top-[6.6rem] lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-[720px] rounded-3xl border border-sky-100/18 bg-black/42 p-3 shadow-2xl backdrop-blur-md md:p-4">
           <p className="text-[9px] font-black uppercase tracking-[0.24em] text-sky-200/65">Procedural world engine</p>
@@ -44,8 +44,8 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
         </div>
       </div>
 
-      <div className="absolute bottom-[5.2rem] left-3 right-3 top-[14.8rem] grid gap-3 md:bottom-[6.2rem] md:left-6 md:right-6 md:top-[13.8rem] lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="min-h-0 rounded-[2rem] border border-sky-100/16 bg-black/28 p-3 shadow-[0_30px_90px_rgba(0,0,0,.48)] backdrop-blur-sm md:p-4">
+      <div className="absolute bottom-[5.2rem] left-3 right-3 top-[14.8rem] flex flex-col gap-3 overflow-y-auto pb-6 md:bottom-[6.2rem] md:left-6 md:right-6 md:top-[13.8rem] lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:overflow-hidden lg:pb-0">
+        <div className="shrink-0 rounded-[2rem] border border-sky-100/16 bg-black/28 p-3 shadow-[0_30px_90px_rgba(0,0,0,.48)] backdrop-blur-sm md:p-4 lg:min-h-0">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-sky-100/60">Generated sectors</p>
             <Legend kind="origin" />
@@ -54,14 +54,14 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
             <Legend kind="trade" />
             <Legend kind="frontier" />
           </div>
-          <div className="grid h-[calc(100%-2.8rem)] min-h-[340px] grid-cols-10 grid-rows-10 gap-1.5 md:gap-2">
+          <div className="grid h-[420px] grid-cols-10 grid-rows-10 gap-1.5 md:h-[520px] md:gap-2 lg:h-[calc(100%-2.8rem)] lg:min-h-[340px]">
             {model.sectors.map((sector) => (
               <SectorTile key={sector.id} sector={sector} selected={sector.index === selected.index} onSelect={() => setSelectedIndex(sector.index)} />
             ))}
           </div>
         </div>
 
-        <aside data-qa="world-sector-inspect" className="min-h-0 overflow-auto rounded-[2rem] border border-amber-100/16 bg-black/48 p-3 shadow-2xl backdrop-blur-md md:p-4">
+        <aside data-qa="world-sector-inspect" className="shrink-0 rounded-[2rem] border border-amber-100/16 bg-black/48 p-3 shadow-2xl backdrop-blur-md md:p-4 lg:min-h-0 lg:overflow-auto">
           <p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-200/60">Sector inspect</p>
           <div className="mt-2 flex items-start justify-between gap-3">
             <div>
@@ -125,7 +125,7 @@ function Legend({ kind }: { kind: SectorKind }) {
   return <span className={`rounded-full border px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] ${kindClasses[kind]}`}>{kindLabels[kind]}</span>;
 }
 
-function Metric({ label, value }: { label: string; value: string | number }) {
+function Metric({ label, value }: { label: string | number; value: string | number }) {
   return (
     <div className="rounded-2xl border border-sky-100/12 bg-black/30 px-2 py-2">
       <p className="text-[8px] font-black uppercase tracking-[0.14em] text-sky-200/50">{label}</p>
