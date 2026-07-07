@@ -99,36 +99,59 @@ async function closeBrowserSafely(browser) {
   await Promise.race([browser.close(), new Promise((resolve) => setTimeout(resolve, 3000))]).catch(() => {});
 }
 
+async function getMapViewBox(page) {
+  return page.locator("svg[aria-label='Aurelian Basin fullscreen map']").first().getAttribute("viewBox");
+}
+
+async function pinchZoom(page, selector) {
+  await page.locator(selector).evaluate((node) => {
+    node.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -180, clientX: 720, clientY: 450 }));
+  });
+}
+
+async function dragMap(page) {
+  const box = await page.locator("[data-qa='map-stage']").boundingBox();
+  if (!box) throw new SmokeError("drag map after zoom", "Missing map-stage bounds");
+  await page.mouse.move(box.x + box.width * 0.55, box.y + box.height * 0.52);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.43, box.y + box.height * 0.60, { steps: 10 });
+  await page.mouse.up();
+}
+
 async function runSmoke(page) {
   await step("open full sector overview", async () => {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
     await expectText(page, "30 charted of 10,000 lands", "open full sector overview");
-    await expectText(page, "Overview", "open full sector overview");
-    await expectText(page, "wheel zoom", "open full sector overview");
+    await expectText(page, "Reset view", "open full sector overview");
+    await expectText(page, "pinch zoom", "open full sector overview");
   });
 
-  await step("wheel zoom changes map transform", async () => {
-    const layer = page.locator("[data-qa='map-layer']").first();
-    const before = await layer.getAttribute("transform");
-    await page.locator("[data-qa='map-stage']").hover();
-    await page.mouse.wheel(0, -450);
+  await step("pinch zoom changes bounded viewbox", async () => {
+    const before = await getMapViewBox(page);
+    await pinchZoom(page, "svg[aria-label='Aurelian Basin fullscreen map']");
     await page.waitForTimeout(350);
-    const after = await layer.getAttribute("transform");
-    if (!after || after === before || !after.includes("scale(1.")) {
-      throw new SmokeError("wheel zoom changes map transform", `Expected wheel zoom to change map transform, before=${before}, after=${after}`);
-    }
+    const after = await getMapViewBox(page);
+    if (!before || !after || before === after || !after.includes(".")) throw new SmokeError("pinch zoom changes bounded viewbox", `Expected viewBox change, before=${before}, after=${after}`);
+  });
+
+  await step("drag map after zoom changes viewbox", async () => {
+    const before = await getMapViewBox(page);
+    await dragMap(page);
+    await page.waitForTimeout(250);
+    const after = await getMapViewBox(page);
+    if (!before || !after || before === after) throw new SmokeError("drag map after zoom changes viewbox", `Expected drag to change viewBox, before=${before}, after=${after}`);
   });
 
   await step("overview inspect rival land", async () => {
-    await clickButton(page, /^Overview$/i, "overview inspect rival land");
+    await clickButton(page, /^Reset view$/i, "overview inspect rival land");
     await page.locator("[data-qa='plot-crownstone']").click({ timeout: 5000, force: true });
     await expectText(page, "Crownstone", "overview inspect rival land");
     await expectText(page, "PN-A01-022", "overview inspect rival land");
   });
 
   await step("claim homeland", async () => {
-    await clickButton(page, /^Overview$/i, "claim homeland");
+    await clickButton(page, /^Reset view$/i, "claim homeland");
     await page.locator("[data-qa='plot-greenvale']").click({ timeout: 5000, force: true });
     await clickButton(page, /^Choose this land$/i, "claim homeland");
     await expectText(page, "Grow the first settlement", "claim homeland");
@@ -145,8 +168,7 @@ async function runSmoke(page) {
   });
 
   await step("map shows visible consequences", async () => {
-    const marker = page.locator("[data-qa='settlement-marker']").first();
-    await marker.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+    await page.locator("[data-qa='settlement-marker']").first().waitFor({ state: "visible", timeout: 5000 }).catch(() => {
       throw new SmokeError("map shows visible consequences", "Missing settlement marker after orders");
     });
     await clickButton(page, /^Open Market Path$/i, "map shows visible consequences");
@@ -155,11 +177,16 @@ async function runSmoke(page) {
     });
   });
 
+  await step("panel switching avoids overlap", async () => {
+    await clickButton(page, /^Banner$/i, "panel switching avoids overlap");
+    await page.locator("[data-qa='chronicle-panel']").waitFor({ state: "visible", timeout: 5000 });
+    const ordersVisible = await page.locator("[data-qa='orders-panel']").isVisible().catch(() => false);
+    if (ordersVisible) throw new SmokeError("panel switching avoids overlap", "Orders panel remained visible while Chronicle was open");
+  });
+
   await step("play shell remains fullscreen framed", async () => {
     const shell = page.locator("[data-qa='play-shell']").first();
-    await shell.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-      throw new SmokeError("play shell remains fullscreen framed", "Missing play shell QA marker");
-    });
+    await shell.waitFor({ state: "visible", timeout: 5000 });
     const position = await shell.evaluate((element) => getComputedStyle(element).position);
     const overflow = await shell.evaluate((element) => getComputedStyle(element).overflow);
     if (position !== "fixed") throw new SmokeError("play shell remains fullscreen framed", `Expected fixed shell, got ${position}`);
@@ -170,9 +197,6 @@ async function runSmoke(page) {
 async function main() {
   const { startedProcess, appSource } = await ensureApp();
   result.appSource = appSource;
-  process.on("SIGINT", () => { if (startedProcess) startedProcess.kill(); process.exit(130); });
-  process.on("SIGTERM", () => { if (startedProcess) startedProcess.kill(); process.exit(143); });
-  process.on("uncaughtException", (err) => { console.error("uncaughtException", err); if (startedProcess) startedProcess.kill(); process.exit(1); });
   let browser;
   try {
     browser = await chromium.launch();
