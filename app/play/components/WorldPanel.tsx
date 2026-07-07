@@ -14,7 +14,7 @@ export function WorldPanel({ state, dispatch }: { state: PlayState; dispatch: (a
       <div className="mt-1 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-2xl font-black text-amber-50 md:text-4xl">{summary.lands.toLocaleString("en-US")} lands</h2>
-          <p className="mt-1 text-xs leading-relaxed text-amber-50/65 md:text-sm">Seed {summary.seed}: deterministic sectors, land ids, biomes, factions, danger, trade and influence.</p>
+          <p className="mt-1 text-xs leading-relaxed text-amber-50/65 md:text-sm">Seed {summary.seed}: sectors, land ids, topology, biomes, factions, danger, trade and influence.</p>
         </div>
         <span className="rounded-full border border-sky-200/25 bg-sky-200/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-sky-100">{claimed}/{summary.lands}</span>
       </div>
@@ -35,8 +35,8 @@ export function WorldPanel({ state, dispatch }: { state: PlayState; dispatch: (a
                 <p className="text-xs font-black text-amber-50">{sector.id}</p>
                 <p className="text-[9px] font-black uppercase tracking-[0.14em] text-sky-100/70">{sector.faction}</p>
               </div>
-              <p className="mt-1 text-[11px] text-amber-50/55">{sector.name} · {sector.biome}</p>
-              <p className="mt-1 text-[10px] text-amber-50/45">D{sector.danger} / T{sector.trade} / {sector.lands} lands</p>
+              <p className="mt-1 text-[11px] text-amber-50/55">{sector.name} · {sector.biome} · [{sector.x},{sector.y}]</p>
+              <p className="mt-1 text-[10px] text-amber-50/45">D{sector.danger} / T{sector.trade} / neighbors {sector.neighbors.join(", ") || "edge"}</p>
             </div>
           ))}
         </div>
@@ -64,8 +64,8 @@ function LandRow({ land }: { land: WorldLand }) {
         <p className="text-sm font-black text-amber-50">{land.name}</p>
         <p className="text-[9px] font-black uppercase tracking-[0.14em] text-amber-100/55">{land.pnid}</p>
       </div>
-      <p className="mt-1 text-xs text-amber-50/55">{land.sectorId} · {land.biome} · {land.role} · {land.faction}</p>
-      <p className="mt-1 text-[10px] text-amber-50/42">Danger {land.danger} / Fertility {land.fertility} / Trade {land.trade} / Influence {land.influence}</p>
+      <p className="mt-1 text-xs text-amber-50/55">{land.sectorId} · [{land.x},{land.y}] · {land.biome} · {land.role} · {land.faction}</p>
+      <p className="mt-1 text-[10px] text-amber-50/42">D{land.danger} / F{land.fertility} / T{land.trade} / I{land.influence} / neighbors {land.neighbors.join(", ") || "edge"}</p>
     </div>
   );
 }
