@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
 import { plots, terrainFill } from "../lib/map-data";
 import type { PlayAction, PlayState } from "../lib/play-state";
 
@@ -15,12 +16,7 @@ const clamp = (value: number, min: number, max: number) => Math.max(min, Math.mi
 function clampBox(box: ViewBox): ViewBox {
   const width = clamp(box.width, minWidth, maxWidth);
   const height = width / aspect;
-  return {
-    x: clamp(box.x, world.x, world.x + world.width - width),
-    y: clamp(box.y, world.y, world.y + world.height - height),
-    width,
-    height,
-  };
+  return { x: clamp(box.x, world.x, world.x + world.width - width), y: clamp(box.y, world.y, world.y + world.height - height), width, height };
 }
 
 function boxString(box: ViewBox) {
@@ -79,21 +75,21 @@ export function MapStage({ state, dispatch }: MapStageProps) {
     dispatch({ type: "select", plotId });
   }
 
-  function onWheel(event: React.WheelEvent<SVGSVGElement>) {
+  function onWheel(event: ReactWheelEvent<SVGSVGElement>) {
     if (!event.ctrlKey) return;
     event.preventDefault();
     const factor = Math.exp(-event.deltaY * 0.006);
     zoomAt(event.clientX, event.clientY, factor);
   }
 
-  function onPointerDown(event: React.PointerEvent<SVGSVGElement>) {
+  function onPointerDown(event: ReactPointerEvent<SVGSVGElement>) {
     const target = event.target as Element;
-    const plotNode = target.closest?.("[data-plot-id]") as HTMLElement | null;
-    dragRef.current = { active: true, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, origin: { ...boxRef.current }, moved: false, targetPlotId: plotNode?.dataset.plotId ?? null, raf: dragRef.current.raf };
+    const plotNode = target.closest?.("[data-plot-id]") as Element | null;
+    dragRef.current = { active: true, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, origin: { ...boxRef.current }, moved: false, targetPlotId: plotNode?.getAttribute("data-plot-id") ?? null, raf: dragRef.current.raf };
     event.currentTarget.setPointerCapture(event.pointerId);
   }
 
-  function onPointerMove(event: React.PointerEvent<SVGSVGElement>) {
+  function onPointerMove(event: ReactPointerEvent<SVGSVGElement>) {
     const drag = dragRef.current;
     if (!drag.active) return;
     const rect = svgRef.current?.getBoundingClientRect();
@@ -105,7 +101,7 @@ export function MapStage({ state, dispatch }: MapStageProps) {
     scheduleBox();
   }
 
-  function onPointerUp(event: React.PointerEvent<SVGSVGElement>) {
+  function onPointerUp(event: ReactPointerEvent<SVGSVGElement>) {
     const drag = dragRef.current;
     if (drag.pointerId === event.pointerId) event.currentTarget.releasePointerCapture(event.pointerId);
     drag.active = false;
