@@ -4,16 +4,7 @@ import { getDevelopmentScore, getOwnedPlot, getPhase, getPopulation } from "../l
 type VillagePlotId = "camp" | "shelter" | "storehouse" | "market" | "council" | "watch" | "fields" | "road";
 type PlotState = "empty" | "building" | "built";
 
-type VillagePlot = {
-  id: VillagePlotId;
-  marker?: SettlementMarker;
-  label: string;
-  hint: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-};
+type VillagePlot = { id: VillagePlotId; marker?: SettlementMarker; label: string; hint: string; x: number; y: number; w: number; h: number };
 
 const villagePlots: VillagePlot[] = [
   { id: "camp", marker: "camp", label: "Campfire Core", hint: "first people gathered", x: 38, y: 49, w: 18, h: 13 },
@@ -54,7 +45,7 @@ export function VillageScene({ state, dispatch }: { state: PlayState; dispatch: 
         </div>
       </div>
 
-      <div className="absolute bottom-[5.2rem] left-3 right-3 top-[12.2rem] z-0 md:bottom-[6.2rem] md:left-6 md:right-6 md:top-[13.6rem]">
+      <div className="absolute bottom-[8.8rem] left-3 right-3 top-[12.2rem] z-0 md:bottom-[9.3rem] md:left-6 md:right-6 md:top-[13.6rem] lg:bottom-[6.2rem]">
         <div className="relative h-full w-full overflow-hidden rounded-[2rem] border border-amber-100/18 bg-[#263f25] shadow-[0_30px_90px_rgba(0,0,0,.45)]">
           <VillageGround />
           <VillageRoads />
@@ -64,11 +55,14 @@ export function VillageScene({ state, dispatch }: { state: PlayState; dispatch: 
       </div>
 
       {hasClaim ? (
-        <div className="absolute bottom-[5.5rem] right-5 z-20 hidden max-w-[280px] rounded-3xl border border-amber-100/18 bg-black/48 p-3 shadow-2xl backdrop-blur-md lg:block">
-          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-200/55">Latest order</p>
-          <p className="mt-1 text-sm font-black text-amber-50">{state.lastEvent}</p>
-          <button data-qa="village-scene-open-orders" onClick={() => dispatch({ type: "setView", view: "orders" })} className="mt-3 w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-black text-stone-950 transition hover:bg-amber-200">Issue next order</button>
-        </div>
+        <>
+          <button data-qa="village-scene-open-orders" onClick={() => dispatch({ type: "setView", view: "orders" })} className="absolute bottom-[5.2rem] left-4 right-4 z-30 rounded-2xl bg-amber-300 px-4 py-3 text-sm font-black text-stone-950 shadow-2xl shadow-black/40 transition hover:bg-amber-200 lg:hidden">Issue next order</button>
+          <div className="absolute bottom-[5.5rem] right-5 z-20 hidden max-w-[280px] rounded-3xl border border-amber-100/18 bg-black/48 p-3 shadow-2xl backdrop-blur-md lg:block">
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-200/55">Latest order</p>
+            <p className="mt-1 text-sm font-black text-amber-50">{state.lastEvent}</p>
+            <button data-qa="village-scene-open-orders-desktop" onClick={() => dispatch({ type: "setView", view: "orders" })} className="mt-3 w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-black text-stone-950 transition hover:bg-amber-200">Issue next order</button>
+          </div>
+        </>
       ) : null}
     </section>
   );
@@ -78,7 +72,6 @@ function VillagePlotNode({ plot, state }: { plot: VillagePlot; state: PlayState 
   const built = plot.marker ? state.settlementMarkers.includes(plot.marker) : plot.id === "fields" ? state.completedOrders.includes("gather-food") : state.completedOrders.includes("open-market");
   const building = !built && plot.marker ? plannedSoon(plot.marker, state) : false;
   const qaState: PlotState = built ? "built" : building ? "building" : "empty";
-
   return (
     <div data-qa="village-plot" data-qa-id={plot.id} data-qa-state={qaState} className={`absolute rounded-[1.2rem] border p-2 shadow-xl transition-all duration-300 ${qaState === "built" ? "border-amber-100/55 bg-amber-200/22 shadow-amber-950/40" : qaState === "building" ? "border-amber-200/35 bg-amber-100/12" : "border-amber-100/10 bg-black/18"}`} style={{ left: `${plot.x}%`, top: `${plot.y}%`, width: `${plot.w}%`, height: `${plot.h}%` }}>
       <div className="relative h-full w-full">
