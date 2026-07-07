@@ -99,21 +99,21 @@ async function runSmoke(page) {
     await clickButton(page, /^Reset view$/i, "claim opens village");
     await page.locator("[data-qa='plot-greenvale']").click({ timeout: 5000, force: true });
     await clickButton(page, /^Choose this land$/i, "claim opens village");
-    await page.locator("[data-qa='village-panel']").waitFor({ state: "visible", timeout: 5000 });
-    await expectText(page, "Village interior", "claim opens village");
+    await page.locator("[data-qa='village-scene']").waitFor({ state: "visible", timeout: 5000 });
+    await expectText(page, "Village scene", "claim opens village");
   });
 
   await step("orders grow village", async () => {
     for (const order of [/Raise Shelter/i, /Gather Food/i, /Cut Timber/i, /Scout Nearby Land/i, /Build Storehouse/i]) await runOneOrder(page, order);
-    await page.locator("[data-qa='district-storehouse']").waitFor({ state: "visible", timeout: 5000 });
+    await page.locator("[data-qa='village-scene-storehouse']").waitFor({ state: "visible", timeout: 5000 });
   });
 
   await step("procedural world exists", async () => {
     await clickButton(page, /^World$/i, "procedural world exists");
-    await page.locator("[data-qa='world-panel']").waitFor({ state: "visible", timeout: 5000 });
-    await expectText(page, "Procedural world engine", "procedural world exists");
-    await expectText(page, "Generated sectors", "procedural world exists");
-    await expectText(page, "Generated land samples", "procedural world exists");
+    await page.locator("[data-qa='world-scene']").waitFor({ state: "visible", timeout: 5000 });
+    await expectText(page, "World scene", "procedural world exists");
+    await expectText(page, "lands, one living atlas", "procedural world exists");
+    await expectText(page, "Nearby generated lands", "procedural world exists");
   });
 
   await step("council and market route exist", async () => {
