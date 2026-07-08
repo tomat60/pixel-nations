@@ -45,6 +45,16 @@ When a prompt says to use the Command Room, issue #79, or AI coordination channe
 
 For the current strategic direction, #79 is the source of truth over older broad plans: prioritize a playable vertical slice before polish, and do not start full backend/auth/payment/multiplayer work unless explicitly scoped.
 
+## Control-plane safety guardrails
+
+These rules exist because accidental write actions and premature merges create cleanup work and can hide product risk.
+
+- If ChatGPT/control-plane, a reviewer, or the Command Room leaves a **Product Lead Gate**, **review pending**, **do not merge yet**, or equivalent blocker on a PR, that PR must not be merged until a later explicit **accepted for merge** verdict appears.
+- Green CI, Vercel, smoke, or screenshot QA is not enough to override an unresolved product gate. User-reported confusion and product-evidence gaps remain blockers until directly resolved or explicitly waived by the control plane.
+- Do not create placeholder issues, temporary files, dummy commits, or test write-actions in the repo. If the wrong GitHub action/tool is loaded, stop and load the correct action instead of probing with harmless-looking writes.
+- Before any GitHub write action, confirm the exact action name and target in the prompt or tool call: `create_pull_request` for PRs, `create_issue` only for real issues, `update_file` only for intended file changes, and `merge_pull_request` only after explicit merge acceptance.
+- If an accidental issue/file/commit is created, immediately close/remove it, report it, and do not continue with broader work until the branch or issue list is clean.
+
 ## How to work on this repo
 
 1. **Read before coding**: `docs/PROJECT_OPERATING_RULES.md` and, for `/world`, `docs/WORLD_MAP_V7_SPEC.md`.
