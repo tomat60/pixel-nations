@@ -1,16 +1,15 @@
 import { chromium } from "playwright";
 import { existsSync } from "node:fs";
-import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 
 const APP_URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const OUTPUT_DIR = "public/qa/play-latest";
 const SCREENSHOT_DIR = `${OUTPUT_DIR}/screenshots`;
-const VIDEO_DIR = `${OUTPUT_DIR}/videos`;
 const REPORT_PATH = `${OUTPUT_DIR}/report.html`;
 const MANIFEST_PATH = `${OUTPUT_DIR}/manifest.json`;
 const INTERACTION_LOG_PATH = `${OUTPUT_DIR}/interaction-log.json`;
-const viewports = [{ viewport: "desktop", width: 1440, height: 900, deviceScaleFactor: 1, isMobile: false, recordVideo: true }];
+const viewports = [{ viewport: "desktop", width: 1440, height: 900, deviceScaleFactor: 1, isMobile: false }];
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function clickButtonByText(page, pattern) {
@@ -92,6 +91,20 @@ const steps = [
   } },
 ];
 
+async function withTimeout(label, fn, timeoutMs = 20000) {
+  let timer;
+  try {
+    return await Promise.race([
+      fn(),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`${label} timed out after ${timeoutMs}ms`)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function isAppRunning() {
   try {
     const response = await fetch(APP_URL, { signal: AbortSignal.timeout(1500) });
@@ -112,7 +125,7 @@ async function waitForApp() {
 
 function startAppIfNeeded() {
   const command = existsSync(".next") ? ["run", "start", "--", "-p", "3000", "-H", "127.0.0.1"] : ["run", "dev", "--", "-p", "3000", "-H", "127.0.0.1"];
-  return spawn("npm", command, { stdio: "pipe", shell: process.platform === "win32" });
+  return spawn("npm", command, { stdio: "pipe", shell: process.platform === "win32", detached: process.platform !== "win32" });
 }
 
 async function ensureApp() {
@@ -126,75 +139,72 @@ async function ensureApp() {
 
 function stopApp(startedProcess) {
   if (!startedProcess) return;
-  startedProcess.kill("SIGTERM");
+  if (process.platform === "win32") {
+    startedProcess.kill("SIGTERM");
+    return;
+  }
+  try {
+    process.kill(-startedProcess.pid, "SIGTERM");
+  } catch {
+    startedProcess.kill("SIGTERM");
+  }
 }
 
 function escapeHtml(value) {
   return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
 
-function buildReport({ generatedAt, appSource, shots, videos, interactionLog }) {
+function buildReport({ generatedAt, appSource, shots, interactionLog }) {
   const items = shots.map((shot) => `<li>${escapeHtml(shot.stepLabel)} — ${shot.error ? `WARNING: ${escapeHtml(shot.error)}` : "ok"}</li>`).join("\n");
-  const videoItems = videos.map((video) => `<li>${escapeHtml(video.filename)}</li>`).join("\n") || "<li>No video evidence generated.</li>";
   const logItems = interactionLog.map((item) => `<li>${escapeHtml(item.viewport)} / ${escapeHtml(item.stepId)} — ${escapeHtml(item.status)}${item.error ? `: ${escapeHtml(item.error)}` : ""}</li>`).join("\n");
-  return `<!doctype html><html><head><meta charset="utf-8"><title>Pixel Nations Expansion QA</title></head><body><main><h1>Expansion Loop evidence</h1><p>Generated: ${escapeHtml(generatedAt)}</p><p>App source: ${escapeHtml(appSource)}</p><h2>Verdict checklist</h2><ul><li>Owned territory visibly grows</li><li>Expansion uses Influence</li><li>Council reflects expansion progress</li></ul><h2>Videos</h2><ul>${videoItems}</ul><h2>Interaction log</h2><ul>${logItems}</ul><h2>Screenshots</h2><ul>${items}</ul></main></body></html>`;
-}
-
-async function saveVideo(page, viewport) {
-  const video = page.video();
-  if (!video) return null;
-  const videoPath = await video.path().catch(() => null);
-  if (!videoPath) return null;
-  await mkdir(VIDEO_DIR, { recursive: true });
-  const filename = `${viewport}-expansion-loop.webm`;
-  await copyFile(videoPath, `${VIDEO_DIR}/${filename}`);
-  return { viewport, filename };
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Pixel Nations Expansion QA</title></head><body><main><h1>Expansion Loop evidence</h1><p>Generated: ${escapeHtml(generatedAt)}</p><p>App source: ${escapeHtml(appSource)}</p><h2>Verdict checklist</h2><ul><li>Owned territory visibly grows</li><li>Expansion uses Influence</li><li>Council reflects expansion progress</li></ul><h2>Interaction log</h2><ul>${logItems}</ul><h2>Screenshots</h2><ul>${items}</ul></main></body></html>`;
 }
 
 async function runViewport(config) {
-  const context = await chromium.launchPersistentContext("", { viewport: { width: config.width, height: config.height }, deviceScaleFactor: config.deviceScaleFactor, isMobile: config.isMobile, recordVideo: config.recordVideo ? { dir: VIDEO_DIR, size: { width: config.width, height: config.height } } : undefined });
-  const page = context.pages()[0] ?? await context.newPage();
+  const browser = await chromium.launch();
+  const context = await browser.newContext({ viewport: { width: config.width, height: config.height }, deviceScaleFactor: config.deviceScaleFactor, isMobile: config.isMobile });
+  const page = await context.newPage();
   const shots = [];
   const interactionLog = [];
-  await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
-  await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-  for (const step of steps) {
-    let error = "";
-    try {
-      if (step.run) await step.run(page);
-      interactionLog.push({ viewport: config.viewport, stepId: step.id, status: "ok" });
-    } catch (err) {
-      error = err instanceof Error ? err.message : String(err);
-      interactionLog.push({ viewport: config.viewport, stepId: step.id, status: "warning", error });
+  try {
+    await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded", timeout: 10000 });
+    await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    for (const step of steps) {
+      let error = "";
+      try {
+        if (step.run) await withTimeout(step.id, () => step.run(page));
+        interactionLog.push({ viewport: config.viewport, stepId: step.id, status: "ok" });
+      } catch (err) {
+        error = err instanceof Error ? err.message : String(err);
+        interactionLog.push({ viewport: config.viewport, stepId: step.id, status: "warning", error });
+      }
+      const filename = `${config.viewport}-play-${step.id}.png`;
+      await page.screenshot({ path: `${SCREENSHOT_DIR}/${filename}`, fullPage: true, timeout: 10000 });
+      shots.push({ viewport: config.viewport, filename, stepId: step.id, stepLabel: step.label, note: step.note, error });
     }
-    const filename = `${config.viewport}-play-${step.id}.png`;
-    await page.screenshot({ path: `${SCREENSHOT_DIR}/${filename}`, fullPage: true });
-    shots.push({ viewport: config.viewport, filename, stepId: step.id, stepLabel: step.label, note: step.note, error });
+  } finally {
+    await context.close().catch(() => {});
+    await browser.close().catch(() => {});
   }
-  await context.close();
-  const savedVideo = config.recordVideo ? await saveVideo(page, config.viewport).catch(() => null) : null;
-  return { shots, interactionLog, video: savedVideo };
+  return { shots, interactionLog };
 }
 
 async function main() {
   await rm(OUTPUT_DIR, { recursive: true, force: true });
   await mkdir(SCREENSHOT_DIR, { recursive: true });
-  await mkdir(VIDEO_DIR, { recursive: true });
   const { startedProcess, appSource } = await ensureApp();
   const generatedAt = new Date().toISOString();
   const allShots = [];
-  const allVideos = [];
   const fullInteractionLog = [];
   try {
     for (const viewport of viewports) {
       const item = await runViewport(viewport);
       allShots.push(...item.shots);
       fullInteractionLog.push(...item.interactionLog);
-      if (item.video) allVideos.push(item.video);
     }
-    await writeFile(MANIFEST_PATH, `${JSON.stringify({ generatedAt, appUrl: APP_URL, appSource, screenshots: allShots, videos: allVideos }, null, 2)}\n`);
+    await writeFile(MANIFEST_PATH, `${JSON.stringify({ generatedAt, appUrl: APP_URL, appSource, screenshots: allShots }, null, 2)}\n`);
     await writeFile(INTERACTION_LOG_PATH, `${JSON.stringify(fullInteractionLog, null, 2)}\n`);
-    await writeFile(REPORT_PATH, buildReport({ generatedAt, appSource, shots: allShots, videos: allVideos, interactionLog: fullInteractionLog }));
+    await writeFile(REPORT_PATH, buildReport({ generatedAt, appSource, shots: allShots, interactionLog: fullInteractionLog }));
     const warnings = fullInteractionLog.filter((item) => item.status !== "ok");
     if (warnings.length) throw new Error(`Play visual QA completed with ${warnings.length} interaction warning(s). See ${INTERACTION_LOG_PATH}`);
     console.log(`Play visual QA evidence written to ${OUTPUT_DIR}`);
