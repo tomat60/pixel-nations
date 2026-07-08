@@ -5,15 +5,18 @@ import { getSectorIndexFromId, getWorldSector } from "./world-engine";
 export type ViewId = "map" | "village" | "orders" | "world" | "council";
 export type OrderId = "raise-shelter" | "gather-food" | "cut-timber" | "scout-nearby" | "build-storehouse" | "open-market" | "form-council" | "fortify-watch";
 export type SettlementMarker = "camp" | "shelter" | "storehouse" | "market" | "council" | "watch";
+export type NationDecisionId = "trade-charter" | "border-guard" | "settler-rights";
 
 export type Resources = { food: number; timber: number; stone: number; influence: number };
 export type ChronicleEntry = { season: number; title: string; body: string };
 export type DevelopmentOrder = { id: OrderId; label: string; short: string; requiresClaim?: boolean };
+export type NationDecision = { id: NationDecisionId; label: string; short: string; effect: string };
 
 export type PlayState = {
   selectedPlotId: string;
   ownedPlotIds: string[];
   ownedSectorIds: string[];
+  nationDecisionId: NationDecisionId | null;
   season: number;
   view: ViewId;
   lastEvent: string;
@@ -28,12 +31,19 @@ export type PlayAction =
   | { type: "select"; plotId: string }
   | { type: "claim"; plotId: string }
   | { type: "claimSector"; sectorId: string }
+  | { type: "foundNation"; decisionId: NationDecisionId }
   | { type: "runOrder"; orderId: OrderId }
   | { type: "setView"; view: ViewId }
   | { type: "reset" };
 
 export { canClaimSector, expansionInfluenceCost, getClaimableSectorIds, getNationReady, getOwnedSectorIds, nationSectorThreshold } from "./expansion-state";
 export const playV1StorageKey = "pixelNations.play.v1";
+
+export const nationDecisions: NationDecision[] = [
+  { id: "trade-charter", label: "Trade Charter", short: "Turn border growth into a market federation.", effect: "+2 Influence now; trade sectors become the preferred next route." },
+  { id: "border-guard", label: "Border Guard", short: "Bind the first sectors through watch posts and patrol rights.", effect: "Rival pressure drops; dangerous sectors become safer to inspect." },
+  { id: "settler-rights", label: "Settler Rights", short: "Promise land rights so families move beyond the homeland.", effect: "+18 people; the council gains a civic founding story." },
+];
 
 export const developmentOrders: DevelopmentOrder[] = [
   { id: "raise-shelter", label: "Raise Shelter", short: "Turn the first camp into a protected home base." },
@@ -50,6 +60,7 @@ export const initialPlayState: PlayState = {
   selectedPlotId: starterPlotId,
   ownedPlotIds: [],
   ownedSectorIds: [],
+  nationDecisionId: null,
   season: 1,
   view: "map",
   lastEvent: "Choose one land. A nation begins when the map changes.",
@@ -68,8 +79,13 @@ export function getOwnedPlot(state: PlayState): Plot | undefined {
   return plots.find((plot) => plot.id === state.ownedPlotIds[0]);
 }
 
-export function getPhase(state: PlayState): "unclaimed" | "camp" | "hamlet" | "village" | "city-seed" {
+export function getNationDecision(state: PlayState) {
+  return nationDecisions.find((decision) => decision.id === state.nationDecisionId) ?? null;
+}
+
+export function getPhase(state: PlayState): "unclaimed" | "camp" | "hamlet" | "village" | "city-seed" | "nation-seed" {
   if (state.ownedPlotIds.length === 0) return "unclaimed";
+  if (state.nationDecisionId) return "nation-seed";
   if (state.completedOrders.includes("form-council") && state.completedOrders.includes("open-market") && state.completedOrders.includes("fortify-watch")) return "city-seed";
   if (state.completedOrders.includes("form-council") || state.completedOrders.length >= 6) return "village";
   if (state.completedOrders.length >= 3) return "hamlet";
@@ -78,18 +94,19 @@ export function getPhase(state: PlayState): "unclaimed" | "camp" | "hamlet" | "v
 
 export function getPopulation(state: PlayState) {
   if (state.ownedPlotIds.length === 0) return 0;
-  return 18 + state.completedOrders.length * 9 + state.settlementMarkers.length * 7 + Math.max(0, getOwnedSectorIds(state).length - 1) * 11;
+  return 18 + state.completedOrders.length * 9 + state.settlementMarkers.length * 7 + Math.max(0, getOwnedSectorIds(state).length - 1) * 11 + (state.nationDecisionId === "settler-rights" ? 18 : 0);
 }
 
 export function getDevelopmentScore(state: PlayState) {
-  return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5;
+  return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5 + (state.nationDecisionId ? 14 : 0);
 }
 
 export function getRivalPressure(state: PlayState) {
   const base = state.season >= 8 ? 28 : state.season >= 5 ? 18 : 8;
   const scoutRelief = state.completedOrders.includes("scout-nearby") ? 4 : 0;
   const defenseRelief = state.completedOrders.includes("fortify-watch") ? 8 : 0;
-  return Math.max(0, base - scoutRelief - defenseRelief);
+  const nationRelief = state.nationDecisionId === "border-guard" ? 8 : 0;
+  return Math.max(0, base - scoutRelief - defenseRelief - nationRelief);
 }
 
 export function getWorldClaimedCount(state: PlayState) {
@@ -130,15 +147,23 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
     case "claim": {
       if (state.ownedPlotIds.includes(action.plotId)) return state;
       const plot = plots.find((item) => item.id === action.plotId);
-      return { ...state, selectedPlotId: action.plotId, ownedPlotIds: [action.plotId], ownedSectorIds: [homelandSectorId], season: 2, view: "village", settlementMarkers: ["camp"], resources: { food: 3, timber: 2, stone: 0, influence: 1 }, chronicle: pushChronicle(state, "First banner raised", `${plot?.name ?? "A land"} became the first claimed homeland.`), lastEvent: `${plot?.name ?? "A land"} is claimed. Enter Village, then choose Orders.` };
+      return { ...state, selectedPlotId: action.plotId, ownedPlotIds: [action.plotId], ownedSectorIds: [homelandSectorId], nationDecisionId: null, season: 2, view: "village", settlementMarkers: ["camp"], resources: { food: 3, timber: 2, stone: 0, influence: 1 }, chronicle: pushChronicle(state, "First banner raised", `${plot?.name ?? "A land"} became the first claimed homeland.`), lastEvent: `${plot?.name ?? "A land"} is claimed. Enter Village, then choose Orders.` };
     }
     case "claimSector": {
       const sector = getWorldSector(getSectorIndexFromId(action.sectorId));
       const status = canClaimSector(state, sector.id);
       if (!status.ok) return { ...state, lastEvent: expansionBlockedMessage(status.reason), view: "world" };
       const ownedSectorIds = [...status.ownedSectorIds, sector.id];
-      const nationLine = ownedSectorIds.length >= nationSectorThreshold ? " The council can now found a nation." : " Expand to 3 sectors to unlock nation scale.";
+      const nationLine = ownedSectorIds.length >= nationSectorThreshold ? " The council can now choose a founding doctrine." : " Expand to 3 sectors to unlock nation scale.";
       return { ...state, ownedSectorIds, resources: { ...state.resources, influence: Math.max(0, state.resources.influence - expansionInfluenceCost) }, season: Math.min(12, state.season + 1), view: "world", chronicle: pushChronicle(state, "Sector claimed", `${sector.id} ${sector.name} joined the border ring.${nationLine}`), lastEvent: `${sector.id} claimed. Borders now hold ${ownedSectorIds.length} sectors.${nationLine}` };
+    }
+    case "foundNation": {
+      const decision = nationDecisions.find((item) => item.id === action.decisionId);
+      if (!decision) return { ...state, lastEvent: "Unknown founding decision.", view: "council" };
+      if (!getOwnedSectorIds(state).length || getOwnedSectorIds(state).length < nationSectorThreshold) return { ...state, lastEvent: `Founding needs ${nationSectorThreshold} connected sectors.`, view: "council" };
+      if (state.nationDecisionId) return { ...state, lastEvent: "The founding doctrine is already set.", view: "council" };
+      const influenceGain = decision.id === "trade-charter" ? 2 : 0;
+      return { ...state, nationDecisionId: decision.id, resources: { ...state.resources, influence: state.resources.influence + influenceGain }, season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, "Nation founded", `${decision.label} became the first doctrine binding ${getOwnedSectorIds(state).length} sectors.`), lastEvent: `Nation founded: ${decision.label}. ${decision.effect}` };
     }
     case "runOrder": {
       const result = orderResult(state, action.orderId);
