@@ -48,7 +48,8 @@ export function VillageScene({ state, dispatch }: { state: PlayState; dispatch: 
       <div className="absolute bottom-[8.8rem] left-3 right-3 top-[12.2rem] z-0 md:bottom-[9.3rem] md:left-6 md:right-6 md:top-[13.6rem] lg:bottom-[6.2rem]">
         <div className="relative h-full w-full overflow-hidden rounded-[2rem] border border-amber-100/18 bg-[#263f25] shadow-[0_30px_90px_rgba(0,0,0,.45)]">
           <VillageGround />
-          <VillageRoads />
+          <VillageRoads state={state} />
+          {hasClaim ? <SettlementCredibilityLayer state={state} /> : null}
           {villagePlots.map((plot) => <VillagePlotNode key={plot.id} plot={plot} state={state} />)}
           {!hasClaim ? <UnclaimedOverlay dispatch={dispatch} /> : null}
         </div>
@@ -85,6 +86,139 @@ function VillagePlotNode({ plot, state }: { plot: VillagePlot; state: PlayState 
   );
 }
 
+function SettlementCredibilityLayer({ state }: { state: PlayState }) {
+  const hasShelter = state.settlementMarkers.includes("shelter");
+  const hasFood = state.completedOrders.includes("gather-food");
+  const hasTimber = state.completedOrders.includes("cut-timber");
+  const hasStorehouse = state.settlementMarkers.includes("storehouse");
+  const hasMarket = state.settlementMarkers.includes("market");
+  const hasCouncil = state.settlementMarkers.includes("council");
+  const hasWatch = state.settlementMarkers.includes("watch");
+  const peopleCount = Math.min(12, 3 + state.completedOrders.length + Math.max(0, state.settlementMarkers.length - 1));
+
+  return (
+    <div data-qa="village-credibility-layer" className="pointer-events-none absolute inset-0 z-[1]">
+      <div data-qa="village-ownership-flag" className="absolute left-[47%] top-[48%] h-8 w-1 rounded-full bg-amber-100 shadow-[0_0_18px_rgba(251,191,36,.45)]">
+        <div className="absolute left-1 top-0 h-4 w-7 rounded-r-md bg-amber-300/90 shadow-lg" />
+      </div>
+      <CampLife peopleCount={peopleCount} />
+      {hasShelter ? <ShelterCluster /> : null}
+      {hasFood ? <FoodFields /> : null}
+      {hasTimber ? <TimberAndFences /> : null}
+      {hasStorehouse ? <StorehouseSupplies /> : null}
+      {hasMarket ? <MarketActivity /> : null}
+      {hasCouncil ? <CouncilPresence /> : null}
+      {hasWatch ? <WatchDefense /> : null}
+    </div>
+  );
+}
+
+function CampLife({ peopleCount }: { peopleCount: number }) {
+  const people = [
+    [44, 55], [48, 58], [52, 54], [41, 61], [57, 59], [36, 52], [62, 64], [31, 45], [68, 51], [46, 42], [53, 69], [73, 33],
+  ].slice(0, peopleCount);
+  return (
+    <>
+      <div data-qa="village-hearth-smoke" className="absolute left-[44%] top-[43%] h-14 w-14 rounded-full bg-orange-300/16 blur-xl" />
+      <div className="absolute left-[46%] top-[45%] h-8 w-8 rounded-full bg-orange-300/55 shadow-[0_0_30px_rgba(251,146,60,.55)]" />
+      {people.map(([left, top], index) => (
+        <span key={`${left}-${top}`} data-qa="village-population" data-person-index={index} className="absolute h-2.5 w-2.5 rounded-full border border-amber-50/50 bg-amber-100 shadow-[0_0_8px_rgba(254,243,199,.45)]" style={{ left: `${left}%`, top: `${top}%` }} />
+      ))}
+    </>
+  );
+}
+
+function ShelterCluster() {
+  const huts = [
+    [23, 38, "rotate-[-8deg]"], [29, 36, "rotate-[5deg]"], [34, 43, "rotate-[10deg]"], [19, 45, "rotate-[3deg]"],
+  ];
+  return (
+    <div data-qa="village-structure-hut" className="absolute inset-0">
+      {huts.map(([left, top, rotate]) => (
+        <div key={`${left}-${top}`} className={`absolute h-10 w-14 ${rotate}`} style={{ left: `${left}%`, top: `${top}%` }}>
+          <div className="absolute bottom-0 h-7 w-14 rounded-b-lg border border-amber-100/40 bg-stone-200/85 shadow-lg" />
+          <div className="absolute left-1 top-0 h-8 w-12 rotate-45 rounded-sm bg-amber-800/90 shadow-md" />
+          <div className="absolute left-6 top-4 h-4 w-3 rounded-t-sm bg-black/35" />
+          <div className="absolute -top-4 left-6 h-6 w-4 rounded-full bg-stone-100/24 blur-sm" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FoodFields() {
+  const rows = [0, 1, 2, 3, 4, 5];
+  return (
+    <div data-qa="village-food-fields" className="absolute left-[13%] top-[61%] h-[17%] w-[23%] rounded-2xl border border-lime-100/35 bg-lime-400/8 shadow-[0_0_24px_rgba(132,204,22,.16)]">
+      {rows.map((row) => <span key={row} className="absolute left-[8%] right-[8%] h-1.5 rounded-full bg-lime-200/45" style={{ top: `${14 + row * 13}%` }} />)}
+      <span className="absolute left-[16%] top-[18%] h-3 w-3 rounded-full bg-amber-200/80" />
+      <span className="absolute left-[68%] top-[62%] h-3 w-3 rounded-full bg-amber-200/80" />
+    </div>
+  );
+}
+
+function TimberAndFences() {
+  return (
+    <div data-qa="village-timber-yards" className="absolute inset-0">
+      <div className="absolute left-[55%] top-[42%] flex gap-1">
+        {[0, 1, 2, 3].map((item) => <span key={item} className="block h-3 w-10 rounded-full bg-amber-900/85 shadow-md" />)}
+      </div>
+      <div className="absolute left-[18%] top-[32%] h-[2px] w-[27%] rotate-[-9deg] bg-amber-200/35" />
+      <div className="absolute left-[66%] top-[28%] h-[2px] w-[19%] rotate-[18deg] bg-amber-200/35" />
+    </div>
+  );
+}
+
+function StorehouseSupplies() {
+  return (
+    <div data-qa="village-storehouse-visual" className="absolute left-[61%] top-[35%] h-14 w-20 rounded-xl border border-amber-100/45 bg-yellow-800/90 shadow-[0_18px_34px_rgba(0,0,0,.34)]">
+      <div className="absolute -top-4 left-2 h-7 w-16 rotate-45 rounded-sm bg-yellow-950/90" />
+      <div className="absolute bottom-2 left-3 flex gap-1">
+        <span className="h-4 w-4 rounded-sm bg-amber-200/80" />
+        <span className="h-4 w-4 rounded-sm bg-stone-200/80" />
+        <span className="h-4 w-4 rounded-sm bg-lime-200/70" />
+      </div>
+    </div>
+  );
+}
+
+function MarketActivity() {
+  return (
+    <div data-qa="village-market-activity" className="absolute inset-0">
+      <div className="absolute left-[49%] top-[68%] h-3 w-[35%] rotate-[-7deg] rounded-full bg-amber-200/45 shadow-[0_0_18px_rgba(251,191,36,.16)]" />
+      <div className="absolute left-[66%] top-[63%] flex gap-1">
+        <span className="h-10 w-4 rounded-t-full bg-sky-300/85" />
+        <span className="h-10 w-4 rounded-t-full bg-amber-300/85" />
+        <span className="h-10 w-4 rounded-t-full bg-emerald-300/85" />
+      </div>
+      <span className="absolute left-[78%] top-[66%] h-3 w-7 rounded-full bg-stone-200/65" />
+      <span className="absolute left-[72%] top-[69%] h-3 w-7 rounded-full bg-amber-100/65" />
+    </div>
+  );
+}
+
+function CouncilPresence() {
+  return (
+    <div data-qa="village-council-visual" className="absolute left-[43%] top-[24%] h-16 w-16 rounded-2xl border-4 border-amber-100/70 bg-amber-500/45 shadow-[0_0_36px_rgba(251,191,36,.22)]">
+      <div className="absolute -top-5 left-1/2 h-6 w-1 -translate-x-1/2 bg-amber-100" />
+      <div className="absolute -top-6 left-[52%] h-4 w-7 rounded-r-md bg-emerald-300/85" />
+      <div className="absolute inset-x-2 bottom-2 h-2 rounded-full bg-black/28" />
+    </div>
+  );
+}
+
+function WatchDefense() {
+  return (
+    <div data-qa="village-watch-visual" className="absolute left-[80%] top-[18%] h-20 w-10">
+      <div className="absolute bottom-0 left-3 h-16 w-5 bg-amber-950/95 shadow-lg" />
+      <div className="absolute left-0 top-0 h-6 w-11 rounded-sm bg-amber-200/80" />
+      <div className="absolute left-3 top-6 h-12 w-[2px] rotate-[-18deg] bg-amber-100/45" />
+      <div className="absolute left-7 top-6 h-12 w-[2px] rotate-[18deg] bg-amber-100/45" />
+      <span className="absolute -right-8 top-8 h-2 w-8 rounded-full bg-red-200/50" />
+    </div>
+  );
+}
+
 function plannedSoon(marker: SettlementMarker, state: PlayState) {
   if (marker === "shelter") return state.settlementMarkers.includes("camp") && !state.completedOrders.includes("raise-shelter");
   if (marker === "storehouse") return state.completedOrders.includes("cut-timber") && !state.completedOrders.includes("build-storehouse");
@@ -116,12 +250,13 @@ function VillageGround() {
   );
 }
 
-function VillageRoads() {
+function VillageRoads({ state }: { state: PlayState }) {
+  const activeRoad = state.completedOrders.includes("open-market") || state.settlementMarkers.includes("storehouse");
   return (
     <div className="absolute inset-0 opacity-75">
-      <div className="absolute left-[27%] top-[55%] h-[4%] w-[52%] -rotate-6 rounded-full bg-amber-200/24" />
-      <div className="absolute left-[47%] top-[28%] h-[45%] w-[4%] rotate-3 rounded-full bg-amber-200/20" />
-      <div className="absolute left-[34%] top-[44%] h-[3%] w-[36%] rotate-[24deg] rounded-full bg-amber-200/16" />
+      <div className={`absolute left-[27%] top-[55%] h-[4%] w-[52%] -rotate-6 rounded-full ${activeRoad ? "bg-amber-200/42 shadow-[0_0_20px_rgba(251,191,36,.18)]" : "bg-amber-200/24"}`} />
+      <div className={`absolute left-[47%] top-[28%] h-[45%] w-[4%] rotate-3 rounded-full ${state.settlementMarkers.includes("council") ? "bg-amber-200/34" : "bg-amber-200/20"}`} />
+      <div className={`absolute left-[34%] top-[44%] h-[3%] w-[36%] rotate-[24deg] rounded-full ${state.settlementMarkers.includes("shelter") ? "bg-amber-200/30" : "bg-amber-200/16"}`} />
     </div>
   );
 }
