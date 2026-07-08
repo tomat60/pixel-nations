@@ -1,21 +1,35 @@
 "use client";
 
-import { useMemo, useReducer } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { BottomDock } from "./components/BottomDock";
 import { CouncilPanel } from "./components/CouncilPanel";
+import { FoundingCeremony } from "./components/FoundingCeremony";
 import { LandSheet } from "./components/LandSheet";
 import { MapStage } from "./components/MapStage";
 import { OrdersPanel } from "./components/OrdersPanel";
 import { TopBar } from "./components/TopBar";
 import { VillageScene } from "./components/VillageScene";
-import { getSelectedPlot, initialPlayState, playReducer } from "./lib/play-state";
+import { getNationDecision, getSelectedPlot, initialPlayState, playReducer, playV1StorageKey, type PlayState } from "./lib/play-state";
 import { WorldMapScene } from "./world/WorldMapScene";
 
 export default function PlayPrototypePage() {
   const [state, dispatch] = useReducer(playReducer, initialPlayState);
+  const [hydrated, setHydrated] = useState(false);
   const selected = useMemo(() => getSelectedPlot(state), [state]);
+  const nationDecision = useMemo(() => getNationDecision(state), [state]);
   const isVillage = state.view === "village";
   const isWorld = state.view === "world";
+
+  useEffect(() => {
+    const restored = restorePlayState();
+    if (restored) dispatch({ type: "hydrate", state: restored });
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    window.localStorage.setItem(playV1StorageKey, JSON.stringify(state));
+  }, [hydrated, state]);
 
   return (
     <main data-qa="play-shell" className="fixed inset-0 overflow-hidden bg-[#06090a] text-[#f7ead2]">
@@ -32,9 +46,35 @@ export default function PlayPrototypePage() {
           {state.view === "map" ? <LandSheet selected={selected} state={state} dispatch={dispatch} /> : null}
           {state.view === "orders" && state.ownedPlotIds.length > 0 ? <OrdersPanel state={state} dispatch={dispatch} /> : null}
           {state.view === "council" ? <CouncilPanel state={state} dispatch={dispatch} /> : null}
+          {nationDecision && !state.foundingCeremonySeen ? <FoundingCeremony state={state} decision={nationDecision} dispatch={dispatch} /> : null}
           <BottomDock activeView={state.view} dispatch={dispatch} />
         </div>
       </section>
     </main>
   );
+}
+
+function restorePlayState(): PlayState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(playV1StorageKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<PlayState>;
+    if (!Array.isArray(parsed.ownedPlotIds) || !Array.isArray(parsed.completedOrders)) return null;
+    return {
+      ...initialPlayState,
+      ...parsed,
+      resources: { ...initialPlayState.resources, ...parsed.resources },
+      ownedPlotIds: parsed.ownedPlotIds ?? [],
+      ownedSectorIds: parsed.ownedSectorIds ?? [],
+      completedOrders: parsed.completedOrders ?? [],
+      settlementMarkers: parsed.settlementMarkers ?? [],
+      scoutedPlotIds: parsed.scoutedPlotIds ?? [],
+      chronicle: parsed.chronicle ?? initialPlayState.chronicle,
+      nationDecisionId: parsed.nationDecisionId ?? null,
+      foundingCeremonySeen: Boolean(parsed.foundingCeremonySeen),
+    };
+  } catch {
+    return null;
+  }
 }
