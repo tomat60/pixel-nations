@@ -1,4 +1,4 @@
-import { getDevelopmentScore, getNationDecision, getNationReady, getOwnedSectorIds, getPhase, getPopulation, getRivalPressure, nationDecisions, nationSectorThreshold, type PlayAction, type PlayState } from "../lib/play-state";
+import { getDevelopmentScore, getNationDecision, getNationReady, getOwnedPlot, getOwnedSectorIds, getPhase, getPopulation, getRivalPressure, nationDecisions, nationSectorThreshold, type PlayAction, type PlayState } from "../lib/play-state";
 
 const roadmap = [
   { label: "Land", detail: "claim one homeland", done: (state: PlayState) => state.ownedPlotIds.length > 0 },
@@ -17,6 +17,7 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
   const ownedSectors = getOwnedSectorIds(state);
   const nationReady = getNationReady(state);
   const nationDecision = getNationDecision(state);
+  const capital = getOwnedPlot(state)?.name ?? "Aurelian Basin";
   const completed = roadmap.filter((item) => item.done(state)).length;
 
   return (
@@ -38,10 +39,15 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
       </div>
 
       {nationDecision ? (
-        <div data-qa="council-nation-founded" className="mt-4 rounded-2xl border border-emerald-200/35 bg-emerald-300/12 p-3">
-          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-100/65">Nation founded</p>
-          <p className="mt-1 text-base font-black text-amber-50">{nationDecision.label}</p>
-          <p className="mt-1 text-xs leading-relaxed text-amber-50/62">{nationDecision.effect}</p>
+        <div data-qa="council-nation-founded" className="mt-4 overflow-hidden rounded-2xl border border-emerald-200/40 bg-[radial-gradient(circle_at_top_left,rgba(52,211,153,.22),transparent_36%),rgba(16,185,129,.12)] p-3 shadow-[0_0_42px_rgba(16,185,129,.14)]">
+          <div className="flex items-start gap-3">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-emerald-100/35 bg-black/28 text-2xl">⚑</div>
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-100/70">Nation founded</p>
+              <p className="mt-1 text-lg font-black text-amber-50">Aurelian Nation · {nationDecision.label}</p>
+              <p className="mt-1 text-xs leading-relaxed text-amber-50/62">Capital: {capital}. Controlled sectors: {ownedSectors.join(" · ")}. {nationDecision.effect}</p>
+            </div>
+          </div>
         </div>
       ) : nationReady ? (
         <div data-qa="council-nation-ready" className="mt-4 rounded-2xl border border-amber-200/35 bg-amber-300/12 p-3">
