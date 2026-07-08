@@ -84,9 +84,46 @@ const steps = [
     if (afterOwned <= beforeOwned) throw new Error(`Owned sectors did not grow: ${beforeOwned} -> ${afterOwned}`);
     await sleep(450);
   } },
-  { id: "06-council-section", label: "Council section", note: "Council tracks expansion and nation progress.", run: async (page) => {
+  { id: "06-council-section", label: "Council section", note: "Council tracks expansion and nation progress before founding.", run: async (page) => {
     await clickButtonByText(page, /Council plan/i);
     await page.locator('[data-qa="council-panel"]').waitFor({ state: "visible", timeout: 5000 });
+    await sleep(450);
+  } },
+  { id: "07-founding-ceremony", label: "Founding ceremony", note: "After the third sector and doctrine choice, a visible founding ceremony must appear exactly when the nation is founded.", run: async (page) => {
+    await runOrder(page, /Open Market Path/i);
+    await clickDock(page, "world");
+    const beforeOwned = await countOwnedSectors(page);
+    if (beforeOwned < 2) throw new Error(`Expected at least 2 owned sectors before final founding claim, got ${beforeOwned}`);
+    await page.locator('[data-qa="world-sector-tile"][data-sector-control="claimable"]').first().click();
+    await clickButtonByText(page, /Claim sector/i);
+    await page.locator('[data-qa="world-map-scene"][data-owned-count="3"]').waitFor({ state: "visible", timeout: 5000 });
+    await clickButtonByText(page, /Council plan/i);
+    await page.locator('[data-qa="council-nation-ready"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-qa="found-nation-choice"][data-decision-id="trade-charter"]').click();
+    await page.locator('[data-qa="founding-ceremony"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.getByText(/The First Nation Rises/i).waitFor({ state: "visible", timeout: 5000 });
+    await sleep(450);
+  } },
+  { id: "08-founded-aftermath-after-dismiss", label: "Founded aftermath after dismiss", note: "Dismissing the ceremony must leave persistent Council and World founded-state visuals.", run: async (page) => {
+    await clickDom(page, '[data-qa="dismiss-founding-ceremony"]');
+    await page.locator('[data-qa="founding-ceremony"]').waitFor({ state: "hidden", timeout: 5000 });
+    await page.locator('[data-qa="council-nation-founded"]').waitFor({ state: "visible", timeout: 5000 });
+    await clickDock(page, "world");
+    await page.locator('[data-qa="nation-world-banner"]').waitFor({ state: "visible", timeout: 5000 });
+    const foundedOwned = await page.locator('[data-qa="world-sector-tile"][data-nation-founded-owned="true"]').count();
+    if (foundedOwned < 3) throw new Error(`Expected at least 3 founded owned sectors, got ${foundedOwned}`);
+    await sleep(450);
+  } },
+  { id: "09-founded-state-after-reload", label: "Founded state after reload", note: "Reload must preserve the founded nation while not replaying the dismissed ceremony.", run: async (page) => {
+    await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
+    await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    await page.locator('[data-qa="founding-ceremony"]').waitFor({ state: "hidden", timeout: 5000 });
+    const replayed = await page.locator('[data-qa="founding-ceremony"]').isVisible().catch(() => false);
+    if (replayed) throw new Error("Founding ceremony replayed after dismissal and reload");
+    await clickDock(page, "council");
+    await page.locator('[data-qa="council-nation-founded"]').waitFor({ state: "visible", timeout: 5000 });
+    await clickDock(page, "world");
+    await page.locator('[data-qa="nation-world-banner"]').waitFor({ state: "visible", timeout: 5000 });
     await sleep(450);
   } },
 ];
@@ -157,7 +194,7 @@ function escapeHtml(value) {
 function buildReport({ generatedAt, appSource, shots, interactionLog }) {
   const items = shots.map((shot) => `<li>${escapeHtml(shot.stepLabel)} — ${shot.error ? `WARNING: ${escapeHtml(shot.error)}` : "ok"}</li>`).join("\n");
   const logItems = interactionLog.map((item) => `<li>${escapeHtml(item.viewport)} / ${escapeHtml(item.stepId)} — ${escapeHtml(item.status)}${item.error ? `: ${escapeHtml(item.error)}` : ""}</li>`).join("\n");
-  return `<!doctype html><html><head><meta charset="utf-8"><title>Pixel Nations Expansion QA</title></head><body><main><h1>Expansion Loop evidence</h1><p>Generated: ${escapeHtml(generatedAt)}</p><p>App source: ${escapeHtml(appSource)}</p><h2>Verdict checklist</h2><ul><li>Owned territory visibly grows</li><li>Expansion uses Influence</li><li>Council reflects expansion progress</li></ul><h2>Interaction log</h2><ul>${logItems}</ul><h2>Screenshots</h2><ul>${items}</ul></main></body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Pixel Nations Expansion QA</title></head><body><main><h1>Expansion Loop evidence</h1><p>Generated: ${escapeHtml(generatedAt)}</p><p>App source: ${escapeHtml(appSource)}</p><h2>Verdict checklist</h2><ul><li>Owned territory visibly grows</li><li>Expansion uses Influence</li><li>Council reflects expansion progress</li><li>Founding ceremony appears after doctrine choice</li><li>Dismissed ceremony does not replay after reload</li></ul><h2>Interaction log</h2><ul>${logItems}</ul><h2>Screenshots</h2><ul>${items}</ul></main></body></html>`;
 }
 
 async function runViewport(config) {
