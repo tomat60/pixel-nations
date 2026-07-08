@@ -1,11 +1,11 @@
-import { getDevelopmentScore, getNationReady, getOwnedSectorIds, getPhase, getPopulation, getRivalPressure, nationSectorThreshold, type PlayAction, type PlayState } from "../lib/play-state";
+import { getDevelopmentScore, getNationDecision, getNationReady, getOwnedSectorIds, getPhase, getPopulation, getRivalPressure, nationDecisions, nationSectorThreshold, type PlayAction, type PlayState } from "../lib/play-state";
 
 const roadmap = [
   { label: "Land", detail: "claim one homeland", done: (state: PlayState) => state.ownedPlotIds.length > 0 },
   { label: "Settlement", detail: "raise shelter + storehouse", done: (state: PlayState) => state.settlementMarkers.includes("shelter") && state.settlementMarkers.includes("storehouse") },
   { label: "Village", detail: "market + council + watch", done: (state: PlayState) => state.settlementMarkers.includes("market") && state.settlementMarkers.includes("council") && state.settlementMarkers.includes("watch") },
   { label: "City", detail: "next sprint: districts, workers, laws", done: () => false },
-  { label: "Nation", detail: "hold 3 connected world sectors", done: getNationReady },
+  { label: "Nation", detail: "hold 3 sectors, then choose a founding doctrine", done: (state: PlayState) => Boolean(state.nationDecisionId) },
   { label: "Empire", detail: "future: regions, rivals, world pressure", done: () => false },
 ];
 
@@ -16,15 +16,16 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
   const population = getPopulation(state);
   const ownedSectors = getOwnedSectorIds(state);
   const nationReady = getNationReady(state);
+  const nationDecision = getNationDecision(state);
   const completed = roadmap.filter((item) => item.done(state)).length;
 
   return (
-    <aside data-qa="council-panel" className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-10rem)] w-[min(500px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/66 p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5 md:p-4">
+    <aside data-qa="council-panel" data-nation-decision={nationDecision?.id ?? "none"} className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-10rem)] w-[min(560px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/66 p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5 md:p-4">
       <p className="text-[9px] font-black uppercase tracking-[0.24em] text-amber-200/65">Council chamber</p>
       <div className="mt-1 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-2xl font-black text-amber-50 md:text-4xl">From land to empire</h2>
-          <p className="mt-1 text-xs leading-relaxed text-amber-50/65 md:text-sm">This screen now tracks the first expansion path: one homeland, connected sectors, then nation-scale play.</p>
+          <p className="mt-1 text-xs leading-relaxed text-amber-50/65 md:text-sm">This screen now turns border growth into the first permanent nation-scale decision.</p>
         </div>
         <span className="rounded-full border border-amber-200/25 bg-amber-200/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-amber-100">{completed}/6</span>
       </div>
@@ -36,7 +37,32 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
         <Metric label="Rivals" value={`${pressure}%`} />
       </div>
 
-      {nationReady ? <div data-qa="council-nation-ready" className="mt-4 rounded-2xl border border-amber-200/35 bg-amber-300/12 p-3"><p className="text-sm font-black text-amber-50">Found Nation is ready</p><p className="mt-1 text-xs leading-relaxed text-amber-50/62">Three connected sectors now answer to your council. The demo has reached the first nation-scale threshold.</p></div> : <div className="mt-4 rounded-2xl border border-amber-100/14 bg-amber-100/8 p-3"><p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-200/55">Next strategic goal</p><p className="mt-1 text-sm font-black text-amber-50">Claim {Math.max(0, nationSectorThreshold - ownedSectors.length)} more connected sector{nationSectorThreshold - ownedSectors.length === 1 ? "" : "s"}</p></div>}
+      {nationDecision ? (
+        <div data-qa="council-nation-founded" className="mt-4 rounded-2xl border border-emerald-200/35 bg-emerald-300/12 p-3">
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-100/65">Nation founded</p>
+          <p className="mt-1 text-base font-black text-amber-50">{nationDecision.label}</p>
+          <p className="mt-1 text-xs leading-relaxed text-amber-50/62">{nationDecision.effect}</p>
+        </div>
+      ) : nationReady ? (
+        <div data-qa="council-nation-ready" className="mt-4 rounded-2xl border border-amber-200/35 bg-amber-300/12 p-3">
+          <p className="text-sm font-black text-amber-50">Choose the founding doctrine</p>
+          <p className="mt-1 text-xs leading-relaxed text-amber-50/62">Three connected sectors now answer to your council. Pick one doctrine; it persists and changes the run.</p>
+          <div className="mt-3 grid gap-2">
+            {nationDecisions.map((decision) => (
+              <button key={decision.id} type="button" data-qa="found-nation-choice" data-decision-id={decision.id} onClick={() => dispatch({ type: "foundNation", decisionId: decision.id })} className="rounded-2xl border border-amber-100/18 bg-white/8 p-3 text-left transition hover:bg-amber-200/12">
+                <span className="block text-sm font-black text-amber-50">{decision.label}</span>
+                <span className="mt-1 block text-xs leading-relaxed text-amber-50/62">{decision.short}</span>
+                <span className="mt-1 block text-[11px] font-bold text-emerald-100/70">{decision.effect}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4 rounded-2xl border border-amber-100/14 bg-amber-100/8 p-3">
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-200/55">Next strategic goal</p>
+          <p className="mt-1 text-sm font-black text-amber-50">Claim {Math.max(0, nationSectorThreshold - ownedSectors.length)} more connected sector{nationSectorThreshold - ownedSectors.length === 1 ? "" : "s"}</p>
+        </div>
+      )}
 
       <div className="mt-4 space-y-2">
         {roadmap.map((item) => {
