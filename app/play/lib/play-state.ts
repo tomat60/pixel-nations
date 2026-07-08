@@ -17,6 +17,7 @@ export type PlayState = {
   ownedPlotIds: string[];
   ownedSectorIds: string[];
   nationDecisionId: NationDecisionId | null;
+  foundingCeremonySeen: boolean;
   season: number;
   view: ViewId;
   lastEvent: string;
@@ -32,6 +33,8 @@ export type PlayAction =
   | { type: "claim"; plotId: string }
   | { type: "claimSector"; sectorId: string }
   | { type: "foundNation"; decisionId: NationDecisionId }
+  | { type: "dismissFoundingCeremony" }
+  | { type: "hydrate"; state: PlayState }
   | { type: "runOrder"; orderId: OrderId }
   | { type: "setView"; view: ViewId }
   | { type: "reset" };
@@ -61,6 +64,7 @@ export const initialPlayState: PlayState = {
   ownedPlotIds: [],
   ownedSectorIds: [],
   nationDecisionId: null,
+  foundingCeremonySeen: false,
   season: 1,
   view: "map",
   lastEvent: "Choose one land. A nation begins when the map changes.",
@@ -142,12 +146,13 @@ function orderResult(state: PlayState, orderId: OrderId): Partial<PlayState> | n
 
 export function playReducer(state: PlayState, action: PlayAction): PlayState {
   switch (action.type) {
+    case "hydrate": return action.state;
     case "select": return { ...state, selectedPlotId: action.plotId, view: state.view === "village" ? "map" : state.view };
     case "setView": return { ...state, view: action.view };
     case "claim": {
       if (state.ownedPlotIds.includes(action.plotId)) return state;
       const plot = plots.find((item) => item.id === action.plotId);
-      return { ...state, selectedPlotId: action.plotId, ownedPlotIds: [action.plotId], ownedSectorIds: [homelandSectorId], nationDecisionId: null, season: 2, view: "village", settlementMarkers: ["camp"], resources: { food: 3, timber: 2, stone: 0, influence: 1 }, chronicle: pushChronicle(state, "First banner raised", `${plot?.name ?? "A land"} became the first claimed homeland.`), lastEvent: `${plot?.name ?? "A land"} is claimed. Enter Village, then choose Orders.` };
+      return { ...state, selectedPlotId: action.plotId, ownedPlotIds: [action.plotId], ownedSectorIds: [homelandSectorId], nationDecisionId: null, foundingCeremonySeen: false, season: 2, view: "village", settlementMarkers: ["camp"], resources: { food: 3, timber: 2, stone: 0, influence: 1 }, chronicle: pushChronicle(state, "First banner raised", `${plot?.name ?? "A land"} became the first claimed homeland.`), lastEvent: `${plot?.name ?? "A land"} is claimed. Enter Village, then choose Orders.` };
     }
     case "claimSector": {
       const sector = getWorldSector(getSectorIndexFromId(action.sectorId));
@@ -163,8 +168,9 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       if (!getOwnedSectorIds(state).length || getOwnedSectorIds(state).length < nationSectorThreshold) return { ...state, lastEvent: `Founding needs ${nationSectorThreshold} connected sectors.`, view: "council" };
       if (state.nationDecisionId) return { ...state, lastEvent: "The founding doctrine is already set.", view: "council" };
       const influenceGain = decision.id === "trade-charter" ? 2 : 0;
-      return { ...state, nationDecisionId: decision.id, resources: { ...state.resources, influence: state.resources.influence + influenceGain }, season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, "Nation founded", `${decision.label} became the first doctrine binding ${getOwnedSectorIds(state).length} sectors.`), lastEvent: `Nation founded: ${decision.label}. ${decision.effect}` };
+      return { ...state, nationDecisionId: decision.id, foundingCeremonySeen: false, resources: { ...state.resources, influence: state.resources.influence + influenceGain }, season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, "Nation founded", `${decision.label} became the first doctrine binding ${getOwnedSectorIds(state).length} sectors.`), lastEvent: `Nation founded: ${decision.label}. ${decision.effect}` };
     }
+    case "dismissFoundingCeremony": return state.nationDecisionId ? { ...state, foundingCeremonySeen: true, view: "council" } : state;
     case "runOrder": {
       const result = orderResult(state, action.orderId);
       if (!result) return { ...state, lastEvent: "That order is already resolved or needs a claimed land." };
