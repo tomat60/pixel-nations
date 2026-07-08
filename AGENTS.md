@@ -11,22 +11,39 @@ Pixel Nations is a premium black/gold strategy game landing page plus a playable
 ## Core fantasy
 
 - **10,000 lands** in a 100 × 100 world — finite, player-owned territory.
-- **Player progression**: claim land → found city → create nation → create empire.
+- **Player progression**: claim land → found city/settlement → create nation → create empire.
 - **No NPC kingdoms** — players create history; the world is empty until founders act.
-- **Demo state** persists in `localStorage` via `app/lib/settlement-state.ts`; claimed land identity must stay consistent across `/world`, `/dashboard`, and downstream demo pages.
+- Current `/play` demo focus: Sector A-01 / Aurelian Basin, village growth, expansion, and nation founding.
+- Legacy demo state may still persist in `localStorage`; do not break existing claim identity or progression compatibility unless the task explicitly scopes it.
 
 ## What agents must preserve
 
 - **Premium strategy-game aesthetic** — black/gold, cinematic but minimal, tactical world-map feel.
-- **Honest world scale** — the playable sector (Sector A-01, 216 visible lands) is a window into the full 10,000-land world, not the whole world.
-- **Claim flow and persistence** — do not break tile selection, claim modal, mobile claim tray, or dashboard land identity.
-- **World Atlas** — treat it as the visual benchmark; playable sector should feel like the atlas came alive.
+- **Honest world scale** — the demo is a window into the full 10,000-land world, not the whole world.
+- **Claim flow and persistence** — do not break tile selection, claim flow, village/play progression, or claimed land identity.
+- **World Atlas / Play scene quality bar** — strategic surfaces should feel like the atlas came alive, not like raw data panels.
 
 ## Language and tone
 
 **Do not use** crypto, NFT, wallet, token, mint, ETH, or Web3 framing. This is a strategy game about land, cities, nations, and empires.
 
 Copy should be cinematic but short — kingdom map, founder record, strategic world — not marketing fluff or ledger jargon.
+
+## Active AI Command Room
+
+The active coordination channel is GitHub issue **#79 — AI Command Room: Fable / Claude / Cursor collaboration channel**.
+
+This issue is not an automatic trigger by itself. It becomes active when a human, ChatGPT/control-plane, Cursor Automation, Claude, Fable, or another agent is explicitly pointed to it.
+
+When a prompt says to use the Command Room, issue #79, or AI coordination channel, agents must:
+
+1. Read issue #79 before coding.
+2. Read `docs/PROJECT_OPERATING_RULES.md` and this `AGENTS.md`.
+3. For strategy requests, respond in issue #79 with recommendation and plan before implementation.
+4. For implementation requests, follow the output contract below.
+5. Reference issue #79 in branch reports, PR bodies, or strategy responses.
+
+For the current strategic direction, #79 is the source of truth over older broad plans: prioritize a playable vertical slice before polish, and do not start full backend/auth/payment/multiplayer work unless explicitly scoped.
 
 ## How to work on this repo
 
@@ -64,11 +81,15 @@ All non-Cursor coding agents must follow this output contract:
 
 | Area | Path |
 |------|------|
-| World map | `app/world/page.tsx` |
+| Current playable demo | `app/play/**` |
+| Play state | `app/play/lib/**` |
+| Play scenes | `app/play/components/**`, `app/play/world/**` |
+| Legacy world map | `app/world/page.tsx` |
 | Claimed land helpers | `app/lib/claimed-land.ts` |
-| Demo state | `app/lib/settlement-state.ts` |
+| Legacy demo state | `app/lib/settlement-state.ts` |
 | Operating rules | `docs/PROJECT_OPERATING_RULES.md` |
 | World map spec | `docs/WORLD_MAP_V7_SPEC.md` |
+| AI cost controls | `docs/AI_COST_CONTROL_CODEX.md` |
 
 ## Reporting
 
