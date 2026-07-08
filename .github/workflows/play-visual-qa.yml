@@ -17,7 +17,7 @@ jobs:
   play-visual-qa:
     name: Generate /play gameplay evidence
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
       - name: Checkout

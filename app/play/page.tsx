@@ -25,7 +25,7 @@ export default function PlayPrototypePage() {
           {isVillage ? <VillageScene state={state} dispatch={dispatch} /> : isWorld ? <WorldMapScene state={state} dispatch={dispatch} /> : <MapStage state={state} dispatch={dispatch} />}
           <TopBar state={state} />
           <div className="pointer-events-none absolute right-3 top-[5.9rem] z-20 max-w-[210px] rounded-2xl border border-amber-100/20 bg-black/42 p-2.5 text-right shadow-xl backdrop-blur-md md:right-5 md:top-[6.8rem] md:max-w-[390px] md:p-3">
-            <p className="text-[8px] uppercase tracking-[0.22em] text-amber-200/65 md:text-[10px] md:tracking-[0.26em]">{isVillage ? "Village scene" : isWorld ? "World map scene" : "Game shell"}</p>
+            <p className="text-[8px] uppercase tracking-[0.22em] text-amber-200/65 md:text-[10px] md:tracking-[0.26em]">{isVillage ? "Village scene" : isWorld ? "Expansion map" : "Game shell"}</p>
             <p className="mt-1 text-xs font-black leading-tight text-amber-50 md:text-base">Map · Village · Orders · World · Council</p>
             <p className="mt-2 hidden text-[10px] font-black uppercase tracking-[0.2em] text-amber-200/55 md:block">{state.lastEvent}</p>
           </div>
