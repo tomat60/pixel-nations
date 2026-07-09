@@ -126,6 +126,43 @@ const steps = [
     await page.locator('[data-qa="nation-world-banner"]').waitFor({ state: "visible", timeout: 5000 });
     await sleep(450);
   } },
+  { id: "10-retention-season-panel", label: "Retention season panel", note: "After founding dismissal, the first retention season decision must be visible.", run: async (page) => {
+    await clickDock(page, "council");
+    await page.locator('[data-qa="season-decision-panel"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-qa="season-decision-panel"][data-season-decision="grain-levy"]').waitFor({ state: "visible", timeout: 5000 });
+    const choices = await page.locator('[data-qa="season-choice"]').count();
+    if (choices < 2) throw new Error(`Expected at least 2 season choices, got ${choices}`);
+    await sleep(450);
+  } },
+  { id: "11-first-era-complete", label: "First era complete", note: "The player can resolve three deterministic post-founding season decisions.", run: async (page) => {
+    await clickDock(page, "council");
+    const expectedDecisions = ["grain-levy", "open-roads", "scribe-patronage"];
+    for (let index = 0; index < expectedDecisions.length; index += 1) {
+      const decisionId = expectedDecisions[index];
+      await page.locator(`[data-qa="season-decision-panel"][data-season-decision="${decisionId}"]`).waitFor({ state: "visible", timeout: 5000 });
+      await page.locator(`[data-qa="season-choice"][data-decision-id="${decisionId}"]`).first().click();
+      await page.locator(`[data-qa="council-panel"][data-retention-count="${index + 1}"]`).waitFor({ state: "visible", timeout: 5000 });
+    }
+    await page.locator('[data-qa="first-era-complete"]').waitFor({ state: "visible", timeout: 5000 });
+    const records = await page.locator('[data-qa="retention-record"]').count();
+    if (records < 3) throw new Error(`Expected at least 3 retention records, got ${records}`);
+    await sleep(450);
+  } },
+  { id: "12-retention-state-after-reload", label: "Retention state after reload", note: "Reload preserves completed first era and world consequence markers.", run: async (page) => {
+    await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
+    await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    await clickDock(page, "council");
+    await page.locator('[data-qa="council-panel"][data-retention-count="3"][data-era-complete="true"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-qa="first-era-complete"]').waitFor({ state: "visible", timeout: 5000 });
+    const records = await page.locator('[data-qa="retention-record"]').count();
+    if (records < 3) throw new Error(`Expected at least 3 persisted retention records, got ${records}`);
+    await clickDock(page, "world");
+    await page.locator('[data-qa="world-map-scene"][data-retention-count="3"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-qa="world-retention-effects"]').waitFor({ state: "visible", timeout: 5000 });
+    const markers = await page.locator('[data-qa="world-retention-marker"]').count();
+    if (markers < 3) throw new Error(`Expected at least 3 world retention markers, got ${markers}`);
+    await sleep(450);
+  } },
 ];
 
 async function withTimeout(label, fn, timeoutMs = 20000) {
@@ -194,7 +231,7 @@ function escapeHtml(value) {
 function buildReport({ generatedAt, appSource, shots, interactionLog }) {
   const items = shots.map((shot) => `<li>${escapeHtml(shot.stepLabel)} — ${shot.error ? `WARNING: ${escapeHtml(shot.error)}` : "ok"}</li>`).join("\n");
   const logItems = interactionLog.map((item) => `<li>${escapeHtml(item.viewport)} / ${escapeHtml(item.stepId)} — ${escapeHtml(item.status)}${item.error ? `: ${escapeHtml(item.error)}` : ""}</li>`).join("\n");
-  return `<!doctype html><html><head><meta charset="utf-8"><title>Pixel Nations Expansion QA</title></head><body><main><h1>Expansion Loop evidence</h1><p>Generated: ${escapeHtml(generatedAt)}</p><p>App source: ${escapeHtml(appSource)}</p><h2>Verdict checklist</h2><ul><li>Owned territory visibly grows</li><li>Expansion uses Influence</li><li>Council reflects expansion progress</li><li>Founding ceremony appears after doctrine choice</li><li>Dismissed ceremony does not replay after reload</li></ul><h2>Interaction log</h2><ul>${logItems}</ul><h2>Screenshots</h2><ul>${items}</ul></main></body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Pixel Nations Gameplay QA</title></head><body><main><h1>Playable loop evidence</h1><p>Generated: ${escapeHtml(generatedAt)}</p><p>App source: ${escapeHtml(appSource)}</p><h2>Verdict checklist</h2><ul><li>Owned territory visibly grows</li><li>Expansion uses Influence</li><li>Council reflects expansion progress</li><li>Founding ceremony appears after doctrine choice</li><li>Dismissed ceremony does not replay after reload</li><li>Retention season panel appears after founding</li><li>Three post-founding season decisions can be resolved</li><li>First era completion and world consequence markers persist after reload</li></ul><h2>Interaction log</h2><ul>${logItems}</ul><h2>Screenshots</h2><ul>${items}</ul></main></body></html>`;
 }
 
 async function runViewport(config) {

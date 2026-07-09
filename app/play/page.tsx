@@ -71,6 +71,7 @@ function restorePlayState(): PlayState | null {
       settlementMarkers: parsed.settlementMarkers ?? [],
       scoutedPlotIds: parsed.scoutedPlotIds ?? [],
       chronicle: parsed.chronicle ?? initialPlayState.chronicle,
+      retentionRecords: parsed.retentionRecords ?? [],
       nationDecisionId: parsed.nationDecisionId ?? null,
       foundingCeremonySeen: Boolean(parsed.foundingCeremonySeen),
     };
