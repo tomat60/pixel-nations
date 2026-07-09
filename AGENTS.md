@@ -13,7 +13,7 @@ Pixel Nations is a premium black/gold strategy game landing page plus a playable
 - **10,000 lands** in a 100 × 100 world — finite, player-owned territory.
 - **Player progression**: claim land → found city/settlement → create nation → create empire.
 - **No NPC kingdoms** — players create history; the world is empty until founders act.
-- Current `/play` demo focus: Sector A-01 / Aurelian Basin, village growth, expansion, and nation founding.
+- Current `/play` demo focus: Sector A-01 / Aurelian Basin, village growth, expansion, nation founding, and post-founding retention evidence.
 - Legacy demo state may still persist in `localStorage`; do not break existing claim identity or progression compatibility unless the task explicitly scopes it.
 
 ## What agents must preserve
@@ -55,11 +55,27 @@ These rules exist because accidental write actions and premature merges create c
 - Before any GitHub write action, confirm the exact action name and target in the prompt or tool call: `create_pull_request` for PRs, `create_issue` only for real issues, `update_file` only for intended file changes, and `merge_pull_request` only after explicit merge acceptance.
 - If an accidental issue/file/commit is created, immediately close/remove it, report it, and do not continue with broader work until the branch or issue list is clean.
 
+## Fable visual/gamefeel evidence protocol
+
+Fable is useful and should be used, but not as a blind visual reviewer.
+
+For any Fable run about visual quality, gamefeel, art direction, onboarding clarity, or screen-readability:
+
+1. The prompt must state that the **only current playable demo route is `/play`**.
+2. The prompt must state that current implementation scope is **`app/play/**` plus relevant `/play` QA scripts**.
+3. The prompt must include a current visual evidence inventory: workflow run, artifact name, screenshot filenames, and a short Product Lead read of what those screenshots show.
+4. The prompt must state whether there is direct video/manual gameplay capture. If not, Fable must mark gamefeel conclusions as screenshot-based and uncertain.
+5. The output must reference current `/play` evidence filenames or current `data-qa` selectors.
+6. Any Fable output that proposes work for legacy routes such as `/world`, `/dashboard`, `/settlement`, `/nation`, or `/empire` is automatically rejected unless the issue explicitly scopes legacy route compatibility.
+7. Any Fable output that references legacy files such as `app/lib/settlement-state.ts` as the current source of truth is automatically rejected.
+
+Fable should be used for structured critique and prompt generation after this evidence contract is satisfied. ChatGPT/control-plane remains responsible for accepting, rejecting, or narrowing Fable recommendations.
+
 ## How to work on this repo
 
-1. **Read before coding**: `docs/PROJECT_OPERATING_RULES.md` and, for `/world`, `docs/WORLD_MAP_V7_SPEC.md`.
+1. **Read before coding**: `docs/PROJECT_OPERATING_RULES.md`, this `AGENTS.md`, and the current `/play` files relevant to the issue.
 2. **No vague cosmetic passes** — if the task is a visual improvement, it must be a meaningful scoped change with clear acceptance criteria, not a 5% color tweak loop.
-3. **Stay in scope** — do not redesign unrelated pages (landing, dashboard, settlement, nation, empire) unless the prompt explicitly requires it or routing compatibility demands it.
+3. **Stay in scope** — do not redesign unrelated landing or legacy compatibility surfaces unless the prompt explicitly requires it.
 4. **Cost control** — avoid broad repo exploration, repeated weak iterations, unnecessary `npm run qa:screens`, and dependency installs without justification.
 5. **Ask for scope only when truly blocked** — if the goal, files, and acceptance criteria are defined in the prompt or docs, execute; do not re-litigate product strategy.
 6. **PR output contract** — Cursor Automation must not open PRs directly. Push the branch and comment with branch name, head SHA, validation result, and blocker/status. ChatGPT/control-plane opens the PR as ready for review through the GitHub connector.
@@ -87,19 +103,18 @@ All non-Cursor coding agents must follow this output contract:
 - If validation passes but a ready PR cannot be opened, do **not** open a draft PR. Push the branch, then comment on the issue with the branch name, head commit SHA, validation result, and the blocker. ChatGPT/control-plane will open or merge the PR from that branch.
 - Do not commit `public/qa/latest/*` artifacts unless the issue explicitly requires public QA evidence updates.
 
-## Key files (reference)
+## Key files (current source of truth)
 
 | Area | Path |
 |------|------|
 | Current playable demo | `app/play/**` |
 | Play state | `app/play/lib/**` |
 | Play scenes | `app/play/components/**`, `app/play/world/**` |
-| Legacy world map | `app/world/page.tsx` |
-| Claimed land helpers | `app/lib/claimed-land.ts` |
-| Legacy demo state | `app/lib/settlement-state.ts` |
+| Play visual QA | `scripts/qa-play-screenshots.mjs` |
 | Operating rules | `docs/PROJECT_OPERATING_RULES.md` |
-| World map spec | `docs/WORLD_MAP_V7_SPEC.md` |
 | AI cost controls | `docs/AI_COST_CONTROL_CODEX.md` |
+
+Do not use legacy route names or legacy state files as current planning anchors unless an issue explicitly scopes compatibility cleanup.
 
 ## Reporting
 
