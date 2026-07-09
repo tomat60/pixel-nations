@@ -1,10 +1,11 @@
-import type { PlayAction, PlayState, SettlementMarker } from "../lib/play-state";
+import type { PlayAction, PlayState, RetentionRecord, SettlementMarker } from "../lib/play-state";
 import { getDevelopmentScore, getOwnedPlot, getPhase, getPopulation } from "../lib/play-state";
 
 type VillagePlotId = "camp" | "shelter" | "storehouse" | "market" | "council" | "watch" | "fields" | "road";
 type PlotState = "empty" | "building" | "built";
 
 type VillagePlot = { id: VillagePlotId; marker?: SettlementMarker; label: string; hint: string; x: number; y: number; w: number; h: number };
+type InstitutionVisual = { label: string; district: string; marker: string; x: number; y: number; emoji: string; tone: string };
 
 const villagePlots: VillagePlot[] = [
   { id: "camp", marker: "camp", label: "Campfire Core", hint: "first people gathered", x: 38, y: 49, w: 18, h: 13 },
@@ -16,6 +17,24 @@ const villagePlots: VillagePlot[] = [
   { id: "fields", label: "Food Terraces", hint: "food orders fill the terraces", x: 13, y: 60, w: 22, h: 17 },
   { id: "road", label: "Village Road", hint: "paths bind districts together", x: 42, y: 67, w: 26, h: 9 },
 ];
+
+function getInstitutionVisuals(records: RetentionRecord[]): InstitutionVisual[] {
+  return records.slice(0, 3).map((record) => {
+    if (record.decisionId === "grain-levy") {
+      return record.choiceId === "authority"
+        ? { label: "Granary Authority", district: "Granary District", marker: "levy stewards", x: 58, y: 25, emoji: "◧", tone: "border-yellow-100/70 bg-yellow-300/24 text-yellow-50" }
+        : { label: "Commons Stores", district: "Civic Commons", marker: "free household stores", x: 28, y: 55, emoji: "◫", tone: "border-lime-100/70 bg-lime-300/20 text-lime-50" };
+    }
+    if (record.decisionId === "open-roads") {
+      return record.choiceId === "authority"
+        ? { label: "Border Road Ward", district: "Guard Road", marker: "road wardens", x: 72, y: 48, emoji: "◆", tone: "border-red-100/65 bg-red-300/18 text-red-50" }
+        : { label: "Open Market Road", district: "Market Street", marker: "caravan brokers", x: 66, y: 67, emoji: "◇", tone: "border-sky-100/70 bg-sky-300/20 text-sky-50" };
+    }
+    return record.choiceId === "authority"
+      ? { label: "Scribe House", district: "Law Hall", marker: "civic scribes", x: 44, y: 18, emoji: "✦", tone: "border-purple-100/70 bg-purple-300/20 text-purple-50" }
+      : { label: "First Foundries", district: "Workshop Row", marker: "foundry crews", x: 52, y: 71, emoji: "✹", tone: "border-orange-100/70 bg-orange-300/20 text-orange-50" };
+  });
+}
 
 export function VillageScene({ state, dispatch }: { state: PlayState; dispatch: (action: PlayAction) => void }) {
   const owned = getOwnedPlot(state);
@@ -94,6 +113,7 @@ function SettlementCredibilityLayer({ state }: { state: PlayState }) {
   const hasMarket = state.settlementMarkers.includes("market");
   const hasCouncil = state.settlementMarkers.includes("council");
   const hasWatch = state.settlementMarkers.includes("watch");
+  const institutionVisuals = getInstitutionVisuals(state.retentionRecords);
   const peopleCount = Math.min(12, 3 + state.completedOrders.length + Math.max(0, state.settlementMarkers.length - 1));
 
   return (
@@ -109,6 +129,7 @@ function SettlementCredibilityLayer({ state }: { state: PlayState }) {
       {hasMarket ? <MarketActivity /> : null}
       {hasCouncil ? <CouncilPresence /> : null}
       {hasWatch ? <WatchDefense /> : null}
+      {institutionVisuals.length > 0 ? <InstitutionDistrictLayer institutions={institutionVisuals} /> : null}
     </div>
   );
 }
@@ -215,6 +236,25 @@ function WatchDefense() {
       <div className="absolute left-3 top-6 h-12 w-[2px] rotate-[-18deg] bg-amber-100/45" />
       <div className="absolute left-7 top-6 h-12 w-[2px] rotate-[18deg] bg-amber-100/45" />
       <span className="absolute -right-8 top-8 h-2 w-8 rounded-full bg-red-200/50" />
+    </div>
+  );
+}
+
+function InstitutionDistrictLayer({ institutions }: { institutions: InstitutionVisual[] }) {
+  return (
+    <div data-qa="village-institution-layer" data-institution-count={institutions.length} className="absolute inset-0">
+      {institutions.map((institution) => (
+        <div key={institution.label} data-qa="village-institution-marker" data-institution-label={institution.label} data-institution-district={institution.district} className={`absolute w-32 rounded-2xl border px-2 py-1.5 shadow-[0_14px_28px_rgba(0,0,0,.34)] backdrop-blur-sm ${institution.tone}`} style={{ left: `${institution.x}%`, top: `${institution.y}%` }}>
+          <div className="flex items-center gap-2">
+            <span className="grid h-7 w-7 place-items-center rounded-xl border border-white/25 bg-black/32 text-sm">{institution.emoji}</span>
+            <div className="min-w-0">
+              <p className="truncate text-[10px] font-black">{institution.label}</p>
+              <p className="truncate text-[8px] font-black uppercase tracking-[0.12em] opacity-70">{institution.district}</p>
+            </div>
+          </div>
+          <p className="mt-1 truncate text-[8px] font-bold opacity-75">{institution.marker}</p>
+        </div>
+      ))}
     </div>
   );
 }
