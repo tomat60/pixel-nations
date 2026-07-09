@@ -19,6 +19,7 @@ export default function PlayPrototypePage() {
   const nationDecision = useMemo(() => getNationDecision(state), [state]);
   const isVillage = state.view === "village";
   const isWorld = state.view === "world";
+  const showOpeningGuide = hydrated && state.view === "map" && state.ownedPlotIds.length === 0;
 
   useEffect(() => {
     const restored = restorePlayState();
@@ -39,10 +40,11 @@ export default function PlayPrototypePage() {
           {isVillage ? <VillageScene state={state} dispatch={dispatch} /> : isWorld ? <WorldMapScene state={state} dispatch={dispatch} /> : <MapStage state={state} dispatch={dispatch} />}
           <TopBar state={state} />
           <div className="pointer-events-none absolute right-3 top-[5.9rem] z-20 max-w-[210px] rounded-2xl border border-amber-100/20 bg-black/42 p-2.5 text-right shadow-xl backdrop-blur-md md:right-5 md:top-[6.8rem] md:max-w-[390px] md:p-3">
-            <p className="text-[8px] uppercase tracking-[0.22em] text-amber-200/65 md:text-[10px] md:tracking-[0.26em]">{isVillage ? "Village scene" : isWorld ? "Expansion map" : "Game shell"}</p>
-            <p className="mt-1 text-xs font-black leading-tight text-amber-50 md:text-base">Map · Village · Orders · World · Council</p>
+            <p className="text-[8px] uppercase tracking-[0.22em] text-amber-200/65 md:text-[10px] md:tracking-[0.26em]">{isVillage ? "Village scene" : isWorld ? "Expansion map" : "First claim"}</p>
+            <p className="mt-1 text-xs font-black leading-tight text-amber-50 md:text-base">{isVillage ? "Orders visibly build your settlement" : isWorld ? "Your nation spreads across sectors" : "Choose one land to begin"}</p>
             <p className="mt-2 hidden text-[10px] font-black uppercase tracking-[0.2em] text-amber-200/55 md:block">{state.lastEvent}</p>
           </div>
+          {showOpeningGuide ? <OpeningGuide selectedName={selected.name} /> : null}
           {state.view === "map" ? <LandSheet selected={selected} state={state} dispatch={dispatch} /> : null}
           {state.view === "orders" && state.ownedPlotIds.length > 0 ? <OrdersPanel state={state} dispatch={dispatch} /> : null}
           {state.view === "council" ? <CouncilPanel state={state} dispatch={dispatch} /> : null}
@@ -51,6 +53,21 @@ export default function PlayPrototypePage() {
         </div>
       </section>
     </main>
+  );
+}
+
+function OpeningGuide({ selectedName }: { selectedName: string }) {
+  return (
+    <section data-qa="opening-guide" className="pointer-events-none absolute left-3 right-3 top-[10.8rem] z-20 rounded-3xl border border-amber-100/20 bg-black/46 p-3 shadow-2xl backdrop-blur-md md:left-5 md:right-auto md:top-[12.2rem] md:w-[390px] md:p-4">
+      <p className="text-[9px] font-black uppercase tracking-[0.24em] text-amber-200/65">Start here</p>
+      <h2 className="mt-1 text-xl font-black text-amber-50 md:text-2xl">One land can become an empire.</h2>
+      <p className="mt-2 text-xs leading-relaxed text-amber-50/68 md:text-sm">You are viewing Sector A-01, the Aurelian Basin. Choose a land, raise the first settlement, then expand toward a nation.</p>
+      <div className="mt-3 grid gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-amber-100/70 md:text-xs">
+        <p>1 · Select {selectedName}</p>
+        <p>2 · Press “Claim this land”</p>
+        <p>3 · Build the first village order</p>
+      </div>
+    </section>
   );
 }
 

@@ -16,14 +16,15 @@ export function LandSheet({ selected, state, dispatch }: { selected: Plot; state
         {owned ? <Tag label={phase} tone="gold" /> : selected.rival ? <Tag label="Rival" tone="slate" /> : selected.trade ? <Tag label="Route" tone="blue" /> : null}
       </div>
 
+      {phase === "unclaimed" ? <p className="mt-3 rounded-2xl border border-amber-200/25 bg-amber-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-amber-100">First move: claim one land, then build a village.</p> : null}
       <p className="mt-2 text-xs leading-relaxed text-amber-50/66 md:text-sm">{terrainLine[selected.terrain]}</p>
       <p className="mt-2 text-xs leading-relaxed text-amber-100/78 md:text-sm">{roleLine[selected.role]}</p>
       <p className="mt-2 text-xs leading-relaxed text-amber-50/66 md:text-sm">{selected.strategicValue}</p>
       <p className="mt-2 text-[10px] font-black uppercase tracking-[0.18em] text-amber-200/55">{selected.resources.join(" / ")}</p>
 
       {phase === "unclaimed" ? (
-        <button data-qa="claim-button" onClick={() => dispatch({ type: "claim", plotId: selected.id })} className="mt-3 w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-black/30 transition hover:bg-amber-200">
-          Choose this land
+        <button data-qa="claim-button" aria-label="Choose this land and claim it" onClick={() => dispatch({ type: "claim", plotId: selected.id })} className="mt-3 w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-black/30 transition hover:bg-amber-200">
+          Claim this land
         </button>
       ) : owned ? (
         <p className="mt-3 rounded-2xl border border-amber-100/20 bg-amber-100/10 px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-amber-100">{state.completedOrders.length} orders complete · settlement is changing on map</p>
