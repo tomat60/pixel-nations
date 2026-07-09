@@ -19,7 +19,6 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
   const nationDecision = getNationDecision(state);
   const capital = getOwnedPlot(state)?.name ?? "Aurelian Basin";
   const completed = roadmap.filter((item) => item.done(state)).length;
-  const nextRetentionDecision = getNextRetentionDecision(state);
   const firstEraComplete = getFirstEraComplete(state);
 
   return (
@@ -112,7 +111,8 @@ function SeasonLoop({ state, dispatch, complete }: { state: PlayState; dispatch:
     return (
       <div data-qa="first-era-complete" className="mt-4 rounded-3xl border border-sky-200/35 bg-sky-300/12 p-3">
         <p className="text-[9px] font-black uppercase tracking-[0.2em] text-sky-100/65">First Era Complete</p>
-        <p className="mt-1 text-sm font-black text-amber-50">The nation now has a three-season memory.</p>
+        <p className="mt-1 text-lg font-black text-amber-50">The nation remembers its first three seasons.</p>
+        <p className="mt-1 text-xs leading-relaxed text-amber-50/62">A council chronicle now records what changed in the village and across the world map.</p>
         <div className="mt-3 space-y-2">
           {state.retentionRecords.map((record) => <RetentionRecordLine key={`${record.decisionId}-${record.choiceId}`} record={record} />)}
         </div>
@@ -123,15 +123,18 @@ function SeasonLoop({ state, dispatch, complete }: { state: PlayState; dispatch:
   if (!decision) return null;
 
   return (
-    <div data-qa="season-decision-panel" data-season-decision={decision.id} className="mt-4 rounded-3xl border border-amber-200/35 bg-amber-300/12 p-3">
-      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-100/65">Advance Season · {decision.season}/3</p>
-      <p className="mt-1 text-sm font-black text-amber-50">{decision.title}</p>
-      <p className="mt-1 text-xs leading-relaxed text-amber-50/62">{decision.prompt}</p>
-      <div className="mt-3 grid gap-2">
+    <div data-qa="season-decision-panel" data-season-decision={decision.id} className="mt-4 overflow-hidden rounded-3xl border border-amber-200/35 bg-amber-300/12">
+      <div className="border-b border-amber-100/14 bg-black/22 p-3">
+        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-100/65">Council decision · Season {decision.season}/3</p>
+        <p className="mt-1 text-lg font-black leading-tight text-amber-50">{decision.title}</p>
+        <p className="mt-2 text-xs leading-relaxed text-amber-50/68 md:text-sm">{decision.prompt}</p>
+      </div>
+      <div className="grid gap-2 p-3">
+        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-200/55">Choose one season order</p>
         {decision.choices.map((choice) => (
-          <button key={choice.id} type="button" data-qa="season-choice" data-decision-id={decision.id} data-choice-id={choice.id} onClick={() => dispatch({ type: "advanceSeason", decisionId: decision.id, choiceId: choice.id })} className="rounded-2xl border border-amber-100/18 bg-white/8 p-3 text-left transition hover:bg-amber-200/12">
+          <button key={choice.id} type="button" data-qa="season-choice" data-decision-id={decision.id} data-choice-id={choice.id} onClick={() => dispatch({ type: "advanceSeason", decisionId: decision.id, choiceId: choice.id })} className="rounded-2xl border border-amber-100/20 bg-black/22 p-3 text-left transition hover:border-amber-200/45 hover:bg-amber-200/12">
             <span className="block text-sm font-black text-amber-50">{choice.label}</span>
-            <span className="mt-1 block text-xs leading-relaxed text-amber-50/62">{choice.short}</span>
+            <span className="mt-1 block text-xs leading-relaxed text-amber-50/58">{choice.short}</span>
           </button>
         ))}
       </div>
@@ -142,9 +145,14 @@ function SeasonLoop({ state, dispatch, complete }: { state: PlayState; dispatch:
 function RetentionRecordLine({ record }: { record: RetentionRecord }) {
   return (
     <div data-qa="retention-record" data-decision-id={record.decisionId} data-choice-id={record.choiceId} data-village-marker={record.villageMarker} data-world-marker={record.worldMarker} className="rounded-2xl border border-sky-100/18 bg-black/22 p-3">
-      <p className="text-[9px] font-black uppercase tracking-[0.16em] text-sky-100/55">Season {record.season}</p>
-      <p className="mt-1 text-sm font-black text-amber-50">{record.label}</p>
-      <p className="mt-1 text-[11px] leading-relaxed text-amber-50/55">Village: {record.villageMarker} · World: {record.worldMarker}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[9px] font-black uppercase tracking-[0.16em] text-sky-100/55">Season {record.season}</p>
+          <p className="mt-1 text-sm font-black text-amber-50">{record.label}</p>
+        </div>
+        <span className="rounded-full border border-sky-100/20 bg-sky-200/10 px-2 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-sky-100/70">recorded</span>
+      </div>
+      <p className="mt-2 text-[11px] leading-relaxed text-amber-50/55">Village: {record.villageMarker} · World: {record.worldMarker}</p>
     </div>
   );
 }
