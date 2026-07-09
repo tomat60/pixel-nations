@@ -5,6 +5,26 @@ function isCitySeed(state: PlayState) {
   return phase === "city-seed" || phase === "nation-seed";
 }
 
+type InstitutionSeed = { label: string; district: string; workers: string; law: string };
+
+function getInstitutionSeeds(records: RetentionRecord[]): InstitutionSeed[] {
+  return records.slice(0, 3).map((record) => {
+    if (record.decisionId === "grain-levy") {
+      return record.choiceId === "authority"
+        ? { label: "Granary Authority", district: "Granary District", workers: "levy stewards", law: "crown supply rights" }
+        : { label: "Commons Stores", district: "Civic Commons", workers: "store keepers", law: "free household stores" };
+    }
+    if (record.decisionId === "open-roads") {
+      return record.choiceId === "authority"
+        ? { label: "Border Road Ward", district: "Guard Road", workers: "road wardens", law: "fortified passage" }
+        : { label: "Open Market Road", district: "Market Street", workers: "caravan brokers", law: "open trade passage" };
+    }
+    return record.choiceId === "authority"
+      ? { label: "Scribe House", district: "Law Hall", workers: "civic scribes", law: "written council record" }
+      : { label: "First Foundries", district: "Workshop Row", workers: "foundry crews", law: "chartered workshops" };
+  });
+}
+
 const roadmap = [
   { label: "Land", detail: "claim one homeland", done: (state: PlayState) => state.ownedPlotIds.length > 0 },
   { label: "Settlement", detail: "raise shelter + storehouse", done: (state: PlayState) => state.settlementMarkers.includes("shelter") && state.settlementMarkers.includes("storehouse") },
@@ -28,7 +48,7 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
   const citySeed = isCitySeed(state);
 
   return (
-    <aside data-qa="council-panel" data-nation-decision={nationDecision?.id ?? "none"} data-retention-count={state.retentionRecords.length} data-era-complete={firstEraComplete ? "true" : "false"} className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-10rem)] w-[min(560px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/66 p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5 md:p-4">
+    <aside data-qa="council-panel" data-nation-decision={nationDecision?.id ?? "none"} data-retention-count={state.retentionRecords.length} data-era-complete={firstEraComplete ? "true" : "false"} data-city-institutions={firstEraComplete ? "true" : "false"} className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-10rem)] w-[min(560px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/66 p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5 md:p-4">
       <p className="text-[9px] font-black uppercase tracking-[0.24em] text-amber-200/65">Council chamber</p>
       <div className="mt-1 flex items-start justify-between gap-3">
         <div>
@@ -88,6 +108,7 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
       {nationDecision && state.foundingCeremonySeen ? (
         <SeasonLoop state={state} dispatch={dispatch} complete={firstEraComplete} />
       ) : null}
+      {firstEraComplete ? <CityInstitutionsSeed records={state.retentionRecords} /> : null}
 
       <div className="mt-4 space-y-2">
         {roadmap.map((item) => {
@@ -150,6 +171,31 @@ function SeasonLoop({ state, dispatch, complete }: { state: PlayState; dispatch:
             <span className="block text-sm font-black text-amber-50">{choice.label}</span>
             <span className="mt-1 block text-xs leading-relaxed text-amber-50/58">{choice.short}</span>
           </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CityInstitutionsSeed({ records }: { records: RetentionRecord[] }) {
+  const institutions = getInstitutionSeeds(records);
+  return (
+    <div data-qa="city-institutions-seed" className="mt-4 rounded-3xl border border-purple-200/35 bg-[radial-gradient(circle_at_top_left,rgba(216,180,254,.18),transparent_36%),rgba(168,85,247,.10)] p-3 shadow-[0_0_34px_rgba(168,85,247,.12)]">
+      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-purple-100/70">City Institutions Seed</p>
+      <p className="mt-1 text-lg font-black text-amber-50">Districts, workers and laws emerge from the first era.</p>
+      <p className="mt-1 text-xs leading-relaxed text-amber-50/62">These are not full systems yet. They are the visible city foundations created by the nation’s first three seasonal choices.</p>
+      <div className="mt-3 grid gap-2">
+        {institutions.map((institution) => (
+          <div key={institution.label} data-qa="city-institution-card" data-district={institution.district} className="rounded-2xl border border-purple-100/18 bg-black/24 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-black text-amber-50">{institution.label}</p>
+                <p className="mt-1 text-xs leading-relaxed text-amber-50/58">{institution.district} · {institution.workers}</p>
+              </div>
+              <span className="rounded-full border border-purple-100/20 bg-purple-200/10 px-2 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-purple-100/70">law seed</span>
+            </div>
+            <p className="mt-2 text-[11px] leading-relaxed text-amber-50/55">Law: {institution.law}</p>
+          </div>
         ))}
       </div>
     </div>
