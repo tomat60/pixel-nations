@@ -23,7 +23,7 @@ export function LandSheet({ selected, state, dispatch }: { selected: Plot; state
       <p className="mt-2 text-[10px] font-black uppercase tracking-[0.18em] text-amber-200/55">{selected.resources.join(" / ")}</p>
 
       {phase === "unclaimed" ? (
-        <button data-qa="claim-button" onClick={() => dispatch({ type: "claim", plotId: selected.id })} className="mt-3 w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-black/30 transition hover:bg-amber-200">
+        <button data-qa="claim-button" aria-label="Choose this land and claim it" onClick={() => dispatch({ type: "claim", plotId: selected.id })} className="mt-3 w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-black/30 transition hover:bg-amber-200">
           Claim this land
         </button>
       ) : owned ? (
