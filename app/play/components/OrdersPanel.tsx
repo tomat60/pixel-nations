@@ -7,6 +7,7 @@ export function OrdersPanel({ state, dispatch }: { state: PlayState; dispatch: (
   const availableOrders = developmentOrders.filter((order) => !state.completedOrders.includes(order.id));
   const nextRouteOrder = availableOrders.find((order) => order.id === "open-market" && state.completedOrders.length >= 5);
   const visibleOrders = prioritizeOrders(availableOrders, nextRouteOrder?.id).slice(0, 6);
+  const citySeed = phase === "city-seed" || phase === "nation-seed";
 
   return (
     <aside data-qa="orders-panel" className="absolute right-3 top-[12rem] z-20 max-h-[calc(100%-18rem)] w-[300px] rounded-3xl border border-amber-100/20 bg-black/58 p-3 shadow-2xl backdrop-blur-md md:right-5 md:top-[11.8rem] md:w-[390px] md:p-4">
@@ -25,6 +26,14 @@ export function OrdersPanel({ state, dispatch }: { state: PlayState; dispatch: (
         <Stat label="Influence" value={state.resources.influence} />
       </div>
 
+      {citySeed ? (
+        <div data-qa="orders-city-seed-complete" className="mt-3 rounded-2xl border border-sky-200/30 bg-sky-300/10 p-3">
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-sky-100/65">City seed established</p>
+          <p className="mt-1 text-sm font-black text-amber-50">The first settlement now has streets, council, market and defense.</p>
+          <p className="mt-1 text-xs leading-relaxed text-amber-50/62">Next big layer: districts, workers and laws — not more basic camp orders.</p>
+        </div>
+      ) : null}
+
       {nextRouteOrder && (
         <button aria-label={nextRouteOrder.label} data-qa="order-open-market-priority" onClick={() => dispatch({ type: "runOrder", orderId: nextRouteOrder.id })} className="mt-3 w-full rounded-2xl border border-amber-200/45 bg-amber-300 px-3 py-3 text-left text-stone-950 shadow-lg shadow-black/30 transition hover:bg-amber-200">
           <p className="text-sm font-black">{nextRouteOrder.label}</p>
@@ -39,8 +48,8 @@ export function OrdersPanel({ state, dispatch }: { state: PlayState; dispatch: (
             <p className="mt-1 text-xs leading-relaxed text-amber-50/62">{order.short}</p>
           </button>
         ))}
-        {availableOrders.length === 0 && (
-          <p className="rounded-2xl border border-amber-100/16 bg-amber-100/8 p-3 text-sm leading-relaxed text-amber-50/68">All first-settlement orders are complete. The next sprint can expand this into city, nation and empire pressure.</p>
+        {availableOrders.length === 0 && !citySeed && (
+          <p className="rounded-2xl border border-amber-100/16 bg-amber-100/8 p-3 text-sm leading-relaxed text-amber-50/68">All first-settlement orders are complete. The next layer can expand this into city, nation and empire pressure.</p>
         )}
       </div>
 

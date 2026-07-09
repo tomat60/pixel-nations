@@ -1,10 +1,15 @@
 import { getDevelopmentScore, getFirstEraComplete, getNationDecision, getNationReady, getNextRetentionDecision, getOwnedPlot, getOwnedSectorIds, getPhase, getPopulation, getRivalPressure, nationDecisions, nationSectorThreshold, type PlayAction, type PlayState, type RetentionRecord } from "../lib/play-state";
 
+function isCitySeed(state: PlayState) {
+  const phase = getPhase(state);
+  return phase === "city-seed" || phase === "nation-seed";
+}
+
 const roadmap = [
   { label: "Land", detail: "claim one homeland", done: (state: PlayState) => state.ownedPlotIds.length > 0 },
   { label: "Settlement", detail: "raise shelter + storehouse", done: (state: PlayState) => state.settlementMarkers.includes("shelter") && state.settlementMarkers.includes("storehouse") },
   { label: "Village", detail: "market + council + watch", done: (state: PlayState) => state.settlementMarkers.includes("market") && state.settlementMarkers.includes("council") && state.settlementMarkers.includes("watch") },
-  { label: "City", detail: "next sprint: districts, workers, laws", done: () => false },
+  { label: "City", detail: "city seed: civic core, market route and defended streets", done: isCitySeed },
   { label: "Nation", detail: "hold 3 sectors, then choose a founding doctrine", done: (state: PlayState) => Boolean(state.nationDecisionId) },
   { label: "Era", detail: "resolve 3 post-founding seasons", done: (state: PlayState) => getFirstEraComplete(state) },
 ];
@@ -20,6 +25,7 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
   const capital = getOwnedPlot(state)?.name ?? "Aurelian Basin";
   const completed = roadmap.filter((item) => item.done(state)).length;
   const firstEraComplete = getFirstEraComplete(state);
+  const citySeed = isCitySeed(state);
 
   return (
     <aside data-qa="council-panel" data-nation-decision={nationDecision?.id ?? "none"} data-retention-count={state.retentionRecords.length} data-era-complete={firstEraComplete ? "true" : "false"} className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-10rem)] w-[min(560px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/66 p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5 md:p-4">
@@ -38,6 +44,14 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
         <Metric label="Sectors" value={`${ownedSectors.length}/${nationSectorThreshold}`} />
         <Metric label="Rivals" value={`${pressure}%`} />
       </div>
+
+      {citySeed ? (
+        <div data-qa="city-seed-milestone" className="mt-4 rounded-2xl border border-sky-200/35 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,.18),transparent_36%),rgba(14,165,233,.10)] p-3 shadow-[0_0_34px_rgba(56,189,248,.12)]">
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-sky-100/70">City Seed</p>
+          <p className="mt-1 text-sm font-black text-amber-50">The village has a civic core, a market route and defended streets.</p>
+          <p className="mt-1 text-xs leading-relaxed text-amber-50/62">This is not a full city yet, but it is no longer just a settlement. The next large layer can add districts, workers and laws.</p>
+        </div>
+      ) : null}
 
       {nationDecision ? (
         <div data-qa="council-nation-founded" className="mt-4 overflow-hidden rounded-2xl border border-emerald-200/40 bg-[radial-gradient(circle_at_top_left,rgba(52,211,153,.22),transparent_36%),rgba(16,185,129,.12)] p-3 shadow-[0_0_42px_rgba(16,185,129,.14)]">
@@ -157,7 +171,7 @@ function RetentionRecordLine({ record }: { record: RetentionRecord }) {
   );
 }
 
-function Metric({ label, value }: { label: string; value: string | number }) {
+function Metric({ label, value }: { label: string | number; value?: string | number }) {
   return (
     <div className="rounded-2xl border border-amber-100/12 bg-black/28 px-2 py-2">
       <p className="text-[8px] font-black uppercase tracking-[0.16em] text-amber-200/50">{label}</p>
