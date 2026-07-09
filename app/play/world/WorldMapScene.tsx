@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { canClaimSector, expansionInfluenceCost, getClaimableSectorIds, getNationDecision, getNationReady, getOwnedSectorIds, type PlayAction, type PlayState } from "../lib/play-state";
+import { LANDS_PER_SECTOR, SECTOR_COUNT, WORLD_LANDS } from "../lib/world-engine";
 import { buildWorldMapModel, getSectorLandSamples, type SectorKind, type WorldMapSector } from "./world-map-selectors";
 
 type SectorControl = "owned" | "claimable" | "locked";
@@ -43,13 +44,13 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
   const nextGoal = nationDecision ? nationDecision.label : nationReady ? "Choose founding doctrine" : `${Math.max(0, 3 - ownedSectorIds.length)} more sector${3 - ownedSectorIds.length === 1 ? "" : "s"} to found a nation`;
 
   return (
-    <section data-qa="world-map-scene" data-owned-count={ownedSectorIds.length} data-influence={state.resources.influence} data-nation-ready={nationReady ? "true" : "false"} data-nation-decision={nationDecision?.id ?? "none"} data-nation-founded={nationFounded ? "true" : "false"} className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(251,191,36,.14),transparent_26%),linear-gradient(180deg,#07111b_0%,#030708_100%)]">
+    <section data-qa="world-map-scene" data-owned-count={ownedSectorIds.length} data-influence={state.resources.influence} data-nation-ready={nationReady ? "true" : "false"} data-nation-decision={nationDecision?.id ?? "none"} data-nation-founded={nationFounded ? "true" : "false"} data-world-lands={WORLD_LANDS} data-sector-count={SECTOR_COUNT} data-lands-per-sector={LANDS_PER_SECTOR} className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(251,191,36,.14),transparent_26%),linear-gradient(180deg,#07111b_0%,#030708_100%)]">
       <div data-qa="world-panel" className="pointer-events-none absolute inset-0" />
       <div data-qa="expansion-hud" className="absolute left-4 right-4 top-[5.7rem] z-10 flex flex-col gap-3 md:left-6 md:right-6 md:top-[6.6rem] lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-[720px] rounded-3xl border border-sky-100/18 bg-black/42 p-3 shadow-2xl backdrop-blur-md md:p-4">
           <p className="text-[9px] font-black uppercase tracking-[0.24em] text-sky-200/65">Expansion / Nation Loop v1</p>
           <h2 className="mt-1 text-2xl font-black text-amber-50 md:text-4xl">WorldMapScene · 10,000 lands</h2>
-          <p className="mt-1 text-xs leading-relaxed text-amber-50/65 md:text-sm">Claim adjacent sectors with Influence. Owned borders create the first path from one land toward nation scale.</p>
+          <p className="mt-1 text-xs leading-relaxed text-amber-50/65 md:text-sm">Claim adjacent sectors with Influence. Each strategic sector expands into 100 generated lands, proving the 10,000-land world without rendering every land as a global node.</p>
           {nationDecision ? <p data-qa="nation-world-banner" className="mt-3 rounded-2xl border border-emerald-200/35 bg-emerald-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-100">⚑ Aurelian Nation founded · {nationDecision.label} · {ownedSectorIds.length} sectors</p> : null}
         </div>
         <div className="grid grid-cols-5 gap-1.5 text-center lg:min-w-[460px]">
@@ -61,8 +62,9 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
         </div>
       </div>
 
-      <div className="absolute bottom-[5.2rem] left-3 right-3 top-[14.8rem] flex flex-col gap-3 overflow-y-auto pb-6 md:bottom-[6.2rem] md:left-6 md:right-6 md:top-[13.8rem] lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:overflow-hidden lg:pb-0">
+      <div className="absolute bottom-[5.2rem] left-3 right-3 top-[14.8rem] flex flex-col gap-3 overflow-y-auto pb-6 md:bottom-[6.2rem] md:left-6 md:right-6 md:top-[13.8rem] lg:grid lg:grid-cols-[minmax(0,1fr)_400px] lg:overflow-hidden lg:pb-0">
         <div className="shrink-0 rounded-[2rem] border border-sky-100/16 bg-black/28 p-3 shadow-[0_30px_90px_rgba(0,0,0,.48)] backdrop-blur-sm md:p-4 lg:min-h-0">
+          <WorldScaleProof ownedSectorIds={ownedSectorIds} selected={selected} />
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-sky-100/60">Generated sectors</p>
             <Legend label="Owned" tone="border-amber-200/80 bg-amber-300/20 text-amber-50" />
@@ -70,7 +72,7 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
             <Legend label="Locked" tone="border-slate-200/20 bg-slate-300/8 text-slate-100/65" />
             {nationFounded ? <Legend label="Nation" tone="border-emerald-200/80 bg-emerald-300/18 text-emerald-50" /> : null}
           </div>
-          <div className="grid h-[420px] grid-cols-10 grid-rows-10 gap-1.5 md:h-[520px] md:gap-2 lg:h-[calc(100%-2.8rem)] lg:min-h-[340px]">
+          <div className="grid h-[380px] grid-cols-10 grid-rows-10 gap-1.5 md:h-[470px] md:gap-2 lg:h-[calc(100%-7.2rem)] lg:min-h-[300px]">
             {model.sectors.map((sector) => (
               <SectorTile key={sector.id} sector={sector} control={getSectorControl(sector.id, ownedSectorIds, claimableSectorIds)} selected={sector.index === selected.index} nationFounded={nationFounded} onSelect={() => setSelectedIndex(sector.index)} canClaim={canClaimSector(state, sector.id).ok} />
             ))}
@@ -91,6 +93,11 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
             <Metric label="Danger" value={selected.danger} />
             <Metric label="Trade" value={selected.trade} />
           </div>
+          <div data-qa="sector-land-scale-card" data-sector-id={selected.id} data-land-count={LANDS_PER_SECTOR} className="mt-3 rounded-2xl border border-sky-200/20 bg-sky-300/8 p-3">
+            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-sky-100/60">100 internal lands</p>
+            <p className="mt-1 text-xs leading-relaxed text-amber-50/62">This selected sector is one tile on the strategic map, but it contains a full 10×10 local land grid: PN-{String(selected.index * LANDS_PER_SECTOR + 1).padStart(5, "0")} → PN-{String((selected.index + 1) * LANDS_PER_SECTOR).padStart(5, "0")}.</p>
+            <LocalLandGrid selected={selected} samples={samples} />
+          </div>
           <div data-qa="expansion-status" data-expansion-status={selectedExpansion.ok ? "claimable" : selectedExpansion.reason ?? "blocked"} className={`mt-3 rounded-2xl border p-3 ${selectedExpansion.ok ? "border-lime-200/35 bg-lime-300/10" : "border-amber-100/14 bg-amber-100/8"}`}>
             <p className="text-[9px] font-black uppercase tracking-[0.18em] text-amber-200/55">Expansion status</p>
             <p className="mt-1 text-sm font-black text-amber-50">{selectedControl === "owned" ? "Inside your borders" : selectedExpansion.ok ? "Adjacent and affordable" : expansionStatusCopy(selectedExpansion.reason)}</p>
@@ -104,6 +111,42 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
         </aside>
       </div>
     </section>
+  );
+}
+
+function WorldScaleProof({ ownedSectorIds, selected }: { ownedSectorIds: string[]; selected: WorldMapSector }) {
+  const controlledLands = ownedSectorIds.length * LANDS_PER_SECTOR;
+  return (
+    <div data-qa="world-scale-proof" data-world-lands={WORLD_LANDS} data-sector-count={SECTOR_COUNT} data-lands-per-sector={LANDS_PER_SECTOR} data-controlled-lands={controlledLands} className="mb-3 grid gap-2 rounded-3xl border border-sky-200/18 bg-sky-400/8 p-3 md:grid-cols-[1fr_auto] md:items-center">
+      <div>
+        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-sky-100/60">World scale proof</p>
+        <p className="mt-1 text-sm font-black text-amber-50">100 sectors × 100 lands = 10,000 generated lands</p>
+        <p className="mt-1 text-xs leading-relaxed text-amber-50/58">Selected sector {selected.id} is one strategic tile. The drawer shows its local 10×10 land grid while the global map stays playable.</p>
+      </div>
+      <div className="grid grid-cols-3 gap-1.5 text-center md:min-w-[250px]">
+        <Metric label="World" value={WORLD_LANDS.toLocaleString("en-US")} />
+        <Metric label="Sector" value={LANDS_PER_SECTOR} />
+        <Metric label="Held lands" value={controlledLands} />
+      </div>
+    </div>
+  );
+}
+
+function LocalLandGrid({ selected, samples }: { selected: WorldMapSector; samples: ReturnType<typeof getSectorLandSamples> }) {
+  const sampleIds = new Set(samples.map((land) => land.id));
+  const sectorStart = selected.index * LANDS_PER_SECTOR + 1;
+  return (
+    <div data-qa="sector-local-grid" data-sector-id={selected.id} data-local-grid="10x10" className="mt-3 grid grid-cols-10 gap-1 rounded-2xl border border-sky-100/10 bg-black/30 p-2">
+      {Array.from({ length: LANDS_PER_SECTOR }, (_, offset) => {
+        const landId = sectorStart + offset;
+        const isSample = sampleIds.has(landId);
+        const isHomelandCore = selected.index === 0 && offset < 3;
+        const isTradeLane = offset % 17 === 0 || offset === 12;
+        return (
+          <span key={landId} data-qa="sector-local-land" data-land-id={landId} data-land-sample={isSample ? "true" : "false"} title={`PN-${String(landId).padStart(5, "0")}`} className={`aspect-square rounded-[0.28rem] border ${isSample ? "border-amber-100 bg-amber-200 shadow-[0_0_10px_rgba(251,191,36,.35)]" : isHomelandCore ? "border-emerald-100/65 bg-emerald-300/70" : isTradeLane ? "border-sky-100/45 bg-sky-300/42" : "border-white/8 bg-white/12"}`} />
+        );
+      })}
+    </div>
   );
 }
 
