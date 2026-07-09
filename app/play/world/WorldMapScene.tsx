@@ -44,7 +44,7 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
   const nextGoal = nationDecision ? nationDecision.label : nationReady ? "Choose founding doctrine" : `${Math.max(0, 3 - ownedSectorIds.length)} more sector${3 - ownedSectorIds.length === 1 ? "" : "s"} to found a nation`;
 
   return (
-    <section data-qa="world-map-scene" data-owned-count={ownedSectorIds.length} data-influence={state.resources.influence} data-nation-ready={nationReady ? "true" : "false"} data-nation-decision={nationDecision?.id ?? "none"} data-nation-founded={nationFounded ? "true" : "false"} data-world-lands={WORLD_LANDS} data-sector-count={SECTOR_COUNT} data-lands-per-sector={LANDS_PER_SECTOR} className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(251,191,36,.14),transparent_26%),linear-gradient(180deg,#07111b_0%,#030708_100%)]">
+    <section data-qa="world-map-scene" data-owned-count={ownedSectorIds.length} data-influence={state.resources.influence} data-nation-ready={nationReady ? "true" : "false"} data-nation-decision={nationDecision?.id ?? "none"} data-nation-founded={nationFounded ? "true" : "false"} data-retention-count={state.retentionRecords.length} data-world-lands={WORLD_LANDS} data-sector-count={SECTOR_COUNT} data-lands-per-sector={LANDS_PER_SECTOR} className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(251,191,36,.14),transparent_26%),linear-gradient(180deg,#07111b_0%,#030708_100%)]">
       <div data-qa="world-panel" className="pointer-events-none absolute inset-0" />
       <div data-qa="expansion-hud" className="absolute left-4 right-4 top-[5.7rem] z-10 flex flex-col gap-3 md:left-6 md:right-6 md:top-[6.6rem] lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-[720px] rounded-3xl border border-sky-100/18 bg-black/42 p-3 shadow-2xl backdrop-blur-md md:p-4">
@@ -104,6 +104,7 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
             <button data-qa="claim-sector-button" disabled={!selectedExpansion.ok} onClick={() => dispatch({ type: "claimSector", sectorId: selected.id })} className="mt-3 w-full rounded-2xl bg-lime-200 px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-black/30 transition hover:bg-lime-100 disabled:cursor-not-allowed disabled:bg-white/12 disabled:text-white/35">Claim sector · {expansionInfluenceCost} Influence</button>
           </div>
           {nationDecision ? <div data-qa="nation-world-effect" className="mt-3 rounded-2xl border border-emerald-200/35 bg-emerald-300/12 p-3"><p className="text-sm font-black text-amber-50">Aurelian Nation controls the border ring</p><p className="mt-1 text-xs leading-relaxed text-amber-50/62">{nationDecision.label}: {nationDecision.effect}</p></div> : nationReady ? <div data-qa="nation-affordance" className="mt-3 rounded-2xl border border-amber-200/35 bg-amber-300/12 p-3"><p className="text-sm font-black text-amber-50">Nation threshold reached</p><p className="mt-1 text-xs leading-relaxed text-amber-50/62">Three sectors now answer to your council. Open Council to choose the founding doctrine.</p></div> : null}
+          {state.retentionRecords.length > 0 ? <WorldRetentionEffects state={state} /> : null}
           <p className="mt-3 text-xs leading-relaxed text-amber-50/58">Land samples stay in this drawer while the world map remains visible. Neighbors: {selected.neighbors.join(", ") || "edge"}.</p>
           <p className="mt-4 text-[9px] font-black uppercase tracking-[0.2em] text-amber-200/55">Generated land samples</p>
           <div className="mt-2 space-y-2">{samples.map((land) => <div key={land.pnid} data-qa="world-land-sample" className="rounded-2xl border border-amber-100/10 bg-amber-100/7 p-2"><div className="flex items-center justify-between gap-3"><p className="text-sm font-black text-amber-50">{land.name}</p><p className="text-[9px] font-black uppercase tracking-[0.14em] text-amber-100/50">{land.pnid}</p></div><p className="mt-1 text-[11px] text-amber-50/55">{land.role} · {land.faction} · D{land.danger} / F{land.fertility} / T{land.trade} / I{land.influence}</p></div>)}</div>
@@ -111,6 +112,21 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
         </aside>
       </div>
     </section>
+  );
+}
+
+function WorldRetentionEffects({ state }: { state: PlayState }) {
+  return (
+    <div data-qa="world-retention-effects" className="mt-3 rounded-2xl border border-sky-200/35 bg-sky-300/12 p-3">
+      <p className="text-[9px] font-black uppercase tracking-[0.18em] text-sky-100/65">Season consequences</p>
+      <div className="mt-2 space-y-1.5">
+        {state.retentionRecords.map((record) => (
+          <div key={`${record.decisionId}-${record.choiceId}`} data-qa="world-retention-marker" data-world-marker={record.worldMarker} data-choice-id={record.choiceId} className="rounded-xl border border-sky-100/14 bg-black/24 px-2 py-1.5 text-[11px] font-bold text-amber-50/72">
+            Season {record.season}: {record.worldMarker}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
