@@ -149,6 +149,7 @@ const steps = [
     if (records < 3) throw new Error(`Expected at least 3 retention records, got ${records}`);
     const institutions = await page.locator('[data-qa="city-institution-card"]').count();
     if (institutions < 3) throw new Error(`Expected at least 3 city institution cards, got ${institutions}`);
+    await page.locator('[data-qa="city-institutions-seed"]').scrollIntoViewIfNeeded();
     await sleep(450);
   } },
   { id: "12-retention-state-after-reload", label: "Retention state after reload", note: "Reload preserves completed first era, city institutions, and world consequence markers.", run: async (page) => {
