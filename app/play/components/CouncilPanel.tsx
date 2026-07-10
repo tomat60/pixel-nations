@@ -46,9 +46,10 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
   const completed = roadmap.filter((item) => item.done(state)).length;
   const firstEraComplete = getFirstEraComplete(state);
   const citySeed = isCitySeed(state);
+  const rivalFrontierVisible = firstEraComplete && Boolean(nationDecision);
 
   return (
-    <aside data-qa="council-panel" data-nation-decision={nationDecision?.id ?? "none"} data-retention-count={state.retentionRecords.length} data-era-complete={firstEraComplete ? "true" : "false"} data-city-institutions={firstEraComplete ? "true" : "false"} className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-10rem)] w-[min(560px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/66 p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5 md:p-4">
+    <aside data-qa="council-panel" data-nation-decision={nationDecision?.id ?? "none"} data-retention-count={state.retentionRecords.length} data-era-complete={firstEraComplete ? "true" : "false"} data-city-institutions={firstEraComplete ? "true" : "false"} data-rival-frontier={rivalFrontierVisible ? "true" : "false"} className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-10rem)] w-[min(560px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/66 p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5 md:p-4">
       <p className="text-[9px] font-black uppercase tracking-[0.24em] text-amber-200/65">Council chamber</p>
       <div className="mt-1 flex items-start justify-between gap-3">
         <div>
@@ -106,6 +107,7 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
       )}
 
       {firstEraComplete ? <CityInstitutionsSeed records={state.retentionRecords} /> : null}
+      {rivalFrontierVisible ? <RivalFrontierSeed pressure={pressure} ownedSectors={ownedSectors.length} /> : null}
       {nationDecision && state.foundingCeremonySeen ? (
         <SeasonLoop state={state} dispatch={dispatch} complete={firstEraComplete} />
       ) : null}
@@ -197,6 +199,21 @@ function CityInstitutionsSeed({ records }: { records: RetentionRecord[] }) {
             <p className="mt-2 text-[11px] leading-relaxed text-amber-50/55">Law: {institution.law}</p>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function RivalFrontierSeed({ pressure, ownedSectors }: { pressure: number; ownedSectors: number }) {
+  return (
+    <div data-qa="rival-frontier-seed" data-rival-pressure={pressure} className="mt-4 rounded-3xl border border-red-200/35 bg-[radial-gradient(circle_at_top_left,rgba(248,113,113,.20),transparent_36%),rgba(127,29,29,.16)] p-3 shadow-[0_0_34px_rgba(248,113,113,.10)]">
+      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-red-100/70">Rival Frontier Seed</p>
+      <p className="mt-1 text-lg font-black text-amber-50">The frontier is no longer passive.</p>
+      <p className="mt-1 text-xs leading-relaxed text-amber-50/62">Neighboring powers have noticed the Aurelian Nation. Border pressure is now a reason to keep expanding, not a combat system.</p>
+      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+        <Metric label="Pressure" value={`${pressure}%`} />
+        <Metric label="Sectors" value={ownedSectors} />
+        <Metric label="Next" value="Frontier" />
       </div>
     </div>
   );
