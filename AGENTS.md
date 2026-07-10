@@ -55,6 +55,16 @@ These rules exist because accidental write actions and premature merges create c
 - Before any GitHub write action, confirm the exact action name and target in the prompt or tool call: `create_pull_request` for PRs, `create_issue` only for real issues, `update_file` only for intended file changes, and `merge_pull_request` only after explicit merge acceptance.
 - If an accidental issue/file/commit is created, immediately close/remove it, report it, and do not continue with broader work until the branch or issue list is clean.
 
+## Fable trigger protocol
+
+Fable issue automation requires the historical title trigger phrase **`FABLE RUN: cursor_prompts`**.
+
+- Labels such as `fable`, `planning`, or `play` are not enough by themselves.
+- If a Fable issue is opened without `cursor_prompts` in the title, do not assume Fable is slow; treat the issue as a failed trigger.
+- Correct by opening a new issue whose title starts with `FABLE RUN: cursor_prompts ...`, then confirm that `github-actions[bot]` comments `Fable run started`.
+- Close the failed-trigger issue as `not_planned` or superseded, with a comment linking to the corrected issue.
+- Do not let a silent Fable issue guide product decisions.
+
 ## Fable visual/gamefeel evidence protocol
 
 Fable is useful and should be used, but not as a blind visual reviewer.
