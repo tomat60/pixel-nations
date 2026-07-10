@@ -106,8 +106,8 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
         </div>
       )}
 
-      {firstEraComplete ? <CityInstitutionsSeed records={state.retentionRecords} /> : null}
       {rivalFrontierVisible ? <RivalFrontierSeed pressure={pressure} ownedSectors={ownedSectors.length} /> : null}
+      {firstEraComplete ? <CityInstitutionsSeed records={state.retentionRecords} /> : null}
       {nationDecision && state.foundingCeremonySeen ? (
         <SeasonLoop state={state} dispatch={dispatch} complete={firstEraComplete} />
       ) : null}
