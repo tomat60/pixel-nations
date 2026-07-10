@@ -105,10 +105,10 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
         </div>
       )}
 
+      {firstEraComplete ? <CityInstitutionsSeed records={state.retentionRecords} /> : null}
       {nationDecision && state.foundingCeremonySeen ? (
         <SeasonLoop state={state} dispatch={dispatch} complete={firstEraComplete} />
       ) : null}
-      {firstEraComplete ? <CityInstitutionsSeed records={state.retentionRecords} /> : null}
 
       <div className="mt-4 space-y-2">
         {roadmap.map((item) => {
