@@ -13,6 +13,7 @@ For a normal scoped PR, review only what changed:
 - Click every new or changed button.
 - Open every new or changed panel/state.
 - Trigger every new milestone added by the PR.
+- If a PR adds a recorded map objective, the targeted review must claim the target and prove the completed state, not only the pending marker.
 - If the milestone appears inside a scrollable panel, the evidence must show that it is visible to the player without depending on hidden scroll unless the scroll itself is part of the intended UX.
 - Keep this short; do not record or validate the whole game every time.
 
