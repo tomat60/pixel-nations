@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { canClaimSector, expansionInfluenceCost, getClaimableSectorIds, getNationDecision, getNationReady, getOwnedSectorIds, type PlayAction, type PlayState, type RetentionRecord } from "../lib/play-state";
+import { canClaimSector, expansionInfluenceCost, getClaimableSectorIds, getFrontierIntent, getNationDecision, getNationReady, getOwnedSectorIds, type FrontierObjective, type PlayAction, type PlayState, type RetentionRecord } from "../lib/play-state";
 import { LANDS_PER_SECTOR, SECTOR_COUNT, WORLD_LANDS } from "../lib/world-engine";
 import { buildWorldMapModel, getSectorLandSamples, type SectorKind, type WorldMapSector } from "./world-map-selectors";
 
@@ -48,6 +48,13 @@ function getInstitutionSignals(records: RetentionRecord[]): InstitutionWorldSign
   });
 }
 
+function getFrontierTargetSectorId(objective: FrontierObjective | null) {
+  if (!objective) return null;
+  if (objective.id === "northern-pass") return "A-02";
+  if (objective.id === "river-gate") return "B-01";
+  return "B-02";
+}
+
 export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch: (action: PlayAction) => void }) {
   const model = useMemo(() => buildWorldMapModel(), []);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -60,12 +67,15 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
   const nationReady = getNationReady(state);
   const nationDecision = getNationDecision(state);
   const nationFounded = Boolean(nationDecision);
+  const frontierObjective = getFrontierIntent(state);
+  const frontierTargetSectorId = getFrontierTargetSectorId(frontierObjective);
+  const frontierTargetSector = frontierTargetSectorId ? model.sectors.find((sector) => sector.id === frontierTargetSectorId) ?? null : null;
   const selectedExpansion = canClaimSector(state, selected.id);
   const selectedControl = getSectorControl(selected.id, ownedSectorIds, claimableSectorIds);
-  const nextGoal = nationDecision ? nationDecision.label : nationReady ? "Choose founding doctrine" : `${Math.max(0, 3 - ownedSectorIds.length)} more sector${3 - ownedSectorIds.length === 1 ? "" : "s"} to found a nation`;
+  const nextGoal = frontierObjective ? frontierObjective.target : nationDecision ? nationDecision.label : nationReady ? "Choose founding doctrine" : `${Math.max(0, 3 - ownedSectorIds.length)} more sector${3 - ownedSectorIds.length === 1 ? "" : "s"} to found a nation`;
 
   return (
-    <section data-qa="world-map-scene" data-owned-count={ownedSectorIds.length} data-influence={state.resources.influence} data-nation-ready={nationReady ? "true" : "false"} data-nation-decision={nationDecision?.id ?? "none"} data-nation-founded={nationFounded ? "true" : "false"} data-retention-count={state.retentionRecords.length} data-institution-count={institutionCount} data-world-lands={WORLD_LANDS} data-sector-count={SECTOR_COUNT} data-lands-per-sector={LANDS_PER_SECTOR} className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(251,191,36,.14),transparent_26%),linear-gradient(180deg,#07111b_0%,#030708_100%)]">
+    <section data-qa="world-map-scene" data-owned-count={ownedSectorIds.length} data-influence={state.resources.influence} data-nation-ready={nationReady ? "true" : "false"} data-nation-decision={nationDecision?.id ?? "none"} data-nation-founded={nationFounded ? "true" : "false"} data-frontier-intent={frontierObjective?.id ?? "none"} data-frontier-target-sector={frontierTargetSectorId ?? "none"} data-retention-count={state.retentionRecords.length} data-institution-count={institutionCount} data-world-lands={WORLD_LANDS} data-sector-count={SECTOR_COUNT} data-lands-per-sector={LANDS_PER_SECTOR} className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(251,191,36,.14),transparent_26%),linear-gradient(180deg,#07111b_0%,#030708_100%)]">
       <div data-qa="world-panel" className="pointer-events-none absolute inset-0" />
       <div data-qa="expansion-hud" className="absolute left-4 right-4 top-[5.7rem] z-10 flex flex-col gap-3 md:left-6 md:right-6 md:top-[6.6rem] lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-[720px] rounded-3xl border border-sky-100/18 bg-black/42 p-3 shadow-2xl backdrop-blur-md md:p-4">
@@ -73,6 +83,7 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
           <h2 className="mt-1 text-2xl font-black text-amber-50 md:text-4xl">WorldMapScene · 10,000 lands</h2>
           <p className="mt-1 text-xs leading-relaxed text-amber-50/65 md:text-sm">Claim adjacent sectors with Influence. Each strategic sector expands into 100 generated lands, proving the 10,000-land world without rendering every land as a global node.</p>
           {nationDecision ? <p data-qa="nation-world-banner" className="mt-3 rounded-2xl border border-emerald-200/35 bg-emerald-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-100">⚑ Aurelian Nation founded · {nationDecision.label} · {ownedSectorIds.length} sectors</p> : null}
+          {frontierObjective ? <p data-qa="world-frontier-objective-banner" data-frontier-intent={frontierObjective.id} data-frontier-target-sector={frontierTargetSectorId ?? "none"} className="mt-2 rounded-2xl border border-orange-200/35 bg-orange-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-orange-100">★ Frontier objective · {frontierObjective.target}{frontierTargetSector ? ` · sector ${frontierTargetSector.id}` : ""}</p> : null}
           {institutionCount > 0 ? <p data-qa="world-institution-indicator" data-institution-count={institutionCount} className="mt-2 rounded-2xl border border-purple-200/35 bg-purple-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-purple-100">City institutions visible · {institutionCount}/3 district signal{institutionCount === 1 ? "" : "s"} now mark the capital sector</p> : null}
         </div>
         <div className="grid grid-cols-5 gap-1.5 text-center lg:min-w-[460px]">
@@ -93,11 +104,12 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
             <Legend label="Claimable" tone="border-lime-200/80 bg-lime-300/18 text-lime-50" />
             <Legend label="Locked" tone="border-slate-200/20 bg-slate-300/8 text-slate-100/65" />
             {nationFounded ? <Legend label="Nation" tone="border-emerald-200/80 bg-emerald-300/18 text-emerald-50" /> : null}
+            {frontierObjective ? <Legend label="Objective" tone="border-orange-200/80 bg-orange-300/18 text-orange-50" /> : null}
             {institutionCount > 0 ? <Legend label="Institutions" tone="border-purple-200/80 bg-purple-300/18 text-purple-50" /> : null}
           </div>
           <div className="grid h-[380px] grid-cols-10 grid-rows-10 gap-1.5 md:h-[470px] md:gap-2 lg:h-[calc(100%-7.2rem)] lg:min-h-[300px]">
             {model.sectors.map((sector) => (
-              <SectorTile key={sector.id} sector={sector} control={getSectorControl(sector.id, ownedSectorIds, claimableSectorIds)} selected={sector.index === selected.index} nationFounded={nationFounded} institutionCount={institutionCount} onSelect={() => setSelectedIndex(sector.index)} canClaim={canClaimSector(state, sector.id).ok} />
+              <SectorTile key={sector.id} sector={sector} control={getSectorControl(sector.id, ownedSectorIds, claimableSectorIds)} selected={sector.index === selected.index} nationFounded={nationFounded} institutionCount={institutionCount} objectiveTarget={sector.id === frontierTargetSectorId} onSelect={() => setSelectedIndex(sector.index)} canClaim={canClaimSector(state, sector.id).ok} />
             ))}
           </div>
         </div>
@@ -116,6 +128,7 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
             <Metric label="Danger" value={selected.danger} />
             <Metric label="Trade" value={selected.trade} />
           </div>
+          {frontierObjective ? <WorldFrontierObjectiveSignal objective={frontierObjective} targetSector={frontierTargetSector} /> : null}
           <div data-qa="sector-land-scale-card" data-sector-id={selected.id} data-land-count={LANDS_PER_SECTOR} className="mt-3 rounded-2xl border border-sky-200/20 bg-sky-300/8 p-3">
             <p className="text-[9px] font-black uppercase tracking-[0.18em] text-sky-100/60">100 internal lands</p>
             <p className="mt-1 text-xs leading-relaxed text-amber-50/62">This selected sector is one tile on the strategic map, but it contains a full 10×10 local land grid: PN-{String(selected.index * LANDS_PER_SECTOR + 1).padStart(5, "0")} → PN-{String((selected.index + 1) * LANDS_PER_SECTOR).padStart(5, "0")}.</p>
@@ -136,6 +149,16 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
         </aside>
       </div>
     </section>
+  );
+}
+
+function WorldFrontierObjectiveSignal({ objective, targetSector }: { objective: FrontierObjective; targetSector: WorldMapSector | null }) {
+  return (
+    <div data-qa="world-frontier-objective-signal" data-frontier-intent={objective.id} data-frontier-target-sector={targetSector?.id ?? "none"} className="mt-3 rounded-2xl border border-orange-200/35 bg-orange-300/12 p-3">
+      <p className="text-[9px] font-black uppercase tracking-[0.18em] text-orange-100/65">Recorded frontier objective</p>
+      <p className="mt-1 text-sm font-black text-amber-50">{objective.target}{targetSector ? ` · ${targetSector.id} ${targetSector.name}` : ""}</p>
+      <p className="mt-1 text-xs leading-relaxed text-amber-50/62">{objective.reason}</p>
+    </div>
   );
 }
 
@@ -220,10 +243,10 @@ function expansionStatusCopy(reason?: string) {
   return "Blocked";
 }
 
-function SectorTile({ sector, control, selected, nationFounded, institutionCount, onSelect, canClaim }: { sector: WorldMapSector; control: SectorControl; selected: boolean; nationFounded: boolean; institutionCount: number; onSelect: () => void; canClaim: boolean }) {
+function SectorTile({ sector, control, selected, nationFounded, institutionCount, objectiveTarget, onSelect, canClaim }: { sector: WorldMapSector; control: SectorControl; selected: boolean; nationFounded: boolean; institutionCount: number; objectiveTarget: boolean; onSelect: () => void; canClaim: boolean }) {
   const foundedOwned = nationFounded && control === "owned";
   const institutionCapital = institutionCount > 0 && sector.isOrigin && control === "owned";
-  return <button type="button" data-qa="world-sector-tile" data-sector-id={sector.id} data-sector-x={sector.x} data-sector-y={sector.y} data-sector-kind={sector.kind} data-sector-control={control} data-sector-can-claim={canClaim ? "true" : "false"} data-sector-origin={sector.isOrigin ? "true" : "false"} data-sector-rival={sector.isRival ? "true" : "false"} data-sector-trade={sector.isTradeRich ? "true" : "false"} data-sector-danger={sector.isHighDanger ? "true" : "false"} data-nation-founded-owned={foundedOwned ? "true" : "false"} data-institution-capital={institutionCapital ? "true" : "false"} aria-label={`Inspect sector ${sector.id} ${sector.name}`} onClick={onSelect} className={`relative overflow-hidden rounded-xl border p-1 text-left transition hover:scale-[1.02] hover:border-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-200/80 ${kindClasses[sector.kind]} ${controlClasses[control]} ${selected ? "ring-2 ring-white" : ""} ${foundedOwned ? "outline outline-2 outline-emerald-200/80 shadow-[0_0_24px_rgba(52,211,153,.28)]" : ""} ${institutionCapital ? "after:absolute after:inset-0 after:rounded-xl after:border-2 after:border-purple-200/80 after:shadow-[inset_0_0_18px_rgba(216,180,254,.28)]" : ""}`}><span className="block text-[9px] font-black leading-none md:text-xs">{sector.id}</span><span className="mt-0.5 hidden truncate text-[8px] opacity-70 md:block">{sector.biome}</span><span className="absolute bottom-1 right-1 text-[8px] font-black opacity-70">{sector.trade}</span>{control === "claimable" ? <span className="absolute left-1 top-1 h-2 w-2 rounded-full bg-lime-200" /> : null}{sector.isHighDanger ? <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-300" /> : null}{foundedOwned ? <span className="absolute bottom-1 left-1 rounded-full bg-emerald-200 px-1 text-[8px] font-black text-stone-950">⚑</span> : null}{institutionCapital ? <span data-qa="world-institution-capital-marker" className="absolute left-1 top-1 rounded-full bg-purple-200 px-1 text-[8px] font-black text-stone-950">{institutionCount}</span> : null}</button>;
+  return <button type="button" data-qa="world-sector-tile" data-sector-id={sector.id} data-sector-x={sector.x} data-sector-y={sector.y} data-sector-kind={sector.kind} data-sector-control={control} data-sector-can-claim={canClaim ? "true" : "false"} data-sector-origin={sector.isOrigin ? "true" : "false"} data-sector-rival={sector.isRival ? "true" : "false"} data-sector-trade={sector.isTradeRich ? "true" : "false"} data-sector-danger={sector.isHighDanger ? "true" : "false"} data-nation-founded-owned={foundedOwned ? "true" : "false"} data-institution-capital={institutionCapital ? "true" : "false"} data-frontier-objective={objectiveTarget ? "true" : "false"} aria-label={`Inspect sector ${sector.id} ${sector.name}`} onClick={onSelect} className={`relative overflow-hidden rounded-xl border p-1 text-left transition hover:scale-[1.02] hover:border-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-200/80 ${kindClasses[sector.kind]} ${controlClasses[control]} ${selected ? "ring-2 ring-white" : ""} ${foundedOwned ? "outline outline-2 outline-emerald-200/80 shadow-[0_0_24px_rgba(52,211,153,.28)]" : ""} ${institutionCapital ? "after:absolute after:inset-0 after:rounded-xl after:border-2 after:border-purple-200/80 after:shadow-[inset_0_0_18px_rgba(216,180,254,.28)]" : ""} ${objectiveTarget ? "outline outline-2 outline-orange-200/90 shadow-[0_0_26px_rgba(251,146,60,.34)]" : ""}`}><span className="block text-[9px] font-black leading-none md:text-xs">{sector.id}</span><span className="mt-0.5 hidden truncate text-[8px] opacity-70 md:block">{sector.biome}</span><span className="absolute bottom-1 right-1 text-[8px] font-black opacity-70">{sector.trade}</span>{control === "claimable" ? <span className="absolute left-1 top-1 h-2 w-2 rounded-full bg-lime-200" /> : null}{sector.isHighDanger ? <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-300" /> : null}{foundedOwned ? <span className="absolute bottom-1 left-1 rounded-full bg-emerald-200 px-1 text-[8px] font-black text-stone-950">⚑</span> : null}{objectiveTarget ? <span data-qa="world-frontier-objective-marker" className="absolute left-1 top-1 rounded-full bg-orange-200 px-1 text-[8px] font-black text-stone-950">★</span> : null}{institutionCapital ? <span data-qa="world-institution-capital-marker" className="absolute left-1 top-1 rounded-full bg-purple-200 px-1 text-[8px] font-black text-stone-950">{institutionCount}</span> : null}</button>;
 }
 
 function Legend({ label, tone }: { label: string; tone: string }) { return <span className={`rounded-full border px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] ${tone}`}>{label}</span>; }
