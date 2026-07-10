@@ -8,6 +8,7 @@ export type SettlementMarker = "camp" | "shelter" | "storehouse" | "market" | "c
 export type NationDecisionId = "trade-charter" | "border-guard" | "settler-rights";
 export type RetentionDecisionId = "grain-levy" | "open-roads" | "scribe-patronage";
 export type RetentionChoiceId = "authority" | "freedom";
+export type FrontierIntentId = "northern-pass" | "river-gate" | "eastern-march";
 
 export type Resources = { food: number; timber: number; stone: number; influence: number };
 export type ChronicleEntry = { season: number; title: string; body: string };
@@ -16,12 +17,14 @@ export type NationDecision = { id: NationDecisionId; label: string; short: strin
 export type RetentionChoice = { id: RetentionChoiceId; label: string; short: string; influenceDelta: number; villageMarker: string; worldMarker: string };
 export type RetentionDecision = { id: RetentionDecisionId; season: number; title: string; prompt: string; choices: RetentionChoice[] };
 export type RetentionRecord = { season: number; decisionId: RetentionDecisionId; choiceId: RetentionChoiceId; label: string; villageMarker: string; worldMarker: string };
+export type FrontierObjective = { id: FrontierIntentId; label: string; target: string; reason: string; result: string };
 
 export type PlayState = {
   selectedPlotId: string;
   ownedPlotIds: string[];
   ownedSectorIds: string[];
   nationDecisionId: NationDecisionId | null;
+  frontierIntentId: FrontierIntentId | null;
   foundingCeremonySeen: boolean;
   season: number;
   view: ViewId;
@@ -41,6 +44,7 @@ export type PlayAction =
   | { type: "foundNation"; decisionId: NationDecisionId }
   | { type: "dismissFoundingCeremony" }
   | { type: "advanceSeason"; decisionId: RetentionDecisionId; choiceId: RetentionChoiceId }
+  | { type: "setFrontierIntent"; intentId: FrontierIntentId }
   | { type: "hydrate"; state: PlayState }
   | { type: "runOrder"; orderId: OrderId }
   | { type: "setView"; view: ViewId }
@@ -53,6 +57,12 @@ export const nationDecisions: NationDecision[] = [
   { id: "trade-charter", label: "Trade Charter", short: "Turn border growth into a market federation.", effect: "+2 Influence now; trade sectors become the preferred next route." },
   { id: "border-guard", label: "Border Guard", short: "Bind the first sectors through watch posts and patrol rights.", effect: "Rival pressure drops; dangerous sectors become safer to inspect." },
   { id: "settler-rights", label: "Settler Rights", short: "Promise land rights so families move beyond the homeland.", effect: "+18 people; the council gains a civic founding story." },
+];
+
+export const frontierObjectives: FrontierObjective[] = [
+  { id: "northern-pass", label: "Chart the Northern Pass", target: "A-01 North Ridge", reason: "Find the safest route beyond the basin before rivals shape it first.", result: "Sets the next expansion intent toward a mountain pass." },
+  { id: "river-gate", label: "Secure the River Gate", target: "A-01 Glasswater Gate", reason: "Turn the river crossing into the next civic frontier objective.", result: "Sets the next expansion intent toward the river approach." },
+  { id: "eastern-march", label: "Open the Eastern March", target: "A-01 Eastfold Road", reason: "Extend the market road into a named frontier march for future empire growth.", result: "Sets the next expansion intent toward the eastern trade road." },
 ];
 
 export const retentionDecisions: RetentionDecision[] = [
@@ -104,6 +114,7 @@ export const initialPlayState: PlayState = {
   ownedPlotIds: [],
   ownedSectorIds: [],
   nationDecisionId: null,
+  frontierIntentId: null,
   foundingCeremonySeen: false,
   season: 1,
   view: "map",
@@ -126,6 +137,10 @@ export function getOwnedPlot(state: PlayState): Plot | undefined {
 
 export function getNationDecision(state: PlayState) {
   return nationDecisions.find((decision) => decision.id === state.nationDecisionId) ?? null;
+}
+
+export function getFrontierIntent(state: PlayState) {
+  return frontierObjectives.find((objective) => objective.id === state.frontierIntentId) ?? null;
 }
 
 export function getNextRetentionDecision(state: PlayState) {
@@ -152,7 +167,7 @@ export function getPopulation(state: PlayState) {
 }
 
 export function getDevelopmentScore(state: PlayState) {
-  return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5 + (state.nationDecisionId ? 14 : 0) + state.retentionRecords.length * 7;
+  return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5 + (state.nationDecisionId ? 14 : 0) + state.retentionRecords.length * 7 + (state.frontierIntentId ? 6 : 0);
 }
 
 export function getRivalPressure(state: PlayState) {
@@ -213,13 +228,13 @@ function resolveRetentionDecision(state: PlayState, decisionId: RetentionDecisio
 
 export function playReducer(state: PlayState, action: PlayAction): PlayState {
   switch (action.type) {
-    case "hydrate": return { ...initialPlayState, ...action.state, resources: { ...initialPlayState.resources, ...action.state.resources }, retentionRecords: action.state.retentionRecords ?? [] };
+    case "hydrate": return { ...initialPlayState, ...action.state, resources: { ...initialPlayState.resources, ...action.state.resources }, retentionRecords: action.state.retentionRecords ?? [], frontierIntentId: action.state.frontierIntentId ?? null };
     case "select": return { ...state, selectedPlotId: action.plotId, view: state.view === "village" ? "map" : state.view };
     case "setView": return { ...state, view: action.view };
     case "claim": {
       if (state.ownedPlotIds.includes(action.plotId)) return state;
       const plot = plots.find((item) => item.id === action.plotId);
-      return { ...state, selectedPlotId: action.plotId, ownedPlotIds: [action.plotId], ownedSectorIds: [homelandSectorId], nationDecisionId: null, foundingCeremonySeen: false, season: 2, view: "village", settlementMarkers: ["camp"], resources: { food: 3, timber: 2, stone: 0, influence: 1 }, chronicle: pushChronicle(state, "First banner raised", `${plot?.name ?? "A land"} became the first claimed homeland.`), retentionRecords: [], lastEvent: `${plot?.name ?? "A land"} is claimed. Enter Village, then choose Orders.` };
+      return { ...state, selectedPlotId: action.plotId, ownedPlotIds: [action.plotId], ownedSectorIds: [homelandSectorId], nationDecisionId: null, frontierIntentId: null, foundingCeremonySeen: false, season: 2, view: "village", settlementMarkers: ["camp"], resources: { food: 3, timber: 2, stone: 0, influence: 1 }, chronicle: pushChronicle(state, "First banner raised", `${plot?.name ?? "A land"} became the first claimed homeland.`), retentionRecords: [], lastEvent: `${plot?.name ?? "A land"} is claimed. Enter Village, then choose Orders.` };
     }
     case "claimSector": {
       const sector = getWorldSector(getSectorIndexFromId(action.sectorId));
@@ -235,13 +250,20 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       if (!getOwnedSectorIds(state).length || getOwnedSectorIds(state).length < nationSectorThreshold) return { ...state, lastEvent: `Founding needs ${nationSectorThreshold} connected sectors.`, view: "council" };
       if (state.nationDecisionId) return { ...state, lastEvent: "The founding doctrine is already set.", view: "council" };
       const influenceGain = decision.id === "trade-charter" ? 2 : 0;
-      return { ...state, nationDecisionId: decision.id, foundingCeremonySeen: false, resources: { ...state.resources, influence: state.resources.influence + influenceGain }, season: Math.min(12, state.season + 1), view: "council", retentionRecords: [], chronicle: pushChronicle(state, "Nation founded", `${decision.label} became the first doctrine binding ${getOwnedSectorIds(state).length} sectors.`), lastEvent: `Nation founded: ${decision.label}. ${decision.effect}` };
+      return { ...state, nationDecisionId: decision.id, frontierIntentId: null, foundingCeremonySeen: false, resources: { ...state.resources, influence: state.resources.influence + influenceGain }, season: Math.min(12, state.season + 1), view: "council", retentionRecords: [], chronicle: pushChronicle(state, "Nation founded", `${decision.label} became the first doctrine binding ${getOwnedSectorIds(state).length} sectors.`), lastEvent: `Nation founded: ${decision.label}. ${decision.effect}` };
     }
     case "dismissFoundingCeremony": return state.nationDecisionId ? { ...state, foundingCeremonySeen: true, view: "council", lastEvent: "The first nation stands. Advance Season to write its first era." } : state;
     case "advanceSeason": {
       const result = resolveRetentionDecision(state, action.decisionId, action.choiceId);
       if (!result) return { ...state, lastEvent: "No available nation season decision.", view: "council" };
       return { ...state, ...result, season: Math.min(12, state.season + 1), view: "council" };
+    }
+    case "setFrontierIntent": {
+      if (!getFirstEraComplete(state)) return { ...state, view: "council", lastEvent: "Finish the first era before setting a frontier objective." };
+      if (state.frontierIntentId) return { ...state, view: "council", lastEvent: "The next frontier objective is already recorded." };
+      const objective = frontierObjectives.find((item) => item.id === action.intentId);
+      if (!objective) return { ...state, view: "council", lastEvent: "Unknown frontier objective." };
+      return { ...state, frontierIntentId: objective.id, view: "council", chronicle: pushChronicle(state, "Frontier objective recorded", `${objective.label}: ${objective.result}`), lastEvent: `Frontier objective recorded: ${objective.target}.` };
     }
     case "runOrder": {
       const result = orderResult(state, action.orderId);
