@@ -1,4 +1,4 @@
-import { getDevelopmentScore, getFirstEraComplete, getNationDecision, getNationReady, getNextRetentionDecision, getOwnedPlot, getOwnedSectorIds, getPhase, getPopulation, getRivalPressure, nationDecisions, nationSectorThreshold, type PlayAction, type PlayState, type RetentionRecord } from "../lib/play-state";
+import { frontierObjectives, getDevelopmentScore, getFirstEraComplete, getFrontierIntent, getNationDecision, getNationReady, getNextRetentionDecision, getOwnedPlot, getOwnedSectorIds, getPhase, getPopulation, getRivalPressure, nationDecisions, nationSectorThreshold, type FrontierObjective, type PlayAction, type PlayState, type RetentionRecord } from "../lib/play-state";
 
 function isCitySeed(state: PlayState) {
   const phase = getPhase(state);
@@ -42,6 +42,7 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
   const ownedSectors = getOwnedSectorIds(state);
   const nationReady = getNationReady(state);
   const nationDecision = getNationDecision(state);
+  const frontierObjective = getFrontierIntent(state);
   const capital = getOwnedPlot(state)?.name ?? "Aurelian Basin";
   const completed = roadmap.filter((item) => item.done(state)).length;
   const firstEraComplete = getFirstEraComplete(state);
@@ -49,7 +50,7 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
   const rivalFrontierVisible = firstEraComplete && Boolean(nationDecision);
 
   return (
-    <aside data-qa="council-panel" data-nation-decision={nationDecision?.id ?? "none"} data-retention-count={state.retentionRecords.length} data-era-complete={firstEraComplete ? "true" : "false"} data-city-institutions={firstEraComplete ? "true" : "false"} data-rival-frontier={rivalFrontierVisible ? "true" : "false"} className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-10rem)] w-[min(560px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/66 p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5 md:p-4">
+    <aside data-qa="council-panel" data-nation-decision={nationDecision?.id ?? "none"} data-retention-count={state.retentionRecords.length} data-era-complete={firstEraComplete ? "true" : "false"} data-city-institutions={firstEraComplete ? "true" : "false"} data-rival-frontier={rivalFrontierVisible ? "true" : "false"} data-frontier-intent={state.frontierIntentId ?? "none"} className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-10rem)] w-[min(560px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/66 p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5 md:p-4">
       <p className="text-[9px] font-black uppercase tracking-[0.24em] text-amber-200/65">Council chamber</p>
       <div className="mt-1 flex items-start justify-between gap-3">
         <div>
@@ -106,7 +107,7 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
         </div>
       )}
 
-      {rivalFrontierVisible ? <RivalFrontierSeed pressure={pressure} ownedSectors={ownedSectors.length} /> : null}
+      {rivalFrontierVisible ? <RivalFrontierSeed pressure={pressure} ownedSectors={ownedSectors.length} selectedObjective={frontierObjective} dispatch={dispatch} /> : null}
       {firstEraComplete ? <CityInstitutionsSeed records={state.retentionRecords} /> : null}
       {nationDecision && state.foundingCeremonySeen ? (
         <SeasonLoop state={state} dispatch={dispatch} complete={firstEraComplete} />
@@ -204,7 +205,7 @@ function CityInstitutionsSeed({ records }: { records: RetentionRecord[] }) {
   );
 }
 
-function RivalFrontierSeed({ pressure, ownedSectors }: { pressure: number; ownedSectors: number }) {
+function RivalFrontierSeed({ pressure, ownedSectors, selectedObjective, dispatch }: { pressure: number; ownedSectors: number; selectedObjective: FrontierObjective | null; dispatch: (action: PlayAction) => void }) {
   return (
     <div data-qa="rival-frontier-seed" data-rival-pressure={pressure} className="mt-4 rounded-3xl border border-red-200/35 bg-[radial-gradient(circle_at_top_left,rgba(248,113,113,.20),transparent_36%),rgba(127,29,29,.16)] p-3 shadow-[0_0_34px_rgba(248,113,113,.10)]">
       <p className="text-[9px] font-black uppercase tracking-[0.2em] text-red-100/70">Rival Frontier Seed</p>
@@ -213,8 +214,25 @@ function RivalFrontierSeed({ pressure, ownedSectors }: { pressure: number; owned
       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
         <Metric label="Pressure" value={`${pressure}%`} />
         <Metric label="Sectors" value={ownedSectors} />
-        <Metric label="Next" value="Frontier" />
+        <Metric label="Next" value={selectedObjective ? "Chosen" : "Choose"} />
       </div>
+      {selectedObjective ? (
+        <div data-qa="frontier-objective-recorded" data-frontier-intent={selectedObjective.id} className="mt-3 rounded-2xl border border-red-100/20 bg-black/26 p-3">
+          <p className="text-[9px] font-black uppercase tracking-[0.18em] text-red-100/60">Expansion intent recorded</p>
+          <p className="mt-1 text-sm font-black text-amber-50">{selectedObjective.label}</p>
+          <p className="mt-1 text-xs leading-relaxed text-amber-50/58">{selectedObjective.target} · {selectedObjective.result}</p>
+        </div>
+      ) : (
+        <div data-qa="frontier-objective-options" className="mt-3 grid gap-2">
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-red-100/60">Choose the next expansion objective</p>
+          {frontierObjectives.map((objective) => (
+            <button key={objective.id} type="button" data-qa="frontier-objective-choice" data-frontier-intent={objective.id} onClick={() => dispatch({ type: "setFrontierIntent", intentId: objective.id })} className="rounded-2xl border border-red-100/20 bg-black/24 p-3 text-left transition hover:border-red-100/45 hover:bg-red-200/10">
+              <span className="block text-sm font-black text-amber-50">{objective.label}</span>
+              <span className="mt-1 block text-xs leading-relaxed text-amber-50/58">{objective.target} · {objective.reason}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
