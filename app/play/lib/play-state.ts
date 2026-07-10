@@ -17,7 +17,7 @@ export type NationDecision = { id: NationDecisionId; label: string; short: strin
 export type RetentionChoice = { id: RetentionChoiceId; label: string; short: string; influenceDelta: number; villageMarker: string; worldMarker: string };
 export type RetentionDecision = { id: RetentionDecisionId; season: number; title: string; prompt: string; choices: RetentionChoice[] };
 export type RetentionRecord = { season: number; decisionId: RetentionDecisionId; choiceId: RetentionChoiceId; label: string; villageMarker: string; worldMarker: string };
-export type FrontierObjective = { id: FrontierIntentId; label: string; target: string; reason: string; result: string };
+export type FrontierObjective = { id: FrontierIntentId; label: string; target: string; targetSectorId: string; reason: string; result: string; secured: string };
 
 export type PlayState = {
   selectedPlotId: string;
@@ -60,9 +60,9 @@ export const nationDecisions: NationDecision[] = [
 ];
 
 export const frontierObjectives: FrontierObjective[] = [
-  { id: "northern-pass", label: "Chart the Northern Pass", target: "A-01 North Ridge", reason: "Find the safest route beyond the basin before rivals shape it first.", result: "Sets the next expansion intent toward a mountain pass." },
-  { id: "river-gate", label: "Secure the River Gate", target: "A-01 Glasswater Gate", reason: "Turn the river crossing into the next civic frontier objective.", result: "Sets the next expansion intent toward the river approach." },
-  { id: "eastern-march", label: "Open the Eastern March", target: "A-01 Eastfold Road", reason: "Extend the market road into a named frontier march for future empire growth.", result: "Sets the next expansion intent toward the eastern trade road." },
+  { id: "northern-pass", label: "Chart the Northern Pass", target: "A-04 North Ridge", targetSectorId: "A-04", reason: "Push beyond the first border ring and secure the safest route out of the basin.", result: "Sets the next expansion intent toward a mountain pass.", secured: "The northern pass is now inside Aurelian borders." },
+  { id: "river-gate", label: "Secure the River Gate", target: "B-03 Glasswater Gate", targetSectorId: "B-03", reason: "Turn the river crossing into the next civic frontier objective.", result: "Sets the next expansion intent toward the river approach.", secured: "The river gate is now held as a civic frontier crossing." },
+  { id: "eastern-march", label: "Open the Eastern March", target: "B-04 Eastfold Road", targetSectorId: "B-04", reason: "Extend the market road into a named frontier march for future empire growth.", result: "Sets the next expansion intent toward the eastern trade road.", secured: "The eastern march is now open for future empire growth." },
 ];
 
 export const retentionDecisions: RetentionDecision[] = [
@@ -143,6 +143,11 @@ export function getFrontierIntent(state: PlayState) {
   return frontierObjectives.find((objective) => objective.id === state.frontierIntentId) ?? null;
 }
 
+export function getFrontierObjectiveSecured(state: PlayState) {
+  const objective = getFrontierIntent(state);
+  return Boolean(objective && getOwnedSectorIds(state).includes(objective.targetSectorId));
+}
+
 export function getNextRetentionDecision(state: PlayState) {
   if (!state.nationDecisionId || !state.foundingCeremonySeen) return null;
   return retentionDecisions.find((decision) => !state.retentionRecords.some((record) => record.decisionId === decision.id)) ?? null;
@@ -167,7 +172,7 @@ export function getPopulation(state: PlayState) {
 }
 
 export function getDevelopmentScore(state: PlayState) {
-  return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5 + (state.nationDecisionId ? 14 : 0) + state.retentionRecords.length * 7 + (state.frontierIntentId ? 6 : 0);
+  return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5 + (state.nationDecisionId ? 14 : 0) + state.retentionRecords.length * 7 + (state.frontierIntentId ? 6 : 0) + (getFrontierObjectiveSecured(state) ? 10 : 0);
 }
 
 export function getRivalPressure(state: PlayState) {
@@ -176,7 +181,8 @@ export function getRivalPressure(state: PlayState) {
   const defenseRelief = state.completedOrders.includes("fortify-watch") ? 8 : 0;
   const nationRelief = state.nationDecisionId === "border-guard" ? 8 : 0;
   const retentionRelief = state.retentionRecords.some((record) => record.worldMarker === "fortified-road") ? 4 : 0;
-  return Math.max(0, base - scoutRelief - defenseRelief - nationRelief - retentionRelief);
+  const objectiveRelief = getFrontierObjectiveSecured(state) ? 3 : 0;
+  return Math.max(0, base - scoutRelief - defenseRelief - nationRelief - retentionRelief - objectiveRelief);
 }
 
 export function getWorldClaimedCount(state: PlayState) {
@@ -242,7 +248,12 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       if (!status.ok) return { ...state, lastEvent: expansionBlockedMessage(status.reason), view: "world" };
       const ownedSectorIds = [...status.ownedSectorIds, sector.id];
       const nationLine = ownedSectorIds.length >= nationSectorThreshold ? " The council can now choose a founding doctrine." : " Expand to 3 sectors to unlock nation scale.";
-      return { ...state, ownedSectorIds, resources: { ...state.resources, influence: Math.max(0, state.resources.influence - expansionInfluenceCost) }, season: Math.min(12, state.season + 1), view: "world", chronicle: pushChronicle(state, "Sector claimed", `${sector.id} ${sector.name} joined the border ring.${nationLine}`), lastEvent: `${sector.id} claimed. Borders now hold ${ownedSectorIds.length} sectors.${nationLine}` };
+      const objective = getFrontierIntent(state);
+      const objectiveSecured = Boolean(objective && objective.targetSectorId === sector.id);
+      const chronicleTitle = objectiveSecured ? "Frontier objective secured" : "Sector claimed";
+      const chronicleBody = objectiveSecured && objective ? `${objective.target} joined the border ring. ${objective.secured}` : `${sector.id} ${sector.name} joined the border ring.${nationLine}`;
+      const lastEvent = objectiveSecured && objective ? `Frontier objective secured: ${objective.target}.` : `${sector.id} claimed. Borders now hold ${ownedSectorIds.length} sectors.${nationLine}`;
+      return { ...state, ownedSectorIds, resources: { ...state.resources, influence: Math.max(0, state.resources.influence - expansionInfluenceCost) }, season: Math.min(12, state.season + 1), view: "world", chronicle: pushChronicle(state, chronicleTitle, chronicleBody), lastEvent };
     }
     case "foundNation": {
       const decision = nationDecisions.find((item) => item.id === action.decisionId);
