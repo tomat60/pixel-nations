@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { canClaimSector, expansionInfluenceCost, getClaimableSectorIds, getFrontierIntent, getFrontierObjectiveSecured, getNationDecision, getNationReady, getOwnedSectorIds, type FrontierObjective, type PlayAction, type PlayState, type RetentionRecord } from "../lib/play-state";
+import { canClaimSector, expansionInfluenceCost, getClaimableSectorIds, getEmpireDeclaration, getFrontierIntent, getFrontierObjectiveSecured, getNationDecision, getNationReady, getOwnedSectorIds, type FrontierObjective, type PlayAction, type PlayState, type RetentionRecord } from "../lib/play-state";
 import { LANDS_PER_SECTOR, SECTOR_COUNT, WORLD_LANDS } from "../lib/world-engine";
 import { buildWorldMapModel, getSectorLandSamples, type SectorKind, type WorldMapSector } from "./world-map-selectors";
 
@@ -64,12 +64,13 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
   const frontierTargetSectorId = frontierObjective?.targetSectorId ?? null;
   const frontierTargetSector = frontierTargetSectorId ? model.sectors.find((sector) => sector.id === frontierTargetSectorId) ?? null : null;
   const frontierObjectiveComplete = getFrontierObjectiveSecured(state);
+  const empireDeclaration = getEmpireDeclaration(state);
   const selectedExpansion = canClaimSector(state, selected.id);
   const selectedControl = getSectorControl(selected.id, ownedSectorIds, claimableSectorIds);
-  const nextGoal = frontierObjectiveComplete && frontierObjective ? `${frontierObjective.target} secured` : frontierObjective ? frontierObjective.target : nationDecision ? nationDecision.label : nationReady ? "Choose founding doctrine" : `${Math.max(0, 3 - ownedSectorIds.length)} more sector${3 - ownedSectorIds.length === 1 ? "" : "s"} to found a nation`;
+  const nextGoal = empireDeclaration ? empireDeclaration.label : frontierObjectiveComplete && frontierObjective ? `${frontierObjective.target} secured` : frontierObjective ? frontierObjective.target : nationDecision ? nationDecision.label : nationReady ? "Choose founding doctrine" : `${Math.max(0, 3 - ownedSectorIds.length)} more sector${3 - ownedSectorIds.length === 1 ? "" : "s"} to found a nation`;
 
   return (
-    <section data-qa="world-map-scene" data-owned-count={ownedSectorIds.length} data-influence={state.resources.influence} data-nation-ready={nationReady ? "true" : "false"} data-nation-decision={nationDecision?.id ?? "none"} data-nation-founded={nationFounded ? "true" : "false"} data-frontier-intent={frontierObjective?.id ?? "none"} data-frontier-target-sector={frontierTargetSectorId ?? "none"} data-frontier-objective-complete={frontierObjectiveComplete ? "true" : "false"} data-retention-count={state.retentionRecords.length} data-institution-count={institutionCount} data-world-lands={WORLD_LANDS} data-sector-count={SECTOR_COUNT} data-lands-per-sector={LANDS_PER_SECTOR} className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(251,191,36,.14),transparent_26%),linear-gradient(180deg,#07111b_0%,#030708_100%)]">
+    <section data-qa="world-map-scene" data-owned-count={ownedSectorIds.length} data-influence={state.resources.influence} data-nation-ready={nationReady ? "true" : "false"} data-nation-decision={nationDecision?.id ?? "none"} data-nation-founded={nationFounded ? "true" : "false"} data-frontier-intent={frontierObjective?.id ?? "none"} data-frontier-target-sector={frontierTargetSectorId ?? "none"} data-frontier-objective-complete={frontierObjectiveComplete ? "true" : "false"} data-empire-declaration={empireDeclaration?.id ?? "none"} data-retention-count={state.retentionRecords.length} data-institution-count={institutionCount} data-world-lands={WORLD_LANDS} data-sector-count={SECTOR_COUNT} data-lands-per-sector={LANDS_PER_SECTOR} className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(251,191,36,.14),transparent_26%),linear-gradient(180deg,#07111b_0%,#030708_100%)]">
       <div data-qa="world-panel" className="pointer-events-none absolute inset-0" />
       <div data-qa="expansion-hud" className="absolute left-4 right-4 top-[5.7rem] z-10 flex flex-col gap-3 md:left-6 md:right-6 md:top-[6.6rem] lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-[720px] rounded-3xl border border-sky-100/18 bg-black/42 p-3 shadow-2xl backdrop-blur-md md:p-4">
@@ -79,6 +80,7 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
           {nationDecision ? <p data-qa="nation-world-banner" className="mt-3 rounded-2xl border border-emerald-200/35 bg-emerald-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-100">⚑ Aurelian Nation founded · {nationDecision.label} · {ownedSectorIds.length} sectors</p> : null}
           {frontierObjective ? <p data-qa="world-frontier-objective-banner" data-frontier-intent={frontierObjective.id} data-frontier-target-sector={frontierTargetSectorId ?? "none"} className="mt-2 rounded-2xl border border-orange-200/35 bg-orange-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-orange-100">★ Frontier objective · {frontierObjective.target}{frontierTargetSector ? ` · sector ${frontierTargetSector.id}` : ""}</p> : null}
           {frontierObjectiveComplete && frontierObjective ? <p data-qa="world-frontier-objective-complete" data-frontier-intent={frontierObjective.id} data-frontier-target-sector={frontierTargetSectorId ?? "none"} className="mt-2 rounded-2xl border border-emerald-200/35 bg-emerald-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-100">✓ Objective secured · {frontierObjective.secured}</p> : null}
+          {empireDeclaration ? <p data-qa="world-empire-banner" data-empire-declaration={empireDeclaration.id} className="mt-2 rounded-2xl border border-amber-200/45 bg-amber-300/16 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-amber-100">♛ Empire seed · {empireDeclaration.title}</p> : null}
           {institutionCount > 0 ? <p data-qa="world-institution-indicator" data-institution-count={institutionCount} className="mt-2 rounded-2xl border border-purple-200/35 bg-purple-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-purple-100">City institutions visible · {institutionCount}/3 district signal{institutionCount === 1 ? "" : "s"} now mark the capital sector</p> : null}
         </div>
         <div className="grid grid-cols-5 gap-1.5 text-center lg:min-w-[460px]">
@@ -99,6 +101,7 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
             <Legend label="Claimable" tone="border-lime-200/80 bg-lime-300/18 text-lime-50" />
             <Legend label="Locked" tone="border-slate-200/20 bg-slate-300/8 text-slate-100/65" />
             {nationFounded ? <Legend label="Nation" tone="border-emerald-200/80 bg-emerald-300/18 text-emerald-50" /> : null}
+            {empireDeclaration ? <Legend label="Empire" tone="border-amber-200/80 bg-amber-300/20 text-amber-50" /> : null}
             {frontierObjective ? <Legend label={frontierObjectiveComplete ? "Objective held" : "Objective"} tone={frontierObjectiveComplete ? "border-emerald-200/80 bg-emerald-300/18 text-emerald-50" : "border-orange-200/80 bg-orange-300/18 text-orange-50"} /> : null}
             {institutionCount > 0 ? <Legend label="Institutions" tone="border-purple-200/80 bg-purple-300/18 text-purple-50" /> : null}
           </div>
@@ -134,6 +137,7 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
             <p className="mt-1 text-sm font-black text-amber-50">{selectedControl === "owned" ? "Inside your borders" : selectedExpansion.ok ? "Adjacent and affordable" : expansionStatusCopy(selectedExpansion.reason)}</p>
             <button data-qa="claim-sector-button" disabled={!selectedExpansion.ok} onClick={() => dispatch({ type: "claimSector", sectorId: selected.id })} className="mt-3 w-full rounded-2xl bg-lime-200 px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-black/30 transition hover:bg-lime-100 disabled:cursor-not-allowed disabled:bg-white/12 disabled:text-white/35">Claim sector · {expansionInfluenceCost} Influence</button>
           </div>
+          {empireDeclaration ? <div data-qa="world-empire-effect" data-empire-declaration={empireDeclaration.id} className="mt-3 rounded-2xl border border-amber-200/40 bg-amber-300/14 p-3"><p className="text-sm font-black text-amber-50">{empireDeclaration.title}</p><p className="mt-1 text-xs leading-relaxed text-amber-50/62">{empireDeclaration.effect}</p></div> : null}
           {nationDecision ? <div data-qa="nation-world-effect" className="mt-3 rounded-2xl border border-emerald-200/35 bg-emerald-300/12 p-3"><p className="text-sm font-black text-amber-50">Aurelian Nation controls the border ring</p><p className="mt-1 text-xs leading-relaxed text-amber-50/62">{nationDecision.label}: {nationDecision.effect}</p></div> : nationReady ? <div data-qa="nation-affordance" className="mt-3 rounded-2xl border border-amber-200/35 bg-amber-300/12 p-3"><p className="text-sm font-black text-amber-50">Nation threshold reached</p><p className="mt-1 text-xs leading-relaxed text-amber-50/62">Three sectors now answer to your council. Open Council to choose the founding doctrine.</p></div> : null}
           {institutionCount > 0 ? <WorldInstitutionSignals signals={institutionSignals} /> : null}
           {state.retentionRecords.length > 0 ? <WorldRetentionEffects state={state} /> : null}
