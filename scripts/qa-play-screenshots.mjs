@@ -156,7 +156,7 @@ const steps = [
     if (institutions < 3) throw new Error(`Expected at least 3 city institution cards, got ${institutions}`);
     await sleep(450);
   } },
-  { id: "12-retention-state-after-reload", label: "Retention state after reload", note: "Reload preserves completed first era, city institutions, frontier objective, world objective marker, objective payoff, and world consequence markers.", run: async (page) => {
+  { id: "12-retention-state-after-reload", label: "Empire declaration after reload", note: "Reload preserves first era, city institutions, frontier objective, objective payoff, empire declaration, and world consequence markers.", run: async (page) => {
     await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
     await clickDock(page, "council");
@@ -182,6 +182,21 @@ const steps = [
     await page.locator('[data-qa="world-retention-effects"]').waitFor({ state: "visible", timeout: 5000 });
     const markers = await page.locator('[data-qa="world-retention-marker"]').count();
     if (markers < 3) throw new Error(`Expected at least 3 world retention markers, got ${markers}`);
+    await clickDock(page, "council");
+    await page.locator('[data-qa="council-panel"][data-frontier-secured="true"][data-empire-ready="true"][data-empire-declaration="none"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-qa="empire-declaration-options"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-qa="empire-declaration-choice"][data-empire-declaration="aurelian-compact"]').click();
+    await page.locator('[data-qa="council-panel"][data-empire-declaration="aurelian-compact"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-qa="empire-declaration-recorded"][data-empire-declaration="aurelian-compact"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
+    await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    await clickDock(page, "council");
+    await page.locator('[data-qa="council-panel"][data-empire-ready="true"][data-empire-declaration="aurelian-compact"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-qa="empire-declaration-recorded"][data-empire-declaration="aurelian-compact"]').waitFor({ state: "visible", timeout: 5000 });
+    await clickDock(page, "world");
+    await page.locator('[data-qa="world-map-scene"][data-empire-declaration="aurelian-compact"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-qa="world-empire-banner"][data-empire-declaration="aurelian-compact"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-qa="world-empire-effect"][data-empire-declaration="aurelian-compact"]').waitFor({ state: "visible", timeout: 5000 });
     await sleep(450);
   } },
 ];
@@ -252,7 +267,7 @@ function escapeHtml(value) {
 function buildReport({ generatedAt, appSource, shots, interactionLog }) {
   const items = shots.map((shot) => `<li>${escapeHtml(shot.stepLabel)} — ${shot.error ? `WARNING: ${escapeHtml(shot.error)}` : "ok"}</li>`).join("\n");
   const logItems = interactionLog.map((item) => `<li>${escapeHtml(item.viewport)} / ${escapeHtml(item.stepId)} — ${escapeHtml(item.status)}${item.error ? `: ${escapeHtml(item.error)}` : ""}</li>`).join("\n");
-  return `<!doctype html><html><head><meta charset="utf-8"><title>Pixel Nations Gameplay QA</title></head><body><main><h1>Playable loop evidence</h1><p>Generated: ${escapeHtml(generatedAt)}</p><p>App source: ${escapeHtml(appSource)}</p><h2>Verdict checklist</h2><ul><li>Owned territory visibly grows</li><li>Expansion uses Influence</li><li>Council reflects expansion progress</li><li>Founding ceremony appears after doctrine choice</li><li>Dismissed ceremony does not replay after reload</li><li>Retention season panel appears after founding</li><li>Three post-founding season decisions can be resolved</li><li>City institutions seed appears after First Era completion</li><li>One frontier objective can be recorded</li><li>Recorded frontier objective appears on the world map</li><li>Recorded frontier objective can be claimed and marked complete</li><li>First era completion, city institutions, frontier objective, and world consequence markers persist after reload</li></ul><h2>Interaction log</h2><ul>${logItems}</ul><h2>Screenshots</h2><ul>${items}</ul></main></body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Pixel Nations Gameplay QA</title></head><body><main><h1>Playable loop evidence</h1><p>Generated: ${escapeHtml(generatedAt)}</p><p>App source: ${escapeHtml(appSource)}</p><h2>Verdict checklist</h2><ul><li>Owned territory visibly grows</li><li>Expansion uses Influence</li><li>Council reflects expansion progress</li><li>Founding ceremony appears after doctrine choice</li><li>Dismissed ceremony does not replay after reload</li><li>Retention season panel appears after founding</li><li>Three post-founding season decisions can be resolved</li><li>City institutions seed appears after First Era completion</li><li>One frontier objective can be recorded</li><li>Recorded frontier objective appears on the world map</li><li>Recorded frontier objective can be claimed and marked complete</li><li>Empire declaration can be recorded after objective payoff</li><li>Empire declaration persists on Council and World after reload</li><li>First era completion, city institutions, frontier objective, empire declaration, and world consequence markers persist after reload</li></ul><h2>Interaction log</h2><ul>${logItems}</ul><h2>Screenshots</h2><ul>${items}</ul></main></body></html>`;
 }
 
 async function runViewport(config) {
