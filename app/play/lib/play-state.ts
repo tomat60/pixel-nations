@@ -9,6 +9,7 @@ export type NationDecisionId = "trade-charter" | "border-guard" | "settler-right
 export type RetentionDecisionId = "grain-levy" | "open-roads" | "scribe-patronage";
 export type RetentionChoiceId = "authority" | "freedom";
 export type FrontierIntentId = "northern-pass" | "river-gate" | "eastern-march";
+export type EmpireDeclarationId = "aurelian-compact" | "frontier-crown" | "basin-hegemony";
 
 export type Resources = { food: number; timber: number; stone: number; influence: number };
 export type ChronicleEntry = { season: number; title: string; body: string };
@@ -18,6 +19,7 @@ export type RetentionChoice = { id: RetentionChoiceId; label: string; short: str
 export type RetentionDecision = { id: RetentionDecisionId; season: number; title: string; prompt: string; choices: RetentionChoice[] };
 export type RetentionRecord = { season: number; decisionId: RetentionDecisionId; choiceId: RetentionChoiceId; label: string; villageMarker: string; worldMarker: string };
 export type FrontierObjective = { id: FrontierIntentId; label: string; target: string; targetSectorId: string; reason: string; result: string; secured: string };
+export type EmpireDeclaration = { id: EmpireDeclarationId; label: string; title: string; short: string; effect: string };
 
 export type PlayState = {
   selectedPlotId: string;
@@ -25,6 +27,7 @@ export type PlayState = {
   ownedSectorIds: string[];
   nationDecisionId: NationDecisionId | null;
   frontierIntentId: FrontierIntentId | null;
+  empireDeclarationId: EmpireDeclarationId | null;
   foundingCeremonySeen: boolean;
   season: number;
   view: ViewId;
@@ -45,6 +48,7 @@ export type PlayAction =
   | { type: "dismissFoundingCeremony" }
   | { type: "advanceSeason"; decisionId: RetentionDecisionId; choiceId: RetentionChoiceId }
   | { type: "setFrontierIntent"; intentId: FrontierIntentId }
+  | { type: "declareEmpire"; declarationId: EmpireDeclarationId }
   | { type: "hydrate"; state: PlayState }
   | { type: "runOrder"; orderId: OrderId }
   | { type: "setView"; view: ViewId }
@@ -63,6 +67,12 @@ export const frontierObjectives: FrontierObjective[] = [
   { id: "northern-pass", label: "Chart the Northern Pass", target: "A-04 North Ridge", targetSectorId: "A-04", reason: "Push beyond the first border ring and secure the safest route out of the basin.", result: "Sets the next expansion intent toward a mountain pass.", secured: "The northern pass is now inside Aurelian borders." },
   { id: "river-gate", label: "Secure the River Gate", target: "B-03 Glasswater Gate", targetSectorId: "B-03", reason: "Turn the river crossing into the next civic frontier objective.", result: "Sets the next expansion intent toward the river approach.", secured: "The river gate is now held as a civic frontier crossing." },
   { id: "eastern-march", label: "Open the Eastern March", target: "B-04 Eastfold Road", targetSectorId: "B-04", reason: "Extend the market road into a named frontier march for future empire growth.", result: "Sets the next expansion intent toward the eastern trade road.", secured: "The eastern march is now open for future empire growth." },
+];
+
+export const empireDeclarations: EmpireDeclaration[] = [
+  { id: "aurelian-compact", label: "Aurelian Compact", title: "The Aurelian Compact", short: "Bind city, frontier and nation into one imperial charter.", effect: "Empire seed formed through civic legitimacy." },
+  { id: "frontier-crown", label: "Frontier Crown", title: "The Frontier Crown", short: "Crown the secured pass as the first imperial mandate.", effect: "Empire seed formed through expansion legitimacy." },
+  { id: "basin-hegemony", label: "Basin Hegemony", title: "The Basin Hegemony", short: "Declare the basin a protected imperial sphere.", effect: "Empire seed formed through territorial legitimacy." },
 ];
 
 export const retentionDecisions: RetentionDecision[] = [
@@ -115,6 +125,7 @@ export const initialPlayState: PlayState = {
   ownedSectorIds: [],
   nationDecisionId: null,
   frontierIntentId: null,
+  empireDeclarationId: null,
   foundingCeremonySeen: false,
   season: 1,
   view: "map",
@@ -148,6 +159,14 @@ export function getFrontierObjectiveSecured(state: PlayState) {
   return Boolean(objective && getOwnedSectorIds(state).includes(objective.targetSectorId));
 }
 
+export function getEmpireDeclaration(state: PlayState) {
+  return empireDeclarations.find((declaration) => declaration.id === state.empireDeclarationId) ?? null;
+}
+
+export function getEmpireReady(state: PlayState) {
+  return Boolean(getFirstEraComplete(state) && state.nationDecisionId && getFrontierObjectiveSecured(state));
+}
+
 export function getNextRetentionDecision(state: PlayState) {
   if (!state.nationDecisionId || !state.foundingCeremonySeen) return null;
   return retentionDecisions.find((decision) => !state.retentionRecords.some((record) => record.decisionId === decision.id)) ?? null;
@@ -172,7 +191,7 @@ export function getPopulation(state: PlayState) {
 }
 
 export function getDevelopmentScore(state: PlayState) {
-  return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5 + (state.nationDecisionId ? 14 : 0) + state.retentionRecords.length * 7 + (state.frontierIntentId ? 6 : 0) + (getFrontierObjectiveSecured(state) ? 10 : 0);
+  return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5 + (state.nationDecisionId ? 14 : 0) + state.retentionRecords.length * 7 + (state.frontierIntentId ? 6 : 0) + (getFrontierObjectiveSecured(state) ? 10 : 0) + (state.empireDeclarationId ? 18 : 0);
 }
 
 export function getRivalPressure(state: PlayState) {
@@ -182,7 +201,8 @@ export function getRivalPressure(state: PlayState) {
   const nationRelief = state.nationDecisionId === "border-guard" ? 8 : 0;
   const retentionRelief = state.retentionRecords.some((record) => record.worldMarker === "fortified-road") ? 4 : 0;
   const objectiveRelief = getFrontierObjectiveSecured(state) ? 3 : 0;
-  return Math.max(0, base - scoutRelief - defenseRelief - nationRelief - retentionRelief - objectiveRelief);
+  const empireRelief = state.empireDeclarationId ? 4 : 0;
+  return Math.max(0, base - scoutRelief - defenseRelief - nationRelief - retentionRelief - objectiveRelief - empireRelief);
 }
 
 export function getWorldClaimedCount(state: PlayState) {
@@ -234,13 +254,13 @@ function resolveRetentionDecision(state: PlayState, decisionId: RetentionDecisio
 
 export function playReducer(state: PlayState, action: PlayAction): PlayState {
   switch (action.type) {
-    case "hydrate": return { ...initialPlayState, ...action.state, resources: { ...initialPlayState.resources, ...action.state.resources }, retentionRecords: action.state.retentionRecords ?? [], frontierIntentId: action.state.frontierIntentId ?? null };
+    case "hydrate": return { ...initialPlayState, ...action.state, resources: { ...initialPlayState.resources, ...action.state.resources }, retentionRecords: action.state.retentionRecords ?? [], frontierIntentId: action.state.frontierIntentId ?? null, empireDeclarationId: action.state.empireDeclarationId ?? null };
     case "select": return { ...state, selectedPlotId: action.plotId, view: state.view === "village" ? "map" : state.view };
     case "setView": return { ...state, view: action.view };
     case "claim": {
       if (state.ownedPlotIds.includes(action.plotId)) return state;
       const plot = plots.find((item) => item.id === action.plotId);
-      return { ...state, selectedPlotId: action.plotId, ownedPlotIds: [action.plotId], ownedSectorIds: [homelandSectorId], nationDecisionId: null, frontierIntentId: null, foundingCeremonySeen: false, season: 2, view: "village", settlementMarkers: ["camp"], resources: { food: 3, timber: 2, stone: 0, influence: 1 }, chronicle: pushChronicle(state, "First banner raised", `${plot?.name ?? "A land"} became the first claimed homeland.`), retentionRecords: [], lastEvent: `${plot?.name ?? "A land"} is claimed. Enter Village, then choose Orders.` };
+      return { ...state, selectedPlotId: action.plotId, ownedPlotIds: [action.plotId], ownedSectorIds: [homelandSectorId], nationDecisionId: null, frontierIntentId: null, empireDeclarationId: null, foundingCeremonySeen: false, season: 2, view: "village", settlementMarkers: ["camp"], resources: { food: 3, timber: 2, stone: 0, influence: 1 }, chronicle: pushChronicle(state, "First banner raised", `${plot?.name ?? "A land"} became the first claimed homeland.`), retentionRecords: [], lastEvent: `${plot?.name ?? "A land"} is claimed. Enter Village, then choose Orders.` };
     }
     case "claimSector": {
       const sector = getWorldSector(getSectorIndexFromId(action.sectorId));
@@ -261,7 +281,7 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       if (!getOwnedSectorIds(state).length || getOwnedSectorIds(state).length < nationSectorThreshold) return { ...state, lastEvent: `Founding needs ${nationSectorThreshold} connected sectors.`, view: "council" };
       if (state.nationDecisionId) return { ...state, lastEvent: "The founding doctrine is already set.", view: "council" };
       const influenceGain = decision.id === "trade-charter" ? 2 : 0;
-      return { ...state, nationDecisionId: decision.id, frontierIntentId: null, foundingCeremonySeen: false, resources: { ...state.resources, influence: state.resources.influence + influenceGain }, season: Math.min(12, state.season + 1), view: "council", retentionRecords: [], chronicle: pushChronicle(state, "Nation founded", `${decision.label} became the first doctrine binding ${getOwnedSectorIds(state).length} sectors.`), lastEvent: `Nation founded: ${decision.label}. ${decision.effect}` };
+      return { ...state, nationDecisionId: decision.id, frontierIntentId: null, empireDeclarationId: null, foundingCeremonySeen: false, resources: { ...state.resources, influence: state.resources.influence + influenceGain }, season: Math.min(12, state.season + 1), view: "council", retentionRecords: [], chronicle: pushChronicle(state, "Nation founded", `${decision.label} became the first doctrine binding ${getOwnedSectorIds(state).length} sectors.`), lastEvent: `Nation founded: ${decision.label}. ${decision.effect}` };
     }
     case "dismissFoundingCeremony": return state.nationDecisionId ? { ...state, foundingCeremonySeen: true, view: "council", lastEvent: "The first nation stands. Advance Season to write its first era." } : state;
     case "advanceSeason": {
@@ -274,7 +294,14 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       if (state.frontierIntentId) return { ...state, view: "council", lastEvent: "The next frontier objective is already recorded." };
       const objective = frontierObjectives.find((item) => item.id === action.intentId);
       if (!objective) return { ...state, view: "council", lastEvent: "Unknown frontier objective." };
-      return { ...state, frontierIntentId: objective.id, view: "council", chronicle: pushChronicle(state, "Frontier objective recorded", `${objective.label}: ${objective.result}`), lastEvent: `Frontier objective recorded: ${objective.target}.` };
+      return { ...state, frontierIntentId: objective.id, empireDeclarationId: null, view: "council", chronicle: pushChronicle(state, "Frontier objective recorded", `${objective.label}: ${objective.result}`), lastEvent: `Frontier objective recorded: ${objective.target}.` };
+    }
+    case "declareEmpire": {
+      if (!getEmpireReady(state)) return { ...state, view: "council", lastEvent: "Secure the frontier objective before declaring an empire." };
+      if (state.empireDeclarationId) return { ...state, view: "council", lastEvent: "The empire declaration is already recorded." };
+      const declaration = empireDeclarations.find((item) => item.id === action.declarationId);
+      if (!declaration) return { ...state, view: "council", lastEvent: "Unknown empire declaration." };
+      return { ...state, empireDeclarationId: declaration.id, view: "council", chronicle: pushChronicle(state, "Empire declared", `${declaration.title}: ${declaration.effect}`), lastEvent: `Empire declared: ${declaration.title}.` };
     }
     case "runOrder": {
       const result = orderResult(state, action.orderId);
