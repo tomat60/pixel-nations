@@ -14,6 +14,13 @@ Every merged gameplay PR must have evidence that exercises the new or changed in
 
 Do not treat a slideshow, GIF made from screenshots, or screenshot sequence as video review. Label it as checkpoint evidence only.
 
+## Artifact retention
+
+- `/play` visual evidence artifacts include screenshots, logs, reports, and continuous `.webm` video.
+- Keep `/play` visual evidence artifacts short-lived: 7 days by default.
+- Fable artifacts may stay longer because they are small text outputs and are useful for sprint traceability.
+- Do not commit generated evidence files into the repo unless a specific release/demo archive is intentionally created.
+
 ## Per-PR targeted review
 
 For a normal scoped PR, review only what changed:
