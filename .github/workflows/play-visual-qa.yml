@@ -51,4 +51,4 @@ jobs:
           name: pixel-nations-play-evidence
           path: public/qa/play-latest
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 7
