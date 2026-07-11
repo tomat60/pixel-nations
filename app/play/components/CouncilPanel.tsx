@@ -1,4 +1,4 @@
-import { empireDeclarations, frontierObjectives, getDevelopmentScore, getEmpireDeclaration, getEmpireReady, getFirstEraComplete, getFrontierIntent, getFrontierObjectiveSecured, getNationDecision, getNationReady, getNextRetentionDecision, getOwnedPlot, getOwnedSectorIds, getPhase, getPopulation, getRivalPressure, nationDecisions, nationSectorThreshold, type FrontierObjective, type PlayAction, type PlayState, type RetentionRecord } from "../lib/play-state";
+import { empireDeclarations, frontierObjectives, getCourtCaseDecision, getCourtCaseReady, getDevelopmentScore, getEmpireDeclaration, getEmpireReady, getFirstEraComplete, getFrontierIntent, getFrontierObjectiveSecured, getImperialCourtCase, getNationDecision, getNationReady, getNextRetentionDecision, getOwnedPlot, getOwnedSectorIds, getPhase, getPopulation, getRivalPressure, nationDecisions, nationSectorThreshold, type FrontierObjective, type PlayAction, type PlayState, type RetentionRecord } from "../lib/play-state";
 
 function isCitySeed(state: PlayState) {
   const phase = getPhase(state);
@@ -43,6 +43,7 @@ const roadmap = [
   { label: "Empire", detail: "secure a frontier objective, then declare the empire seed", done: (state: PlayState) => Boolean(state.empireDeclarationId) },
   { label: "Consequence", detail: "give the empire seed a system direction", done: (state: PlayState) => Boolean(getEmpireDeclaration(state)) },
   { label: "Mandate", detail: "record the first imperial law seed", done: (state: PlayState) => Boolean(getEmpireFoundingConsequence(getEmpireDeclaration(state))) },
+  { label: "Court", detail: "resolve the first charter court case", done: (state: PlayState) => Boolean(state.courtCaseDecisionId) },
 ];
 
 export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: (action: PlayAction) => void }) {
@@ -57,6 +58,9 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
   const empireReady = getEmpireReady(state);
   const empireDeclaration = getEmpireDeclaration(state);
   const empireConsequence = getEmpireFoundingConsequence(empireDeclaration);
+  const courtCase = getImperialCourtCase(state);
+  const courtDecision = getCourtCaseDecision(state);
+  const courtCaseReady = getCourtCaseReady(state);
   const capital = getOwnedPlot(state)?.name ?? "Aurelian Basin";
   const completed = roadmap.filter((item) => item.done(state)).length;
   const firstEraComplete = getFirstEraComplete(state);
@@ -64,14 +68,14 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
   const rivalFrontierVisible = firstEraComplete && Boolean(nationDecision);
 
   return (
-    <aside data-qa="council-panel" data-nation-decision={nationDecision?.id ?? "none"} data-retention-count={state.retentionRecords.length} data-era-complete={firstEraComplete ? "true" : "false"} data-city-institutions={firstEraComplete ? "true" : "false"} data-rival-frontier={rivalFrontierVisible ? "true" : "false"} data-frontier-intent={state.frontierIntentId ?? "none"} data-frontier-secured={frontierObjectiveSecured ? "true" : "false"} data-empire-ready={empireReady ? "true" : "false"} data-empire-declaration={state.empireDeclarationId ?? "none"} data-empire-consequence={empireConsequence?.id ?? "none"} data-imperial-mandate={empireConsequence?.mandateId ?? "none"} className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-10rem)] w-[min(560px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/66 p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5 md:p-4">
+    <aside data-qa="council-panel" data-nation-decision={nationDecision?.id ?? "none"} data-retention-count={state.retentionRecords.length} data-era-complete={firstEraComplete ? "true" : "false"} data-city-institutions={firstEraComplete ? "true" : "false"} data-rival-frontier={rivalFrontierVisible ? "true" : "false"} data-frontier-intent={state.frontierIntentId ?? "none"} data-frontier-secured={frontierObjectiveSecured ? "true" : "false"} data-empire-ready={empireReady ? "true" : "false"} data-empire-declaration={state.empireDeclarationId ?? "none"} data-empire-consequence={empireConsequence?.id ?? "none"} data-imperial-mandate={empireConsequence?.mandateId ?? "none"} data-court-case-ready={courtCaseReady ? "true" : "false"} data-court-case-decision={state.courtCaseDecisionId ?? "none"} className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-10rem)] w-[min(560px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/66 p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5 md:p-4">
       <p className="text-[9px] font-black uppercase tracking-[0.24em] text-amber-200/65">Council chamber</p>
       <div className="mt-1 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-2xl font-black text-amber-50 md:text-4xl">From land to empire</h2>
           <p className="mt-1 text-xs leading-relaxed text-amber-50/65 md:text-sm">This screen now turns border growth into the first permanent nation-scale decision.</p>
         </div>
-        <span className="rounded-full border border-amber-200/25 bg-amber-200/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-amber-100">{completed}/9</span>
+        <span className="rounded-full border border-amber-200/25 bg-amber-200/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-amber-100">{completed}/10</span>
       </div>
 
       <div className="mt-4 grid grid-cols-4 gap-2 text-center">
@@ -123,6 +127,7 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
 
       {rivalFrontierVisible ? <RivalFrontierSeed pressure={pressure} ownedSectors={ownedSectors.length} selectedObjective={frontierObjective} objectiveSecured={frontierObjectiveSecured} dispatch={dispatch} /> : null}
       {empireReady ? <EmpireDeclarationSeed state={state} capital={capital} ownedSectors={ownedSectors} nationDecision={nationDecision} frontierObjective={frontierObjective} empireDeclaration={empireDeclaration} empireConsequence={empireConsequence} dispatch={dispatch} /> : null}
+      {empireDeclaration ? <ImperialCourtCaseSeed courtCase={courtCase} courtDecision={courtDecision} dispatch={dispatch} /> : null}
       {firstEraComplete ? <CityInstitutionsSeed records={state.retentionRecords} /> : null}
       {nationDecision && state.foundingCeremonySeen ? (
         <SeasonLoop state={state} dispatch={dispatch} complete={firstEraComplete} />
@@ -237,6 +242,36 @@ function EmpireDeclarationSeed({ state, capital, ownedSectors, nationDecision, f
             <span className="block text-sm font-black text-amber-50">{declaration.title}</span>
             <span className="mt-1 block text-xs leading-relaxed text-amber-50/58">{declaration.short}</span>
             <span className="mt-1 block text-[11px] font-bold text-amber-100/70">{declaration.effect}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ImperialCourtCaseSeed({ courtCase, courtDecision, dispatch }: { courtCase: ReturnType<typeof getImperialCourtCase>; courtDecision: ReturnType<typeof getCourtCaseDecision>; dispatch: (action: PlayAction) => void }) {
+  if (!courtCase) return null;
+  if (courtDecision) {
+    return (
+      <div data-qa="court-case-recorded" data-court-case={courtCase.id} data-court-case-decision={courtDecision.id} className="mt-4 rounded-3xl border border-emerald-200/35 bg-[radial-gradient(circle_at_top_left,rgba(52,211,153,.18),transparent_36%),rgba(16,185,129,.10)] p-3 shadow-[0_0_34px_rgba(16,185,129,.12)]">
+        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-100/70">Court case resolved</p>
+        <p className="mt-1 text-lg font-black text-amber-50">{courtCase.title}</p>
+        <p className="mt-1 text-sm font-black text-emerald-100">{courtDecision.label}</p>
+        <p className="mt-1 text-xs leading-relaxed text-amber-50/62">{courtDecision.effect}</p>
+      </div>
+    );
+  }
+  return (
+    <div data-qa="court-case-options" data-court-case={courtCase.id} className="mt-4 rounded-3xl border border-emerald-200/35 bg-[radial-gradient(circle_at_top_left,rgba(52,211,153,.16),transparent_36%),rgba(6,78,59,.14)] p-3 shadow-[0_0_34px_rgba(52,211,153,.10)]">
+      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-100/70">Imperial Court Case v1</p>
+      <p className="mt-1 text-lg font-black text-amber-50">{courtCase.title}</p>
+      <p className="mt-1 text-xs leading-relaxed text-amber-50/62">{courtCase.prompt}</p>
+      <div className="mt-3 grid gap-2">
+        {courtCase.decisions.map((decision) => (
+          <button key={decision.id} type="button" data-qa="court-case-choice" data-court-case-decision={decision.id} onClick={() => dispatch({ type: "resolveCourtCase", decisionId: decision.id })} className="rounded-2xl border border-emerald-100/20 bg-black/24 p-3 text-left transition hover:border-emerald-100/45 hover:bg-emerald-200/10">
+            <span className="block text-sm font-black text-amber-50">{decision.label}</span>
+            <span className="mt-1 block text-xs leading-relaxed text-amber-50/58">{decision.short}</span>
+            <span className="mt-1 block text-[11px] font-bold text-emerald-100/70">{decision.effect}</span>
           </button>
         ))}
       </div>
