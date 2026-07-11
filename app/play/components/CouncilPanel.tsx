@@ -6,6 +6,14 @@ function isCitySeed(state: PlayState) {
 }
 
 type InstitutionSeed = { label: string; district: string; workers: string; law: string };
+type EmpireFoundingConsequence = { id: "order" | "expansion" | "prosperity"; label: string; short: string; effect: string };
+
+function getEmpireFoundingConsequence(empireDeclaration: ReturnType<typeof getEmpireDeclaration>): EmpireFoundingConsequence | null {
+  if (!empireDeclaration) return null;
+  if (empireDeclaration.id === "frontier-crown") return { id: "expansion", label: "Expansion Mandate", short: "The empire is judged by the next frontier it can hold.", effect: "Future empire systems should prefer frontier claims, rival borders and outward pressure." };
+  if (empireDeclaration.id === "basin-hegemony") return { id: "prosperity", label: "Prosperity Pact", short: "The empire is judged by the wealth it can organize inside the basin.", effect: "Future empire systems should prefer trade, production and civic prosperity." };
+  return { id: "order", label: "Imperial Order", short: "The empire is judged by the stability of its charter.", effect: "Future empire systems should prefer laws, institutions and legitimacy before war." };
+}
 
 function getInstitutionSeeds(records: RetentionRecord[]): InstitutionSeed[] {
   return records.slice(0, 3).map((record) => {
@@ -33,12 +41,12 @@ const roadmap = [
   { label: "Nation", detail: "hold 3 sectors, then choose a founding doctrine", done: (state: PlayState) => Boolean(state.nationDecisionId) },
   { label: "Era", detail: "resolve 3 post-founding seasons", done: (state: PlayState) => getFirstEraComplete(state) },
   { label: "Empire", detail: "secure a frontier objective, then declare the empire seed", done: (state: PlayState) => Boolean(state.empireDeclarationId) },
+  { label: "Consequence", detail: "give the empire seed a system direction", done: (state: PlayState) => Boolean(getEmpireDeclaration(state)) },
 ];
 
 export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: (action: PlayAction) => void }) {
   const phase = getPhase(state);
   const pressure = getRivalPressure(state);
-  const score = getDevelopmentScore(state);
   const population = getPopulation(state);
   const ownedSectors = getOwnedSectorIds(state);
   const nationReady = getNationReady(state);
@@ -47,6 +55,7 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
   const frontierObjectiveSecured = getFrontierObjectiveSecured(state);
   const empireReady = getEmpireReady(state);
   const empireDeclaration = getEmpireDeclaration(state);
+  const empireConsequence = getEmpireFoundingConsequence(empireDeclaration);
   const capital = getOwnedPlot(state)?.name ?? "Aurelian Basin";
   const completed = roadmap.filter((item) => item.done(state)).length;
   const firstEraComplete = getFirstEraComplete(state);
@@ -54,14 +63,14 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
   const rivalFrontierVisible = firstEraComplete && Boolean(nationDecision);
 
   return (
-    <aside data-qa="council-panel" data-nation-decision={nationDecision?.id ?? "none"} data-retention-count={state.retentionRecords.length} data-era-complete={firstEraComplete ? "true" : "false"} data-city-institutions={firstEraComplete ? "true" : "false"} data-rival-frontier={rivalFrontierVisible ? "true" : "false"} data-frontier-intent={state.frontierIntentId ?? "none"} data-frontier-secured={frontierObjectiveSecured ? "true" : "false"} data-empire-ready={empireReady ? "true" : "false"} data-empire-declaration={state.empireDeclarationId ?? "none"} className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-10rem)] w-[min(560px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/66 p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5 md:p-4">
+    <aside data-qa="council-panel" data-nation-decision={nationDecision?.id ?? "none"} data-retention-count={state.retentionRecords.length} data-era-complete={firstEraComplete ? "true" : "false"} data-city-institutions={firstEraComplete ? "true" : "false"} data-rival-frontier={rivalFrontierVisible ? "true" : "false"} data-frontier-intent={state.frontierIntentId ?? "none"} data-frontier-secured={frontierObjectiveSecured ? "true" : "false"} data-empire-ready={empireReady ? "true" : "false"} data-empire-declaration={state.empireDeclarationId ?? "none"} data-empire-consequence={empireConsequence?.id ?? "none"} className="absolute bottom-[4.7rem] right-3 z-20 max-h-[calc(100%-10rem)] w-[min(560px,calc(100%-1.5rem))] overflow-auto rounded-3xl border border-amber-100/20 bg-black/66 p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:right-5 md:p-4">
       <p className="text-[9px] font-black uppercase tracking-[0.24em] text-amber-200/65">Council chamber</p>
       <div className="mt-1 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-2xl font-black text-amber-50 md:text-4xl">From land to empire</h2>
           <p className="mt-1 text-xs leading-relaxed text-amber-50/65 md:text-sm">This screen now turns border growth into the first permanent nation-scale decision.</p>
         </div>
-        <span className="rounded-full border border-amber-200/25 bg-amber-200/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-amber-100">{completed}/7</span>
+        <span className="rounded-full border border-amber-200/25 bg-amber-200/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-amber-100">{completed}/8</span>
       </div>
 
       <div className="mt-4 grid grid-cols-4 gap-2 text-center">
@@ -112,7 +121,7 @@ export function CouncilPanel({ state, dispatch }: { state: PlayState; dispatch: 
       )}
 
       {rivalFrontierVisible ? <RivalFrontierSeed pressure={pressure} ownedSectors={ownedSectors.length} selectedObjective={frontierObjective} objectiveSecured={frontierObjectiveSecured} dispatch={dispatch} /> : null}
-      {empireReady ? <EmpireDeclarationSeed state={state} capital={capital} ownedSectors={ownedSectors} nationDecision={nationDecision} frontierObjective={frontierObjective} empireDeclaration={empireDeclaration} dispatch={dispatch} /> : null}
+      {empireReady ? <EmpireDeclarationSeed state={state} capital={capital} ownedSectors={ownedSectors} nationDecision={nationDecision} frontierObjective={frontierObjective} empireDeclaration={empireDeclaration} empireConsequence={empireConsequence} dispatch={dispatch} /> : null}
       {firstEraComplete ? <CityInstitutionsSeed records={state.retentionRecords} /> : null}
       {nationDecision && state.foundingCeremonySeen ? (
         <SeasonLoop state={state} dispatch={dispatch} complete={firstEraComplete} />
@@ -185,10 +194,10 @@ function SeasonLoop({ state, dispatch, complete }: { state: PlayState; dispatch:
   );
 }
 
-function EmpireDeclarationSeed({ state, capital, ownedSectors, nationDecision, frontierObjective, empireDeclaration, dispatch }: { state: PlayState; capital: string; ownedSectors: string[]; nationDecision: ReturnType<typeof getNationDecision>; frontierObjective: ReturnType<typeof getFrontierIntent>; empireDeclaration: ReturnType<typeof getEmpireDeclaration>; dispatch: (action: PlayAction) => void }) {
+function EmpireDeclarationSeed({ state, capital, ownedSectors, nationDecision, frontierObjective, empireDeclaration, empireConsequence, dispatch }: { state: PlayState; capital: string; ownedSectors: string[]; nationDecision: ReturnType<typeof getNationDecision>; frontierObjective: ReturnType<typeof getFrontierIntent>; empireDeclaration: ReturnType<typeof getEmpireDeclaration>; empireConsequence: EmpireFoundingConsequence | null; dispatch: (action: PlayAction) => void }) {
   if (empireDeclaration) {
     return (
-      <div data-qa="empire-declaration-recorded" data-empire-declaration={empireDeclaration.id} className="mt-4 rounded-3xl border border-amber-200/45 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,.24),transparent_36%),rgba(180,83,9,.16)] p-3 shadow-[0_0_44px_rgba(251,191,36,.18)]">
+      <div data-qa="empire-declaration-recorded" data-empire-declaration={empireDeclaration.id} data-empire-consequence={empireConsequence?.id ?? "none"} className="mt-4 rounded-3xl border border-amber-200/45 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,.24),transparent_36%),rgba(180,83,9,.16)] p-3 shadow-[0_0_44px_rgba(251,191,36,.18)]">
         <p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-100/75">Empire Seed Declared</p>
         <p className="mt-1 text-xl font-black text-amber-50">{empireDeclaration.title}</p>
         <p className="mt-1 text-xs leading-relaxed text-amber-50/66">Founder record: {capital} → Aurelian Nation → {frontierObjective?.target ?? "frontier secured"} → {empireDeclaration.label}.</p>
@@ -198,6 +207,14 @@ function EmpireDeclarationSeed({ state, capital, ownedSectors, nationDecision, f
           <Metric label="Score" value={getDevelopmentScore(state)} />
         </div>
         <p className="mt-2 text-[11px] leading-relaxed text-amber-50/58">{empireDeclaration.effect}</p>
+        {empireConsequence ? (
+          <div data-qa="empire-founding-consequence" data-empire-consequence={empireConsequence.id} className="mt-3 rounded-2xl border border-amber-100/24 bg-black/24 p-3">
+            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-amber-100/62">Founding consequence</p>
+            <p className="mt-1 text-sm font-black text-amber-50">{empireConsequence.label}</p>
+            <p className="mt-1 text-xs leading-relaxed text-amber-50/60">{empireConsequence.short}</p>
+            <p className="mt-1 text-[11px] font-bold text-amber-100/70">{empireConsequence.effect}</p>
+          </div>
+        ) : null}
       </div>
     );
   }
