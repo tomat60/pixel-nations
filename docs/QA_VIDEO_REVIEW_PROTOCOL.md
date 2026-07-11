@@ -1,10 +1,18 @@
 # Pixel Nations — Video / Interaction Review Protocol
 
-This protocol exists to prevent screenshot-only QA from hiding important game progress inside panels or untested interactive states.
+This protocol exists to prevent screenshot-only QA from hiding important game progress inside panels, untested interactive states, or fake video evidence.
 
 ## Rule
 
 Every merged gameplay PR must have evidence that exercises the new or changed interaction, not just a static screenshot.
+
+## Evidence types
+
+- **Continuous video** means a native browser recording of the scripted walkthrough, currently Playwright `.webm` output in `public/qa/play-latest/videos/`.
+- **Screenshots** are checkpoint frames after scripted steps. They are useful for layout/state proof, but they are not proof of smoothness, transitions, or gamefeel.
+- **Interaction log** proves which scripted checks passed or failed.
+
+Do not treat a slideshow, GIF made from screenshots, or screenshot sequence as video review. Label it as checkpoint evidence only.
 
 ## Per-PR targeted review
 
@@ -21,7 +29,7 @@ For a normal scoped PR, review only what changed:
 
 After several gameplay PRs, or before any public demo/share, run a full walkthrough:
 
-land claim → village growth → city seed → expansion → nation founding → first era → city institutions → world consequences → reload persistence.
+land claim → village growth → city seed → expansion → nation founding → first era → city institutions → world consequences → reload persistence → empire declaration.
 
 The full walkthrough should intentionally interact with all major moving/clickable elements:
 
@@ -31,8 +39,10 @@ The full walkthrough should intentionally interact with all major moving/clickab
 - founding doctrine and ceremony dismissal,
 - season choices,
 - city/institution milestones,
+- frontier objective and objective payoff,
+- empire declaration,
 - reload persistence.
 
 ## Product Lead gate
 
-Green CI, smoke, or screenshots do not override hidden-progress concerns. If a new milestone is technically present but not visibly understandable, the PR needs a UX/progression fix before it is treated as accepted product evidence.
+Green CI, smoke, screenshots, or selector checks do not override hidden-progress or gamefeel concerns. If a new milestone is technically present but not visibly understandable, the PR needs a UX/progression fix before it is treated as accepted product evidence.
