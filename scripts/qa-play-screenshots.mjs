@@ -1,11 +1,12 @@
 import { chromium } from "playwright";
 import { existsSync } from "node:fs";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 
 const APP_URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const OUTPUT_DIR = "public/qa/play-latest";
 const SCREENSHOT_DIR = `${OUTPUT_DIR}/screenshots`;
+const VIDEO_DIR = `${OUTPUT_DIR}/videos`;
 const REPORT_PATH = `${OUTPUT_DIR}/report.html`;
 const MANIFEST_PATH = `${OUTPUT_DIR}/manifest.json`;
 const INTERACTION_LOG_PATH = `${OUTPUT_DIR}/interaction-log.json`;
@@ -264,18 +265,26 @@ function escapeHtml(value) {
   return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
 
-function buildReport({ generatedAt, appSource, shots, interactionLog }) {
+function buildReport({ generatedAt, appSource, shots, interactionLog, videos }) {
   const items = shots.map((shot) => `<li>${escapeHtml(shot.stepLabel)} — ${shot.error ? `WARNING: ${escapeHtml(shot.error)}` : "ok"}</li>`).join("\n");
   const logItems = interactionLog.map((item) => `<li>${escapeHtml(item.viewport)} / ${escapeHtml(item.stepId)} — ${escapeHtml(item.status)}${item.error ? `: ${escapeHtml(item.error)}` : ""}</li>`).join("\n");
-  return `<!doctype html><html><head><meta charset="utf-8"><title>Pixel Nations Gameplay QA</title></head><body><main><h1>Playable loop evidence</h1><p>Generated: ${escapeHtml(generatedAt)}</p><p>App source: ${escapeHtml(appSource)}</p><h2>Verdict checklist</h2><ul><li>Owned territory visibly grows</li><li>Expansion uses Influence</li><li>Council reflects expansion progress</li><li>Founding ceremony appears after doctrine choice</li><li>Dismissed ceremony does not replay after reload</li><li>Retention season panel appears after founding</li><li>Three post-founding season decisions can be resolved</li><li>City institutions seed appears after First Era completion</li><li>One frontier objective can be recorded</li><li>Recorded frontier objective appears on the world map</li><li>Recorded frontier objective can be claimed and marked complete</li><li>Empire declaration can be recorded after objective payoff</li><li>Empire declaration persists on Council and World after reload</li><li>First era completion, city institutions, frontier objective, empire declaration, and world consequence markers persist after reload</li></ul><h2>Interaction log</h2><ul>${logItems}</ul><h2>Screenshots</h2><ul>${items}</ul></main></body></html>`;
+  const videoItems = videos.map((video) => `<li><a href="./videos/${escapeHtml(video.filename)}">${escapeHtml(video.viewport)} continuous Playwright video</a> — real browser recording of the scripted run, not a screenshot slideshow.</li>`).join("\n");
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Pixel Nations Gameplay QA</title></head><body><main><h1>Playable loop evidence</h1><p>Generated: ${escapeHtml(generatedAt)}</p><p>App source: ${escapeHtml(appSource)}</p><h2>Continuous video</h2><p>The videos below are native Playwright browser recordings of the full scripted run. Screenshots remain checkpoint evidence; they are not treated as smoothness or gamefeel proof.</p><ul>${videoItems}</ul><h2>Verdict checklist</h2><ul><li>Owned territory visibly grows</li><li>Expansion uses Influence</li><li>Council reflects expansion progress</li><li>Founding ceremony appears after doctrine choice</li><li>Dismissed ceremony does not replay after reload</li><li>Retention season panel appears after founding</li><li>Three post-founding season decisions can be resolved</li><li>City institutions seed appears after First Era completion</li><li>One frontier objective can be recorded</li><li>Recorded frontier objective appears on the world map</li><li>Recorded frontier objective can be claimed and marked complete</li><li>Empire declaration can be recorded after objective payoff</li><li>Empire declaration persists on Council and World after reload</li><li>First era completion, city institutions, frontier objective, empire declaration, and world consequence markers persist after reload</li></ul><h2>Interaction log</h2><ul>${logItems}</ul><h2>Screenshots</h2><ul>${items}</ul></main></body></html>`;
 }
 
 async function runViewport(config) {
   const browser = await chromium.launch();
-  const context = await browser.newContext({ viewport: { width: config.width, height: config.height }, deviceScaleFactor: config.deviceScaleFactor, isMobile: config.isMobile });
+  const context = await browser.newContext({
+    viewport: { width: config.width, height: config.height },
+    deviceScaleFactor: config.deviceScaleFactor,
+    isMobile: config.isMobile,
+    recordVideo: { dir: VIDEO_DIR, size: { width: config.width, height: config.height } },
+  });
   const page = await context.newPage();
+  const video = page.video();
   const shots = [];
   const interactionLog = [];
+  const videos = [];
   try {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded", timeout: 10000 });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
@@ -294,29 +303,45 @@ async function runViewport(config) {
     }
   } finally {
     await context.close().catch(() => {});
+    if (video) {
+      const originalVideoPath = await video.path().catch(() => null);
+      if (originalVideoPath) {
+        const filename = `${config.viewport}-play-continuous.webm`;
+        await rename(originalVideoPath, `${VIDEO_DIR}/${filename}`).catch(async () => {
+          const fallbackFilename = `${config.viewport}-play-continuous-${Date.now()}.webm`;
+          await rename(originalVideoPath, `${VIDEO_DIR}/${fallbackFilename}`);
+          videos.push({ viewport: config.viewport, filename: fallbackFilename, kind: "continuous-playwright-video" });
+        });
+        if (!videos.some((item) => item.viewport === config.viewport)) videos.push({ viewport: config.viewport, filename, kind: "continuous-playwright-video" });
+      }
+    }
     await browser.close().catch(() => {});
   }
-  return { shots, interactionLog };
+  return { shots, interactionLog, videos };
 }
 
 async function main() {
   await rm(OUTPUT_DIR, { recursive: true, force: true });
   await mkdir(SCREENSHOT_DIR, { recursive: true });
+  await mkdir(VIDEO_DIR, { recursive: true });
   const { startedProcess, appSource } = await ensureApp();
   const generatedAt = new Date().toISOString();
   const allShots = [];
+  const allVideos = [];
   const fullInteractionLog = [];
   try {
     for (const viewport of viewports) {
       const item = await runViewport(viewport);
       allShots.push(...item.shots);
+      allVideos.push(...item.videos);
       fullInteractionLog.push(...item.interactionLog);
     }
-    await writeFile(MANIFEST_PATH, `${JSON.stringify({ generatedAt, appUrl: APP_URL, appSource, screenshots: allShots }, null, 2)}\n`);
+    await writeFile(MANIFEST_PATH, `${JSON.stringify({ generatedAt, appUrl: APP_URL, appSource, screenshots: allShots, videos: allVideos }, null, 2)}\n`);
     await writeFile(INTERACTION_LOG_PATH, `${JSON.stringify(fullInteractionLog, null, 2)}\n`);
-    await writeFile(REPORT_PATH, buildReport({ generatedAt, appSource, shots: allShots, interactionLog: fullInteractionLog }));
+    await writeFile(REPORT_PATH, buildReport({ generatedAt, appSource, shots: allShots, interactionLog: fullInteractionLog, videos: allVideos }));
     const warnings = fullInteractionLog.filter((item) => item.status !== "ok");
     if (warnings.length) throw new Error(`Play visual QA completed with ${warnings.length} interaction warning(s). See ${INTERACTION_LOG_PATH}`);
+    if (!allVideos.length) throw new Error(`Play visual QA did not produce a continuous video. Expected at least one file in ${VIDEO_DIR}`);
     console.log(`Play visual QA evidence written to ${OUTPUT_DIR}`);
   } finally {
     stopApp(startedProcess);
