@@ -50,6 +50,9 @@ jobs:
       - name: Generate imperial cycle evidence
         run: node scripts/qa-imperial-turn.mjs
 
+      - name: Generate first-run finale evidence
+        run: node scripts/qa-demo-complete.mjs
+
       - name: Upload play evidence
         uses: actions/upload-artifact@v4
         if: always()
