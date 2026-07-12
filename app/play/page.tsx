@@ -49,6 +49,11 @@ export default function PlayPrototypePage() {
     setRestartedRun(true);
   }
 
+  function openFounderRecord() {
+    dispatch({ type: "setView", view: "council" });
+    setDemoOverlayDismissed(false);
+  }
+
   return (
     <main data-qa="play-shell" className="fixed inset-0 overflow-hidden bg-[#06090a] text-[#f7ead2]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(250,204,21,.18),transparent_30%),radial-gradient(circle_at_78%_22%,rgba(56,189,248,.15),transparent_32%),linear-gradient(180deg,#101711_0%,#050807_100%)]" />
@@ -56,14 +61,14 @@ export default function PlayPrototypePage() {
         <div data-qa="map-stage" className="relative h-full overflow-hidden rounded-[1.5rem] border border-amber-200/20 bg-[#1d2d23] shadow-[0_30px_90px_rgba(0,0,0,.45)] md:rounded-[2rem]">
           {isVillage ? <VillageScene state={state} dispatch={dispatch} /> : isWorld ? <WorldMapScene state={state} dispatch={dispatch} /> : <MapStage state={state} dispatch={dispatch} />}
           <TopBar state={state} />
-          <CurrentObjective state={state} demoComplete={demoComplete} demoOverlayDismissed={demoOverlayDismissed} secondRunStarted={secondRunStarted} onOpenFounderRecord={() => setDemoOverlayDismissed(false)} />
+          <CurrentObjective state={state} demoComplete={demoComplete} demoOverlayDismissed={demoOverlayDismissed} secondRunStarted={secondRunStarted} onOpenFounderRecord={openFounderRecord} />
           {showOpeningGuide ? <OpeningGuide selectedName={selected.name} /> : null}
           {state.view === "map" ? <LandSheet selected={selected} state={state} dispatch={dispatch} /> : null}
           {state.view === "orders" && state.ownedPlotIds.length > 0 ? <OrdersPanel state={state} dispatch={dispatch} /> : null}
           {state.view === "council" ? <CouncilPanel state={state} dispatch={dispatch} /> : null}
           <StrategicBranchOverlay state={state} dispatch={dispatch} />
           {nationDecision && !state.foundingCeremonySeen ? <FoundingCeremony state={state} decision={nationDecision} dispatch={dispatch} /> : null}
-          {hydrated && demoComplete && !demoOverlayDismissed ? <DemoCompleteOverlay state={state} onContinue={() => setDemoOverlayDismissed(true)} onRestart={restartRun} /> : null}
+          {hydrated && demoComplete && !demoOverlayDismissed && state.view === "council" ? <DemoCompleteOverlay state={state} onContinue={() => setDemoOverlayDismissed(true)} onRestart={restartRun} /> : null}
           <BottomDock activeView={state.view} dispatch={dispatch} />
         </div>
       </section>
