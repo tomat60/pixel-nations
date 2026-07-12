@@ -1,5 +1,12 @@
 import { canClaimSector, expansionBlockedMessage, expansionInfluenceCost, getOwnedSectorIds, homelandSectorId, nationSectorThreshold } from "./expansion-state";
 import { plots, starterPlotId, type Plot } from "./map-data";
+import {
+  getStrategicBranchDefinition,
+  getStrategicOutcomeDefinition,
+  type StrategicEscalationId,
+  type StrategicOutcome,
+  type StrategicOutcomeId,
+} from "./strategic-branches";
 import { getSectorIndexFromId, getWorldSector } from "./world-engine";
 
 export type ViewId = "map" | "village" | "orders" | "world" | "council";
@@ -12,8 +19,8 @@ export type FrontierIntentId = "northern-pass" | "river-gate" | "eastern-march";
 export type EmpireDeclarationId = "aurelian-compact" | "frontier-crown" | "basin-hegemony";
 export type CourtCaseDecisionId = "enforce-charter-law" | "favor-frontier-settlers" | "protect-trade-passage";
 export type RivalResponseDecisionId = "enforce-by-decree" | "offer-tribute-passage" | "summon-border-assembly";
-export type ConflictEscalationDecisionId = "raise-border-host" | "seize-pass-tariffs" | "summon-rival-envoys";
-export type StandoffDecisionId = "show-of-force" | "open-talks";
+export type ConflictEscalationDecisionId = StrategicEscalationId;
+export type StandoffDecisionId = StrategicOutcomeId;
 
 export type Resources = { food: number; timber: number; stone: number; influence: number };
 export type ChronicleEntry = { season: number; title: string; body: string };
@@ -30,7 +37,7 @@ export type RivalResponseDecision = { id: RivalResponseDecisionId; label: string
 export type RivalResponse = { id: "obsidian-march-rejection"; title: string; rival: string; prompt: string; decisions: RivalResponseDecision[] };
 export type ConflictEscalationDecision = { id: ConflictEscalationDecisionId; label: string; short: string; effect: string; worldEffect: string; influenceDelta: number; pressureDelta: number };
 export type ConflictEscalation = { id: "first-imperial-ultimatum"; title: string; prompt: string; decisions: ConflictEscalationDecision[] };
-export type StandoffDecision = { id: StandoffDecisionId; label: string; short: string; effect: string; worldEffect: string; influenceDelta: number; pressureDelta: number; pressureState: "active" | "contained" };
+export type StandoffDecision = StrategicOutcome;
 export type BorderHostStandoff = { id: "border-host-standoff"; title: string; prompt: string; decisions: StandoffDecision[] };
 
 export type PlayState = {
@@ -129,14 +136,12 @@ export const conflictEscalations: ConflictEscalation[] = [{
   ],
 }];
 
+const martialBranch = getStrategicBranchDefinition("raise-border-host")!;
 export const borderHostStandoffs: BorderHostStandoff[] = [{
   id: "border-host-standoff",
-  title: "North Ridge Standoff",
-  prompt: "The Border Host reaches North Ridge. Obsidian riders hold the far stones. The first standoff can become intimidation or negotiation.",
-  decisions: [
-    { id: "show-of-force", label: "Show of Force", short: "March banners to the ridge line and make the court ruling physically visible.", effect: "+2 Influence, +7 Rival Pressure; the March falls back for now, but future war pressure hardens.", worldEffect: "Aurelian banners hold North Ridge while Obsidian scouts withdraw beyond the pass.", influenceDelta: 2, pressureDelta: 7, pressureState: "contained" },
-    { id: "open-talks", label: "Open Talks", short: "Invite Obsidian captains to witness the charter record before spears decide the pass.", effect: "+1 Influence, -8 Rival Pressure; the standoff cools into a negotiated border pause.", worldEffect: "Envoys stand between the host and Obsidian riders, containing the pass without a military display.", influenceDelta: 1, pressureDelta: -8, pressureState: "contained" },
-  ],
+  title: martialBranch.title,
+  prompt: martialBranch.prompt,
+  decisions: martialBranch.outcomes,
 }];
 
 export const retentionDecisions: RetentionDecision[] = [
@@ -203,17 +208,19 @@ export function getRivalResponseReady(state: PlayState) { return Boolean(getRiva
 export function getConflictEscalation(state: PlayState) { return state.rivalResponseDecisionId ? conflictEscalations[0] : null; }
 export function getConflictEscalationDecision(state: PlayState) { const escalation = getConflictEscalation(state); return escalation?.decisions.find((decision) => decision.id === state.conflictEscalationDecisionId) ?? null; }
 export function getConflictEscalationReady(state: PlayState) { return Boolean(getConflictEscalation(state) && !state.conflictEscalationDecisionId); }
+export function getStrategicPosture(state: PlayState) { return getStrategicBranchDefinition(state.conflictEscalationDecisionId); }
+export function getStrategicOutcome(state: PlayState) { return getStrategicOutcomeDefinition(state.conflictEscalationDecisionId, state.standoffDecisionId); }
 export function getBorderHostStandoff(state: PlayState) { return state.conflictEscalationDecisionId === "raise-border-host" ? borderHostStandoffs[0] : null; }
-export function getStandoffDecision(state: PlayState) { const standoff = getBorderHostStandoff(state); return standoff?.decisions.find((decision) => decision.id === state.standoffDecisionId) ?? null; }
+export function getStandoffDecision(state: PlayState) { return getStrategicOutcome(state); }
 export function getStandoffReady(state: PlayState) { return Boolean(getBorderHostStandoff(state) && !state.standoffDecisionId); }
-export function getObsidianPressureState(state: PlayState): "none" | "active" | "contained" { if (getStandoffDecision(state)) return getStandoffDecision(state)?.pressureState ?? "contained"; if (state.conflictEscalationDecisionId === "raise-border-host") return "active"; return "none"; }
+export function getObsidianPressureState(state: PlayState): "none" | "active" | "contained" { const outcome = getStrategicOutcome(state); if (outcome) return outcome.pressureState; if (state.conflictEscalationDecisionId) return "active"; return "none"; }
 export function getEmpireReady(state: PlayState) { return Boolean(getFirstEraComplete(state) && state.nationDecisionId && getFrontierObjectiveSecured(state)); }
 export function getNextRetentionDecision(state: PlayState) { if (!state.nationDecisionId || !state.foundingCeremonySeen) return null; return retentionDecisions.find((decision) => !state.retentionRecords.some((record) => record.decisionId === decision.id)) ?? null; }
 export function getFirstEraComplete(state: PlayState) { return state.retentionRecords.length >= retentionDecisions.length; }
 export function getPhase(state: PlayState): "unclaimed" | "camp" | "hamlet" | "village" | "city-seed" | "nation-seed" { if (state.ownedPlotIds.length === 0) return "unclaimed"; if (state.nationDecisionId) return "nation-seed"; if (state.completedOrders.includes("form-council") && state.completedOrders.includes("open-market") && state.completedOrders.includes("fortify-watch")) return "city-seed"; if (state.completedOrders.includes("form-council") || state.completedOrders.length >= 6) return "village"; if (state.completedOrders.length >= 3) return "hamlet"; return "camp"; }
 export function getPopulation(state: PlayState) { if (state.ownedPlotIds.length === 0) return 0; return 18 + state.completedOrders.length * 9 + state.settlementMarkers.length * 7 + Math.max(0, getOwnedSectorIds(state).length - 1) * 11 + (state.nationDecisionId === "settler-rights" ? 18 : 0) + state.retentionRecords.length * 5 + (state.courtCaseDecisionId === "favor-frontier-settlers" ? 9 : 0); }
 export function getDevelopmentScore(state: PlayState) { return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5 + (state.nationDecisionId ? 14 : 0) + state.retentionRecords.length * 7 + (state.frontierIntentId ? 6 : 0) + (getFrontierObjectiveSecured(state) ? 10 : 0) + (state.empireDeclarationId ? 18 : 0) + (state.courtCaseDecisionId ? 9 : 0) + (state.rivalResponseDecisionId ? 12 : 0) + (state.conflictEscalationDecisionId ? 14 : 0) + (state.standoffDecisionId ? 16 : 0); }
-export function getRivalPressure(state: PlayState) { const base = state.season >= 8 ? 28 : state.season >= 5 ? 18 : 8; const scoutRelief = state.completedOrders.includes("scout-nearby") ? 4 : 0; const defenseRelief = state.completedOrders.includes("fortify-watch") ? 8 : 0; const nationRelief = state.nationDecisionId === "border-guard" ? 8 : 0; const retentionRelief = state.retentionRecords.some((record) => record.worldMarker === "fortified-road") ? 4 : 0; const objectiveRelief = getFrontierObjectiveSecured(state) ? 3 : 0; const empireRelief = state.empireDeclarationId ? 4 : 0; const courtRelief = state.courtCaseDecisionId === "enforce-charter-law" ? 4 : 0; const rivalChallenge = state.courtCaseDecisionId ? 16 : 0; const rivalDecision = getRivalResponseDecision(state); const escalationDecision = getConflictEscalationDecision(state); const standoffDecision = getStandoffDecision(state); return Math.max(0, base + rivalChallenge + (rivalDecision?.pressureDelta ?? 0) + (escalationDecision?.pressureDelta ?? 0) + (standoffDecision?.pressureDelta ?? 0) - scoutRelief - defenseRelief - nationRelief - retentionRelief - objectiveRelief - empireRelief - courtRelief); }
+export function getRivalPressure(state: PlayState) { const base = state.season >= 8 ? 28 : state.season >= 5 ? 18 : 8; const scoutRelief = state.completedOrders.includes("scout-nearby") ? 4 : 0; const defenseRelief = state.completedOrders.includes("fortify-watch") ? 8 : 0; const nationRelief = state.nationDecisionId === "border-guard" ? 8 : 0; const retentionRelief = state.retentionRecords.some((record) => record.worldMarker === "fortified-road") ? 4 : 0; const objectiveRelief = getFrontierObjectiveSecured(state) ? 3 : 0; const empireRelief = state.empireDeclarationId ? 4 : 0; const courtRelief = state.courtCaseDecisionId === "enforce-charter-law" ? 4 : 0; const rivalChallenge = state.courtCaseDecisionId ? 16 : 0; const rivalDecision = getRivalResponseDecision(state); const escalationDecision = getConflictEscalationDecision(state); const strategicOutcome = getStrategicOutcome(state); return Math.max(0, base + rivalChallenge + (rivalDecision?.pressureDelta ?? 0) + (escalationDecision?.pressureDelta ?? 0) + (strategicOutcome?.pressureDelta ?? 0) - scoutRelief - defenseRelief - nationRelief - retentionRelief - objectiveRelief - empireRelief - courtRelief); }
 export function getWorldClaimedCount(state: PlayState) { return getOwnedSectorIds(state).length; }
 
 function hasOrder(state: PlayState, orderId: OrderId) { return state.completedOrders.includes(orderId); }
@@ -318,12 +325,12 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       return { ...state, conflictEscalationDecisionId: decision.id, standoffDecisionId: null, resources: { ...state.resources, influence: Math.max(0, state.resources.influence + decision.influenceDelta) }, season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, escalation.title, `${decision.label}: ${decision.effect}`), lastEvent: `Conflict escalation chosen: ${decision.label}.` };
     }
     case "resolveStandoff": {
-      const standoff = getBorderHostStandoff(state);
-      if (!standoff) return { ...state, view: "council", lastEvent: "Raise the Border Host before resolving the standoff." };
-      if (state.standoffDecisionId) return { ...state, view: "council", lastEvent: "The North Ridge standoff is already resolved." };
-      const decision = standoff.decisions.find((item) => item.id === action.decisionId);
-      if (!decision) return { ...state, view: "council", lastEvent: "Unknown standoff decision." };
-      return { ...state, standoffDecisionId: decision.id, resources: { ...state.resources, influence: Math.max(0, state.resources.influence + decision.influenceDelta) }, season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, standoff.title, `${decision.label}: ${decision.effect}`), lastEvent: `Standoff outcome: ${decision.label}.` };
+      const branch = getStrategicPosture(state);
+      if (!branch) return { ...state, view: "council", lastEvent: "Choose a strategic posture before resolving its outcome." };
+      if (state.standoffDecisionId) return { ...state, view: "council", lastEvent: "The post-empire branch outcome is already resolved." };
+      const decision = getStrategicOutcomeDefinition(state.conflictEscalationDecisionId, action.decisionId);
+      if (!decision) return { ...state, view: "council", lastEvent: "That outcome does not belong to the selected strategic posture." };
+      return { ...state, standoffDecisionId: decision.id, resources: { ...state.resources, influence: Math.max(0, state.resources.influence + decision.influenceDelta) }, season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, branch.title, `${decision.label}: ${decision.effect}`), lastEvent: `Strategic outcome: ${decision.label}.` };
     }
     case "runOrder": { const result = orderResult(state, action.orderId); if (!result) return { ...state, lastEvent: "That order is already resolved or needs a claimed land." }; return { ...state, ...result, season: Math.min(12, state.season + 1), completedOrders: [...state.completedOrders, action.orderId], view: "village" }; }
     case "reset": return initialPlayState;
