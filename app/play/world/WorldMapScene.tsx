@@ -1,7 +1,34 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { canClaimSector, expansionInfluenceCost, getBorderHostStandoff, getClaimableSectorIds, getConflictEscalation, getConflictEscalationDecision, getCourtCaseDecision, getEmpireDeclaration, getFrontierIntent, getFrontierObjectiveSecured, getImperialCourtCase, getNationDecision, getNationReady, getObsidianPressureState, getOwnedSectorIds, getRivalPressure, getRivalResponse, getRivalResponseDecision, getStandoffDecision, type FrontierObjective, type PlayAction, type PlayState, type RetentionRecord } from "../lib/play-state";
+import {
+  canClaimSector,
+  expansionInfluenceCost,
+  getBorderHostStandoff,
+  getClaimableSectorIds,
+  getConflictEscalation,
+  getConflictEscalationDecision,
+  getCourtCaseDecision,
+  getEmpireDeclaration,
+  getFrontierIntent,
+  getFrontierObjectiveSecured,
+  getImperialCourtCase,
+  getImperialTurnNumber,
+  getLatestImperialTurnAction,
+  getNationDecision,
+  getNationReady,
+  getObsidianPressureState,
+  getOwnedSectorIds,
+  getRivalPressure,
+  getRivalResponse,
+  getRivalResponseDecision,
+  getStandoffDecision,
+  getStrategicPosture,
+  type FrontierObjective,
+  type PlayAction,
+  type PlayState,
+  type RetentionRecord,
+} from "../lib/play-state";
 import { LANDS_PER_SECTOR, SECTOR_COUNT, WORLD_LANDS } from "../lib/world-engine";
 import { buildWorldMapModel, getSectorLandSamples, type SectorKind, type WorldMapSector } from "./world-map-selectors";
 
@@ -54,34 +81,112 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
   const conflictEscalationDecision = getConflictEscalationDecision(state);
   const standoff = getBorderHostStandoff(state);
   const standoffDecision = getStandoffDecision(state);
+  const strategicPosture = getStrategicPosture(state);
+  const imperialTurnNumber = getImperialTurnNumber(state);
+  const latestImperialAction = getLatestImperialTurnAction(state);
   const obsidianPressure = getObsidianPressureState(state);
   const pressure = getRivalPressure(state);
   const selectedExpansion = canClaimSector(state, selected.id);
   const selectedControl = getSectorControl(selected.id, ownedSectorIds, claimableSectorIds);
-  const nextGoal = standoffDecision ? standoffDecision.label : standoff ? standoff.title : conflictEscalationDecision ? conflictEscalationDecision.label : conflictEscalation ? conflictEscalation.title : rivalResponseDecision ? rivalResponseDecision.label : rivalResponse ? rivalResponse.title : courtDecision ? courtDecision.label : courtCase ? courtCase.title : empireConsequence ? empireConsequence.mandateLabel : empireDeclaration ? empireDeclaration.label : frontierObjectiveComplete && frontierObjective ? `${frontierObjective.target} secured` : frontierObjective ? frontierObjective.target : nationDecision ? nationDecision.label : nationReady ? "Choose founding doctrine" : `${Math.max(0, 3 - ownedSectorIds.length)} more sectors to found a nation`;
+  const nextGoal = latestImperialAction
+    ? latestImperialAction.label
+    : strategicPosture && standoffDecision
+      ? imperialTurnNumber >= 3 ? "Imperial cycle complete" : `Imperial Turn ${imperialTurnNumber + 1}/3`
+      : standoffDecision
+        ? standoffDecision.label
+        : standoff
+          ? standoff.title
+          : conflictEscalationDecision
+            ? conflictEscalationDecision.label
+            : conflictEscalation
+              ? conflictEscalation.title
+              : rivalResponseDecision
+                ? rivalResponseDecision.label
+                : rivalResponse
+                  ? rivalResponse.title
+                  : courtDecision
+                    ? courtDecision.label
+                    : courtCase
+                      ? courtCase.title
+                      : empireConsequence
+                        ? empireConsequence.mandateLabel
+                        : empireDeclaration
+                          ? empireDeclaration.label
+                          : frontierObjectiveComplete && frontierObjective
+                            ? `${frontierObjective.target} secured`
+                            : frontierObjective
+                              ? frontierObjective.target
+                              : nationDecision
+                                ? nationDecision.label
+                                : nationReady
+                                  ? "Choose founding doctrine"
+                                  : `${Math.max(0, 3 - ownedSectorIds.length)} more sectors to found a nation`;
 
   return (
-    <section data-qa="world-map-scene" data-owned-count={ownedSectorIds.length} data-influence={state.resources.influence} data-nation-ready={nationReady ? "true" : "false"} data-nation-decision={nationDecision?.id ?? "none"} data-nation-founded={nationFounded ? "true" : "false"} data-frontier-intent={frontierObjective?.id ?? "none"} data-frontier-target-sector={frontierTargetSectorId ?? "none"} data-frontier-objective-complete={frontierObjectiveComplete ? "true" : "false"} data-empire-declaration={empireDeclaration?.id ?? "none"} data-empire-consequence={empireConsequence?.id ?? "none"} data-imperial-mandate={empireConsequence?.mandateId ?? "none"} data-court-case={courtCase?.id ?? "none"} data-court-case-decision={state.courtCaseDecisionId ?? "none"} data-rival-response={rivalResponse?.id ?? "none"} data-rival-response-decision={state.rivalResponseDecisionId ?? "none"} data-conflict-escalation={conflictEscalation?.id ?? "none"} data-conflict-escalation-decision={state.conflictEscalationDecisionId ?? "none"} data-standoff={standoff?.id ?? "none"} data-standoff-decision={state.standoffDecisionId ?? "none"} data-obsidian-pressure={obsidianPressure} data-retention-count={state.retentionRecords.length} data-institution-count={institutionCount} data-world-lands={WORLD_LANDS} data-sector-count={SECTOR_COUNT} data-lands-per-sector={LANDS_PER_SECTOR} className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(251,191,36,.14),transparent_26%),linear-gradient(180deg,#07111b_0%,#030708_100%)]">
+    <section
+      data-qa="world-map-scene"
+      data-owned-count={ownedSectorIds.length}
+      data-influence={state.resources.influence}
+      data-nation-ready={nationReady ? "true" : "false"}
+      data-nation-decision={nationDecision?.id ?? "none"}
+      data-nation-founded={nationFounded ? "true" : "false"}
+      data-frontier-intent={frontierObjective?.id ?? "none"}
+      data-frontier-target-sector={frontierTargetSectorId ?? "none"}
+      data-frontier-objective-complete={frontierObjectiveComplete ? "true" : "false"}
+      data-empire-declaration={empireDeclaration?.id ?? "none"}
+      data-empire-consequence={empireConsequence?.id ?? "none"}
+      data-imperial-mandate={empireConsequence?.mandateId ?? "none"}
+      data-court-case={courtCase?.id ?? "none"}
+      data-court-case-decision={state.courtCaseDecisionId ?? "none"}
+      data-rival-response={rivalResponse?.id ?? "none"}
+      data-rival-response-decision={state.rivalResponseDecisionId ?? "none"}
+      data-conflict-escalation={conflictEscalation?.id ?? "none"}
+      data-conflict-escalation-decision={state.conflictEscalationDecisionId ?? "none"}
+      data-standoff={standoff?.id ?? "none"}
+      data-standoff-decision={state.standoffDecisionId ?? "none"}
+      data-strategic-posture={strategicPosture?.postureId ?? "none"}
+      data-imperial-turn={imperialTurnNumber}
+      data-obsidian-pressure={obsidianPressure}
+      data-retention-count={state.retentionRecords.length}
+      data-institution-count={institutionCount}
+      data-world-lands={WORLD_LANDS}
+      data-sector-count={SECTOR_COUNT}
+      data-lands-per-sector={LANDS_PER_SECTOR}
+      className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(251,191,36,.14),transparent_26%),linear-gradient(180deg,#07111b_0%,#030708_100%)]"
+    >
       <div data-qa="expansion-hud" className="absolute left-4 right-4 top-[5.7rem] z-10 flex flex-col gap-3 md:left-6 md:right-6 md:top-[6.6rem] lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-[720px] rounded-3xl border border-sky-100/18 bg-black/42 p-3 shadow-2xl backdrop-blur-md md:p-4">
           <p className="text-[9px] font-black uppercase tracking-[0.24em] text-sky-200/65">Expansion / Nation Loop v1</p>
           <h2 className="mt-1 text-2xl font-black text-amber-50 md:text-4xl">WorldMapScene · 10,000 lands</h2>
           <p className="mt-1 text-xs leading-relaxed text-amber-50/65 md:text-sm">Claim adjacent sectors with Influence. Each strategic sector expands into 100 generated lands.</p>
-          {nationDecision ? <Banner qa="nation-world-banner" text={`⚑ Aurelian Nation founded · ${nationDecision.label} · ${ownedSectorIds.length} sectors`} tone="emerald" /> : null}
-          {frontierObjective ? <p data-qa="world-frontier-objective-banner" data-frontier-intent={frontierObjective.id} data-frontier-target-sector={frontierTargetSectorId ?? "none"} className="mt-2 rounded-2xl border border-orange-200/35 bg-orange-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-orange-100">★ Frontier objective · {frontierObjective.target}{frontierTargetSector ? ` · sector ${frontierTargetSector.id}` : ""}</p> : null}
-          {frontierObjectiveComplete && frontierObjective ? <p data-qa="world-frontier-objective-complete" data-frontier-intent={frontierObjective.id} data-frontier-target-sector={frontierTargetSectorId ?? "none"} className="mt-2 rounded-2xl border border-emerald-200/35 bg-emerald-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-100">✓ Objective secured · {frontierObjective.secured}</p> : null}
-          {empireDeclaration ? <p data-qa="world-empire-banner" data-empire-declaration={empireDeclaration.id} className="mt-2 rounded-2xl border border-amber-200/45 bg-amber-300/16 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-amber-100">♛ Empire seed · {empireDeclaration.title}</p> : null}
-          {empireConsequence ? <p data-qa="world-empire-consequence-banner" data-empire-consequence={empireConsequence.id} className="mt-2 rounded-2xl border border-amber-100/35 bg-amber-100/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-amber-50">◆ Founding consequence · {empireConsequence.label}</p> : null}
-          {empireConsequence ? <p data-qa="world-imperial-mandate-banner" data-imperial-mandate={empireConsequence.mandateId} className="mt-2 rounded-2xl border border-amber-50/35 bg-amber-50/10 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-amber-50">◇ First mandate · {empireConsequence.mandateLabel}</p> : null}
-          {courtDecision ? <p data-qa="world-court-case-banner" data-court-case-decision={courtDecision.id} className="mt-2 rounded-2xl border border-emerald-200/35 bg-emerald-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-100">⚖ Court ruling · {courtDecision.label}</p> : courtCase ? <p data-qa="world-court-case-ready" data-court-case={courtCase.id} className="mt-2 rounded-2xl border border-emerald-200/30 bg-emerald-300/8 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-100">⚖ Court case pending · {courtCase.title}</p> : null}
-          {rivalResponseDecision ? <p data-qa="world-rival-response-banner" data-rival-response-decision={rivalResponseDecision.id} className="mt-2 rounded-2xl border border-red-200/40 bg-red-500/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-red-100">⚔ Rival Response · {rivalResponseDecision.label}</p> : rivalResponse ? <p data-qa="world-rival-response-ready" data-rival-response={rivalResponse.id} className="mt-2 rounded-2xl border border-red-200/30 bg-red-500/8 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-red-100">⚔ Rival response pending · {rivalResponse.title}</p> : null}
-          {conflictEscalationDecision ? <p data-qa="world-conflict-escalation-banner" data-conflict-escalation-decision={conflictEscalationDecision.id} className="mt-2 rounded-2xl border border-orange-200/45 bg-orange-500/14 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-orange-100">⚑ Conflict escalation · {conflictEscalationDecision.label}</p> : conflictEscalation ? <p data-qa="world-conflict-escalation-ready" data-conflict-escalation={conflictEscalation.id} className="mt-2 rounded-2xl border border-orange-200/30 bg-orange-500/8 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-orange-100">⚑ Escalation pending · {conflictEscalation.title}</p> : null}
+
+          {strategicPosture ? (
+            <div data-qa="world-history-summary" data-posture={strategicPosture.postureId} className="mt-3 rounded-2xl border border-amber-100/22 bg-black/28 p-3">
+              <p className="text-[8px] font-black uppercase tracking-[0.18em] text-amber-100/55">Empire history compressed</p>
+              <p className="mt-1 text-sm font-black text-amber-50">Aurelian Nation → {empireDeclaration?.title ?? "Empire"} → {empireConsequence?.mandateLabel ?? "Mandate"} → {strategicPosture.label}</p>
+              <p className="mt-1 text-xs leading-relaxed text-amber-50/58">The full founding chain remains recorded in Council and Chronicle; World now prioritizes the current strategic state.</p>
+            </div>
+          ) : (
+            <>
+              {nationDecision ? <Banner qa="nation-world-banner" text={`⚑ Aurelian Nation founded · ${nationDecision.label} · ${ownedSectorIds.length} sectors`} tone="emerald" /> : null}
+              {frontierObjective ? <p data-qa="world-frontier-objective-banner" data-frontier-intent={frontierObjective.id} data-frontier-target-sector={frontierTargetSectorId ?? "none"} className="mt-2 rounded-2xl border border-orange-200/35 bg-orange-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-orange-100">★ Frontier objective · {frontierObjective.target}{frontierTargetSector ? ` · sector ${frontierTargetSector.id}` : ""}</p> : null}
+              {frontierObjectiveComplete && frontierObjective ? <p data-qa="world-frontier-objective-complete" data-frontier-intent={frontierObjective.id} data-frontier-target-sector={frontierTargetSectorId ?? "none"} className="mt-2 rounded-2xl border border-emerald-200/35 bg-emerald-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-100">✓ Objective secured · {frontierObjective.secured}</p> : null}
+              {empireDeclaration ? <p data-qa="world-empire-banner" data-empire-declaration={empireDeclaration.id} className="mt-2 rounded-2xl border border-amber-200/45 bg-amber-300/16 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-amber-100">♛ Empire seed · {empireDeclaration.title}</p> : null}
+              {empireConsequence ? <p data-qa="world-empire-consequence-banner" data-empire-consequence={empireConsequence.id} className="mt-2 rounded-2xl border border-amber-100/35 bg-amber-100/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-amber-50">◆ Founding consequence · {empireConsequence.label}</p> : null}
+              {empireConsequence ? <p data-qa="world-imperial-mandate-banner" data-imperial-mandate={empireConsequence.mandateId} className="mt-2 rounded-2xl border border-amber-50/35 bg-amber-50/10 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-amber-50">◇ First mandate · {empireConsequence.mandateLabel}</p> : null}
+              {courtDecision ? <p data-qa="world-court-case-banner" data-court-case-decision={courtDecision.id} className="mt-2 rounded-2xl border border-emerald-200/35 bg-emerald-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-100">⚖ Court ruling · {courtDecision.label}</p> : courtCase ? <p data-qa="world-court-case-ready" data-court-case={courtCase.id} className="mt-2 rounded-2xl border border-emerald-200/30 bg-emerald-300/8 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-100">⚖ Court case pending · {courtCase.title}</p> : null}
+              {rivalResponseDecision ? <p data-qa="world-rival-response-banner" data-rival-response-decision={rivalResponseDecision.id} className="mt-2 rounded-2xl border border-red-200/40 bg-red-500/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-red-100">⚔ Rival Response · {rivalResponseDecision.label}</p> : rivalResponse ? <p data-qa="world-rival-response-ready" data-rival-response={rivalResponse.id} className="mt-2 rounded-2xl border border-red-200/30 bg-red-500/8 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-red-100">⚔ Rival response pending · {rivalResponse.title}</p> : null}
+              {conflictEscalationDecision ? <p data-qa="world-conflict-escalation-banner" data-conflict-escalation-decision={conflictEscalationDecision.id} className="mt-2 rounded-2xl border border-orange-200/45 bg-orange-500/14 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-orange-100">⚑ Conflict escalation · {conflictEscalationDecision.label}</p> : conflictEscalation ? <p data-qa="world-conflict-escalation-ready" data-conflict-escalation={conflictEscalation.id} className="mt-2 rounded-2xl border border-orange-200/30 bg-orange-500/8 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-orange-100">⚑ Escalation pending · {conflictEscalation.title}</p> : null}
+            </>
+          )}
+
           {obsidianPressure !== "none" ? <p data-qa="map-obsidian-pressure" data-obsidian-pressure={obsidianPressure} data-standoff-decision={state.standoffDecisionId ?? "none"} className="mt-2 rounded-2xl border border-red-200/45 bg-red-500/16 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-red-100">◆ Obsidian pressure · {obsidianPressure === "active" ? "active at North Ridge" : "contained at North Ridge"}</p> : null}
-          {standoffDecision ? <p data-qa="world-standoff-outcome" data-standoff-decision={standoffDecision.id} className="mt-2 rounded-2xl border border-red-100/45 bg-red-400/14 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-red-50">⚔ Standoff outcome · {standoffDecision.label}</p> : standoff ? <p data-qa="world-standoff-ready" data-standoff={standoff.id} className="mt-2 rounded-2xl border border-red-100/30 bg-red-400/8 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-red-50">⚔ Standoff pending · {standoff.title}</p> : null}
+          {standoffDecision ? <p data-qa="world-standoff-outcome" data-standoff-decision={standoffDecision.id} className="mt-2 rounded-2xl border border-red-100/45 bg-red-400/14 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-red-50">⚔ Strategic outcome · {standoffDecision.label}</p> : standoff ? <p data-qa="world-standoff-ready" data-standoff={standoff.id} className="mt-2 rounded-2xl border border-red-100/30 bg-red-400/8 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-red-50">⚔ Standoff pending · {standoff.title}</p> : null}
           {institutionCount > 0 ? <p data-qa="world-institution-indicator" data-institution-count={institutionCount} className="mt-2 rounded-2xl border border-purple-200/35 bg-purple-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-purple-100">City institutions visible · {institutionCount}/3 district signals</p> : null}
         </div>
         <div className="grid grid-cols-5 gap-1.5 text-center lg:min-w-[460px]"><Metric label="Owned" value={ownedSectorIds.length} /><Metric label="Influence" value={state.resources.influence} /><Metric label="Pressure" value={`${pressure}%`} /><Metric label="Claimable" value={claimableSectorIds.length} /><Metric label="Goal" value={nextGoal} /></div>
       </div>
+
       <div className="absolute bottom-[5.2rem] left-3 right-3 top-[14.8rem] flex flex-col gap-3 overflow-y-auto pb-6 md:bottom-[6.2rem] md:left-6 md:right-6 md:top-[13.8rem] lg:grid lg:grid-cols-[minmax(0,1fr)_400px] lg:overflow-hidden lg:pb-0">
         <div className="shrink-0 rounded-[2rem] border border-sky-100/16 bg-black/28 p-3 shadow-[0_30px_90px_rgba(0,0,0,.48)] backdrop-blur-sm md:p-4 lg:min-h-0">
           <WorldScaleProof ownedSectorIds={ownedSectorIds} selected={selected} />
@@ -100,8 +205,8 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
           {courtDecision ? <Effect qa="world-court-ruling" attrs={{ "data-court-case": courtCase?.id ?? "none", "data-court-case-decision": courtDecision.id }} eyebrow="Court ruling on the map" title={courtDecision.label} body={courtDecision.worldEffect} tone="emerald" /> : null}
           {rivalResponseDecision ? <Effect qa="world-rival-response" attrs={{ "data-rival-response": rivalResponse?.id ?? "none", "data-rival-response-decision": rivalResponseDecision.id }} eyebrow="Rival response on the map" title={rivalResponseDecision.label} body={rivalResponseDecision.worldEffect} tone="red" /> : null}
           {conflictEscalationDecision ? <Effect qa="world-conflict-escalation" attrs={{ "data-conflict-escalation": conflictEscalation?.id ?? "none", "data-conflict-escalation-decision": conflictEscalationDecision.id }} eyebrow="Conflict escalation on the map" title={conflictEscalationDecision.label} body={conflictEscalationDecision.worldEffect} tone="orange" /> : null}
-          {obsidianPressure !== "none" ? <Effect qa="map-obsidian-pressure" attrs={{ "data-obsidian-pressure": obsidianPressure, "data-standoff-decision": state.standoffDecisionId ?? "none" }} eyebrow="Obsidian pressure on the map" title={obsidianPressure === "active" ? "Active at North Ridge" : "Contained at North Ridge"} body={obsidianPressure === "active" ? "The pass is contested while the Border Host forms." : "The first standoff outcome contains the pressure without deeper simulation yet."} tone="red" /> : null}
-          {standoffDecision ? <Effect qa="world-standoff-outcome" attrs={{ "data-standoff": standoff?.id ?? "none", "data-standoff-decision": standoffDecision.id }} eyebrow="Standoff outcome on the map" title={standoffDecision.label} body={standoffDecision.worldEffect} tone="red" /> : null}
+          {obsidianPressure !== "none" ? <Effect qa="map-obsidian-pressure" attrs={{ "data-obsidian-pressure": obsidianPressure, "data-standoff-decision": state.standoffDecisionId ?? "none" }} eyebrow="Obsidian pressure on the map" title={obsidianPressure === "active" ? "Active at North Ridge" : "Contained at North Ridge"} body={obsidianPressure === "active" ? "The pass is contested while the Border Host forms." : "The first strategic outcome contains the pressure while imperial turns continue."} tone="red" /> : null}
+          {standoffDecision ? <Effect qa="world-standoff-outcome" attrs={{ "data-standoff": standoff?.id ?? "none", "data-standoff-decision": standoffDecision.id }} eyebrow="Strategic outcome on the map" title={standoffDecision.label} body={standoffDecision.worldEffect} tone="red" /> : null}
           {nationDecision ? <Effect qa="nation-world-effect" title="Aurelian Nation controls the border ring" body={`${nationDecision.label}: ${nationDecision.effect}`} tone="emerald" /> : nationReady ? <Effect qa="nation-affordance" title="Nation threshold reached" body="Three sectors now answer to your council. Open Council to choose the founding doctrine." /> : null}
           {institutionCount > 0 ? <WorldInstitutionSignals signals={institutionSignals} /> : null}
           {state.retentionRecords.length > 0 ? <WorldRetentionEffects state={state} /> : null}
