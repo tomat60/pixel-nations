@@ -77,7 +77,7 @@ export function StrategicBranchOverlay({ state, dispatch }: { state: PlayState; 
               <p className="text-lg font-black text-amber-50">{branch.title}</p>
               <p className="mt-1 text-xs leading-relaxed text-amber-50/65">{branch.worldSignal}</p>
             </div>
-            <div data-qa="world-imperial-turn" data-turn-count={turnNumber} className="shrink-0 rounded-2xl border border-white/14 bg-black/28 px-2.5 py-2 text-center">
+            <div data-qa="world-imperial-turn" data-turn-count={turnNumber} data-influence={state.resources.influence} data-pressure={pressure} className="shrink-0 rounded-2xl border border-white/14 bg-black/28 px-2.5 py-2 text-center">
               <p className="text-[8px] font-black uppercase tracking-[0.14em] text-amber-100/55">Turn</p>
               <p className="text-sm font-black text-amber-50">{turnNumber}/3</p>
             </div>
@@ -148,7 +148,7 @@ export function StrategicBranchOverlay({ state, dispatch }: { state: PlayState; 
       )}
 
       {outcome && !turnComplete ? (
-        <div data-qa="imperial-turn-panel" data-turn-count={turnNumber} data-next-turn={turnNumber + 1} className="mt-3 rounded-2xl border border-white/15 bg-black/30 p-3">
+        <div data-qa="imperial-turn-panel" data-turn-count={turnNumber} data-next-turn={turnNumber + 1} data-influence={state.resources.influence} data-pressure={pressure} className="mt-3 rounded-2xl border border-white/15 bg-black/30 p-3">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-[8px] font-black uppercase tracking-[0.16em] text-amber-100/55">Repeatable strategy loop</p>
@@ -177,7 +177,7 @@ export function StrategicBranchOverlay({ state, dispatch }: { state: PlayState; 
       ) : null}
 
       {outcome && turnComplete ? (
-        <div data-qa="imperial-turn-summary" data-turn-count={turnNumber} className="mt-3 rounded-2xl border border-emerald-100/20 bg-emerald-300/10 p-3">
+        <div data-qa="imperial-turn-summary" data-turn-count={turnNumber} data-influence={state.resources.influence} data-pressure={pressure} className="mt-3 rounded-2xl border border-emerald-100/20 bg-emerald-300/10 p-3">
           <p className="text-[8px] font-black uppercase tracking-[0.16em] text-emerald-100/65">Imperial cycle complete</p>
           <p className="mt-1 text-sm font-black text-amber-50">Three strategic turns now define this empire.</p>
           <div className="mt-2 space-y-1.5">
