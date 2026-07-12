@@ -47,6 +47,9 @@ jobs:
       - name: Generate posture evidence
         run: node scripts/qa-play-branches.mjs
 
+      - name: Generate imperial cycle evidence
+        run: node scripts/qa-imperial-turn.mjs
+
       - name: Upload play evidence
         uses: actions/upload-artifact@v4
         if: always()
