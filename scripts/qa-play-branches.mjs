@@ -76,12 +76,6 @@ async function clickDock(page, view) {
   await button.click({ force: true });
 }
 
-async function clickButtonByText(page, pattern) {
-  const button = page.getByRole("button", { name: pattern }).first();
-  await button.waitFor({ state: "visible", timeout: 5000 });
-  await button.click({ force: true });
-}
-
 async function waitForStoredOutcome(page, outcomeId) {
   await page.waitForFunction(
     ({ key, expected }) => {
@@ -96,6 +90,15 @@ async function waitForStoredOutcome(page, outcomeId) {
     { key: STORAGE_KEY, expected: outcomeId },
     { timeout: 5000 },
   );
+}
+
+async function resetStoredRun(page) {
+  await page.evaluate((key) => window.localStorage.removeItem(key), STORAGE_KEY);
+  await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
+  await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+  await page.locator('[data-qa="opening-guide"]').waitFor({ state: "visible", timeout: 5000 });
+  const postureStillVisible = await page.locator('[data-qa="posture-label"]').isVisible().catch(() => false);
+  if (postureStillVisible) throw new Error("Posture overlay remained visible after clearing the saved run");
 }
 
 async function runBranch(browser, branchCase) {
@@ -144,11 +147,7 @@ async function runBranch(browser, branchCase) {
     await page.screenshot({ path: `${SCREENSHOT_DIR}/${worldShot}`, fullPage: true });
     screenshots.push(worldShot);
 
-    await clickDock(page, "map");
-    await clickButtonByText(page, /Reset view/i);
-    await page.locator('[data-qa="opening-guide"]').waitFor({ state: "visible", timeout: 5000 });
-    const postureStillVisible = await page.locator('[data-qa="posture-label"]').isVisible().catch(() => false);
-    if (postureStillVisible) throw new Error(`${branchCase.posture}: posture overlay remained visible after reset`);
+    await resetStoredRun(page);
     await sleep(250);
 
     return {
