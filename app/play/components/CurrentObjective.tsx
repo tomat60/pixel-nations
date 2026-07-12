@@ -23,13 +23,16 @@ export function CurrentObjective({
   onOpenFounderRecord: () => void;
 }) {
   const objective = getCurrentObjectiveText(state);
+  const placement = state.view === "council"
+    ? "left-1/2 top-[6rem] w-[min(320px,calc(100%-1.5rem))] -translate-x-1/2 text-center md:left-[43%] md:top-[6.8rem]"
+    : "right-3 top-[5.9rem] max-w-[210px] text-right md:right-5 md:top-[6.8rem] md:max-w-[390px]";
 
   return (
     <aside
       data-qa="current-objective"
       data-view={state.view}
       data-demo-complete={demoComplete ? "true" : "false"}
-      className="absolute right-3 top-[5.9rem] z-20 max-w-[210px] rounded-2xl border border-amber-100/20 bg-black/48 p-2.5 text-right shadow-xl backdrop-blur-md md:right-5 md:top-[6.8rem] md:max-w-[390px] md:p-3"
+      className={`absolute z-40 rounded-2xl border border-amber-100/20 bg-black/58 p-2.5 shadow-xl backdrop-blur-md md:p-3 ${placement}`}
     >
       <p className="text-[8px] font-black uppercase tracking-[0.22em] text-amber-200/65 md:text-[10px] md:tracking-[0.26em]">Current objective</p>
       <p data-qa="current-objective-text" className="mt-1 text-xs font-black leading-tight text-amber-50 md:text-base">{objective}</p>
