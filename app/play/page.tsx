@@ -7,6 +7,7 @@ import { FoundingCeremony } from "./components/FoundingCeremony";
 import { LandSheet } from "./components/LandSheet";
 import { MapStage } from "./components/MapStage";
 import { OrdersPanel } from "./components/OrdersPanel";
+import { StrategicBranchOverlay } from "./components/StrategicBranchOverlay";
 import { TopBar } from "./components/TopBar";
 import { VillageScene } from "./components/VillageScene";
 import { getNationDecision, getSelectedPlot, initialPlayState, playReducer, playV1StorageKey, type PlayState } from "./lib/play-state";
@@ -48,6 +49,7 @@ export default function PlayPrototypePage() {
           {state.view === "map" ? <LandSheet selected={selected} state={state} dispatch={dispatch} /> : null}
           {state.view === "orders" && state.ownedPlotIds.length > 0 ? <OrdersPanel state={state} dispatch={dispatch} /> : null}
           {state.view === "council" ? <CouncilPanel state={state} dispatch={dispatch} /> : null}
+          <StrategicBranchOverlay state={state} dispatch={dispatch} />
           {nationDecision && !state.foundingCeremonySeen ? <FoundingCeremony state={state} decision={nationDecision} dispatch={dispatch} /> : null}
           <BottomDock activeView={state.view} dispatch={dispatch} />
         </div>
