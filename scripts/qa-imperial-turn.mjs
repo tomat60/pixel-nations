@@ -117,9 +117,15 @@ async function runCase(browser, item) {
     await page.screenshot({ path: `${SHOTS}/${reloadShot}`, fullPage: true }); screenshots.push(reloadShot);
 
     await action().click({ force: true });
+    await storedCount(page, 3);
+    const founderRecord = page.locator(`[data-qa="demo-complete-overlay"][data-posture="${item.posture}"]`).first();
+    await founderRecord.waitFor({ state: "visible", timeout: 5000 });
+    if (await page.locator('[data-qa="founder-record-turn"]').count() !== 3) throw new Error(`${item.posture}: Founder Record missing turn history`);
+    await page.locator('[data-qa="continue-ruling"]').click({ force: true });
+    await founderRecord.waitFor({ state: "hidden", timeout: 5000 });
+
     const summary = page.locator('[data-qa="imperial-turn-summary"][data-turn-count="3"]').first();
     await summary.waitFor({ state: "visible", timeout: 5000 });
-    await storedCount(page, 3);
     if (await page.locator('[data-qa="imperial-turn-record"]').count() !== 3) throw new Error(`${item.posture}: missing turn history`);
     const finalInfluence = await numberAttr(summary, "data-influence");
     const finalPressure = await numberAttr(summary, "data-pressure");
