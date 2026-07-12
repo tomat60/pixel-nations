@@ -143,6 +143,7 @@ async function runBranch(browser, branchCase) {
     await clickDock(page, "world");
     await page.locator(`[data-qa="world-posture-signal"][data-posture="${branchCase.posture}"][data-outcome="${branchCase.outcomeId}"]`).waitFor({ state: "visible", timeout: 5000 });
     await page.locator(`[data-qa="world-posture-outcome"][data-outcome-id="${branchCase.outcomeId}"]`).waitFor({ state: "visible", timeout: 5000 });
+    await sleep(250);
     const worldShot = `${branchCase.posture}-03-world-after-reload.png`;
     await page.screenshot({ path: `${SCREENSHOT_DIR}/${worldShot}`, fullPage: true });
     screenshots.push(worldShot);
