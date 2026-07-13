@@ -120,10 +120,10 @@ async function runCase(browser, item) {
     await storedCount(page, 3);
     const crisisPanel = page.locator('[data-qa="empire-crisis-panel"]').first();
     if (await crisisPanel.isVisible()) {
-      const stabilizeChoice = page.locator('[data-qa="empire-crisis-choice"][data-crisis-recovery="stabilize-influence"]').first();
+      const stabilizeChoice = page.locator('[data-qa="empire-crisis-choice"][data-crisis-recovery="stabilize-frontier"]').first();
       await stabilizeChoice.waitFor({ state: "visible", timeout: 5000 });
       await stabilizeChoice.click({ force: true });
-      await page.locator('[data-qa="empire-crisis-resolved"][data-crisis-recovery="stabilize-influence"]').first().waitFor({ state: "visible", timeout: 5000 });
+      await page.locator('[data-qa="empire-crisis-resolved"][data-crisis-recovery="stabilize-frontier"]').first().waitFor({ state: "visible", timeout: 5000 });
     }
     const founderRecord = page.locator(`[data-qa="demo-complete-overlay"][data-posture="${item.posture}"]`).first();
     await founderRecord.waitFor({ state: "visible", timeout: 5000 });
