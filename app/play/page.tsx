@@ -12,7 +12,7 @@ import { OrdersPanel } from "./components/OrdersPanel";
 import { StrategicBranchOverlay } from "./components/StrategicBranchOverlay";
 import { TopBar } from "./components/TopBar";
 import { VillageScene } from "./components/VillageScene";
-import { getImperialTurnComplete, getNationDecision, getSelectedPlot, initialPlayState, playReducer, playV1StorageKey, type PlayState } from "./lib/play-state";
+import { getEmpireCrisisOpen, getImperialTurnComplete, getNationDecision, getSelectedPlot, initialPlayState, playReducer, playV1StorageKey, type PlayState } from "./lib/play-state";
 import { WorldMapScene } from "./world/WorldMapScene";
 
 export default function PlayPrototypePage() {
@@ -24,7 +24,8 @@ export default function PlayPrototypePage() {
   const nationDecision = useMemo(() => getNationDecision(state), [state]);
   const isVillage = state.view === "village";
   const isWorld = state.view === "world";
-  const demoComplete = Boolean(state.empireDeclarationId && getImperialTurnComplete(state));
+  const crisisOpen = getEmpireCrisisOpen(state);
+  const demoComplete = Boolean(state.empireDeclarationId && getImperialTurnComplete(state) && !crisisOpen);
   const showOpeningGuide = hydrated && state.view === "map" && state.ownedPlotIds.length === 0;
   const secondRunStarted = restartedRun && state.ownedPlotIds.length > 0;
 
@@ -110,6 +111,8 @@ function restorePlayState(): PlayState | null {
       chronicle: parsed.chronicle ?? initialPlayState.chronicle,
       retentionRecords: parsed.retentionRecords ?? [],
       nationDecisionId: parsed.nationDecisionId ?? null,
+      empireCrisisReason: parsed.empireCrisisReason ?? null,
+      empireCrisisRecoveryId: parsed.empireCrisisRecoveryId ?? null,
       foundingCeremonySeen: Boolean(parsed.foundingCeremonySeen),
     };
   } catch {

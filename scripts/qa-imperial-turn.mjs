@@ -118,6 +118,15 @@ async function runCase(browser, item) {
 
     await action().click({ force: true });
     await storedCount(page, 3);
+    const crisisPanel = page.locator('[data-qa="empire-crisis-panel"]').first();
+    let crisisRecovery = null;
+    if (await crisisPanel.isVisible()) {
+      crisisRecovery = "stabilize-frontier";
+      const stabilizeChoice = page.locator('[data-qa="empire-crisis-choice"][data-crisis-recovery="stabilize-frontier"]').first();
+      await stabilizeChoice.waitFor({ state: "visible", timeout: 5000 });
+      await stabilizeChoice.click({ force: true });
+      await page.locator('[data-qa="empire-crisis-resolved"][data-crisis-recovery="stabilize-frontier"]').first().waitFor({ state: "visible", timeout: 5000 });
+    }
     const founderRecord = page.locator(`[data-qa="demo-complete-overlay"][data-posture="${item.posture}"]`).first();
     await founderRecord.waitFor({ state: "visible", timeout: 5000 });
     if (await page.locator('[data-qa="founder-record-turn"]').count() !== 3) throw new Error(`${item.posture}: Founder Record missing turn history`);
@@ -136,7 +145,7 @@ async function runCase(browser, item) {
     await finalLayer.waitFor({ state: "visible", timeout: 5000 });
     const finalBand = await finalLayer.getAttribute("data-pressure-band");
     if (await numberAttr(finalLayer, "data-pressure") !== finalPressure) throw new Error(`${item.posture}: pressure mismatch`);
-    if (item.bandChange && initialBand === finalBand) throw new Error(`${item.posture}: pressure band did not change`);
+    if (item.bandChange && !crisisRecovery && initialBand === finalBand) throw new Error(`${item.posture}: pressure band did not change`);
     await page.locator('[data-qa="world-imperial-turn"][data-turn-count="3"]').waitFor({ state: "visible", timeout: 5000 });
     await page.locator(`[data-qa="world-imperial-action-marker"][data-action-id="${item.action}"]`).waitFor({ state: "visible", timeout: 5000 });
     await page.locator(`[data-qa="world-history-summary"][data-posture="${item.posture}"]`).waitFor({ state: "visible", timeout: 5000 });
@@ -145,7 +154,7 @@ async function runCase(browser, item) {
     await page.screenshot({ path: `${SHOTS}/${worldShot}`, fullPage: true }); screenshots.push(worldShot);
     await clearRun(page);
 
-    return { posture: item.posture, action: item.action, initialInfluence, finalInfluence, initialPressure, finalPressure, initialBand, finalBand, legacy: item.legacy, screenshots, status: "ok" };
+    return { posture: item.posture, action: item.action, initialInfluence, finalInfluence, initialPressure, finalPressure, initialBand, finalBand, crisisRecovery, legacy: item.legacy, screenshots, status: "ok" };
   } finally {
     await context.close().catch(() => {});
     const original = video ? await video.path().catch(() => null) : null;

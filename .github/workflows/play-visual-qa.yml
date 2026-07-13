@@ -53,6 +53,9 @@ jobs:
       - name: Generate first-run finale evidence
         run: node scripts/qa-demo-complete.mjs
 
+      - name: Generate empire crisis evidence
+        run: node scripts/qa-empire-crisis.mjs
+
       - name: Upload play evidence
         uses: actions/upload-artifact@v4
         if: always()

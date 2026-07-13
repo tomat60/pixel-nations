@@ -1,6 +1,13 @@
 import { getImperialPressureBand } from "../lib/imperial-turn";
 import {
+  empireCrisisRecoveries,
   getAvailableImperialTurnActions,
+  getEmpireCrisisOpen,
+  getEmpireCrisisPrompt,
+  getEmpireCrisisReasonLabel,
+  getEmpireCrisisRecovery,
+  getEmpireCrisisResolved,
+  getFounderRecordOutcomeLabel,
   getImperialTurnComplete,
   getImperialTurnHistory,
   getImperialTurnNumber,
@@ -53,6 +60,10 @@ export function StrategicBranchOverlay({ state, dispatch }: { state: PlayState; 
   const latestAction = getLatestImperialTurnAction(state);
   const pressure = getRivalPressure(state);
   const pressureBand = getImperialPressureBand(pressure);
+  const crisisOpen = getEmpireCrisisOpen(state);
+  const crisisResolved = getEmpireCrisisResolved(state);
+  const crisisRecovery = getEmpireCrisisRecovery(state);
+  const finalOutcomeLabel = getFounderRecordOutcomeLabel(state);
 
   if (state.view === "world") {
     return (
@@ -67,6 +78,8 @@ export function StrategicBranchOverlay({ state, dispatch }: { state: PlayState; 
           data-qa="world-posture-signal"
           data-posture={branch.postureId}
           data-outcome={outcome?.id ?? "none"}
+          data-empire-crisis={state.empireCrisisReason ?? "none"}
+          data-empire-crisis-recovery={state.empireCrisisRecoveryId ?? "none"}
           className={`absolute bottom-[5.2rem] left-3 z-30 w-[min(390px,calc(100%-1.5rem))] rounded-3xl border p-3 shadow-2xl backdrop-blur-md md:bottom-[6.2rem] md:left-6 md:p-4 ${tone.panel}`}
         >
           <p data-qa="posture-label" data-posture={branch.postureId} className={`text-[9px] font-black uppercase tracking-[0.2em] ${tone.eyebrow}`}>
@@ -97,6 +110,13 @@ export function StrategicBranchOverlay({ state, dispatch }: { state: PlayState; 
               <p className="mt-1 text-xs leading-relaxed text-amber-50/60">{latestAction.worldMarker}</p>
             </div>
           ) : null}
+          {state.empireCrisisReason ? (
+            <div data-qa="world-empire-crisis" data-crisis-reason={state.empireCrisisReason} data-crisis-recovery={state.empireCrisisRecoveryId ?? "none"} className={`mt-2 rounded-2xl border p-3 ${crisisResolved ? "border-emerald-100/25 bg-emerald-300/10" : "border-red-100/35 bg-red-500/16"}`}>
+              <p className="text-[8px] font-black uppercase tracking-[0.16em] text-red-100/65">Empire crisis</p>
+              <p className="mt-1 text-sm font-black text-amber-50">{crisisRecovery ? crisisRecovery.outcomeLabel : getEmpireCrisisReasonLabel(state.empireCrisisReason)}</p>
+              <p className="mt-1 text-xs leading-relaxed text-amber-50/60">{crisisRecovery ? crisisRecovery.worldEffect : "Founder Record is blocked until the crisis is resolved in Council."}</p>
+            </div>
+          ) : null}
           <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-amber-100/55">Rival pressure · {pressure}% · {pressureBand}</p>
         </aside>
       </>
@@ -108,6 +128,8 @@ export function StrategicBranchOverlay({ state, dispatch }: { state: PlayState; 
       data-qa="post-empire-branch"
       data-posture={branch.postureId}
       data-outcome={outcome?.id ?? "none"}
+      data-empire-crisis={state.empireCrisisReason ?? "none"}
+      data-empire-crisis-recovery={state.empireCrisisRecoveryId ?? "none"}
       className={`absolute bottom-[4.7rem] left-3 z-30 max-h-[calc(100%-10rem)] w-[min(420px,calc(100%-1.5rem))] overflow-auto rounded-3xl border p-3 shadow-2xl backdrop-blur-md md:bottom-[5.7rem] md:left-5 md:p-4 ${tone.panel}`}
     >
       <p data-qa="posture-label" data-posture={branch.postureId} className={`text-[9px] font-black uppercase tracking-[0.2em] ${tone.eyebrow}`}>
@@ -176,8 +198,40 @@ export function StrategicBranchOverlay({ state, dispatch }: { state: PlayState; 
         </div>
       ) : null}
 
+      {outcome && turnComplete && crisisOpen ? (
+        <div data-qa="empire-crisis-panel" data-crisis-reason={state.empireCrisisReason ?? "none"} data-influence={state.resources.influence} data-pressure={pressure} className="mt-3 rounded-2xl border border-red-100/35 bg-red-500/16 p-3">
+          <p className="text-[8px] font-black uppercase tracking-[0.16em] text-red-100/70">Empire Crisis Threshold</p>
+          <p className="mt-1 text-sm font-black text-amber-50">{getEmpireCrisisReasonLabel(state.empireCrisisReason)}</p>
+          <p className="mt-1 text-xs leading-relaxed text-amber-50/62">{getEmpireCrisisPrompt(state)}</p>
+          <div className="mt-3 grid gap-2">
+            {empireCrisisRecoveries.map((recovery) => (
+              <button
+                key={recovery.id}
+                type="button"
+                data-qa="empire-crisis-choice"
+                data-crisis-recovery={recovery.id}
+                onClick={() => dispatch({ type: "resolveEmpireCrisis", recoveryId: recovery.id })}
+                className="rounded-2xl border border-red-100/22 bg-black/26 p-3 text-left transition hover:border-red-100/55 hover:bg-red-200/12"
+              >
+                <span className="block text-sm font-black text-amber-50">{recovery.label}</span>
+                <span className="mt-1 block text-xs leading-relaxed text-amber-50/60">{recovery.short}</span>
+                <span className="mt-2 block text-[11px] font-bold text-red-100">{recovery.effect}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {outcome && turnComplete && crisisResolved && crisisRecovery ? (
+        <div data-qa="empire-crisis-resolved" data-crisis-recovery={crisisRecovery.id} className="mt-3 rounded-2xl border border-emerald-100/24 bg-emerald-300/10 p-3">
+          <p className="text-[8px] font-black uppercase tracking-[0.16em] text-emerald-100/65">Empire crisis resolved</p>
+          <p className="mt-1 text-sm font-black text-amber-50">{finalOutcomeLabel}</p>
+          <p className="mt-1 text-xs leading-relaxed text-amber-50/62">{crisisRecovery.effect}</p>
+        </div>
+      ) : null}
+
       {outcome && turnComplete ? (
-        <div data-qa="imperial-turn-summary" data-turn-count={turnNumber} data-influence={state.resources.influence} data-pressure={pressure} className="mt-3 rounded-2xl border border-emerald-100/20 bg-emerald-300/10 p-3">
+        <div data-qa="imperial-turn-summary" data-turn-count={turnNumber} data-influence={state.resources.influence} data-pressure={pressure} data-empire-crisis={state.empireCrisisReason ?? "none"} data-empire-crisis-recovery={state.empireCrisisRecoveryId ?? "none"} className="mt-3 rounded-2xl border border-emerald-100/20 bg-emerald-300/10 p-3">
           <p className="text-[8px] font-black uppercase tracking-[0.16em] text-emerald-100/65">Imperial cycle complete</p>
           <p className="mt-1 text-sm font-black text-amber-50">Three strategic turns now define this empire.</p>
           <div className="mt-2 space-y-1.5">
