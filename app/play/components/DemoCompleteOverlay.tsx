@@ -1,5 +1,7 @@
 import { strategicBranches } from "../lib/strategic-branches";
 import {
+  getEmpireCrisisRecovery,
+  getFounderRecordOutcomeLabel,
   getImperialTurnHistory,
   getRivalPressure,
   getStrategicOutcome,
@@ -23,9 +25,11 @@ export function DemoCompleteOverlay({
 
   const otherPostures = strategicBranches.filter((branch) => branch.postureId !== posture.postureId);
   const pressure = getRivalPressure(state);
+  const crisisRecovery = getEmpireCrisisRecovery(state);
+  const finalOutcomeLabel = getFounderRecordOutcomeLabel(state);
 
   return (
-    <section data-qa="demo-complete-overlay" data-posture={posture.postureId} className="absolute inset-0 z-50 flex items-center justify-center bg-black/72 p-3 backdrop-blur-md md:p-6">
+    <section data-qa="demo-complete-overlay" data-posture={posture.postureId} data-empire-crisis={state.empireCrisisReason ?? "none"} data-empire-crisis-recovery={state.empireCrisisRecoveryId ?? "none"} className="absolute inset-0 z-50 flex items-center justify-center bg-black/72 p-3 backdrop-blur-md md:p-6">
       <div className="max-h-[calc(100%-1rem)] w-full max-w-3xl overflow-auto rounded-[2rem] border border-amber-200/35 bg-[radial-gradient(circle_at_18%_0%,rgba(251,191,36,.16),transparent_34%),linear-gradient(160deg,rgba(15,23,18,.98),rgba(5,8,7,.98))] p-4 shadow-[0_40px_120px_rgba(0,0,0,.72)] md:p-7">
         <p className="text-[9px] font-black uppercase tracking-[0.28em] text-amber-200/65">Founder Record · First Run Complete</p>
         <h2 className="mt-2 text-3xl font-black leading-none text-amber-50 md:text-5xl">Your first empire stands.</h2>
@@ -35,8 +39,15 @@ export function DemoCompleteOverlay({
           <div className="rounded-3xl border border-amber-100/18 bg-black/30 p-4">
             <p className="text-[9px] font-black uppercase tracking-[0.18em] text-amber-100/55">Empire identity</p>
             <p data-qa="founder-record-posture" data-posture={posture.postureId} className="mt-2 text-xl font-black text-amber-50">{posture.label}</p>
-            <p data-qa="founder-record-outcome" data-outcome={outcome.id} className="mt-1 text-sm font-black text-amber-100">{outcome.label}</p>
+            <p data-qa="founder-record-outcome" data-outcome={outcome.id} className="mt-1 text-sm font-black text-amber-100">{finalOutcomeLabel}</p>
             <p className="mt-2 text-xs leading-relaxed text-amber-50/58">{outcome.worldEffect}</p>
+            {crisisRecovery ? (
+              <div data-qa="founder-record-crisis" data-crisis-recovery={crisisRecovery.id} className="mt-3 rounded-2xl border border-red-100/25 bg-red-500/10 p-3">
+                <p className="text-[8px] font-black uppercase tracking-[0.16em] text-red-100/65">Crisis recovery</p>
+                <p className="mt-1 text-sm font-black text-amber-50">{crisisRecovery.label}</p>
+                <p className="mt-1 text-xs leading-relaxed text-amber-50/58">{crisisRecovery.worldEffect}</p>
+              </div>
+            ) : null}
             <div className="mt-4 grid grid-cols-2 gap-2 text-center">
               <Metric label="Influence" value={state.resources.influence} />
               <Metric label="Rival pressure" value={`${pressure}%`} />
