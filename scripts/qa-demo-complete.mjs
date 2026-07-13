@@ -78,10 +78,12 @@ async function main() {
     await page.locator('[data-qa="imperial-turn-action"][data-action-id="reinforce-ridge"]').first().click({ force: true });
 
     const crisisPanel = page.locator('[data-qa="empire-crisis-panel"]');
+    let resolvedCrisis = false;
     if (await crisisPanel.count()) {
       await crisisPanel.waitFor({ state: "visible", timeout: 5000 });
       await page.locator('[data-qa="empire-crisis-choice"][data-crisis-recovery="stabilize-frontier"]').click({ force: true });
       await page.locator('[data-qa="empire-crisis-resolved"][data-crisis-recovery="stabilize-frontier"]').waitFor({ state: "visible", timeout: 5000 });
+      resolvedCrisis = true;
     }
 
     const overlay = page.locator('[data-qa="demo-complete-overlay"]').first();
@@ -96,7 +98,8 @@ async function main() {
     await page.locator('[data-qa="continue-ruling"]').click({ force: true });
     await overlay.waitFor({ state: "hidden", timeout: 5000 });
     await page.locator('[data-qa="open-founder-record"]').waitFor({ state: "visible", timeout: 5000 });
-    await page.locator('[data-qa="current-objective-text"]').getByText(/first empire stands/i).waitFor({ state: "visible", timeout: 5000 });
+    const expectedObjective = resolvedCrisis ? /first empire survived its crisis/i : /first empire stands/i;
+    await page.locator('[data-qa="current-objective-text"]').getByText(expectedObjective).waitFor({ state: "visible", timeout: 5000 });
     const continueShot = "02-continue-ruling.png";
     await page.screenshot({ path: `${SHOT_DIR}/${continueShot}`, fullPage: true }); evidence.push(continueShot);
 
