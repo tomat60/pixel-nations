@@ -92,6 +92,9 @@ async function triggerCrisisAndRecover(page, recoveryId, screenshotName) {
   await page.locator(`[data-qa="demo-complete-overlay"][data-empire-crisis-recovery="${recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
   await page.locator(`[data-qa="founder-record-crisis"][data-crisis-recovery="${recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
   await assertStoredRecovery(page, recoveryId);
+  await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
+  await page.locator(`[data-qa="demo-complete-overlay"][data-empire-crisis-recovery="${recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
+  await page.locator(`[data-qa="founder-record-crisis"][data-crisis-recovery="${recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
   await page.screenshot({ path: `${SHOT_DIR}/${screenshotName}`, fullPage: true });
 }
 
