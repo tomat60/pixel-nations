@@ -76,6 +76,14 @@ async function main() {
 
     await page.locator('[data-qa="current-objective-text"]').getByText(/Imperial Turn 3\/3/i).waitFor({ state: "visible", timeout: 5000 });
     await page.locator('[data-qa="imperial-turn-action"][data-action-id="reinforce-ridge"]').first().click({ force: true });
+
+    const crisisPanel = page.locator('[data-qa="empire-crisis-panel"]');
+    if (await crisisPanel.count()) {
+      await crisisPanel.waitFor({ state: "visible", timeout: 5000 });
+      await page.locator('[data-qa="empire-crisis-choice"][data-crisis-recovery="stabilize-frontier"]').click({ force: true });
+      await page.locator('[data-qa="empire-crisis-resolved"][data-crisis-recovery="stabilize-frontier"]').waitFor({ state: "visible", timeout: 5000 });
+    }
+
     const overlay = page.locator('[data-qa="demo-complete-overlay"]').first();
     await overlay.waitFor({ state: "visible", timeout: 5000 });
     await page.locator('[data-qa="founder-record-posture"][data-posture="martial"]').waitFor({ state: "visible", timeout: 5000 });
