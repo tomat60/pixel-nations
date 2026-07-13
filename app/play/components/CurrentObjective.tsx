@@ -1,4 +1,6 @@
 import {
+  getEmpireCrisisOpen,
+  getEmpireCrisisReasonLabel,
   getFirstEraComplete,
   getFrontierIntent,
   getFrontierObjectiveSecured,
@@ -32,6 +34,8 @@ export function CurrentObjective({
       data-qa="current-objective"
       data-view={state.view}
       data-demo-complete={demoComplete ? "true" : "false"}
+      data-empire-crisis={state.empireCrisisReason ?? "none"}
+      data-empire-crisis-recovery={state.empireCrisisRecoveryId ?? "none"}
       className={`absolute z-40 rounded-2xl border border-amber-100/20 bg-black/58 p-2.5 shadow-xl backdrop-blur-md md:p-3 ${placement}`}
     >
       <p className="text-[8px] font-black uppercase tracking-[0.22em] text-amber-200/65 md:text-[10px] md:tracking-[0.26em]">Current objective</p>
@@ -79,5 +83,7 @@ function getCurrentObjectiveText(state: PlayState): string {
 
   const turn = getImperialTurnNumber(state);
   if (turn < 3) return `Take Imperial Turn ${turn + 1}/3 and shape the character of your empire.`;
+  if (getEmpireCrisisOpen(state)) return `Resolve the Empire Crisis: ${getEmpireCrisisReasonLabel(state.empireCrisisReason)}.`;
+  if (state.empireCrisisRecoveryId) return "Your first empire survived its crisis. Review its Founder Record or begin another history.";
   return "Your first empire stands. Review its Founder Record or begin a different history.";
 }
