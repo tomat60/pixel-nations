@@ -91,3 +91,25 @@ export function getPostCrisisResponse(
 ) {
   return getPostCrisisCountermove(origin)?.responses.find((response) => response.id === responseId) ?? null;
 }
+
+export function getPostCrisisCountermoveOrigin(
+  recoveryId: PostCrisisCountermoveOrigin | null,
+): PostCrisisCountermoveOrigin | null {
+  return recoveryId && recoveryId in postCrisisCountermoves ? recoveryId : null;
+}
+
+export function getPostCrisisCountermoveReady(
+  recoveryId: PostCrisisCountermoveOrigin | null,
+  resolvedResponseId: PostCrisisResponseId | null,
+) {
+  return Boolean(getPostCrisisCountermoveOrigin(recoveryId) && !resolvedResponseId);
+}
+
+export function getPostCrisisConsequenceLabel(
+  origin: PostCrisisCountermoveOrigin | null,
+  responseId: PostCrisisResponseId | null,
+) {
+  const response = getPostCrisisResponse(origin, responseId);
+  if (!response) return null;
+  return `${response.label}: ${response.worldEffect}`;
+}
