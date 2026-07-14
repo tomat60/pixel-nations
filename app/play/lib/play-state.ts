@@ -9,6 +9,12 @@ import {
 } from "./imperial-turn";
 import { plots, starterPlotId, type Plot } from "./map-data";
 import {
+  getPostCrisisCountermoveOrigin as getPostCrisisCountermoveOriginDefinition,
+  getPostCrisisResponse,
+  type PostCrisisCountermoveOrigin,
+  type PostCrisisResponseId,
+} from "./post-crisis-countermove";
+import {
   getStrategicBranchDefinition,
   getStrategicOutcomeDefinition,
   type StrategicEscalationId,
@@ -65,6 +71,8 @@ export type PlayState = {
   imperialTurnActionIds: ImperialTurnActionId[];
   empireCrisisReason: EmpireCrisisReason | null;
   empireCrisisRecoveryId: EmpireCrisisRecoveryId | null;
+  postCrisisCountermoveOrigin: PostCrisisCountermoveOrigin | null;
+  postCrisisResponseId: PostCrisisResponseId | null;
   foundingCeremonySeen: boolean;
   season: number;
   view: ViewId;
@@ -92,6 +100,8 @@ export type PlayAction =
   | { type: "resolveStandoff"; decisionId: StandoffDecisionId }
   | { type: "resolveImperialTurn"; actionId: ImperialTurnActionId }
   | { type: "resolveEmpireCrisis"; recoveryId: EmpireCrisisRecoveryId }
+  | { type: "beginPostCrisisCountermove" }
+  | { type: "resolvePostCrisisResponse"; responseId: PostCrisisResponseId }
   | { type: "hydrate"; state: PlayState }
   | { type: "runOrder"; orderId: OrderId }
   | { type: "setView"; view: ViewId }
@@ -225,6 +235,8 @@ export const initialPlayState: PlayState = {
   imperialTurnActionIds: [],
   empireCrisisReason: null,
   empireCrisisRecoveryId: null,
+  postCrisisCountermoveOrigin: null,
+  postCrisisResponseId: null,
   foundingCeremonySeen: false,
   season: 1,
   view: "map",
@@ -268,21 +280,24 @@ export function getNextRetentionDecision(state: PlayState) { if (!state.nationDe
 export function getFirstEraComplete(state: PlayState) { return state.retentionRecords.length >= retentionDecisions.length; }
 export function getPhase(state: PlayState): "unclaimed" | "camp" | "hamlet" | "village" | "city-seed" | "nation-seed" { if (state.ownedPlotIds.length === 0) return "unclaimed"; if (state.nationDecisionId) return "nation-seed"; if (state.completedOrders.includes("form-council") && state.completedOrders.includes("open-market") && state.completedOrders.includes("fortify-watch")) return "city-seed"; if (state.completedOrders.includes("form-council") || state.completedOrders.length >= 6) return "village"; if (state.completedOrders.length >= 3) return "hamlet"; return "camp"; }
 export function getPopulation(state: PlayState) { if (state.ownedPlotIds.length === 0) return 0; return 18 + state.completedOrders.length * 9 + state.settlementMarkers.length * 7 + Math.max(0, getOwnedSectorIds(state).length - 1) * 11 + (state.nationDecisionId === "settler-rights" ? 18 : 0) + state.retentionRecords.length * 5 + (state.courtCaseDecisionId === "favor-frontier-settlers" ? 9 : 0); }
-export function getDevelopmentScore(state: PlayState) { return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5 + (state.nationDecisionId ? 14 : 0) + state.retentionRecords.length * 7 + (state.frontierIntentId ? 6 : 0) + (getFrontierObjectiveSecured(state) ? 10 : 0) + (state.empireDeclarationId ? 18 : 0) + (state.courtCaseDecisionId ? 9 : 0) + (state.rivalResponseDecisionId ? 12 : 0) + (state.conflictEscalationDecisionId ? 14 : 0) + (state.standoffDecisionId ? 16 : 0) + state.imperialTurnActionIds.length * 6 + (state.empireCrisisReason ? 4 : 0) + (state.empireCrisisRecoveryId ? 6 : 0); }
+export function getDevelopmentScore(state: PlayState) { return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5 + (state.nationDecisionId ? 14 : 0) + state.retentionRecords.length * 7 + (state.frontierIntentId ? 6 : 0) + (getFrontierObjectiveSecured(state) ? 10 : 0) + (state.empireDeclarationId ? 18 : 0) + (state.courtCaseDecisionId ? 9 : 0) + (state.rivalResponseDecisionId ? 12 : 0) + (state.conflictEscalationDecisionId ? 14 : 0) + (state.standoffDecisionId ? 16 : 0) + state.imperialTurnActionIds.length * 6 + (state.empireCrisisReason ? 4 : 0) + (state.empireCrisisRecoveryId ? 6 : 0) + (state.postCrisisCountermoveOrigin ? 4 : 0) + (state.postCrisisResponseId ? 6 : 0); }
 export function getEmpireCrisisRecovery(state: PlayState) { return empireCrisisRecoveries.find((decision) => decision.id === state.empireCrisisRecoveryId) ?? null; }
 export function getEmpireCrisisOpen(state: PlayState) { return Boolean(getImperialTurnComplete(state) && state.empireCrisisReason && !state.empireCrisisRecoveryId); }
 export function getEmpireCrisisResolved(state: PlayState) { return Boolean(state.empireCrisisReason && state.empireCrisisRecoveryId); }
 export function getEmpireCrisisReasonLabel(reason: EmpireCrisisReason | null) { if (reason === "rival-pressure") return "Rival Pressure threshold crossed"; if (reason === "low-influence") return "Influence reserve critically low"; return "No empire crisis"; }
 export function getEmpireCrisisPrompt(state: PlayState) { if (state.empireCrisisReason === "low-influence") return "The imperial turn cycle ended with too little authority left to bind the frontier. One final recovery decision must define how the first empire survives."; return "The imperial turn cycle pushed Obsidian pressure into a crisis. One final recovery decision must define whether the first empire stabilizes or compromises."; }
 export function getFounderRecordOutcomeLabel(state: PlayState) { const outcome = getStrategicOutcome(state); const recovery = getEmpireCrisisRecovery(state); if (!outcome) return "Unknown outcome"; if (!recovery) return outcome.label; return recovery.id === "accept-concession" ? `${outcome.label} · ${recovery.outcomeLabel}` : `${outcome.label} · ${recovery.outcomeLabel}`; }
-export function getRivalPressure(state: PlayState) { const base = state.season >= 8 ? 28 : state.season >= 5 ? 18 : 8; const scoutRelief = state.completedOrders.includes("scout-nearby") ? 4 : 0; const defenseRelief = state.completedOrders.includes("fortify-watch") ? 8 : 0; const nationRelief = state.nationDecisionId === "border-guard" ? 8 : 0; const retentionRelief = state.retentionRecords.some((record) => record.worldMarker === "fortified-road") ? 4 : 0; const objectiveRelief = getFrontierObjectiveSecured(state) ? 3 : 0; const empireRelief = state.empireDeclarationId ? 4 : 0; const courtRelief = state.courtCaseDecisionId === "enforce-charter-law" ? 4 : 0; const rivalChallenge = state.courtCaseDecisionId ? 16 : 0; const rivalDecision = getRivalResponseDecision(state); const escalationDecision = getConflictEscalationDecision(state); const strategicOutcome = getStrategicOutcome(state); const crisisRecovery = getEmpireCrisisRecovery(state); return Math.max(0, base + rivalChallenge + (rivalDecision?.pressureDelta ?? 0) + (escalationDecision?.pressureDelta ?? 0) + (strategicOutcome?.pressureDelta ?? 0) + (crisisRecovery?.pressureDelta ?? 0) + getImperialTurnPressureDelta(state.imperialTurnActionIds) - scoutRelief - defenseRelief - nationRelief - retentionRelief - objectiveRelief - empireRelief - courtRelief); }
+export function getPostCrisisCountermoveOrigin(state: PlayState) { return state.postCrisisCountermoveOrigin; }
+export function getPostCrisisResponseDecision(state: PlayState) { return getPostCrisisResponse(state.postCrisisCountermoveOrigin, state.postCrisisResponseId); }
+export function getPostCrisisCountermoveReady(state: PlayState) { return Boolean(state.postCrisisCountermoveOrigin && !state.postCrisisResponseId); }
+export function getRivalPressure(state: PlayState) { const base = state.season >= 8 ? 28 : state.season >= 5 ? 18 : 8; const scoutRelief = state.completedOrders.includes("scout-nearby") ? 4 : 0; const defenseRelief = state.completedOrders.includes("fortify-watch") ? 8 : 0; const nationRelief = state.nationDecisionId === "border-guard" ? 8 : 0; const retentionRelief = state.retentionRecords.some((record) => record.worldMarker === "fortified-road") ? 4 : 0; const objectiveRelief = getFrontierObjectiveSecured(state) ? 3 : 0; const empireRelief = state.empireDeclarationId ? 4 : 0; const courtRelief = state.courtCaseDecisionId === "enforce-charter-law" ? 4 : 0; const rivalChallenge = state.courtCaseDecisionId ? 16 : 0; const rivalDecision = getRivalResponseDecision(state); const escalationDecision = getConflictEscalationDecision(state); const strategicOutcome = getStrategicOutcome(state); const crisisRecovery = getEmpireCrisisRecovery(state); const postCrisisResponse = getPostCrisisResponseDecision(state); return Math.max(0, base + rivalChallenge + (rivalDecision?.pressureDelta ?? 0) + (escalationDecision?.pressureDelta ?? 0) + (strategicOutcome?.pressureDelta ?? 0) + (crisisRecovery?.pressureDelta ?? 0) + (postCrisisResponse?.pressureDelta ?? 0) + getImperialTurnPressureDelta(state.imperialTurnActionIds) - scoutRelief - defenseRelief - nationRelief - retentionRelief - objectiveRelief - empireRelief - courtRelief); }
 export function getWorldClaimedCount(state: PlayState) { return getOwnedSectorIds(state).length; }
 
 function evaluateEmpireCrisisReason(state: PlayState): EmpireCrisisReason | null { if (!getImperialTurnComplete(state)) return null; if (getRivalPressure(state) >= empireCrisisPressureThreshold) return "rival-pressure"; if (state.resources.influence <= empireCrisisInfluenceThreshold) return "low-influence"; return null; }
 function hasOrder(state: PlayState, orderId: OrderId) { return state.completedOrders.includes(orderId); }
 function pushChronicle(state: PlayState, title: string, body: string): ChronicleEntry[] { return [{ season: state.season + 1, title, body }, ...state.chronicle].slice(0, 10); }
 function addMarker(markers: SettlementMarker[], marker: SettlementMarker): SettlementMarker[] { return markers.includes(marker) ? markers : [...markers, marker]; }
-function resetEmpireCrisis(state: PlayState) { return { ...state, empireCrisisReason: null, empireCrisisRecoveryId: null }; }
+function resetEmpireCrisis(state: PlayState) { return { ...state, empireCrisisReason: null, empireCrisisRecoveryId: null, postCrisisCountermoveOrigin: null, postCrisisResponseId: null }; }
 
 function orderResult(state: PlayState, orderId: OrderId): Partial<PlayState> | null {
   if (state.ownedPlotIds.length === 0 || hasOrder(state, orderId)) return null;
@@ -312,7 +327,11 @@ function resolveRetentionDecision(state: PlayState, decisionId: RetentionDecisio
 
 export function playReducer(state: PlayState, action: PlayAction): PlayState {
   switch (action.type) {
-    case "hydrate": return { ...initialPlayState, ...action.state, resources: { ...initialPlayState.resources, ...action.state.resources }, retentionRecords: action.state.retentionRecords ?? [], frontierIntentId: action.state.frontierIntentId ?? null, empireDeclarationId: action.state.empireDeclarationId ?? null, courtCaseDecisionId: action.state.courtCaseDecisionId ?? null, rivalResponseDecisionId: action.state.rivalResponseDecisionId ?? null, conflictEscalationDecisionId: action.state.conflictEscalationDecisionId ?? null, standoffDecisionId: action.state.standoffDecisionId ?? null, imperialTurnActionIds: action.state.imperialTurnActionIds ?? [], empireCrisisReason: action.state.empireCrisisReason ?? null, empireCrisisRecoveryId: action.state.empireCrisisRecoveryId ?? null };
+    case "hydrate": {
+      const postCrisisOrigin = getPostCrisisCountermoveOriginDefinition(action.state.postCrisisCountermoveOrigin ?? null);
+      const postCrisisResponse = getPostCrisisResponse(postCrisisOrigin, action.state.postCrisisResponseId ?? null);
+      return { ...initialPlayState, ...action.state, resources: { ...initialPlayState.resources, ...action.state.resources }, retentionRecords: action.state.retentionRecords ?? [], frontierIntentId: action.state.frontierIntentId ?? null, empireDeclarationId: action.state.empireDeclarationId ?? null, courtCaseDecisionId: action.state.courtCaseDecisionId ?? null, rivalResponseDecisionId: action.state.rivalResponseDecisionId ?? null, conflictEscalationDecisionId: action.state.conflictEscalationDecisionId ?? null, standoffDecisionId: action.state.standoffDecisionId ?? null, imperialTurnActionIds: action.state.imperialTurnActionIds ?? [], empireCrisisReason: action.state.empireCrisisReason ?? null, empireCrisisRecoveryId: action.state.empireCrisisRecoveryId ?? null, postCrisisCountermoveOrigin: postCrisisOrigin, postCrisisResponseId: postCrisisResponse?.id ?? null };
+    }
     case "select": return { ...state, selectedPlotId: action.plotId, view: state.view === "village" ? "map" : state.view };
     case "setView": return { ...state, view: action.view };
     case "claim": {
@@ -400,13 +419,27 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       const nextState: PlayState = { ...state, imperialTurnActionIds: [...state.imperialTurnActionIds, turnAction.id], resources: { ...state.resources, influence: Math.max(0, state.resources.influence + turnAction.influenceDelta) }, view: "council", chronicle: pushChronicle(state, `Imperial Turn ${nextTurn}`, `${turnAction.label}: ${turnAction.short}`), lastEvent: `Imperial Turn ${nextTurn}: ${turnAction.label}.` };
       const crisisReason = nextTurn >= IMPERIAL_TURN_LIMIT ? evaluateEmpireCrisisReason(nextState) : null;
       if (!crisisReason) return nextState;
-      return { ...nextState, empireCrisisReason: crisisReason, empireCrisisRecoveryId: null, chronicle: pushChronicle(nextState, "Empire crisis threshold", `${getEmpireCrisisReasonLabel(crisisReason)} after the third Imperial Turn.`), lastEvent: `Empire crisis opened: ${getEmpireCrisisReasonLabel(crisisReason)}.` };
+      return { ...nextState, empireCrisisReason: crisisReason, empireCrisisRecoveryId: null, postCrisisCountermoveOrigin: null, postCrisisResponseId: null, chronicle: pushChronicle(nextState, "Empire crisis threshold", `${getEmpireCrisisReasonLabel(crisisReason)} after the third Imperial Turn.`), lastEvent: `Empire crisis opened: ${getEmpireCrisisReasonLabel(crisisReason)}.` };
     }
     case "resolveEmpireCrisis": {
       if (!getEmpireCrisisOpen(state)) return { ...state, view: "council", lastEvent: "No unresolved empire crisis is open." };
       const recovery = empireCrisisRecoveries.find((item) => item.id === action.recoveryId);
       if (!recovery) return { ...state, view: "council", lastEvent: "Unknown empire crisis recovery." };
-      return { ...state, empireCrisisRecoveryId: recovery.id, resources: { ...state.resources, influence: Math.max(0, state.resources.influence + recovery.influenceDelta) }, view: "council", chronicle: pushChronicle(state, "Empire crisis resolved", `${recovery.label}: ${recovery.effect}`), lastEvent: `Empire crisis resolved: ${recovery.label}.` };
+      return { ...state, empireCrisisRecoveryId: recovery.id, postCrisisCountermoveOrigin: null, postCrisisResponseId: null, resources: { ...state.resources, influence: Math.max(0, state.resources.influence + recovery.influenceDelta) }, view: "council", chronicle: pushChronicle(state, "Empire crisis resolved", `${recovery.label}: ${recovery.effect}`), lastEvent: `Empire crisis resolved: ${recovery.label}.` };
+    }
+    case "beginPostCrisisCountermove": {
+      const origin = getPostCrisisCountermoveOriginDefinition(state.empireCrisisRecoveryId);
+      if (!origin) return { ...state, view: "council", lastEvent: "Resolve the empire crisis before the rival can answer." };
+      if (state.postCrisisResponseId) return { ...state, view: "council", lastEvent: "The post-crisis counter-move is already resolved." };
+      if (state.postCrisisCountermoveOrigin) return { ...state, view: "council", lastEvent: "The Obsidian March counter-move is already pending." };
+      return { ...state, postCrisisCountermoveOrigin: origin, view: "council", lastEvent: "The Obsidian March answers the Founder Record." };
+    }
+    case "resolvePostCrisisResponse": {
+      if (!state.postCrisisCountermoveOrigin) return { ...state, view: "council", lastEvent: "No post-crisis counter-move is pending." };
+      if (state.postCrisisResponseId) return { ...state, view: "council", lastEvent: "The post-crisis response is already recorded." };
+      const response = getPostCrisisResponse(state.postCrisisCountermoveOrigin, action.responseId);
+      if (!response) return { ...state, view: "council", lastEvent: "That response does not belong to the current counter-move." };
+      return { ...state, postCrisisResponseId: response.id, resources: { ...state.resources, influence: Math.max(0, state.resources.influence + response.influenceDelta) }, view: "council", chronicle: pushChronicle(state, "Post-crisis counter-move", `${response.label}: ${response.effect}`), lastEvent: `Post-crisis response: ${response.label}.` };
     }
     case "runOrder": { const result = orderResult(state, action.orderId); if (!result) return { ...state, lastEvent: "That order is already resolved or needs a claimed land." }; return { ...state, ...result, season: Math.min(12, state.season + 1), completedOrders: [...state.completedOrders, action.orderId], view: "village" }; }
     case "reset": return initialPlayState;
