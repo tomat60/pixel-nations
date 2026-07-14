@@ -93,13 +93,13 @@ export function getPostCrisisResponse(
 }
 
 export function getPostCrisisCountermoveOrigin(
-  recoveryId: PostCrisisCountermoveOrigin | null,
+  recoveryId: string | null,
 ): PostCrisisCountermoveOrigin | null {
-  return recoveryId && recoveryId in postCrisisCountermoves ? recoveryId : null;
+  return recoveryId === "stabilize-frontier" || recoveryId === "accept-concession" ? recoveryId : null;
 }
 
 export function getPostCrisisCountermoveReady(
-  recoveryId: PostCrisisCountermoveOrigin | null,
+  recoveryId: string | null,
   resolvedResponseId: PostCrisisResponseId | null,
 ) {
   return Boolean(getPostCrisisCountermoveOrigin(recoveryId) && !resolvedResponseId);
