@@ -81,8 +81,8 @@ async function main() {
     let resolvedCrisis = false;
     if (await crisisPanel.count()) {
       await crisisPanel.waitFor({ state: "visible", timeout: 5000 });
-      await page.locator('[data-qa="empire-crisis-choice"][data-crisis-recovery="stabilize-frontier"]').click({ force: true });
-      await page.locator('[data-qa="empire-crisis-resolved"][data-crisis-recovery="stabilize-frontier"]').waitFor({ state: "visible", timeout: 5000 });
+      await page.locator('[data-qa="empire-crisis-choice"][data-crisis-recovery="stabilize-frontier"]').first().click({ force: true });
+      await page.locator('[data-qa="empire-crisis-resolved"][data-crisis-recovery="stabilize-frontier"]').first().waitFor({ state: "visible", timeout: 5000 });
       resolvedCrisis = true;
     }
 
