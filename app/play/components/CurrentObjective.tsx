@@ -15,12 +15,14 @@ export function CurrentObjective({
   state,
   demoComplete,
   demoOverlayDismissed,
+  founderRecordAvailable,
   secondRunStarted,
   onOpenFounderRecord,
 }: {
   state: PlayState;
   demoComplete: boolean;
   demoOverlayDismissed: boolean;
+  founderRecordAvailable: boolean;
   secondRunStarted: boolean;
   onOpenFounderRecord: () => void;
 }) {
@@ -34,6 +36,7 @@ export function CurrentObjective({
       data-qa="current-objective"
       data-view={state.view}
       data-demo-complete={demoComplete ? "true" : "false"}
+      data-founder-record-available={founderRecordAvailable ? "true" : "false"}
       data-empire-crisis={state.empireCrisisReason ?? "none"}
       data-empire-crisis-recovery={state.empireCrisisRecoveryId ?? "none"}
       className={`absolute z-40 rounded-2xl border border-amber-100/20 bg-black/58 p-2.5 shadow-xl backdrop-blur-md md:p-3 ${placement}`}
@@ -41,7 +44,7 @@ export function CurrentObjective({
       <p className="text-[8px] font-black uppercase tracking-[0.22em] text-amber-200/65 md:text-[10px] md:tracking-[0.26em]">Current objective</p>
       <p data-qa="current-objective-text" className="mt-1 text-xs font-black leading-tight text-amber-50 md:text-base">{objective}</p>
       <p className="mt-2 hidden text-[10px] font-black uppercase tracking-[0.18em] text-amber-200/50 md:block">{state.lastEvent}</p>
-      {demoComplete && demoOverlayDismissed ? (
+      {founderRecordAvailable && demoOverlayDismissed ? (
         <button
           type="button"
           data-qa="open-founder-record"
@@ -84,6 +87,8 @@ function getCurrentObjectiveText(state: PlayState): string {
   const turn = getImperialTurnNumber(state);
   if (turn < 3) return `Take Imperial Turn ${turn + 1}/3 and shape the character of your empire.`;
   if (getEmpireCrisisOpen(state)) return `Resolve the Empire Crisis: ${getEmpireCrisisReasonLabel(state.empireCrisisReason)}.`;
+  if (state.postCrisisCountermoveOrigin && !state.postCrisisResponseId) return "Answer the Obsidian March's post-crisis counter-move.";
+  if (state.postCrisisResponseId) return "Your first empire answered the rival counter-move. Review its Founder Record or begin another history.";
   if (state.empireCrisisRecoveryId) return "Your first empire survived its crisis. Review its Founder Record or begin another history.";
   return "Your first empire stands. Review its Founder Record or begin a different history.";
 }
