@@ -31,16 +31,19 @@ export default function PlayPrototypePage() {
   const [state, dispatch] = useReducer(playReducer, initialPlayState);
   const [hydrated, setHydrated] = useState(false);
   const [demoOverlayDismissed, setDemoOverlayDismissed] = useState(false);
+  const [founderRecordReopened, setFounderRecordReopened] = useState(false);
   const [restartedRun, setRestartedRun] = useState(false);
   const selected = useMemo(() => getSelectedPlot(state), [state]);
   const nationDecision = useMemo(() => getNationDecision(state), [state]);
   const isVillage = state.view === "village";
   const isWorld = state.view === "world";
   const crisisOpen = getEmpireCrisisOpen(state);
+  const founderRecordReady = Boolean(state.empireDeclarationId && getImperialTurnComplete(state) && !crisisOpen);
   const postCrisisStarted = Boolean(state.postCrisisCountermoveOrigin);
   const postCrisisReady = getPostCrisisCountermoveReady(state);
   const postCrisisResponse = getPostCrisisResponseDecision(state);
-  const demoComplete = Boolean(state.empireDeclarationId && getImperialTurnComplete(state) && !crisisOpen && !postCrisisStarted);
+  const demoComplete = founderRecordReady && !postCrisisStarted;
+  const showFounderRecord = founderRecordReopened || (demoComplete && !demoOverlayDismissed);
   const showOpeningGuide = hydrated && state.view === "map" && state.ownedPlotIds.length === 0;
   const secondRunStarted = restartedRun && state.ownedPlotIds.length > 0;
 
@@ -56,23 +59,37 @@ export default function PlayPrototypePage() {
   }, [hydrated, state]);
 
   useEffect(() => {
-    if (!demoComplete) setDemoOverlayDismissed(false);
-  }, [demoComplete]);
+    if (!founderRecordReady) {
+      setDemoOverlayDismissed(false);
+      setFounderRecordReopened(false);
+    }
+  }, [founderRecordReady]);
 
   function restartRun() {
     dispatch({ type: "reset" });
     setDemoOverlayDismissed(false);
+    setFounderRecordReopened(false);
     setRestartedRun(true);
   }
 
   function openFounderRecord() {
     dispatch({ type: "setView", view: "council" });
-    setDemoOverlayDismissed(false);
+    setFounderRecordReopened(true);
   }
 
   function continueRuling() {
     dispatch({ type: "beginPostCrisisCountermove" });
     setDemoOverlayDismissed(true);
+  }
+
+  function continueFounderRecord() {
+    if (founderRecordReopened || postCrisisStarted) {
+      setFounderRecordReopened(false);
+      setDemoOverlayDismissed(true);
+      return;
+    }
+
+    continueRuling();
   }
 
   return (
@@ -82,7 +99,7 @@ export default function PlayPrototypePage() {
         <div data-qa="map-stage" className="relative h-full overflow-hidden rounded-[1.5rem] border border-amber-200/20 bg-[#1d2d23] shadow-[0_30px_90px_rgba(0,0,0,.45)] md:rounded-[2rem]">
           {isVillage ? <VillageScene state={state} dispatch={dispatch} /> : isWorld ? <WorldMapScene state={state} dispatch={dispatch} /> : <MapStage state={state} dispatch={dispatch} />}
           <TopBar state={state} />
-          <CurrentObjective state={state} demoComplete={demoComplete} demoOverlayDismissed={demoOverlayDismissed} secondRunStarted={secondRunStarted} onOpenFounderRecord={openFounderRecord} />
+          <CurrentObjective state={state} demoComplete={demoComplete} demoOverlayDismissed={demoOverlayDismissed} founderRecordAvailable={founderRecordReady} secondRunStarted={secondRunStarted} onOpenFounderRecord={openFounderRecord} />
           {showOpeningGuide ? <OpeningGuide selectedName={selected.name} /> : null}
           {state.view === "map" ? <LandSheet selected={selected} state={state} dispatch={dispatch} /> : null}
           {state.view === "orders" && state.ownedPlotIds.length > 0 ? <OrdersPanel state={state} dispatch={dispatch} /> : null}
@@ -108,7 +125,7 @@ export default function PlayPrototypePage() {
               <p className="mt-2 text-xs leading-relaxed text-amber-50/65">{postCrisisResponse.worldEffect}</p>
             </section>
           ) : null}
-          {hydrated && demoComplete && !demoOverlayDismissed && state.view === "council" ? <DemoCompleteOverlay state={state} onContinue={continueRuling} onRestart={restartRun} /> : null}
+          {hydrated && state.view === "council" && showFounderRecord ? <DemoCompleteOverlay state={state} onContinue={continueFounderRecord} onRestart={restartRun} /> : null}
           <BottomDock activeView={state.view} dispatch={dispatch} />
         </div>
       </section>
