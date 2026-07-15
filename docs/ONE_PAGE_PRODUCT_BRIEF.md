@@ -1,28 +1,29 @@
 # Pixel Nations — One Page Product Brief
 
----
-
 ## What It Is
 
 Pixel Nations is a **premium player-built strategy world** where every city, nation, and empire begins with **one claimed land**.
-
----
 
 ## Core Fantasy
 
 **One land can become an empire.**
 
----
+## Current Source of Truth
+
+The current playable game is **`/play`**.
+
+Legacy routes such as `/world`, `/dashboard`, `/settlement`, `/nation`, and `/empire` are no longer active product surfaces. They may exist only as compatibility redirects or archived historical context.
+
+See: `docs/PLAY_ROUTE_SOURCE_OF_TRUTH.md`.
 
 ## Simple Player Arc
 
 1. **Claim land**
-2. **Found a settlement**
+2. **Found a settlement / city seed**
 3. **Create a nation**
 4. **Declare an empire**
-5. **Become part of the world’s first history**
-
----
+5. **Survive crisis and answer the rival**
+6. **Become part of the world’s first history**
 
 ## World Truth
 
@@ -30,14 +31,12 @@ Pixel Nations is a **premium player-built strategy world** where every city, nat
 |---------|-------|
 | Full world grid | **100 × 100** lands |
 | Total lands | **10,000** |
-| Current playable demo | **Sector A-01** |
-| Visible demo sector | **216 lands** (18 × 12) |
+| Current playable demo | **Sector A-01 / Aurelian Basin** |
+| Current active route | **`/play`** |
 
 - **Sector A-01 is not the full world.**
-- The **Atlas** represents the full world.
-- The **playable sector** is the first frontier window.
-
----
+- The **Atlas** represents the full world promise.
+- The playable demo is the first bounded window into that world.
 
 ## Product Tone
 
@@ -48,8 +47,6 @@ Pixel Nations is a **premium player-built strategy world** where every city, nat
 - Black / gold
 - Atlas · kingdom map · grand strategy feeling
 
----
-
 ## Not This
 
 Pixel Nations is **not**:
@@ -59,79 +56,51 @@ Pixel Nations is **not**:
 - Marketplace
 - Pixel ad board
 - Pay-to-win strategy game
-- Full simulator (yet)
+- Full simulator yet
 - Generic SaaS dashboard
-
----
 
 ## Core Message
 
 **“Choose where your history begins.”**
 
----
-
 ## Key Line
 
 **“History will remember the first.”**
 
----
-
 ## MVP Goal
 
-The **first 3 minutes** should make a player feel:
+The **first few minutes** should make a player feel:
 
-> “I chose a land, founded a city, created a nation, and saw the beginning of an empire.”
-
----
+> “I chose one land, founded a settlement, created a nation, declared an empire, and saw history remember my choices.”
 
 ## Current Priority
 
-### World Map v7
+Make **`/play`** understandable, impressive, and testable as the full vertical slice:
 
-Make **`/world`** the first true **gameplay wow** moment.
+```text
+land → settlement/city → nation → empire → crisis → rival consequence
+```
 
-The playable sector must feel like **the Atlas came alive** — not a spreadsheet.
-
-**Spec:** `docs/WORLD_MAP_V7_SPEC.md`  
-**Execute:** `docs/WORLD_MAP_V7_EXECUTION_RUNBOOK.md`  
-**Review:** `docs/WORLD_MAP_V7_REVIEW_RUBRIC.md`
-
----
+Before adding new systems, protect this route from confusion, stale docs, duplicate routes, and unclear onboarding.
 
 ## Before First Tests
 
 ### Do
 
-- World Map v7
-- Claim → Settlement continuity
-- Nation + Empire demo arc polish
-- QA
-- Mobile usability
+- Keep `/play` as the only active gameplay surface
+- Make the first-run path understandable without narration
+- Preserve the premium black/gold atlas tone
+- Keep QA evidence and selectors current
+- Improve mobile usability only when it affects the playable slice
 
 ### Do not
 
 - Payments
 - Marketplace
 - Accounts
-- Combat
+- Combat simulator
 - Full economy
 - Multiplayer
 - Real backend ownership
 - Crypto / Web3 language
-
-**Full cut list:** `docs/PRODUCT_SCOPE_CUT.md`
-
----
-
-## Strategic Rule
-
-**Simple first. Deep later.**
-
----
-
-## Related documents
-
-- `docs/PRODUCT_SIMPLICITY_DOCTRINE.md`
-- `docs/PRODUCT_SCOPE_CUT.md`
-- `docs/NEXT_SPRINT_PLAN.md`
-- `AGENTS.md`
+- Reopen old `/world` / `/dashboard` route work unless explicitly scoped
