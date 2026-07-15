@@ -56,6 +56,9 @@ jobs:
       - name: Generate empire crisis evidence
         run: node scripts/qa-empire-crisis.mjs
 
+      - name: Generate post-crisis counter-move evidence
+        run: node scripts/qa-post-crisis-countermove.mjs
+
       - name: Upload play evidence
         uses: actions/upload-artifact@v4
         if: always()
