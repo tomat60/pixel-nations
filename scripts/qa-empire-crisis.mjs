@@ -33,6 +33,8 @@ const baseSeed = {
   ],
   empireCrisisReason: null,
   empireCrisisRecoveryId: null,
+  postCrisisCountermoveOrigin: null,
+  postCrisisResponseId: null,
 };
 
 function crisisSeed() {
@@ -66,9 +68,13 @@ async function ensureApp() { if (await appReady()) return null; const child = st
 function stopApp(child) { if (!child) return; if (process.platform === "win32") return child.kill("SIGTERM"); try { process.kill(-child.pid, "SIGTERM"); } catch { child.kill("SIGTERM"); } }
 
 async function loadSeed(page, state) {
-  await page.goto(`${URL}/play`, { waitUntil: "domcontentloaded", timeout: 10000 });
+  await page.goto(`${URL}/play?qa-preseed=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 10000 });
+  await page.evaluate(() => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+  });
   await page.evaluate(({ key, state }) => window.localStorage.setItem(key, JSON.stringify(state)), { key: KEY, state });
-  await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
+  await page.goto(`${URL}/play?qa-seed=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 10000 });
   await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
 }
 
