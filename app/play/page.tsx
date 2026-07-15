@@ -9,23 +9,41 @@ import { FoundingCeremony } from "./components/FoundingCeremony";
 import { LandSheet } from "./components/LandSheet";
 import { MapStage } from "./components/MapStage";
 import { OrdersPanel } from "./components/OrdersPanel";
+import { PostCrisisCountermovePanel } from "./components/PostCrisisCountermovePanel";
 import { StrategicBranchOverlay } from "./components/StrategicBranchOverlay";
 import { TopBar } from "./components/TopBar";
 import { VillageScene } from "./components/VillageScene";
-import { getEmpireCrisisOpen, getImperialTurnComplete, getNationDecision, getSelectedPlot, initialPlayState, playReducer, playV1StorageKey, type PlayState } from "./lib/play-state";
+import {
+  getEmpireCrisisOpen,
+  getImperialTurnComplete,
+  getNationDecision,
+  getPostCrisisCountermoveReady,
+  getPostCrisisResponseDecision,
+  getSelectedPlot,
+  initialPlayState,
+  playReducer,
+  playV1StorageKey,
+  type PlayState,
+} from "./lib/play-state";
 import { WorldMapScene } from "./world/WorldMapScene";
 
 export default function PlayPrototypePage() {
   const [state, dispatch] = useReducer(playReducer, initialPlayState);
   const [hydrated, setHydrated] = useState(false);
   const [demoOverlayDismissed, setDemoOverlayDismissed] = useState(false);
+  const [founderRecordReopened, setFounderRecordReopened] = useState(false);
   const [restartedRun, setRestartedRun] = useState(false);
   const selected = useMemo(() => getSelectedPlot(state), [state]);
   const nationDecision = useMemo(() => getNationDecision(state), [state]);
   const isVillage = state.view === "village";
   const isWorld = state.view === "world";
   const crisisOpen = getEmpireCrisisOpen(state);
-  const demoComplete = Boolean(state.empireDeclarationId && getImperialTurnComplete(state) && !crisisOpen);
+  const founderRecordReady = Boolean(state.empireDeclarationId && getImperialTurnComplete(state) && !crisisOpen);
+  const postCrisisStarted = Boolean(state.postCrisisCountermoveOrigin);
+  const postCrisisReady = getPostCrisisCountermoveReady(state);
+  const postCrisisResponse = getPostCrisisResponseDecision(state);
+  const demoComplete = founderRecordReady && !postCrisisStarted;
+  const showFounderRecord = founderRecordReopened || (demoComplete && !demoOverlayDismissed);
   const showOpeningGuide = hydrated && state.view === "map" && state.ownedPlotIds.length === 0;
   const secondRunStarted = restartedRun && state.ownedPlotIds.length > 0;
 
@@ -41,18 +59,37 @@ export default function PlayPrototypePage() {
   }, [hydrated, state]);
 
   useEffect(() => {
-    if (!demoComplete) setDemoOverlayDismissed(false);
-  }, [demoComplete]);
+    if (!founderRecordReady) {
+      setDemoOverlayDismissed(false);
+      setFounderRecordReopened(false);
+    }
+  }, [founderRecordReady]);
 
   function restartRun() {
     dispatch({ type: "reset" });
     setDemoOverlayDismissed(false);
+    setFounderRecordReopened(false);
     setRestartedRun(true);
   }
 
   function openFounderRecord() {
     dispatch({ type: "setView", view: "council" });
-    setDemoOverlayDismissed(false);
+    setFounderRecordReopened(true);
+  }
+
+  function continueRuling() {
+    dispatch({ type: "beginPostCrisisCountermove" });
+    setDemoOverlayDismissed(true);
+  }
+
+  function continueFounderRecord() {
+    if (founderRecordReopened || postCrisisStarted) {
+      setFounderRecordReopened(false);
+      setDemoOverlayDismissed(true);
+      return;
+    }
+
+    continueRuling();
   }
 
   return (
@@ -62,14 +99,33 @@ export default function PlayPrototypePage() {
         <div data-qa="map-stage" className="relative h-full overflow-hidden rounded-[1.5rem] border border-amber-200/20 bg-[#1d2d23] shadow-[0_30px_90px_rgba(0,0,0,.45)] md:rounded-[2rem]">
           {isVillage ? <VillageScene state={state} dispatch={dispatch} /> : isWorld ? <WorldMapScene state={state} dispatch={dispatch} /> : <MapStage state={state} dispatch={dispatch} />}
           <TopBar state={state} />
-          <CurrentObjective state={state} demoComplete={demoComplete} demoOverlayDismissed={demoOverlayDismissed} secondRunStarted={secondRunStarted} onOpenFounderRecord={openFounderRecord} />
+          <CurrentObjective state={state} demoComplete={demoComplete} demoOverlayDismissed={demoOverlayDismissed} founderRecordAvailable={founderRecordReady} secondRunStarted={secondRunStarted} onOpenFounderRecord={openFounderRecord} />
           {showOpeningGuide ? <OpeningGuide selectedName={selected.name} /> : null}
           {state.view === "map" ? <LandSheet selected={selected} state={state} dispatch={dispatch} /> : null}
           {state.view === "orders" && state.ownedPlotIds.length > 0 ? <OrdersPanel state={state} dispatch={dispatch} /> : null}
           {state.view === "council" ? <CouncilPanel state={state} dispatch={dispatch} /> : null}
           <StrategicBranchOverlay state={state} dispatch={dispatch} />
           {nationDecision && !state.foundingCeremonySeen ? <FoundingCeremony state={state} decision={nationDecision} dispatch={dispatch} /> : null}
-          {hydrated && demoComplete && !demoOverlayDismissed && state.view === "council" ? <DemoCompleteOverlay state={state} onContinue={() => setDemoOverlayDismissed(true)} onRestart={restartRun} /> : null}
+          {hydrated && state.view === "council" && postCrisisReady && state.postCrisisCountermoveOrigin ? (
+            <div className="absolute inset-x-3 bottom-20 z-40 md:inset-x-auto md:left-5 md:right-5 md:bottom-24">
+              <PostCrisisCountermovePanel
+                origin={state.postCrisisCountermoveOrigin}
+                onRespond={(responseId) => dispatch({ type: "resolvePostCrisisResponse", responseId })}
+              />
+            </div>
+          ) : null}
+          {hydrated && state.view === "council" && postCrisisResponse ? (
+            <section
+              data-qa="world-post-crisis-consequence"
+              data-post-crisis-response={state.postCrisisResponseId ?? "none"}
+              className="absolute bottom-20 left-3 right-3 z-30 rounded-3xl border border-sky-200/25 bg-slate-950/88 p-4 shadow-2xl backdrop-blur-md md:left-auto md:right-5 md:w-[420px]"
+            >
+              <p className="text-[9px] font-black uppercase tracking-[0.18em] text-sky-100/60">World consequence</p>
+              <p className="mt-1 text-lg font-black text-amber-50">{postCrisisResponse.label}</p>
+              <p className="mt-2 text-xs leading-relaxed text-amber-50/65">{postCrisisResponse.worldEffect}</p>
+            </section>
+          ) : null}
+          {hydrated && state.view === "council" && showFounderRecord ? <DemoCompleteOverlay state={state} onContinue={continueFounderRecord} onRestart={restartRun} /> : null}
           <BottomDock activeView={state.view} dispatch={dispatch} />
         </div>
       </section>
