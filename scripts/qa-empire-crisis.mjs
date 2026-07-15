@@ -112,31 +112,42 @@ async function assertSafeBypass(page) {
   await page.screenshot({ path: `${SHOT_DIR}/01-safe-bypass.png`, fullPage: true });
 }
 
+async function runIsolated(browser, videoName, fn) {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, recordVideo: { dir: VIDEO_DIR, size: { width: 1440, height: 900 } } });
+  const page = await context.newPage();
+  const video = page.video();
+  try {
+    await fn(page);
+  } finally {
+    await page.close().catch(() => {});
+    await context.close().catch(() => {});
+    const original = video ? await video.path().catch(() => null) : null;
+    if (original) await rename(original, `${VIDEO_DIR}/${videoName}`);
+  }
+}
+
 async function main() {
   await rm(OUT, { recursive: true, force: true });
   await mkdir(VIDEO_DIR, { recursive: true });
   await mkdir(SHOT_DIR, { recursive: true });
   const child = await ensureApp();
   const browser = await chromium.launch();
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, recordVideo: { dir: VIDEO_DIR, size: { width: 1440, height: 900 } } });
-  const page = await context.newPage();
-  const video = page.video();
   const evidence = [];
+  const videos = [];
 
   try {
-    await assertSafeBypass(page); evidence.push("01-safe-bypass.png");
-    await triggerCrisisAndRecover(page, "stabilize-frontier", "02-crisis-stabilized.png"); evidence.push("02-crisis-stabilized.png");
-    await triggerCrisisAndRecover(page, "accept-concession", "03-crisis-concession.png"); evidence.push("03-crisis-concession.png");
-    await writeFile(`${OUT}/empire-crisis-summary.json`, `${JSON.stringify({ generatedAt: new Date().toISOString(), evidence, status: "ok" }, null, 2)}\n`);
+    await runIsolated(browser, "safe-bypass.webm", async (page) => { await assertSafeBypass(page); evidence.push("01-safe-bypass.png"); videos.push("safe-bypass.webm"); });
+    await runIsolated(browser, "crisis-stabilized.webm", async (page) => { await triggerCrisisAndRecover(page, "stabilize-frontier", "02-crisis-stabilized.png"); evidence.push("02-crisis-stabilized.png"); videos.push("crisis-stabilized.webm"); });
+    await runIsolated(browser, "crisis-concession.webm", async (page) => { await triggerCrisisAndRecover(page, "accept-concession", "03-crisis-concession.png"); evidence.push("03-crisis-concession.png"); videos.push("crisis-concession.webm"); });
+    await writeFile(`${OUT}/empire-crisis-summary.json`, `${JSON.stringify({ generatedAt: new Date().toISOString(), evidence, videos, status: "ok" }, null, 2)}\n`);
   } finally {
-    await context.close().catch(() => {});
-    const original = video ? await video.path().catch(() => null) : null;
-    if (original) await rename(original, `${VIDEO_DIR}/empire-crisis-recovery.webm`);
     await browser.close().catch(() => {});
     stopApp(child);
   }
 
-  if (!existsSync(`${VIDEO_DIR}/empire-crisis-recovery.webm`)) throw new Error("Missing empire crisis recovery video");
+  for (const videoName of ["safe-bypass.webm", "crisis-stabilized.webm", "crisis-concession.webm"]) {
+    if (!existsSync(`${VIDEO_DIR}/${videoName}`)) throw new Error(`Missing empire crisis video: ${videoName}`);
+  }
   console.log(`Empire crisis evidence written to ${OUT}`);
 }
 
