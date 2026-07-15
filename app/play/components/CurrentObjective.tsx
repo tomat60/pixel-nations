@@ -14,7 +14,6 @@ import {
 export function CurrentObjective({
   state,
   demoComplete,
-  demoOverlayDismissed,
   founderRecordAvailable,
   secondRunStarted,
   onOpenFounderRecord,
@@ -44,7 +43,7 @@ export function CurrentObjective({
       <p className="text-[8px] font-black uppercase tracking-[0.22em] text-amber-200/65 md:text-[10px] md:tracking-[0.26em]">Current objective</p>
       <p data-qa="current-objective-text" className="mt-1 text-xs font-black leading-tight text-amber-50 md:text-base">{objective}</p>
       <p className="mt-2 hidden text-[10px] font-black uppercase tracking-[0.18em] text-amber-200/50 md:block">{state.lastEvent}</p>
-      {founderRecordAvailable && demoOverlayDismissed ? (
+      {founderRecordAvailable ? (
         <button
           type="button"
           data-qa="open-founder-record"
