@@ -98,8 +98,13 @@ async function main() {
     await page.locator('[data-qa="continue-ruling"]').click({ force: true });
     await overlay.waitFor({ state: "hidden", timeout: 5000 });
     await page.locator('[data-qa="open-founder-record"]').waitFor({ state: "visible", timeout: 5000 });
-    const expectedObjective = resolvedCrisis ? /first empire survived its crisis/i : /first empire stands/i;
-    await page.locator('[data-qa="current-objective-text"]').getByText(expectedObjective).waitFor({ state: "visible", timeout: 5000 });
+    if (resolvedCrisis) {
+      await page.locator('[data-qa="post-crisis-countermove"][data-countermove-origin="stabilize-frontier"]').waitFor({ state: "visible", timeout: 5000 });
+      if (await page.locator('[data-qa="post-crisis-response"]').count() !== 2) throw new Error("Post-crisis counter-move does not expose exactly two responses");
+      await page.locator('[data-qa="current-objective-text"]').getByText(/post-crisis counter-move/i).waitFor({ state: "visible", timeout: 5000 });
+    } else {
+      await page.locator('[data-qa="current-objective-text"]').getByText(/first empire stands/i).waitFor({ state: "visible", timeout: 5000 });
+    }
     const continueShot = "02-continue-ruling.png";
     await page.screenshot({ path: `${SHOT_DIR}/${continueShot}`, fullPage: true }); evidence.push(continueShot);
 
