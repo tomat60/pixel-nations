@@ -2,15 +2,25 @@
 
 This doctrine protects Pixel Nations from becoming too complex before the core fantasy is proven.
 
----
-
 ## North star
 
 **One land can become an empire.**
 
 Everything else is optional until that emotion lands.
 
----
+## Current source of truth
+
+The current playable game is **`/play`**.
+
+Legacy routes are not active gameplay surfaces:
+
+- `/world`
+- `/dashboard`
+- `/settlement`
+- `/nation`
+- `/empire`
+
+See: `docs/PLAY_ROUTE_SOURCE_OF_TRUTH.md`.
 
 ## Understandable in 10 seconds
 
@@ -18,43 +28,38 @@ A new visitor should grasp within **10 seconds**:
 
 - There is a **finite world** of lands.
 - They can **claim one land** and write history from it.
-- That land can grow into a **city, nation, and empire**.
+- That land can grow into a **settlement/city, nation, and empire**.
+- The playable demo starts from **`/play`**.
 
 If a feature cannot be explained in one breath, it is probably too early.
-
----
 
 ## Core fantasy
 
 **One land can become an empire.**
 
-Not: manage 47 systems, optimize yields, connect a wallet, or browse a marketplace.
+Not: manage 47 systems, optimize yields, browse marketplaces, or juggle infrastructure.
 
 The player is a **founder**, not an investor.
-
----
 
 ## Simple user path
 
 The demo arc must stay obvious:
 
 ```text
-Claim land → Build city → Found nation → Rise into empire
+claim land -> build settlement/city -> found nation -> rise into empire -> face consequence
 ```
 
 Think broadly about the full game vision — **communicate simply** in the MVP. Strategy can be deep later; the **first experience must be obvious**.
 
----
+## Pixel inspiration, not speculative language
 
-## Pixel inspiration, not crypto language
+The original “one tile matters” idea remains **inspiration for simplicity**:
 
-The original “buy a pixel / tile” idea remains **inspiration for simplicity**:
+- One land matters.
+- Placement is permanent in the story.
+- The first move defines the history.
 
-- One tile matters.
-- Placement is permanent.
-- The first move defines the story.
-
-**Current product language** must **not** sound like an NFT or crypto land sale.
+Current product language must not sound like a financial or speculative land sale.
 
 ### Prefer
 
@@ -63,6 +68,7 @@ The original “buy a pixel / tile” idea remains **inspiration for simplicity*
 - Join the First Age
 - Founder of {land}
 - One land. One history.
+- Enter `/play`
 
 ### Avoid
 
@@ -77,8 +83,6 @@ The original “buy a pixel / tile” idea remains **inspiration for simplicity*
 - web3
 - digital real estate
 
----
-
 ## MVP definition
 
 **MVP is not a small version of the full game.**
@@ -89,32 +93,28 @@ MVP is the **smallest version of the emotion**:
 
 Ship feeling first. Systems second.
 
----
-
 ## Anti-complexity checklist
 
 Before adding any feature, page, or system, answer **yes** to all that apply — or **cut / defer** the feature:
 
 | # | Question |
 |---|----------|
-| 1 | Does this strengthen **land → city → nation → empire**? |
+| 1 | Does this strengthen **land → settlement/city → nation → empire**? |
 | 2 | Can a user understand it **without explanation**? |
 | 3 | Is it **needed before first user tests**? |
-| 4 | Does it **avoid crypto vibes**? |
-| 5 | Does it **avoid pay-to-win** framing? |
-| 6 | Can it be done **later** without hurting the vertical slice? |
+| 4 | Does it preserve `/play` as source of truth? |
+| 5 | Does it avoid speculative/financial framing? |
+| 6 | Does it avoid pay-to-win framing? |
+| 7 | Can it be done later without hurting the vertical slice? |
 
-If (6) is “yes” and (3) is “no” → **defer**.
-
----
+If (7) is “yes” and (3) is “no” → **defer**.
 
 ## How this connects to execution
 
-- **World Map v7** — wow moment for “choose your land,” not grid polish loops.
+- **Current route** — `/play` is the playable game.
 - **Copy** — cinematic, minimal; see `docs/ONE_PAGE_PRODUCT_BRIEF.md`.
-- **Agents** — no vague “improve everything” passes; see `docs/CURSOR_TASK_TEMPLATE.md`.
+- **Agents** — no vague “improve everything” passes; see `docs/AI_COST_CONTROL_CODEX.md`.
 - **Scope** — see `docs/PRODUCT_SCOPE_CUT.md` for what not to build yet.
-
----
+- **Legacy route context** — see `docs/PLAY_ROUTE_SOURCE_OF_TRUTH.md` before using old `/world` docs.
 
 ## Simple first. Deep later.
