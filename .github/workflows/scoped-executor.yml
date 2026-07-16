@@ -1,0 +1,122 @@
+name: Pixel Nations Scoped Executor
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  scoped-executor:
+    name: Scoped implementation executor
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    if: >-
+      github.event.issue.user.login == 'tomat60' &&
+      startsWith(github.event.issue.title, 'AGENT RUN: scoped_implementation')
+
+    steps:
+      - name: Comment executor started
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: `Scoped executor started.\n\nRun: ${runUrl}\n\nThis run may create a draft PR, but it will not merge anything.`,
+            });
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run scoped executor patch generation
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: claude-fable-5
+          MAX_INPUT_TOKENS: "120000"
+          MAX_OUTPUT_TOKENS: "14000"
+          MAX_ESTIMATED_COST_USD: "2.75"
+          INPUT_PRICE_PER_MILLION_USD: "10"
+          OUTPUT_PRICE_PER_MILLION_USD: "50"
+        run: node scripts/scoped-executor.mjs
+
+      - name: Upload scoped executor artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scoped-executor-output-${{ github.event.issue.number }}
+          path: scoped-executor-output/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Commit generated patch to branch
+        id: commit_patch
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          BRANCH="agent/scoped-implementation-${ISSUE_NUMBER}-${GITHUB_RUN_ID}"
+          echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
+          git config user.name "pixel-nations-scoped-executor"
+          git config user.email "actions@github.com"
+          git checkout -b "$BRANCH"
+          git add app/play scripts package.json .github/workflows || true
+          if git diff --cached --quiet; then
+            echo "No staged changes after scoped executor patch."
+            exit 1
+          fi
+          git commit -m "feat(play): scoped implementation for #${ISSUE_NUMBER}"
+          git push origin "$BRANCH"
+
+      - name: Create draft PR
+        uses: actions/github-script@v7
+        env:
+          BRANCH: ${{ steps.commit_patch.outputs.branch }}
+        with:
+          script: |
+            const issueNumber = context.payload.issue.number;
+            const branch = process.env.BRANCH;
+            const pr = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `agent: scoped implementation for #${issueNumber}`,
+              head: branch,
+              base: 'main',
+              draft: true,
+              body: `## Scoped executor output\n\nGenerated from issue #${issueNumber}.\n\nThis PR was created automatically by the guarded scoped executor. It is intentionally a draft.\n\n## Safety gates\n- No auto-merge.\n- Product Lead review required.\n- CI and Play Visual QA must pass.\n- Evidence artifact must be inspected before merge.\n\n## Scope reminder\nThe executor is allowlisted to app/play/**, scripts/qa-*.mjs, package.json, and the Play Visual QA workflow only.`,
+            });
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `Scoped executor created draft PR: ${pr.data.html_url}\n\nNext gate: inspect diff, CI, Play Visual QA, and evidence artifact before any merge.`,
+            });
+
+      - name: Comment executor failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: `Scoped executor failed or stopped safely.\n\nRun: ${runUrl}\n\nNo merge was attempted. Inspect the logs/artifact before retrying.`,
+            });
