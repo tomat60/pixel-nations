@@ -2,7 +2,7 @@ name: Pixel Nations Scoped Executor
 
 on:
   issues:
-    types: [opened, edited]
+    types: [opened]
 
 permissions:
   contents: write
@@ -49,12 +49,12 @@ jobs:
       - name: Run scoped executor patch generation
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANTHROPIC_MODEL: claude-fable-5
+          ANTHROPIC_MODEL: claude-sonnet-4-20250514
           MAX_INPUT_TOKENS: "120000"
           MAX_OUTPUT_TOKENS: "14000"
           MAX_ESTIMATED_COST_USD: "2.75"
-          INPUT_PRICE_PER_MILLION_USD: "10"
-          OUTPUT_PRICE_PER_MILLION_USD: "50"
+          INPUT_PRICE_PER_MILLION_USD: "3"
+          OUTPUT_PRICE_PER_MILLION_USD: "15"
         run: node scripts/scoped-executor.mjs
 
       - name: Upload scoped executor artifact
