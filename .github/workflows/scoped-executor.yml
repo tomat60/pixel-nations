@@ -44,15 +44,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Run scoped executor patch generation
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANTHROPIC_MODEL: claude-sonnet-5
-          MAX_INPUT_TOKENS: "120000"
-          MAX_OUTPUT_TOKENS: "14000"
-          MAX_ESTIMATED_COST_USD: "2.75"
+          ANTHROPIC_MODEL: claude-sonnet-4-20250514
+          MAX_INPUT_TOKENS: "80000"
+          MAX_OUTPUT_TOKENS: "12000"
+          MAX_ESTIMATED_COST_USD: "2.00"
           INPUT_PRICE_PER_MILLION_USD: "3"
           OUTPUT_PRICE_PER_MILLION_USD: "15"
         run: node scripts/scoped-executor.mjs
