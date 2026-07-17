@@ -104,8 +104,10 @@ function isAllowedPath(filePath) {
 function extractPatch(text) {
   const fenced = text.match(/```(?:diff|patch)?\s*\n([\s\S]*?)```/i);
   const patch = (fenced ? fenced[1] : text).trim();
-  if (!patch.includes("diff --git")) {
-    throw new Error("Model output did not contain a unified git diff.");
+  const hasGitDiff = /^diff --git a\/.+? b\/.+$/m.test(patch);
+  const hasStandardUnifiedDiff = /^--- a\/.+$/m.test(patch) && /^\+\+\+ b\/.+$/m.test(patch) && /^@@ /m.test(patch);
+  if (!hasGitDiff && !hasStandardUnifiedDiff) {
+    throw new Error("Model output did not contain a unified diff.");
   }
   return `${patch}\n`;
 }
@@ -180,6 +182,7 @@ async function buildPrompt(issue) {
     `MISSION\n${issue.title}\n\n${issue.body}\n\n` +
     `ABSOLUTE RULES\n` +
     `- Output exactly one unified git diff. No prose outside the diff.\n` +
+    `- Use either git diff format (diff --git) or standard unified diff (--- a/... / +++ b/...).\n` +
     `- Keep the patch minimal and bounded.\n` +
     `- Only modify allowlisted paths: app/play/**, scripts/qa-*.mjs, package.json, .github/workflows/play-visual-qa.yml.\n` +
     `- Do not delete files. Do not rename files. Do not add packages. Do not touch secrets.\n` +
