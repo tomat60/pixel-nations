@@ -332,7 +332,8 @@ async function main() {
 
   await fs.writeFile(OUT_PATCH, patch, "utf8");
 
-  const applyCheck = runGitDetailed(["apply", "--check", "--whitespace=nowarn", OUT_PATCH]);
+  const applyArgs = ["apply", "--recount", "--whitespace=nowarn", OUT_PATCH];
+  const applyCheck = runGitDetailed(["apply", "--check", "--recount", "--whitespace=nowarn", OUT_PATCH]);
   await fs.writeFile(OUT_APPLY_CHECK, JSON.stringify(applyCheck, null, 2), "utf8");
   if (!gitSucceeded(applyCheck)) {
     const reason = `git apply --check failed with status ${applyCheck.status ?? "unknown"}.`;
@@ -350,7 +351,7 @@ async function main() {
     throw new Error(reason);
   }
 
-  const applyResult = runGitDetailed(["apply", "--whitespace=nowarn", OUT_PATCH]);
+  const applyResult = runGitDetailed(applyArgs);
   await fs.writeFile(OUT_APPLY_RESULT, JSON.stringify(applyResult, null, 2), "utf8");
   if (!gitSucceeded(applyResult)) {
     const reason = `git apply failed with status ${applyResult.status ?? "unknown"}.`;
