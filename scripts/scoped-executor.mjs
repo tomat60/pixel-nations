@@ -1,12 +1,15 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 
 const ROOT = process.cwd();
 const OUT_DIR = path.join(ROOT, "scoped-executor-output");
 const OUT_PATCH = path.join(OUT_DIR, "scoped-executor.patch");
 const OUT_REPORT = path.join(OUT_DIR, "scoped-executor-report.md");
 const OUT_META = path.join(OUT_DIR, "scoped-executor-meta.json");
+const OUT_RAW_OUTPUT = path.join(OUT_DIR, "scoped-executor-raw-output.txt");
+const OUT_APPLY_CHECK = path.join(OUT_DIR, "scoped-executor-apply-check.json");
+const OUT_APPLY_RESULT = path.join(OUT_DIR, "scoped-executor-apply-result.json");
 
 const CANDIDATE_FILES = [
   "package.json",
@@ -222,7 +225,7 @@ function summarizeAnthropicResponse(data) {
   };
 }
 
-async function writeFailureDiagnostics({ issue, model, thinkingMode, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, data, reason }) {
+async function writeFailureDiagnostics({ issue, model, thinkingMode, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, data, reason, diagnostics = null }) {
   const response = summarizeAnthropicResponse(data);
   const meta = {
     status: "failed",
@@ -234,6 +237,7 @@ async function writeFailureDiagnostics({ issue, model, thinkingMode, estimatedIn
     maxOutputTokens,
     estimatedMaxCostUsd: Number(estimatedMaxCost.toFixed(6)),
     anthropicResponse: response,
+    diagnostics,
     createdAt: new Date().toISOString(),
   };
 
@@ -241,15 +245,32 @@ async function writeFailureDiagnostics({ issue, model, thinkingMode, estimatedIn
   await fs.writeFile(OUT_META, JSON.stringify(meta, null, 2), "utf8");
   await fs.writeFile(
     OUT_REPORT,
-    `# Scoped Executor Failure Report\n\nIssue: #${issue.number}\n\nRequested model: ${model}\n\nRequested thinking mode: ${thinkingMode}\n\nFailure: ${reason}\n\nStop reason: ${response.stopReason ?? "unknown"}\n\nContent block types: ${response.contentBlockTypes.length ? response.contentBlockTypes.join(", ") : "none"}\n\nResponse ID: ${response.responseId ?? "unknown"}\n\nUsage: ${JSON.stringify(response.usage)}\n`,
+    `# Scoped Executor Failure Report\n\nIssue: #${issue.number}\n\nRequested model: ${model}\n\nRequested thinking mode: ${thinkingMode}\n\nFailure: ${reason}\n\nStop reason: ${response.stopReason ?? "unknown"}\n\nContent block types: ${response.contentBlockTypes.length ? response.contentBlockTypes.join(", ") : "none"}\n\nResponse ID: ${response.responseId ?? "unknown"}\n\nUsage: ${JSON.stringify(response.usage)}\n\nDiagnostics: ${diagnostics ? JSON.stringify(diagnostics, null, 2) : "none"}\n`,
     "utf8",
   );
   console.error("Anthropic response summary:", JSON.stringify(response));
+  if (diagnostics) console.error("Scoped executor diagnostics:", JSON.stringify(diagnostics));
   return response;
 }
 
 function runGit(args) {
   return execFileSync("git", args, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+}
+
+function runGitDetailed(args) {
+  const result = spawnSync("git", args, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  return {
+    command: ["git", ...args].join(" "),
+    status: result.status,
+    signal: result.signal,
+    stdout: result.stdout ?? "",
+    stderr: result.stderr ?? "",
+    error: result.error ? result.error.message : null,
+  };
+}
+
+function gitSucceeded(result) {
+  return result.status === 0 && !result.error;
 }
 
 async function main() {
@@ -271,6 +292,9 @@ async function main() {
 
   const data = await callAnthropic({ apiKey, model, prompt, maxOutputTokens, thinkingMode });
   const outputText = extractText(data);
+  await fs.mkdir(OUT_DIR, { recursive: true });
+  await fs.writeFile(OUT_RAW_OUTPUT, outputText || "", "utf8");
+
   if (!outputText) {
     const response = summarizeAnthropicResponse(data);
     const reason = `Anthropic returned no text content (stop_reason=${response.stopReason ?? "unknown"}; content_types=${response.contentBlockTypes.join(",") || "none"}).`;
@@ -278,18 +302,82 @@ async function main() {
     throw new Error(reason);
   }
 
-  const patch = extractPatch(outputText);
-  const paths = validatePatch(patch);
+  let patch;
+  let paths;
+  try {
+    patch = extractPatch(outputText);
+    paths = validatePatch(patch);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    await writeFailureDiagnostics({
+      issue,
+      model,
+      thinkingMode,
+      estimatedInputTokens,
+      maxOutputTokens,
+      estimatedMaxCost,
+      data,
+      reason,
+      diagnostics: { stage: "extract-or-validate-patch" },
+    });
+    throw error;
+  }
 
-  await fs.mkdir(OUT_DIR, { recursive: true });
   await fs.writeFile(OUT_PATCH, patch, "utf8");
 
-  runGit(["apply", "--check", "--whitespace=nowarn", OUT_PATCH]);
-  runGit(["apply", "--whitespace=nowarn", OUT_PATCH]);
+  const applyCheck = runGitDetailed(["apply", "--check", "--whitespace=nowarn", OUT_PATCH]);
+  await fs.writeFile(OUT_APPLY_CHECK, JSON.stringify(applyCheck, null, 2), "utf8");
+  if (!gitSucceeded(applyCheck)) {
+    const reason = `git apply --check failed with status ${applyCheck.status ?? "unknown"}.`;
+    await writeFailureDiagnostics({
+      issue,
+      model,
+      thinkingMode,
+      estimatedInputTokens,
+      maxOutputTokens,
+      estimatedMaxCost,
+      data,
+      reason,
+      diagnostics: { stage: "git-apply-check", applyCheck },
+    });
+    throw new Error(reason);
+  }
+
+  const applyResult = runGitDetailed(["apply", "--whitespace=nowarn", OUT_PATCH]);
+  await fs.writeFile(OUT_APPLY_RESULT, JSON.stringify(applyResult, null, 2), "utf8");
+  if (!gitSucceeded(applyResult)) {
+    const reason = `git apply failed with status ${applyResult.status ?? "unknown"}.`;
+    await writeFailureDiagnostics({
+      issue,
+      model,
+      thinkingMode,
+      estimatedInputTokens,
+      maxOutputTokens,
+      estimatedMaxCost,
+      data,
+      reason,
+      diagnostics: { stage: "git-apply", applyResult },
+    });
+    throw new Error(reason);
+  }
 
   let changedFiles = "";
   try { changedFiles = runGit(["diff", "--name-only"]); } catch {}
-  if (!changedFiles.trim()) throw new Error("Patch applied but produced no working tree changes.");
+  if (!changedFiles.trim()) {
+    const reason = "Patch applied but produced no working tree changes.";
+    await writeFailureDiagnostics({
+      issue,
+      model,
+      thinkingMode,
+      estimatedInputTokens,
+      maxOutputTokens,
+      estimatedMaxCost,
+      data,
+      reason,
+      diagnostics: { stage: "empty-working-tree" },
+    });
+    throw new Error(reason);
+  }
 
   const meta = {
     status: "succeeded",
