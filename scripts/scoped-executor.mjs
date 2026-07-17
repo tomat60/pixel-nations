@@ -200,6 +200,44 @@ function extractText(data) {
     .trim();
 }
 
+function summarizeAnthropicResponse(data) {
+  const content = Array.isArray(data?.content) ? data.content : [];
+  return {
+    responseId: typeof data?.id === "string" ? data.id : null,
+    model: typeof data?.model === "string" ? data.model : null,
+    stopReason: typeof data?.stop_reason === "string" ? data.stop_reason : null,
+    stopSequence: typeof data?.stop_sequence === "string" ? data.stop_sequence : null,
+    usage: data?.usage ?? null,
+    contentBlockTypes: content.map((part) => typeof part?.type === "string" ? part.type : "unknown"),
+    contentBlockCount: content.length,
+  };
+}
+
+async function writeFailureDiagnostics({ issue, model, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, data, reason }) {
+  const response = summarizeAnthropicResponse(data);
+  const meta = {
+    status: "failed",
+    failureReason: reason,
+    issueNumber: issue.number,
+    requestedModel: model,
+    estimatedInputTokens,
+    maxOutputTokens,
+    estimatedMaxCostUsd: Number(estimatedMaxCost.toFixed(6)),
+    anthropicResponse: response,
+    createdAt: new Date().toISOString(),
+  };
+
+  await fs.mkdir(OUT_DIR, { recursive: true });
+  await fs.writeFile(OUT_META, JSON.stringify(meta, null, 2), "utf8");
+  await fs.writeFile(
+    OUT_REPORT,
+    `# Scoped Executor Failure Report\n\nIssue: #${issue.number}\n\nRequested model: ${model}\n\nFailure: ${reason}\n\nStop reason: ${response.stopReason ?? "unknown"}\n\nContent block types: ${response.contentBlockTypes.length ? response.contentBlockTypes.join(", ") : "none"}\n\nResponse ID: ${response.responseId ?? "unknown"}\n\nUsage: ${JSON.stringify(response.usage)}\n`,
+    "utf8",
+  );
+  console.error("Anthropic response summary:", JSON.stringify(response));
+  return response;
+}
+
 function runGit(args) {
   return execFileSync("git", args, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
 }
@@ -222,7 +260,12 @@ async function main() {
 
   const data = await callAnthropic({ apiKey, model, prompt, maxOutputTokens });
   const outputText = extractText(data);
-  if (!outputText) throw new Error("Anthropic returned no text content.");
+  if (!outputText) {
+    const response = summarizeAnthropicResponse(data);
+    const reason = `Anthropic returned no text content (stop_reason=${response.stopReason ?? "unknown"}; content_types=${response.contentBlockTypes.join(",") || "none"}).`;
+    await writeFailureDiagnostics({ issue, model, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, data, reason });
+    throw new Error(reason);
+  }
 
   const patch = extractPatch(outputText);
   const paths = validatePatch(patch);
@@ -238,12 +281,14 @@ async function main() {
   if (!changedFiles.trim()) throw new Error("Patch applied but produced no working tree changes.");
 
   const meta = {
+    status: "succeeded",
     issueNumber: issue.number,
     model,
     estimatedInputTokens,
     maxOutputTokens,
     estimatedMaxCostUsd: Number(estimatedMaxCost.toFixed(6)),
     usage: data.usage ?? null,
+    anthropicResponse: summarizeAnthropicResponse(data),
     patchPaths: paths,
     changedFiles: changedFiles.trim().split("\n"),
     createdAt: new Date().toISOString(),
