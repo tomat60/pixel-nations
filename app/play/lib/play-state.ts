@@ -73,6 +73,7 @@ export type PlayState = {
   empireCrisisRecoveryId: EmpireCrisisRecoveryId | null;
   postCrisisCountermoveOrigin: PostCrisisCountermoveOrigin | null;
   postCrisisResponseId: PostCrisisResponseId | null;
+  postCrisisFrontierPayoffSecured: boolean;
   foundingCeremonySeen: boolean;
   season: number;
   view: ViewId;
@@ -102,6 +103,7 @@ export type PlayAction =
   | { type: "resolveEmpireCrisis"; recoveryId: EmpireCrisisRecoveryId }
   | { type: "beginPostCrisisCountermove" }
   | { type: "resolvePostCrisisResponse"; responseId: PostCrisisResponseId }
+  | { type: "securePostCrisisFrontierPayoff" }
   | { type: "hydrate"; state: PlayState }
   | { type: "runOrder"; orderId: OrderId }
   | { type: "setView"; view: ViewId }
@@ -237,6 +239,7 @@ export const initialPlayState: PlayState = {
   empireCrisisRecoveryId: null,
   postCrisisCountermoveOrigin: null,
   postCrisisResponseId: null,
+  postCrisisFrontierPayoffSecured: false,
   foundingCeremonySeen: false,
   season: 1,
   view: "map",
@@ -290,6 +293,26 @@ export function getFounderRecordOutcomeLabel(state: PlayState) { const outcome =
 export function getPostCrisisCountermoveOrigin(state: PlayState) { return state.postCrisisCountermoveOrigin; }
 export function getPostCrisisResponseDecision(state: PlayState) { return getPostCrisisResponse(state.postCrisisCountermoveOrigin, state.postCrisisResponseId); }
 export function getPostCrisisCountermoveReady(state: PlayState) { return Boolean(state.postCrisisCountermoveOrigin && !state.postCrisisResponseId); }
+
+export type PostCrisisFrontierPayoffTarget = { id: "fortified-frontier" | "legitimacy-trade"; label: string; short: string };
+
+export function getPostCrisisFrontierPayoffTarget(state: PlayState): PostCrisisFrontierPayoffTarget | null {
+  const response = getPostCrisisResponseDecision(state);
+  if (!response) return null;
+  if (response.id === "hold-north-ridge" || response.id === "revoke-passage-right") {
+    return {
+      id: "fortified-frontier",
+      label: "Fortified Frontier Payoff",
+      short: "A permanent frontier garrison becomes the visible reward for holding the line.",
+    };
+  }
+  return {
+    id: "legitimacy-trade",
+    label: "Legitimacy & Trade Payoff",
+    short: "Bargained legitimacy becomes an open trade concession the council can point to.",
+  };
+}
+
 export function getRivalPressure(state: PlayState) { const base = state.season >= 8 ? 28 : state.season >= 5 ? 18 : 8; const scoutRelief = state.completedOrders.includes("scout-nearby") ? 4 : 0; const defenseRelief = state.completedOrders.includes("fortify-watch") ? 8 : 0; const nationRelief = state.nationDecisionId === "border-guard" ? 8 : 0; const retentionRelief = state.retentionRecords.some((record) => record.worldMarker === "fortified-road") ? 4 : 0; const objectiveRelief = getFrontierObjectiveSecured(state) ? 3 : 0; const empireRelief = state.empireDeclarationId ? 4 : 0; const courtRelief = state.courtCaseDecisionId === "enforce-charter-law" ? 4 : 0; const rivalChallenge = state.courtCaseDecisionId ? 16 : 0; const rivalDecision = getRivalResponseDecision(state); const escalationDecision = getConflictEscalationDecision(state); const strategicOutcome = getStrategicOutcome(state); const crisisRecovery = getEmpireCrisisRecovery(state); const postCrisisResponse = getPostCrisisResponseDecision(state); return Math.max(0, base + rivalChallenge + (rivalDecision?.pressureDelta ?? 0) + (escalationDecision?.pressureDelta ?? 0) + (strategicOutcome?.pressureDelta ?? 0) + (crisisRecovery?.pressureDelta ?? 0) + (postCrisisResponse?.pressureDelta ?? 0) + getImperialTurnPressureDelta(state.imperialTurnActionIds) - scoutRelief - defenseRelief - nationRelief - retentionRelief - objectiveRelief - empireRelief - courtRelief); }
 export function getWorldClaimedCount(state: PlayState) { return getOwnedSectorIds(state).length; }
 
@@ -297,7 +320,7 @@ function evaluateEmpireCrisisReason(state: PlayState): EmpireCrisisReason | null
 function hasOrder(state: PlayState, orderId: OrderId) { return state.completedOrders.includes(orderId); }
 function pushChronicle(state: PlayState, title: string, body: string): ChronicleEntry[] { return [{ season: state.season + 1, title, body }, ...state.chronicle].slice(0, 10); }
 function addMarker(markers: SettlementMarker[], marker: SettlementMarker): SettlementMarker[] { return markers.includes(marker) ? markers : [...markers, marker]; }
-function resetEmpireCrisis(state: PlayState) { return { ...state, empireCrisisReason: null, empireCrisisRecoveryId: null, postCrisisCountermoveOrigin: null, postCrisisResponseId: null }; }
+function resetEmpireCrisis(state: PlayState) { return { ...state, empireCrisisReason: null, empireCrisisRecoveryId: null, postCrisisCountermoveOrigin: null, postCrisisResponseId: null, postCrisisFrontierPayoffSecured: false }; }
 
 function orderResult(state: PlayState, orderId: OrderId): Partial<PlayState> | null {
   if (state.ownedPlotIds.length === 0 || hasOrder(state, orderId)) return null;
@@ -330,7 +353,7 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
     case "hydrate": {
       const postCrisisOrigin = getPostCrisisCountermoveOriginDefinition(action.state.postCrisisCountermoveOrigin ?? null);
       const postCrisisResponse = getPostCrisisResponse(postCrisisOrigin, action.state.postCrisisResponseId ?? null);
-      return { ...initialPlayState, ...action.state, resources: { ...initialPlayState.resources, ...action.state.resources }, retentionRecords: action.state.retentionRecords ?? [], frontierIntentId: action.state.frontierIntentId ?? null, empireDeclarationId: action.state.empireDeclarationId ?? null, courtCaseDecisionId: action.state.courtCaseDecisionId ?? null, rivalResponseDecisionId: action.state.rivalResponseDecisionId ?? null, conflictEscalationDecisionId: action.state.conflictEscalationDecisionId ?? null, standoffDecisionId: action.state.standoffDecisionId ?? null, imperialTurnActionIds: action.state.imperialTurnActionIds ?? [], empireCrisisReason: action.state.empireCrisisReason ?? null, empireCrisisRecoveryId: action.state.empireCrisisRecoveryId ?? null, postCrisisCountermoveOrigin: postCrisisOrigin, postCrisisResponseId: postCrisisResponse?.id ?? null };
+      return { ...initialPlayState, ...action.state, resources: { ...initialPlayState.resources, ...action.state.resources }, retentionRecords: action.state.retentionRecords ?? [], frontierIntentId: action.state.frontierIntentId ?? null, empireDeclarationId: action.state.empireDeclarationId ?? null, courtCaseDecisionId: action.state.courtCaseDecisionId ?? null, rivalResponseDecisionId: action.state.rivalResponseDecisionId ?? null, conflictEscalationDecisionId: action.state.conflictEscalationDecisionId ?? null, standoffDecisionId: action.state.standoffDecisionId ?? null, imperialTurnActionIds: action.state.imperialTurnActionIds ?? [], empireCrisisReason: action.state.empireCrisisReason ?? null, empireCrisisRecoveryId: action.state.empireCrisisRecoveryId ?? null, postCrisisCountermoveOrigin: postCrisisOrigin, postCrisisResponseId: postCrisisResponse?.id ?? null, postCrisisFrontierPayoffSecured: Boolean(action.state.postCrisisFrontierPayoffSecured) };
     }
     case "select": return { ...state, selectedPlotId: action.plotId, view: state.view === "village" ? "map" : state.view };
     case "setView": return { ...state, view: action.view };
@@ -440,6 +463,12 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       const response = getPostCrisisResponse(state.postCrisisCountermoveOrigin, action.responseId);
       if (!response) return { ...state, view: "council", lastEvent: "That response does not belong to the current counter-move." };
       return { ...state, postCrisisResponseId: response.id, resources: { ...state.resources, influence: Math.max(0, state.resources.influence + response.influenceDelta) }, view: "council", chronicle: pushChronicle(state, "Post-crisis counter-move", `${response.label}: ${response.effect}`), lastEvent: `Post-crisis response: ${response.label}.` };
+    }
+    case "securePostCrisisFrontierPayoff": {
+      const target = getPostCrisisFrontierPayoffTarget(state);
+      if (!target) return { ...state, view: "council", lastEvent: "No frontier payoff is available yet." };
+      if (state.postCrisisFrontierPayoffSecured) return state;
+      return { ...state, postCrisisFrontierPayoffSecured: true, resources: { ...state.resources, influence: state.resources.influence + 1 }, view: "council", chronicle: pushChronicle(state, "Frontier payoff secured", `${target.label}: ${target.short}`), lastEvent: `Frontier payoff secured: ${target.label}.` };
     }
     case "runOrder": { const result = orderResult(state, action.orderId); if (!result) return { ...state, lastEvent: "That order is already resolved or needs a claimed land." }; return { ...state, ...result, season: Math.min(12, state.season + 1), completedOrders: [...state.completedOrders, action.orderId], view: "village" }; }
     case "reset": return initialPlayState;
