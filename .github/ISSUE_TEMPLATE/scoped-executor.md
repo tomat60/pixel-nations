@@ -17,7 +17,7 @@ assignees: []
 ## Model / tool choice
 
 - Executor: Pixel Nations Scoped Executor GitHub Action
-- Model: `claude-sonnet-4-20250514` through Anthropic API
+- Model: `claude-sonnet-5` through Anthropic API
 - MAX: off / bounded by workflow caps
 - Cost risk: bounded by workflow cap
 
