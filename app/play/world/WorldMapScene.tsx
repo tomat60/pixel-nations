@@ -19,6 +19,7 @@ import {
   getNationReady,
   getObsidianPressureState,
   getOwnedSectorIds,
+  getPostCrisisFrontierPayoffTarget,
   getRivalPressure,
   getRivalResponse,
   getRivalResponseDecision,
@@ -87,6 +88,8 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
   const obsidianPressure = getObsidianPressureState(state);
   const pressure = getRivalPressure(state);
   const selectedExpansion = canClaimSector(state, selected.id);
+  const postCrisisFrontierPayoffTarget = getPostCrisisFrontierPayoffTarget(state);
+  const postCrisisFrontierPayoffSecured = state.postCrisisFrontierPayoffSecured;
   const selectedControl = getSectorControl(selected.id, ownedSectorIds, claimableSectorIds);
   const nextGoal = latestImperialAction
     ? latestImperialAction.label
@@ -181,6 +184,15 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
           )}
 
           {obsidianPressure !== "none" ? <p data-qa="map-obsidian-pressure" data-obsidian-pressure={obsidianPressure} data-standoff-decision={state.standoffDecisionId ?? "none"} className="mt-2 rounded-2xl border border-red-200/45 bg-red-500/16 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-red-100">◆ Obsidian pressure · {obsidianPressure === "active" ? "active at North Ridge" : "contained at North Ridge"}</p> : null}
+          {postCrisisFrontierPayoffTarget ? (
+            <p
+              data-qa="world-post-crisis-payoff"
+              data-frontier-payoff-origin={postCrisisFrontierPayoffTarget.id}
+              className={`mt-2 rounded-2xl border px-3 py-2 text-xs font-black uppercase tracking-[0.16em] ${postCrisisFrontierPayoffSecured ? "border-emerald-200/45 bg-emerald-300/16 text-emerald-100" : "border-emerald-100/30 bg-emerald-300/8 text-emerald-100"}`}
+            >
+              {postCrisisFrontierPayoffSecured ? "✓ Frontier payoff secured" : "◇ Frontier payoff available"} · {postCrisisFrontierPayoffTarget.label}
+            </p>
+          ) : null}
           {standoffDecision ? <p data-qa="world-standoff-outcome" data-standoff-decision={standoffDecision.id} className="mt-2 rounded-2xl border border-red-100/45 bg-red-400/14 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-red-50">⚔ Strategic outcome · {standoffDecision.label}</p> : standoff ? <p data-qa="world-standoff-ready" data-standoff={standoff.id} className="mt-2 rounded-2xl border border-red-100/30 bg-red-400/8 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-red-50">⚔ Standoff pending · {standoff.title}</p> : null}
           {institutionCount > 0 ? <p data-qa="world-institution-indicator" data-institution-count={institutionCount} className="mt-2 rounded-2xl border border-purple-200/35 bg-purple-300/12 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-purple-100">City institutions visible · {institutionCount}/3 district signals</p> : null}
         </div>

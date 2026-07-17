@@ -18,6 +18,7 @@ import {
   getImperialTurnComplete,
   getNationDecision,
   getPostCrisisCountermoveReady,
+  getPostCrisisFrontierPayoffTarget,
   getPostCrisisResponseDecision,
   getSelectedPlot,
   initialPlayState,
@@ -42,6 +43,8 @@ export default function PlayPrototypePage() {
   const postCrisisStarted = Boolean(state.postCrisisCountermoveOrigin);
   const postCrisisReady = getPostCrisisCountermoveReady(state);
   const postCrisisResponse = getPostCrisisResponseDecision(state);
+  const postCrisisFrontierPayoffTarget = useMemo(() => getPostCrisisFrontierPayoffTarget(state), [state]);
+  const postCrisisFrontierPayoffSecured = state.postCrisisFrontierPayoffSecured;
   const demoComplete = founderRecordReady && !postCrisisStarted;
   const showFounderRecord = founderRecordReopened || (demoComplete && !demoOverlayDismissed);
   const showOpeningGuide = hydrated && state.view === "map" && state.ownedPlotIds.length === 0;
@@ -123,6 +126,31 @@ export default function PlayPrototypePage() {
               <p className="text-[9px] font-black uppercase tracking-[0.18em] text-sky-100/60">World consequence</p>
               <p className="mt-1 text-lg font-black text-amber-50">{postCrisisResponse.label}</p>
               <p className="mt-2 text-xs leading-relaxed text-amber-50/65">{postCrisisResponse.worldEffect}</p>
+            </section>
+          ) : null}
+          {hydrated && state.view === "council" && postCrisisFrontierPayoffTarget ? (
+            <section
+              data-qa="post-crisis-frontier-target"
+              data-frontier-payoff-origin={postCrisisFrontierPayoffTarget.id}
+              className="absolute bottom-20 left-3 right-3 z-30 rounded-3xl border border-emerald-200/25 bg-slate-950/88 p-4 shadow-2xl backdrop-blur-md md:left-auto md:right-5 md:w-[420px]"
+            >
+              <p className="text-[9px] font-black uppercase tracking-[0.18em] text-emerald-100/60">Frontier payoff</p>
+              <p className="mt-1 text-lg font-black text-amber-50">{postCrisisFrontierPayoffTarget.label}</p>
+              <p className="mt-2 text-xs leading-relaxed text-amber-50/65">{postCrisisFrontierPayoffTarget.short}</p>
+              {postCrisisFrontierPayoffSecured ? (
+                <p data-qa="post-crisis-frontier-secured" className="mt-3 rounded-2xl border border-emerald-200/35 bg-emerald-300/12 px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] text-emerald-100">
+                  Secured
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  data-qa="secure-post-crisis-frontier"
+                  onClick={() => dispatch({ type: "securePostCrisisFrontierPayoff" })}
+                  className="mt-3 w-full rounded-2xl bg-emerald-200 px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-black/30 transition hover:bg-emerald-100"
+                >
+                  Secure frontier payoff
+                </button>
+              )}
             </section>
           ) : null}
           {hydrated && state.view === "council" && showFounderRecord ? <DemoCompleteOverlay state={state} onContinue={continueFounderRecord} onRestart={restartRun} /> : null}
