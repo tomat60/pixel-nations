@@ -26,6 +26,10 @@ const CANDIDATE_FILES = [
   ".github/workflows/play-visual-qa.yml",
 ];
 
+const FILE_CONTEXT_LIMITS = new Map([
+  ["app/play/lib/play-state.ts", 120000],
+]);
+
 const FORBIDDEN_PATH_FRAGMENTS = [
   ".env",
   "secret",
@@ -167,7 +171,10 @@ async function readIssueContext() {
 
 async function buildPrompt(issue) {
   const chunks = [];
-  for (const file of CANDIDATE_FILES) chunks.push(await readFileForPrompt(file));
+  for (const file of CANDIDATE_FILES) {
+    const maxChars = FILE_CONTEXT_LIMITS.get(file) ?? 45000;
+    chunks.push(await readFileForPrompt(file, maxChars));
+  }
   const repoContext = chunks.join("\n");
   return `You are a careful coding agent for Pixel Nations. Produce one minimal unified git diff only.\n\n` +
     `MISSION\n${issue.title}\n\n${issue.body}\n\n` +
