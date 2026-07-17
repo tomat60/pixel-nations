@@ -49,6 +49,14 @@ function env(name, fallback) {
   return value === undefined || value === "" ? fallback : value;
 }
 
+function enumEnv(name, fallback, allowed) {
+  const value = env(name, fallback);
+  if (!allowed.includes(value)) {
+    throw new Error(`Invalid env var ${name}: ${value}. Allowed: ${allowed.join(", ")}`);
+  }
+  return value;
+}
+
 function intEnv(name, fallback) {
   const raw = env(name, String(fallback));
   const parsed = Number.parseInt(raw, 10);
@@ -171,7 +179,7 @@ async function buildPrompt(issue) {
     `REPOSITORY CONTEXT\n${repoContext}`;
 }
 
-async function callAnthropic({ apiKey, model, prompt, maxOutputTokens }) {
+async function callAnthropic({ apiKey, model, prompt, maxOutputTokens, thinkingMode }) {
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -182,6 +190,7 @@ async function callAnthropic({ apiKey, model, prompt, maxOutputTokens }) {
     body: JSON.stringify({
       model,
       max_tokens: maxOutputTokens,
+      thinking: { type: thinkingMode },
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -213,13 +222,14 @@ function summarizeAnthropicResponse(data) {
   };
 }
 
-async function writeFailureDiagnostics({ issue, model, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, data, reason }) {
+async function writeFailureDiagnostics({ issue, model, thinkingMode, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, data, reason }) {
   const response = summarizeAnthropicResponse(data);
   const meta = {
     status: "failed",
     failureReason: reason,
     issueNumber: issue.number,
     requestedModel: model,
+    requestedThinkingMode: thinkingMode,
     estimatedInputTokens,
     maxOutputTokens,
     estimatedMaxCostUsd: Number(estimatedMaxCost.toFixed(6)),
@@ -231,7 +241,7 @@ async function writeFailureDiagnostics({ issue, model, estimatedInputTokens, max
   await fs.writeFile(OUT_META, JSON.stringify(meta, null, 2), "utf8");
   await fs.writeFile(
     OUT_REPORT,
-    `# Scoped Executor Failure Report\n\nIssue: #${issue.number}\n\nRequested model: ${model}\n\nFailure: ${reason}\n\nStop reason: ${response.stopReason ?? "unknown"}\n\nContent block types: ${response.contentBlockTypes.length ? response.contentBlockTypes.join(", ") : "none"}\n\nResponse ID: ${response.responseId ?? "unknown"}\n\nUsage: ${JSON.stringify(response.usage)}\n`,
+    `# Scoped Executor Failure Report\n\nIssue: #${issue.number}\n\nRequested model: ${model}\n\nRequested thinking mode: ${thinkingMode}\n\nFailure: ${reason}\n\nStop reason: ${response.stopReason ?? "unknown"}\n\nContent block types: ${response.contentBlockTypes.length ? response.contentBlockTypes.join(", ") : "none"}\n\nResponse ID: ${response.responseId ?? "unknown"}\n\nUsage: ${JSON.stringify(response.usage)}\n`,
     "utf8",
   );
   console.error("Anthropic response summary:", JSON.stringify(response));
@@ -245,11 +255,12 @@ function runGit(args) {
 async function main() {
   const issue = await readIssueContext();
   const model = env("ANTHROPIC_MODEL", "claude-sonnet-5");
-  const maxOutputTokens = intEnv("MAX_OUTPUT_TOKENS", 14000);
-  const maxInputTokens = intEnv("MAX_INPUT_TOKENS", 120000);
+  const thinkingMode = enumEnv("ANTHROPIC_THINKING_MODE", "disabled", ["disabled"]);
+  const maxOutputTokens = intEnv("MAX_OUTPUT_TOKENS", 12000);
+  const maxInputTokens = intEnv("MAX_INPUT_TOKENS", 80000);
   const inputPrice = numberEnv("INPUT_PRICE_PER_MILLION_USD", 3);
   const outputPrice = numberEnv("OUTPUT_PRICE_PER_MILLION_USD", 15);
-  const maxEstimatedCost = numberEnv("MAX_ESTIMATED_COST_USD", 2.75);
+  const maxEstimatedCost = numberEnv("MAX_ESTIMATED_COST_USD", 2.0);
   const apiKey = requiredEnv("ANTHROPIC_API_KEY");
 
   const prompt = await buildPrompt(issue);
@@ -258,12 +269,12 @@ async function main() {
   if (estimatedInputTokens > maxInputTokens) throw new Error(`Input token estimate ${estimatedInputTokens} exceeds cap ${maxInputTokens}`);
   if (estimatedMaxCost > maxEstimatedCost) throw new Error(`Estimated max cost $${estimatedMaxCost.toFixed(4)} exceeds cap $${maxEstimatedCost.toFixed(4)}`);
 
-  const data = await callAnthropic({ apiKey, model, prompt, maxOutputTokens });
+  const data = await callAnthropic({ apiKey, model, prompt, maxOutputTokens, thinkingMode });
   const outputText = extractText(data);
   if (!outputText) {
     const response = summarizeAnthropicResponse(data);
     const reason = `Anthropic returned no text content (stop_reason=${response.stopReason ?? "unknown"}; content_types=${response.contentBlockTypes.join(",") || "none"}).`;
-    await writeFailureDiagnostics({ issue, model, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, data, reason });
+    await writeFailureDiagnostics({ issue, model, thinkingMode, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, data, reason });
     throw new Error(reason);
   }
 
@@ -284,6 +295,7 @@ async function main() {
     status: "succeeded",
     issueNumber: issue.number,
     model,
+    thinkingMode,
     estimatedInputTokens,
     maxOutputTokens,
     estimatedMaxCostUsd: Number(estimatedMaxCost.toFixed(6)),
@@ -294,7 +306,7 @@ async function main() {
     createdAt: new Date().toISOString(),
   };
   await fs.writeFile(OUT_META, JSON.stringify(meta, null, 2), "utf8");
-  await fs.writeFile(OUT_REPORT, `# Scoped Executor Report\n\nIssue: #${issue.number}\n\nModel: ${model}\n\nEstimated input tokens: ${estimatedInputTokens}\n\nMax output tokens: ${maxOutputTokens}\n\nEstimated max cost USD: ${estimatedMaxCost.toFixed(4)}\n\nPatch paths:\n${paths.map((p) => `- ${p}`).join("\n")}\n\nChanged files:\n${meta.changedFiles.map((p) => `- ${p}`).join("\n")}\n`, "utf8");
+  await fs.writeFile(OUT_REPORT, `# Scoped Executor Report\n\nIssue: #${issue.number}\n\nModel: ${model}\n\nThinking mode: ${thinkingMode}\n\nEstimated input tokens: ${estimatedInputTokens}\n\nMax output tokens: ${maxOutputTokens}\n\nEstimated max cost USD: ${estimatedMaxCost.toFixed(4)}\n\nPatch paths:\n${paths.map((p) => `- ${p}`).join("\n")}\n\nChanged files:\n${meta.changedFiles.map((p) => `- ${p}`).join("\n")}\n`, "utf8");
 
   console.log(`Scoped executor changed files:\n${changedFiles}`);
 }
