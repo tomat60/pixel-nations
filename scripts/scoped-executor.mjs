@@ -206,7 +206,7 @@ function runGit(args) {
 
 async function main() {
   const issue = await readIssueContext();
-  const model = env("ANTHROPIC_MODEL", "claude-sonnet-4-20250514");
+  const model = env("ANTHROPIC_MODEL", "claude-sonnet-5");
   const maxOutputTokens = intEnv("MAX_OUTPUT_TOKENS", 14000);
   const maxInputTokens = intEnv("MAX_INPUT_TOKENS", 120000);
   const inputPrice = numberEnv("INPUT_PRICE_PER_MILLION_USD", 3);
