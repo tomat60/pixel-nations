@@ -18,6 +18,29 @@ const villagePlots: VillagePlot[] = [
   { id: "road", label: "Village Road", hint: "paths bind districts together", x: 42, y: 67, w: 26, h: 9 },
 ];
 
+// Module-level deterministic visual-ownership policy (Fable #209).
+// Physical helpers (CampLife, ShelterCluster, StorehouseSupplies, MarketActivity,
+// CouncilPresence, WatchDefense, FoodFields, VillageRoads) are the sole owners of
+// built visuals. VillagePlotNode never renders a built icon and only shows a
+// compact micro-label for plots that need one once built.
+const villagePlotVisualPolicy: Record<VillagePlotId, { builtLabel: boolean }> = {
+  camp: { builtLabel: false },
+  shelter: { builtLabel: false },
+  storehouse: { builtLabel: true },
+  market: { builtLabel: true },
+  council: { builtLabel: true },
+  watch: { builtLabel: true },
+  fields: { builtLabel: true },
+  road: { builtLabel: false },
+};
+
+function getPlotVisualPresentation(plotId: VillagePlotId, qaState: PlotState) {
+  const policy = villagePlotVisualPolicy[plotId];
+  const showIcon = qaState !== "built";
+  const showBuiltLabel = qaState === "built" && policy.builtLabel;
+  return { showIcon, showBuiltLabel };
+}
+
 function getInstitutionVisuals(records: RetentionRecord[]): InstitutionVisual[] {
   return records.slice(0, 3).map((record) => {
     if (record.decisionId === "grain-levy") {
@@ -93,7 +116,7 @@ function VillagePlotNode({ plot, state }: { plot: VillagePlot; state: PlayState 
   const built = plot.marker ? state.settlementMarkers.includes(plot.marker) : plot.id === "fields" ? state.completedOrders.includes("gather-food") : state.completedOrders.includes("open-market");
   const building = !built && plot.marker ? plannedSoon(plot.marker, state) : false;
   const qaState: PlotState = built ? "built" : building ? "building" : "empty";
-  const physicalCampBuilt = plot.id === "camp" && qaState === "built";
+  const { showIcon, showBuiltLabel } = getPlotVisualPresentation(plot.id, qaState);
   return (
     <div
       data-qa="village-plot"
@@ -109,15 +132,15 @@ function VillagePlotNode({ plot, state }: { plot: VillagePlot; state: PlayState 
       style={{ left: `${plot.x}%`, top: `${plot.y}%`, width: `${plot.w}%`, height: `${plot.h}%` }}
     >
       <div className="relative h-full w-full">
-        {!physicalCampBuilt ? renderVillageIcon(plot.id, qaState) : null}
+        {showIcon ? renderVillageIcon(plot.id, qaState) : null}
         {qaState === "building" ? (
           <div className="absolute inset-x-0 bottom-0 rounded-md bg-black/28 px-1.5 py-0.5">
             <p className="truncate text-[9px] font-black text-amber-50/80">{plot.label} · planned</p>
           </div>
         ) : null}
-        {qaState === "built" && !physicalCampBuilt ? (
-          <div className="absolute inset-x-0 bottom-0 rounded-md bg-black/30 px-1.5 py-0.5">
-            <p className="truncate text-[10px] font-black text-amber-50">{plot.label}</p>
+        {showBuiltLabel ? (
+          <div className="absolute inset-x-0 bottom-0 z-[2] rounded-md bg-black/30 px-1.5 py-0.5">
+            <p className="truncate text-[9px] font-black text-amber-50/90">{plot.label}</p>
           </div>
         ) : null}
       </div>
