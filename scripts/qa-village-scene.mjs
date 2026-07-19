@@ -192,7 +192,11 @@ async function main() {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
 
     await page.locator('[data-qa="plot-greenvale"]').click({ timeout: 5000, force: true });
-    await clickVisibleButton(page, "Choose this land", "claim land");
+    const claimButton = page.locator('[data-qa="claim-button"]');
+    await claimButton.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+      throw new VillageQaError("claim land", "Claim button did not become visible");
+    });
+    await claimButton.click({ timeout: 5000 });
     await page.locator('[data-qa="village-scene"]').waitFor({ state: "visible", timeout: 5000 });
 
     result.before = await captureState(browser, page, "01-camp", [
