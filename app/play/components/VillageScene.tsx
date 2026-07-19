@@ -67,15 +67,9 @@ export function VillageScene({ state, dispatch }: { state: PlayState; dispatch: 
   const hasClaim = state.ownedPlotIds.length > 0;
 
   return (
-    <section data-qa="village-scene" className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_50%_42%,rgba(251,191,36,.20),transparent_34%),linear-gradient(180deg,#162015_0%,#07100d_100%)]">
-      <div className="absolute inset-0 opacity-70" aria-hidden="true">
-        <div className="absolute left-[6%] top-[13%] h-[28%] w-[28%] rounded-full bg-emerald-700/18 blur-3xl" />
-        <div className="absolute right-[8%] top-[14%] h-[22%] w-[24%] rounded-full bg-sky-500/12 blur-3xl" />
-        <div className="absolute bottom-[7%] left-[18%] h-[26%] w-[52%] rounded-full bg-amber-500/10 blur-3xl" />
-      </div>
-
-      <div className="absolute left-4 right-4 top-[5.7rem] z-10 md:left-6 md:right-6 md:top-[6.2rem]">
-        <div className="flex items-center justify-between gap-3 rounded-2xl border border-amber-100/18 bg-black/42 px-3 py-2 shadow-2xl backdrop-blur-md md:px-4 md:py-2.5">
+    <section data-qa="village-scene" className="absolute inset-0 overflow-hidden bg-[#0b120c]">
+      <div className="absolute left-3 right-3 top-[5.4rem] z-10 md:left-5 md:right-5 md:top-[5.9rem]">
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-100/14 bg-black/38 px-3 py-1.5 shadow-xl backdrop-blur-sm md:px-3.5 md:py-2">
           <div className="min-w-0">
             <p className="text-[8px] font-black uppercase tracking-[0.24em] text-amber-200/60">Village</p>
             <h2 className="truncate text-base font-black text-amber-50 md:text-xl">{owned?.name ?? "No homeland"}</h2>
@@ -88,8 +82,8 @@ export function VillageScene({ state, dispatch }: { state: PlayState; dispatch: 
         </div>
       </div>
 
-      <div className="absolute bottom-[8.8rem] left-3 right-3 top-[9.4rem] z-0 md:bottom-[9.3rem] md:left-6 md:right-6 md:top-[10.4rem] lg:bottom-[6.2rem]">
-        <div className="relative h-full w-full overflow-hidden rounded-[2rem] border border-amber-100/18 bg-[#263f25] shadow-[0_30px_90px_rgba(0,0,0,.45)]">
+      <div className="absolute bottom-[7.6rem] left-1.5 right-1.5 top-[8.4rem] z-0 md:bottom-[8.2rem] md:left-2.5 md:right-2.5 md:top-[9.3rem] lg:bottom-[5rem]">
+        <div className="relative h-full w-full overflow-hidden rounded-[1rem] border border-amber-100/10 shadow-[0_20px_60px_rgba(0,0,0,.4)]">
           <VillageGround />
           <VillageRoads state={state} />
           {hasClaim ? <SettlementCredibilityLayer state={state} /> : null}
@@ -124,22 +118,21 @@ function VillagePlotNode({ plot, state }: { plot: VillagePlot; state: PlayState 
       data-qa-state={qaState}
       className={`absolute transition-all duration-300 ${
         qaState === "built"
-          ? "rounded-[1.2rem]"
+          ? "pointer-events-none"
           : qaState === "building"
-            ? "rounded-[1.2rem] border border-dashed border-amber-200/30"
-            : "rounded-[1.2rem] opacity-15"
+            ? "rounded-[0.6rem] border border-dashed border-amber-200/35 pointer-events-none"
+            : "pointer-events-none opacity-0"
       }`}
       style={{ left: `${plot.x}%`, top: `${plot.y}%`, width: `${plot.w}%`, height: `${plot.h}%` }}
     >
       <div className="relative h-full w-full">
-        {showIcon ? renderVillageIcon(plot.id, qaState) : null}
         {qaState === "building" ? (
-          <div className="absolute inset-x-0 bottom-0 rounded-md bg-black/28 px-1.5 py-0.5">
-            <p className="truncate text-[9px] font-black text-amber-50/80">{plot.label} · planned</p>
+          <div className="absolute inset-x-0 bottom-0 rounded-md bg-black/24 px-1.5 py-0.5">
+            <p className="truncate text-[8px] font-black text-amber-50/75">{plot.label} · planned</p>
           </div>
         ) : null}
         {showBuiltLabel ? (
-          <div className="absolute inset-x-0 bottom-0 z-[2] rounded-md bg-black/30 px-1.5 py-0.5">
+          <div className="absolute inset-x-0 bottom-0 z-[2] rounded-md bg-black/24 px-1.5 py-0.5 opacity-0">
             <p className="truncate text-[9px] font-black text-amber-50/90">{plot.label}</p>
           </div>
         ) : null}
@@ -337,36 +330,147 @@ function plannedSoon(marker: SettlementMarker, state: PlayState) {
   return false;
 }
 
-function renderVillageIcon(id: VillagePlotId, state: PlotState) {
-  const opacity = state === "empty" ? "opacity-25" : state === "building" ? "opacity-60" : "opacity-100";
-  if (id === "camp") return <div className={`absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-400/80 shadow-[0_0_30px_rgba(251,146,60,.8)] ${opacity}`} />;
-  if (id === "shelter") return <div className={`absolute left-1/2 top-1/2 h-12 w-16 -translate-x-1/2 -translate-y-1/2 rounded-b-lg bg-stone-200/80 before:absolute before:-top-5 before:left-1 before:h-8 before:w-14 before:rotate-45 before:bg-amber-700/80 ${opacity}`} />;
-  if (id === "storehouse") return <div className={`absolute left-1/2 top-1/2 h-12 w-16 -translate-x-1/2 -translate-y-1/2 rounded-md bg-yellow-700/85 outline outline-4 outline-yellow-200/40 ${opacity}`} />;
-  if (id === "market") return <div className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 gap-1 ${opacity}`}><span className="h-10 w-4 rounded-t-full bg-sky-300/80" /><span className="h-10 w-4 rounded-t-full bg-amber-300/80" /><span className="h-10 w-4 rounded-t-full bg-emerald-300/80" /></div>;
-  if (id === "council") return <div className={`absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-xl border-4 border-amber-100/70 bg-amber-500/45 ${opacity}`} />;
-  if (id === "watch") return <div className={`absolute left-1/2 top-1/2 h-16 w-7 -translate-x-1/2 -translate-y-1/2 bg-amber-900/90 before:absolute before:-top-4 before:left-[-10px] before:h-5 before:w-12 before:bg-amber-200/75 ${opacity}`} />;
-  if (id === "fields") return <div className={`absolute inset-3 rounded-xl bg-[repeating-linear-gradient(90deg,rgba(251,191,36,.55)_0_8px,rgba(22,101,52,.45)_8px_16px)] ${opacity}`} />;
-  return <div className={`absolute left-0 right-0 top-1/2 h-3 -translate-y-1/2 rounded-full bg-amber-200/60 ${opacity}`} />;
-}
-
 function VillageGround() {
+  // Deterministic terrain built from a small set of reusable SVG shapes.
+  const forestClumps = [
+    [4, 6, 22], [10, 2, 16], [1, 18, 18], [6, 24, 14], [15, 10, 12], [2, 34, 12], [9, 40, 10],
+  ];
+  const rockyClumps = [
+    [86, 8, 9], [92, 15, 7], [80, 4, 8], [96, 24, 6],
+  ];
+  const clearingBlobs = [
+    [46, 46, 30, 22], [38, 58, 24, 18], [58, 40, 22, 16],
+  ];
+  const tufts = [
+    [24, 52], [30, 66], [50, 72], [64, 55], [70, 70], [34, 30], [56, 24], [20, 44], [66, 34], [44, 62], [28, 40], [72, 46],
+  ];
+  const stones = [
+    [78, 22], [72, 30], [66, 40], [58, 52], [48, 62], [36, 74],
+  ];
+
   return (
-    <div className="absolute inset-0">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_48%_50%,rgba(180,134,64,.42),transparent_36%),radial-gradient(circle_at_18%_74%,rgba(22,101,52,.50),transparent_26%),radial-gradient(circle_at_82%_26%,rgba(20,83,45,.55),transparent_24%)]" />
-      <div className="absolute left-[7%] top-[8%] h-[84%] w-[86%] rounded-[45%] border border-amber-100/10 bg-amber-950/12" />
-      <div className="absolute right-[4%] top-[12%] h-[34%] w-[8%] rounded-full bg-sky-300/20 blur-sm" />
-    </div>
+    <svg
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      className="absolute inset-0 h-full w-full"
+      aria-hidden="true"
+    >
+      {/* base clearing wash, warm upper-left light / lower-right shadow */}
+      <defs>
+        <radialGradient id="vg-light" cx="22%" cy="18%" r="85%">
+          <stop offset="0%" stopColor="#3c4a26" />
+          <stop offset="55%" stopColor="#2c3a1f" />
+          <stop offset="100%" stopColor="#131c10" />
+        </radialGradient>
+        <linearGradient id="vg-shadow" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#000000" stopOpacity="0" />
+          <stop offset="100%" stopColor="#000000" stopOpacity="0.32" />
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="100" height="100" fill="url(#vg-light)" />
+      <rect x="0" y="0" width="100" height="100" fill="url(#vg-shadow)" />
+
+      {/* warm ochre clearing around the settlement, irregular */}
+      {clearingBlobs.map(([cx, cy, rx, ry], i) => (
+        <ellipse key={`clear-${i}`} cx={cx} cy={cy} rx={rx} ry={ry} fill="#6a5a2c" opacity={0.34 - i * 0.05} />
+      ))}
+      <ellipse cx="48" cy="52" rx="34" ry="26" fill="#7a6a34" opacity="0.22" />
+
+      {/* dark forest mass running off upper-left edge */}
+      {forestClumps.map(([cx, cy, r], i) => (
+        <circle key={`forest-${i}`} cx={cx} cy={cy} r={r} fill="#0e1a0d" opacity={0.85} />
+      ))}
+      <path d="M0,0 L28,0 Q14,14 6,30 Q0,20 0,0 Z" fill="#0e1a0d" opacity="0.6" />
+
+      {/* rocky rise upper-right */}
+      {rockyClumps.map(([cx, cy, r], i) => (
+        <polygon
+          key={`rock-${i}`}
+          points={`${cx - r},${cy + r * 0.6} ${cx},${cy - r} ${cx + r},${cy + r * 0.5} ${cx + r * 0.3},${cy + r}`}
+          fill="#4b463f"
+          opacity="0.8"
+        />
+      ))}
+      <path d="M100,0 L100,26 Q90,14 78,6 Q88,0 100,0 Z" fill="#3a362f" opacity="0.55" />
+
+      {/* stream entering upper-right, exiting lower-left, with banks */}
+      <path
+        d="M92,14 C78,20 70,30 62,40 C52,52 42,58 26,66 C16,71 8,78 2,88"
+        fill="none"
+        stroke="#0e2530"
+        strokeWidth="6.4"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+      <path
+        d="M92,14 C78,20 70,30 62,40 C52,52 42,58 26,66 C16,71 8,78 2,88"
+        fill="none"
+        stroke="#4fa4c9"
+        strokeWidth="3.2"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+      <path
+        d="M92,14 C78,20 70,30 62,40 C52,52 42,58 26,66 C16,71 8,78 2,88"
+        fill="none"
+        stroke="#bfe7f5"
+        strokeWidth="0.9"
+        strokeLinecap="round"
+        opacity="0.4"
+      />
+      {stones.map(([x, y], i) => (
+        <ellipse key={`stone-${i}`} cx={x} cy={y} rx={1.6} ry={1.1} fill="#8a8375" opacity="0.7" />
+      ))}
+
+      {/* terrain tufts / patches to remove flat-green read */}
+      {tufts.map(([x, y], i) => (
+        <ellipse key={`tuft-${i}`} cx={x} cy={y} rx={2.4} ry={1.3} fill="#8ca24a" opacity="0.32" />
+      ))}
+    </svg>
   );
 }
 
 function VillageRoads({ state }: { state: PlayState }) {
   const activeRoad = state.completedOrders.includes("open-market") || state.settlementMarkers.includes("storehouse");
+  const hearth = { x: 47, y: 55 };
+  const nodes: Array<{ id: string; x: number; y: number; active: boolean }> = [
+    { id: "shelter", x: 27, y: 41, active: state.settlementMarkers.includes("shelter") },
+    { id: "fields", x: 22, y: 66, active: state.completedOrders.includes("gather-food") },
+    { id: "storehouse", x: 68, y: 40, active: state.settlementMarkers.includes("storehouse") },
+    { id: "market", x: 74, y: 66, active: state.settlementMarkers.includes("market") },
+    { id: "council", x: 50, y: 29, active: state.settlementMarkers.includes("council") },
+    { id: "watch", x: 84, y: 24, active: state.settlementMarkers.includes("watch") },
+  ];
+
+  function pathFor(node: { x: number; y: number }) {
+    const midX = (hearth.x + node.x) / 2 + (node.x > hearth.x ? -3 : 3);
+    const midY = (hearth.y + node.y) / 2 + (node.y > hearth.y ? -2 : 2);
+    return `M${hearth.x},${hearth.y} Q${midX},${midY} ${node.x},${node.y}`;
+  }
+
   return (
-    <div className="absolute inset-0 opacity-75">
-      <div className={`absolute left-[27%] top-[55%] h-[4%] w-[52%] -rotate-6 rounded-full ${activeRoad ? "bg-amber-200/42 shadow-[0_0_20px_rgba(251,191,36,.18)]" : "bg-amber-200/24"}`} />
-      <div className={`absolute left-[47%] top-[28%] h-[45%] w-[4%] rotate-3 rounded-full ${state.settlementMarkers.includes("council") ? "bg-amber-200/34" : "bg-amber-200/20"}`} />
-      <div className={`absolute left-[34%] top-[44%] h-[3%] w-[36%] rotate-[24deg] rounded-full ${state.settlementMarkers.includes("shelter") ? "bg-amber-200/30" : "bg-amber-200/16"}`} />
-    </div>
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden="true">
+      {/* main road entering from bottom, converging at hearth */}
+      <path
+        d={`M40,100 Q44,80 ${hearth.x},${hearth.y}`}
+        fill="none"
+        stroke="#d8b46a"
+        strokeWidth={activeRoad ? 3.4 : 2.2}
+        strokeLinecap="round"
+        opacity={activeRoad ? 0.55 : 0.3}
+      />
+      {nodes.map((node) => (
+        <path
+          key={node.id}
+          d={pathFor(node)}
+          fill="none"
+          stroke="#d8b46a"
+          strokeWidth={node.active ? 2.2 : 1.1}
+          strokeLinecap="round"
+          opacity={node.active ? 0.48 : 0.18}
+        />
+      ))}
+    </svg>
   );
 }
 
