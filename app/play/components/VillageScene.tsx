@@ -226,8 +226,8 @@ function SettlementBuilding({
   windows = 1,
 }: {
   variant: BuildingVariant;
-  width: number;
-  height: number;
+  width: number | string;
+  height: number | string;
   rotation?: number;
   chimney?: boolean;
   smoke?: boolean;
@@ -282,11 +282,11 @@ function SettlementBuilding({
 }
 
 function ShelterCluster() {
-  const huts: Array<{ left: number; top: number; rotation: number; w: number; h: number; smoke: boolean; back?: boolean }> = [
-    { left: 20, top: 36, rotation: -8, w: 46, h: 38, smoke: true },
-    { left: 30, top: 34, rotation: 6, w: 40, h: 34, smoke: true, back: true },
-    { left: 34, top: 43, rotation: 11, w: 48, h: 40, smoke: false },
-    { left: 17, top: 46, rotation: 3, w: 42, h: 35, smoke: false },
+  const huts: Array<{ left: number; top: number; rotation: number; w: string; h: string; smoke: boolean; back?: boolean }> = [
+    { left: 24, top: 36, rotation: -8, w: "clamp(58px, 8.4vw, 88px)", h: "clamp(48px, 6.8vw, 72px)", smoke: true },
+    { left: 32, top: 34, rotation: 6, w: "clamp(52px, 7.6vw, 80px)", h: "clamp(44px, 6.2vw, 66px)", smoke: true, back: true },
+    { left: 34, top: 45, rotation: 11, w: "clamp(60px, 8.8vw, 94px)", h: "clamp(50px, 7.2vw, 78px)", smoke: false },
+    { left: 22, top: 47, rotation: 3, w: "clamp(56px, 8vw, 84px)", h: "clamp(46px, 6.4vw, 70px)", smoke: false },
   ];
   return (
     <div data-qa="village-structure-hut" className="absolute inset-0">
@@ -340,8 +340,8 @@ function TimberAndFences() {
 
 function StorehouseSupplies() {
   return (
-    <div data-qa="village-storehouse-visual" className="absolute left-[60%] top-[32%] h-[4.4rem] w-[6.5rem]">
-      <SettlementBuilding variant="storehouse" width={104} height={68} windows={2} />
+    <div data-qa="village-storehouse-visual" className="absolute left-[60%] top-[32%]" style={{ width: "clamp(96px, 11vw, 132px)", height: "clamp(72px, 8.2vw, 100px)" }}>
+      <SettlementBuilding variant="storehouse" width="100%" height="100%" windows={2} />
       {/* wide door already rendered by shared glyph; add crates, sacks and stacked logs beside it */}
       <div className="absolute -right-3 bottom-1 flex gap-1">
         <span className="h-3.5 w-3.5 rounded-sm bg-amber-200/85 shadow-md" />
@@ -366,7 +366,7 @@ function MarketActivity() {
     <div data-qa="village-market-activity" className="absolute inset-0">
       {stalls.map((stall) => (
         <div key={`${stall.left}-${stall.top}`} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${stall.left}%`, top: `${stall.top}%` }}>
-          <svg viewBox="0 0 34 30" width="30" height="26" style={{ overflow: "visible" }} aria-hidden="true">
+          <svg viewBox="0 0 34 30" width="clamp(36px, 4.2vw, 52px)" height="clamp(30px, 3.6vw, 44px)" style={{ overflow: "visible" }} aria-hidden="true">
             <ellipse cx="18" cy="27" rx="13" ry="2.4" fill="#000" opacity="0.28" />
             {/* posts */}
             <rect x="6" y="10" width="1.8" height="16" fill="#3a2a18" />
@@ -384,7 +384,7 @@ function MarketActivity() {
       ))}
       {/* compact cart with two wheels and a few crates/barrels along the existing road */}
       <div className="absolute left-[70%] top-[73%] -translate-x-1/2 -translate-y-1/2">
-        <svg viewBox="0 0 40 22" width="34" height="18" style={{ overflow: "visible" }} aria-hidden="true">
+        <svg viewBox="0 0 40 22" width="clamp(34px, 3.6vw, 44px)" height="clamp(18px, 2vw, 24px)" style={{ overflow: "visible" }} aria-hidden="true">
           <ellipse cx="20" cy="20" rx="15" ry="1.8" fill="#000" opacity="0.25" />
           <rect x="6" y="7" width="24" height="7" rx="0.8" fill="#5a4028" />
           <rect x="8" y="3" width="5" height="4" fill="#c9a24a" />
@@ -399,8 +399,8 @@ function MarketActivity() {
 
 function CouncilPresence() {
   return (
-    <div data-qa="village-council-visual" className="absolute left-[40%] top-[19%] h-[5.6rem] w-[7.6rem]">
-      <SettlementBuilding variant="hall" width={122} height={90} windows={2} chimney smoke />
+    <div data-qa="village-council-visual" className="absolute left-[40%] top-[19%]" style={{ width: "clamp(128px, 14.8vw, 170px)", height: "clamp(96px, 11.2vw, 128px)" }}>
+      <SettlementBuilding variant="hall" width="100%" height="100%" windows={2} chimney smoke />
       {/* banner pole, taller than storehouse/huts, dominant landmark */}
       <div className="absolute left-1/2 top-[-1.4rem] h-6 w-[3px] -translate-x-1/2 bg-amber-100/80" />
       <div className="absolute left-[calc(50%+1px)] top-[-1.4rem] h-3.5 w-5 rounded-r-sm bg-emerald-300/85 shadow-md" />
@@ -410,8 +410,8 @@ function CouncilPresence() {
 
 function WatchDefense() {
   return (
-    <div data-qa="village-watch-visual" className="absolute left-[78%] top-[15%] h-[5.6rem] w-[3.4rem]">
-      <svg viewBox="0 0 36 62" width="54" height="90" style={{ overflow: "visible" }} aria-hidden="true">
+    <div data-qa="village-watch-visual" className="absolute left-[78%] top-[15%]" style={{ width: "clamp(58px, 6.8vw, 78px)", height: "clamp(94px, 11vw, 124px)" }}>
+      <svg viewBox="0 0 36 62" width="100%" height="100%" style={{ overflow: "visible" }} aria-hidden="true">
         <ellipse cx="18" cy="58" rx="13" ry="3" fill="#000" opacity="0.3" />
         {/* four timber supports */}
         <rect x="4" y="24" width="2.4" height="32" fill="#3a2a18" />
