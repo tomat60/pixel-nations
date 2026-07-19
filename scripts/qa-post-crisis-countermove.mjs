@@ -132,9 +132,18 @@ async function runScenario(page, scenario, evidence) {
 }
 
 async function runPayoffSecureCheck(page, scenario, evidence) {
-  await page.locator('[data-qa="post-crisis-frontier-target"]').waitFor({ state: "visible", timeout: 5000 });
-  await page.locator(`[data-qa="post-crisis-frontier-target"][data-frontier-payoff-origin]`).waitFor({ state: "visible", timeout: 5000 });
-  await page.locator('[data-qa="world-post-crisis-payoff"]').waitFor({ state: "attached", timeout: 5000 });
+  const target = page.locator('[data-qa="post-crisis-frontier-target"]');
+  await target.waitFor({ state: "visible", timeout: 5000 });
+  const payoffOrigin = await target.getAttribute("data-frontier-payoff-origin");
+  if (!payoffOrigin) throw new Error(`${scenario.origin} payoff target did not expose an origin`);
+
+  await page.locator('[data-qa="view-world"]').click({ force: true });
+  await page.locator(`[data-qa="world-post-crisis-payoff"][data-frontier-payoff-origin="${payoffOrigin}"]`).waitFor({ state: "visible", timeout: 5000 });
+  const worldPayoffShot = `${scenario.prefix}-05-world-payoff-marker.png`;
+  await page.screenshot({ path: `${SHOT_DIR}/${worldPayoffShot}`, fullPage: true }); evidence.push(worldPayoffShot);
+
+  await page.locator('[data-qa="view-council"]').click({ force: true });
+  await page.locator(`[data-qa="post-crisis-frontier-target"][data-frontier-payoff-origin="${payoffOrigin}"]`).waitFor({ state: "visible", timeout: 5000 });
 
   const preSecureState = await page.evaluate((key) => {
     try { return JSON.parse(window.localStorage.getItem(key) ?? "{}"); } catch { return {}; }
@@ -150,7 +159,7 @@ async function runPayoffSecureCheck(page, scenario, evidence) {
     { expectedInfluence },
     `${scenario.origin} payoff secure persistence`,
   );
-  const securedShot = `${scenario.prefix}-05-payoff-secured.png`;
+  const securedShot = `${scenario.prefix}-06-payoff-secured.png`;
   await page.screenshot({ path: `${SHOT_DIR}/${securedShot}`, fullPage: true }); evidence.push(securedShot);
 
   await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
@@ -164,7 +173,7 @@ async function runPayoffSecureCheck(page, scenario, evidence) {
     { expectedInfluence },
     `${scenario.origin} payoff no-double-reward persistence`,
   );
-  const reloadSecuredShot = `${scenario.prefix}-06-payoff-reload-secured.png`;
+  const reloadSecuredShot = `${scenario.prefix}-07-payoff-reload-secured.png`;
   await page.screenshot({ path: `${SHOT_DIR}/${reloadSecuredShot}`, fullPage: true }); evidence.push(reloadSecuredShot);
 }
 
