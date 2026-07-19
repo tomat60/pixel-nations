@@ -83,22 +83,23 @@ jobs:
           if (paths.length > maxFiles) throw new Error(`Too many dynamic target files: ${paths.length} > ${maxFiles}`);
 
           const root = process.cwd();
-          const allowedRoot = `${path.resolve(root, "app/play")}${path.sep}`;
+          const allowedRoot = `${fs.realpathSync(path.resolve(root, "app/play"))}${path.sep}`;
           let totalBytes = 0;
           const sourceBlocks = [];
 
           for (const targetPath of paths) {
             if (targetPath.includes("..")) throw new Error(`Unsafe target path: ${targetPath}`);
             const absolutePath = path.resolve(root, targetPath);
-            if (!absolutePath.startsWith(allowedRoot)) throw new Error(`Target outside app/play: ${targetPath}`);
+            const realPath = fs.realpathSync(absolutePath);
+            if (!realPath.startsWith(allowedRoot)) throw new Error(`Target outside real app/play root: ${targetPath}`);
 
-            const stat = fs.statSync(absolutePath);
+            const stat = fs.statSync(realPath);
             if (!stat.isFile()) throw new Error(`Target is not a file: ${targetPath}`);
             if (stat.size > maxFileBytes) throw new Error(`Target file too large: ${targetPath} (${stat.size} bytes)`);
 
             totalBytes += stat.size;
             if (totalBytes > maxTotalBytes) throw new Error(`Dynamic target context too large: ${totalBytes} bytes`);
-            sourceBlocks.push(`\n--- DYNAMIC TARGET FILE: ${targetPath} ---\n${fs.readFileSync(absolutePath, "utf8")}\n`);
+            sourceBlocks.push(`\n--- DYNAMIC TARGET FILE: ${targetPath} ---\n${fs.readFileSync(realPath, "utf8")}\n`);
           }
 
           const normalizedAllowed = `\n\n## Allowed files (normalized execution scope)\n${paths.map((targetPath) => `- \`${targetPath}\``).join("\n")}`;
