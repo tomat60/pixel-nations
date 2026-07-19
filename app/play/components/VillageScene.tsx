@@ -316,12 +316,43 @@ function ShelterCluster() {
 }
 
 function FoodFields() {
-  const rows = [0, 1, 2, 3, 4, 5];
   return (
-    <div data-qa="village-food-fields" className="absolute left-[13%] top-[61%] h-[17%] w-[23%] rounded-2xl border border-lime-100/35 bg-lime-400/8 shadow-[0_0_24px_rgba(132,204,22,.16)]">
-      {rows.map((row) => <span key={row} className="absolute left-[8%] right-[8%] h-1.5 rounded-full bg-lime-200/45" style={{ top: `${14 + row * 13}%` }} />)}
-      <span className="absolute left-[16%] top-[18%] h-3 w-3 rounded-full bg-amber-200/80" />
-      <span className="absolute left-[68%] top-[62%] h-3 w-3 rounded-full bg-amber-200/80" />
+    <div data-qa="village-food-fields" className="pointer-events-none absolute inset-0 overflow-hidden">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden="true">
+        <defs>
+          <clipPath id="village-field-a"><path d={`M${FIELD_POLY_A}`} /></clipPath>
+          <clipPath id="village-field-b"><path d={`M${FIELD_POLY_B}`} /></clipPath>
+          <clipPath id="village-field-c"><path d={`M${FIELD_POLY_C}`} /></clipPath>
+        </defs>
+
+        {/* three adjoining irregular plots, muted soil/crop fills */}
+        <path d={`M${FIELD_POLY_A}`} fill="#6a7a34" opacity="0.55" />
+        <path d={`M${FIELD_POLY_B}`} fill="#5c6e2e" opacity="0.55" />
+        <path d={`M${FIELD_POLY_C}`} fill="#7a6a3a" opacity="0.5" />
+
+        <g clipPath="url(#village-field-a)">
+          {FIELD_FURROWS_A.map(([x1, y1, x2, y2], i) => (
+            <line key={`furrow-a-${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#3f4a1e" strokeWidth="0.6" strokeLinecap="round" opacity="0.5" />
+          ))}
+        </g>
+        <g clipPath="url(#village-field-b)">
+          {FIELD_FURROWS_B.map(([x1, y1, x2, y2], i) => (
+            <line key={`furrow-b-${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#333f1a" strokeWidth="0.6" strokeLinecap="round" opacity="0.5" />
+          ))}
+        </g>
+        <g clipPath="url(#village-field-c)">
+          {FIELD_FURROWS_C.map(([x1, y1, x2, y2], i) => (
+            <line key={`furrow-c-${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#4a3d20" strokeWidth="0.6" strokeLinecap="round" opacity="0.5" />
+          ))}
+        </g>
+
+        {/* restrained fence edge along the shared boundary */}
+        <path d="M13,60 L30,58" stroke="#5a4028" strokeWidth="0.6" strokeLinecap="round" opacity="0.45" />
+
+        {/* small hay/crop accents */}
+        <ellipse cx="20" cy="63" rx="1.4" ry="0.8" fill="#c9a24a" opacity="0.65" />
+        <ellipse cx="29" cy="80" rx="1.2" ry="0.7" fill="#8fae4a" opacity="0.6" />
+      </svg>
     </div>
   );
 }
