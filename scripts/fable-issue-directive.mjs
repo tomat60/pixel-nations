@@ -18,7 +18,7 @@ const SOURCE_FILES = [
   ['app/play/components/TopBar.tsx', 12000],
   ['app/play/components/CurrentObjective.tsx', 18000],
   ['app/play/components/BottomDock.tsx', 10000],
-  ['app/play/scenes/VillageScene.tsx', 38000],
+  ['app/play/components/VillageScene.tsx', 38000],
   ['app/play/components/MapStage.tsx', 30000],
   ['app/play/world/WorldMapScene.tsx', 52000],
 ];
@@ -223,7 +223,7 @@ async function main() {
 
   const model = env('ANTHROPIC_MODEL', 'claude-fable-5');
   const maxInputTokens = intEnv('MAX_INPUT_TOKENS', 70000);
-  const maxOutputTokens = intEnv('MAX_OUTPUT_TOKENS', 9000);
+  const maxOutputTokens = intEnv('MAX_OUTPUT_TOKENS', 15000);
   const maxEstimatedCost = numberEnv('MAX_ESTIMATED_COST_USD', 1.5);
   const inputPricePerMillion = numberEnv('INPUT_PRICE_PER_MILLION_USD', 10);
   const outputPricePerMillion = numberEnv('OUTPUT_PRICE_PER_MILLION_USD', 50);
