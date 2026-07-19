@@ -135,7 +135,6 @@ export default function PlayPrototypePage() {
               className="absolute bottom-20 left-3 right-3 z-30 rounded-3xl border border-emerald-200/25 bg-slate-950/88 p-4 shadow-2xl backdrop-blur-md md:left-auto md:right-5 md:w-[420px]"
             >
               <p className="text-[9px] font-black uppercase tracking-[0.18em] text-emerald-100/60">Frontier payoff</p>
-              <span data-qa="world-post-crisis-payoff" className="sr-only">World payoff marker active</span>
               <p className="mt-1 text-lg font-black text-amber-50">{postCrisisFrontierPayoffTarget.label}</p>
               <p className="mt-2 text-xs leading-relaxed text-amber-50/65">{postCrisisFrontierPayoffTarget.short}</p>
               {postCrisisFrontierPayoffSecured ? (
