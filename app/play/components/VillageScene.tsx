@@ -472,20 +472,77 @@ function plannedSoon(marker: SettlementMarker, state: PlayState) {
   return false;
 }
 
+// Compact deterministic geometry constants (Village Run A). Constants only;
+// no procedural/random generation. Kept readable for later extraction.
+
+// Irregular warm clearing outline (world-space 0-100 coordinates).
+const CLEARING_OUTLINE =
+  "M18,40 C14,32 18,22 28,18 C36,12 48,10 58,14 C68,10 80,14 86,24 " +
+  "C92,32 90,44 84,50 C90,58 88,70 78,76 C70,84 56,86 46,82 " +
+  "C34,86 20,80 16,68 C10,60 12,48 18,40 Z";
+
+// Two overlapping continuous canopy masses (upper-left forest edge) plus one
+// smaller accent mass, replacing repeated circle/triangle clumps.
+const CANOPY_MASS_A = "M0,0 L0,46 C10,40 16,30 14,20 C20,16 26,8 22,0 Z";
+const CANOPY_MASS_B = "M0,18 C8,28 6,40 0,50 L0,70 C14,64 22,52 20,38 C26,32 28,22 22,14 Z";
+const CANOPY_ACCENT = "M0,58 C10,62 16,72 12,84 L0,100 Z";
+
+// Compact ridge mass, confined to the upper-right corner.
+const RIDGE_BASE = "M80,20 L86,4 L92,10 L96,2 L100,8 L100,22 L82,24 Z";
+const RIDGE_HIGHLIGHT = "M82,22 L87,12 L90,16 L93,10 L96,16 L96,24 Z";
+const RIDGE_SHADE = "M84,18 L88,10 L90,14 Z";
+
+// Perimeter stream, right / lower-right, kept away from the civic core.
+const STREAM_PATH = "M100,22 C94,32 91,45 89,58 C87,72 84,86 78,100";
+
+// Irregular adjoining lower-left field polygons (world-space).
+const FIELD_POLY_A = "13,60 30,58 33,68 24,74 12,72 Z";
+const FIELD_POLY_B = "24,74 33,68 36,78 30,86 18,84 Z";
+const FIELD_POLY_C = "13,72 24,74 18,84 8,80 Z";
+
+// Short furrow segments per field polygon (kept inside bounds visually).
+const FIELD_FURROWS_A: Array<[number, number, number, number]> = [
+  [16, 64, 27, 62],
+  [15, 68, 28, 66],
+  [17, 71, 26, 69],
+];
+const FIELD_FURROWS_B: Array<[number, number, number, number]> = [
+  [26, 76, 33, 74],
+  [24, 80, 32, 78],
+];
+const FIELD_FURROWS_C: Array<[number, number, number, number]> = [
+  [11, 76, 20, 76],
+  [10, 79, 19, 79],
+];
+
+// Two main curved trunks: lower-entry/market trunk terminates at hearth;
+// civic trunk connects hearth to the council forecourt. Only these paths
+// may touch the hearth point.
+const HEARTH = { x: 47, y: 47 };
+const LOWER_TRUNK = `M20,100 C30,86 34,70 38,58 Q42,52 ${HEARTH.x},${HEARTH.y}`;
+const LOWER_TRUNK_MARKET_BRANCH = "M38,58 C48,60 60,62 68,66";
+const CIVIC_TRUNK = `M${HEARTH.x},${HEARTH.y} Q48,38 50,29`;
+
+// Fixed trunk join / waypoint constants.
+const WAYPOINT_LOWER_MID = { x: 38, y: 58 };
+const WAYPOINT_MARKET_JOIN = { x: 68, y: 66 };
+
+// District spur paths, curving into a trunk waypoint rather than the hearth.
+const SPUR_SHELTER = "M27,41 Q32,50 38,58";
+const SPUR_FIELDS = "M22,66 Q28,66 30,58";
+const SPUR_STOREHOUSE = "M68,40 Q60,52 38,58";
+const SPUR_MARKET = "M74,66 Q71,66 68,66";
+const SPUR_WATCH = "M84,24 Q66,26 50,29";
+
 function VillageGround() {
   // Deterministic terrain built from a small set of reusable SVG shapes.
-  const forestClumps = [
-    [3, 4, 5], [8, 2, 4], [14, 5, 6], [20, 3, 4], [26, 6, 5], [33, 4, 4],
-    [2, 12, 4], [2, 20, 5], [2, 28, 4], [2, 36, 6], [2, 44, 4], [4, 52, 5],
-    [6, 60, 4], [3, 68, 5],
-  ];
-  const clearingBlobs = [
-    [46, 46, 30, 22], [38, 58, 24, 18], [58, 40, 22, 16],
-  ];
   const tufts = [
     [24, 52], [30, 66], [50, 72], [64, 55], [70, 70], [34, 30], [56, 24], [20, 44], [66, 34], [44, 62], [28, 40], [72, 46],
   ];
   const stones = [[91, 30], [88, 44], [84, 58], [80, 70]];
+  const groundMarks = [
+    [40, 44], [54, 50], [46, 60], [60, 42], [36, 55], [58, 62],
+  ];
 
   return (
     <svg
@@ -505,34 +562,37 @@ function VillageGround() {
           <stop offset="0%" stopColor="#000000" stopOpacity="0" />
           <stop offset="100%" stopColor="#000000" stopOpacity="0.32" />
         </linearGradient>
+        <clipPath id="vg-clearing-clip"><path d={CLEARING_OUTLINE} /></clipPath>
       </defs>
       <rect x="0" y="0" width="100" height="100" fill="url(#vg-light)" />
       <rect x="0" y="0" width="100" height="100" fill="url(#vg-shadow)" />
 
-      {/* warm ochre clearing around the settlement, irregular */}
-      {clearingBlobs.map(([cx, cy, rx, ry], i) => (
-        <ellipse key={`clear-${i}`} cx={cx} cy={cy} rx={rx} ry={ry} fill="#6a5a2c" opacity={0.34 - i * 0.05} />
-      ))}
-      <ellipse cx="48" cy="52" rx="34" ry="26" fill="#7a6a34" opacity="0.22" />
+      {/* one irregular warm meadow / worn-earth clearing, no rounded panel edge */}
+      <path d={CLEARING_OUTLINE} fill="#6a5a2c" opacity="0.4" />
+      <path d={CLEARING_OUTLINE} fill="#7a6a34" opacity="0.18" />
+      <g clipPath="url(#vg-clearing-clip)" opacity="0.5">
+        {groundMarks.map(([x, y], i) => (
+          <ellipse key={`mark-${i}`} cx={x} cy={y} rx={1.1} ry={0.5} fill="#4a3d1f" opacity="0.35" />
+        ))}
+      </g>
 
-      {/* dark forest mass running off upper-left edge */}
-      {forestClumps.map(([cx, cy, r], i) => (
-        <g key={`forest-${i}`}>
-          <circle cx={cx} cy={cy + r * 0.3} r={r} fill="#0e1a0d" opacity={0.82} />
-          <circle cx={cx} cy={cy} r={r * 0.72} fill="#16240f" opacity={0.78} />
-          <path d={`M${cx},${cy - r} L${cx - r * 0.55},${cy + r * 0.35} L${cx + r * 0.55},${cy + r * 0.35} Z`} fill="#0a140a" opacity={0.7} />
-        </g>
-      ))}
+      {/* continuous canopy masses running off the upper-left edge */}
+      <path d={CANOPY_MASS_A} fill="#0e1a0d" opacity="0.84" />
+      <path d={CANOPY_MASS_B} fill="#16240f" opacity="0.78" />
+      <path d={CANOPY_ACCENT} fill="#0a140a" opacity="0.7" />
+      {/* sparse edge tree accents */}
+      <circle cx="24" cy="10" r="2.6" fill="#16240f" opacity="0.6" />
+      <circle cx="10" cy="58" r="2.2" fill="#16240f" opacity="0.55" />
+      <circle cx="30" cy="86" r="2" fill="#0e1a0d" opacity="0.5" />
 
-      {/* compact ridgeline mass upper-right, confined to x:78-100 / y:0-24 */}
-      <polygon points="80,20 86,4 92,10 96,2 100,8 100,22 82,24" fill="#4b463f" opacity="0.82" />
-      <polygon points="82,22 87,12 90,16 93,10 96,16 96,24" fill="#3a362f" opacity="0.6" />
-      <polygon points="84,18 88,10 90,14" fill="#5a554b" opacity="0.55" />
-      <polygon points="90,20 94,12 97,18" fill="#5a554b" opacity="0.5" />
+      {/* compact ridge mass upper-right, confined to x:78-100 / y:0-24 */}
+      <path d={RIDGE_BASE} fill="#4b463f" opacity="0.82" />
+      <path d={RIDGE_HIGHLIGHT} fill="#3a362f" opacity="0.6" />
+      <path d={RIDGE_SHADE} fill="#5a554b" opacity="0.55" />
 
       {/* stream routed along the right / lower-right perimeter, avoiding the settlement core */}
       <path
-        d="M100,22 C94,32 91,45 89,58 C87,72 84,86 78,100"
+        d={STREAM_PATH}
         fill="none"
         stroke="#0e2530"
         strokeWidth="4"
@@ -540,7 +600,7 @@ function VillageGround() {
         opacity="0.5"
       />
       <path
-        d="M100,22 C94,32 91,45 89,58 C87,72 84,86 78,100"
+        d={STREAM_PATH}
         fill="none"
         stroke="#4fa4c9"
         strokeWidth="2.2"
@@ -548,7 +608,7 @@ function VillageGround() {
         opacity="0.55"
       />
       <path
-        d="M100,22 C94,32 91,45 89,58 C87,72 84,86 78,100"
+        d={STREAM_PATH}
         fill="none"
         stroke="#bfe7f5"
         strokeWidth="0.6"
@@ -569,44 +629,44 @@ function VillageGround() {
 
 function VillageRoads({ state }: { state: PlayState }) {
   const activeRoad = state.completedOrders.includes("open-market") || state.settlementMarkers.includes("storehouse");
-  const hearth = { x: 47, y: 47 };
-  const nodes: Array<{ id: string; x: number; y: number; active: boolean }> = [
-    { id: "shelter", x: 27, y: 41, active: state.settlementMarkers.includes("shelter") },
-    { id: "fields", x: 22, y: 66, active: state.completedOrders.includes("gather-food") },
-    { id: "storehouse", x: 68, y: 40, active: state.settlementMarkers.includes("storehouse") },
-    { id: "market", x: 74, y: 66, active: state.settlementMarkers.includes("market") },
-    { id: "council", x: 50, y: 29, active: state.settlementMarkers.includes("council") },
-    { id: "watch", x: 84, y: 24, active: state.settlementMarkers.includes("watch") },
-  ];
+  const shelterActive = state.settlementMarkers.includes("shelter");
+  const fieldsActive = state.completedOrders.includes("gather-food");
+  const storehouseActive = state.settlementMarkers.includes("storehouse");
+  const marketActive = state.settlementMarkers.includes("market");
+  const councilActive = state.settlementMarkers.includes("council");
+  const watchActive = state.settlementMarkers.includes("watch");
 
-  function pathFor(node: { x: number; y: number }) {
-    const midX = (hearth.x + node.x) / 2 + (node.x > hearth.x ? -3 : 3);
-    const midY = (hearth.y + node.y) / 2 + (node.y > hearth.y ? -2 : 2);
-    return `M${hearth.x},${hearth.y} Q${midX},${midY} ${node.x},${node.y}`;
+  // Layered dirt render: broad dark under-stroke + narrower warm stroke,
+  // optional rut highlight. Trunks wider than spurs. Inactive full routes
+  // are omitted rather than shown as faint hub lines.
+  function DirtPath({ d, active, trunk }: { d: string; active: boolean; trunk?: boolean }) {
+    if (!active && !trunk) return null;
+    const underW = trunk ? 6.2 : 3.4;
+    const dirtW = trunk ? 3.6 : 1.9;
+    const rutW = trunk ? 1 : 0.6;
+    const opacityScale = active ? 1 : 0.32;
+    return (
+      <g opacity={opacityScale}>
+        <path d={d} fill="none" stroke="#2a1f12" strokeWidth={underW} strokeLinecap="round" strokeLinejoin="round" opacity="0.55" />
+        <path d={d} fill="none" stroke="#8a6a3c" strokeWidth={dirtW} strokeLinecap="round" strokeLinejoin="round" opacity="0.72" />
+        <path d={d} fill="none" stroke="#c9a866" strokeWidth={rutW} strokeLinecap="round" strokeLinejoin="round" opacity="0.4" />
+      </g>
+    );
   }
 
   return (
     <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden="true">
-      {/* main road entering from bottom, converging at hearth */}
-      <path
-        d={`M43,100 Q45,75 ${hearth.x},${hearth.y}`}
-        fill="none"
-        stroke="#d8b46a"
-        strokeWidth={activeRoad ? 3.4 : 2.2}
-        strokeLinecap="round"
-        opacity={activeRoad ? 0.55 : 0.3}
-      />
-      {nodes.map((node) => (
-        <path
-          key={node.id}
-          d={pathFor(node)}
-          fill="none"
-          stroke="#d8b46a"
-          strokeWidth={node.active ? 2.2 : 1.1}
-          strokeLinecap="round"
-          opacity={node.active ? 0.48 : 0.18}
-        />
-      ))}
+      {/* the only two paths permitted to touch the hearth */}
+      <DirtPath d={LOWER_TRUNK} active trunk />
+      <DirtPath d={CIVIC_TRUNK} active={councilActive} trunk />
+      {marketActive || activeRoad ? <DirtPath d={LOWER_TRUNK_MARKET_BRANCH} active={marketActive || activeRoad} trunk /> : null}
+
+      {/* spurs join a trunk waypoint rather than reaching the hearth directly */}
+      <DirtPath d={SPUR_SHELTER} active={shelterActive} />
+      <DirtPath d={SPUR_FIELDS} active={fieldsActive} />
+      <DirtPath d={SPUR_STOREHOUSE} active={storehouseActive} />
+      <DirtPath d={SPUR_MARKET} active={marketActive} />
+      <DirtPath d={SPUR_WATCH} active={watchActive} />
     </svg>
   );
 }
