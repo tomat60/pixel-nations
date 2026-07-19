@@ -10,9 +10,14 @@ const views: Array<{ id: ViewId; label: string }> = [
 
 export function BottomDock({ activeView, dispatch }: { activeView: ViewId; dispatch: (action: PlayAction) => void }) {
   return (
-    <nav className="absolute bottom-3 left-3 right-3 z-20 grid grid-cols-5 gap-1.5 rounded-3xl border border-amber-200/20 bg-black/48 p-1.5 shadow-2xl backdrop-blur-md md:bottom-5 md:left-5 md:right-5 md:gap-2 md:p-2">
+    <nav className="absolute bottom-2 left-2 right-2 z-20 grid grid-cols-5 gap-1 rounded-2xl border border-amber-200/18 bg-black/48 p-1 shadow-xl backdrop-blur-md md:bottom-4 md:left-4 md:right-4 md:gap-1.5 md:p-1.5">
       {views.map((item) => (
-        <button key={item.id} data-qa={`view-${item.id}`} onClick={() => dispatch({ type: "setView", view: item.id })} className={`rounded-2xl px-1.5 py-2 text-[10px] font-black uppercase tracking-wide transition md:px-2 md:py-3 md:text-sm ${activeView === item.id ? "bg-amber-300 text-stone-950" : "bg-white/5 text-amber-50/70 hover:bg-white/10"}`}>
+        <button
+          key={item.id}
+          data-qa={`view-${item.id}`}
+          onClick={() => dispatch({ type: "setView", view: item.id })}
+          className={`rounded-xl px-1 py-1.5 text-[9px] font-black uppercase tracking-wide transition md:px-2 md:py-2 md:text-xs ${activeView === item.id ? "bg-amber-300 text-stone-950 shadow-md ring-1 ring-amber-100/70" : "bg-white/4 text-amber-50/68 hover:bg-white/10"}`}
+        >
           {item.label}
         </button>
       ))}
