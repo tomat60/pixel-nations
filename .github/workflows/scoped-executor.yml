@@ -118,13 +118,34 @@ jobs:
           if (paths.length > maxFiles) throw new Error(`Too many dynamic target files: ${paths.length} > ${maxFiles}`);
 
           const root = process.cwd();
-          const allowedRoot = `${fs.realpathSync(path.resolve(root, "app/play"))}${path.sep}`;
+          const appPlayRoot = fs.realpathSync(path.resolve(root, "app/play"));
+          const allowedRoot = `${appPlayRoot}${path.sep}`;
           let totalBytes = 0;
           const sourceBlocks = [];
 
           for (const targetPath of paths) {
             if (targetPath.includes("..")) throw new Error(`Unsafe target path: ${targetPath}`);
-            const realPath = fs.realpathSync(path.resolve(root, targetPath));
+            const resolvedPath = path.resolve(root, targetPath);
+            if (!resolvedPath.startsWith(`${path.resolve(root, "app/play")}${path.sep}`)) {
+              throw new Error(`Target outside app/play root: ${targetPath}`);
+            }
+
+            if (!fs.existsSync(resolvedPath)) {
+              let existingAncestor = path.dirname(resolvedPath);
+              while (!fs.existsSync(existingAncestor)) {
+                const parent = path.dirname(existingAncestor);
+                if (parent === existingAncestor) throw new Error(`Could not resolve safe ancestor for new target: ${targetPath}`);
+                existingAncestor = parent;
+              }
+              const realAncestor = fs.realpathSync(existingAncestor);
+              if (realAncestor !== appPlayRoot && !realAncestor.startsWith(allowedRoot)) {
+                throw new Error(`New target ancestor outside real app/play root: ${targetPath}`);
+              }
+              sourceBlocks.push(`\n--- DYNAMIC TARGET FILE: ${targetPath} (NEW FILE) ---\n[file does not exist yet; create only if explicitly allowed by the issue]\n`);
+              continue;
+            }
+
+            const realPath = fs.realpathSync(resolvedPath);
             if (!realPath.startsWith(allowedRoot)) throw new Error(`Target outside real app/play root: ${targetPath}`);
 
             const stat = fs.statSync(realPath);
@@ -140,7 +161,7 @@ jobs:
           const dynamicContext = `\n\n## Dynamic target source context\nThe following source is authoritative and current for this execution.${sourceBlocks.join("")}`;
           event.issue.body = `${body}${normalizedAllowed}${dynamicContext}`;
           fs.writeFileSync(eventPath, `${JSON.stringify(event)}\n`, "utf8");
-          console.log(`Injected ${paths.length} target file(s), ${totalBytes} total bytes: ${paths.join(", ")}`);
+          console.log(`Injected ${paths.length} target file(s), ${totalBytes} existing-file bytes: ${paths.join(", ")}`);
           NODE
 
           node scripts/scoped-executor.mjs
