@@ -203,10 +203,17 @@ function ShelterCluster() {
     <div data-qa="village-structure-hut" className="absolute inset-0">
       {huts.map(([left, top, rotate]) => (
         <div key={`${left}-${top}`} className={`absolute h-10 w-14 ${rotate}`} style={{ left: `${left}%`, top: `${top}%` }}>
-          <div className="absolute bottom-0 h-7 w-14 rounded-b-lg border border-amber-100/40 bg-stone-200/85 shadow-lg" />
-          <div className="absolute left-1 top-0 h-8 w-12 rotate-45 rounded-sm bg-amber-800/90 shadow-md" />
-          <div className="absolute left-6 top-4 h-4 w-3 rounded-t-sm bg-black/35" />
-          <div className="absolute -top-4 left-6 h-6 w-4 rounded-full bg-stone-100/24 blur-sm" />
+          <div className="absolute -bottom-1 left-1 h-2 w-12 rounded-full bg-black/38 blur-[2px]" />
+          <div className="absolute bottom-0 h-7 w-14 rounded-b-lg border border-black/30 bg-gradient-to-b from-stone-800/90 to-stone-950/95 shadow-lg" />
+          <div className="absolute bottom-0 left-1 h-7 w-[2px] bg-black/25" />
+          <div className="absolute bottom-0 left-4 h-7 w-[2px] bg-black/25" />
+          <div className="absolute bottom-0 left-7 h-7 w-[2px] bg-black/25" />
+          <div className="absolute bottom-0 left-10 h-7 w-[2px] bg-black/25" />
+          <div className="absolute left-1 top-0 h-8 w-12 rotate-45 rounded-sm bg-gradient-to-br from-amber-900/95 to-yellow-950/90 shadow-md" />
+          <div className="absolute left-2 top-1 h-6 w-9 rotate-45 rounded-sm border border-amber-950/40" />
+          <div className="absolute left-6 top-4 h-4 w-3 rounded-t-sm bg-black/70" />
+          <div className="absolute left-[26px] top-[19px] h-1 w-1 rounded-full bg-orange-300/85 shadow-[0_0_5px_rgba(251,146,60,.85)]" />
+          <div className="absolute -top-4 left-6 h-6 w-4 rounded-full bg-stone-100/14 blur-sm" />
         </div>
       ))}
     </div>
@@ -216,10 +223,29 @@ function ShelterCluster() {
 function FoodFields() {
   const rows = [0, 1, 2, 3, 4, 5];
   return (
-    <div data-qa="village-food-fields" className="absolute left-[13%] top-[61%] h-[17%] w-[23%] rounded-2xl border border-lime-100/35 bg-lime-400/8 shadow-[0_0_24px_rgba(132,204,22,.16)]">
-      {rows.map((row) => <span key={row} className="absolute left-[8%] right-[8%] h-1.5 rounded-full bg-lime-200/45" style={{ top: `${14 + row * 13}%` }} />)}
-      <span className="absolute left-[16%] top-[18%] h-3 w-3 rounded-full bg-amber-200/80" />
-      <span className="absolute left-[68%] top-[62%] h-3 w-3 rounded-full bg-amber-200/80" />
+    <div data-qa="village-food-fields" className="absolute left-[13%] top-[61%] h-[17%] w-[23%] rounded-2xl bg-[radial-gradient(circle_at_30%_20%,rgba(120,72,32,.55),transparent_60%),linear-gradient(160deg,rgba(84,54,26,.65)_0%,rgba(46,58,24,.55)_100%)]">
+      {rows.map((row) => {
+        const angle = row % 2 === 0 ? -3 : 3;
+        const depth = row % 2 === 0 ? "opacity-70" : "opacity-55";
+        return (
+          <span
+            key={row}
+            className={`absolute left-[6%] right-[6%] h-1.5 rounded-full bg-lime-500/40 ${depth}`}
+            style={{ top: `${12 + row * 13.5}%`, transform: `rotate(${angle}deg)` }}
+          >
+            <span className="absolute inset-y-0 left-[10%] w-[55%] rounded-full bg-lime-300/45" />
+          </span>
+        );
+      })}
+      <div className="absolute left-[18%] top-[16%]">
+        <div className="h-3 w-3 rounded-full bg-amber-700/85" />
+        <div className="h-2.5 w-4 -translate-x-1/2 translate-y-[-2px] rounded-full bg-amber-600/80" style={{ marginLeft: "6px" }} />
+        <div className="h-2 w-5 -translate-x-1/2 translate-y-[-3px] rounded-full bg-amber-500/75" style={{ marginLeft: "6px" }} />
+      </div>
+      <div className="absolute left-[64%] top-[58%] h-6 w-[2px] bg-amber-900/70">
+        <span className="absolute -top-1 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full border border-amber-800/60 bg-amber-200/25" />
+        <span className="absolute top-0 left-1/2 h-2 w-4 -translate-x-1/2 -rotate-12 bg-amber-800/70" />
+      </div>
     </div>
   );
 }
