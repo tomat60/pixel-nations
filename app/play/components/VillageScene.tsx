@@ -554,10 +554,6 @@ const LOWER_TRUNK = `M20,100 C30,86 34,70 38,58 Q42,52 ${HEARTH.x},${HEARTH.y}`;
 const LOWER_TRUNK_MARKET_BRANCH = "M38,58 C48,60 60,62 68,66";
 const CIVIC_TRUNK = `M${HEARTH.x},${HEARTH.y} Q48,38 50,29`;
 
-// Fixed trunk join / waypoint constants.
-const WAYPOINT_LOWER_MID = { x: 38, y: 58 };
-const WAYPOINT_MARKET_JOIN = { x: 68, y: 66 };
-
 // District spur paths, curving into a trunk waypoint rather than the hearth.
 const SPUR_SHELTER = "M27,41 Q32,50 38,58";
 const SPUR_FIELDS = "M22,66 Q28,66 30,58";
@@ -671,7 +667,7 @@ function VillageRoads({ state }: { state: PlayState }) {
   // optional rut highlight. Trunks wider than spurs. Inactive full routes
   // are omitted rather than shown as faint hub lines.
   function DirtPath({ d, active, trunk }: { d: string; active: boolean; trunk?: boolean }) {
-    if (!active && !trunk) return null;
+    if (!active) return null;
     const underW = trunk ? 6.2 : 3.4;
     const dirtW = trunk ? 3.6 : 1.9;
     const rutW = trunk ? 1 : 0.6;
