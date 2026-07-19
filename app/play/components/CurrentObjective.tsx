@@ -27,8 +27,8 @@ export function CurrentObjective({
 }) {
   const objective = getCurrentObjectiveText(state);
   const placement = state.view === "council"
-    ? "left-1/2 top-[6rem] w-[min(320px,calc(100%-1.5rem))] -translate-x-1/2 text-center md:left-[43%] md:top-[6.8rem]"
-    : "right-3 top-[5.9rem] max-w-[210px] text-right md:right-5 md:top-[6.8rem] md:max-w-[390px]";
+    ? "left-1/2 top-[4.4rem] w-[min(300px,calc(100%-1.25rem))] -translate-x-1/2 text-center md:left-[43%] md:top-[5rem]"
+    : "right-2 top-[4.3rem] max-w-[190px] text-right md:right-4 md:top-[5rem] md:max-w-[320px]";
 
   return (
     <aside
@@ -38,22 +38,22 @@ export function CurrentObjective({
       data-founder-record-available={founderRecordAvailable ? "true" : "false"}
       data-empire-crisis={state.empireCrisisReason ?? "none"}
       data-empire-crisis-recovery={state.empireCrisisRecoveryId ?? "none"}
-      className={`absolute z-40 rounded-2xl border border-amber-100/20 bg-black/58 p-2.5 shadow-xl backdrop-blur-md md:p-3 ${placement}`}
+      className={`absolute z-40 rounded-xl border border-amber-100/18 bg-black/56 p-2 shadow-lg backdrop-blur-md md:p-2.5 ${placement}`}
     >
-      <p className="text-[8px] font-black uppercase tracking-[0.22em] text-amber-200/65 md:text-[10px] md:tracking-[0.26em]">Current objective</p>
-      <p data-qa="current-objective-text" className="mt-1 text-xs font-black leading-tight text-amber-50 md:text-base">{objective}</p>
-      <p className="mt-2 hidden text-[10px] font-black uppercase tracking-[0.18em] text-amber-200/50 md:block">{state.lastEvent}</p>
+      <p className="text-[7px] font-black uppercase tracking-[0.2em] text-amber-200/60 md:text-[8px] md:tracking-[0.22em]">Objective</p>
+      <p data-qa="current-objective-text" className="mt-0.5 text-[11px] font-black leading-tight text-amber-50 md:text-sm">{objective}</p>
+      <p className="mt-1.5 hidden truncate text-[9px] font-black uppercase tracking-[0.14em] text-amber-200/45 lg:block">{state.lastEvent}</p>
       {founderRecordAvailable ? (
         <button
           type="button"
           data-qa="open-founder-record"
           onClick={onOpenFounderRecord}
-          className="mt-2 w-full rounded-xl border border-amber-200/25 bg-amber-200/10 px-2 py-1.5 text-[9px] font-black uppercase tracking-[0.14em] text-amber-100 transition hover:bg-amber-200/18"
+          className="mt-1.5 w-full rounded-lg border border-amber-200/22 bg-amber-200/9 px-2 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-amber-100 transition hover:bg-amber-200/16"
         >
           Founder Record
         </button>
       ) : null}
-      {secondRunStarted ? <p data-qa="second-run-started" className="mt-2 text-[9px] font-black uppercase tracking-[0.14em] text-emerald-100">Second history begun</p> : null}
+      {secondRunStarted ? <p data-qa="second-run-started" className="mt-1.5 text-[8px] font-black uppercase tracking-[0.12em] text-emerald-100">Second history begun</p> : null}
     </aside>
   );
 }
