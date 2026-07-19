@@ -44,6 +44,9 @@ jobs:
       - name: Generate primary play evidence
         run: node scripts/qa-play-screenshots.mjs
 
+      - name: Generate Village progression evidence
+        run: npm run qa:village
+
       - name: Generate posture evidence
         run: node scripts/qa-play-branches.mjs
 
@@ -64,6 +67,8 @@ jobs:
         if: always()
         with:
           name: pixel-nations-play-evidence
-          path: public/qa/play-latest
+          path: |
+            public/qa/play-latest
+            public/qa/village-scene
           if-no-files-found: error
           retention-days: 7
