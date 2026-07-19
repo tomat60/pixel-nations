@@ -36,9 +36,8 @@ const villagePlotVisualPolicy: Record<VillagePlotId, { builtLabel: boolean }> = 
 
 function getPlotVisualPresentation(plotId: VillagePlotId, qaState: PlotState) {
   const policy = villagePlotVisualPolicy[plotId];
-  const showIcon = qaState !== "built";
   const showBuiltLabel = qaState === "built" && policy.builtLabel;
-  return { showIcon, showBuiltLabel };
+  return { showBuiltLabel };
 }
 
 function getInstitutionVisuals(records: RetentionRecord[]): InstitutionVisual[] {
@@ -110,7 +109,7 @@ function VillagePlotNode({ plot, state }: { plot: VillagePlot; state: PlayState 
   const built = plot.marker ? state.settlementMarkers.includes(plot.marker) : plot.id === "fields" ? state.completedOrders.includes("gather-food") : state.completedOrders.includes("open-market");
   const building = !built && plot.marker ? plannedSoon(plot.marker, state) : false;
   const qaState: PlotState = built ? "built" : building ? "building" : "empty";
-  const { showIcon, showBuiltLabel } = getPlotVisualPresentation(plot.id, qaState);
+  const { showBuiltLabel } = getPlotVisualPresentation(plot.id, qaState);
   return (
     <div
       data-qa="village-plot"
@@ -333,10 +332,9 @@ function plannedSoon(marker: SettlementMarker, state: PlayState) {
 function VillageGround() {
   // Deterministic terrain built from a small set of reusable SVG shapes.
   const forestClumps = [
-    [4, 6, 22], [10, 2, 16], [1, 18, 18], [6, 24, 14], [15, 10, 12], [2, 34, 12], [9, 40, 10],
-  ];
-  const rockyClumps = [
-    [86, 8, 9], [92, 15, 7], [80, 4, 8], [96, 24, 6],
+    [3, 4, 5], [8, 2, 4], [14, 5, 6], [20, 3, 4], [26, 6, 5], [33, 4, 4],
+    [2, 12, 4], [2, 20, 5], [2, 28, 4], [2, 36, 6], [2, 44, 4], [4, 52, 5],
+    [6, 60, 4], [3, 68, 5],
   ];
   const clearingBlobs = [
     [46, 46, 30, 22], [38, 58, 24, 18], [58, 40, 22, 16],
@@ -344,9 +342,7 @@ function VillageGround() {
   const tufts = [
     [24, 52], [30, 66], [50, 72], [64, 55], [70, 70], [34, 30], [56, 24], [20, 44], [66, 34], [44, 62], [28, 40], [72, 46],
   ];
-  const stones = [
-    [78, 22], [72, 30], [66, 40], [58, 52], [48, 62], [36, 74],
-  ];
+  const stones = [[91, 30], [88, 44], [84, 58], [80, 70]];
 
   return (
     <svg
@@ -378,43 +374,41 @@ function VillageGround() {
 
       {/* dark forest mass running off upper-left edge */}
       {forestClumps.map(([cx, cy, r], i) => (
-        <circle key={`forest-${i}`} cx={cx} cy={cy} r={r} fill="#0e1a0d" opacity={0.85} />
+        <g key={`forest-${i}`}>
+          <circle cx={cx} cy={cy + r * 0.3} r={r} fill="#0e1a0d" opacity={0.82} />
+          <circle cx={cx} cy={cy} r={r * 0.72} fill="#16240f" opacity={0.78} />
+          <path d={`M${cx},${cy - r} L${cx - r * 0.55},${cy + r * 0.35} L${cx + r * 0.55},${cy + r * 0.35} Z`} fill="#0a140a" opacity={0.7} />
+        </g>
       ))}
-      <path d="M0,0 L28,0 Q14,14 6,30 Q0,20 0,0 Z" fill="#0e1a0d" opacity="0.6" />
 
-      {/* rocky rise upper-right */}
-      {rockyClumps.map(([cx, cy, r], i) => (
-        <polygon
-          key={`rock-${i}`}
-          points={`${cx - r},${cy + r * 0.6} ${cx},${cy - r} ${cx + r},${cy + r * 0.5} ${cx + r * 0.3},${cy + r}`}
-          fill="#4b463f"
-          opacity="0.8"
-        />
-      ))}
-      <path d="M100,0 L100,26 Q90,14 78,6 Q88,0 100,0 Z" fill="#3a362f" opacity="0.55" />
+      {/* compact ridgeline mass upper-right, confined to x:78-100 / y:0-24 */}
+      <polygon points="80,20 86,4 92,10 96,2 100,8 100,22 82,24" fill="#4b463f" opacity="0.82" />
+      <polygon points="82,22 87,12 90,16 93,10 96,16 96,24" fill="#3a362f" opacity="0.6" />
+      <polygon points="84,18 88,10 90,14" fill="#5a554b" opacity="0.55" />
+      <polygon points="90,20 94,12 97,18" fill="#5a554b" opacity="0.5" />
 
-      {/* stream entering upper-right, exiting lower-left, with banks */}
+      {/* stream routed along the right / lower-right perimeter, avoiding the settlement core */}
       <path
-        d="M92,14 C78,20 70,30 62,40 C52,52 42,58 26,66 C16,71 8,78 2,88"
+        d="M100,22 C94,32 91,45 89,58 C87,72 84,86 78,100"
         fill="none"
         stroke="#0e2530"
-        strokeWidth="6.4"
+        strokeWidth="4"
         strokeLinecap="round"
         opacity="0.5"
       />
       <path
-        d="M92,14 C78,20 70,30 62,40 C52,52 42,58 26,66 C16,71 8,78 2,88"
+        d="M100,22 C94,32 91,45 89,58 C87,72 84,86 78,100"
         fill="none"
         stroke="#4fa4c9"
-        strokeWidth="3.2"
+        strokeWidth="2.2"
         strokeLinecap="round"
         opacity="0.55"
       />
       <path
-        d="M92,14 C78,20 70,30 62,40 C52,52 42,58 26,66 C16,71 8,78 2,88"
+        d="M100,22 C94,32 91,45 89,58 C87,72 84,86 78,100"
         fill="none"
         stroke="#bfe7f5"
-        strokeWidth="0.9"
+        strokeWidth="0.6"
         strokeLinecap="round"
         opacity="0.4"
       />
@@ -432,7 +426,7 @@ function VillageGround() {
 
 function VillageRoads({ state }: { state: PlayState }) {
   const activeRoad = state.completedOrders.includes("open-market") || state.settlementMarkers.includes("storehouse");
-  const hearth = { x: 47, y: 55 };
+  const hearth = { x: 47, y: 47 };
   const nodes: Array<{ id: string; x: number; y: number; active: boolean }> = [
     { id: "shelter", x: 27, y: 41, active: state.settlementMarkers.includes("shelter") },
     { id: "fields", x: 22, y: 66, active: state.completedOrders.includes("gather-food") },
@@ -452,7 +446,7 @@ function VillageRoads({ state }: { state: PlayState }) {
     <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden="true">
       {/* main road entering from bottom, converging at hearth */}
       <path
-        d={`M40,100 Q44,80 ${hearth.x},${hearth.y}`}
+        d={`M43,100 Q45,75 ${hearth.x},${hearth.y}`}
         fill="none"
         stroke="#d8b46a"
         strokeWidth={activeRoad ? 3.4 : 2.2}
