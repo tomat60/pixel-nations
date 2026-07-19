@@ -46,6 +46,68 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Inject exact allowed target context
+        env:
+          MAX_DYNAMIC_FILES: "3"
+          MAX_DYNAMIC_FILE_BYTES: "90000"
+          MAX_DYNAMIC_TOTAL_BYTES: "180000"
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          import path from "node:path";
+
+          const eventPath = process.env.GITHUB_EVENT_PATH;
+          if (!eventPath) throw new Error("Missing GITHUB_EVENT_PATH.");
+
+          const event = JSON.parse(fs.readFileSync(eventPath, "utf8"));
+          const body = String(event?.issue?.body ?? "");
+          const section = body.match(/##\s+(?:Exact\s+)?Allowed files?\s*\n([\s\S]*?)(?=\n##\s|$)/i);
+
+          if (!section) {
+            console.log("No exact allowed-file section found; scoped executor will use static repository context.");
+            process.exit(0);
+          }
+
+          const paths = [...new Set(
+            [...section[1].matchAll(/`(app\/play\/[A-Za-z0-9._/-]+)`/g)].map((match) => match[1]),
+          )];
+
+          if (!paths.length) {
+            console.log("Allowed-file section contains no exact app/play file paths; using static repository context.");
+            process.exit(0);
+          }
+
+          const maxFiles = Number.parseInt(process.env.MAX_DYNAMIC_FILES ?? "3", 10);
+          const maxFileBytes = Number.parseInt(process.env.MAX_DYNAMIC_FILE_BYTES ?? "90000", 10);
+          const maxTotalBytes = Number.parseInt(process.env.MAX_DYNAMIC_TOTAL_BYTES ?? "180000", 10);
+          if (paths.length > maxFiles) throw new Error(`Too many dynamic target files: ${paths.length} > ${maxFiles}`);
+
+          const root = process.cwd();
+          const allowedRoot = `${path.resolve(root, "app/play")}${path.sep}`;
+          let totalBytes = 0;
+          const sourceBlocks = [];
+
+          for (const targetPath of paths) {
+            if (targetPath.includes("..")) throw new Error(`Unsafe target path: ${targetPath}`);
+            const absolutePath = path.resolve(root, targetPath);
+            if (!absolutePath.startsWith(allowedRoot)) throw new Error(`Target outside app/play: ${targetPath}`);
+
+            const stat = fs.statSync(absolutePath);
+            if (!stat.isFile()) throw new Error(`Target is not a file: ${targetPath}`);
+            if (stat.size > maxFileBytes) throw new Error(`Target file too large: ${targetPath} (${stat.size} bytes)`);
+
+            totalBytes += stat.size;
+            if (totalBytes > maxTotalBytes) throw new Error(`Dynamic target context too large: ${totalBytes} bytes`);
+            sourceBlocks.push(`\n--- DYNAMIC TARGET FILE: ${targetPath} ---\n${fs.readFileSync(absolutePath, "utf8")}\n`);
+          }
+
+          const normalizedAllowed = `\n\n## Allowed files (normalized execution scope)\n${paths.map((targetPath) => `- \`${targetPath}\``).join("\n")}`;
+          const dynamicContext = `\n\n## Dynamic target source context\nThe following source is authoritative and current for this execution.${sourceBlocks.join("")}`;
+          event.issue.body = `${body}${normalizedAllowed}${dynamicContext}`;
+          fs.writeFileSync(eventPath, `${JSON.stringify(event)}\n`, "utf8");
+          console.log(`Injected ${paths.length} target file(s), ${totalBytes} total bytes: ${paths.join(", ")}`);
+          NODE
+
       - name: Run scoped executor patch generation
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
