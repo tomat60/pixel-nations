@@ -75,31 +75,24 @@ async function readIssue() {
   const body = typeof issue.body === 'string' ? issue.body.trim() : '';
   if (!title.startsWith('FABLE DIRECTIVE:')) throw new Error(`Unexpected issue title: ${title}`);
   if (!body) throw new Error('Issue body is empty.');
-
   return { number: issue.number, title, body };
 }
 
 function extractRequiredOutputContract(body) {
   const match = body.match(/## Required output contract\s*\n([\s\S]*?)(?=\n##\s|$)/i);
-  if (!match) {
-    throw new Error('Issue must include a `## Required output contract` section.');
-  }
+  if (!match) throw new Error('Issue must include a `## Required output contract` section.');
 
   const items = [];
   for (const line of match[1].split('\n')) {
     const item = line.match(/^\s*(\d+)\.\s+(.+?)\s*$/);
     if (item) items.push({ number: item[1], text: item[2] });
   }
-
-  if (items.length === 0) {
-    throw new Error('Required output contract must contain a numbered list.');
-  }
+  if (items.length === 0) throw new Error('Required output contract must contain a numbered list.');
   return items;
 }
 
 function buildPrompt({ issue, contractItems, repositoryContext }) {
   const exactHeadings = contractItems.map((item) => `## ${item.number}. ${item.text}`).join('\n');
-
   return `You are Fable, a delegated product, UX and visual-strategy consultant inside a GPT-5.6-led Pixel Nations development system.
 
 AUTHORITY AND ROLE
@@ -117,7 +110,7 @@ ${exactHeadings}
 4. Answer the actual issue. Do not substitute the old generic three-Cursor-prompts template unless the issue explicitly requests exactly that.
 5. Ground recommendations in the supplied current repository context. Distinguish what exists now from what you propose.
 6. Keep suggestions bounded, reviewable and realistic for the stated deadline.
-7. Mark any uncertain claim as an inference. Do not claim visual inspection beyond the supplied source context.
+7. Mark uncertain claims as inferences. Do not claim visual inspection beyond the supplied source context.
 8. If a deliverable cannot be completed, keep its exact heading and write INCOMPLETE with the precise missing information. Do not silently omit it.
 9. Do not propose crypto, NFT, wallet, mint, token, pay-to-win, backend expansion, multiplayer, a new rendering engine or a large asset pipeline unless the issue explicitly reopens that direction.
 10. End with the exact compliance block defined below.
@@ -170,10 +163,7 @@ function validateOutput(output, contractItems, stopReason) {
   for (const marker of requiredMarkers) {
     if (!output.includes(marker)) failures.push(`missing compliance marker: ${marker}`);
   }
-
-  if (failures.length) {
-    throw new Error(`Fable directive output failed validation:\n- ${failures.join('\n- ')}`);
-  }
+  return failures;
 }
 
 async function callAnthropic({ apiKey, model, prompt, maxOutputTokens }) {
@@ -184,11 +174,7 @@ async function callAnthropic({ apiKey, model, prompt, maxOutputTokens }) {
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
     },
-    body: JSON.stringify({
-      model,
-      max_tokens: maxOutputTokens,
-      messages: [{ role: 'user', content: prompt }],
-    }),
+    body: JSON.stringify({ model, max_tokens: maxOutputTokens, messages: [{ role: 'user', content: prompt }] }),
   });
 
   const raw = await response.text();
@@ -198,11 +184,34 @@ async function callAnthropic({ apiKey, model, prompt, maxOutputTokens }) {
   } catch {
     data = { raw };
   }
-
-  if (!response.ok) {
-    throw new Error(`Anthropic API failed ${response.status}: ${JSON.stringify(data).slice(0, 2000)}`);
-  }
+  if (!response.ok) throw new Error(`Anthropic API failed ${response.status}: ${JSON.stringify(data).slice(0, 2000)}`);
   return data;
+}
+
+async function writeResult({ issue, contractItems, model, data, output, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, failures }) {
+  await fs.mkdir(OUT_DIR, { recursive: true });
+  const passed = failures.length === 0;
+  const meta = {
+    issueNumber: issue.number,
+    issueTitle: issue.title,
+    model,
+    stopReason: data.stop_reason ?? null,
+    estimatedInputTokens,
+    maxOutputTokens,
+    estimatedMaxCostUsd: Number(estimatedMaxCost.toFixed(6)),
+    usage: data.usage ?? null,
+    requiredOutputContract: contractItems,
+    sourceFiles: SOURCE_FILES.map(([filePath]) => filePath),
+    validation: passed ? 'passed' : 'rejected',
+    validationFailures: failures,
+    createdAt: new Date().toISOString(),
+  };
+  const failureSection = passed ? '' : `\n\n## VALIDATION FAILURES\n${failures.map((failure) => `- ${failure}`).join('\n')}\n`;
+  const report = `# Fable Issue Directive\n\nIssue: #${issue.number} — ${issue.title}\n\nModel: ${model}\n\nValidation: ${passed ? 'PASSED' : 'REJECTED'}${failureSection}\n\n---\n\n${output || '[no text output returned]'}\n`;
+  await fs.writeFile(OUT_MD, report, 'utf8');
+  await fs.writeFile(OUT_JSON, `${JSON.stringify(meta, null, 2)}\n`, 'utf8');
+  console.log(`Wrote ${OUT_MD}`);
+  console.log(`Wrote ${OUT_JSON}`);
 }
 
 async function main() {
@@ -231,39 +240,14 @@ async function main() {
   console.log(`Max output tokens: ${maxOutputTokens}`);
   console.log(`Estimated max cost USD: ${estimatedMaxCost.toFixed(4)}`);
 
-  if (estimatedInputTokens > maxInputTokens) {
-    throw new Error(`Input token estimate ${estimatedInputTokens} exceeds cap ${maxInputTokens}`);
-  }
-  if (estimatedMaxCost > maxEstimatedCost) {
-    throw new Error(`Estimated max cost $${estimatedMaxCost.toFixed(4)} exceeds cap $${maxEstimatedCost.toFixed(4)}`);
-  }
+  if (estimatedInputTokens > maxInputTokens) throw new Error(`Input token estimate ${estimatedInputTokens} exceeds cap ${maxInputTokens}`);
+  if (estimatedMaxCost > maxEstimatedCost) throw new Error(`Estimated max cost $${estimatedMaxCost.toFixed(4)} exceeds cap $${maxEstimatedCost.toFixed(4)}`);
 
   const data = await callAnthropic({ apiKey, model, prompt, maxOutputTokens });
   const output = extractText(data);
-  if (!output) throw new Error('Anthropic returned no text content.');
-  validateOutput(output, contractItems, data.stop_reason ?? null);
-
-  await fs.mkdir(OUT_DIR, { recursive: true });
-  const meta = {
-    issueNumber: issue.number,
-    issueTitle: issue.title,
-    model,
-    stopReason: data.stop_reason ?? null,
-    estimatedInputTokens,
-    maxOutputTokens,
-    estimatedMaxCostUsd: Number(estimatedMaxCost.toFixed(6)),
-    usage: data.usage ?? null,
-    requiredOutputContract: contractItems,
-    sourceFiles: SOURCE_FILES.map(([filePath]) => filePath),
-    validation: 'passed',
-    createdAt: new Date().toISOString(),
-  };
-
-  const report = `# Fable Issue Directive\n\nIssue: #${issue.number} — ${issue.title}\n\nModel: ${model}\n\nValidation: PASSED\n\n---\n\n${output}\n`;
-  await fs.writeFile(OUT_MD, report, 'utf8');
-  await fs.writeFile(OUT_JSON, `${JSON.stringify(meta, null, 2)}\n`, 'utf8');
-  console.log(`Wrote ${OUT_MD}`);
-  console.log(`Wrote ${OUT_JSON}`);
+  const failures = validateOutput(output, contractItems, data.stop_reason ?? null);
+  await writeResult({ issue, contractItems, model, data, output, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, failures });
+  if (failures.length) throw new Error(`Fable directive output failed validation:\n- ${failures.join('\n- ')}`);
 }
 
 main().catch((error) => {
