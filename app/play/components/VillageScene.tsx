@@ -210,20 +210,107 @@ function CampLife({ peopleCount, development }: { peopleCount: number; developme
   );
 }
 
+type BuildingVariant = "hut" | "storehouse" | "hall";
+
+// Shared deterministic physical-building glyph. Renders a compact timber/thatch
+// structure with a shaded wall body, an overhanging gabled roof with a ridge
+// line, a door, one or two windows, an optional chimney/smoke, and a soft
+// lower-right cast shadow. Width/height/rotation are supplied by the caller.
+function SettlementBuilding({
+  variant,
+  width,
+  height,
+  rotation = 0,
+  chimney = false,
+  smoke = false,
+  windows = 1,
+}: {
+  variant: BuildingVariant;
+  width: number;
+  height: number;
+  rotation?: number;
+  chimney?: boolean;
+  smoke?: boolean;
+  windows?: 0 | 1 | 2;
+}) {
+  const wallTone = variant === "hall" ? "#6b4a2f" : variant === "storehouse" ? "#5c4128" : "#7a5a38";
+  const wallShade = variant === "hall" ? "#4a3220" : variant === "storehouse" ? "#3d2d1a" : "#54391f";
+  const roofTone = variant === "hall" ? "#2f3a26" : variant === "storehouse" ? "#5a4a2a" : "#7a6238";
+  const roofShade = variant === "hall" ? "#1c2417" : variant === "storehouse" ? "#3c2f18" : "#4a3a20";
+  const doorTone = "#241a10";
+  const windowTone = "#f2c46a";
+
+  return (
+    <svg
+      viewBox="0 0 60 50"
+      width={width}
+      height={height}
+      style={{ transform: `rotate(${rotation}deg)`, overflow: "visible" }}
+      aria-hidden="true"
+    >
+      {/* cast shadow, lower-right */}
+      <ellipse cx="34" cy="45" rx="22" ry="4.5" fill="#000000" opacity="0.32" />
+
+      {/* wall body: light plane (left) + shade plane (right) */}
+      <rect x="10" y="24" width="40" height="20" fill={wallTone} />
+      <rect x="30" y="24" width="20" height="20" fill={wallShade} />
+      <rect x="10" y="24" width="40" height="20" fill="none" stroke="#1a120a" strokeOpacity="0.35" strokeWidth="0.6" />
+
+      {/* overhanging pitched/gabled roof */}
+      <polygon points="4,26 30,6 56,26 50,26 30,12 10,26" fill={roofTone} />
+      <polygon points="30,6 56,26 50,26 30,12" fill={roofShade} />
+      <line x1="30" y1="6" x2="30" y2="12" stroke="#1a1409" strokeOpacity="0.5" strokeWidth="0.8" />
+      <line x1="4" y1="26" x2="56" y2="26" stroke="#1a1409" strokeOpacity="0.4" strokeWidth="0.6" />
+
+      {/* door */}
+      <rect x="26" y="33" width="8" height="11" rx="1" fill={doorTone} />
+
+      {/* windows */}
+      {windows >= 1 ? <rect x="14" y="30" width="6" height="6" rx="0.6" fill={windowTone} opacity="0.85" /> : null}
+      {windows >= 2 ? <rect x="40" y="30" width="6" height="6" rx="0.6" fill={windowTone} opacity="0.85" /> : null}
+
+      {/* optional chimney + smoke */}
+      {chimney ? <rect x="40" y="10" width="4" height="10" fill="#3a2e22" /> : null}
+      {chimney && smoke ? (
+        <>
+          <circle cx="42" cy="6" r="2.2" fill="#e7e2d8" opacity="0.4" />
+          <circle cx="43.5" cy="2" r="2.8" fill="#e7e2d8" opacity="0.3" />
+        </>
+      ) : null}
+    </svg>
+  );
+}
+
 function ShelterCluster() {
-  const huts = [
-    [23, 38, "rotate-[-8deg]"], [29, 36, "rotate-[5deg]"], [34, 43, "rotate-[10deg]"], [19, 45, "rotate-[3deg]"],
+  const huts: Array<{ left: number; top: number; rotation: number; w: number; h: number; smoke: boolean; back?: boolean }> = [
+    { left: 20, top: 36, rotation: -8, w: 46, h: 38, smoke: true },
+    { left: 30, top: 34, rotation: 6, w: 40, h: 34, smoke: true, back: true },
+    { left: 34, top: 43, rotation: 11, w: 48, h: 40, smoke: false },
+    { left: 17, top: 46, rotation: 3, w: 42, h: 35, smoke: false },
   ];
   return (
     <div data-qa="village-structure-hut" className="absolute inset-0">
-      {huts.map(([left, top, rotate]) => (
-        <div key={`${left}-${top}`} className={`absolute h-10 w-14 ${rotate}`} style={{ left: `${left}%`, top: `${top}%` }}>
-          <div className="absolute bottom-0 h-7 w-14 rounded-b-lg border border-amber-100/40 bg-stone-200/85 shadow-lg" />
-          <div className="absolute left-1 top-0 h-8 w-12 rotate-45 rounded-sm bg-amber-800/90 shadow-md" />
-          <div className="absolute left-6 top-4 h-4 w-3 rounded-t-sm bg-black/35" />
-          <div className="absolute -top-4 left-6 h-6 w-4 rounded-full bg-stone-100/24 blur-sm" />
+      {huts.map((hut, index) => (
+        <div
+          key={`${hut.left}-${hut.top}`}
+          className="absolute -translate-x-1/2 -translate-y-1/2"
+          style={{ left: `${hut.left}%`, top: `${hut.top}%`, opacity: hut.back ? 0.92 : 1, zIndex: hut.back ? 1 : 2 }}
+        >
+          <SettlementBuilding
+            variant="hut"
+            width={hut.w}
+            height={hut.h}
+            rotation={hut.rotation}
+            chimney={hut.smoke}
+            smoke={hut.smoke}
+            windows={index % 2 === 0 ? 1 : 0}
+          />
         </div>
       ))}
+      {/* yard props: wood pile + barrel, touching the shared yard/path area */}
+      <div className="absolute left-[26%] top-[52%] h-2 w-6 -translate-x-1/2 rounded-full bg-amber-900/80 shadow-md" />
+      <div className="absolute left-[26%] top-[50%] h-2 w-5 -translate-x-1/2 rounded-full bg-amber-800/75 shadow-sm" />
+      <div className="absolute left-[24%] top-[55%] h-3 w-2.5 -translate-x-1/2 rounded-sm bg-stone-700/80 shadow-md" />
     </div>
   );
 }
@@ -253,50 +340,106 @@ function TimberAndFences() {
 
 function StorehouseSupplies() {
   return (
-    <div data-qa="village-storehouse-visual" className="absolute left-[61%] top-[35%] h-14 w-20 rounded-xl border border-amber-100/45 bg-yellow-800/90 shadow-[0_18px_34px_rgba(0,0,0,.34)]">
-      <div className="absolute -top-4 left-2 h-7 w-16 rotate-45 rounded-sm bg-yellow-950/90" />
-      <div className="absolute bottom-2 left-3 flex gap-1">
-        <span className="h-4 w-4 rounded-sm bg-amber-200/80" />
-        <span className="h-4 w-4 rounded-sm bg-stone-200/80" />
-        <span className="h-4 w-4 rounded-sm bg-lime-200/70" />
+    <div data-qa="village-storehouse-visual" className="absolute left-[60%] top-[32%] h-[4.4rem] w-[6.5rem]">
+      <SettlementBuilding variant="storehouse" width={104} height={68} windows={2} />
+      {/* wide door already rendered by shared glyph; add crates, sacks and stacked logs beside it */}
+      <div className="absolute -right-3 bottom-1 flex gap-1">
+        <span className="h-3.5 w-3.5 rounded-sm bg-amber-200/85 shadow-md" />
+        <span className="h-3.5 w-3.5 rounded-sm bg-stone-200/80 shadow-md" />
+      </div>
+      <div className="absolute -right-5 top-6 h-4 w-4 rounded-full bg-lime-200/70 shadow-md" />
+      <div className="absolute -left-4 bottom-1 flex flex-col gap-0.5">
+        <span className="block h-1.5 w-8 rounded-full bg-amber-900/85 shadow-sm" />
+        <span className="block h-1.5 w-7 rounded-full bg-amber-800/80 shadow-sm" />
       </div>
     </div>
   );
 }
 
 function MarketActivity() {
+  const stalls = [
+    { left: 65, top: 63, tone: "#c9a24a", tone2: "#8a6c2e" },
+    { left: 73, top: 68, tone: "#5c8f7a", tone2: "#3a5c4e" },
+    { left: 80, top: 62, tone: "#b25c4a", tone2: "#7a3a2e" },
+  ];
   return (
     <div data-qa="village-market-activity" className="absolute inset-0">
-      <div className="absolute left-[49%] top-[68%] h-3 w-[35%] rotate-[-7deg] rounded-full bg-amber-200/45 shadow-[0_0_18px_rgba(251,191,36,.16)]" />
-      <div className="absolute left-[66%] top-[63%] flex gap-1">
-        <span className="h-10 w-4 rounded-t-full bg-sky-300/85" />
-        <span className="h-10 w-4 rounded-t-full bg-amber-300/85" />
-        <span className="h-10 w-4 rounded-t-full bg-emerald-300/85" />
+      {stalls.map((stall) => (
+        <div key={`${stall.left}-${stall.top}`} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${stall.left}%`, top: `${stall.top}%` }}>
+          <svg viewBox="0 0 34 30" width="30" height="26" style={{ overflow: "visible" }} aria-hidden="true">
+            <ellipse cx="18" cy="27" rx="13" ry="2.4" fill="#000" opacity="0.28" />
+            {/* posts */}
+            <rect x="6" y="10" width="1.8" height="16" fill="#3a2a18" />
+            <rect x="26" y="10" width="1.8" height="16" fill="#2c2013" />
+            {/* two-tone striped awning */}
+            <polygon points="3,10 31,10 27,3 7,3" fill={stall.tone} />
+            <polygon points="14,10 24,10 22,3 16,3" fill={stall.tone2} />
+            {/* small goods table */}
+            <rect x="9" y="19" width="16" height="4" fill="#5a4028" />
+            <rect x="10" y="16.5" width="3" height="2.5" fill="#d8b46a" />
+            <rect x="14.5" y="16.5" width="3" height="2.5" fill="#8fae4a" />
+            <rect x="19" y="16.5" width="3" height="2.5" fill="#c96b4a" />
+          </svg>
+        </div>
+      ))}
+      {/* compact cart with two wheels and a few crates/barrels along the existing road */}
+      <div className="absolute left-[70%] top-[73%] -translate-x-1/2 -translate-y-1/2">
+        <svg viewBox="0 0 40 22" width="34" height="18" style={{ overflow: "visible" }} aria-hidden="true">
+          <ellipse cx="20" cy="20" rx="15" ry="1.8" fill="#000" opacity="0.25" />
+          <rect x="6" y="7" width="24" height="7" rx="0.8" fill="#5a4028" />
+          <rect x="8" y="3" width="5" height="4" fill="#c9a24a" />
+          <rect x="14" y="2.5" width="5" height="4.5" fill="#8fae4a" />
+          <circle cx="12" cy="17" r="3.6" fill="none" stroke="#2c2013" strokeWidth="1.4" />
+          <circle cx="24" cy="17" r="3.6" fill="none" stroke="#2c2013" strokeWidth="1.4" />
+        </svg>
       </div>
-      <span className="absolute left-[78%] top-[66%] h-3 w-7 rounded-full bg-stone-200/65" />
-      <span className="absolute left-[72%] top-[69%] h-3 w-7 rounded-full bg-amber-100/65" />
     </div>
   );
 }
 
 function CouncilPresence() {
   return (
-    <div data-qa="village-council-visual" className="absolute left-[43%] top-[24%] h-16 w-16 rounded-2xl border-4 border-amber-100/70 bg-amber-500/45 shadow-[0_0_36px_rgba(251,191,36,.22)]">
-      <div className="absolute -top-5 left-1/2 h-6 w-1 -translate-x-1/2 bg-amber-100" />
-      <div className="absolute -top-6 left-[52%] h-4 w-7 rounded-r-md bg-emerald-300/85" />
-      <div className="absolute inset-x-2 bottom-2 h-2 rounded-full bg-black/28" />
+    <div data-qa="village-council-visual" className="absolute left-[40%] top-[19%] h-[5.6rem] w-[7.6rem]">
+      <SettlementBuilding variant="hall" width={122} height={90} windows={2} chimney smoke />
+      {/* banner pole, taller than storehouse/huts, dominant landmark */}
+      <div className="absolute left-1/2 top-[-1.4rem] h-6 w-[3px] -translate-x-1/2 bg-amber-100/80" />
+      <div className="absolute left-[calc(50%+1px)] top-[-1.4rem] h-3.5 w-5 rounded-r-sm bg-emerald-300/85 shadow-md" />
     </div>
   );
 }
 
 function WatchDefense() {
   return (
-    <div data-qa="village-watch-visual" className="absolute left-[80%] top-[18%] h-20 w-10">
-      <div className="absolute bottom-0 left-3 h-16 w-5 bg-amber-950/95 shadow-lg" />
-      <div className="absolute left-0 top-0 h-6 w-11 rounded-sm bg-amber-200/80" />
-      <div className="absolute left-3 top-6 h-12 w-[2px] rotate-[-18deg] bg-amber-100/45" />
-      <div className="absolute left-7 top-6 h-12 w-[2px] rotate-[18deg] bg-amber-100/45" />
-      <span className="absolute -right-8 top-8 h-2 w-8 rounded-full bg-red-200/50" />
+    <div data-qa="village-watch-visual" className="absolute left-[78%] top-[15%] h-[5.6rem] w-[3.4rem]">
+      <svg viewBox="0 0 36 62" width="54" height="90" style={{ overflow: "visible" }} aria-hidden="true">
+        <ellipse cx="18" cy="58" rx="13" ry="3" fill="#000" opacity="0.3" />
+        {/* four timber supports */}
+        <rect x="4" y="24" width="2.4" height="32" fill="#3a2a18" />
+        <rect x="12" y="24" width="2.4" height="32" fill="#2c2013" />
+        <rect x="22" y="24" width="2.4" height="32" fill="#2c2013" />
+        <rect x="30" y="24" width="2.4" height="32" fill="#3a2a18" />
+        {/* cross braces / ladder */}
+        <line x1="4" y1="46" x2="14.4" y2="38" stroke="#4a3620" strokeWidth="1.4" />
+        <line x1="14.4" y1="46" x2="4" y2="38" stroke="#4a3620" strokeWidth="1.4" />
+        <line x1="10" y1="30" x2="10" y2="54" stroke="#4a3620" strokeWidth="1" />
+        <line x1="8" y1="34" x2="12" y2="34" stroke="#4a3620" strokeWidth="1" />
+        <line x1="8" y1="42" x2="12" y2="42" stroke="#4a3620" strokeWidth="1" />
+        <line x1="8" y1="50" x2="12" y2="50" stroke="#4a3620" strokeWidth="1" />
+        {/* platform */}
+        <rect x="2" y="20" width="32" height="5" fill="#5a4028" />
+        <rect x="2" y="20" width="32" height="5" fill="none" stroke="#1a1409" strokeOpacity="0.4" strokeWidth="0.5" />
+        {/* roof */}
+        <polygon points="0,20 18,6 36,20" fill="#3a4a2c" />
+        <polygon points="18,6 36,20 30,20" fill="#26301c" />
+        <line x1="18" y1="6" x2="18" y2="20" stroke="#141a0e" strokeOpacity="0.5" strokeWidth="0.8" />
+        {/* short palisade segments */}
+        <rect x="-6" y="50" width="2" height="10" fill="#3a2a18" />
+        <rect x="-2" y="48" width="2" height="12" fill="#4a3620" />
+        <rect x="38" y="49" width="2" height="11" fill="#4a3620" />
+        <rect x="42" y="51" width="2" height="9" fill="#3a2a18" />
+      </svg>
+      {/* small warm fire basket / beacon */}
+      <div className="absolute left-[52%] top-[8%] h-2 w-2 -translate-x-1/2 rounded-full bg-orange-400/90 shadow-[0_0_10px_rgba(251,146,60,.7)]" />
     </div>
   );
 }
