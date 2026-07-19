@@ -1,0 +1,88 @@
+name: Fable Issue Directive
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: read
+  issues: write
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: fable-issue-directive-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  fable-issue-directive:
+    name: Fable Issue Directive
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: >-
+      github.event.issue.user.login == 'tomat60' &&
+      startsWith(github.event.issue.title, 'FABLE DIRECTIVE:')
+
+    steps:
+      - name: Comment directive started
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: `Fable directive started under the binding-output protocol.\n\nRun: ${runUrl}`,
+            });
+
+      - name: Checkout repository read-only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run validated Fable issue directive
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: claude-fable-5
+          MAX_INPUT_TOKENS: '70000'
+          MAX_OUTPUT_TOKENS: '9000'
+          MAX_ESTIMATED_COST_USD: '1.50'
+          INPUT_PRICE_PER_MILLION_USD: '10'
+          OUTPUT_PRICE_PER_MILLION_USD: '50'
+        run: node scripts/fable-issue-directive.mjs
+
+      - name: Upload directive artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fable-issue-directive-${{ github.event.issue.number }}
+          path: |
+            fable-output/fable-issue-directive.md
+            fable-output/fable-issue-directive-meta.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Comment directive finished
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = `${{ job.status }}`;
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+            const meaning = status === 'success'
+              ? 'Output passed the exact-heading and compliance validation gate.'
+              : 'Output was rejected or the run failed; inspect logs/artifact before retrying.';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: `Fable directive finished with status: ${status}.\n\n${meaning}\n\nRun and artifacts: ${runUrl}`,
+            });
