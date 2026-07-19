@@ -127,6 +127,54 @@ async function runScenario(page, scenario, evidence) {
   await assertStored(page, "(state, args) => state.postCrisisCountermoveOrigin === args.origin && state.postCrisisResponseId === args.responseId", scenario, `${scenario.origin} reload persistence`);
   const reloadShot = `${scenario.prefix}-04-reload-persisted.png`;
   await page.screenshot({ path: `${SHOT_DIR}/${reloadShot}`, fullPage: true }); evidence.push(reloadShot);
+
+  await runPayoffSecureCheck(page, scenario, evidence);
+}
+
+async function runPayoffSecureCheck(page, scenario, evidence) {
+  const target = page.locator('[data-qa="post-crisis-frontier-target"]');
+  await target.waitFor({ state: "visible", timeout: 5000 });
+  const payoffOrigin = await target.getAttribute("data-frontier-payoff-origin");
+  if (!payoffOrigin) throw new Error(`${scenario.origin} payoff target did not expose an origin`);
+
+  await page.locator('[data-qa="view-world"]').click({ force: true });
+  await page.locator(`[data-qa="world-post-crisis-payoff"][data-frontier-payoff-origin="${payoffOrigin}"]`).waitFor({ state: "visible", timeout: 5000 });
+  const worldPayoffShot = `${scenario.prefix}-05-world-payoff-marker.png`;
+  await page.screenshot({ path: `${SHOT_DIR}/${worldPayoffShot}`, fullPage: true }); evidence.push(worldPayoffShot);
+
+  await page.locator('[data-qa="view-council"]').click({ force: true });
+  await page.locator(`[data-qa="post-crisis-frontier-target"][data-frontier-payoff-origin="${payoffOrigin}"]`).waitFor({ state: "visible", timeout: 5000 });
+
+  const preSecureState = await page.evaluate((key) => {
+    try { return JSON.parse(window.localStorage.getItem(key) ?? "{}"); } catch { return {}; }
+  }, KEY);
+  const expectedInfluence = preSecureState?.resources?.influence ?? scenario.expectedInfluence;
+
+  await page.locator('[data-qa="secure-post-crisis-frontier"]').click({ force: true });
+  await page.locator('[data-qa="post-crisis-frontier-secured"]').waitFor({ state: "visible", timeout: 5000 });
+
+  await assertStored(
+    page,
+    "(state, args) => state.postCrisisFrontierPayoffSecured === true && state.resources.influence === args.expectedInfluence + 1 && Array.isArray(state.chronicle) && state.chronicle[0]?.title === 'Frontier payoff secured'",
+    { expectedInfluence },
+    `${scenario.origin} payoff secure persistence`,
+  );
+  const securedShot = `${scenario.prefix}-06-payoff-secured.png`;
+  await page.screenshot({ path: `${SHOT_DIR}/${securedShot}`, fullPage: true }); evidence.push(securedShot);
+
+  await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
+  await page.locator('[data-qa="post-crisis-frontier-secured"]').waitFor({ state: "visible", timeout: 5000 });
+  if (await page.locator('[data-qa="secure-post-crisis-frontier"]').count() !== 0) {
+    throw new Error(`${scenario.origin} secure button still visible after reload`);
+  }
+  await assertStored(
+    page,
+    "(state, args) => state.postCrisisFrontierPayoffSecured === true && state.resources.influence === args.expectedInfluence + 1",
+    { expectedInfluence },
+    `${scenario.origin} payoff no-double-reward persistence`,
+  );
+  const reloadSecuredShot = `${scenario.prefix}-07-payoff-reload-secured.png`;
+  await page.screenshot({ path: `${SHOT_DIR}/${reloadSecuredShot}`, fullPage: true }); evidence.push(reloadSecuredShot);
 }
 
 async function assertResetClears(page, evidence) {
