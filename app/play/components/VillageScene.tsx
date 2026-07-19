@@ -51,20 +51,15 @@ export function VillageScene({ state, dispatch }: { state: PlayState; dispatch: 
         <div className="absolute bottom-[7%] left-[18%] h-[26%] w-[52%] rounded-full bg-amber-500/10 blur-3xl" />
       </div>
 
-      <div className="absolute left-4 right-4 top-[5.7rem] z-10 flex items-start justify-between gap-3 md:left-6 md:right-6 md:top-[6.6rem]">
-        <div className="max-w-[560px] rounded-3xl border border-amber-100/18 bg-black/42 p-3 shadow-2xl backdrop-blur-md md:p-4">
-          <p className="text-[9px] font-black uppercase tracking-[0.24em] text-amber-200/65">Village scene</p>
-          <h2 className="mt-1 text-2xl font-black text-amber-50 md:text-4xl">{owned?.name ?? "No homeland"}</h2>
-          <p className="mt-1 text-xs leading-relaxed text-amber-50/65 md:text-sm">Orders must change the land below, not just the sidebar. Build the first visible districts here.</p>
-        </div>
-        <div className="hidden grid-cols-3 gap-2 text-center md:grid">
-          <Metric label="Phase" value={phase} />
-          <Metric label="People" value={population} />
-          <Metric label="Dev" value={score} />
+      <div className="absolute left-4 right-4 top-[5.7rem] z-10 md:left-6 md:right-6 md:top-[6.2rem]">
+        <div className="inline-flex max-w-full items-center gap-2 rounded-2xl border border-amber-100/18 bg-black/44 px-3 py-1.5 shadow-2xl backdrop-blur-md">
+          <h2 className="truncate text-base font-black text-amber-50 md:text-lg">{owned?.name ?? "No homeland"}</h2>
+          <span className="hidden h-3 w-px bg-amber-100/25 md:block" aria-hidden="true" />
+          <p className="hidden truncate text-[10px] font-black uppercase tracking-[0.12em] text-amber-100/65 md:block">{phase} · {population} people · dev {score}</p>
         </div>
       </div>
 
-      <div className="absolute bottom-[8.8rem] left-3 right-3 top-[12.2rem] z-0 md:bottom-[9.3rem] md:left-6 md:right-6 md:top-[13.6rem] lg:bottom-[6.2rem]">
+      <div className="absolute bottom-[8.8rem] left-3 right-3 top-[9.4rem] z-0 md:bottom-[9.3rem] md:left-6 md:right-6 md:top-[10.4rem] lg:bottom-[6.2rem]">
         <div className="relative h-full w-full overflow-hidden rounded-[2rem] border border-amber-100/18 bg-[#263f25] shadow-[0_30px_90px_rgba(0,0,0,.45)]">
           <VillageGround />
           <VillageRoads state={state} />
@@ -92,14 +87,25 @@ function VillagePlotNode({ plot, state }: { plot: VillagePlot; state: PlayState 
   const built = plot.marker ? state.settlementMarkers.includes(plot.marker) : plot.id === "fields" ? state.completedOrders.includes("gather-food") : state.completedOrders.includes("open-market");
   const building = !built && plot.marker ? plannedSoon(plot.marker, state) : false;
   const qaState: PlotState = built ? "built" : building ? "building" : "empty";
+  const containerClass =
+    qaState === "built"
+      ? "absolute rounded-[1.2rem] transition-all duration-300"
+      : qaState === "building"
+        ? "absolute rounded-[1.2rem] border border-dashed border-amber-100/25 bg-amber-100/5 transition-all duration-300"
+        : "absolute rounded-[1.2rem] transition-all duration-300 opacity-40";
   return (
-    <div data-qa="village-plot" data-qa-id={plot.id} data-qa-state={qaState} className={`absolute rounded-[1.2rem] border p-2 shadow-xl transition-all duration-300 ${qaState === "built" ? "border-amber-100/55 bg-amber-200/22 shadow-amber-950/40" : qaState === "building" ? "border-amber-200/35 bg-amber-100/12" : "border-amber-100/10 bg-black/18"}`} style={{ left: `${plot.x}%`, top: `${plot.y}%`, width: `${plot.w}%`, height: `${plot.h}%` }}>
+    <div data-qa="village-plot" data-qa-id={plot.id} data-qa-state={qaState} className={containerClass} style={{ left: `${plot.x}%`, top: `${plot.y}%`, width: `${plot.w}%`, height: `${plot.h}%` }}>
       <div className="relative h-full w-full">
         {renderVillageIcon(plot.id, qaState)}
-        <div className="absolute inset-x-0 bottom-0 rounded-xl bg-black/32 px-2 py-1 backdrop-blur-sm">
-          <p className="truncate text-[10px] font-black text-amber-50 md:text-xs">{plot.label}</p>
-          <p className="hidden truncate text-[9px] text-amber-50/55 md:block">{qaState === "built" ? plot.hint : qaState === "building" ? "planned next" : "empty plot"}</p>
-        </div>
+        {qaState === "built" ? (
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-lg bg-black/38 px-2 py-0.5 backdrop-blur-sm">
+            <p className="truncate text-[9px] font-black text-amber-50">{plot.label}</p>
+          </div>
+        ) : qaState === "building" ? (
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-lg bg-black/24 px-2 py-0.5">
+            <p className="truncate text-[8px] font-black uppercase tracking-[0.1em] text-amber-100/55">planned</p>
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -115,13 +121,17 @@ function SettlementCredibilityLayer({ state }: { state: PlayState }) {
   const hasWatch = state.settlementMarkers.includes("watch");
   const institutionVisuals = getInstitutionVisuals(state.retentionRecords);
   const peopleCount = Math.min(12, 3 + state.completedOrders.length + Math.max(0, state.settlementMarkers.length - 1));
+  const developmentFactor = Math.min(
+    1,
+    (state.completedOrders.length + state.settlementMarkers.length) / 12,
+  );
 
   return (
     <div data-qa="village-credibility-layer" className="pointer-events-none absolute inset-0 z-[1]">
       <div data-qa="village-ownership-flag" className="absolute left-[47%] top-[48%] h-8 w-1 rounded-full bg-amber-100 shadow-[0_0_18px_rgba(251,191,36,.45)]">
         <div className="absolute left-1 top-0 h-4 w-7 rounded-r-md bg-amber-300/90 shadow-lg" />
       </div>
-      <CampLife peopleCount={peopleCount} />
+      <CampLife peopleCount={peopleCount} developmentFactor={developmentFactor} />
       {hasShelter ? <ShelterCluster /> : null}
       {hasFood ? <FoodFields /> : null}
       {hasTimber ? <TimberAndFences /> : null}
@@ -134,16 +144,36 @@ function SettlementCredibilityLayer({ state }: { state: PlayState }) {
   );
 }
 
-function CampLife({ peopleCount }: { peopleCount: number }) {
+function CampLife({ peopleCount, developmentFactor }: { peopleCount: number; developmentFactor: number }) {
   const people = [
     [44, 55], [48, 58], [52, 54], [41, 61], [57, 59], [36, 52], [62, 64], [31, 45], [68, 51], [46, 42], [53, 69], [73, 33],
   ].slice(0, peopleCount);
+  const glowScale = 1 + developmentFactor * 0.6;
   return (
     <>
-      <div data-qa="village-hearth-smoke" className="absolute left-[44%] top-[43%] h-14 w-14 rounded-full bg-orange-300/16 blur-xl" />
-      <div className="absolute left-[46%] top-[45%] h-8 w-8 rounded-full bg-orange-300/55 shadow-[0_0_30px_rgba(251,146,60,.55)]" />
+      <div
+        data-qa="village-hearth-smoke"
+        className="absolute left-[44%] top-[43%] h-14 w-14 rounded-full bg-orange-300/16 blur-xl"
+        style={{ transform: `scale(${glowScale})` }}
+      />
+      <div className="absolute left-[38%] top-[40%] h-16 w-16 rounded-full border border-stone-300/25 bg-stone-800/25" />
+      <div className="absolute left-[39.5%] top-[41.3%] flex h-[13%] w-[13%] items-center justify-center">
+        <span className="absolute h-3.5 w-3.5 -rotate-12 rounded-sm bg-stone-500/70" />
+        <span className="absolute h-3.5 w-3.5 rotate-45 rounded-sm bg-stone-400/70" />
+        <span className="absolute h-3.5 w-3.5 rotate-[100deg] rounded-sm bg-stone-500/60" />
+      </div>
+      <div
+        className="absolute left-[42%] top-[42%] h-10 w-10 animate-pulse rounded-full bg-orange-400/25 blur-md"
+        style={{ transform: `scale(${glowScale})` }}
+      />
+      <div className="absolute left-[45%] top-[44%] h-6 w-6 rounded-full bg-orange-300/60 shadow-[0_0_24px_rgba(251,146,60,.5)]" />
+      <div className="absolute left-[46.4%] top-[45.4%] h-3 w-3 animate-pulse rounded-full bg-amber-100/90 shadow-[0_0_16px_rgba(254,240,138,.85)]" />
+      <div className="absolute left-[46.8%] top-[33%] h-8 w-4 rounded-full bg-stone-100/12 blur-sm" />
       {people.map(([left, top], index) => (
-        <span key={`${left}-${top}`} data-qa="village-population" data-person-index={index} className="absolute h-2.5 w-2.5 rounded-full border border-amber-50/50 bg-amber-100 shadow-[0_0_8px_rgba(254,243,199,.45)]" style={{ left: `${left}%`, top: `${top}%` }} />
+        <span key={`${left}-${top}`} data-qa="village-population" data-person-index={index} className="absolute h-3 w-2 -translate-x-1/2 -translate-y-1/2" style={{ left: `${left}%`, top: `${top}%` }}>
+          <span className="absolute left-1/2 top-0 h-1.5 w-1.5 -translate-x-1/2 rounded-full border border-amber-50/60 bg-amber-100 shadow-[0_0_6px_rgba(254,243,199,.5)]" />
+          <span className="absolute left-1/2 bottom-0 h-2 w-1.5 -translate-x-1/2 rounded-t-full bg-amber-200/85 shadow-[0_0_5px_rgba(254,243,199,.4)]" />
+        </span>
       ))}
     </>
   );
