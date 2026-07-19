@@ -83,10 +83,17 @@ export function VillageScene({ state, dispatch }: { state: PlayState; dispatch: 
 
       <div className="absolute bottom-[7.6rem] left-1.5 right-1.5 top-[8.4rem] z-0 md:bottom-[8.2rem] md:left-2.5 md:right-2.5 md:top-[9.3rem] lg:bottom-[5rem]">
         <div className="relative h-full w-full overflow-hidden rounded-[1rem] border border-amber-100/10 shadow-[0_20px_60px_rgba(0,0,0,.4)]">
-          <VillageGround />
-          <VillageRoads state={state} />
-          {hasClaim ? <SettlementCredibilityLayer state={state} /> : null}
-          {villagePlots.map((plot) => <VillagePlotNode key={plot.id} plot={plot} state={state} />)}
+          <div
+            className="absolute inset-0 origin-center lg:scale-100 lg:translate-x-0 lg:translate-y-0"
+            style={{ transform: undefined }}
+          >
+            <div className="absolute inset-0 scale-[1.14] translate-x-[-2%] translate-y-[-3%] lg:scale-100 lg:translate-x-0 lg:translate-y-0">
+              <VillageGround />
+              <VillageRoads state={state} />
+              {hasClaim ? <SettlementCredibilityLayer state={state} /> : null}
+              {villagePlots.map((plot) => <VillagePlotNode key={plot.id} plot={plot} state={state} />)}
+            </div>
+          </div>
           {!hasClaim ? <UnclaimedOverlay dispatch={dispatch} /> : null}
         </div>
       </div>
@@ -154,6 +161,7 @@ function SettlementCredibilityLayer({ state }: { state: PlayState }) {
 
   return (
     <div data-qa="village-credibility-layer" className="pointer-events-none absolute inset-0 z-[1]">
+      <DistrictGroundLayer state={state} />
       <div data-qa="village-ownership-flag" className="absolute left-[47%] top-[48%] h-8 w-1 rounded-full bg-amber-100 shadow-[0_0_18px_rgba(251,191,36,.45)]">
         <div className="absolute left-1 top-0 h-4 w-7 rounded-r-md bg-amber-300/90 shadow-lg" />
       </div>
@@ -165,14 +173,109 @@ function SettlementCredibilityLayer({ state }: { state: PlayState }) {
       {hasMarket ? <MarketActivity /> : null}
       {hasCouncil ? <CouncilPresence /> : null}
       {hasWatch ? <WatchDefense /> : null}
+      <DistrictPropsLayer state={state} />
       {institutionVisuals.length > 0 ? <InstitutionDistrictLayer institutions={institutionVisuals} /> : null}
+    </div>
+  );
+}
+
+// Compact deterministic local ground-patch constants (Run B). Small, irregular
+// worn-earth/packed-ground shapes beneath each district's structures.
+const GROUND_CAMP = "M40,44 C46,41 52,42 55,46 C57,50 55,56 50,58 C45,60 40,57 39,52 Z";
+const GROUND_SHELTER = "M17,32 C25,29 34,30 38,35 C40,42 38,50 33,54 C26,57 18,54 16,47 C14,41 15,36 17,32 Z";
+const GROUND_STOREHOUSE = "M57,31 C65,29 73,31 76,37 C77,42 75,48 70,51 C63,53 57,50 56,44 C55,39 55,35 57,31 Z";
+const GROUND_MARKET = "M60,58 C68,56 80,58 86,62 C87,66 84,70 76,72 C68,74 61,72 59,67 Z";
+const GROUND_COUNCIL = "M36,18 C44,15 56,16 61,21 C63,27 60,34 52,37 C44,39 37,36 35,29 C34,25 34,21 36,18 Z";
+const GROUND_WATCH = "M75,12 C82,10 90,13 91,20 C92,26 88,32 81,34 C76,35 74,30 74,24 C74,20 74,15 75,12 Z";
+
+function DistrictGroundLayer({ state }: { state: PlayState }) {
+  const hasShelter = state.settlementMarkers.includes("shelter");
+  const hasStorehouse = state.settlementMarkers.includes("storehouse");
+  const hasMarket = state.settlementMarkers.includes("market");
+  const hasCouncil = state.settlementMarkers.includes("council");
+  const hasWatch = state.settlementMarkers.includes("watch");
+  return (
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden="true">
+      <path d={GROUND_CAMP} fill="#5a4a2a" opacity="0.4" />
+      {hasShelter ? <path d={GROUND_SHELTER} fill="#4f4028" opacity="0.36" /> : null}
+      {hasStorehouse ? <path d={GROUND_STOREHOUSE} fill="#4a3d24" opacity="0.36" /> : null}
+      {hasMarket ? <path d={GROUND_MARKET} fill="#5a4a2e" opacity="0.34" /> : null}
+      {hasCouncil ? <path d={GROUND_COUNCIL} fill="#5c5448" opacity="0.4" /> : null}
+      {hasWatch ? <path d={GROUND_WATCH} fill="#4a463d" opacity="0.4" /> : null}
+    </svg>
+  );
+}
+
+function FenceSegment({ left, top, width, rotation = 0 }: { left: number; top: number; width: number; rotation?: number }) {
+  return (
+    <div
+      className="absolute h-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-900/55"
+      style={{ left: `${left}%`, top: `${top}%`, width: `${width}%`, transform: `translate(-50%, -50%) rotate(${rotation}deg)` }}
+    />
+  );
+}
+
+function CrateStack({ left, top }: { left: number; top: number }) {
+  return (
+    <div className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${left}%`, top: `${top}%` }}>
+      <span className="block h-2.5 w-2.5 rounded-sm bg-amber-700/70 shadow-sm" />
+    </div>
+  );
+}
+
+function Haystack({ left, top }: { left: number; top: number }) {
+  return <div className="absolute h-2 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-500/55 shadow-sm" style={{ left: `${left}%`, top: `${top}%` }} />;
+}
+
+function GardenPatch({ left, top }: { left: number; top: number }) {
+  return <div className="absolute h-2 w-3 -translate-x-1/2 -translate-y-1/2 rounded-sm bg-lime-700/45" style={{ left: `${left}%`, top: `${top}%` }} />;
+}
+
+function BannerProp({ left, top }: { left: number; top: number }) {
+  return (
+    <div className="absolute -translate-x-1/2 -translate-y-full" style={{ left: `${left}%`, top: `${top}%` }}>
+      <span className="block h-3 w-[2px] bg-amber-100/70" />
+      <span className="absolute left-[2px] top-0 h-1.5 w-2 rounded-r-sm bg-emerald-300/75" />
+    </div>
+  );
+}
+
+function DistrictPropsLayer({ state }: { state: PlayState }) {
+  const hasShelter = state.settlementMarkers.includes("shelter");
+  const hasStorehouse = state.settlementMarkers.includes("storehouse");
+  const hasWatch = state.settlementMarkers.includes("watch");
+  const hasCouncil = state.settlementMarkers.includes("council");
+  return (
+    <div className="absolute inset-0">
+      {hasShelter ? (
+        <>
+          <FenceSegment left={20} top={31} width={9} rotation={-6} />
+          <FenceSegment left={30} top={29} width={8} rotation={4} />
+          <Haystack left={35} top={50} />
+          <GardenPatch left={19} top={51} />
+        </>
+      ) : null}
+      {hasStorehouse ? <CrateStack left={73} top={48} /> : null}
+      {hasWatch ? (
+        <>
+          <FenceSegment left={78} top={33} width={6} rotation={2} />
+          <FenceSegment left={86} top={31} width={6} rotation={-3} />
+        </>
+      ) : null}
+      {hasCouncil ? (
+        <>
+          <BannerProp left={38} top={22} />
+          <BannerProp left={58} top={22} />
+        </>
+      ) : null}
     </div>
   );
 }
 
 function CampLife({ peopleCount, development }: { peopleCount: number; development: number }) {
   const people = [
-    [44, 55], [48, 58], [52, 54], [41, 61], [57, 59], [36, 52], [62, 64], [31, 45], [68, 51], [46, 42], [53, 69], [73, 33],
+    [45, 54], [50, 57], [43, 60], [39, 56], [36, 62], [33, 66], [65, 68], [70, 71], [61, 64],
+    [46, 41], [52, 39], [58, 34],
   ].slice(0, peopleCount);
   const glowScale = 0.85 + Math.min(1, development / 100) * 0.5;
   return (
@@ -389,7 +492,7 @@ function StorehouseSupplies() {
 
 function MarketActivity() {
   const stalls = [
-    { left: 65, top: 63, tone: "#c9a24a", tone2: "#8a6c2e" },
+    { left: 64, top: 63, tone: "#c9a24a", tone2: "#8a6c2e" },
     { left: 73, top: 68, tone: "#5c8f7a", tone2: "#3a5c4e" },
     { left: 80, top: 62, tone: "#b25c4a", tone2: "#7a3a2e" },
   ];
@@ -430,11 +533,19 @@ function MarketActivity() {
 
 function CouncilPresence() {
   return (
+    <div className="absolute inset-0">
+    <div className="absolute left-[26%] top-[24%]" style={{ width: "clamp(56px, 6.4vw, 74px)", height: "clamp(44px, 5vw, 58px)" }}>
+      <SettlementBuilding variant="hut" width="100%" height="100%" rotation={-4} windows={0} />
+    </div>
+    <div className="absolute left-[66%] top-[26%]" style={{ width: "clamp(58px, 6.6vw, 76px)", height: "clamp(46px, 5.2vw, 60px)" }}>
+      <SettlementBuilding variant="storehouse" width="100%" height="100%" rotation={5} windows={1} />
+    </div>
     <div data-qa="village-council-visual" className="absolute left-[40%] top-[19%]" style={{ width: "clamp(128px, 14.8vw, 170px)", height: "clamp(96px, 11.2vw, 128px)" }}>
       <SettlementBuilding variant="hall" width="100%" height="100%" windows={2} chimney smoke />
       {/* banner pole, taller than storehouse/huts, dominant landmark */}
       <div className="absolute left-1/2 top-[-1.4rem] h-6 w-[3px] -translate-x-1/2 bg-amber-100/80" />
       <div className="absolute left-[calc(50%+1px)] top-[-1.4rem] h-3.5 w-5 rounded-r-sm bg-emerald-300/85 shadow-md" />
+    </div>
     </div>
   );
 }
@@ -668,9 +779,9 @@ function VillageRoads({ state }: { state: PlayState }) {
   // are omitted rather than shown as faint hub lines.
   function DirtPath({ d, active, trunk }: { d: string; active: boolean; trunk?: boolean }) {
     if (!active) return null;
-    const underW = trunk ? 6.2 : 3.4;
-    const dirtW = trunk ? 3.6 : 1.9;
-    const rutW = trunk ? 1 : 0.6;
+    const underW = trunk ? 4.7 : 2.7;
+    const dirtW = trunk ? 2.7 : 1.5;
+    const rutW = trunk ? 0.65 : 0.42;
     const opacityScale = active ? 1 : 0.32;
     return (
       <g opacity={opacityScale}>
@@ -684,7 +795,7 @@ function VillageRoads({ state }: { state: PlayState }) {
   return (
     <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden="true">
       {/* the only two paths permitted to touch the hearth */}
-      <DirtPath d={LOWER_TRUNK} active trunk />
+      <DirtPath d={LOWER_TRUNK} active trunk={activeRoad} />
       <DirtPath d={CIVIC_TRUNK} active={councilActive} trunk />
       {marketActive || activeRoad ? <DirtPath d={LOWER_TRUNK_MARKET_BRANCH} active={marketActive || activeRoad} trunk /> : null}
 
