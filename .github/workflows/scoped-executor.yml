@@ -35,11 +35,34 @@ jobs:
               body: `Scoped executor started.\n\nRun: ${runUrl}\n\nThis run may create a draft PR, but it will not merge anything.`,
             });
 
+      - name: Resolve safe base ref
+        id: base_ref
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = String(context.payload.issue.body ?? "");
+            const section = body.match(/##\s+Base ref\s*\n([\s\S]*?)(?=\n##\s|$)/i);
+            const requested = section?.[1]?.match(/`([^`]+)`/)?.[1]?.trim();
+            const ref = requested || "main";
+            const safe = /^(main|agent\/[A-Za-z0-9._/-]+|gpt56\/[A-Za-z0-9._/-]+)$/.test(ref) && !ref.includes("..");
+            if (!safe) {
+              core.setFailed(`Unsafe executor base ref: ${ref}`);
+              return;
+            }
+            core.setOutput("ref", ref);
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: `Executor base ref resolved to: \`${ref}\`.`,
+            });
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+          ref: ${{ steps.base_ref.outputs.ref }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
