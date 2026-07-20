@@ -47,6 +47,9 @@ jobs:
       - name: Generate Village progression evidence
         run: npm run qa:village
 
+      - name: Generate Village progression video evidence
+        run: node scripts/qa-village-progression-video.mjs
+
       - name: Generate posture evidence
         run: node scripts/qa-play-branches.mjs
 
@@ -70,5 +73,6 @@ jobs:
           path: |
             public/qa/play-latest
             public/qa/village-scene
+            public/qa/village-progression
           if-no-files-found: error
           retention-days: 7
