@@ -7,62 +7,51 @@ const CROPPED_SCENE_CLASS =
   "pointer-events-none absolute left-[-40.18%] top-[-44.44%] h-[182.86%] w-[182.86%] max-w-none select-none object-fill transition-[filter] duration-700 ease-out";
 
 const SCENE_FILTERS = [
-  "brightness(.48) saturate(.58) contrast(1.04) blur(4px)",
-  "brightness(.56) saturate(.66) contrast(1.04) blur(3.4px)",
-  "brightness(.64) saturate(.73) contrast(1.045) blur(2.8px)",
-  "brightness(.71) saturate(.8) contrast(1.05) blur(2.2px)",
-  "brightness(.78) saturate(.87) contrast(1.05) blur(1.6px)",
-  "brightness(.84) saturate(.93) contrast(1.055) blur(1.1px)",
-  "brightness(.9) saturate(.98) contrast(1.055) blur(.7px)",
-  "brightness(.96) saturate(1.02) contrast(1.055) blur(.35px)",
+  "brightness(.58) saturate(.7) contrast(1.04) blur(2px)",
+  "brightness(.65) saturate(.78) contrast(1.045) blur(1.6px)",
+  "brightness(.71) saturate(.84) contrast(1.05) blur(1.2px)",
+  "brightness(.77) saturate(.9) contrast(1.05) blur(.8px)",
+  "brightness(.82) saturate(.94) contrast(1.055) blur(.5px)",
+  "brightness(.87) saturate(.98) contrast(1.055) blur(.3px)",
+  "brightness(.92) saturate(1) contrast(1.055) blur(.15px)",
+  "brightness(.97) saturate(1.03) contrast(1.06) blur(0)",
   "brightness(1) saturate(1.05) contrast(1.06) blur(0)",
 ] as const;
 
 const STAGE_GLOWS: Record<VillageV2LayerId, string> = {
-  camp: "radial-gradient(circle at 51% 71%, rgba(251,146,60,.25), transparent 17%)",
-  shelter: "radial-gradient(ellipse at 25% 43%, rgba(253,186,116,.16), transparent 26%)",
-  food: "radial-gradient(ellipse at 10% 22%, rgba(250,204,21,.14), transparent 24%)",
-  timber: "radial-gradient(ellipse at 15% 78%, rgba(180,83,9,.14), transparent 23%)",
-  storehouse: "radial-gradient(ellipse at 78% 28%, rgba(251,191,36,.14), transparent 24%)",
-  market: "radial-gradient(ellipse at 81% 73%, rgba(244,114,182,.12), transparent 25%)",
-  watch: "radial-gradient(circle at 90% 15%, rgba(253,224,71,.17), transparent 19%)",
-  council: "radial-gradient(ellipse at 51% 37%, rgba(251,191,36,.17), transparent 33%)",
-};
-
-const QA_MARKERS: Record<VillageV2LayerId, string> = {
-  camp: "village-hearth-smoke",
-  shelter: "village-structure-hut",
-  food: "village-food-fields",
-  timber: "village-timber-yards",
-  storehouse: "village-storehouse-visual",
-  market: "village-market-activity",
-  watch: "village-watch-visual",
-  council: "village-council-visual",
+  camp: "radial-gradient(circle at 51% 71%, rgba(251,146,60,.23), transparent 17%)",
+  shelter: "radial-gradient(ellipse at 25% 43%, rgba(253,186,116,.14), transparent 26%)",
+  food: "radial-gradient(ellipse at 10% 22%, rgba(250,204,21,.13), transparent 24%)",
+  timber: "radial-gradient(ellipse at 15% 78%, rgba(180,83,9,.13), transparent 23%)",
+  storehouse: "radial-gradient(ellipse at 78% 28%, rgba(251,191,36,.13), transparent 24%)",
+  market: "radial-gradient(ellipse at 81% 73%, rgba(244,114,182,.11), transparent 25%)",
+  watch: "radial-gradient(circle at 90% 15%, rgba(253,224,71,.16), transparent 19%)",
+  council: "radial-gradient(ellipse at 51% 37%, rgba(251,191,36,.16), transparent 33%)",
 };
 
 function StageAccent({ id }: { id: VillageV2LayerId }) {
   if (id === "camp") {
     return (
-      <div className="absolute left-[51%] top-[71%] h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-300/12 shadow-[0_0_42px_18px_rgba(251,146,60,.2)]" />
+      <div className="absolute left-[51%] top-[71%] h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-300/10 shadow-[0_0_38px_16px_rgba(251,146,60,.18)]" />
     );
   }
   if (id === "food") {
     return (
-      <div className="absolute left-[3%] top-[14%] h-[13%] w-[18%] -rotate-6 rounded-[45%] bg-[repeating-linear-gradient(100deg,transparent_0_9px,rgba(250,204,21,.13)_10px_12px)]" />
+      <div className="absolute left-[3%] top-[14%] h-[13%] w-[18%] -rotate-6 rounded-[45%] bg-[repeating-linear-gradient(100deg,transparent_0_9px,rgba(250,204,21,.11)_10px_12px)]" />
     );
   }
   if (id === "watch") {
     return (
-      <div className="absolute right-[7%] top-[10%] h-3 w-3 rounded-full bg-amber-100/55 shadow-[0_0_28px_12px_rgba(253,224,71,.24)]" />
+      <div className="absolute right-[7%] top-[10%] h-3 w-3 rounded-full bg-amber-100/48 shadow-[0_0_25px_10px_rgba(253,224,71,.22)]" />
     );
   }
   if (id === "council") {
     return (
       <>
-        <div className="absolute left-[43%] top-[32%] h-8 w-1 rounded-full bg-amber-100/55 shadow-[0_0_15px_rgba(251,191,36,.35)]" />
-        <div className="absolute left-[43.4%] top-[32%] h-4 w-7 rounded-r-md bg-amber-300/48" />
-        <div className="absolute left-[61%] top-[35%] h-7 w-1 rounded-full bg-amber-100/45" />
-        <div className="absolute left-[61.4%] top-[35%] h-3.5 w-6 rounded-r-md bg-red-300/36" />
+        <div className="absolute left-[43%] top-[32%] h-8 w-1 rounded-full bg-amber-100/48 shadow-[0_0_15px_rgba(251,191,36,.3)]" />
+        <div className="absolute left-[43.4%] top-[32%] h-4 w-7 rounded-r-md bg-amber-300/42" />
+        <div className="absolute left-[61%] top-[35%] h-7 w-1 rounded-full bg-amber-100/4" />
+        <div className="absolute left-[61.4%] top-[35%] h-3.5 w-6 rounded-r-md bg-red-300/32" />
       </>
     );
   }
@@ -96,19 +85,13 @@ export function VillageStageV2({ state }: { state: PlayState }) {
       {visibleLayers.map((layer) => (
         <div
           key={layer.id}
-          data-qa={QA_MARKERS[layer.id]}
-          data-visual-stage={layer.id}
-          className="pointer-events-none absolute inset-0"
+          data-qa="village-v2-layer"
+          data-layer-id={layer.id}
+          data-layer-order={layer.order}
+          className="pointer-events-none absolute inset-0 [animation:village-v2-accent_650ms_cubic-bezier(.2,.78,.22,1)_both]"
+          style={{ background: STAGE_GLOWS[layer.id] }}
         >
-          <div
-            data-qa="village-v2-layer"
-            data-layer-id={layer.id}
-            data-layer-order={layer.order}
-            className="absolute inset-0 [animation:village-v2-accent_650ms_cubic-bezier(.2,.78,.22,1)_both]"
-            style={{ background: STAGE_GLOWS[layer.id] }}
-          >
-            <StageAccent id={layer.id} />
-          </div>
+          <StageAccent id={layer.id} />
         </div>
       ))}
 
@@ -121,9 +104,13 @@ export function VillageStageV2({ state }: { state: PlayState }) {
         />
       ) : null}
 
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(7,10,7,.04),transparent_22%,transparent_76%,rgba(5,7,4,.2))] shadow-[inset_0_0_62px_rgba(5,7,4,.35)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(7,10,7,.03),transparent_22%,transparent_76%,rgba(5,7,4,.16))] shadow-[inset_0_0_56px_rgba(5,7,4,.3)]" />
 
       <style>{`
+        [data-qa="village-v2-stage"] + div:has([data-qa="village-credibility-layer"]) {
+          opacity: .52 !important;
+          filter: saturate(.88) contrast(.96);
+        }
         @keyframes village-v2-accent {
           0% { opacity: 0; transform: translateY(8px) scale(.992); filter: blur(5px); }
           62% { opacity: 1; transform: translateY(-1px) scale(1.002); filter: blur(.5px); }
@@ -131,7 +118,7 @@ export function VillageStageV2({ state }: { state: PlayState }) {
         }
         @keyframes village-v2-settle {
           0% { opacity: 0; }
-          36% { opacity: .72; }
+          36% { opacity: .65; }
           100% { opacity: 0; }
         }
       `}</style>
