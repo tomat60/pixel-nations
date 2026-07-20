@@ -23,6 +23,18 @@ const SOURCE_FILES = [
   ['app/play/world/WorldMapScene.tsx', 52000],
 ];
 
+const MAX_VISUAL_FILES = 2;
+const MAX_VISUAL_FILE_BYTES = 4_000_000;
+const MAX_VISUAL_TOTAL_BYTES = 8_000_000;
+const ESTIMATED_TOKENS_PER_VISUAL = 4_000;
+const ALLOWED_VISUAL_PREFIXES = ['docs/visual-evidence/', 'public/qa/', 'assets-src/'];
+const VISUAL_MEDIA_TYPES = new Map([
+  ['.png', 'image/png'],
+  ['.jpg', 'image/jpeg'],
+  ['.jpeg', 'image/jpeg'],
+  ['.webp', 'image/webp'],
+]);
+
 function requiredEnv(name) {
   const value = process.env[name];
   if (!value) throw new Error(`Missing required env var: ${name}`);
@@ -91,8 +103,67 @@ function extractRequiredOutputContract(body) {
   return items;
 }
 
-function buildPrompt({ issue, contractItems, repositoryContext }) {
+function extractVisualEvidencePaths(body) {
+  const match = body.match(/## Visual evidence files\s*\n([\s\S]*?)(?=\n##\s|$)/i);
+  if (!match) return [];
+
+  const paths = [...new Set(
+    [...match[1].matchAll(/`([^`]+\.(?:png|jpe?g|webp))`/gi)].map((entry) => entry[1].trim()),
+  )];
+  if (paths.length > MAX_VISUAL_FILES) {
+    throw new Error(`Too many visual evidence files: ${paths.length} > ${MAX_VISUAL_FILES}`);
+  }
+  return paths;
+}
+
+function normalizeVisualPath(filePath) {
+  const normalized = path.posix.normalize(filePath.replace(/^\.\//, ''));
+  if (normalized.startsWith('/') || normalized === '..' || normalized.startsWith('../') || normalized.includes('/../')) {
+    throw new Error(`Unsafe visual evidence path: ${filePath}`);
+  }
+  if (!ALLOWED_VISUAL_PREFIXES.some((prefix) => normalized.startsWith(prefix))) {
+    throw new Error(`Visual evidence path outside allowlist: ${normalized}`);
+  }
+  const extension = path.extname(normalized).toLowerCase();
+  const mediaType = VISUAL_MEDIA_TYPES.get(extension);
+  if (!mediaType) throw new Error(`Unsupported visual evidence format: ${normalized}`);
+  return { normalized, mediaType };
+}
+
+async function readVisualEvidence(filePaths) {
+  const evidence = [];
+  let totalBytes = 0;
+  const realRoot = await fs.realpath(ROOT);
+  const rootPrefix = `${realRoot}${path.sep}`;
+
+  for (const requestedPath of filePaths) {
+    const { normalized, mediaType } = normalizeVisualPath(requestedPath);
+    const abs = path.resolve(ROOT, normalized);
+    const realPath = await fs.realpath(abs);
+    if (realPath !== realRoot && !realPath.startsWith(rootPrefix)) {
+      throw new Error(`Visual evidence resolved outside repository: ${normalized}`);
+    }
+    const stat = await fs.stat(realPath);
+    if (!stat.isFile()) throw new Error(`Visual evidence is not a file: ${normalized}`);
+    if (stat.size > MAX_VISUAL_FILE_BYTES) {
+      throw new Error(`Visual evidence file too large: ${normalized} (${stat.size} bytes)`);
+    }
+    totalBytes += stat.size;
+    if (totalBytes > MAX_VISUAL_TOTAL_BYTES) {
+      throw new Error(`Visual evidence total too large: ${totalBytes} bytes`);
+    }
+    const bytes = await fs.readFile(realPath);
+    evidence.push({ filePath: normalized, mediaType, base64: bytes.toString('base64'), sizeBytes: stat.size });
+  }
+  return evidence;
+}
+
+function buildPrompt({ issue, contractItems, repositoryContext, visualEvidence }) {
   const exactHeadings = contractItems.map((item) => `## ${item.number}. ${item.text}`).join('\n');
+  const visualInstruction = visualEvidence.length
+    ? `ACTUAL VISUAL EVIDENCE\n- ${visualEvidence.length} repository-local image(s) are attached as image blocks after this text.\n- Inspect them directly. You may make visual observations grounded in those images.\n- Refer to them by repository path: ${visualEvidence.map((item) => item.filePath).join(', ')}.\n- Do not claim access to any image not attached in this request.`
+    : 'ACTUAL VISUAL EVIDENCE\n- No image blocks were supplied. Do not claim direct visual inspection.';
+
   return `You are Fable, a delegated product, UX and visual-strategy consultant inside a GPT-5.6-led Pixel Nations development system.
 
 AUTHORITY AND ROLE
@@ -108,12 +179,14 @@ EXECUTION RULES
 3. Use the following exact Markdown headings; do not rename, merge, skip or replace them:
 ${exactHeadings}
 4. Answer the actual issue. Do not substitute the old generic three-Cursor-prompts template unless the issue explicitly requests exactly that.
-5. Ground recommendations in the supplied current repository context. Distinguish what exists now from what you propose.
+5. Ground recommendations in the supplied current repository context and attached visual evidence. Distinguish what exists now from what you propose.
 6. Keep suggestions bounded, reviewable and realistic for the stated deadline.
-7. Mark uncertain claims as inferences. Do not claim visual inspection beyond the supplied source context.
+7. Mark uncertain claims as inferences. Claim direct visual inspection only for attached image blocks.
 8. If a deliverable cannot be completed, keep its exact heading and write INCOMPLETE with the precise missing information. Do not silently omit it.
 9. Do not propose crypto, NFT, wallet, mint, token, pay-to-win, backend expansion, multiplayer, a new rendering engine or a large asset pipeline unless the issue explicitly reopens that direction.
 10. End with the exact compliance block defined below.
+
+${visualInstruction}
 
 BINDING GITHUB ISSUE
 Title: ${issue.title}
@@ -166,7 +239,14 @@ function validateOutput(output, contractItems, stopReason) {
   return failures;
 }
 
-async function callAnthropic({ apiKey, model, prompt, maxOutputTokens }) {
+async function callAnthropic({ apiKey, model, prompt, visualEvidence, maxOutputTokens }) {
+  const content = [
+    { type: 'text', text: prompt },
+    ...visualEvidence.map((item) => ({
+      type: 'image',
+      source: { type: 'base64', media_type: item.mediaType, data: item.base64 },
+    })),
+  ];
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -174,7 +254,7 @@ async function callAnthropic({ apiKey, model, prompt, maxOutputTokens }) {
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
     },
-    body: JSON.stringify({ model, max_tokens: maxOutputTokens, messages: [{ role: 'user', content: prompt }] }),
+    body: JSON.stringify({ model, max_tokens: maxOutputTokens, messages: [{ role: 'user', content }] }),
   });
 
   const raw = await response.text();
@@ -188,7 +268,7 @@ async function callAnthropic({ apiKey, model, prompt, maxOutputTokens }) {
   return data;
 }
 
-async function writeResult({ issue, contractItems, model, data, output, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, failures }) {
+async function writeResult({ issue, contractItems, model, data, output, visualEvidence, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, failures }) {
   await fs.mkdir(OUT_DIR, { recursive: true });
   const passed = failures.length === 0;
   const meta = {
@@ -202,6 +282,7 @@ async function writeResult({ issue, contractItems, model, data, output, estimate
     usage: data.usage ?? null,
     requiredOutputContract: contractItems,
     sourceFiles: SOURCE_FILES.map(([filePath]) => filePath),
+    visualEvidence: visualEvidence.map(({ filePath, mediaType, sizeBytes }) => ({ filePath, mediaType, sizeBytes })),
     validation: passed ? 'passed' : 'rejected',
     validationFailures: failures,
     createdAt: new Date().toISOString(),
@@ -217,6 +298,8 @@ async function writeResult({ issue, contractItems, model, data, output, estimate
 async function main() {
   const issue = await readIssue();
   const contractItems = extractRequiredOutputContract(issue.body);
+  const visualPaths = extractVisualEvidencePaths(issue.body);
+  const visualEvidence = await readVisualEvidence(visualPaths);
   const chunks = [];
   for (const [filePath, maxChars] of SOURCE_FILES) chunks.push(await readText(filePath, maxChars));
   const repositoryContext = chunks.join('\n');
@@ -229,13 +312,14 @@ async function main() {
   const outputPricePerMillion = numberEnv('OUTPUT_PRICE_PER_MILLION_USD', 50);
   const apiKey = requiredEnv('ANTHROPIC_API_KEY');
 
-  const prompt = buildPrompt({ issue, contractItems, repositoryContext });
-  const estimatedInputTokens = estimateTokens(prompt);
+  const prompt = buildPrompt({ issue, contractItems, repositoryContext, visualEvidence });
+  const estimatedInputTokens = estimateTokens(prompt) + visualEvidence.length * ESTIMATED_TOKENS_PER_VISUAL;
   const estimatedMaxCost = (estimatedInputTokens / 1_000_000) * inputPricePerMillion + (maxOutputTokens / 1_000_000) * outputPricePerMillion;
 
   console.log(`Fable directive issue: #${issue.number}`);
   console.log(`Model: ${model}`);
   console.log(`Required output items: ${contractItems.length}`);
+  console.log(`Visual evidence files: ${visualEvidence.length ? visualEvidence.map((item) => item.filePath).join(', ') : 'none'}`);
   console.log(`Estimated input tokens: ${estimatedInputTokens}`);
   console.log(`Max output tokens: ${maxOutputTokens}`);
   console.log(`Estimated max cost USD: ${estimatedMaxCost.toFixed(4)}`);
@@ -243,10 +327,10 @@ async function main() {
   if (estimatedInputTokens > maxInputTokens) throw new Error(`Input token estimate ${estimatedInputTokens} exceeds cap ${maxInputTokens}`);
   if (estimatedMaxCost > maxEstimatedCost) throw new Error(`Estimated max cost $${estimatedMaxCost.toFixed(4)} exceeds cap $${maxEstimatedCost.toFixed(4)}`);
 
-  const data = await callAnthropic({ apiKey, model, prompt, maxOutputTokens });
+  const data = await callAnthropic({ apiKey, model, prompt, visualEvidence, maxOutputTokens });
   const output = extractText(data);
   const failures = validateOutput(output, contractItems, data.stop_reason ?? null);
-  await writeResult({ issue, contractItems, model, data, output, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, failures });
+  await writeResult({ issue, contractItems, model, data, output, visualEvidence, estimatedInputTokens, maxOutputTokens, estimatedMaxCost, failures });
   if (failures.length) throw new Error(`Fable directive output failed validation:\n- ${failures.join('\n- ')}`);
 }
 
