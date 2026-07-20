@@ -1,5 +1,8 @@
 import type { PlayAction, PlayState, RetentionRecord, SettlementMarker } from "../lib/play-state";
 import { getDevelopmentScore, getOwnedPlot, getPhase, getPopulation } from "../lib/play-state";
+import { VillageStageV2 } from "../visual/village-v2/VillageStageV2";
+
+const VILLAGE_V2_ENABLED = process.env.NEXT_PUBLIC_VILLAGE_V2 === "1";
 
 type VillagePlotId = "camp" | "shelter" | "storehouse" | "market" | "council" | "watch" | "fields" | "road";
 type PlotState = "empty" | "building" | "built";
@@ -88,9 +91,22 @@ export function VillageScene({ state, dispatch }: { state: PlayState; dispatch: 
             style={{ transform: undefined }}
           >
             <div className="absolute inset-0 scale-[1.14] translate-x-[-2%] translate-y-[-3%] lg:scale-100 lg:translate-x-0 lg:translate-y-0">
-              <VillageGround />
-              <VillageRoads state={state} />
-              {hasClaim ? <SettlementCredibilityLayer state={state} /> : null}
+              {VILLAGE_V2_ENABLED ? (
+                <>
+                  <VillageStageV2 state={state} />
+                  {hasClaim ? (
+                    <div className="absolute inset-0 pointer-events-none opacity-0">
+                      <SettlementCredibilityLayer state={state} />
+                    </div>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  <VillageGround />
+                  <VillageRoads state={state} />
+                  {hasClaim ? <SettlementCredibilityLayer state={state} /> : null}
+                </>
+              )}
               {villagePlots.map((plot) => <VillagePlotNode key={plot.id} plot={plot} state={state} />)}
             </div>
           </div>
