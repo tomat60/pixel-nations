@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 20
     if: >-
       github.event.issue.user.login == 'tomat60' &&
-      startsWith(github.event.issue.title, 'FABLE DIRECTIVE:')
+      (startsWith(github.event.issue.title, 'FABLE DIRECTIVE:') || startsWith(github.event.issue.title, 'FABLE DIRECTIVE ['))
 
     steps:
       - name: Comment directive started
@@ -57,6 +57,7 @@ jobs:
           MAX_ESTIMATED_COST_USD: '1.50'
           INPUT_PRICE_PER_MILLION_USD: '10'
           OUTPUT_PRICE_PER_MILLION_USD: '50'
+          FABLE_PREFLIGHT_ONLY: 'false'
         run: node scripts/fable-issue-directive.mjs
 
       - name: Upload directive artifact
@@ -75,14 +76,29 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const status = `${{ job.status }}`;
+            const fs = require('fs');
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-            const meaning = status === 'success'
-              ? 'Output passed the exact-heading and compliance validation gate.'
-              : 'Output was rejected or the run failed; inspect logs/artifact before retrying.';
+            let resultClass = 'NO_ARTIFACT';
+            let failures = [];
+            try {
+              const meta = JSON.parse(fs.readFileSync('fable-output/fable-issue-directive-meta.json', 'utf8'));
+              resultClass = meta.resultClass || resultClass;
+              failures = Array.isArray(meta.validationFailures) ? meta.validationFailures : [];
+            } catch (error) {
+              failures = [`Could not read result metadata: ${error.message}`];
+            }
+            const messages = {
+              VALIDATED_FABLE_OUTPUT: 'Fable output passed the selected mode, evidence and compliance gates.',
+              HOLD_NO_IMPLEMENTATION: 'Deterministic preflight returned HOLD_NO_IMPLEMENTATION. No model call or implementation authorization occurred.',
+              DRY_RUN_VALIDATED: 'Preflight-only validation passed. No model call occurred.',
+              MODEL_OUTPUT_REJECTED: 'The model responded, but the output was rejected by validation.',
+              PREFLIGHT_FAILURE: 'Preflight failed before a valid model result. The artifact contains the exact error.',
+              NO_ARTIFACT: 'No readable result metadata was produced; inspect job logs.',
+            };
+            const detail = failures.length ? `\n\nValidation details:\n${failures.map((item) => `- ${item}`).join('\n')}` : '';
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.issue.number,
-              body: `Fable directive finished with status: ${status}.\n\n${meaning}\n\nRun and artifacts: ${runUrl}`,
+              body: `Fable directive result: ${resultClass}.\n\n${messages[resultClass] || 'Inspect the artifact before relying on this run.'}${detail}\n\nRun and artifacts: ${runUrl}`,
             });
