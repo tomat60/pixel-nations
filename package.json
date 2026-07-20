@@ -9,6 +9,7 @@
     "qa:screens": "node scripts/qa-screenshots.mjs",
     "qa:smoke": "node scripts/qa-smoke.mjs",
     "qa:village": "node scripts/qa-village-scene.mjs",
+    "qa:village-v2-assets": "node scripts/qa-village-v2-assets.mjs",
     "qa:world": "node scripts/qa-world-scene.mjs",
     "qa:expansion": "node scripts/qa-expansion-loop.mjs",
     "qa:public-evidence": "node scripts/pn-handoff.mjs --check-public-evidence",
