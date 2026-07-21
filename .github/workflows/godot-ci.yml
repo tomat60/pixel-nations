@@ -29,17 +29,17 @@ jobs:
 
       - name: Install runtime dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends unzip libgl1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends unzip libgl1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 >/dev/null
 
       - name: Download pinned Godot and export templates
         run: |
           set -euo pipefail
           mkdir -p /tmp/godot /tmp/godot-templates
-          curl --fail --location --retry 3 \
+          curl --silent --show-error --fail --location --retry 3 \
             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
             --output /tmp/godot/godot.zip
-          curl --fail --location --retry 3 \
+          curl --silent --show-error --fail --location --retry 3 \
             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz" \
             --output /tmp/godot/templates.tpz
           unzip -q /tmp/godot/godot.zip -d /tmp/godot
@@ -47,30 +47,48 @@ jobs:
           unzip -q /tmp/godot/templates.tpz -d /tmp/godot-templates
           mkdir -p "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
           cp -R /tmp/godot-templates/templates/. "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
-          "${GODOT_BIN}" --version
+          echo "GODOT_VERSION=$(${GODOT_BIN} --version)"
+
+      - name: Verify engine-neutral fixture parity
+        run: cmp migration/golden_run_v1.json game/tests/fixtures/golden_run_v1.json
 
       - name: Import project headlessly
         run: |
           set -euo pipefail
-          "${GODOT_BIN}" --headless --path game --editor --quit 2>&1 | tee godot-import.log
+          if ! "${GODOT_BIN}" --headless --path game --editor --quit > godot-import.log 2>&1; then
+            cat godot-import.log
+            exit 1
+          fi
+          echo "GODOT_IMPORT=PASS"
 
       - name: Run deterministic state and persistence tests
         run: |
           set -euo pipefail
-          "${GODOT_BIN}" --headless --path game --script res://tests/run_all.gd 2>&1 | tee godot-tests.log
+          if ! "${GODOT_BIN}" --headless --path game --script res://tests/run_all.gd > godot-tests.log 2>&1; then
+            cat godot-tests.log
+            exit 1
+          fi
           grep -F "PIXEL_NATIONS_GODOT_TESTS: PASS" godot-tests.log
 
       - name: Export Linux and Web proofs
         run: |
           set -euo pipefail
           mkdir -p game/build/linux game/build/web
-          "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 2>&1 | tee godot-export-linux.log
-          "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html 2>&1 | tee godot-export-web.log
+          if ! "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > godot-export-linux.log 2>&1; then
+            cat godot-export-linux.log
+            exit 1
+          fi
+          if ! "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html > godot-export-web.log 2>&1; then
+            cat godot-export-web.log
+            exit 1
+          fi
           test -x game/build/linux/pixel-nations-foundation.x86_64
           test -f game/build/linux/pixel-nations-foundation.pck
           test -f game/build/web/index.html
           test -f game/build/web/index.wasm
           test -f game/build/web/index.pck
+          echo "GODOT_EXPORT_LINUX=PASS"
+          echo "GODOT_EXPORT_WEB=PASS"
 
       - name: Native artifact launch smoke
         run: |
@@ -86,7 +104,7 @@ jobs:
             cat native-smoke.log
             exit "$status"
           fi
-          cat native-smoke.log
+          echo "GODOT_NATIVE_SMOKE=PASS"
 
       - name: Reject generated cache leakage
         run: |
@@ -95,6 +113,13 @@ jobs:
             echo "Godot cache/build files are visible to Git; update ignore rules."
             exit 1
           fi
+          echo "GODOT_CACHE_LEAKAGE=NONE"
+
+      - name: Foundation evidence summary
+        run: |
+          echo "GODOT_FOUNDATION_SHA=${GITHUB_SHA}"
+          echo "GODOT_FOUNDATION_RESULT=PASS"
+          du -h game/build/linux/pixel-nations-foundation.x86_64 game/build/linux/pixel-nations-foundation.pck game/build/web/index.wasm game/build/web/index.pck
 
       - name: Upload exact-SHA foundation evidence
         if: always()
