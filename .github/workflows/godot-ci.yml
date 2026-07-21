@@ -76,7 +76,10 @@ jobs:
         run: |
           set -euo pipefail
           set +e
-          timeout 5s game/build/linux/pixel-nations-foundation.x86_64 --headless --path game > native-smoke.log 2>&1
+          (
+            cd game/build/linux
+            timeout 5s ./pixel-nations-foundation.x86_64 --headless
+          ) > native-smoke.log 2>&1
           status=$?
           set -e
           if [ "$status" -ne 0 ] && [ "$status" -ne 124 ]; then
