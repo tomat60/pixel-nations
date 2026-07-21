@@ -1,0 +1,35 @@
+{
+  "schema": "pixel_nations_golden_run_v1",
+  "source": "engine-neutral migration fixture derived from the accepted product loop",
+  "sector_id": "A-01",
+  "actions": [
+    {
+      "type": "CLAIM_LAND",
+      "land_id": "A-01-0042"
+    },
+    {
+      "type": "FOUND_SETTLEMENT",
+      "name": "Aurelian Haven"
+    },
+    {
+      "type": "COMPLETE_VILLAGE_ORDER",
+      "order_id": "shelter"
+    }
+  ],
+  "expected_state": {
+    "schema_version": 1,
+    "sector_id": "A-01",
+    "claimed_land_id": "A-01-0042",
+    "settlement": {
+      "founded": true,
+      "name": "Aurelian Haven",
+      "completed_orders": [
+        "shelter"
+      ]
+    },
+    "resources": {
+      "food": 0,
+      "timber": 5
+    }
+  }
+}
