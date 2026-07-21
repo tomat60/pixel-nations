@@ -6,16 +6,18 @@ const GameState = preload("res://core/game_state.gd")
 @onready var detail_label: Label = %DetailLabel
 
 func _ready() -> void:
-	var actions := [
+	var actions: Array[Dictionary] = [
 		{"type": "CLAIM_LAND", "land_id": "A-01-0042"},
 		{"type": "FOUND_SETTLEMENT", "name": "Aurelian Haven"},
 		{"type": "COMPLETE_VILLAGE_ORDER", "order_id": "shelter"},
 	]
-	var state := GameState.replay(actions)
-	var passed := (
+	var state: Dictionary = GameState.replay(actions)
+	var settlement: Dictionary = state.get("settlement", {})
+	var completed_orders: Array = settlement.get("completed_orders", [])
+	var passed: bool = (
 		String(state.get("claimed_land_id", "")) == "A-01-0042"
-		and bool(state.get("settlement", {}).get("founded", false))
-		and state.get("settlement", {}).get("completed_orders", []).has("shelter")
+		and bool(settlement.get("founded", false))
+		and completed_orders.has("shelter")
 	)
 
 	status_label.text = "FOUNDATION TEST: %s" % ("PASS" if passed else "FAIL")
