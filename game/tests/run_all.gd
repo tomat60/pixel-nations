@@ -51,8 +51,7 @@ func _test_save_load_round_trip() -> void:
 	_expect_equal(restored, original, "JSON save/load round trip")
 
 func _load_golden_fixture() -> Dictionary:
-	var fixture_path := ProjectSettings.globalize_path("res://../migration/golden_run_v1.json")
-	var file := FileAccess.open(fixture_path, FileAccess.READ)
+	var file := FileAccess.open("res://tests/fixtures/golden_run_v1.json", FileAccess.READ)
 	if file == null:
 		return {}
 	var parsed = JSON.parse_string(file.get_as_text())
