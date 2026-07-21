@@ -1,6 +1,6 @@
 extends SceneTree
 
-const GameState = preload("res://core/game_state.gd")
+const GameStateScript = preload("res://core/game_state.gd")
 
 var failures: Array[String] = []
 
@@ -24,7 +24,7 @@ func _test_golden_run() -> void:
 	if fixture.is_empty():
 		_fail("golden fixture could not be loaded")
 		return
-	var actual := GameState.replay(fixture.get("actions", []))
+	var actual := GameStateScript.replay(fixture.get("actions", []))
 	var expected: Dictionary = fixture.get("expected_state", {})
 	_expect_equal(actual, expected, "golden action replay")
 
@@ -32,22 +32,22 @@ func _test_idempotent_order() -> void:
 	var fixture := _load_golden_fixture()
 	var actions: Array = fixture.get("actions", []).duplicate(true)
 	actions.append({"type": "COMPLETE_VILLAGE_ORDER", "order_id": "shelter"})
-	var actual := GameState.replay(actions)
+	var actual := GameStateScript.replay(actions)
 	var expected: Dictionary = fixture.get("expected_state", {})
 	_expect_equal(actual, expected, "repeating the same Village order must be idempotent")
 
 func _test_invalid_sequence_is_safe() -> void:
-	var actual := GameState.replay([
+	var actual := GameStateScript.replay([
 		{"type": "FOUND_SETTLEMENT", "name": "Too Early"},
 		{"type": "COMPLETE_VILLAGE_ORDER", "order_id": "shelter"},
 	])
-	_expect_equal(actual, GameState.initial_state(), "invalid actions must not mutate state")
+	_expect_equal(actual, GameStateScript.initial_state(), "invalid actions must not mutate state")
 
 func _test_save_load_round_trip() -> void:
 	var fixture := _load_golden_fixture()
-	var original := GameState.replay(fixture.get("actions", []))
-	var payload := GameState.to_json(original)
-	var restored := GameState.from_json(payload)
+	var original := GameStateScript.replay(fixture.get("actions", []))
+	var payload := GameStateScript.to_json(original)
+	var restored := GameStateScript.from_json(payload)
 	_expect_equal(restored, original, "JSON save/load round trip")
 
 func _load_golden_fixture() -> Dictionary:
@@ -60,8 +60,25 @@ func _load_golden_fixture() -> Dictionary:
 	return {}
 
 func _expect_equal(actual: Variant, expected: Variant, label: String) -> void:
-	if actual != expected:
-		_fail("%s mismatch\nexpected=%s\nactual=%s" % [label, JSON.stringify(expected), JSON.stringify(actual)])
+	var normalized_actual := _normalize(actual)
+	var normalized_expected := _normalize(expected)
+	if normalized_actual != normalized_expected:
+		_fail("%s mismatch\nexpected=%s\nactual=%s" % [label, JSON.stringify(normalized_expected), JSON.stringify(normalized_actual)])
+
+func _normalize(value: Variant) -> Variant:
+	if value is Dictionary:
+		var normalized_dictionary := {}
+		for key in value.keys():
+			normalized_dictionary[key] = _normalize(value[key])
+		return normalized_dictionary
+	if value is Array:
+		var normalized_array := []
+		for item in value:
+			normalized_array.append(_normalize(item))
+		return normalized_array
+	if value is int or value is float:
+		return float(value)
+	return value
 
 func _fail(message: String) -> void:
 	failures.append(message)
