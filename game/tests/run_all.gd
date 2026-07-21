@@ -4,7 +4,7 @@ const GameStateScript = preload("res://core/game_state.gd")
 
 var failures: Array[String] = []
 
-func _initialize() -> void:
+func _init() -> void:
 	_test_golden_run()
 	_test_idempotent_order()
 	_test_invalid_sequence_is_safe()
