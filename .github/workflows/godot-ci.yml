@@ -1,0 +1,110 @@
+name: Godot Foundation CI
+
+on:
+  pull_request:
+    paths:
+      - "game/**"
+      - "migration/**"
+      - ".github/workflows/godot-ci.yml"
+      - ".gitignore"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GODOT_VERSION: "4.7.1"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+
+jobs:
+  foundation:
+    name: Import, test and export Godot foundation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout exact ref
+        uses: actions/checkout@v4
+
+      - name: Install runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends unzip libgl1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2
+
+      - name: Download pinned Godot and export templates
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/godot /tmp/godot-templates
+          curl --fail --location --retry 3 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            --output /tmp/godot/godot.zip
+          curl --fail --location --retry 3 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz" \
+            --output /tmp/godot/templates.tpz
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          unzip -q /tmp/godot/templates.tpz -d /tmp/godot-templates
+          mkdir -p "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          cp -R /tmp/godot-templates/templates/. "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          "${GODOT_BIN}" --version
+
+      - name: Import project headlessly
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit 2>&1 | tee godot-import.log
+
+      - name: Run deterministic state and persistence tests
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --script res://tests/run_all.gd 2>&1 | tee godot-tests.log
+          grep -F "PIXEL_NATIONS_GODOT_TESTS: PASS" godot-tests.log
+
+      - name: Export Linux and Web proofs
+        run: |
+          set -euo pipefail
+          mkdir -p game/build/linux game/build/web
+          "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 2>&1 | tee godot-export-linux.log
+          "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html 2>&1 | tee godot-export-web.log
+          test -x game/build/linux/pixel-nations-foundation.x86_64
+          test -f game/build/linux/pixel-nations-foundation.pck
+          test -f game/build/web/index.html
+          test -f game/build/web/index.wasm
+          test -f game/build/web/index.pck
+
+      - name: Native artifact launch smoke
+        run: |
+          set -euo pipefail
+          set +e
+          timeout 5s game/build/linux/pixel-nations-foundation.x86_64 --headless --path game > native-smoke.log 2>&1
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ] && [ "$status" -ne 124 ]; then
+            cat native-smoke.log
+            exit "$status"
+          fi
+          cat native-smoke.log
+
+      - name: Reject generated cache leakage
+        run: |
+          set -euo pipefail
+          if git status --short --untracked-files=all | grep -E '(^| )game/(\.godot|build)/'; then
+            echo "Godot cache/build files are visible to Git; update ignore rules."
+            exit 1
+          fi
+
+      - name: Upload exact-SHA foundation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-foundation-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            godot-import.log
+            godot-tests.log
+            godot-export-linux.log
+            godot-export-web.log
+            native-smoke.log
+            game/build/linux/**
+            game/build/web/**
