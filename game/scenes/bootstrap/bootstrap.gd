@@ -20,3 +20,7 @@ func _ready() -> void:
 
 	status_label.text = "FOUNDATION TEST: %s" % ("PASS" if passed else "FAIL")
 	detail_label.text = "Godot %s · Migration Sprint 1\nAurelian Basin core-state proof only\nNo visual migration claim" % Engine.get_version_info().get("string", "unknown")
+
+	if DisplayServer.get_name() == "headless":
+		await get_tree().process_frame
+		get_tree().quit(0 if passed else 1)
