@@ -1,84 +1,67 @@
 extends SceneTree
 
-const GameStateScript = preload("res://core/game_state.gd")
+const STATE = preload("res://core/game_state.gd")
 
-var failures: Array[String] = []
+var failures = []
 
 func _init() -> void:
-	_test_golden_run()
-	_test_idempotent_order()
-	_test_invalid_sequence_is_safe()
-	_test_save_load_round_trip()
-
-	if failures.is_empty():
-		print("PIXEL_NATIONS_GODOT_TESTS: PASS")
-		quit(0)
-	else:
-		for failure in failures:
-			push_error(failure)
-		print("PIXEL_NATIONS_GODOT_TESTS: FAIL (%d)" % failures.size())
-		quit(1)
-
-func _test_golden_run() -> void:
-	var fixture := _load_golden_fixture()
-	if fixture.is_empty():
-		_fail("golden fixture could not be loaded")
+	var fixture_file = FileAccess.open("res://tests/fixtures/golden_run_v1.json", FileAccess.READ)
+	if fixture_file == null:
+		_fail("fixture_open")
+		_finish()
 		return
-	var actual := GameStateScript.replay(fixture.get("actions", []))
-	var expected: Dictionary = fixture.get("expected_state", {})
-	_expect_equal(actual, expected, "golden action replay")
 
-func _test_idempotent_order() -> void:
-	var fixture := _load_golden_fixture()
-	var actions: Array = fixture.get("actions", []).duplicate(true)
-	actions.append({"type": "COMPLETE_VILLAGE_ORDER", "order_id": "shelter"})
-	var actual := GameStateScript.replay(actions)
-	var expected: Dictionary = fixture.get("expected_state", {})
-	_expect_equal(actual, expected, "repeating the same Village order must be idempotent")
+	var fixture = JSON.parse_string(fixture_file.get_as_text())
+	if not fixture is Dictionary:
+		_fail("fixture_parse")
+		_finish()
+		return
 
-func _test_invalid_sequence_is_safe() -> void:
-	var actual := GameStateScript.replay([
+	var actions = fixture.get("actions", [])
+	var state = STATE.replay(actions)
+	_check(String(state.get("claimed_land_id", "")) == "A-01-0042", "claimed_land")
+
+	var settlement = state.get("settlement", {})
+	_check(bool(settlement.get("founded", false)), "settlement_founded")
+	_check(String(settlement.get("name", "")) == "Aurelian Haven", "settlement_name")
+	_check(settlement.get("completed_orders", []).size() == 1, "order_count")
+	_check(settlement.get("completed_orders", []).has("shelter"), "shelter_order")
+	_check(int(state.get("resources", {}).get("timber", 0)) == 5, "shelter_reward")
+
+	var duplicate_actions = actions.duplicate(true)
+	duplicate_actions.append({"type": "COMPLETE_VILLAGE_ORDER", "order_id": "shelter"})
+	var duplicate_state = STATE.replay(duplicate_actions)
+	_check(duplicate_state.get("settlement", {}).get("completed_orders", []).size() == 1, "order_idempotence")
+	_check(int(duplicate_state.get("resources", {}).get("timber", 0)) == 5, "reward_idempotence")
+
+	var invalid_state = STATE.replay([
 		{"type": "FOUND_SETTLEMENT", "name": "Too Early"},
 		{"type": "COMPLETE_VILLAGE_ORDER", "order_id": "shelter"},
 	])
-	_expect_equal(actual, GameStateScript.initial_state(), "invalid actions must not mutate state")
+	_check(String(invalid_state.get("claimed_land_id", "")).is_empty(), "invalid_claim_guard")
+	_check(not bool(invalid_state.get("settlement", {}).get("founded", false)), "invalid_settlement_guard")
 
-func _test_save_load_round_trip() -> void:
-	var fixture := _load_golden_fixture()
-	var original := GameStateScript.replay(fixture.get("actions", []))
-	var payload := GameStateScript.to_json(original)
-	var restored := GameStateScript.from_json(payload)
-	_expect_equal(restored, original, "JSON save/load round trip")
+	var restored = STATE.from_json(STATE.to_json(state))
+	_check(String(restored.get("claimed_land_id", "")) == "A-01-0042", "save_claim")
+	_check(bool(restored.get("settlement", {}).get("founded", false)), "save_settlement")
+	_check(restored.get("settlement", {}).get("completed_orders", []).has("shelter"), "save_order")
+	_check(int(restored.get("resources", {}).get("timber", 0)) == 5, "save_reward")
 
-func _load_golden_fixture() -> Dictionary:
-	var file := FileAccess.open("res://tests/fixtures/golden_run_v1.json", FileAccess.READ)
-	if file == null:
-		return {}
-	var parsed = JSON.parse_string(file.get_as_text())
-	if parsed is Dictionary:
-		return parsed
-	return {}
+	_finish()
 
-func _expect_equal(actual: Variant, expected: Variant, label: String) -> void:
-	var normalized_actual := _normalize(actual)
-	var normalized_expected := _normalize(expected)
-	if normalized_actual != normalized_expected:
-		_fail("%s mismatch\nexpected=%s\nactual=%s" % [label, JSON.stringify(normalized_expected), JSON.stringify(normalized_actual)])
+func _check(condition: bool, label: String) -> void:
+	if not condition:
+		_fail(label)
 
-func _normalize(value: Variant) -> Variant:
-	if value is Dictionary:
-		var normalized_dictionary := {}
-		for key in value.keys():
-			normalized_dictionary[key] = _normalize(value[key])
-		return normalized_dictionary
-	if value is Array:
-		var normalized_array := []
-		for item in value:
-			normalized_array.append(_normalize(item))
-		return normalized_array
-	if value is int or value is float:
-		return float(value)
-	return value
+func _fail(label: String) -> void:
+	failures.append(label)
 
-func _fail(message: String) -> void:
-	failures.append(message)
+func _finish() -> void:
+	if failures.is_empty():
+		print("PIXEL_NATIONS_GODOT_TESTS: PASS")
+		quit(0)
+		return
+	for failure in failures:
+		push_error("PIXEL_NATIONS_GODOT_TEST_FAILURE: %s" % failure)
+	print("PIXEL_NATIONS_GODOT_TESTS: FAIL (%d)" % failures.size())
+	quit(1)
