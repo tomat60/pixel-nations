@@ -59,6 +59,10 @@ jobs:
             cat godot-import.log
             exit 1
           fi
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" godot-import.log; then
+            cat godot-import.log
+            exit 1
+          fi
           echo "GODOT_IMPORT=PASS"
 
       - name: Run deterministic state and persistence tests
@@ -82,6 +86,11 @@ jobs:
             cat godot-export-web.log
             exit 1
           fi
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" godot-export-linux.log godot-export-web.log; then
+            cat godot-export-linux.log
+            cat godot-export-web.log
+            exit 1
+          fi
           test -x game/build/linux/pixel-nations-foundation.x86_64
           test -f game/build/linux/pixel-nations-foundation.pck
           test -f game/build/web/index.html
@@ -93,16 +102,17 @@ jobs:
       - name: Native artifact launch smoke
         run: |
           set -euo pipefail
-          set +e
           (
             cd game/build/linux
-            timeout 5s ./pixel-nations-foundation.x86_64 --headless
-          ) > native-smoke.log 2>&1
-          status=$?
-          set -e
-          if [ "$status" -ne 0 ] && [ "$status" -ne 124 ]; then
+            timeout 10s env -u GODOT_PATH -u GODOT_PROJECT_PATH GODOT_SILENCE_ROOT_WARNING=1 ./pixel-nations-foundation.x86_64 --headless
+          ) > native-smoke.log 2>&1 || {
+            status=$?
             cat native-smoke.log
             exit "$status"
+          }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" native-smoke.log; then
+            cat native-smoke.log
+            exit 1
           fi
           echo "GODOT_NATIVE_SMOKE=PASS"
 
