@@ -104,7 +104,7 @@ jobs:
           set -euo pipefail
           (
             cd game/build/linux
-            timeout 10s env -u GODOT_PATH -u GODOT_PROJECT_PATH GODOT_SILENCE_ROOT_WARNING=1 ./pixel-nations-foundation.x86_64 --headless
+            timeout 10s env -u GODOT_PATH -u GODOT_PROJECT_PATH GODOT_SILENCE_ROOT_WARNING=1 ./pixel-nations-foundation.x86_64 --headless --quit-after 2
           ) > native-smoke.log 2>&1 || {
             status=$?
             cat native-smoke.log
