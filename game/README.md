@@ -37,15 +37,16 @@ $GODOT --headless --path game --export-release "Linux/X11" build/linux/pixel-nat
 $GODOT --headless --path game --export-release "Web" build/web/index.html
 ```
 
-Run the native proof:
+Run the native proof from the artifact directory so the executable resolves its adjacent `.pck`:
 
 ```bash
-./game/build/linux/pixel-nations-foundation.x86_64 --path game
+cd game/build/linux
+./pixel-nations-foundation.x86_64 --headless
 ```
 
 ## Golden fixture
 
-`../migration/golden_run_v1.json` is engine-neutral. Godot tests load it from outside `res://` so the canonical migration contract remains separate from runtime implementation.
+`../migration/golden_run_v1.json` is the engine-neutral canonical migration contract. Godot imports an identical mirror at `tests/fixtures/golden_run_v1.json`; CI performs a byte-for-byte comparison before running the state tests so the runtime fixture cannot drift from the canonical source.
 
 ## Acceptance boundary
 
