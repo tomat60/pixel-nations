@@ -20,6 +20,10 @@
 # production
 /build
 
+# Godot generated cache and exports
+/game/.godot/
+/game/build/
+
 # misc
 .DS_Store
 *.pem
