@@ -1,0 +1,35 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/map/aurelian_basin_v3.gd" id="1_v3"]
+
+[node name="AurelianBasinV3" type="Node3D"]
+script = ExtResource("1_v3")
+
+[node name="LateMorningSun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-52, -38, 0)
+light_color = Color(1, 0.83, 0.61, 1)
+light_energy = 1.32
+shadow_enabled = true
+
+[node name="CoolFill" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-58, 138, 0)
+light_color = Color(0.46, 0.61, 0.64, 1)
+light_energy = 0.26
+
+[node name="CameraRig" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+position = Vector3(10.8, 12.8, 11.6)
+projection = 1
+size = 12.4
+current = true
+
+[node name="BasinTerrain" type="Node3D" parent="."]
+
+[node name="GeographyProps" type="Node3D" parent="."]
+
+[node name="Interaction" type="Node3D" parent="."]
+
+[node name="ClaimedState" type="Node3D" parent="."]
+
+[node name="HUDRoot" type="Node" parent="."]
