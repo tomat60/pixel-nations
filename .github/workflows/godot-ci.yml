@@ -1,4 +1,4 @@
-name: Godot Foundation CI
+name: Godot Aurelian Basin V2 CI
 
 on:
   pull_request:
@@ -18,10 +18,10 @@ env:
   GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
 
 jobs:
-  foundation:
-    name: Import, test and export Godot foundation
+  basin-v2:
+    name: Vendor assets, import, test and export Basin V2
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Checkout exact ref
@@ -49,6 +49,15 @@ jobs:
           cp -R /tmp/godot-templates/templates/. "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
           echo "GODOT_VERSION=$(${GODOT_BIN} --version)"
 
+      - name: Vendor exact KayKit subset
+        run: |
+          set -euo pipefail
+          python3 game/tools/vendor_kaykit_subset.py | tee kaykit-vendor.log
+          grep -F "KAYKIT_SUBSET_VENDOR_PASS" kaykit-vendor.log
+          test -f game/assets/aurelian-basin/KAYKIT_SUBSET_MANIFEST.json
+          test -f game/assets/aurelian-basin/kaykit/tiles/base/hex_grass.gltf
+          test -f game/assets/aurelian-basin/kaykit/buildings/blue/building_blacksmith_blue.gltf
+
       - name: Verify engine-neutral fixture parity
         run: cmp migration/golden_run_v1.json game/tests/fixtures/golden_run_v1.json
 
@@ -59,13 +68,13 @@ jobs:
             cat godot-import.log
             exit 1
           fi
-          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" godot-import.log; then
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|AURELIAN_BASIN_ASSET_MISSING" godot-import.log; then
             cat godot-import.log
             exit 1
           fi
           echo "GODOT_IMPORT=PASS"
 
-      - name: Run deterministic state and persistence tests
+      - name: Run deterministic state and Basin contract tests
         run: |
           set -euo pipefail
           if ! "${GODOT_BIN}" --headless --path game --script res://tests/run_all.gd > godot-tests.log 2>&1; then
@@ -86,7 +95,7 @@ jobs:
             cat godot-export-web.log
             exit 1
           fi
-          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" godot-export-linux.log godot-export-web.log; then
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|AURELIAN_BASIN_ASSET_MISSING" godot-export-linux.log godot-export-web.log; then
             cat godot-export-linux.log
             cat godot-export-web.log
             exit 1
@@ -104,13 +113,13 @@ jobs:
           set -euo pipefail
           (
             cd game/build/linux
-            timeout 10s env -u GODOT_PATH -u GODOT_PROJECT_PATH GODOT_SILENCE_ROOT_WARNING=1 ./pixel-nations-foundation.x86_64 --headless
+            timeout 15s env -u GODOT_PATH -u GODOT_PROJECT_PATH GODOT_SILENCE_ROOT_WARNING=1 ./pixel-nations-foundation.x86_64 --headless --quit-after 2
           ) > native-smoke.log 2>&1 || {
             status=$?
             cat native-smoke.log
             exit "$status"
           }
-          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" native-smoke.log; then
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|AURELIAN_BASIN_ASSET_MISSING" native-smoke.log; then
             cat native-smoke.log
             exit 1
           fi
@@ -125,24 +134,26 @@ jobs:
           fi
           echo "GODOT_CACHE_LEAKAGE=NONE"
 
-      - name: Foundation evidence summary
+      - name: Basin V2 evidence summary
         run: |
-          echo "GODOT_FOUNDATION_SHA=${GITHUB_SHA}"
-          echo "GODOT_FOUNDATION_RESULT=PASS"
+          echo "AURELIAN_BASIN_V2_SHA=${GITHUB_SHA}"
+          echo "AURELIAN_BASIN_V2_RESULT=PASS"
           du -h game/build/linux/pixel-nations-foundation.x86_64 game/build/linux/pixel-nations-foundation.pck game/build/web/index.wasm game/build/web/index.pck
 
-      - name: Upload exact-SHA foundation evidence
+      - name: Upload exact-SHA Basin V2 evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: godot-foundation-${{ github.sha }}
+          name: aurelian-basin-v2-${{ github.sha }}
           if-no-files-found: error
           retention-days: 14
           path: |
+            kaykit-vendor.log
             godot-import.log
             godot-tests.log
             godot-export-linux.log
             godot-export-web.log
             native-smoke.log
+            game/assets/aurelian-basin/KAYKIT_SUBSET_MANIFEST.json
             game/build/linux/**
             game/build/web/**
