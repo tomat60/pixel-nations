@@ -9,6 +9,10 @@ config/name="Pixel Nations"
 run/main_scene="res://scenes/map/aurelian_basin_v2.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
+[autoload]
+
+CaptureDriver="*res://core/capture_driver.gd"
+
 [display]
 
 window/size/viewport_width=1440
