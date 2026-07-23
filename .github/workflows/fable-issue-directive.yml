@@ -3,6 +3,11 @@ name: Fable Issue Directive
 on:
   issues:
     types: [opened, edited]
+  pull_request:
+    paths:
+      - '.github/workflows/fable-issue-directive.yml'
+      - 'scripts/fable-issue-directive.mjs'
+      - 'scripts/validate-fable-evidence-ref.mjs'
 
 permissions:
   contents: read
@@ -13,19 +18,60 @@ defaults:
     shell: bash
 
 concurrency:
-  group: fable-issue-directive-${{ github.event.issue.number }}
+  group: fable-issue-directive-${{ github.event.issue.number || github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
+  evidence-ref-self-test:
+    name: Immutable evidence ref self-test
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate immutable evidence-ref parser
+        run: node scripts/validate-fable-evidence-ref.mjs --self-test
+
   fable-issue-directive:
     name: Fable Issue Directive
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
     if: >-
+      github.event_name == 'issues' &&
       github.event.issue.user.login == 'tomat60' &&
       (startsWith(github.event.issue.title, 'FABLE DIRECTIVE:') || startsWith(github.event.issue.title, 'FABLE DIRECTIVE ['))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
+      - name: Resolve immutable visual evidence ref
+        id: evidence_ref
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+            const matches = [...body.matchAll(/^Visual evidence ref:\s*(\S+)\s*$/gim)].map((match) => match[1]);
+            if (matches.length > 1) {
+              core.setFailed('Visual evidence ref must appear at most once.');
+              return;
+            }
+            const value = matches[0] || '';
+            if (value && !/^[0-9a-f]{40}$/i.test(value)) {
+              core.setFailed('Visual evidence ref must be exactly one full 40-character hexadecimal commit SHA.');
+              return;
+            }
+            core.setOutput('requested', value.toLowerCase());
+            core.setOutput('checkout', value || context.payload.repository.default_branch);
+
       - name: Comment directive started
         uses: actions/github-script@v7
         with:
@@ -41,12 +87,19 @@ jobs:
       - name: Checkout repository read-only
         uses: actions/checkout@v4
         with:
+          ref: ${{ steps.evidence_ref.outputs.checkout }}
           persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Verify checked-out evidence identity
+        run: >-
+          node scripts/validate-fable-evidence-ref.mjs
+          --event "$GITHUB_EVENT_PATH"
+          --checked-out-sha "$GITHUB_SHA"
 
       - name: Run validated Fable issue directive
         env:
