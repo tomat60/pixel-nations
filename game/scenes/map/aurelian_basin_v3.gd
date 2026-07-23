@@ -6,49 +6,65 @@ extends "res://scenes/map/aurelian_basin_v2.gd"
 @onready var authored_interaction: Node3D = $Interaction
 @onready var authored_claimed: Node3D = $ClaimedState
 
+const AUTHORED_REGION_CENTERS := {
+    "A-01-0042": Vector3(0.0, 0.14, 0.45),
+    "A-01-0041": Vector3(-2.7, 0.40, -2.65),
+    "A-01-0043": Vector3(3.15, 0.12, 0.10),
+    "A-01-0036": Vector3(-4.15, 0.22, 0.55),
+    "A-01-0048": Vector3(1.25, 0.10, 3.25),
+    "A-01-0037": Vector3(3.85, 0.42, -2.75),
+    "A-01-0047": Vector3(-2.80, 0.10, 3.30),
+}
+
 func _build_environment() -> void:
     camera = authored_camera
-    camera.look_at(Vector3(0.0, 0.0, 0.8), Vector3.UP)
+    camera.look_at(Vector3(0.0, 0.0, 0.65), Vector3.UP)
     camera.current = true
 
 func _build_geography() -> void:
+    # The visible Basin is fully authored in aurelian_basin_v3.tscn. Runtime work is
+    # limited to deterministic interaction areas, region identity and KayKit props.
     for region_id in region_defs.keys():
-        var definition: Dictionary = region_defs[region_id]
         region_tiles[region_id] = []
-        var center := Vector3.ZERO
-        for coord in definition["coords"]:
-            var tile_position := _hex_to_world(coord)
-            tile_position.y = _height_for_coord(coord, region_id)
-            center += tile_position
-            var tile := _spawn_asset(
-                authored_terrain,
-                _terrain_asset_for_coord(coord),
-                tile_position,
-                0.0,
-                Vector3.ONE * 1.14
-            )
-            if tile != null:
-                tile.name = "%s_%d_%d" % [region_id, coord.x, coord.y]
-                region_tiles[region_id].append(tile)
-            _build_tile_interaction(authored_interaction, region_id, coord, tile_position)
-        center /= float(definition["coords"].size())
+        var center: Vector3 = AUTHORED_REGION_CENTERS[region_id]
         region_centers[region_id] = center
+        _build_region_interaction(authored_interaction, region_id, center)
 
     _build_region_props(authored_props)
     _build_world_edges()
     claimed_root = authored_claimed
     _refresh_region_visuals()
 
+func _build_region_interaction(parent: Node3D, region_id: String, center: Vector3) -> void:
+    var area := Area3D.new()
+    area.name = "Pick_%s" % region_id
+    area.position = center + Vector3(0.0, 0.45, 0.0)
+    area.input_ray_pickable = true
+    area.collision_layer = 1
+    area.collision_mask = 1
+    area.set_meta("region_id", region_id)
+
+    var collision := CollisionShape3D.new()
+    var shape := BoxShape3D.new()
+    shape.size = Vector3(2.75, 0.9, 2.45)
+    collision.shape = shape
+    area.add_child(collision)
+
+    area.mouse_entered.connect(_on_region_mouse_entered.bind(region_id))
+    area.mouse_exited.connect(_on_region_mouse_exited.bind(region_id))
+    area.input_event.connect(_on_region_input.bind(region_id))
+    parent.add_child(area)
+
 func _build_world_edges() -> void:
     var entries := [
-        ["decoration/nature/hill_single_A.gltf", Vector3(-6.4, 0.02, -4.8), 0.15, 1.45],
-        ["decoration/nature/hill_single_B.gltf", Vector3(-5.5, 0.02, -5.8), -0.2, 1.35],
-        ["decoration/nature/tree_single_A.gltf", Vector3(-6.8, 0.08, -3.6), 0.4, 1.28],
-        ["decoration/nature/tree_single_B.gltf", Vector3(-5.9, 0.08, -2.8), -0.4, 1.22],
-        ["decoration/nature/rock_single_A.gltf", Vector3(6.2, 0.06, -3.9), 0.6, 1.35],
-        ["decoration/nature/rock_single_C.gltf", Vector3(6.8, 0.06, -2.5), -0.5, 1.18],
-        ["decoration/nature/tree_single_A.gltf", Vector3(-5.8, 0.06, 6.0), 0.2, 1.18],
-        ["decoration/nature/tree_single_B.gltf", Vector3(5.7, 0.06, 5.8), -0.2, 1.12],
+        ["decoration/nature/hill_single_A.gltf", Vector3(-5.6, 0.14, -4.1), 0.15, 1.42],
+        ["decoration/nature/hill_single_B.gltf", Vector3(-4.7, 0.18, -4.7), -0.2, 1.30],
+        ["decoration/nature/tree_single_A.gltf", Vector3(-6.0, 0.18, -3.0), 0.4, 1.20],
+        ["decoration/nature/tree_single_B.gltf", Vector3(-5.1, 0.18, -2.3), -0.4, 1.16],
+        ["decoration/nature/rock_single_A.gltf", Vector3(5.2, 0.18, -3.3), 0.6, 1.28],
+        ["decoration/nature/rock_single_C.gltf", Vector3(5.8, 0.16, -2.0), -0.5, 1.10],
+        ["decoration/nature/tree_single_A.gltf", Vector3(-5.0, 0.12, 4.8), 0.2, 1.10],
+        ["decoration/nature/tree_single_B.gltf", Vector3(4.8, 0.12, 4.7), -0.2, 1.06],
     ]
     for entry in entries:
         _spawn_asset(
@@ -65,7 +81,25 @@ func _refresh_claimed_footprint() -> void:
         return
     if String(state.get("claimed_land_id", "")) != CLAIMABLE_ID:
         return
+
     var center: Vector3 = region_centers.get(CLAIMABLE_ID, Vector3.ZERO)
+
+    var activated_route := MeshInstance3D.new()
+    activated_route.name = "ActivatedFounderRoad"
+    var route_mesh := BoxMesh.new()
+    route_mesh.size = Vector3(0.30, 0.05, 3.35)
+    activated_route.mesh = route_mesh
+    activated_route.position = center + Vector3(0.75, 0.08, 1.45)
+    activated_route.rotation.y = -0.36
+    var route_material := StandardMaterial3D.new()
+    route_material.albedo_color = Color("caa45a")
+    route_material.roughness = 0.82
+    route_material.emission_enabled = true
+    route_material.emission = Color("6b4b22")
+    route_material.emission_energy_multiplier = 0.20
+    activated_route.material_override = route_material
+    claimed_root.add_child(activated_route)
+
     var claim_light := OmniLight3D.new()
     claim_light.name = "FounderWarmth"
     claim_light.position = center + Vector3(0.0, 2.4, 0.0)
