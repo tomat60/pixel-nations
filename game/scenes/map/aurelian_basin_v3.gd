@@ -57,14 +57,14 @@ func _build_region_interaction(parent: Node3D, region_id: String, center: Vector
 
 func _build_world_edges() -> void:
     var entries := [
-        ["decoration/nature/hill_single_A.gltf", Vector3(-5.6, 0.14, -4.1), 0.15, 1.42],
-        ["decoration/nature/hill_single_B.gltf", Vector3(-4.7, 0.18, -4.7), -0.2, 1.30],
-        ["decoration/nature/tree_single_A.gltf", Vector3(-6.0, 0.18, -3.0), 0.4, 1.20],
-        ["decoration/nature/tree_single_B.gltf", Vector3(-5.1, 0.18, -2.3), -0.4, 1.16],
-        ["decoration/nature/rock_single_A.gltf", Vector3(5.2, 0.18, -3.3), 0.6, 1.28],
-        ["decoration/nature/rock_single_C.gltf", Vector3(5.8, 0.16, -2.0), -0.5, 1.10],
-        ["decoration/nature/tree_single_A.gltf", Vector3(-5.0, 0.12, 4.8), 0.2, 1.10],
-        ["decoration/nature/tree_single_B.gltf", Vector3(4.8, 0.12, 4.7), -0.2, 1.06],
+        ["decoration/nature/hill_single_A.gltf", Vector3(-5.8, 0.18, -3.9), 0.15, 1.42],
+        ["decoration/nature/hill_single_B.gltf", Vector3(-4.9, 0.24, -4.6), -0.2, 1.30],
+        ["decoration/nature/tree_single_A.gltf", Vector3(-6.1, 0.22, -2.9), 0.4, 1.20],
+        ["decoration/nature/tree_single_B.gltf", Vector3(-5.0, 0.24, -2.0), -0.4, 1.16],
+        ["decoration/nature/rock_single_A.gltf", Vector3(5.1, 0.22, -3.2), 0.6, 1.28],
+        ["decoration/nature/rock_single_C.gltf", Vector3(5.8, 0.20, -1.7), -0.5, 1.10],
+        ["decoration/nature/tree_single_A.gltf", Vector3(-5.2, 0.12, 4.5), 0.2, 1.10],
+        ["decoration/nature/tree_single_B.gltf", Vector3(4.9, 0.12, 4.5), -0.2, 1.06],
     ]
     for entry in entries:
         _spawn_asset(
@@ -87,23 +87,23 @@ func _refresh_claimed_footprint() -> void:
     var activated_route := MeshInstance3D.new()
     activated_route.name = "ActivatedFounderRoad"
     var route_mesh := BoxMesh.new()
-    route_mesh.size = Vector3(0.30, 0.05, 3.35)
+    route_mesh.size = Vector3(0.18, 0.035, 2.20)
     activated_route.mesh = route_mesh
-    activated_route.position = center + Vector3(0.75, 0.08, 1.45)
-    activated_route.rotation.y = -0.36
+    activated_route.position = center + Vector3(0.54, 0.18, 0.96)
+    activated_route.rotation.y = -0.26
     var route_material := StandardMaterial3D.new()
-    route_material.albedo_color = Color("caa45a")
-    route_material.roughness = 0.82
+    route_material.albedo_color = Color("b88b43")
+    route_material.roughness = 0.86
     route_material.emission_enabled = true
-    route_material.emission = Color("6b4b22")
-    route_material.emission_energy_multiplier = 0.20
+    route_material.emission = Color("5b3b18")
+    route_material.emission_energy_multiplier = 0.16
     activated_route.material_override = route_material
     claimed_root.add_child(activated_route)
 
     var claim_light := OmniLight3D.new()
     claim_light.name = "FounderWarmth"
-    claim_light.position = center + Vector3(0.0, 2.4, 0.0)
-    claim_light.light_color = Color("e9b866")
-    claim_light.light_energy = 2.1
-    claim_light.omni_range = 5.2
+    claim_light.position = center + Vector3(0.0, 2.2, 0.0)
+    claim_light.light_color = Color("e5ad59")
+    claim_light.light_energy = 1.65
+    claim_light.omni_range = 4.5
     claimed_root.add_child(claim_light)
