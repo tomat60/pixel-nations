@@ -43,6 +43,18 @@ jobs:
       - name: Validate immutable evidence-ref parser
         run: node scripts/validate-fable-evidence-ref.mjs --self-test
 
+      - name: Validate trusted-tooling separation contract
+        run: |
+          set -euo pipefail
+          test -f scripts/fable-issue-directive.mjs
+          test -f scripts/validate-fable-evidence-ref.mjs
+          rm -rf evidence-repo
+          mkdir -p evidence-repo
+          git archive HEAD | tar -x -C evidence-repo
+          test -f evidence-repo/README.md
+          test "$(realpath evidence-repo)" != "$(realpath .)"
+          echo "FABLE_EVIDENCE_WORKTREE_SEPARATION=PASS"
+
   fable-issue-directive:
     name: Fable Issue Directive
     if: >-
@@ -84,10 +96,17 @@ jobs:
               body: `Fable directive started under the binding-output protocol.\n\nRun: ${runUrl}`,
             });
 
-      - name: Checkout repository read-only
+      - name: Checkout trusted workflow tooling
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Checkout immutable evidence snapshot
         uses: actions/checkout@v4
         with:
           ref: ${{ steps.evidence_ref.outputs.checkout }}
+          path: evidence-repo
           persist-credentials: false
 
       - name: Setup Node
@@ -96,10 +115,14 @@ jobs:
           node-version: '20'
 
       - name: Verify checked-out evidence identity
-        run: >-
-          node scripts/validate-fable-evidence-ref.mjs
-          --event "$GITHUB_EVENT_PATH"
-          --checked-out-sha "$GITHUB_SHA"
+        run: |
+          set -euo pipefail
+          evidence_sha="$(git -C evidence-repo rev-parse HEAD)"
+          node scripts/validate-fable-evidence-ref.mjs \
+            --event "$GITHUB_EVENT_PATH" \
+            --checked-out-sha "$evidence_sha"
+          echo "FABLE_TRUSTED_TOOLING_SHA=$(git rev-parse HEAD)"
+          echo "FABLE_EVIDENCE_SHA=$evidence_sha"
 
       - name: Run validated Fable issue directive
         env:
@@ -111,7 +134,10 @@ jobs:
           INPUT_PRICE_PER_MILLION_USD: '10'
           OUTPUT_PRICE_PER_MILLION_USD: '50'
           FABLE_PREFLIGHT_ONLY: 'false'
-        run: node scripts/fable-issue-directive.mjs
+        run: |
+          set -euo pipefail
+          cd evidence-repo
+          node ../scripts/fable-issue-directive.mjs
 
       - name: Upload directive artifact
         if: always()
@@ -119,8 +145,8 @@ jobs:
         with:
           name: fable-issue-directive-${{ github.event.issue.number }}
           path: |
-            fable-output/fable-issue-directive.md
-            fable-output/fable-issue-directive-meta.json
+            evidence-repo/fable-output/fable-issue-directive.md
+            evidence-repo/fable-output/fable-issue-directive-meta.json
           if-no-files-found: warn
           retention-days: 14
 
@@ -134,7 +160,7 @@ jobs:
             let resultClass = 'NO_ARTIFACT';
             let failures = [];
             try {
-              const meta = JSON.parse(fs.readFileSync('fable-output/fable-issue-directive-meta.json', 'utf8'));
+              const meta = JSON.parse(fs.readFileSync('evidence-repo/fable-output/fable-issue-directive-meta.json', 'utf8'));
               resultClass = meta.resultClass || resultClass;
               failures = Array.isArray(meta.validationFailures) ? meta.validationFailures : [];
             } catch (error) {
