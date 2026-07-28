@@ -40,18 +40,19 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf /tmp/kaykit game/art_target/kaykit
-          mkdir -p /tmp/kaykit/src game/art_target/kaykit
+          mkdir -p /tmp/kaykit/src game/art_target/kaykit evidence/kaykit-aurelian-basin
           curl -fsSL --retry 3 "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip" -o /tmp/kaykit/source.zip
           test "$(head -c 2 /tmp/kaykit/source.zip)" = "PK"
           unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/src
-          sha256sum /tmp/kaykit/source.zip > game/art_target/kaykit/source-archive.sha256
+          sha256sum /tmp/kaykit/source.zip | tee game/art_target/kaykit/source-archive.sha256
           ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
+          find "$ROOT" -type f | sort > evidence/kaykit-aurelian-basin/full-source-manifest.txt
           cp "$ROOT/LICENSE.txt" game/art_target/kaykit/LICENSE.txt
           python3 - "$ROOT" game/art_target/kaykit <<'PY'
           import hashlib,json,re,shutil,sys
           from pathlib import Path
           src,dest=Path(sys.argv[1]),Path(sys.argv[2])
-          files=sorted(src.rglob('*.gltf'))
+          files=sorted(list(src.rglob('*.gltf'))+list(src.rglob('*.glb')))
           specs=[('church','church'),('blacksmith','blacksmith|smith'),('barracks','barrack'),('house','house'),('market','market'),('bridge','bridge'),('tree','tree'),('rock','rock'),('mountain','mountain|hill')]
           chosen={}
           for role,pat in specs:
@@ -59,20 +60,23 @@ jobs:
               if role in {'church','blacksmith','barracks','house','market'}:
                   red=[p for p in hits if re.search('red',p.stem,re.I)]
                   hits=red or hits
-              if not hits: raise SystemExit('Missing role '+role)
+              if not hits:
+                  raise SystemExit('Missing role '+role+'; candidates='+','.join(p.stem for p in files[:80]))
               chosen[role]=hits[0]
           copied=set(); manifest={'source_commit':'84fa4e91af6a88989be7c99e0891cede11f2ca38','license':'CC0-1.0','models':{}}
           for role,p in chosen.items():
               rel=p.relative_to(src); target=dest/'source'/rel; target.parent.mkdir(parents=True,exist_ok=True); shutil.copy2(p,target); copied.add(p.resolve())
-              data=json.loads(p.read_text()); deps=[]
-              for item in data.get('buffers',[])+data.get('images',[]):
-                  uri=item.get('uri','')
-                  if not uri or uri.startswith('data:'): continue
-                  dep=(p.parent/uri).resolve()
-                  if not dep.exists(): raise SystemExit(f'Missing {uri} for {p}')
-                  drel=dep.relative_to(src.resolve()); dt=dest/'source'/drel; dt.parent.mkdir(parents=True,exist_ok=True)
-                  if dep not in copied: shutil.copy2(dep,dt); copied.add(dep)
-                  deps.append(str(drel))
+              deps=[]
+              if p.suffix.lower()=='.gltf':
+                  data=json.loads(p.read_text())
+                  for item in data.get('buffers',[])+data.get('images',[]):
+                      uri=item.get('uri','')
+                      if not uri or uri.startswith('data:'): continue
+                      dep=(p.parent/uri).resolve()
+                      if not dep.exists(): raise SystemExit(f'Missing {uri} for {p}')
+                      drel=dep.relative_to(src.resolve()); dt=dest/'source'/drel; dt.parent.mkdir(parents=True,exist_ok=True)
+                      if dep not in copied: shutil.copy2(dep,dt); copied.add(dep)
+                      deps.append(str(drel))
               manifest['models'][role]={'source_path':str(rel),'resource_path':'res://art_target/kaykit/source/'+str(rel).replace('\\','/'),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'dependencies':deps}
           if len(copied)>20: raise SystemExit(f'Curated source file gate exceeded: {len(copied)}')
           manifest['curated_source_file_count']=len(copied); manifest['curated_model_count']=len(chosen)
@@ -81,11 +85,11 @@ jobs:
               for p in sorted(dest.rglob('*')):
                   if p.is_file() and p.name!='SHA256SUMS.txt': out.write(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(dest)}\n")
           PY
+          cat game/art_target/kaykit/manifest.json | tee evidence/kaykit-aurelian-basin/curated-manifest.json
 
       - name: Import and capture exact scene
         run: |
           set -euo pipefail
-          mkdir -p evidence/kaykit-aurelian-basin
           "$GODOT" --headless --path game --editor --quit > evidence/kaykit-aurelian-basin/import.log 2>&1
           ! grep -E "SCRIPT ERROR|Parse Error|Failed to load" evidence/kaykit-aurelian-basin/import.log
           timeout 35s xvfb-run -a env CAPTURE_WIDTH=1440 CAPTURE_HEIGHT=900 CAPTURE_PATH="$PWD/evidence/kaykit-aurelian-basin/desktop-1440x900.png" "$GODOT" --path game res://scenes/art_target/aurelian_basin_target.tscn > evidence/kaykit-aurelian-basin/desktop.log 2>&1
@@ -102,6 +106,7 @@ jobs:
           git config user.name pixel-nations-steward
           git config user.email actions@users.noreply.github.com
           git add game/art_target game/scenes/art_target evidence/kaykit-aurelian-basin
+          git diff --cached --quiet && { echo 'No generated changes'; exit 1; }
           git commit -m "feat(godot): add authored KayKit Aurelian Basin target"
           git push origin HEAD:${TARGET_BRANCH}
 
@@ -120,3 +125,5 @@ jobs:
         with:
           script: |
             await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:298,body:`## KayKit authored target run ${context.runId}\n\n- Workflow SHA: \`${context.sha}\`\n- Branch: \`${process.env.TARGET_BRANCH}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`kaykit-aurelian-basin-${context.runId}\`\n- Expected evidence: desktop 1440x900 and mobile 390x844.\n\nNo main write, merge, deployment, gameplay, paid asset or second asset family was used.`})
+
+# steward-redispatch: 2026-07-28T15:30+02:00
