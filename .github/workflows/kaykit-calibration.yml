@@ -1,0 +1,190 @@
+name: KayKit Calibration Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/kaykit-calibration.yml
+      - tools/blender/kaykit_calibration.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  KAYKIT_SHA: 84fa4e91af6a88989be7c99e0891cede11f2ca38
+  KAYKIT_ARCHIVE_SHA256: cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028
+
+jobs:
+  calibrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout calibration branch
+        uses: actions/checkout@v4
+
+      - name: Install deterministic calibration tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends blender python3-numpy python3-pil unzip fonts-dejavu-core >/dev/null
+          blender --version | head -1
+          blender -b --python-expr "import numpy; print('BLENDER_NUMPY=' + numpy.__version__)"
+          python3 - <<'PY'
+          from PIL import Image
+          print('PIL_OK=' + Image.__version__)
+          PY
+
+      - name: Fetch and verify pinned KayKit source
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/kaykit calibration-evidence
+          mkdir -p /tmp/kaykit calibration-evidence
+          curl -fsSL --retry 3 "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip" -o /tmp/kaykit/source.zip
+          echo "${KAYKIT_ARCHIVE_SHA256}  /tmp/kaykit/source.zip" | sha256sum -c -
+          unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/source
+          ROOT="$(find /tmp/kaykit/source -mindepth 1 -maxdepth 1 -type d | head -1)"
+          echo "KAYKIT_ROOT=$ROOT" >> "$GITHUB_ENV"
+          curl -fsSL --retry 3 "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/${KAYKIT_SHA}/LICENSE.txt" -o calibration-evidence/LICENSE.txt
+          grep -F "Creative Commons Zero" calibration-evidence/LICENSE.txt
+          sha256sum /tmp/kaykit/source.zip calibration-evidence/LICENSE.txt > calibration-evidence/source-sha256.txt
+
+      - name: Measure models and render neutral thumbnails
+        run: |
+          set -euo pipefail
+          blender -b --python tools/blender/kaykit_calibration.py -- "$KAYKIT_ROOT" "$PWD/calibration-evidence" 2>&1 | tee calibration-evidence/blender-calibration.log
+          grep -F "KAYKIT_CALIBRATION_EXPORTED=" calibration-evidence/blender-calibration.log
+          test -s calibration-evidence/kaykit-metrics.json
+          test "$(find calibration-evidence/thumbnails -name '*.png' -type f | wc -l)" -eq 9
+
+      - name: Build contact sheet and calibration contracts
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import csv
+          import json
+          from pathlib import Path
+          from PIL import Image, ImageDraw, ImageFont, ImageStat
+
+          out = Path('calibration-evidence')
+          report = json.loads((out / 'kaykit-metrics.json').read_text())
+          roles = ['church','blacksmith','barracks','house_a','house_b','market','well','tree','rock']
+          font_path = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+          bold_path = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+          font = ImageFont.truetype(font_path, 20)
+          small = ImageFont.truetype(font_path, 16)
+          bold = ImageFont.truetype(bold_path, 23)
+          cell_w, image_h, label_h = 640, 640, 112
+          sheet = Image.new('RGB', (cell_w * 3, (image_h + label_h) * 3), (24, 29, 34))
+          draw = ImageDraw.Draw(sheet)
+          rows = []
+          for index, role in enumerate(roles):
+              data = report['models'][role]
+              thumb = Image.open(out / data['thumbnail']).convert('RGB')
+              if thumb.size != (640, 640):
+                  raise SystemExit(f'Wrong thumbnail dimensions for {role}: {thumb.size}')
+              if max(ImageStat.Stat(thumb).var) < 8:
+                  raise SystemExit(f'Blank thumbnail for {role}')
+              x = (index % 3) * cell_w
+              y = (index // 3) * (image_h + label_h)
+              sheet.paste(thumb, (x, y))
+              dims = data['dimensions']
+              draw.rectangle((x, y + image_h, x + cell_w, y + image_h + label_h), fill=(18, 22, 27))
+              draw.text((x + 18, y + image_h + 12), role, font=bold, fill=(240, 242, 244))
+              draw.text((x + 18, y + image_h + 46), f"native XYZ: {dims['x']:.3f} × {dims['y']:.3f} × {dims['z']:.3f}", font=font, fill=(190, 205, 214))
+              draw.text((x + 18, y + image_h + 76), data['sha256'][:20] + '…', font=small, fill=(130, 150, 160))
+              rows.append({
+                  'role': role,
+                  'source_path': data['source_path'],
+                  'sha256': data['sha256'],
+                  'x': dims['x'], 'y': dims['y'], 'z': dims['z'],
+                  'footprint_max': data['footprint_max'],
+                  'root_origins': json.dumps(data['root_origins']),
+              })
+          sheet.save(out / 'kaykit-contact-sheet.png')
+
+          with (out / 'kaykit-scale-table.csv').open('w', newline='') as handle:
+              writer = csv.DictWriter(handle, fieldnames=rows[0].keys())
+              writer.writeheader(); writer.writerows(rows)
+
+          reference = report['models']['house_a']['footprint_max']
+          scale = 10.0 / reference
+          world = {}
+          for role in roles:
+              dims = report['models'][role]['dimensions']
+              world[role] = {axis: round(dims[axis] * scale, 4) for axis in ('x','y','z')}
+          contract = {
+              'status': 'PROPOSAL_REQUIRES_REVIEW',
+              'world_unit_convention': '1 world unit = 1 calibrated meter; house_a maximum footprint = 10 units',
+              'uniform_import_scale': round(scale, 8),
+              'normalized_model_dimensions': world,
+              'terrain': {'ground_y': 0.0, 'water_y': -1.2, 'river_bed_y': -2.8, 'bank_top_y': 0.4},
+              'crossing': {'road_width': 5.0, 'bridge_deck_width': 6.0, 'river_clear_width': 24.0, 'bridge_clear_span': 27.0},
+              'basin_plan': {
+                  'size': [120.0, 90.0],
+                  'bridge_center': [54.0, 52.0],
+                  'settlement_center': [82.0, 31.0],
+                  'church': [89.0, 17.0],
+                  'blacksmith': [70.0, 37.0],
+                  'barracks': [101.0, 35.0],
+                  'market': [81.0, 32.0],
+                  'well': [82.0, 27.0],
+                  'house_a': [75.0, 25.0],
+                  'house_b': [91.0, 27.0],
+              },
+              'camera': {
+                  'desktop': {'output': [1440,900], 'terrain_occupancy_target': [0.78,0.86], 'orthographic': True},
+                  'portrait': {'output': [390,844], 'requires_distinct_framing': True, 'orthographic': True},
+              },
+              'lighting': {'view_transform': 'Standard', 'exposure': 0.0, 'neutral_background_rgb': [0.155,0.175,0.19]},
+          }
+          (out / 'calibration-contract.json').write_text(json.dumps(contract, indent=2) + '\n')
+
+          plan = '''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 120 90">
+          <rect width="120" height="90" fill="#6e7650"/>
+          <path d="M0 24 C28 25 36 46 54 52 C76 60 96 69 120 72" fill="none" stroke="#357b83" stroke-width="11"/>
+          <path d="M0 24 C28 25 36 46 54 52 C76 60 96 69 120 72" fill="none" stroke="#75c2c7" stroke-width="7"/>
+          <path d="M52 90 C53 72 53 61 54 52 C62 44 71 38 82 31" fill="none" stroke="#c59b62" stroke-width="5"/>
+          <rect x="40.5" y="49" width="27" height="6" rx="1" fill="#6b4f35" stroke="#e2c995" stroke-width="0.8"/>
+          <ellipse cx="82" cy="31" rx="23" ry="17" fill="#84915e" stroke="#d4bc72" stroke-width="0.8"/>
+          <g fill="#9c3030" stroke="#f2c46d" stroke-width="0.5">
+          <rect x="85" y="12" width="8" height="10"/><rect x="66" y="33" width="8" height="8"/><rect x="97" y="31" width="9" height="9"/>
+          <rect x="77" y="28" width="9" height="7"/><rect x="72" y="21" width="8" height="8"/><rect x="87" y="23" width="8" height="8"/>
+          <circle cx="82" cy="27" r="2"/>
+          </g>
+          <g font-family="sans-serif" font-size="2.2" fill="#fff"><text x="2" y="6">Aurelian Basin calibration plan — PROPOSAL</text><text x="47" y="48">bridge</text><text x="78" y="52">Hearthmeadow</text></g>
+          </svg>'''
+          (out / 'composition-plan.svg').write_text(plan)
+
+          cross = '''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 120 50">
+          <rect width="120" height="50" fill="#1f252a"/>
+          <path d="M0 20 L35 20 L47 32 L73 32 L85 20 L120 20 L120 50 L0 50 Z" fill="#6e7650"/>
+          <rect x="47" y="28" width="26" height="4" fill="#357b83"/>
+          <rect x="45" y="14" width="30" height="4" fill="#6b4f35" stroke="#e2c995" stroke-width="0.7"/>
+          <rect x="45" y="18" width="3" height="10" fill="#8d775c"/><rect x="72" y="18" width="3" height="10" fill="#8d775c"/>
+          <g font-family="sans-serif" font-size="2.4" fill="#fff"><text x="3" y="6">River / bridge / road cross-section — PROPOSAL</text><text x="49" y="38">river bed -2.8</text><text x="50" y="27">water -1.2</text><text x="48" y="12">deck width 6 / span 27</text></g>
+          </svg>'''
+          (out / 'cross-section.svg').write_text(cross)
+          PY
+          test -s calibration-evidence/kaykit-contact-sheet.png
+          test -s calibration-evidence/kaykit-scale-table.csv
+          test -s calibration-evidence/calibration-contract.json
+          test -s calibration-evidence/composition-plan.svg
+          test -s calibration-evidence/cross-section.svg
+          sha256sum calibration-evidence/* calibration-evidence/thumbnails/*.png > calibration-evidence/SHA256SUMS.txt
+
+      - name: Upload exact calibration evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaykit-calibration-${{ github.run_id }}
+          path: calibration-evidence/**
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Report calibration run
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:302,body:`## KayKit calibration run ${context.runId}\n\n- Event SHA: \`${context.sha}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`kaykit-calibration-${context.runId}\`\n- Expected evidence: neutral contact sheet, native AABBs/pivots, scale table, proposed normalization contract, composition plan and crossing cross-section.\n\nNo full scene, gameplay, second asset family, paid tool, main write, merge or deployment was used.`})
