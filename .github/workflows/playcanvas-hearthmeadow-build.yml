@@ -1,0 +1,227 @@
+name: PlayCanvas Hearthmeadow Static Frame
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [spike/playcanvas-hearthmeadow-static]
+    paths: [.github/workflows/playcanvas-hearthmeadow-build.yml]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: pixel-nations-playcanvas-hearthmeadow
+  cancel-in-progress: true
+
+jobs:
+  build-frame:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: spike/playcanvas-hearthmeadow-static
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Resolve and download verified Quaternius GLB assets
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ROOT="$RUNNER_TEMP/hearthmeadow-assets"
+          mkdir -p "$ROOT/responses" public/assets/hearthmeadow-quaternius/models
+
+          cat > "$ROOT/models.tsv" <<'EOF'
+          barracks	UXCOwRBSxx
+          temple	v36uJiErXS
+          farm	91wMLb9kKo
+          house_a	RSwoYSLblu
+          house_b	oJJIRwv6Bo
+          houses	gEjAC1UvVU
+          market	fmHUuX9AS3
+          pine_trees	oYtDty0fR6
+          crops	Ro6K0Yg7mx
+          town_center	sPY1OPVCAX
+          EOF
+
+          while IFS=$'\t' read -r name id; do
+            mkdir -p "$ROOT/responses/$name"
+            curl --location --fail --silent --show-error --max-time 60 \
+              -A 'Mozilla/5.0' \
+              -o "$ROOT/responses/$name/page.txt" "https://r.jina.ai/http://poly.pizza/m/$id"
+          done < "$ROOT/models.tsv"
+
+          python3 - "$ROOT" <<'PY'
+          import html, re, subprocess, sys, hashlib
+          from pathlib import Path
+          from urllib.parse import unquote
+
+          root=Path(sys.argv[1])
+          out=Path('public/assets/hearthmeadow-quaternius/models')
+          url_rx=re.compile(r'https?://[^\s"\'<>\\]+', re.I)
+          required=['barracks','temple','farm','house_a','house_b','houses','market','pine_trees','crops','town_center']
+          manifest=[]
+          for name in required:
+              text=(root/'responses'/name/'page.txt').read_text(encoding='utf-8',errors='replace')
+              urls=[]
+              for raw in url_rx.findall(html.unescape(text)):
+                  u=unquote(raw).replace('\\u0026','&').replace('\\/','/').rstrip('.,);]}')
+                  if any(x in u.lower() for x in ('.glb','.gltf','.zip')):
+                      urls.append(u)
+              seen=[]
+              for u in urls:
+                  if u not in seen: seen.append(u)
+              chosen=None
+              for idx,u in enumerate(seen[:30]):
+                  tmp=root/f'{name}-{idx}'
+                  rc=subprocess.run(['curl','--location','--fail','--silent','--show-error','--max-time','90','-A','Mozilla/5.0',u,'-o',str(tmp)]).returncode
+                  if rc or not tmp.exists() or tmp.stat().st_size < 1000: continue
+                  head=tmp.read_bytes()[:4]
+                  if head==b'glTF':
+                      chosen=tmp; source=u; break
+              if chosen is None:
+                  raise SystemExit(f'No real GLB resolved for {name}')
+              target=out/f'{name}.glb'
+              target.write_bytes(chosen.read_bytes())
+              manifest.append((name,target.stat().st_size,hashlib.sha256(target.read_bytes()).hexdigest(),source))
+          Path('public/assets/hearthmeadow-quaternius/MANIFEST.tsv').write_text(
+              'name\tbytes\tsha256\tsource_url\n'+'\n'.join('\t'.join(map(str,row)) for row in manifest)+'\n',encoding='utf-8')
+          PY
+
+          cat > public/assets/hearthmeadow-quaternius/PROVENANCE.md <<'EOF'
+          # Hearthmeadow Quaternius provenance
+
+          - Creator: Quaternius.
+          - Original pack: Ultimate Fantasy RTS.
+          - Creator page: https://quaternius.com/packs/ultimatefantasyrts.html
+          - Distribution mirror: https://poly.pizza/bundle/Ultimate-Fantasy-RTS
+          - Creator profile: https://poly.pizza/u/Quaternius
+          - License: CC0 1.0 / Public Domain.
+          - Only models from this single creator and single visual family are included.
+          - Exact source URLs, byte sizes and SHA-256 hashes are recorded in MANIFEST.tsv.
+          EOF
+
+      - name: Install PlayCanvas dependencies
+        run: npm install --save-exact playcanvas@2.21.1 @playcanvas/react@0.11.5
+
+      - name: Create isolated Hearthmeadow route
+        shell: bash
+        run: |
+          mkdir -p app/lab/hearthmeadow-playcanvas
+          cat > app/lab/hearthmeadow-playcanvas/page.tsx <<'EOF'
+          import HearthmeadowCanvas from './HearthmeadowCanvas';
+
+          export default function Page() {
+            return <main style={{width:'100vw',height:'100svh',overflow:'hidden',background:'#b9d6cf'}}><HearthmeadowCanvas /></main>;
+          }
+          EOF
+
+          cat > app/lab/hearthmeadow-playcanvas/HearthmeadowCanvas.tsx <<'EOF'
+          'use client';
+
+          import { useEffect, useRef } from 'react';
+          import * as pc from 'playcanvas';
+
+          const A='/assets/hearthmeadow-quaternius/models/';
+          const models=[
+            ['temple.glb',0,0,-8,1.45,0],
+            ['town_center.glb',0,0,-1,1.15,0],
+            ['barracks.glb',9,0,-2,1.05,-18],
+            ['market.glb',-6,0,1,1.0,15],
+            ['farm.glb',-10,0,7,1.05,8],
+            ['house_a.glb',-5,0,-5,0.9,-10],
+            ['house_b.glb',5,0,-5,0.9,12],
+            ['houses.glb',4,0,4,0.9,-8],
+            ['house_a.glb',-2,0,6,0.82,22],
+            ['house_b.glb',8,0,7,0.82,-18],
+            ['crops.glb',-12,0,10,1.25,0],
+          ] as const;
+
+          export default function HearthmeadowCanvas(){
+            const ref=useRef<HTMLCanvasElement>(null);
+            useEffect(()=>{
+              const canvas=ref.current!;
+              const app=new pc.Application(canvas,{graphicsDeviceOptions:{antialias:true,alpha:false}});
+              app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+              app.setCanvasResolution(pc.RESOLUTION_AUTO);
+              app.scene.ambientLight=new pc.Color(0.55,0.58,0.5);
+              app.scene.skyboxMip=2;
+
+              const mat=(r:number,g:number,b:number)=>{const m=new pc.StandardMaterial();m.diffuse=new pc.Color(r,g,b);m.roughness=0.95;m.update();return m;};
+              const box=(name:string,pos:[number,number,number],scale:[number,number,number],material:pc.StandardMaterial,rot=0)=>{
+                const e=new pc.Entity(name);e.addComponent('render',{type:'box'});e.setPosition(...pos);e.setLocalScale(...scale);e.setEulerAngles(0,rot,0);(e.render!.meshInstances as pc.MeshInstance[]).forEach(mi=>mi.material=material);app.root.addChild(e);return e;
+              };
+              const grass=mat(0.28,0.48,0.24), earth=mat(0.42,0.31,0.18), water=mat(0.10,0.43,0.55), road=mat(0.55,0.43,0.27), stone=mat(0.42,0.39,0.33);
+              box('terrain',[0,-1.5,0],[42,2.5,32],grass);
+              box('north ridge',[0,0,-15],[42,3,4],grass);
+              box('west hill',[-18,0,-5],[5,4,18],grass,-8);
+              box('east shoulder',[18,0,-4],[5,3.5,17],grass,8);
+              box('river',[0,-0.42,13],[42,0.65,4.8],water);
+              box('north bank',[0,-0.05,10.4],[42,0.8,1.1],earth);
+              box('south bank',[0,-0.05,15.6],[42,0.8,1.1],earth);
+              box('road north',[0,0.06,3],[2.6,0.18,15],road);
+              box('road south',[0,0.06,22],[2.6,0.18,12],road);
+              box('bridge',[0,0.35,13],[4.4,0.65,5.3],stone);
+              for(let i=-2;i<=2;i++) box('bridge plank',[i*0.8,0.72,13],[0.32,0.12,5.0],road);
+
+              const camera=new pc.Entity('camera');camera.addComponent('camera',{clearColor:new pc.Color(0.62,0.76,0.78),projection:pc.PROJECTION_ORTHOGRAPHIC,orthoHeight:29,farClip:150});camera.setPosition(31,31,39);camera.lookAt(0,0,2);app.root.addChild(camera);
+              const light=new pc.Entity('sun');light.addComponent('light',{type:'directional',color:new pc.Color(1,0.94,0.8),intensity:1.8,castShadows:true,shadowResolution:2048});light.setEulerAngles(48,32,0);app.root.addChild(light);
+
+              const addModel=(url:string,x:number,y:number,z:number,s:number,rot:number)=>new Promise<void>((resolve,reject)=>{
+                app.assets.loadFromUrl(url,'container',(err,asset)=>{if(err||!asset){reject(err);return;}const e=asset.resource.instantiateRenderEntity();e.setPosition(x,y,z);e.setLocalScale(s,s,s);e.setEulerAngles(0,rot,0);app.root.addChild(e);resolve();});
+              });
+              Promise.all(models.map(m=>addModel(A+m[0],m[1],m[2],m[3],m[4],m[5]))).then(()=>{
+                const treePositions=[[-15,-10],[-12,-12],[-8,-13],[10,-12],[14,-10],[16,-7],[-17,2],[16,3],[-15,8],[13,9]];
+                return Promise.all(treePositions.map(([x,z],i)=>addModel(A+'pine_trees.glb',x,0,z,0.65+(i%3)*0.08,i*27)));
+              }).catch(console.error);
+
+              app.start();
+              const resize=()=>app.resizeCanvas();window.addEventListener('resize',resize);
+              return()=>{window.removeEventListener('resize',resize);app.destroy();};
+            },[]);
+            return <div style={{position:'relative',width:'100%',height:'100%'}}>
+              <canvas ref={ref} style={{display:'block',width:'100%',height:'100%'}} />
+              <div style={{position:'absolute',left:'50%',top:'7%',transform:'translateX(-50%)',padding:'8px 16px',borderRadius:999,background:'rgba(37,45,34,.78)',color:'#f6e9c3',font:'600 14px/1.2 system-ui',letterSpacing:'.08em',textTransform:'uppercase',boxShadow:'0 8px 24px rgba(0,0,0,.18)'}}>Hearthmeadow</div>
+            </div>;
+          }
+          EOF
+
+      - name: Build application
+        run: npm run build
+
+      - name: Capture desktop and mobile runtime evidence
+        shell: bash
+        run: |
+          npx playwright install --with-deps chromium
+          npm run start -- -p 3000 > /tmp/hearthmeadow-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          for i in $(seq 1 40); do curl -fsS http://127.0.0.1:3000/lab/hearthmeadow-playcanvas >/dev/null && break || sleep 2; done
+          mkdir -p evidence/playcanvas-hearthmeadow
+          node <<'EOF'
+          const { chromium }=require('playwright');
+          (async()=>{const b=await chromium.launch({headless:true});for(const [name,w,h] of [['desktop',1440,900],['mobile',390,844]]){const p=await b.newPage({viewport:{width:w,height:h},deviceScaleFactor:1});const errors=[];p.on('console',m=>{if(m.type()==='error')errors.push(m.text())});p.on('pageerror',e=>errors.push(String(e)));const t=Date.now();await p.goto('http://127.0.0.1:3000/lab/hearthmeadow-playcanvas',{waitUntil:'networkidle'});await p.waitForTimeout(5000);await p.screenshot({path:`evidence/playcanvas-hearthmeadow/${name}.png`,fullPage:true});require('fs').writeFileSync(`evidence/playcanvas-hearthmeadow/${name}-qa.json`,JSON.stringify({viewport:[w,h],loadMs:Date.now()-t,errors},null,2));await p.close();}await b.close();})();
+          EOF
+          cp /tmp/hearthmeadow-server.log evidence/playcanvas-hearthmeadow/server.log
+          du -sb public/assets/hearthmeadow-quaternius > evidence/playcanvas-hearthmeadow/asset-bytes.txt
+
+      - name: Commit verified spike result
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add package.json package-lock.json app/lab/hearthmeadow-playcanvas public/assets/hearthmeadow-quaternius evidence/playcanvas-hearthmeadow
+          git commit -m 'Build PlayCanvas Hearthmeadow static frame with Quaternius assets'
+          git push origin HEAD:spike/playcanvas-hearthmeadow-static
+
+      - name: Upload screenshot evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: playcanvas-hearthmeadow-frame-${{ github.run_id }}
+          path: evidence/playcanvas-hearthmeadow/**
+          retention-days: 30
