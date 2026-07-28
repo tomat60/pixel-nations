@@ -54,34 +54,41 @@ jobs:
           import hashlib,json,re,shutil,sys
           from pathlib import Path
           src,dest=Path(sys.argv[1]),Path(sys.argv[2])
-          files=sorted(list(src.rglob('*.gltf'))+list(src.rglob('*.glb')))
-          specs=[('church','church'),('blacksmith','blacksmith|smith'),('barracks','barrack'),('house','house'),('market','market'),('bridge','bridge'),('well','well'),('flag','flag'),('tree','tree'),('rock','rock'),('mountain','mountain|hill')]
+          files=sorted(src.rglob('*.gltf'))
+          exact={
+            'church':'building_church_red',
+            'blacksmith':'building_blacksmith_red',
+            'barracks':'building_barracks_red',
+            'house_a':'building_home_A_red',
+            'house_b':'building_home_B_red',
+            'market':'building_market_red',
+            'well':'building_well_red',
+          }
           chosen={}
-          for role,pat in specs:
-              hits=[p for p in files if re.search(pat,p.stem,re.I)]
-              if role in {'church','blacksmith','barracks','house','market'}:
-                  red=[p for p in hits if re.search('red',p.stem,re.I)]
-                  hits=red or hits
-              if not hits:
-                  raise SystemExit('Missing role '+role+'; matching stems='+','.join(p.stem for p in files if re.search(pat,p.stem,re.I)))
+          for role,stem in exact.items():
+              hits=[p for p in files if p.stem==stem]
+              if len(hits)!=1: raise SystemExit(f'Expected one {stem}, found {len(hits)}')
+              chosen[role]=hits[0]
+          for role,pattern in {'tree':r'tree','rock':r'rock'}.items():
+              hits=[p for p in files if re.search(pattern,p.stem,re.I)]
+              if not hits: raise SystemExit(f'Missing {role}; available nature stems='+','.join(p.stem for p in files if 'decoration/nature' in str(p).replace('\\','/')))
               chosen[role]=hits[0]
           copied=set(); manifest={'source_commit':'84fa4e91af6a88989be7c99e0891cede11f2ca38','license':'CC0-1.0','models':{}}
           for role,p in chosen.items():
               rel=p.relative_to(src); target=dest/'source'/rel; target.parent.mkdir(parents=True,exist_ok=True); shutil.copy2(p,target); copied.add(p.resolve())
               deps=[]
-              if p.suffix.lower()=='.gltf':
-                  data=json.loads(p.read_text())
-                  for item in data.get('buffers',[])+data.get('images',[]):
-                      uri=item.get('uri','')
-                      if not uri or uri.startswith('data:'): continue
-                      dep=(p.parent/uri).resolve()
-                      if not dep.exists(): raise SystemExit(f'Missing {uri} for {p}')
-                      drel=dep.relative_to(src.resolve()); dt=dest/'source'/drel; dt.parent.mkdir(parents=True,exist_ok=True)
-                      if dep not in copied: shutil.copy2(dep,dt); copied.add(dep)
-                      deps.append(str(drel))
+              data=json.loads(p.read_text())
+              for item in data.get('buffers',[])+data.get('images',[]):
+                  uri=item.get('uri','')
+                  if not uri or uri.startswith('data:'): continue
+                  dep=(p.parent/uri).resolve()
+                  if not dep.exists(): raise SystemExit(f'Missing {uri} for {p}')
+                  drel=dep.relative_to(src.resolve()); dt=dest/'source'/drel; dt.parent.mkdir(parents=True,exist_ok=True)
+                  if dep not in copied: shutil.copy2(dep,dt); copied.add(dep)
+                  deps.append(str(drel))
               manifest['models'][role]={'source_path':str(rel),'resource_path':'res://art_target/kaykit/source/'+str(rel).replace('\\','/'),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'dependencies':deps}
           if len(chosen)>16: raise SystemExit(f'Curated model gate exceeded: {len(chosen)}')
-          if len(copied)>20: raise SystemExit(f'Curated source file gate exceeded: {len(copied)}')
+          if len(copied)>20: raise SystemExit(f'Curated source file gate exceeded: {len(copied)}; files='+','.join(str(p.relative_to(src.resolve())) for p in sorted(copied)))
           manifest['curated_source_file_count']=len(copied); manifest['curated_model_count']=len(chosen)
           (dest/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
           with (dest/'SHA256SUMS.txt').open('w') as out:
@@ -136,6 +143,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:298,body:`## KayKit authored target run ${context.runId}\n\n- Workflow SHA: \`${context.sha}\`\n- Branch: \`${process.env.TARGET_BRANCH}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`kaykit-aurelian-basin-${context.runId}\`\n- Evidence expected: pinned manifest, static Blender terrain GLB, desktop 1440x900, mobile 390x844.\n\nNo runtime-generated terrain, main write, merge, deployment, gameplay, paid asset or second asset family was used.`})
+            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:298,body:`## KayKit authored target run ${context.runId}\n\n- Workflow SHA: \`${context.sha}\`\n- Branch: \`${process.env.TARGET_BRANCH}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`kaykit-aurelian-basin-${context.runId}\`\n- Evidence expected: pinned manifest, static Blender terrain GLB, desktop 1440x900, mobile 390x844.\n\nNo main write, merge, deployment, gameplay, paid asset or second asset family was used.`})
 
-# final-technical-retry: 2026-07-28T15:30+02:00
+# final-technical-retry-exact-paths: 2026-07-28T16:26+02:00
