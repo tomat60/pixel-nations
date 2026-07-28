@@ -41,6 +41,7 @@ jobs:
           chmod +x "$GODOT"
           echo "GODOT=$GODOT" >> "$GITHUB_ENV"
           "$GODOT" --version
+          ldconfig -p | grep -E 'libEGL.so.1|libGL.so.1'
 
       - name: Fetch and verify exact KayKit subset
         run: |
@@ -59,14 +60,21 @@ jobs:
           import hashlib, json, shutil, sys
           from pathlib import Path
           src, dest = Path(sys.argv[1]), Path(sys.argv[2])
-          stems = ['building_home_A_red', 'building_blacksmith_red', 'building_church_red']
+          expected = {
+              'building_home_A_red':'158bcb4149f4d6db461774d7bd67d264262f30145762eddd0a8def8be292286c',
+              'building_blacksmith_red':'5689a8f37fa59a956927b4deaeb6d8ee48228fe29c2c61b71048bec04a7b086f',
+              'building_church_red':'e4dc40472c3c0039c0dde205630ebb3a4e51da2ddf55109a3c2f9a8ba91ad2c3',
+          }
           manifest = {'source_commit':'84fa4e91af6a88989be7c99e0891cede11f2ca38','license':'CC0-1.0','models':{}}
           copied = set()
-          for stem in stems:
+          for stem, expected_sha in expected.items():
               hits = list(src.rglob(stem + '.gltf'))
               if len(hits) != 1:
                   raise SystemExit(f'Expected one {stem}, found {len(hits)}')
               model = hits[0]
+              model_sha = hashlib.sha256(model.read_bytes()).hexdigest()
+              if model_sha != expected_sha:
+                  raise SystemExit(f'Hash mismatch for {stem}: {model_sha}')
               data = json.loads(model.read_text())
               target = dest / model.name
               shutil.copy2(model, target); copied.add(target.name)
@@ -85,7 +93,7 @@ jobs:
               manifest['models'][stem] = {
                   'source_path': str(model.relative_to(src)),
                   'resource_path': 'res://art_target/kaykit_cluster/' + model.name,
-                  'sha256': hashlib.sha256(model.read_bytes()).hexdigest(),
+                  'sha256': model_sha,
                   'dependencies': deps,
               }
           (dest/'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
@@ -98,16 +106,19 @@ jobs:
         run: |
           set -euo pipefail
           "$GODOT" --headless --path game --editor --quit 2>&1 | tee evidence/godot-kaykit-cluster/import.log
-          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|ERROR:" evidence/godot-kaykit-cluster/import.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|Missing KayKit model|Grounding failed|No mesh found" evidence/godot-kaykit-cluster/import.log
 
       - name: Capture desktop and portrait contracts
         run: |
           set -euo pipefail
-          xvfb-run -a env CAPTURE_MODE=desktop CAPTURE_WIDTH=1440 CAPTURE_HEIGHT=900 CAPTURE_PATH="$PWD/evidence/godot-kaykit-cluster/desktop-1440x900.png" CONTRACT_PATH="$PWD/evidence/godot-kaykit-cluster/desktop-contract.json" "$GODOT" --path game res://scenes/calibration/kaykit_cluster.tscn 2>&1 | tee evidence/godot-kaykit-cluster/desktop.log
-          xvfb-run -a env CAPTURE_MODE=portrait CAPTURE_WIDTH=390 CAPTURE_HEIGHT=844 CAPTURE_PATH="$PWD/evidence/godot-kaykit-cluster/portrait-390x844.png" CONTRACT_PATH="$PWD/evidence/godot-kaykit-cluster/portrait-contract.json" "$GODOT" --path game res://scenes/calibration/kaykit_cluster.tscn 2>&1 | tee evidence/godot-kaykit-cluster/portrait.log
-          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|ERROR:" evidence/godot-kaykit-cluster/desktop.log evidence/godot-kaykit-cluster/portrait.log
+          export XDG_RUNTIME_DIR="/tmp/pixel-nations-xdg"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 45s xvfb-run -a env CAPTURE_MODE=desktop CAPTURE_WIDTH=1440 CAPTURE_HEIGHT=900 CAPTURE_PATH="$PWD/evidence/godot-kaykit-cluster/desktop-1440x900.png" CONTRACT_PATH="$PWD/evidence/godot-kaykit-cluster/desktop-contract.json" "$GODOT" --path game res://scenes/calibration/kaykit_cluster.tscn 2>&1 | tee evidence/godot-kaykit-cluster/desktop.log
+          timeout 45s xvfb-run -a env CAPTURE_MODE=portrait CAPTURE_WIDTH=390 CAPTURE_HEIGHT=844 CAPTURE_PATH="$PWD/evidence/godot-kaykit-cluster/portrait-390x844.png" CONTRACT_PATH="$PWD/evidence/godot-kaykit-cluster/portrait-contract.json" "$GODOT" --path game res://scenes/calibration/kaykit_cluster.tscn 2>&1 | tee evidence/godot-kaykit-cluster/portrait.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|Missing KayKit model|Grounding failed|No mesh found|Screenshot save failed|Contract file open failed" evidence/godot-kaykit-cluster/desktop.log evidence/godot-kaykit-cluster/portrait.log
           python3 - <<'PY'
-          import hashlib, json, statistics
+          import hashlib, json
           from pathlib import Path
           from PIL import Image, ImageStat
           root = Path('evidence/godot-kaykit-cluster')
@@ -123,16 +134,25 @@ jobs:
               stat = ImageStat.Stat(image)
               luminance = sum(stat.mean)/3.0
               variance = sum(stat.var)/3.0
-              if variance < 25.0 or luminance < 20.0 or luminance > 235.0:
-                  raise SystemExit(f'Image QA failed {name}: luminance={luminance:.2f} variance={variance:.2f}')
-              qa[name] = {'width':dims[0],'height':dims[1],'bytes':path.stat().st_size,'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'mean_luminance':round(luminance,3),'variance':round(variance,3)}
+              pixels = list(image.getdata())
+              near_white = sum(1 for r,g,b in pixels if r > 245 and g > 245 and b > 245) / len(pixels)
+              if variance < 25.0 or luminance < 20.0 or luminance > 220.0 or near_white > 0.08:
+                  raise SystemExit(f'Image QA failed {name}: luminance={luminance:.2f} variance={variance:.2f} near_white={near_white:.4f}')
+              qa[name] = {'width':dims[0],'height':dims[1],'bytes':path.stat().st_size,'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'mean_luminance':round(luminance,3),'variance':round(variance,3),'near_white_fraction':round(near_white,6)}
           desktop = json.loads((root/'desktop-contract.json').read_text())
           portrait = json.loads((root/'portrait-contract.json').read_text())
-          final = {'classification':'PENDING_HUMAN_REVIEW','input_sha':(root/'input-sha.txt').read_text().strip(),'source_commit':'84fa4e91af6a88989be7c99e0891cede11f2ca38','source_archive_sha256':'cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028','desktop':desktop,'portrait':portrait,'image_qa':qa}
+          input_sha = (root/'input-sha.txt').read_text().strip()
+          if sorted(desktop['roles']) != ['blacksmith','church','home'] or sorted(portrait['roles']) != ['blacksmith','church','home']:
+              raise SystemExit('Role contract incomplete')
+          for mode, contract in [('desktop',desktop),('portrait',portrait)]:
+              for role, data in contract['roles'].items():
+                  if abs(data['world_aabb_position'][1]) > 0.03:
+                      raise SystemExit(f'Grounding contract failed {mode}/{role}: {data}')
+          final = {'classification':'PENDING_HUMAN_REVIEW','input_sha':input_sha,'output_sha':input_sha,'source_commit':'84fa4e91af6a88989be7c99e0891cede11f2ca38','source_archive_sha256':'cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028','desktop':desktop,'portrait':portrait,'image_qa':qa}
           (root/'final-contract.json').write_text(json.dumps(final,indent=2)+'\n')
           PY
           find game/art_target/kaykit_cluster -type f -printf '%s\n' | awk '{s+=$1} END{print s+0}' > evidence/godot-kaykit-cluster/asset-bytes.txt
-          sha256sum evidence/godot-kaykit-cluster/* | sort > evidence/godot-kaykit-cluster/SHA256SUMS.txt
+          find evidence/godot-kaykit-cluster -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > evidence/godot-kaykit-cluster/SHA256SUMS.txt
 
       - name: Upload exact cluster evidence
         if: always()
