@@ -34,8 +34,10 @@ jobs:
       - name: Install Blender, Godot and render dependencies
         run: |
           set -euo pipefail
+          INPUT_SHA="$(git rev-parse HEAD)"
+          echo "INPUT_SHA=$INPUT_SHA" >> "$GITHUB_ENV"
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends blender unzip xvfb libgl1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 >/dev/null
+          sudo apt-get install -y -qq --no-install-recommends blender python3-numpy python3-pil unzip xvfb libgl1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 >/dev/null
           mkdir -p /tmp/godot
           curl -fsSL --retry 3 "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" -o /tmp/godot/godot.zip
           unzip -q /tmp/godot/godot.zip -d /tmp/godot
@@ -43,6 +45,7 @@ jobs:
           chmod +x "$GODOT"
           echo "GODOT=$GODOT" >> "$GITHUB_ENV"
           blender --version | head -1
+          blender -b --python-expr "import numpy; print('BLENDER_NUMPY=' + numpy.__version__)"
           "$GODOT" --version
 
       - name: Curate exact pinned KayKit subset
@@ -50,6 +53,7 @@ jobs:
           set -euo pipefail
           rm -rf /tmp/kaykit game/art_target/kaykit game/art_target/terrain evidence/kaykit-aurelian-basin
           mkdir -p /tmp/kaykit/src game/art_target/kaykit game/art_target/terrain evidence/kaykit-aurelian-basin
+          printf '%s\n' "$INPUT_SHA" > evidence/kaykit-aurelian-basin/input-head.txt
           curl -fsSL --retry 3 "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip" -o /tmp/kaykit/source.zip
           test "$(head -c 2 /tmp/kaykit/source.zip)" = "PK"
           unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/src
@@ -108,6 +112,7 @@ jobs:
       - name: Author continuous terrain and support geometry in Blender
         run: |
           set -euo pipefail
+          rm -f /tmp/aurelian_basin.glb
           blender -b --python tools/blender/aurelian_basin_static.py 2>&1 | tee evidence/kaykit-aurelian-basin/blender.log
           test -s /tmp/aurelian_basin.glb
           cp /tmp/aurelian_basin.glb game/art_target/terrain/aurelian_basin.glb
@@ -123,7 +128,22 @@ jobs:
           timeout 35s xvfb-run -a env CAPTURE_WIDTH=390 CAPTURE_HEIGHT=844 CAPTURE_PATH="$PWD/evidence/kaykit-aurelian-basin/mobile-390x844.png" "$GODOT" --path game res://scenes/art_target/aurelian_basin_target.tscn > evidence/kaykit-aurelian-basin/mobile.log 2>&1
           test -s evidence/kaykit-aurelian-basin/desktop-1440x900.png
           test -s evidence/kaykit-aurelian-basin/mobile-390x844.png
-          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|ERROR:" evidence/kaykit-aurelian-basin/*.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|ERROR:" evidence/kaykit-aurelian-basin/import.log evidence/kaykit-aurelian-basin/desktop.log evidence/kaykit-aurelian-basin/mobile.log
+          python3 - <<'PY'
+          from PIL import Image, ImageStat
+          expected = {
+              'evidence/kaykit-aurelian-basin/desktop-1440x900.png': (1440, 900),
+              'evidence/kaykit-aurelian-basin/mobile-390x844.png': (390, 844),
+          }
+          for path, size in expected.items():
+              image = Image.open(path).convert('RGB')
+              if image.size != size:
+                  raise SystemExit(f'Wrong PNG size for {path}: {image.size}, expected {size}')
+              stat = ImageStat.Stat(image)
+              if max(stat.var) < 4.0:
+                  raise SystemExit(f'Blank or near-uniform PNG: {path}; variance={stat.var}')
+              print(f'PNG_QA={path} size={image.size} variance={stat.var}')
+          PY
           find game/art_target -type f -printf '%s\n' | awk '{s+=$1} END{print s+0}' > evidence/kaykit-aurelian-basin/asset-bytes.txt
           sha256sum evidence/kaykit-aurelian-basin/*.png game/art_target/kaykit/manifest.json game/art_target/terrain/aurelian_basin.glb > evidence/kaykit-aurelian-basin/SHA256SUMS.txt
 
@@ -133,9 +153,15 @@ jobs:
           git config user.name pixel-nations-steward
           git config user.email actions@users.noreply.github.com
           git add game/art_target game/scenes/art_target tools/blender/aurelian_basin_static.py evidence/kaykit-aurelian-basin
-          git diff --cached --quiet && { echo 'No generated changes'; exit 1; }
-          git commit -m "feat(godot): add authored KayKit Aurelian Basin target"
-          git push origin HEAD:${TARGET_BRANCH}
+          if git diff --cached --quiet; then
+            echo "No generated changes; exact evidence is deterministic."
+          else
+            git commit -m "feat(godot): add authored KayKit Aurelian Basin target"
+            git push origin HEAD:${TARGET_BRANCH}
+          fi
+          OUTPUT_SHA="$(git rev-parse HEAD)"
+          printf '%s\n' "$OUTPUT_SHA" | tee evidence/kaykit-aurelian-basin/output-head.txt
+          echo "OUTPUT_SHA=$OUTPUT_SHA" >> "$GITHUB_ENV"
 
       - name: Upload evidence
         if: always()
@@ -151,6 +177,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:298,body:`## KayKit authored target run ${context.runId}\n\n- Workflow SHA: \`${context.sha}\`\n- Branch: \`${process.env.TARGET_BRANCH}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`kaykit-aurelian-basin-${context.runId}\`\n- Evidence expected: pinned manifest, static Blender terrain GLB, desktop 1440x900, mobile 390x844.\n\nNo main write, merge, deployment, gameplay, paid asset or second asset family was used.`})
+            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:298,body:`## KayKit authored target run ${context.runId}\n\n- Event SHA: \`${context.sha}\`\n- Input branch SHA: \`${process.env.INPUT_SHA || 'not-reached'}\`\n- Output branch SHA: \`${process.env.OUTPUT_SHA || 'not-reached'}\`\n- Branch: \`${process.env.TARGET_BRANCH}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`kaykit-aurelian-basin-${context.runId}\`\n- Evidence expected: pinned manifest, static Blender terrain GLB, desktop 1440x900, mobile 390x844.\n\nNo main write, merge, deployment, gameplay, paid asset or second asset family was used.`})
 
-# blender-observability-tee: 2026-07-28T21:08+02:00
+# proactive-runtime-qa: 2026-07-28T21:20+02:00
