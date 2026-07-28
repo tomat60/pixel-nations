@@ -18,29 +18,31 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.TARGET_BRANCH }}
           fetch-depth: 0
 
-      - name: Install Godot and render dependencies
+      - name: Install Blender, Godot and render dependencies
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends unzip xvfb libgl1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 >/dev/null
+          sudo apt-get install -y -qq --no-install-recommends blender unzip xvfb libgl1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 >/dev/null
           mkdir -p /tmp/godot
           curl -fsSL --retry 3 "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" -o /tmp/godot/godot.zip
           unzip -q /tmp/godot/godot.zip -d /tmp/godot
           chmod +x /tmp/godot/Godot_v${GODOT_RELEASE}_linux.x86_64
           echo "GODOT=/tmp/godot/Godot_v${GODOT_RELEASE}_linux.x86_64" >> "$GITHUB_ENV"
+          blender --version | head -1
+          "$GODOT" --version
 
       - name: Curate exact pinned KayKit subset
         run: |
           set -euo pipefail
-          rm -rf /tmp/kaykit game/art_target/kaykit
-          mkdir -p /tmp/kaykit/src game/art_target/kaykit evidence/kaykit-aurelian-basin
+          rm -rf /tmp/kaykit game/art_target/kaykit game/art_target/terrain evidence/kaykit-aurelian-basin
+          mkdir -p /tmp/kaykit/src game/art_target/kaykit game/art_target/terrain evidence/kaykit-aurelian-basin
           curl -fsSL --retry 3 "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip" -o /tmp/kaykit/source.zip
           test "$(head -c 2 /tmp/kaykit/source.zip)" = "PK"
           unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/src
@@ -53,7 +55,7 @@ jobs:
           from pathlib import Path
           src,dest=Path(sys.argv[1]),Path(sys.argv[2])
           files=sorted(list(src.rglob('*.gltf'))+list(src.rglob('*.glb')))
-          specs=[('church','church'),('blacksmith','blacksmith|smith'),('barracks','barrack'),('house','house'),('market','market'),('bridge','bridge'),('tree','tree'),('rock','rock'),('mountain','mountain|hill')]
+          specs=[('church','church'),('blacksmith','blacksmith|smith'),('barracks','barrack'),('house','house'),('market','market'),('bridge','bridge'),('well','well'),('flag','flag'),('tree','tree'),('rock','rock'),('mountain','mountain|hill')]
           chosen={}
           for role,pat in specs:
               hits=[p for p in files if re.search(pat,p.stem,re.I)]
@@ -61,7 +63,7 @@ jobs:
                   red=[p for p in hits if re.search('red',p.stem,re.I)]
                   hits=red or hits
               if not hits:
-                  raise SystemExit('Missing role '+role+'; candidates='+','.join(p.stem for p in files[:80]))
+                  raise SystemExit('Missing role '+role+'; matching stems='+','.join(p.stem for p in files if re.search(pat,p.stem,re.I)))
               chosen[role]=hits[0]
           copied=set(); manifest={'source_commit':'84fa4e91af6a88989be7c99e0891cede11f2ca38','license':'CC0-1.0','models':{}}
           for role,p in chosen.items():
@@ -78,6 +80,7 @@ jobs:
                       if dep not in copied: shutil.copy2(dep,dt); copied.add(dep)
                       deps.append(str(drel))
               manifest['models'][role]={'source_path':str(rel),'resource_path':'res://art_target/kaykit/source/'+str(rel).replace('\\','/'),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'dependencies':deps}
+          if len(chosen)>16: raise SystemExit(f'Curated model gate exceeded: {len(chosen)}')
           if len(copied)>20: raise SystemExit(f'Curated source file gate exceeded: {len(copied)}')
           manifest['curated_source_file_count']=len(copied); manifest['curated_model_count']=len(chosen)
           (dest/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
@@ -86,6 +89,15 @@ jobs:
                   if p.is_file() and p.name!='SHA256SUMS.txt': out.write(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(dest)}\n")
           PY
           cat game/art_target/kaykit/manifest.json | tee evidence/kaykit-aurelian-basin/curated-manifest.json
+
+      - name: Author continuous terrain and support geometry in Blender
+        run: |
+          set -euo pipefail
+          blender -b --python tools/blender/aurelian_basin_static.py > evidence/kaykit-aurelian-basin/blender.log 2>&1
+          test -s /tmp/aurelian_basin.glb
+          cp /tmp/aurelian_basin.glb game/art_target/terrain/aurelian_basin.glb
+          sha256sum game/art_target/terrain/aurelian_basin.glb | tee evidence/kaykit-aurelian-basin/terrain-sha256.txt
+          grep -F 'AURELIAN_TERRAIN_EXPORTED=' evidence/kaykit-aurelian-basin/blender.log
 
       - name: Import and capture exact scene
         run: |
@@ -97,15 +109,15 @@ jobs:
           test -s evidence/kaykit-aurelian-basin/desktop-1440x900.png
           test -s evidence/kaykit-aurelian-basin/mobile-390x844.png
           ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|ERROR:" evidence/kaykit-aurelian-basin/*.log
-          find game/art_target/kaykit -type f -printf '%s\n' | awk '{s+=$1} END{print s+0}' > evidence/kaykit-aurelian-basin/asset-bytes.txt
-          sha256sum evidence/kaykit-aurelian-basin/*.png game/art_target/kaykit/manifest.json > evidence/kaykit-aurelian-basin/SHA256SUMS.txt
+          find game/art_target -type f -printf '%s\n' | awk '{s+=$1} END{print s+0}' > evidence/kaykit-aurelian-basin/asset-bytes.txt
+          sha256sum evidence/kaykit-aurelian-basin/*.png game/art_target/kaykit/manifest.json game/art_target/terrain/aurelian_basin.glb > evidence/kaykit-aurelian-basin/SHA256SUMS.txt
 
       - name: Commit generated subset and evidence
         run: |
           set -euo pipefail
           git config user.name pixel-nations-steward
           git config user.email actions@users.noreply.github.com
-          git add game/art_target game/scenes/art_target evidence/kaykit-aurelian-basin
+          git add game/art_target game/scenes/art_target tools/blender/aurelian_basin_static.py evidence/kaykit-aurelian-basin
           git diff --cached --quiet && { echo 'No generated changes'; exit 1; }
           git commit -m "feat(godot): add authored KayKit Aurelian Basin target"
           git push origin HEAD:${TARGET_BRANCH}
@@ -124,6 +136,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:298,body:`## KayKit authored target run ${context.runId}\n\n- Workflow SHA: \`${context.sha}\`\n- Branch: \`${process.env.TARGET_BRANCH}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`kaykit-aurelian-basin-${context.runId}\`\n- Expected evidence: desktop 1440x900 and mobile 390x844.\n\nNo main write, merge, deployment, gameplay, paid asset or second asset family was used.`})
+            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:298,body:`## KayKit authored target run ${context.runId}\n\n- Workflow SHA: \`${context.sha}\`\n- Branch: \`${process.env.TARGET_BRANCH}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`kaykit-aurelian-basin-${context.runId}\`\n- Evidence expected: pinned manifest, static Blender terrain GLB, desktop 1440x900, mobile 390x844.\n\nNo runtime-generated terrain, main write, merge, deployment, gameplay, paid asset or second asset family was used.`})
 
-# steward-redispatch: 2026-07-28T15:30+02:00
+# final-technical-retry: 2026-07-28T15:30+02:00
