@@ -1,0 +1,44 @@
+/usr/share/blender/scripts/addons/io_scene_gltf2/io/exp/gltf2_io_image_data.py:25: SyntaxWarning: invalid escape sequence '\.'
+  regex_dot = re.compile("\.")
+/usr/share/blender/scripts/addons/io_scene_gltf2/io/exp/gltf2_io_image_data.py:27: SyntaxWarning: invalid escape sequence '\]'
+  new_name = "".join([char for char in adjusted_name if char not in "!#$&'()*+,/:;<>?@[\]^`{|}~"])
+19:45:24 | ERROR: Draco mesh compression is not available because library could not be found at /usr/bin/4.0/python/lib/python3.12/site-packages/libextern_draco.so
+19:45:25 | INFO: Starting glTF 2.0 export
+19:45:25 | INFO: Extracting primitive: AuthoredTerrainMesh
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: RiverSurfaceMesh
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: RiverBankLMesh
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: RiverBankRMesh
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: RoadBedMesh
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: CommonsMesh
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: ChurchPadMesh
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: BlacksmithPadMesh
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: BarracksPadMesh
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: Cube
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: Cube.001
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: Cube.002
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: Cube.003
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: Cube.004
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: Cylinder
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Extracting primitive: FounderFlagClothMesh
+19:45:25 | INFO: Primitives created: 1
+19:45:25 | INFO: Finished glTF 2.0 export in 0.03917503356933594 s
+
+AURELIAN_TERRAIN_EXPORTED=/tmp/aurelian_basin.glb
+Blender 4.0.2
+
+Blender quit

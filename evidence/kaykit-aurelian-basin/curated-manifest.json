@@ -1,0 +1,89 @@
+{
+  "source_commit": "84fa4e91af6a88989be7c99e0891cede11f2ca38",
+  "license": "CC0-1.0",
+  "models": {
+    "church": {
+      "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_church_red.gltf",
+      "resource_path": "res://art_target/kaykit/source/addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_church_red.gltf",
+      "sha256": "e4dc40472c3c0039c0dde205630ebb3a4e51da2ddf55109a3c2f9a8ba91ad2c3",
+      "dependencies": [
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_church_red.bin",
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/hexagons_medieval.png"
+      ]
+    },
+    "blacksmith": {
+      "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_blacksmith_red.gltf",
+      "resource_path": "res://art_target/kaykit/source/addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_blacksmith_red.gltf",
+      "sha256": "5689a8f37fa59a956927b4deaeb6d8ee48228fe29c2c61b71048bec04a7b086f",
+      "dependencies": [
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_blacksmith_red.bin",
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/hexagons_medieval.png"
+      ]
+    },
+    "barracks": {
+      "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_barracks_red.gltf",
+      "resource_path": "res://art_target/kaykit/source/addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_barracks_red.gltf",
+      "sha256": "3a10bf352be40343281658a0cffa28cef84bb452636c08fe1cc68e35af1b2665",
+      "dependencies": [
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_barracks_red.bin",
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/hexagons_medieval.png"
+      ]
+    },
+    "house_a": {
+      "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_home_A_red.gltf",
+      "resource_path": "res://art_target/kaykit/source/addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_home_A_red.gltf",
+      "sha256": "158bcb4149f4d6db461774d7bd67d264262f30145762eddd0a8def8be292286c",
+      "dependencies": [
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_home_A_red.bin",
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/hexagons_medieval.png"
+      ]
+    },
+    "house_b": {
+      "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_home_B_red.gltf",
+      "resource_path": "res://art_target/kaykit/source/addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_home_B_red.gltf",
+      "sha256": "0c43594d4fd7eadf098de4189414764476b18cfbc6ea6c695c1dda01c768fffe",
+      "dependencies": [
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_home_B_red.bin",
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/hexagons_medieval.png"
+      ]
+    },
+    "market": {
+      "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_market_red.gltf",
+      "resource_path": "res://art_target/kaykit/source/addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_market_red.gltf",
+      "sha256": "d58ea12f4f1bdd052a9d3bf815be5aca2cf253627e6614ef26ee22fc4d5733b6",
+      "dependencies": [
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_market_red.bin",
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/hexagons_medieval.png"
+      ]
+    },
+    "well": {
+      "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_well_red.gltf",
+      "resource_path": "res://art_target/kaykit/source/addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_well_red.gltf",
+      "sha256": "ed5b51f67c15ee80e65a685ddae9f2b5809aef75d4f8d8691270353698041ed8",
+      "dependencies": [
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_well_red.bin",
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/hexagons_medieval.png"
+      ]
+    },
+    "tree": {
+      "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/hills_A_trees.gltf",
+      "resource_path": "res://art_target/kaykit/source/addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/hills_A_trees.gltf",
+      "sha256": "6e7e71bd37856c442dc7cf562a1cc1e9eb172050dc002d2d65c3fb5b90ae1d28",
+      "dependencies": [
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/hills_A_trees.bin",
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/hexagons_medieval.png"
+      ]
+    },
+    "rock": {
+      "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_A.gltf",
+      "resource_path": "res://art_target/kaykit/source/addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_A.gltf",
+      "sha256": "ddf307987fb18aa8e7594bb399de3943e497b50bc01aae0e7292a38418944915",
+      "dependencies": [
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_A.bin",
+        "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/hexagons_medieval.png"
+      ]
+    }
+  },
+  "curated_source_file_count": 20,
+  "curated_model_count": 9
+}

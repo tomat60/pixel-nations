@@ -1,0 +1,1 @@
+dad05d0dcef5bcd4726f3adf1444e73f68d10c0bcc152bc4874c6b091acaeedb  game/art_target/terrain/aurelian_basin.glb
