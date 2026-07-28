@@ -99,15 +99,24 @@ func _add_camera() -> void:
 func _capture() -> void:
     var w := int(OS.get_environment("CAPTURE_WIDTH"))
     var h := int(OS.get_environment("CAPTURE_HEIGHT"))
-    if w > 0 and h > 0:
-        DisplayServer.window_set_size(Vector2i(w, h))
-        if h > w:
-            camera.size = 78.0
+    if w <= 0 or h <= 0:
+        push_error("Missing capture dimensions")
+        get_tree().quit(4)
+        return
+    if h > w:
+        camera.size = 78.0
     await get_tree().process_frame
     await get_tree().process_frame
     await get_tree().create_timer(2.0).timeout
     var path := OS.get_environment("CAPTURE_PATH")
-    if not path.is_empty():
-        get_viewport().get_texture().get_image().save_png(path)
-        print("CAPTURE_SAVED=" + path)
-        get_tree().quit()
+    if path.is_empty():
+        push_error("Missing capture path")
+        get_tree().quit(5)
+        return
+    var result := get_viewport().get_texture().get_image().save_png(path)
+    if result != OK:
+        push_error("Capture save failed: " + error_string(result))
+        get_tree().quit(6)
+        return
+    print("CAPTURE_SAVED=" + path + " VIEWPORT=" + str(get_viewport().get_visible_rect().size))
+    get_tree().quit()
