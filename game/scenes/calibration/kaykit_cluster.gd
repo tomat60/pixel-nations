@@ -24,8 +24,9 @@ func _ready() -> void:
     _add_environment()
     _add_support_geometry()
     for role in ["home", "blacksmith", "church"]:
-        _place_model(role)
+        await _place_model(role)
     _add_camera()
+    await get_tree().process_frame
     call_deferred("_capture")
 
 func _add_environment() -> void:
@@ -86,6 +87,10 @@ func _place_model(role: String) -> void:
     node.position.y += root_y_offset
     await get_tree().process_frame
     var final_aabb := _global_aabb(node)
+    if abs(final_aabb.position.y) > 0.03:
+        push_error("Grounding failed for %s: %.5f" % [role, final_aabb.position.y])
+        get_tree().quit(14)
+        return
     role_contract[role] = {
         "resource_path": MODEL_PATHS[role],
         "uniform_scale": SCALE,
@@ -123,9 +128,9 @@ func _add_camera() -> void:
     camera.projection = Camera3D.PROJECTION_ORTHOGONAL
     var mode := OS.get_environment("CAPTURE_MODE")
     if mode == "portrait":
-        camera.position = Vector3(36.0, 35.0, 44.0)
-        camera.size = 39.0
-        camera.look_at_from_position(camera.position, Vector3(0.0, 3.2, 0.0), Vector3.UP)
+        camera.position = Vector3(50.0, 38.0, 0.0)
+        camera.size = 44.0
+        camera.look_at_from_position(camera.position, Vector3(0.0, 3.2, 0.5), Vector3.UP)
     else:
         camera.position = Vector3(39.0, 34.0, 45.0)
         camera.size = 30.0
@@ -147,7 +152,11 @@ func _capture() -> void:
     var capture_path := OS.get_environment("CAPTURE_PATH")
     var contract_path := OS.get_environment("CONTRACT_PATH")
     var image := get_viewport().get_texture().get_image()
-    image.save_png(capture_path)
+    var save_error := image.save_png(capture_path)
+    if save_error != OK:
+        push_error("Screenshot save failed: %s" % save_error)
+        get_tree().quit(15)
+        return
     var contract := {
         "mode": OS.get_environment("CAPTURE_MODE"),
         "capture_width": image.get_width(),
@@ -173,11 +182,17 @@ func _capture() -> void:
             "projection": "orthogonal",
             "position": _v3(camera.position),
             "orthographic_size": camera.size,
-            "target": [0.0, 3.2 if OS.get_environment("CAPTURE_MODE") == "portrait" else 3.0, 0.0],
+            "target": [0.0, 3.2 if OS.get_environment("CAPTURE_MODE") == "portrait" else 3.0, 0.5 if OS.get_environment("CAPTURE_MODE") == "portrait" else 0.0],
         },
         "roles": role_contract,
     }
-    FileAccess.open(contract_path, FileAccess.WRITE).store_string(JSON.stringify(contract, "  ") + "\n")
+    var contract_file := FileAccess.open(contract_path, FileAccess.WRITE)
+    if contract_file == null:
+        push_error("Contract file open failed: " + contract_path)
+        get_tree().quit(16)
+        return
+    contract_file.store_string(JSON.stringify(contract, "  ") + "\n")
+    contract_file.close()
     print("CALIBRATION_CAPTURE_SAVED=" + capture_path)
     print("CALIBRATION_CONTRACT_SAVED=" + contract_path)
     get_tree().quit()
