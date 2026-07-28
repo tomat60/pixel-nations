@@ -174,7 +174,8 @@ jobs:
           test -s calibration-evidence/composition-plan.svg
           test -s calibration-evidence/cross-section.svg
           find calibration-evidence -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > calibration-evidence/SHA256SUMS.txt
-          test "$(wc -l < calibration-evidence/SHA256SUMS.txt)" -ge 19
+          test "$(wc -l < calibration-evidence/SHA256SUMS.txt)" -eq 18
+          test "$(find calibration-evidence -type f | wc -l)" -eq 19
 
       - name: Upload exact calibration evidence
         if: always()
