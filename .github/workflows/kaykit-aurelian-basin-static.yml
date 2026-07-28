@@ -122,13 +122,27 @@ jobs:
       - name: Import and capture exact scene
         run: |
           set -euo pipefail
-          "$GODOT" --headless --path game --editor --quit > evidence/kaykit-aurelian-basin/import.log 2>&1
+          "$GODOT" --headless --path game --editor --quit 2>&1 | tee evidence/kaykit-aurelian-basin/import.log
           ! grep -E "SCRIPT ERROR|Parse Error|Failed to load" evidence/kaykit-aurelian-basin/import.log
-          timeout 35s xvfb-run -a -s "-screen 0 1440x900x24" env AUDIO_DRIVER=Dummy CAPTURE_WIDTH=1440 CAPTURE_HEIGHT=900 CAPTURE_PATH="$PWD/evidence/kaykit-aurelian-basin/desktop-1440x900.png" "$GODOT" --resolution 1440x900 --path game res://scenes/art_target/aurelian_basin_target.tscn > evidence/kaykit-aurelian-basin/desktop.log 2>&1
-          timeout 35s xvfb-run -a -s "-screen 0 390x844x24" env AUDIO_DRIVER=Dummy CAPTURE_WIDTH=390 CAPTURE_HEIGHT=844 CAPTURE_PATH="$PWD/evidence/kaykit-aurelian-basin/mobile-390x844.png" "$GODOT" --resolution 390x844 --path game res://scenes/art_target/aurelian_basin_target.tscn > evidence/kaykit-aurelian-basin/mobile.log 2>&1
-          test -s evidence/kaykit-aurelian-basin/desktop-1440x900.png
-          test -s evidence/kaykit-aurelian-basin/mobile-390x844.png
-          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load" evidence/kaykit-aurelian-basin/import.log evidence/kaykit-aurelian-basin/desktop.log evidence/kaykit-aurelian-basin/mobile.log
+
+          capture() {
+            local label="$1" width="$2" height="$3" output="$4" log="$5"
+            rm -f "$output"
+            set +e
+            timeout 35s xvfb-run -a --server-args="-screen 0 ${width}x${height}x24 -ac +extension GLX +render -noreset" \
+              env CAPTURE_WIDTH="$width" CAPTURE_HEIGHT="$height" CAPTURE_PATH="$PWD/$output" \
+              "$GODOT" --display-driver x11 --audio-driver Dummy --resolution "${width}x${height}" --position 0,0 --path game res://scenes/art_target/aurelian_basin_target.tscn \
+              2>&1 | tee "$log"
+            local status=${PIPESTATUS[0]}
+            set -e
+            echo "CAPTURE_PROCESS=${label} status=${status} expected=${width}x${height} output=${output}"
+            test "$status" -eq 0
+            test -s "$output"
+          }
+
+          capture desktop 1440 900 evidence/kaykit-aurelian-basin/desktop-1440x900.png evidence/kaykit-aurelian-basin/desktop.log
+          capture mobile 390 844 evidence/kaykit-aurelian-basin/mobile-390x844.png evidence/kaykit-aurelian-basin/mobile.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|ERR_CANT_OPEN" evidence/kaykit-aurelian-basin/import.log evidence/kaykit-aurelian-basin/desktop.log evidence/kaykit-aurelian-basin/mobile.log
           python3 - <<'PY'
           from PIL import Image, ImageStat
           expected = {
@@ -137,6 +151,7 @@ jobs:
           }
           for path, size in expected.items():
               image = Image.open(path).convert('RGB')
+              print(f'PNG_OBSERVED={path} size={image.size}')
               if image.size != size:
                   raise SystemExit(f'Wrong PNG size for {path}: {image.size}, expected {size}')
               stat = ImageStat.Stat(image)
@@ -179,4 +194,4 @@ jobs:
           script: |
             await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:298,body:`## KayKit authored target run ${context.runId}\n\n- Event SHA: \`${context.sha}\`\n- Input branch SHA: \`${process.env.INPUT_SHA || 'not-reached'}\`\n- Output branch SHA: \`${process.env.OUTPUT_SHA || 'not-reached'}\`\n- Branch: \`${process.env.TARGET_BRANCH}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`kaykit-aurelian-basin-${context.runId}\`\n- Evidence expected: pinned manifest, static Blender terrain GLB, desktop 1440x900, mobile 390x844.\n\nNo main write, merge, deployment, gameplay, paid asset or second asset family was used.`})
 
-# deterministic-xvfb-resolution: 2026-07-28T21:39+02:00
+# exact-capture-diagnostics: 2026-07-28T21:44+02:00
