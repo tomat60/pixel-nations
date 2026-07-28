@@ -28,9 +28,10 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends blender python3-numpy python3-pil unzip fonts-dejavu-core >/dev/null
+          sudo apt-get install -y -qq --no-install-recommends blender python3-numpy python3-pil unzip fonts-dejavu-core xvfb libegl1 libgl1-mesa-dri libglx-mesa0 >/dev/null
           blender --version | head -1
           blender -b --python-expr "import numpy; print('BLENDER_NUMPY=' + numpy.__version__)"
+          ldconfig -p | grep -F 'libEGL.so.1'
           python3 - <<'PY'
           from PIL import Image
           print('PIL_OK=' + Image.__version__)
@@ -53,7 +54,7 @@ jobs:
       - name: Measure models and render neutral thumbnails
         run: |
           set -euo pipefail
-          blender -b --python tools/blender/kaykit_calibration.py -- "$KAYKIT_ROOT" "$PWD/calibration-evidence" 2>&1 | tee calibration-evidence/blender-calibration.log
+          LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1280x1024x24" blender -b --python tools/blender/kaykit_calibration.py -- "$KAYKIT_ROOT" "$PWD/calibration-evidence" 2>&1 | tee calibration-evidence/blender-calibration.log
           grep -F "KAYKIT_CALIBRATION_EXPORTED=" calibration-evidence/blender-calibration.log
           test -s calibration-evidence/kaykit-metrics.json
           test "$(find calibration-evidence/thumbnails -name '*.png' -type f | wc -l)" -eq 9
@@ -175,11 +176,12 @@ jobs:
           sha256sum calibration-evidence/* calibration-evidence/thumbnails/*.png > calibration-evidence/SHA256SUMS.txt
 
       - name: Upload exact calibration evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: kaykit-calibration-${{ github.run_id }}
           path: calibration-evidence/**
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
 
       - name: Report calibration run
