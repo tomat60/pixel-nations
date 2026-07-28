@@ -56,7 +56,8 @@ jobs:
           sha256sum /tmp/kaykit/source.zip | tee game/art_target/kaykit/source-archive.sha256
           ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
           find "$ROOT" -type f | sort > evidence/kaykit-aurelian-basin/full-source-manifest.txt
-          cp "$ROOT/LICENSE.txt" game/art_target/kaykit/LICENSE.txt
+          curl -fsSL --retry 3 "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/${KAYKIT_SHA}/LICENSE.txt" -o game/art_target/kaykit/LICENSE.txt
+          grep -F "Creative Commons Zero" game/art_target/kaykit/LICENSE.txt
           python3 - "$ROOT" game/art_target/kaykit <<'PY'
           import hashlib,json,re,shutil,sys
           from pathlib import Path
