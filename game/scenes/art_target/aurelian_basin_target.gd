@@ -103,6 +103,17 @@ func _capture() -> void:
         push_error("Missing capture dimensions")
         get_tree().quit(4)
         return
+
+    # The project baseline is 1280x720 with canvas stretch. Override the root Window
+    # for evidence capture so the rendered viewport itself matches the requested size
+    # instead of preserving the 16:9 baseline inside a differently shaped OS window.
+    var root_window := get_tree().root
+    root_window.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
+    root_window.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_IGNORE
+    root_window.content_scale_size = Vector2i(w, h)
+    root_window.size = Vector2i(w, h)
+    DisplayServer.window_set_size(Vector2i(w, h))
+
     if h > w:
         camera.size = 78.0
     await get_tree().process_frame
@@ -113,10 +124,16 @@ func _capture() -> void:
         push_error("Missing capture path")
         get_tree().quit(5)
         return
+    var observed := get_viewport().get_visible_rect().size
+    print("CAPTURE_VIEWPORT expected=" + str(Vector2i(w, h)) + " observed=" + str(observed))
+    if Vector2i(observed) != Vector2i(w, h):
+        push_error("Capture viewport mismatch: expected " + str(Vector2i(w, h)) + ", observed " + str(observed))
+        get_tree().quit(7)
+        return
     var result := get_viewport().get_texture().get_image().save_png(path)
     if result != OK:
         push_error("Capture save failed: " + error_string(result))
         get_tree().quit(6)
         return
-    print("CAPTURE_SAVED=" + path + " VIEWPORT=" + str(get_viewport().get_visible_rect().size))
+    print("CAPTURE_SAVED=" + path + " VIEWPORT=" + str(observed))
     get_tree().quit()
