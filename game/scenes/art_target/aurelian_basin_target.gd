@@ -64,7 +64,7 @@ func _place(role: String, pos: Vector3, rot_y: float, scale_value := 2.0) -> voi
     add_child(node)
 
 func _add_settlement() -> void:
-    # Crossing and founder flag are authored into the committed terrain/support GLB.
+    # Crossing, rocky shoulder and founder flag are authored into the terrain/support GLB.
     _place("church", Vector3(20, 0.2, -17), 205, 2.4)
     _place("blacksmith", Vector3(10, -0.1, -5), 150, 2.1)
     _place("barracks", Vector3(25, 0.3, -7), 220, 2.1)
@@ -78,7 +78,6 @@ func _add_settlement() -> void:
         _place("tree", p, float((p.x + p.z) * 9.0), 2.3)
     for p in [Vector3(34, 3.0, -9), Vector3(38, 4.8, 1), Vector3(31, 3.2, 12)]:
         _place("rock", p, 30, 2.4)
-    _place("mountain", Vector3(39, 2.5, 8), 15, 3.0)
 
     var label := Label3D.new()
     label.text = "Hearthmeadow"
