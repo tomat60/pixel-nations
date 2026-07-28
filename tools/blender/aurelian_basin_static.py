@@ -22,6 +22,10 @@ terrain_mat = mat('Basin_Olive', (0.32, 0.34, 0.18), 0.96)
 water_mat = mat('River_Teal', (0.05, 0.28, 0.30), 0.34, 0.05)
 road_mat = mat('Road_Ochre', (0.48, 0.34, 0.20), 0.98)
 bank_mat = mat('Bank_Earth', (0.38, 0.27, 0.15), 0.98)
+bridge_mat = mat('Bridge_Stone', (0.43, 0.39, 0.31), 0.92)
+wood_mat = mat('Bridge_Wood', (0.30, 0.18, 0.09), 0.94)
+flag_red = mat('Aurelian_Red', (0.38, 0.035, 0.025), 0.82)
+flag_gold = mat('Aurelian_Gold', (0.72, 0.48, 0.08), 0.72, 0.08)
 
 
 def river_z(x):
@@ -55,7 +59,7 @@ def grid_mesh(name, nx=64, nz=48, sx=104.0, sz=78.0):
 terrain=grid_mesh('AuthoredTerrain')
 
 
-def ribbon(name, points, width, z_offset, material):
+def ribbon(name, points, width, material):
     verts=[]; faces=[]
     for i,p in enumerate(points):
         prev=Vector(points[max(0,i-1)]); nxt=Vector(points[min(len(points)-1,i+1)])
@@ -73,24 +77,23 @@ river=[]
 for i in range(65):
     x=-52+104*i/64
     river.append((x, river_z(x), -2.12))
-ribbon('RiverSurface', river, 5.4, 0, water_mat)
+ribbon('RiverSurface', river, 5.4, water_mat)
 
-# Exposed banks make the channel readable around the bridge and along the bend.
 for sign in (-1,1):
     bank=[]
     for i in range(65):
         x=-52+104*i/64; z=river_z(x)+sign*3.1
         bank.append((x,z,height(x,z)+0.08))
-    ribbon('RiverBankL' if sign<0 else 'RiverBankR', bank, 1.15, 0, bank_mat)
+    ribbon('RiverBankL' if sign<0 else 'RiverBankR', bank, 1.15, bank_mat)
 
 road_xy=[(3,38),(2,28),(1,18),(0,8),(0,4),(7,-4),(15,-10),(20,-13)]
 road=[]
 for x,z in road_xy:
     road.append((x,z,height(x,z)+0.20))
-ribbon('RoadBed', road, 3.0, 0, road_mat)
+ribbon('RoadBed', road, 3.0, road_mat)
 
-# Flattened founder pads and commons are support geometry, not gameplay parcels.
-def disk(name, x, z, radius, material):
+
+def disk(name, x, z, radius):
     y=height(x,z)+0.10
     verts=[(x,z,y)]
     seg=32
@@ -103,14 +106,27 @@ def disk(name, x, z, radius, material):
     obj=bpy.data.objects.new(name,mesh); bpy.context.collection.objects.link(obj); obj.data.materials.append(road_mat)
 
 for name,x,z,r in [('Commons',17,-9,5.4),('ChurchPad',20,-17,3.6),('BlacksmithPad',10,-5,3.2),('BarracksPad',25,-7,3.5)]:
-    disk(name,x,z,r,road_mat)
+    disk(name,x,z,r)
 
-# Bridge abutments are authored support geometry sockets.
-for x,z in [(-1.2,1.0),(1.2,5.7)]:
-    bpy.ops.mesh.primitive_cube_add(location=(x,z,-0.35),scale=(2.5,1.8,1.1))
-    o=bpy.context.object; o.name='BridgeAbutment'; o.data.materials.append(bank_mat)
+# Authored crossing: stone abutments, timber deck and rails aligned to the approach road.
+for x,z in [(-1.25,1.0),(1.25,5.7)]:
+    bpy.ops.mesh.primitive_cube_add(location=(x,z,-0.35),scale=(2.6,1.8,1.1))
+    o=bpy.context.object; o.name='BridgeAbutment'; o.data.materials.append(bridge_mat)
 
-# Blender Z-up -> glTF/Godot Y-up conversion is handled by exporter.
+bridge_angle = math.radians(-28.0)
+bpy.ops.mesh.primitive_cube_add(location=(0.0,3.35,-0.05),scale=(2.0,3.25,0.28),rotation=(0,0,bridge_angle))
+deck=bpy.context.object; deck.name='BridgeDeck'; deck.data.materials.append(wood_mat)
+for side in (-1,1):
+    bpy.ops.mesh.primitive_cube_add(location=(side*2.05,3.35,0.75),scale=(0.12,3.3,0.12),rotation=(0,0,bridge_angle))
+    rail=bpy.context.object; rail.name='BridgeRail'; rail.data.materials.append(wood_mat)
+
+# Restrained founder marker at the settlement threshold.
+bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.10, depth=5.0, location=(8,-2,2.5))
+pole=bpy.context.object; pole.name='FounderFlagPole'; pole.data.materials.append(flag_gold)
+verts=[(8.1,-2.0,4.8),(8.1,-2.0,3.2),(10.0,-2.0,4.0)]
+mesh=bpy.data.meshes.new('FounderFlagClothMesh'); mesh.from_pydata(verts,[],[(0,1,2)]); mesh.update()
+cloth=bpy.data.objects.new('FounderFlagCloth',mesh); bpy.context.collection.objects.link(cloth); cloth.data.materials.append(flag_red)
+
 bpy.ops.object.select_all(action='SELECT')
 OUT.parent.mkdir(parents=True, exist_ok=True)
 bpy.ops.export_scene.gltf(filepath=str(OUT), export_format='GLB', use_selection=True, export_apply=True)
