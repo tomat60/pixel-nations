@@ -1,6 +1,12 @@
 name: KayKit Aurelian Basin Static Target
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/kaykit-aurelian-basin-static.yml
+      - game/scenes/art_target/**
+      - tools/blender/aurelian_basin_static.py
   push:
     branches: [art-target/kaykit-aurelian-basin-static]
     paths: [.github/workflows/kaykit-aurelian-basin-static.yml]
@@ -145,4 +151,4 @@ jobs:
           script: |
             await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:298,body:`## KayKit authored target run ${context.runId}\n\n- Workflow SHA: \`${context.sha}\`\n- Branch: \`${process.env.TARGET_BRANCH}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`kaykit-aurelian-basin-${context.runId}\`\n- Evidence expected: pinned manifest, static Blender terrain GLB, desktop 1440x900, mobile 390x844.\n\nNo main write, merge, deployment, gameplay, paid asset or second asset family was used.`})
 
-# final-technical-retry-exact-paths: 2026-07-28T16:26+02:00
+# dispatch-recovery-via-draft-pr: 2026-07-28T20:45+02:00
