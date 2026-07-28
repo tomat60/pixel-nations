@@ -64,17 +64,15 @@ func _place(role: String, pos: Vector3, rot_y: float, scale_value := 2.0) -> voi
     add_child(node)
 
 func _add_settlement() -> void:
-    # Positions are authored against the committed static terrain GLB.
-    _place("bridge", Vector3(0, -0.9, 3.4), -80, 2.2)
+    # Crossing and founder flag are authored into the committed terrain/support GLB.
     _place("church", Vector3(20, 0.2, -17), 205, 2.4)
     _place("blacksmith", Vector3(10, -0.1, -5), 150, 2.1)
     _place("barracks", Vector3(25, 0.3, -7), 220, 2.1)
     _place("market", Vector3(16, -0.1, -8), 175, 2.0)
     _place("well", Vector3(17, 0.0, -10), 0, 1.8)
-    _place("flag", Vector3(8, 0.0, -2), 0, 2.0)
-    _place("house", Vector3(13, 0.0, -15), 200, 1.9)
-    _place("house", Vector3(22, 0.2, -11), 165, 1.9)
-    _place("house", Vector3(18, -0.1, -3), 235, 1.9)
+    _place("house_a", Vector3(13, 0.0, -15), 200, 1.9)
+    _place("house_b", Vector3(22, 0.2, -11), 165, 1.9)
+    _place("house_a", Vector3(18, -0.1, -3), 235, 1.9)
 
     for p in [Vector3(-31, 5.0, -20), Vector3(-26, 5.4, -16), Vector3(-35, 4.4, -10), Vector3(-22, 4.5, -24), Vector3(-17, 3.0, -19), Vector3(-29, 3.8, -5)]:
         _place("tree", p, float((p.x + p.z) * 9.0), 2.3)
