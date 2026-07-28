@@ -108,7 +108,7 @@ jobs:
       - name: Author continuous terrain and support geometry in Blender
         run: |
           set -euo pipefail
-          blender -b --python tools/blender/aurelian_basin_static.py > evidence/kaykit-aurelian-basin/blender.log 2>&1
+          blender -b --python tools/blender/aurelian_basin_static.py 2>&1 | tee evidence/kaykit-aurelian-basin/blender.log
           test -s /tmp/aurelian_basin.glb
           cp /tmp/aurelian_basin.glb game/art_target/terrain/aurelian_basin.glb
           sha256sum game/art_target/terrain/aurelian_basin.glb | tee evidence/kaykit-aurelian-basin/terrain-sha256.txt
@@ -153,4 +153,4 @@ jobs:
           script: |
             await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:298,body:`## KayKit authored target run ${context.runId}\n\n- Workflow SHA: \`${context.sha}\`\n- Branch: \`${process.env.TARGET_BRANCH}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`kaykit-aurelian-basin-${context.runId}\`\n- Evidence expected: pinned manifest, static Blender terrain GLB, desktop 1440x900, mobile 390x844.\n\nNo main write, merge, deployment, gameplay, paid asset or second asset family was used.`})
 
-# dispatch-recovery-via-draft-pr: 2026-07-28T20:45+02:00
+# blender-observability-tee: 2026-07-28T21:08+02:00
