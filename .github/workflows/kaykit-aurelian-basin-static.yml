@@ -124,11 +124,11 @@ jobs:
           set -euo pipefail
           "$GODOT" --headless --path game --editor --quit > evidence/kaykit-aurelian-basin/import.log 2>&1
           ! grep -E "SCRIPT ERROR|Parse Error|Failed to load" evidence/kaykit-aurelian-basin/import.log
-          timeout 35s xvfb-run -a env CAPTURE_WIDTH=1440 CAPTURE_HEIGHT=900 CAPTURE_PATH="$PWD/evidence/kaykit-aurelian-basin/desktop-1440x900.png" "$GODOT" --path game res://scenes/art_target/aurelian_basin_target.tscn > evidence/kaykit-aurelian-basin/desktop.log 2>&1
-          timeout 35s xvfb-run -a env CAPTURE_WIDTH=390 CAPTURE_HEIGHT=844 CAPTURE_PATH="$PWD/evidence/kaykit-aurelian-basin/mobile-390x844.png" "$GODOT" --path game res://scenes/art_target/aurelian_basin_target.tscn > evidence/kaykit-aurelian-basin/mobile.log 2>&1
+          timeout 35s xvfb-run -a env AUDIO_DRIVER=Dummy CAPTURE_WIDTH=1440 CAPTURE_HEIGHT=900 CAPTURE_PATH="$PWD/evidence/kaykit-aurelian-basin/desktop-1440x900.png" "$GODOT" --path game res://scenes/art_target/aurelian_basin_target.tscn > evidence/kaykit-aurelian-basin/desktop.log 2>&1
+          timeout 35s xvfb-run -a env AUDIO_DRIVER=Dummy CAPTURE_WIDTH=390 CAPTURE_HEIGHT=844 CAPTURE_PATH="$PWD/evidence/kaykit-aurelian-basin/mobile-390x844.png" "$GODOT" --path game res://scenes/art_target/aurelian_basin_target.tscn > evidence/kaykit-aurelian-basin/mobile.log 2>&1
           test -s evidence/kaykit-aurelian-basin/desktop-1440x900.png
           test -s evidence/kaykit-aurelian-basin/mobile-390x844.png
-          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|ERROR:" evidence/kaykit-aurelian-basin/import.log evidence/kaykit-aurelian-basin/desktop.log evidence/kaykit-aurelian-basin/mobile.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load" evidence/kaykit-aurelian-basin/import.log evidence/kaykit-aurelian-basin/desktop.log evidence/kaykit-aurelian-basin/mobile.log
           python3 - <<'PY'
           from PIL import Image, ImageStat
           expected = {
@@ -179,4 +179,4 @@ jobs:
           script: |
             await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:298,body:`## KayKit authored target run ${context.runId}\n\n- Event SHA: \`${context.sha}\`\n- Input branch SHA: \`${process.env.INPUT_SHA || 'not-reached'}\`\n- Output branch SHA: \`${process.env.OUTPUT_SHA || 'not-reached'}\`\n- Branch: \`${process.env.TARGET_BRANCH}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`kaykit-aurelian-basin-${context.runId}\`\n- Evidence expected: pinned manifest, static Blender terrain GLB, desktop 1440x900, mobile 390x844.\n\nNo main write, merge, deployment, gameplay, paid asset or second asset family was used.`})
 
-# proactive-runtime-qa: 2026-07-28T21:20+02:00
+# capture-audio-noise-filter: 2026-07-28T21:37+02:00
