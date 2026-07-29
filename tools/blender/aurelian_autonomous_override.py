@@ -99,7 +99,7 @@ def setup_render(mode, preview_path):
     scene.camera = camera
     return camera
 
-def build_scene(mode, source, out, blueprint):
+def build_scene(mode, source, out):
     base.CURRENT_MODE = mode
     bpy.ops.wm.read_factory_settings(use_empty=True)
     materials = {
@@ -132,5 +132,13 @@ def build_scene(mode, source, out, blueprint):
     (out/f"autonomous-{mode}-contract.json").write_text(json.dumps(contract,indent=2)+"\n")
     print(f"AUTONOMOUS_PREVIEW_EXPORTED={mode}:{preview}")
 
-base.build_scene = build_scene
-base.main()
+for role, relative in base.ASSETS.items():
+    path = source_root / relative
+    if not path.is_file():
+        raise FileNotFoundError(f"Missing pinned source {role}: {path}")
+
+build_scene("desktop", source_root, output_dir)
+build_scene("portrait", source_root, output_dir)
+manifest = {role: {"path": relative, "sha256": hashlib.sha256((source_root / relative).read_bytes()).hexdigest()} for role, relative in base.ASSETS.items()}
+(output_dir / "source-manifest.json").write_text(json.dumps({"source_commit": base.SOURCE_SHA, "assets": manifest}, indent=2) + "\n")
+print(f"AUTONOMOUS_DCC_PASS_EXPORTED={output_dir}")
