@@ -110,7 +110,7 @@ func _global_aabb(root: Node3D) -> AABB:
         if current is MeshInstance3D:
             var mesh_instance := current as MeshInstance3D
             if mesh_instance.mesh != null:
-                var aabb := mesh_instance.global_transform * mesh_instance.mesh.get_aabb()
+                var aabb: AABB = mesh_instance.global_transform * mesh_instance.mesh.get_aabb()
                 if not found:
                     merged = aabb
                     found = true
