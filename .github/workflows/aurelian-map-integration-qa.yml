@@ -2,7 +2,9 @@ name: Aurelian Map Integration QA
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - art-target/aurelian-2d-world-integration
     paths:
       - app/play/page.tsx
       - app/play/components/LandSheet.tsx
