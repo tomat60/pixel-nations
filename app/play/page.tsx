@@ -163,11 +163,16 @@ export default function PlayPrototypePage() {
 
 function OpeningGuide({ selectedName }: { selectedName: string }) {
   return (
-    <section data-qa="opening-guide" className="pointer-events-none absolute left-3 right-3 top-[10.8rem] z-20 rounded-3xl border border-amber-100/20 bg-black/46 p-3 shadow-2xl backdrop-blur-md md:left-5 md:right-auto md:top-[12.2rem] md:w-[390px] md:p-4">
-      <p className="text-[9px] font-black uppercase tracking-[0.24em] text-amber-200/65">Start here</p>
-      <h2 className="mt-1 text-xl font-black text-amber-50 md:text-2xl">One land can become an empire.</h2>
-      <p className="mt-2 text-xs leading-relaxed text-amber-50/68 md:text-sm">You are viewing Sector A-01, the Aurelian Basin. Choose a land, raise the first settlement, then expand toward a nation.</p>
-      <div className="mt-3 grid gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-amber-100/70 md:text-xs">
+    <section data-qa="opening-guide" className="pointer-events-none absolute left-3 right-3 top-[9.7rem] z-20 rounded-2xl border border-amber-100/20 bg-black/58 p-2.5 shadow-2xl backdrop-blur-md md:left-5 md:right-auto md:top-[12.2rem] md:w-[390px] md:rounded-3xl md:bg-black/46 md:p-4">
+      <p className="text-[8px] font-black uppercase tracking-[0.22em] text-amber-200/65 md:text-[9px] md:tracking-[0.24em]">Start here</p>
+      <h2 className="mt-1 text-lg font-black leading-tight text-amber-50 md:text-2xl">One land can become an empire.</h2>
+      <p className="mt-2 hidden text-sm leading-relaxed text-amber-50/68 md:block">You are viewing Sector A-01, the Aurelian Basin. Choose a land, raise the first settlement, then expand toward a nation.</p>
+      <div className="mt-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.13em] text-amber-100/78 md:hidden">
+        <span>1 · {selectedName}</span>
+        <span aria-hidden="true">→</span>
+        <span>Claim</span>
+      </div>
+      <div className="mt-3 hidden gap-2 text-xs font-black uppercase tracking-[0.16em] text-amber-100/70 md:grid">
         <p>1 · Select {selectedName}</p>
         <p>2 · Press “Claim this land”</p>
         <p>3 · Build the first village order</p>
