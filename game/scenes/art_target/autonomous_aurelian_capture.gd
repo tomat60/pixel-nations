@@ -9,6 +9,7 @@ var active_camera: Camera3D
 var imported_root: Node3D
 var capture_mode: String
 var contract_path: String
+var normalized_material_surfaces := 0
 
 func _ready() -> void:
     capture_mode = OS.get_environment("CAPTURE_MODE")
@@ -42,6 +43,7 @@ func _ready() -> void:
         get_tree().quit(23)
         return
     add_child(imported_root)
+    _normalize_imported_materials(imported_root)
     _normalize_imported_lights(imported_root)
     active_camera = _find_camera(imported_root)
     if active_camera == null:
@@ -64,6 +66,29 @@ func _make_environment() -> Environment:
     environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
     environment.tonemap_exposure = 0.0
     return environment
+
+func _normalize_imported_materials(root: Node) -> void:
+    if root is MeshInstance3D:
+        var mesh_instance := root as MeshInstance3D
+        if mesh_instance.mesh != null:
+            for surface in range(mesh_instance.mesh.get_surface_count()):
+                var source_material := mesh_instance.get_active_material(surface)
+                if source_material is BaseMaterial3D:
+                    var proof_material := source_material.duplicate(true) as BaseMaterial3D
+                    proof_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+                    proof_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+                    proof_material.disable_receive_shadows = true
+                    mesh_instance.set_surface_override_material(surface, proof_material)
+                    normalized_material_surfaces += 1
+                elif source_material == null:
+                    var fallback := StandardMaterial3D.new()
+                    fallback.albedo_color = Color("#8a9270")
+                    fallback.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+                    fallback.cull_mode = BaseMaterial3D.CULL_DISABLED
+                    mesh_instance.set_surface_override_material(surface, fallback)
+                    normalized_material_surfaces += 1
+    for child in root.get_children():
+        _normalize_imported_materials(child)
 
 func _normalize_imported_lights(root: Node) -> void:
     var lights: Array[DirectionalLight3D] = []
@@ -130,10 +155,12 @@ func _write_contract_after_first_frame() -> void:
             "directional_energy": 0.82,
             "tonemap": "filmic",
             "exposure": 0.0,
+            "material_mode": "instance_local_unshaded_preserve_albedo",
         },
         "mesh_instances": _count_nodes(imported_root, "MeshInstance3D"),
         "camera_nodes": _count_nodes(imported_root, "Camera3D"),
         "directional_lights": _count_nodes(imported_root, "DirectionalLight3D"),
+        "normalized_material_surfaces": normalized_material_surfaces,
     }
     var file := FileAccess.open(contract_path, FileAccess.WRITE)
     if file == null:
@@ -141,6 +168,7 @@ func _write_contract_after_first_frame() -> void:
         get_tree().quit(28)
         return
     file.store_string(JSON.stringify(contract, "  ") + "\n")
+    print("AUTONOMOUS_GODOT_MATERIAL_SURFACES=" + str(normalized_material_surfaces))
     print("AUTONOMOUS_GODOT_SCENE_READY=" + capture_mode)
     print("AUTONOMOUS_GODOT_CONTRACT_SAVED=" + contract_path)
 
