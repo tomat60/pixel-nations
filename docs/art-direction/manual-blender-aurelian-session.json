@@ -1,0 +1,88 @@
+{
+  "status": "GUIDED_INTERACTIVE_AUTHORING_AUTHORIZED",
+  "route": "zero_cost_local_blender",
+  "cost_pln": 0,
+  "max_mode": false,
+  "repo": "tomat60/pixel-nations",
+  "issue": 312,
+  "branch": "art-direction/manual-blender-aurelian-session",
+  "source": {
+    "kaykit_commit": "84fa4e91af6a88989be7c99e0891cede11f2ca38",
+    "license": "CC0-1.0",
+    "archive_sha256": "cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028",
+    "blueprint_head": "3c61f8ade5e582da9798ce8a6f1bc9ac69ecebe2",
+    "uniform_scale": 11.71437541
+  },
+  "locked_geometry": {
+    "max_primary_overlap": 0.30,
+    "spacing_world": {
+      "home_home": 14,
+      "home_primary": 18,
+      "primary_primary": 22
+    },
+    "road_width": 5,
+    "bridge_deck_width": 6,
+    "bridge_clear_span": 27
+  },
+  "curated_assets": {
+    "church": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_church_red.gltf",
+    "blacksmith": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_blacksmith_red.gltf",
+    "barracks": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/blue/building_barracks_blue.gltf",
+    "home_a": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/green/building_home_A_green.gltf",
+    "home_b": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/yellow/building_home_B_yellow.gltf",
+    "market": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/yellow/building_market_yellow.gltf",
+    "well": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/blue/building_well_blue.gltf",
+    "bridge": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/building_bridge_A.gltf",
+    "tree_a": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/tree_single_A.gltf",
+    "tree_b": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/tree_single_B.gltf",
+    "rock_c": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+    "rock_e": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_E.gltf"
+  },
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "continuous terrain silhouette",
+      "allowed": ["terrain", "river channel", "desktop camera", "collections"],
+      "forbidden": ["buildings", "bridge", "road", "trees", "rocks", "lighting polish"],
+      "required_screenshots": ["M1-desktop-camera.png", "M1-top-view.png", "M1-outliner.png"],
+      "stop_after_capture": true
+    },
+    {
+      "id": "M2",
+      "name": "river road and crossing",
+      "requires": "M1_ACCEPTED"
+    },
+    {
+      "id": "M3",
+      "name": "desktop settlement hierarchy",
+      "requires": "M2_ACCEPTED"
+    },
+    {
+      "id": "M4",
+      "name": "independent portrait composition",
+      "requires": "M3_ACCEPTED"
+    },
+    {
+      "id": "M5",
+      "name": "neutral lighting and materials",
+      "requires": "M4_ACCEPTED"
+    },
+    {
+      "id": "M6",
+      "name": "GLB export and Godot proof",
+      "requires": "M5_ACCEPTED"
+    }
+  ],
+  "global_forbidden": [
+    "procedural_scene_layout",
+    "gameplay",
+    "backend",
+    "second_asset_family",
+    "main_write",
+    "merge",
+    "deployment",
+    "payment_without_approval",
+    "max_mode"
+  ],
+  "current_stop_condition": "M1 package ready and Paweł opens a clean Blender file"
+}
