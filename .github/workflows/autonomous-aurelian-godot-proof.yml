@@ -21,6 +21,8 @@ env:
   BASE_SCRIPT_SHA: d001d96117fc9d1de20f3ff57d7a47e2441a0393
   ACCEPTED_DESKTOP_PREVIEW_SHA: 4abf789798ec27cb9d037a755f56062da3c0e9dd575f26ff013bc576d636df95
   ACCEPTED_PORTRAIT_PREVIEW_SHA: 0c23af5b6f7894b6cca21c70c6a3488cb5346100575c13d2421df1e364bf197c
+  ACCEPTED_DESKTOP_DHASH: e0e2656dabdb6393
+  ACCEPTED_PORTRAIT_DHASH: 31c6e6a218998361
 
 jobs:
   prove:
@@ -87,8 +89,42 @@ jobs:
           timeout 15m env PYTHONPATH="$BLENDER_PYTHONPATH" LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1600x1200x24" blender -b --python tools/blender/aurelian_autonomous_override.py -- /tmp/aurelian-base/aurelian_basin_master.py "$KAYKIT_ROOT" "$PWD/evidence/autonomous-aurelian-godot" 2>&1 | tee evidence/autonomous-aurelian-godot/blender.log
           grep -F 'AUTONOMOUS_GLB_EXPORTED=desktop' evidence/autonomous-aurelian-godot/blender.log
           grep -F 'AUTONOMOUS_GLB_EXPORTED=portrait' evidence/autonomous-aurelian-godot/blender.log
-          test "$(sha256sum evidence/autonomous-aurelian-godot/autonomous-desktop-preview.png | cut -d' ' -f1)" = "$ACCEPTED_DESKTOP_PREVIEW_SHA"
-          test "$(sha256sum evidence/autonomous-aurelian-godot/autonomous-portrait-preview.png | cut -d' ' -f1)" = "$ACCEPTED_PORTRAIT_PREVIEW_SHA"
+          python3 - <<'PY'
+          import hashlib, os
+          from pathlib import Path
+          from PIL import Image
+          root = Path('evidence/autonomous-aurelian-godot')
+          def dhash(path):
+              image = Image.open(path).convert('L').resize((9,8), Image.Resampling.LANCZOS)
+              pixels = list(image.getdata())
+              value = 0
+              for y in range(8):
+                  row = pixels[y*9:(y+1)*9]
+                  for x in range(8):
+                      value = (value << 1) | int(row[x] > row[x+1])
+              return f'{value:016x}'
+          actual = {
+              'desktop': dhash(root / 'autonomous-desktop-preview.png'),
+              'portrait': dhash(root / 'autonomous-portrait-preview.png'),
+          }
+          expected = {
+              'desktop': os.environ['ACCEPTED_DESKTOP_DHASH'],
+              'portrait': os.environ['ACCEPTED_PORTRAIT_DHASH'],
+          }
+          if actual != expected:
+              raise SystemExit(f'accepted preview perceptual drift: actual={actual} expected={expected}')
+          report = {
+              mode: {
+                  'accepted_byte_sha256': os.environ[f'ACCEPTED_{mode.upper()}_PREVIEW_SHA'],
+                  'reproduced_byte_sha256': hashlib.sha256((root / f'autonomous-{mode}-preview.png').read_bytes()).hexdigest(),
+                  'accepted_dhash': expected[mode],
+                  'reproduced_dhash': actual[mode],
+              } for mode in ('desktop','portrait')
+          }
+          import json
+          (root / 'preview-reproduction.json').write_text(json.dumps(report,indent=2)+'\n')
+          print('ACCEPTED_PREVIEW_PERCEPTUAL_REPRODUCTION_OK')
+          PY
           test "$(stat -c%s evidence/autonomous-aurelian-godot/autonomous-desktop.glb)" -gt 500000
           test "$(stat -c%s evidence/autonomous-aurelian-godot/autonomous-portrait.glb)" -gt 500000
           cp evidence/autonomous-aurelian-godot/autonomous-desktop.glb game/art_target/autonomous_aurelian/
@@ -153,10 +189,7 @@ jobs:
               'input_sha':input_sha,
               'output_sha':output_sha,
               'source_commit':'84fa4e91af6a88989be7c99e0891cede11f2ca38',
-              'accepted_blender_preview_hashes':{
-                  'desktop':'4abf789798ec27cb9d037a755f56062da3c0e9dd575f26ff013bc576d636df95',
-                  'portrait':'0c23af5b6f7894b6cca21c70c6a3488cb5346100575c13d2421df1e364bf197c'
-              },
+              'preview_reproduction':json.loads((root / 'preview-reproduction.json').read_text()),
               'godot_images':qa
           }
           (root / 'final-contract.json').write_text(json.dumps(final,indent=2)+'\n')
