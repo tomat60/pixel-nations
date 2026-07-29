@@ -106,7 +106,7 @@ func _global_aabb(root: Node3D) -> AABB:
     var merged := AABB()
     var stack: Array[Node] = [root]
     while not stack.is_empty():
-        var current := stack.pop_back()
+        var current: Node = stack.pop_back() as Node
         if current is MeshInstance3D:
             var mesh_instance := current as MeshInstance3D
             if mesh_instance.mesh != null:
