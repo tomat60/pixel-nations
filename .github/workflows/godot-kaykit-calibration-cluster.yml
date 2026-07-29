@@ -109,13 +109,35 @@ jobs:
           ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|Missing KayKit model|Grounding failed|No mesh found" evidence/godot-kaykit-cluster/import.log
 
       - name: Capture desktop and portrait contracts
+        id: captures
         run: |
-          set -euo pipefail
+          set -uo pipefail
           export XDG_RUNTIME_DIR="/tmp/pixel-nations-xdg"
           mkdir -p "$XDG_RUNTIME_DIR"
           chmod 700 "$XDG_RUNTIME_DIR"
+          set +e
           timeout 45s xvfb-run -a env CAPTURE_MODE=desktop CAPTURE_WIDTH=1440 CAPTURE_HEIGHT=900 CAPTURE_PATH="$PWD/evidence/godot-kaykit-cluster/desktop-1440x900.png" CONTRACT_PATH="$PWD/evidence/godot-kaykit-cluster/desktop-contract.json" "$GODOT" --path game res://scenes/calibration/kaykit_cluster.tscn 2>&1 | tee evidence/godot-kaykit-cluster/desktop.log
+          desktop_status=${PIPESTATUS[0]}
           timeout 45s xvfb-run -a env CAPTURE_MODE=portrait CAPTURE_WIDTH=390 CAPTURE_HEIGHT=844 CAPTURE_PATH="$PWD/evidence/godot-kaykit-cluster/portrait-390x844.png" CONTRACT_PATH="$PWD/evidence/godot-kaykit-cluster/portrait-contract.json" "$GODOT" --path game res://scenes/calibration/kaykit_cluster.tscn 2>&1 | tee evidence/godot-kaykit-cluster/portrait.log
+          portrait_status=${PIPESTATUS[0]}
+          printf '%s\n' "$desktop_status" > evidence/godot-kaykit-cluster/desktop-exit-status.txt
+          printf '%s\n' "$portrait_status" > evidence/godot-kaykit-cluster/portrait-exit-status.txt
+          {
+            echo '## Desktop log tail'
+            echo '```'
+            tail -n 80 evidence/godot-kaykit-cluster/desktop.log
+            echo '```'
+            echo '## Portrait log tail'
+            echo '```'
+            tail -n 80 evidence/godot-kaykit-cluster/portrait.log
+            echo '```'
+          } > evidence/godot-kaykit-cluster/capture-diagnostics.md
+          cat evidence/godot-kaykit-cluster/capture-diagnostics.md >> "$GITHUB_STEP_SUMMARY"
+          if [ "$desktop_status" -ne 0 ] || [ "$portrait_status" -ne 0 ]; then
+            echo "Capture process failed: desktop=$desktop_status portrait=$portrait_status" >&2
+            exit 1
+          fi
+          set -e
           ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|Missing KayKit model|Grounding failed|No mesh found|Screenshot save failed|Contract file open failed" evidence/godot-kaykit-cluster/desktop.log evidence/godot-kaykit-cluster/portrait.log
           python3 - <<'PY'
           import hashlib, json
@@ -168,4 +190,9 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:304,body:`## Godot KayKit calibration cluster run ${context.runId}\n\n- Event SHA: \`${context.sha}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`godot-kaykit-cluster-${context.runId}\`\n- Expected evidence: exact source manifest, desktop 1440x900, portrait 390x844, import/runtime logs, image QA and final contract.\n\nNo full frame, gameplay, second asset family, main write, merge, deployment or paid tool was used.`})
+            const fs = require('fs')
+            let diagnostics = 'No capture diagnostics file was produced.'
+            try {
+              diagnostics = fs.readFileSync('evidence/godot-kaykit-cluster/capture-diagnostics.md', 'utf8').slice(-12000)
+            } catch (_) {}
+            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:304,body:`## Godot KayKit calibration cluster run ${context.runId}\n\n- Event SHA: \`${context.sha}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`godot-kaykit-cluster-${context.runId}\`\n- Expected evidence: exact source manifest, desktop 1440x900, portrait 390x844, import/runtime logs, image QA and final contract.\n\n<details><summary>Capture diagnostics</summary>\n\n${diagnostics}\n\n</details>\n\nNo full frame, gameplay, second asset family, main write, merge, deployment or paid tool was used.`})
