@@ -4,6 +4,8 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - app/play/page.tsx
+      - app/play/components/LandSheet.tsx
       - app/play/components/MapStage.tsx
       - public/art/aurelian-basin-map-desktop.png
       - public/art/aurelian-basin-map-portrait.png
@@ -55,4 +57,4 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:316,body:`## Scoped Aurelian map QA ${context.runId}\n\n- Event SHA: \`${context.sha}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`aurelian-map-integration-${context.runId}\`\n- Covers desktop/mobile first run, land selection, claim access and Village transition.\n\nNo merge, deployment, payment or MAX was used.`})
+            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:318,body:`## Mobile first-run clarity QA ${context.runId}\n\n- Event SHA: \`${context.sha}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`aurelian-map-integration-${context.runId}\`\n- Covers desktop regression, mobile panel bounds, visible map corridor, land selection, claim access and Village transition.\n\nNo map asset, MapStage, reducer, merge, deployment, payment or MAX change was used.`})
