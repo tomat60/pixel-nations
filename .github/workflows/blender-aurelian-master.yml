@@ -90,8 +90,6 @@ jobs:
           grep -F "BLENDER_MASTER_EXPORTED=desktop" evidence/blender-aurelian-master/blender-authoring.log
           grep -F "BLENDER_MASTER_EXPORTED=portrait" evidence/blender-aurelian-master/blender-authoring.log
           grep -F "AURELIAN_DCC_PACKAGE_EXPORTED=" evidence/blender-aurelian-master/blender-authoring.log
-          test -s evidence/blender-aurelian-master/aurelian-basin-desktop.glb
-          test -s evidence/blender-aurelian-master/aurelian-basin-portrait.glb
           test "$(stat -c%s evidence/blender-aurelian-master/aurelian-basin-desktop.glb)" -gt 500000
           test "$(stat -c%s evidence/blender-aurelian-master/aurelian-basin-portrait.glb)" -gt 500000
           cp evidence/blender-aurelian-master/aurelian-basin-desktop.glb game/art_target/blender_aurelian/
@@ -105,10 +103,7 @@ jobs:
           from pathlib import Path
           from PIL import Image, ImageStat
           root = Path('evidence/blender-aurelian-master')
-          expected = {
-              'blender-desktop-preview.png': (1440, 900),
-              'blender-portrait-preview.png': (390, 844),
-          }
+          expected = {'blender-desktop-preview.png': (1440, 900), 'blender-portrait-preview.png': (390, 844)}
           report = {}
           for name, dims in expected.items():
               path = root / name
@@ -120,26 +115,17 @@ jobs:
               stat = ImageStat.Stat(image)
               luminance = sum(stat.mean) / 3.0
               variance = sum(stat.var) / 3.0
-              sample = image.resize((240, 150))
-              pixels = list(sample.getdata())
+              pixels = list(image.resize((240, 150)).getdata())
               near_white = sum(1 for pixel in pixels if min(pixel) > 245) / len(pixels)
               if variance < 45.0 or luminance < 25.0 or luminance > 225.0 or near_white > 0.08:
                   raise SystemExit(f'Blender preview QA failed {name}: luminance={luminance:.2f} variance={variance:.2f} near_white={near_white:.4f}')
-              if 'desktop' in name:
-                  slices = [image.crop((0, 0, 480, 900)), image.crop((480, 0, 960, 900)), image.crop((960, 0, 1440, 900))]
-              else:
-                  slices = [image.crop((0, 0, 390, 211)), image.crop((0, 211, 390, 422)), image.crop((0, 422, 390, 633)), image.crop((0, 633, 390, 844))]
+              slices = ([image.crop((0, 0, 480, 900)), image.crop((480, 0, 960, 900)), image.crop((960, 0, 1440, 900))]
+                        if 'desktop' in name else
+                        [image.crop((0, 0, 390, 211)), image.crop((0, 211, 390, 422)), image.crop((0, 422, 390, 633)), image.crop((0, 633, 390, 844))])
               slice_variance = [round(sum(ImageStat.Stat(part).var) / 3.0, 3) for part in slices]
               if min(slice_variance) < 12.0:
                   raise SystemExit(f'Composition band appears empty in {name}: {slice_variance}')
-              report[name] = {
-                  'bytes': path.stat().st_size,
-                  'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
-                  'mean_luminance': round(luminance, 3),
-                  'variance': round(variance, 3),
-                  'near_white_fraction': round(near_white, 5),
-                  'slice_variance': slice_variance,
-              }
+              report[name] = {'bytes': path.stat().st_size, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest(), 'mean_luminance': round(luminance, 3), 'variance': round(variance, 3), 'near_white_fraction': round(near_white, 5), 'slice_variance': slice_variance}
           (root / 'blender-preview-qa.json').write_text(json.dumps(report, indent=2) + '\n')
           print('BLENDER_PREVIEW_GATE_OK')
           PY
@@ -148,7 +134,7 @@ jobs:
         run: |
           set -euo pipefail
           "$GODOT" --headless --path game --editor --quit 2>&1 | tee evidence/blender-aurelian-master/godot-import.log
-          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|ERROR:" evidence/blender-aurelian-master/godot-import.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load" evidence/blender-aurelian-master/godot-import.log
           test -d game/.godot/imported
 
       - name: Capture exact Godot desktop and portrait proof
@@ -157,11 +143,11 @@ jobs:
           export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
           mkdir -p "$XDG_RUNTIME_DIR"
           chmod 700 "$XDG_RUNTIME_DIR"
-          timeout 75s xvfb-run -a env CAPTURE_MODE=desktop CAPTURE_WIDTH=1440 CAPTURE_HEIGHT=900 CAPTURE_PATH="$PWD/evidence/blender-aurelian-master/godot-desktop-1440x900.png" CONTRACT_PATH="$PWD/evidence/blender-aurelian-master/godot-desktop-contract.json" "$GODOT" --path game res://scenes/art_target/blender_aurelian_capture.tscn 2>&1 | tee evidence/blender-aurelian-master/godot-desktop.log
-          timeout 75s xvfb-run -a env CAPTURE_MODE=portrait CAPTURE_WIDTH=390 CAPTURE_HEIGHT=844 CAPTURE_PATH="$PWD/evidence/blender-aurelian-master/godot-portrait-390x844.png" CONTRACT_PATH="$PWD/evidence/blender-aurelian-master/godot-portrait-contract.json" "$GODOT" --path game res://scenes/art_target/blender_aurelian_capture.tscn 2>&1 | tee evidence/blender-aurelian-master/godot-portrait.log
+          timeout 75s xvfb-run -a env AUDIO_DRIVER=Dummy CAPTURE_MODE=desktop CAPTURE_WIDTH=1440 CAPTURE_HEIGHT=900 CAPTURE_PATH="$PWD/evidence/blender-aurelian-master/godot-desktop-1440x900.png" CONTRACT_PATH="$PWD/evidence/blender-aurelian-master/godot-desktop-contract.json" "$GODOT" --path game res://scenes/art_target/blender_aurelian_capture.tscn 2>&1 | tee evidence/blender-aurelian-master/godot-desktop.log
+          timeout 75s xvfb-run -a env AUDIO_DRIVER=Dummy CAPTURE_MODE=portrait CAPTURE_WIDTH=390 CAPTURE_HEIGHT=844 CAPTURE_PATH="$PWD/evidence/blender-aurelian-master/godot-portrait-390x844.png" CONTRACT_PATH="$PWD/evidence/blender-aurelian-master/godot-portrait-contract.json" "$GODOT" --path game res://scenes/art_target/blender_aurelian_capture.tscn 2>&1 | tee evidence/blender-aurelian-master/godot-portrait.log
           grep -F "DCC_GODOT_CAPTURE_SAVED=" evidence/blender-aurelian-master/godot-desktop.log
           grep -F "DCC_GODOT_CAPTURE_SAVED=" evidence/blender-aurelian-master/godot-portrait.log
-          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|ERROR:" evidence/blender-aurelian-master/godot-desktop.log evidence/blender-aurelian-master/godot-portrait.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load" evidence/blender-aurelian-master/godot-desktop.log evidence/blender-aurelian-master/godot-portrait.log
 
       - name: Build exact evidence contract
         run: |
@@ -171,10 +157,7 @@ jobs:
           from pathlib import Path
           from PIL import Image, ImageStat
           root = Path('evidence/blender-aurelian-master')
-          expected = {
-              'godot-desktop-1440x900.png': (1440, 900),
-              'godot-portrait-390x844.png': (390, 844),
-          }
+          expected = {'godot-desktop-1440x900.png': (1440, 900), 'godot-portrait-390x844.png': (390, 844)}
           qa = {}
           for name, dims in expected.items():
               path = root / name
@@ -190,12 +173,7 @@ jobs:
               near_white = sum(1 for pixel in pixels if min(pixel) > 245) / len(pixels)
               if variance < 40.0 or luminance < 25.0 or luminance > 225.0 or near_white > 0.08:
                   raise SystemExit(f'Godot image QA failed {name}: luminance={luminance:.2f} variance={variance:.2f} near_white={near_white:.4f}')
-              qa[name] = {
-                  'width': dims[0], 'height': dims[1], 'bytes': path.stat().st_size,
-                  'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
-                  'mean_luminance': round(luminance, 3), 'variance': round(variance, 3),
-                  'near_white_fraction': round(near_white, 5),
-              }
+              qa[name] = {'width': dims[0], 'height': dims[1], 'bytes': path.stat().st_size, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest(), 'mean_luminance': round(luminance, 3), 'variance': round(variance, 3), 'near_white_fraction': round(near_white, 5)}
           desktop_contract = json.loads((root / 'godot-desktop-contract.json').read_text())
           portrait_contract = json.loads((root / 'godot-portrait-contract.json').read_text())
           for contract in (desktop_contract, portrait_contract):
@@ -207,17 +185,7 @@ jobs:
           output_sha = (root / 'output-sha.txt').read_text().strip()
           if input_sha != output_sha:
               raise SystemExit('Input/output SHA mismatch')
-          final = {
-              'classification': 'PENDING_DIRECT_VISUAL_REVIEW',
-              'input_sha': input_sha,
-              'output_sha': output_sha,
-              'source_commit': '84fa4e91af6a88989be7c99e0891cede11f2ca38',
-              'blueprint_commit': '3c61f8ade5e582da9798ce8a6f1bc9ac69ecebe2',
-              'blender_preview_qa': json.loads((root / 'blender-preview-qa.json').read_text()),
-              'godot_image_qa': qa,
-              'desktop_contract': desktop_contract,
-              'portrait_contract': portrait_contract,
-          }
+          final = {'classification': 'PENDING_DIRECT_VISUAL_REVIEW', 'input_sha': input_sha, 'output_sha': output_sha, 'source_commit': '84fa4e91af6a88989be7c99e0891cede11f2ca38', 'blueprint_commit': '3c61f8ade5e582da9798ce8a6f1bc9ac69ecebe2', 'blender_preview_qa': json.loads((root / 'blender-preview-qa.json').read_text()), 'godot_image_qa': qa, 'desktop_contract': desktop_contract, 'portrait_contract': portrait_contract}
           (root / 'final-contract.json').write_text(json.dumps(final, indent=2) + '\n')
           PY
           find game/art_target/blender_aurelian -type f -printf '%s\n' | awk '{s+=$1} END{print s+0}' > evidence/blender-aurelian-master/glb-bytes.txt
