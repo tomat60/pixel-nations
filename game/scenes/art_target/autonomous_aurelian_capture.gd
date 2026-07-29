@@ -12,6 +12,7 @@ var contract_path: String
 var normalized_material_surfaces := 0
 var normalized_textured_surfaces := 0
 var normalized_color_surfaces := 0
+var cleared_object_material_overrides := 0
 var normalized_material_names: Dictionary = {}
 
 func _ready() -> void:
@@ -45,7 +46,9 @@ func _ready() -> void:
         push_error("Failed to instantiate autonomous Aurelian GLB")
         get_tree().quit(23)
         return
-    add_child(imported_root)
+
+    # Normalize every render property before the GLB enters the SceneTree.
+    # This ensures RenderServer registers the proof materials, not the imported overrides.
     _normalize_imported_materials(imported_root)
     _normalize_imported_lights(imported_root)
     active_camera = _find_camera(imported_root)
@@ -56,6 +59,7 @@ func _ready() -> void:
     active_camera.near = 0.1
     active_camera.far = 2000.0
     active_camera.cull_mask = 0xFFFFF
+    add_child(imported_root)
     active_camera.current = true
     call_deferred("_write_contract_after_first_frame")
 
@@ -93,9 +97,17 @@ func _normalized_color_for_name(material_name: String, source_color: Color) -> C
 func _normalize_imported_materials(root: Node) -> void:
     if root is MeshInstance3D:
         var mesh_instance := root as MeshInstance3D
+        if mesh_instance.material_override != null or mesh_instance.material_overlay != null:
+            cleared_object_material_overrides += 1
+        mesh_instance.material_override = null
+        mesh_instance.material_overlay = null
+        mesh_instance.transparency = 0.0
+        mesh_instance.visible = true
+        mesh_instance.visibility_range_begin = 0.0
+        mesh_instance.visibility_range_end = 0.0
         if mesh_instance.mesh != null:
             for surface in range(mesh_instance.mesh.get_surface_count()):
-                var source_material := mesh_instance.get_active_material(surface)
+                var source_material := mesh_instance.mesh.surface_get_material(surface)
                 var proof_material := StandardMaterial3D.new()
                 var material_name := "missing"
                 if source_material != null and not source_material.resource_name.is_empty():
@@ -134,7 +146,7 @@ func _normalize_imported_lights(root: Node) -> void:
         var fallback := DirectionalLight3D.new()
         fallback.name = "AutonomousProofSun"
         fallback.rotation_degrees = Vector3(-42.0, 28.0, 18.0)
-        add_child(fallback)
+        root.add_child(fallback)
         lights.append(fallback)
     for light in lights:
         light.light_color = Color("#fff0dc")
@@ -171,6 +183,7 @@ func _write_contract_after_first_frame() -> void:
         "mode": capture_mode,
         "scene_resource": SCENES[capture_mode],
         "capture_backend": "godot_movie_writer_png",
+        "material_registration": "normalized_off_tree_before_render_server_registration",
         "viewport_width": int(viewport_size.x),
         "viewport_height": int(viewport_size.y),
         "window_width": get_window().size.x,
@@ -200,6 +213,7 @@ func _write_contract_after_first_frame() -> void:
         "normalized_material_surfaces": normalized_material_surfaces,
         "normalized_textured_surfaces": normalized_textured_surfaces,
         "normalized_color_surfaces": normalized_color_surfaces,
+        "cleared_object_material_overrides": cleared_object_material_overrides,
         "normalized_material_names": normalized_material_names,
     }
     var file := FileAccess.open(contract_path, FileAccess.WRITE)
@@ -211,6 +225,7 @@ func _write_contract_after_first_frame() -> void:
     print("AUTONOMOUS_GODOT_MATERIAL_SURFACES=" + str(normalized_material_surfaces))
     print("AUTONOMOUS_GODOT_TEXTURED_SURFACES=" + str(normalized_textured_surfaces))
     print("AUTONOMOUS_GODOT_COLOR_SURFACES=" + str(normalized_color_surfaces))
+    print("AUTONOMOUS_GODOT_CLEARED_OBJECT_OVERRIDES=" + str(cleared_object_material_overrides))
     print("AUTONOMOUS_GODOT_SCENE_READY=" + capture_mode)
     print("AUTONOMOUS_GODOT_CONTRACT_SAVED=" + contract_path)
 
