@@ -143,10 +143,28 @@ def build_scene(mode, source, out):
     preview=out/f"autonomous-{mode}-preview.png"
     camera=setup_render(mode,preview)
     bpy.ops.render.render(write_still=True)
-    bpy.ops.wm.save_as_mainfile(filepath=str(out/f"autonomous-{mode}.blend"))
-    contract={"pass":"AUTONOMOUS_DCC_PASS_3","mode":mode,"source_commit":base.SOURCE_SHA,"camera":layout["camera"],"terrain_extent":layout["extent"],"bridge":layout["bridge"],"placements":placements,"preview_sha256":hashlib.sha256(preview.read_bytes()).hexdigest(),"camera_object":camera.name}
+    blend_path=out/f"autonomous-{mode}.blend"
+    bpy.ops.wm.save_as_mainfile(filepath=str(blend_path))
+    glb_path=out/f"autonomous-{mode}.glb"
+    bpy.ops.export_scene.gltf(filepath=str(glb_path), export_format="GLB", export_cameras=True, export_lights=True, export_apply=True)
+    if not glb_path.is_file() or glb_path.stat().st_size < 500000:
+        raise RuntimeError(f"GLB export failed for {mode}")
+    contract={
+        "pass":"AUTONOMOUS_DCC_PASS_3_ACCEPTED",
+        "mode":mode,
+        "source_commit":base.SOURCE_SHA,
+        "camera":layout["camera"],
+        "terrain_extent":layout["extent"],
+        "bridge":layout["bridge"],
+        "placements":placements,
+        "preview_sha256":hashlib.sha256(preview.read_bytes()).hexdigest(),
+        "glb_sha256":hashlib.sha256(glb_path.read_bytes()).hexdigest(),
+        "glb_bytes":glb_path.stat().st_size,
+        "camera_object":camera.name
+    }
     (out/f"autonomous-{mode}-contract.json").write_text(json.dumps(contract,indent=2)+"\n")
     print(f"AUTONOMOUS_PREVIEW_EXPORTED={mode}:{preview}")
+    print(f"AUTONOMOUS_GLB_EXPORTED={mode}:{glb_path}")
 
 for role, relative in base.ASSETS.items():
     path = source_root / relative
