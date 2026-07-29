@@ -1,32 +1,86 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
-import { plots, terrainFill } from "../lib/map-data";
+import { plots } from "../lib/map-data";
 import type { PlayAction, PlayState } from "../lib/play-state";
 
 type MapStageProps = { state: PlayState; dispatch: (action: PlayAction) => void };
 type ViewBox = { x: number; y: number; width: number; height: number };
 type DragState = { active: boolean; pointerId: number | null; startX: number; startY: number; origin: ViewBox; moved: boolean; targetPlotId: string | null; raf: number | null };
+type MapMode = "desktop" | "portrait";
+type MapConfig = {
+  mode: MapMode;
+  width: number;
+  height: number;
+  minWidth: number;
+  image: string;
+  plotScaleX: number;
+  plotScaleY: number;
+  markerScale: number;
+};
 
-const world = { x: 0, y: 0, width: 1000, height: 900 };
-const minWidth = 360;
-const maxWidth = 1000;
-const aspect = world.width / world.height;
+const legacyPlotSpace = { width: 1000, height: 900 };
+const configs: Record<MapMode, MapConfig> = {
+  desktop: {
+    mode: "desktop",
+    width: 1440,
+    height: 900,
+    minWidth: 560,
+    image: "/art/aurelian-basin-map-desktop.png",
+    plotScaleX: 1440 / legacyPlotSpace.width,
+    plotScaleY: 900 / legacyPlotSpace.height,
+    markerScale: 1,
+  },
+  portrait: {
+    mode: "portrait",
+    width: 390,
+    height: 844,
+    minWidth: 190,
+    image: "/art/aurelian-basin-map-portrait.png",
+    plotScaleX: 390 / legacyPlotSpace.width,
+    plotScaleY: 844 / legacyPlotSpace.height,
+    markerScale: 0.7,
+  },
+};
+
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
-function clampBox(box: ViewBox): ViewBox {
-  const width = clamp(box.width, minWidth, maxWidth);
-  const height = width / aspect;
-  return { x: clamp(box.x, world.x, world.x + world.width - width), y: clamp(box.y, world.y, world.y + world.height - height), width, height };
-}
-
-function boxString(box: ViewBox) {
-  return `${box.x.toFixed(1)} ${box.y.toFixed(1)} ${box.width.toFixed(1)} ${box.height.toFixed(1)}`;
-}
-
 export function MapStage({ state, dispatch }: MapStageProps) {
+  const [mode, setMode] = useState<MapMode>("desktop");
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+    const syncMode = () => setMode(query.matches ? "portrait" : "desktop");
+    syncMode();
+    query.addEventListener("change", syncMode);
+    return () => query.removeEventListener("change", syncMode);
+  }, []);
+
+  return <InteractiveAurelianMap key={mode} config={configs[mode]} state={state} dispatch={dispatch} />;
+}
+
+function InteractiveAurelianMap({ config, state, dispatch }: MapStageProps & { config: MapConfig }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const world = { x: 0, y: 0, width: config.width, height: config.height };
+  const aspect = config.width / config.height;
   const boxRef = useRef<ViewBox>({ ...world });
   const dragRef = useRef<DragState>({ active: false, pointerId: null, startX: 0, startY: 0, origin: { ...world }, moved: false, targetPlotId: null, raf: null });
+  const ownedFilterId = `owned-focus-${config.mode}`;
+  const selectionFilterId = `selection-focus-${config.mode}`;
+
+  function clampBox(box: ViewBox): ViewBox {
+    const width = clamp(box.width, config.minWidth, config.width);
+    const height = width / aspect;
+    return {
+      x: clamp(box.x, world.x, world.x + world.width - width),
+      y: clamp(box.y, world.y, world.y + world.height - height),
+      width,
+      height,
+    };
+  }
+
+  function boxString(box: ViewBox) {
+    return `${box.x.toFixed(1)} ${box.y.toFixed(1)} ${box.width.toFixed(1)} ${box.height.toFixed(1)}`;
+  }
 
   function applyBox() {
     dragRef.current.raf = null;
@@ -46,17 +100,19 @@ export function MapStage({ state, dispatch }: MapStageProps) {
   }, []);
 
   function clientToSvg(clientX: number, clientY: number, box = boxRef.current) {
-    const rect = svgRef.current?.getBoundingClientRect();
-    if (!rect) return { x: box.x + box.width / 2, y: box.y + box.height / 2, rx: 0.5, ry: 0.5 };
-    const rx = clamp((clientX - rect.left) / rect.width, 0, 1);
-    const ry = clamp((clientY - rect.top) / rect.height, 0, 1);
-    return { x: box.x + rx * box.width, y: box.y + ry * box.height, rx, ry };
+    const svg = svgRef.current;
+    const matrix = svg?.getScreenCTM();
+    if (!svg || !matrix) return { x: box.x + box.width / 2, y: box.y + box.height / 2, rx: 0.5, ry: 0.5 };
+    const point = new DOMPoint(clientX, clientY).matrixTransform(matrix.inverse());
+    const rx = clamp((point.x - box.x) / box.width, 0, 1);
+    const ry = clamp((point.y - box.y) / box.height, 0, 1);
+    return { x: point.x, y: point.y, rx, ry };
   }
 
   function zoomAt(clientX: number, clientY: number, factor: number) {
     const current = boxRef.current;
     const focus = clientToSvg(clientX, clientY, current);
-    const nextWidth = clamp(current.width / factor, minWidth, maxWidth);
+    const nextWidth = clamp(current.width / factor, config.minWidth, config.width);
     const nextHeight = nextWidth / aspect;
     boxRef.current = clampBox({ x: focus.x - focus.rx * nextWidth, y: focus.y - focus.ry * nextHeight, width: nextWidth, height: nextHeight });
     scheduleBox();
@@ -71,41 +127,45 @@ export function MapStage({ state, dispatch }: MapStageProps) {
     applyBox();
   }
 
-  function selectPlot(plotId: string) {
-    dispatch({ type: "select", plotId });
-  }
-
   function onWheel(event: ReactWheelEvent<SVGSVGElement>) {
     if (!event.ctrlKey) return;
     event.preventDefault();
-    const factor = Math.exp(-event.deltaY * 0.006);
-    zoomAt(event.clientX, event.clientY, factor);
+    zoomAt(event.clientX, event.clientY, Math.exp(-event.deltaY * 0.006));
   }
 
   function onPointerDown(event: ReactPointerEvent<SVGSVGElement>) {
     const target = event.target as Element;
     const plotNode = target.closest?.("[data-plot-id]") as Element | null;
-    dragRef.current = { active: true, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, origin: { ...boxRef.current }, moved: false, targetPlotId: plotNode?.getAttribute("data-plot-id") ?? null, raf: dragRef.current.raf };
+    dragRef.current = {
+      active: true,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      origin: { ...boxRef.current },
+      moved: false,
+      targetPlotId: plotNode?.getAttribute("data-plot-id") ?? null,
+      raf: dragRef.current.raf,
+    };
     event.currentTarget.setPointerCapture(event.pointerId);
   }
 
   function onPointerMove(event: ReactPointerEvent<SVGSVGElement>) {
     const drag = dragRef.current;
     if (!drag.active) return;
-    const rect = svgRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const dx = event.clientX - drag.startX;
-    const dy = event.clientY - drag.startY;
-    if (Math.abs(dx) + Math.abs(dy) > 6) drag.moved = true;
-    boxRef.current = clampBox({ x: drag.origin.x - (dx / rect.width) * drag.origin.width, y: drag.origin.y - (dy / rect.height) * drag.origin.height, width: drag.origin.width, height: drag.origin.height });
+    const matrix = svgRef.current?.getScreenCTM();
+    if (!matrix) return;
+    const dx = (event.clientX - drag.startX) / Math.max(Math.abs(matrix.a), 0.0001);
+    const dy = (event.clientY - drag.startY) / Math.max(Math.abs(matrix.d), 0.0001);
+    if (Math.abs(event.clientX - drag.startX) + Math.abs(event.clientY - drag.startY) > 6) drag.moved = true;
+    boxRef.current = clampBox({ x: drag.origin.x - dx, y: drag.origin.y - dy, width: drag.origin.width, height: drag.origin.height });
     scheduleBox();
   }
 
   function onPointerUp(event: ReactPointerEvent<SVGSVGElement>) {
     const drag = dragRef.current;
-    if (drag.pointerId === event.pointerId) event.currentTarget.releasePointerCapture(event.pointerId);
+    if (drag.pointerId === event.pointerId && event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     drag.active = false;
-    if (!drag.moved && drag.targetPlotId) selectPlot(drag.targetPlotId);
+    if (!drag.moved && drag.targetPlotId) dispatch({ type: "select", plotId: drag.targetPlotId });
   }
 
   function onPointerCancel() {
@@ -113,104 +173,107 @@ export function MapStage({ state, dispatch }: MapStageProps) {
   }
 
   return (
-    <div className="absolute inset-0 touch-none">
+    <div data-qa="accepted-aurelian-map" data-map-mode={config.mode} className="absolute inset-0 touch-none overflow-hidden bg-[#26342d]">
       <div className="absolute left-3 top-[6.8rem] z-30 flex flex-col gap-2 md:left-5 md:top-[7.2rem]">
-        <button data-qa="zoom-overview" onClick={resetOverview} className="rounded-2xl border border-amber-100/20 bg-black/48 px-3 py-2 text-xs font-black text-amber-50 shadow-xl backdrop-blur-md hover:bg-black/60">Reset view</button>
+        <button data-qa="zoom-overview" onClick={resetOverview} className="rounded-2xl border border-amber-100/20 bg-black/48 px-3 py-2 text-xs font-black text-amber-50 shadow-xl backdrop-blur-md transition hover:bg-black/60">Reset view</button>
         <p className="hidden rounded-2xl border border-amber-100/15 bg-black/36 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-amber-100/58 md:block">pinch zoom · drag</p>
       </div>
-      <svg ref={svgRef} viewBox="0 0 1000 900" preserveAspectRatio="xMidYMid meet" className="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" role="img" aria-label="Aurelian Basin fullscreen map" onWheel={onWheel} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerCancel} onPointerLeave={onPointerCancel}>
+
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${config.width} ${config.height}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing"
+        role="img"
+        aria-label={`Aurelian Basin ${config.mode} strategy map`}
+        onWheel={onWheel}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
+        onPointerLeave={onPointerCancel}
+      >
         <defs>
-          <linearGradient id="seaV4" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stopColor="#0d2a3a" /><stop offset="55%" stopColor="#0e4453" /><stop offset="100%" stopColor="#0a5560" /></linearGradient>
-          <linearGradient id="landV4" x1="0" x2="0.7" y1="0" y2="1"><stop offset="0%" stopColor="#c7a75f" /><stop offset="45%" stopColor="#a9873f" /><stop offset="100%" stopColor="#7a6230" /></linearGradient>
-          <linearGradient id="landShadeV4" x1="0" x2="0.6" y1="0" y2="1"><stop offset="0%" stopColor="#8a6f38" /><stop offset="100%" stopColor="#5a4726" /></linearGradient>
-          <linearGradient id="mountainV4" x1="0" x2="0.3" y1="0" y2="1"><stop offset="0%" stopColor="#8a7a68" /><stop offset="100%" stopColor="#4a3f34" /></linearGradient>
-          <linearGradient id="coastV4" x1="0" x2="1" y1="0" y2="0"><stop offset="0%" stopColor="#f0e6b8" stopOpacity="0.9" /><stop offset="100%" stopColor="#f0e6b8" stopOpacity="0" /></linearGradient>
-          <radialGradient id="ownedGlowV4" cx="50%" cy="42%" r="60%"><stop offset="0%" stopColor="#ffe9a8" stopOpacity="0.55" /><stop offset="100%" stopColor="#ffe9a8" stopOpacity="0" /></radialGradient>
-          <pattern id="forestV4" width="26" height="26" patternUnits="userSpaceOnUse" patternTransform="rotate(8)">
-            <rect width="26" height="26" fill="none" />
-            <path d="M13 3 L20 18 L6 18 Z" fill="#1f5a3a" opacity="0.6" />
-          </pattern>
-          <filter id="v3SoftShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="20" stdDeviation="18" floodColor="#000000" floodOpacity="0.42" /></filter>
-          <filter id="landBevelV4" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="-3" dy="-3" stdDeviation="3" floodColor="#fff3cf" floodOpacity="0.22" />
-            <feDropShadow dx="4" dy="6" stdDeviation="5" floodColor="#000000" floodOpacity="0.35" />
-          </filter>
-          <filter id="ownedFocusV4" x="-60%" y="-60%" width="220%" height="220%">
-            <feDropShadow dx="0" dy="0" stdDeviation="10" floodColor="#ffcf5c" floodOpacity="0.55" />
-          </filter>
+          <filter id={ownedFilterId} x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="0" stdDeviation="8" floodColor="#ffcf5c" floodOpacity="0.58" /></filter>
+          <filter id={selectionFilterId} x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#fff3bf" floodOpacity="0.55" /></filter>
         </defs>
-        <rect width="1000" height="900" fill="url(#seaV4)" />
-        <g opacity="0.14">
-          <circle cx="120" cy="90" r="150" fill="#7fe6ff" opacity="0.16" />
-          <circle cx="860" cy="740" r="220" fill="#053040" opacity="0.32" />
-        </g>
-        <g data-qa="map-layer">
-          <path d="M0 0 H214 C150 136 104 246 92 360 C76 510 116 692 62 900 H0 Z" fill="#0f4b5c" opacity="0.92" />
-          <path d="M82 190 C162 60 328 28 492 54 C702 88 866 238 914 432 C972 666 812 842 612 884 C402 928 184 810 104 612 C42 460 24 286 82 190 Z" fill="url(#landV4)" opacity="0.9" filter="url(#v3SoftShadow)" />
-          <path d="M150 194 C246 72 432 52 608 108 C782 164 878 318 872 486 C864 720 676 846 476 824 C270 800 132 650 116 480 C104 342 98 260 150 194 Z" fill="url(#landShadeV4)" opacity="0.3" />
-          <path d="M82 190 C162 60 328 28 492 54 C702 88 866 238 914 432 C972 666 812 842 612 884 C402 928 184 810 104 612 C42 460 24 286 82 190 Z" fill="none" stroke="url(#coastV4)" strokeWidth="10" opacity="0.5" />
-          <path d="M480 58 C430 168 520 238 486 346 C452 454 404 548 430 826" fill="none" stroke="#64d6ff" strokeWidth="20" strokeLinecap="round" opacity="0.48" />
-          <path d="M512 60 C474 172 548 250 526 354 C498 476 452 580 468 828" fill="none" stroke="#d6fbff" strokeWidth="5" strokeLinecap="round" opacity="0.78" />
-          <path d="M126 460 C264 410 478 412 858 646" fill="none" stroke="#3b2b19" strokeWidth="8" strokeDasharray="15 17" opacity="0.55" />
-          {state.settlementMarkers.includes("market") && <path data-qa="market-route" d="M354 285 C430 390 560 510 790 640" fill="none" stroke="#fbbf24" strokeWidth="9" strokeLinecap="round" strokeDasharray="18 14" opacity="0.92" />}
-          <path d="M600 150 L632 76 L672 164 L704 98 L756 220 Z" fill="url(#mountainV4)" filter="url(#landBevelV4)" />
-          <path d="M610 145 L632 76 L660 145 Z M690 150 L704 98 L734 200 Z" fill="#f5ecd8" opacity="0.8" />
-          <path d="M180 250 q60 -120 220 -90 q90 20 60 130 q-30 90 -180 90 q-140 0 -100 -130Z" fill="url(#forestV4)" opacity="0.55" />
-          <path d="M210 276 q34 -68 80 0 q-43 -26 -80 0Z M248 330 q38 -78 92 0 q-48 -30 -92 0Z M168 374 q44 -86 100 0 q-50 -32 -100 0Z" fill="#174f35" opacity="0.9" />
+
+        <image data-qa="aurelian-map-art" href={config.image} x="0" y="0" width={config.width} height={config.height} preserveAspectRatio="none" />
+
+        <g data-qa="map-layer" transform={`scale(${config.plotScaleX} ${config.plotScaleY})`}>
+          {state.settlementMarkers.includes("market") && (
+            <path data-qa="market-route" d="M354 285 C430 390 560 510 790 640" fill="none" stroke="#f8c75d" strokeWidth="5" strokeLinecap="round" strokeDasharray="13 12" opacity="0.72" vectorEffect="non-scaling-stroke" pointerEvents="none" />
+          )}
           {plots.map((plot) => {
             const selected = state.selectedPlotId === plot.id;
             const owned = state.ownedPlotIds.includes(plot.id);
             const scouted = state.scoutedPlotIds.includes(plot.id);
-            const baseFill = terrainFill[plot.terrain];
-            const fill = owned ? "#caa24d" : plot.rival ? "#5c6a78" : !scouted && !owned ? mixCool(baseFill) : baseFill;
-            const fillOpacity = owned ? 1 : scouted ? 0.94 : plot.rival ? 0.72 : plot.trade ? 0.88 : 0.66;
+            const visual = getPlotVisualState({ selected, owned, scouted, rival: Boolean(plot.rival), trade: Boolean(plot.trade) });
             return (
-              <g key={plot.id} data-qa={`plot-group-${plot.id}`} data-plot-id={plot.id} onClick={(event) => { event.stopPropagation(); if (!dragRef.current.moved) selectPlot(plot.id); }} className="cursor-pointer">
-                <path data-qa={`plot-${plot.id}`} data-plot-id={plot.id} d={plot.d} fill={fill} opacity={fillOpacity} stroke={selected ? "#fff4bf" : owned ? "#ffdf8a" : scouted ? "#bef264" : plot.rival ? "#94a3b8" : plot.trade ? "#7dd3fc" : "#241a10"} strokeWidth={selected ? 7 : owned ? 6 : scouted ? 4 : plot.rival || plot.trade ? 3 : 2} strokeDasharray={plot.trade && !owned ? "9 7" : undefined} filter={owned ? "url(#ownedFocusV4)" : undefined} />
-                {owned && <path d={plot.d} fill="url(#ownedGlowV4)" opacity="0.9" />}
-                {owned && <path d={plot.d} fill="none" stroke="#fff1a8" strokeWidth="3" opacity="0.85" />}
-                {selected && <path d={plot.d} fill="none" stroke="#fffbe3" strokeWidth="12" opacity="0.34" />}
-                {scouted && !owned && <path d={plot.d} fill="#bef264" opacity="0.1" stroke="#ecfccb" strokeWidth="3" strokeDasharray="8 8" />}
-                {plot.rival && <path data-plot-id={plot.id} d={plot.d} fill="#334155" opacity="0.22" stroke="#e2e8f0" strokeWidth="2" strokeDasharray="10 8" />}
-                {plot.trade && !owned && <path d={plot.d} fill="#38bdf8" opacity="0.08" />}
-              </g>
-            );
-          })}
-          {plots.map((plot) => {
-            const selected = state.selectedPlotId === plot.id;
-            const owned = state.ownedPlotIds.includes(plot.id);
-            const shouldLabel = selected || owned || plot.starter || plot.rival || plot.trade || state.scoutedPlotIds.includes(plot.id);
-            const showText = selected || owned || (plot.starter && state.ownedPlotIds.length === 0);
-            return (
-              <g key={`${plot.id}-labels`} pointerEvents="none">
-                {plot.starter && state.ownedPlotIds.length === 0 && <circle cx={plot.cx} cy={plot.cy} r={selected ? 44 : 34} fill="none" stroke="#ffe39a" strokeWidth="5" opacity="0.72" />}
-                {owned && <Settlement x={plot.cx} y={plot.cy} markers={state.settlementMarkers} />}
-                {owned && <Banner x={plot.cx} y={plot.cy - 42} />}
-                {plot.rival && <Rival x={plot.cx} y={plot.cy - 34} />}
-                {plot.trade && !owned && <Trade x={plot.cx} y={plot.cy - 34} />}
-                {state.scoutedPlotIds.includes(plot.id) && !owned && <Scout x={plot.cx} y={plot.cy - 18} />}
-                {showText && <><rect x={plot.cx - 60} y={plot.cy + 10} width="120" height="22" rx="11" fill="#1c130b" opacity="0.4" /><text x={plot.cx} y={plot.cy + 26} textAnchor="middle" fontSize={selected ? "16" : "13"} fontWeight="900" fill="#fff6de" stroke="#1c130b" strokeWidth="2.4" paintOrder="stroke">{plot.name}</text></>}
-                {!showText && shouldLabel && <circle cx={plot.cx} cy={plot.cy + 20} r="3" fill="#fff6de" opacity="0.7" />}
+              <g key={plot.id} className="cursor-pointer">
+                <path
+                  d={plot.d}
+                  fill={visual.fill}
+                  stroke={visual.stroke}
+                  strokeWidth={visual.strokeWidth}
+                  strokeDasharray={visual.strokeDasharray}
+                  opacity={visual.opacity}
+                  filter={selected ? `url(#${selectionFilterId})` : owned ? `url(#${ownedFilterId})` : undefined}
+                  vectorEffect="non-scaling-stroke"
+                  pointerEvents="none"
+                />
+                <path
+                  data-qa={`plot-${plot.id}`}
+                  data-plot-id={plot.id}
+                  d={plot.d}
+                  fill="rgba(255,255,255,0.001)"
+                  stroke="transparent"
+                  strokeWidth="16"
+                  vectorEffect="non-scaling-stroke"
+                />
               </g>
             );
           })}
         </g>
+
+        {plots.map((plot) => {
+          const selected = state.selectedPlotId === plot.id;
+          const owned = state.ownedPlotIds.includes(plot.id);
+          const scouted = state.scoutedPlotIds.includes(plot.id);
+          const showText = selected || owned || (plot.starter && state.ownedPlotIds.length === 0);
+          const showMarker = selected || owned || scouted || plot.rival || plot.trade || (plot.starter && state.ownedPlotIds.length === 0);
+          if (!showMarker) return null;
+          const x = plot.cx * config.plotScaleX;
+          const y = plot.cy * config.plotScaleY;
+          return (
+            <g key={`${plot.id}-labels`} transform={`translate(${x} ${y}) scale(${config.markerScale})`} pointerEvents="none">
+              {plot.starter && state.ownedPlotIds.length === 0 && <circle r={selected ? 42 : 32} fill="none" stroke="#ffe39a" strokeWidth="4" opacity="0.76" />}
+              {owned && <Settlement x={0} y={0} markers={state.settlementMarkers} />}
+              {owned && <Banner x={0} y={-42} />}
+              {plot.rival && <Rival x={0} y={-34} />}
+              {plot.trade && !owned && <Trade x={0} y={-34} />}
+              {scouted && !owned && <Scout x={0} y={-18} />}
+              {showText && (
+                <>
+                  <rect x="-60" y="10" width="120" height="22" rx="11" fill="#100d08" opacity="0.72" />
+                  <text x="0" y="26" textAnchor="middle" fontSize={selected ? "16" : "13"} fontWeight="900" fill="#fff6de" stroke="#1c130b" strokeWidth="2.4" paintOrder="stroke">{plot.name}</text>
+                </>
+              )}
+            </g>
+          );
+        })}
       </svg>
     </div>
   );
 }
 
-function mixCool(hex: string): string {
-  const value = hex.replace("#", "");
-  if (value.length !== 6) return hex;
-  const r = parseInt(value.slice(0, 2), 16);
-  const g = parseInt(value.slice(2, 4), 16);
-  const b = parseInt(value.slice(4, 6), 16);
-  const mix = (channel: number, target: number) => Math.round(channel * 0.72 + target * 0.28);
-  const nr = mix(r, 70);
-  const ng = mix(g, 92);
-  const nb = mix(b, 108);
-  return `#${nr.toString(16).padStart(2, "0")}${ng.toString(16).padStart(2, "0")}${nb.toString(16).padStart(2, "0")}`;
+function getPlotVisualState({ selected, owned, scouted, rival, trade }: { selected: boolean; owned: boolean; scouted: boolean; rival: boolean; trade: boolean }) {
+  if (selected) return { fill: "rgba(255,224,140,0.18)", stroke: "#fff2bd", strokeWidth: 5, strokeDasharray: undefined, opacity: 1 };
+  if (owned) return { fill: "rgba(245,183,61,0.16)", stroke: "#ffd978", strokeWidth: 4, strokeDasharray: undefined, opacity: 1 };
+  if (scouted) return { fill: "rgba(190,242,100,0.08)", stroke: "#d9f99d", strokeWidth: 2.5, strokeDasharray: "8 8", opacity: 0.95 };
+  if (rival) return { fill: "rgba(51,65,85,0.13)", stroke: "#cbd5e1", strokeWidth: 2.25, strokeDasharray: "9 8", opacity: 0.9 };
+  if (trade) return { fill: "rgba(56,189,248,0.06)", stroke: "#7dd3fc", strokeWidth: 2, strokeDasharray: "8 8", opacity: 0.82 };
+  return { fill: "rgba(255,255,255,0.018)", stroke: "rgba(255,246,220,0.16)", strokeWidth: 1.25, strokeDasharray: undefined, opacity: 0.82 };
 }
 
 function Settlement({ x, y, markers }: { x: number; y: number; markers: string[] }) {
