@@ -90,7 +90,7 @@ jobs:
           grep -F 'AUTONOMOUS_GLB_EXPORTED=desktop' evidence/autonomous-aurelian-godot/blender.log
           grep -F 'AUTONOMOUS_GLB_EXPORTED=portrait' evidence/autonomous-aurelian-godot/blender.log
           python3 - <<'PY'
-          import hashlib, os
+          import hashlib, json, os
           from pathlib import Path
           from PIL import Image
           root = Path('evidence/autonomous-aurelian-godot')
@@ -103,26 +103,12 @@ jobs:
                   for x in range(8):
                       value = (value << 1) | int(row[x] > row[x+1])
               return f'{value:016x}'
-          actual = {
-              'desktop': dhash(root / 'autonomous-desktop-preview.png'),
-              'portrait': dhash(root / 'autonomous-portrait-preview.png'),
-          }
-          expected = {
-              'desktop': os.environ['ACCEPTED_DESKTOP_DHASH'],
-              'portrait': os.environ['ACCEPTED_PORTRAIT_DHASH'],
-          }
+          actual = {'desktop': dhash(root/'autonomous-desktop-preview.png'), 'portrait': dhash(root/'autonomous-portrait-preview.png')}
+          expected = {'desktop': os.environ['ACCEPTED_DESKTOP_DHASH'], 'portrait': os.environ['ACCEPTED_PORTRAIT_DHASH']}
           if actual != expected:
               raise SystemExit(f'accepted preview perceptual drift: actual={actual} expected={expected}')
-          report = {
-              mode: {
-                  'accepted_byte_sha256': os.environ[f'ACCEPTED_{mode.upper()}_PREVIEW_SHA'],
-                  'reproduced_byte_sha256': hashlib.sha256((root / f'autonomous-{mode}-preview.png').read_bytes()).hexdigest(),
-                  'accepted_dhash': expected[mode],
-                  'reproduced_dhash': actual[mode],
-              } for mode in ('desktop','portrait')
-          }
-          import json
-          (root / 'preview-reproduction.json').write_text(json.dumps(report,indent=2)+'\n')
+          report = {mode:{'accepted_byte_sha256':os.environ[f'ACCEPTED_{mode.upper()}_PREVIEW_SHA'],'reproduced_byte_sha256':hashlib.sha256((root/f'autonomous-{mode}-preview.png').read_bytes()).hexdigest(),'accepted_dhash':expected[mode],'reproduced_dhash':actual[mode]} for mode in ('desktop','portrait')}
+          (root/'preview-reproduction.json').write_text(json.dumps(report,indent=2)+'\n')
           print('ACCEPTED_PREVIEW_PERCEPTUAL_REPRODUCTION_OK')
           PY
           test "$(stat -c%s evidence/autonomous-aurelian-godot/autonomous-desktop.glb)" -gt 500000
@@ -137,17 +123,29 @@ jobs:
           ! grep -E 'SCRIPT ERROR|Parse Error|Failed to load' evidence/autonomous-aurelian-godot/godot-import.log
           test -d game/.godot/imported
 
-      - name: Capture exact Godot desktop and portrait proof
+      - name: Capture exact Godot desktop and portrait proof with MovieWriter
         run: |
           set -euo pipefail
           export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
           mkdir -p "$XDG_RUNTIME_DIR"
           chmod 700 "$XDG_RUNTIME_DIR"
-          timeout 90s xvfb-run -a env AUDIO_DRIVER=Dummy CAPTURE_MODE=desktop CAPTURE_WIDTH=1440 CAPTURE_HEIGHT=900 CAPTURE_PATH="$PWD/evidence/autonomous-aurelian-godot/godot-desktop-1440x900.png" CONTRACT_PATH="$PWD/evidence/autonomous-aurelian-godot/godot-desktop-contract.json" "$GODOT" --path game res://scenes/art_target/autonomous_aurelian_capture.tscn 2>&1 | tee evidence/autonomous-aurelian-godot/godot-desktop.log
-          timeout 90s xvfb-run -a env AUDIO_DRIVER=Dummy CAPTURE_MODE=portrait CAPTURE_WIDTH=390 CAPTURE_HEIGHT=844 CAPTURE_PATH="$PWD/evidence/autonomous-aurelian-godot/godot-portrait-390x844.png" CONTRACT_PATH="$PWD/evidence/autonomous-aurelian-godot/godot-portrait-contract.json" "$GODOT" --path game res://scenes/art_target/autonomous_aurelian_capture.tscn 2>&1 | tee evidence/autonomous-aurelian-godot/godot-portrait.log
-          grep -F 'AUTONOMOUS_GODOT_CAPTURE_SAVED=' evidence/autonomous-aurelian-godot/godot-desktop.log
-          grep -F 'AUTONOMOUS_GODOT_CAPTURE_SAVED=' evidence/autonomous-aurelian-godot/godot-portrait.log
+          rm -f evidence/autonomous-aurelian-godot/desktop-frame*.png evidence/autonomous-aurelian-godot/desktop-frame.wav
+          timeout 90s xvfb-run -a -s "-screen 0 1440x900x24" env CAPTURE_MODE=desktop CAPTURE_WIDTH=1440 CAPTURE_HEIGHT=900 CONTRACT_PATH="$PWD/evidence/autonomous-aurelian-godot/godot-desktop-contract.json" "$GODOT" --path game --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 --write-movie "$PWD/evidence/autonomous-aurelian-godot/desktop-frame.png" --fixed-fps 30 --quit-after 12 --disable-vsync res://scenes/art_target/autonomous_aurelian_capture.tscn 2>&1 | tee evidence/autonomous-aurelian-godot/godot-desktop.log
+          grep -F 'AUTONOMOUS_GODOT_SCENE_READY=desktop' evidence/autonomous-aurelian-godot/godot-desktop.log
+          DESKTOP_LAST="$(find evidence/autonomous-aurelian-godot -maxdepth 1 -name 'desktop-frame????????.png' | sort | tail -1)"
+          test -n "$DESKTOP_LAST"
+          cp "$DESKTOP_LAST" evidence/autonomous-aurelian-godot/godot-desktop-1440x900.png
+          rm -f evidence/autonomous-aurelian-godot/desktop-frame*.png evidence/autonomous-aurelian-godot/desktop-frame.wav
+
+          rm -f evidence/autonomous-aurelian-godot/portrait-frame*.png evidence/autonomous-aurelian-godot/portrait-frame.wav
+          timeout 90s xvfb-run -a -s "-screen 0 390x844x24" env CAPTURE_MODE=portrait CAPTURE_WIDTH=390 CAPTURE_HEIGHT=844 CONTRACT_PATH="$PWD/evidence/autonomous-aurelian-godot/godot-portrait-contract.json" "$GODOT" --path game --audio-driver Dummy --rendering-method gl_compatibility --resolution 390x844 --position 0,0 --write-movie "$PWD/evidence/autonomous-aurelian-godot/portrait-frame.png" --fixed-fps 30 --quit-after 12 --disable-vsync res://scenes/art_target/autonomous_aurelian_capture.tscn 2>&1 | tee evidence/autonomous-aurelian-godot/godot-portrait.log
+          grep -F 'AUTONOMOUS_GODOT_SCENE_READY=portrait' evidence/autonomous-aurelian-godot/godot-portrait.log
+          PORTRAIT_LAST="$(find evidence/autonomous-aurelian-godot -maxdepth 1 -name 'portrait-frame????????.png' | sort | tail -1)"
+          test -n "$PORTRAIT_LAST"
+          cp "$PORTRAIT_LAST" evidence/autonomous-aurelian-godot/godot-portrait-390x844.png
+          rm -f evidence/autonomous-aurelian-godot/portrait-frame*.png evidence/autonomous-aurelian-godot/portrait-frame.wav
           ! grep -E 'SCRIPT ERROR|Parse Error|Failed to load' evidence/autonomous-aurelian-godot/godot-desktop.log evidence/autonomous-aurelian-godot/godot-portrait.log
+          echo AUTONOMOUS_GODOT_MOVIE_FRAMES_CAPTURED
 
       - name: Build exact final evidence contract
         run: |
@@ -175,24 +173,17 @@ jobs:
                   raise SystemExit(f'Godot image QA failed {name}: lum={luminance:.2f} var={variance:.2f} white={near_white:.4f}')
               qa[name] = {'width':dims[0],'height':dims[1],'bytes':path.stat().st_size,'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'luminance':round(luminance,3),'variance':round(variance,3),'near_white':round(near_white,5)}
           for contract_name in ('godot-desktop-contract.json','godot-portrait-contract.json'):
-              contract = json.loads((root / contract_name).read_text())
+              contract = json.loads((root/contract_name).read_text())
               if contract['camera_nodes'] < 1 or contract['mesh_instances'] < 20:
                   raise SystemExit(f'invalid imported scene contract: {contract}')
               if contract['camera']['projection'] != 'orthogonal':
                   raise SystemExit('imported camera is not orthogonal')
-          input_sha = (root / 'input-sha.txt').read_text().strip()
-          output_sha = (root / 'output-sha.txt').read_text().strip()
+          input_sha = (root/'input-sha.txt').read_text().strip()
+          output_sha = (root/'output-sha.txt').read_text().strip()
           if input_sha != output_sha:
               raise SystemExit('input/output SHA mismatch')
-          final = {
-              'classification':'PENDING_DIRECT_VISUAL_REVIEW',
-              'input_sha':input_sha,
-              'output_sha':output_sha,
-              'source_commit':'84fa4e91af6a88989be7c99e0891cede11f2ca38',
-              'preview_reproduction':json.loads((root / 'preview-reproduction.json').read_text()),
-              'godot_images':qa
-          }
-          (root / 'final-contract.json').write_text(json.dumps(final,indent=2)+'\n')
+          final = {'classification':'PENDING_DIRECT_VISUAL_REVIEW','input_sha':input_sha,'output_sha':output_sha,'source_commit':'84fa4e91af6a88989be7c99e0891cede11f2ca38','preview_reproduction':json.loads((root/'preview-reproduction.json').read_text()),'godot_images':qa}
+          (root/'final-contract.json').write_text(json.dumps(final,indent=2)+'\n')
           print('AUTONOMOUS_GODOT_EVIDENCE_OK')
           PY
           find evidence/autonomous-aurelian-godot -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > evidence/autonomous-aurelian-godot/SHA256SUMS.txt
