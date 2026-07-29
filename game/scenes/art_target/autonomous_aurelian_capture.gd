@@ -10,6 +10,9 @@ var imported_root: Node3D
 var capture_mode: String
 var contract_path: String
 var normalized_material_surfaces := 0
+var normalized_textured_surfaces := 0
+var normalized_color_surfaces := 0
+var normalized_material_names: Dictionary = {}
 
 func _ready() -> void:
     capture_mode = OS.get_environment("CAPTURE_MODE")
@@ -67,26 +70,60 @@ func _make_environment() -> Environment:
     environment.tonemap_exposure = 0.0
     return environment
 
+func _normalized_color_for_name(material_name: String, source_color: Color) -> Color:
+    var lowered := material_name.to_lower()
+    if "terrainolive" in lowered:
+        return Color(0.29, 0.36, 0.20, 1.0)
+    if "terrainforest" in lowered:
+        return Color(0.18, 0.29, 0.16, 1.0)
+    if "bankearth" in lowered:
+        return Color(0.36, 0.27, 0.17, 1.0)
+    if "riverteal" in lowered:
+        return Color(0.05, 0.31, 0.37, 1.0)
+    if "roadochre" in lowered:
+        return Color(0.49, 0.36, 0.22, 1.0)
+    if "bridgewood" in lowered:
+        return Color(0.28, 0.17, 0.08, 1.0)
+    if "bridgestone" in lowered:
+        return Color(0.38, 0.40, 0.37, 1.0)
+    if source_color.r + source_color.g + source_color.b > 0.03:
+        return Color(source_color.r, source_color.g, source_color.b, 1.0)
+    return Color("#8a9270")
+
 func _normalize_imported_materials(root: Node) -> void:
     if root is MeshInstance3D:
         var mesh_instance := root as MeshInstance3D
         if mesh_instance.mesh != null:
             for surface in range(mesh_instance.mesh.get_surface_count()):
                 var source_material := mesh_instance.get_active_material(surface)
+                var proof_material := StandardMaterial3D.new()
+                var material_name := "missing"
+                if source_material != null and not source_material.resource_name.is_empty():
+                    material_name = source_material.resource_name
+                proof_material.resource_name = "Proof_" + material_name
+                proof_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+                proof_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+                proof_material.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+                proof_material.disable_receive_shadows = true
+                proof_material.vertex_color_use_as_albedo = false
                 if source_material is BaseMaterial3D:
-                    var proof_material := source_material.duplicate(true) as BaseMaterial3D
-                    proof_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-                    proof_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-                    proof_material.disable_receive_shadows = true
-                    mesh_instance.set_surface_override_material(surface, proof_material)
-                    normalized_material_surfaces += 1
-                elif source_material == null:
-                    var fallback := StandardMaterial3D.new()
-                    fallback.albedo_color = Color("#8a9270")
-                    fallback.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-                    fallback.cull_mode = BaseMaterial3D.CULL_DISABLED
-                    mesh_instance.set_surface_override_material(surface, fallback)
-                    normalized_material_surfaces += 1
+                    var source_base := source_material as BaseMaterial3D
+                    proof_material.uv1_scale = source_base.uv1_scale
+                    proof_material.uv1_offset = source_base.uv1_offset
+                    proof_material.texture_filter = source_base.texture_filter
+                    if source_base.albedo_texture != null:
+                        proof_material.albedo_texture = source_base.albedo_texture
+                        proof_material.albedo_color = Color.WHITE
+                        normalized_textured_surfaces += 1
+                    else:
+                        proof_material.albedo_color = _normalized_color_for_name(material_name, source_base.albedo_color)
+                        normalized_color_surfaces += 1
+                else:
+                    proof_material.albedo_color = Color("#8a9270")
+                    normalized_color_surfaces += 1
+                mesh_instance.set_surface_override_material(surface, proof_material)
+                normalized_material_surfaces += 1
+                normalized_material_names[material_name] = int(normalized_material_names.get(material_name, 0)) + 1
     for child in root.get_children():
         _normalize_imported_materials(child)
 
@@ -155,12 +192,15 @@ func _write_contract_after_first_frame() -> void:
             "directional_energy": 0.82,
             "tonemap": "filmic",
             "exposure": 0.0,
-            "material_mode": "instance_local_unshaded_preserve_albedo",
+            "material_mode": "fresh_unshaded_standard_preserve_texture_uv",
         },
         "mesh_instances": _count_nodes(imported_root, "MeshInstance3D"),
         "camera_nodes": _count_nodes(imported_root, "Camera3D"),
         "directional_lights": _count_nodes(imported_root, "DirectionalLight3D"),
         "normalized_material_surfaces": normalized_material_surfaces,
+        "normalized_textured_surfaces": normalized_textured_surfaces,
+        "normalized_color_surfaces": normalized_color_surfaces,
+        "normalized_material_names": normalized_material_names,
     }
     var file := FileAccess.open(contract_path, FileAccess.WRITE)
     if file == null:
@@ -169,6 +209,8 @@ func _write_contract_after_first_frame() -> void:
         return
     file.store_string(JSON.stringify(contract, "  ") + "\n")
     print("AUTONOMOUS_GODOT_MATERIAL_SURFACES=" + str(normalized_material_surfaces))
+    print("AUTONOMOUS_GODOT_TEXTURED_SURFACES=" + str(normalized_textured_surfaces))
+    print("AUTONOMOUS_GODOT_COLOR_SURFACES=" + str(normalized_color_surfaces))
     print("AUTONOMOUS_GODOT_SCENE_READY=" + capture_mode)
     print("AUTONOMOUS_GODOT_CONTRACT_SAVED=" + contract_path)
 
