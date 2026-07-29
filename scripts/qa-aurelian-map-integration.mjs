@@ -77,7 +77,10 @@ async function captureCase(browser, testCase) {
     throw new Error(`${testCase.mode} horizontal overflow: ${JSON.stringify(overflow)}`);
   }
 
-  await page.locator('[data-qa="plot-greenvale"]').waitFor({ state: "visible", timeout: 5000 });
+  const greenvalePlot = page.locator('[data-qa="plot-greenvale"]');
+  await greenvalePlot.waitFor({ state: "visible", timeout: 5000 });
+  const mapMode = await map.getAttribute("data-map-mode");
+  const greenvalePlotVisible = await greenvalePlot.isVisible();
   const claimButton = page.getByRole("button", { name: /Claim this land|Choose this land/i }).first();
   await claimButton.waitFor({ state: "visible", timeout: 5000 });
   await page.screenshot({ path: `${OUTPUT_DIR}/${testCase.mode}-01-first-run.png`, fullPage: false });
@@ -86,7 +89,7 @@ async function captureCase(browser, testCase) {
   await page.getByText("Riverbend", { exact: true }).first().waitFor({ state: "visible", timeout: 5000 });
   await page.screenshot({ path: `${OUTPUT_DIR}/${testCase.mode}-02-riverbend-selected.png`, fullPage: false });
 
-  await page.locator('[data-qa="plot-greenvale"]').click({ force: true });
+  await greenvalePlot.click({ force: true });
   await claimButton.click();
   await page.locator('[data-qa="village-scene"]').waitFor({ state: "visible", timeout: 8000 });
   await page.screenshot({ path: `${OUTPUT_DIR}/${testCase.mode}-03-after-claim.png`, fullPage: false });
@@ -96,8 +99,8 @@ async function captureCase(browser, testCase) {
     viewport: [testCase.width, testCase.height],
     artHref: href,
     overflow,
-    mapMode: await map.getAttribute("data-map-mode"),
-    greenvalePlotVisible: await page.locator('[data-qa="plot-greenvale"]').count() > 0,
+    mapMode,
+    greenvalePlotVisible,
     villageVisibleAfterClaim: await page.locator('[data-qa="village-scene"]').isVisible(),
   };
   await context.close();
