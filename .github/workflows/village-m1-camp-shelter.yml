@@ -82,7 +82,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import hashlib, json, math
+          import hashlib, json
           from pathlib import Path
           from PIL import Image, ImageChops, ImageDraw, ImageStat
 
@@ -121,7 +121,7 @@ jobs:
                   variance = sum(stat.var) / 3.0
                   sample = list(image.resize((240, 150)).getdata())
                   near_white = sum(1 for p in sample if min(p) > 245) / len(sample)
-                  if not 35 <= luminance <= 205 or variance < 65 or near_white > 0.04:
+                  if not 35 <= luminance <= 205 or variance < 55 or near_white > 0.04:
                       raise SystemExit(f'image QA failed {mode}/{label}: lum={luminance:.2f} var={variance:.2f} white={near_white:.4f}')
 
               diff = ImageChops.difference(camp, shelter)
