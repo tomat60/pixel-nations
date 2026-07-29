@@ -145,7 +145,12 @@ func _capture() -> void:
         push_error("Invalid capture dimensions")
         get_tree().quit(13)
         return
-    DisplayServer.window_set_size(Vector2i(width, height))
+    var target_size := Vector2i(width, height)
+    var root_window: Window = get_tree().root
+    root_window.content_scale_size = target_size
+    root_window.size = target_size
+    DisplayServer.window_set_size(target_size)
+    await get_tree().process_frame
     await get_tree().process_frame
     await get_tree().process_frame
     await get_tree().create_timer(2.0).timeout
