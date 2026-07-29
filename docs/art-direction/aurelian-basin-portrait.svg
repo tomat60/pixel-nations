@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <rect width="390" height="844" fill="#1d2524"/>
+  <path d="M-35 -30 H425 V890 H-35 Z" fill="#6b7354"/>
+  <path d="M-60 590 C75 540 230 590 455 515" fill="none" stroke="#355e63" stroke-width="125"/>
+  <path d="M-60 590 C75 540 230 590 455 515" fill="none" stroke="#5a9294" stroke-width="70"/>
+  <path d="M195 850 C180 750 190 660 205 580 C220 500 245 420 250 330" fill="none" stroke="#a28765" stroke-width="34"/>
+  <rect x="112" y="525" width="170" height="46" rx="10" fill="#6e5038" stroke="#d2b67a" stroke-width="6"/>
+  <ellipse cx="235" cy="345" rx="135" ry="115" fill="#7a845c" stroke="#c3ae6b" stroke-width="5"/>
+  <g fill="#b6433e" stroke="#f1cf7c" stroke-width="4">
+    <rect x="45" y="340" width="92" height="78" rx="8"/>
+    <rect x="250" y="325" width="90" height="76" rx="8"/>
+    <rect x="42" y="205" width="90" height="80" rx="8"/>
+    <rect x="205" y="85" width="120" height="145" rx="8"/>
+  </g>
+  <circle cx="225" cy="360" r="25" fill="#d6bb74"/>
+  <g font-family="sans-serif" font-size="15" fill="#ffffff">
+    <text x="20" y="28">Aurelian Basin — portrait blueprint</text>
+    <text x="135" y="812">approach</text>
+    <text x="118" y="515">crossing</text>
+    <text x="42" y="332">blacksmith</text>
+    <text x="185" y="455">commons</text>
+    <text x="205" y="75">church landmark</text>
+    <text x="38" y="195">barracks</text>
+  </g>
+  <rect x="31" y="38" width="328" height="768" fill="none" stroke="#ffffff" stroke-dasharray="10 8" stroke-width="2" opacity="0.55"/>
+</svg>
