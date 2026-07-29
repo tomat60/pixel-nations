@@ -1,0 +1,241 @@
+name: Blender Authored Aurelian Basin Master
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/blender-aurelian-master.yml
+      - tools/blender/aurelian_basin_master.py
+      - game/scenes/art_target/blender_aurelian_capture.gd
+      - game/scenes/art_target/blender_aurelian_capture.tscn
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  GODOT_RELEASE: 4.7.1-stable
+  KAYKIT_SHA: 84fa4e91af6a88989be7c99e0891cede11f2ca38
+  BLUEPRINT_SHA: 3c61f8ade5e582da9798ce8a6f1bc9ac69ecebe2
+  EXPECTED_ARCHIVE_SHA: cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028
+
+jobs:
+  author-and-prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout Blender authoring branch
+        uses: actions/checkout@v4
+        with:
+          ref: art-target/blender-authored-aurelian-master
+          fetch-depth: 0
+
+      - name: Install deterministic Blender and Godot tooling
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends blender python3-numpy python3-pil unzip xvfb libegl1 libgl1-mesa-dri libglx-mesa0 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 >/dev/null
+          blender --version | head -1
+          blender -b --python-expr "import numpy; print('BLENDER_NUMPY=' + numpy.__version__)"
+          ldconfig -p | grep -F 'libEGL.so.1'
+          python3 - <<'PY'
+          from PIL import Image
+          print('PIL_OK=' + Image.__version__)
+          PY
+          mkdir -p /tmp/godot
+          curl -fsSL --retry 3 "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          GODOT="/tmp/godot/Godot_v${GODOT_RELEASE}_linux.x86_64"
+          chmod +x "$GODOT"
+          echo "GODOT=$GODOT" >> "$GITHUB_ENV"
+          "$GODOT" --version
+
+      - name: Fetch pinned KayKit and accepted blueprint
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/kaykit evidence/blender-aurelian-master game/art_target/blender_aurelian
+          mkdir -p /tmp/kaykit/src evidence/blender-aurelian-master game/art_target/blender_aurelian
+          curl -fsSL --retry 3 "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip" -o /tmp/kaykit/source.zip
+          ACTUAL_ARCHIVE_SHA="$(sha256sum /tmp/kaykit/source.zip | cut -d' ' -f1)"
+          test "$ACTUAL_ARCHIVE_SHA" = "$EXPECTED_ARCHIVE_SHA"
+          unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/src
+          ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
+          echo "KAYKIT_ROOT=$ROOT" >> "$GITHUB_ENV"
+          curl -fsSL --retry 3 "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/${KAYKIT_SHA}/LICENSE.txt" -o evidence/blender-aurelian-master/LICENSE.txt
+          grep -F "Creative Commons Zero" evidence/blender-aurelian-master/LICENSE.txt
+          curl -fsSL --retry 3 "https://raw.githubusercontent.com/tomat60/pixel-nations/${BLUEPRINT_SHA}/docs/art-direction/aurelian-basin-blueprint.json" -o evidence/blender-aurelian-master/aurelian-basin-blueprint.json
+          curl -fsSL --retry 3 "https://raw.githubusercontent.com/tomat60/pixel-nations/${BLUEPRINT_SHA}/docs/art-direction/aurelian-basin-blueprint.md" -o evidence/blender-aurelian-master/aurelian-basin-blueprint.md
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('evidence/blender-aurelian-master/aurelian-basin-blueprint.json').read_text())
+          assert data['source']['kaykit_commit'] == '84fa4e91af6a88989be7c99e0891cede11f2ca38'
+          assert data['source']['uniform_scale'] == 11.71437541
+          assert data['rules']['max_primary_silhouette_overlap'] <= 0.30
+          assert data['rules']['terrain_continues_beyond_frame'] is True
+          print('BLUEPRINT_LOCK_OK')
+          PY
+          printf '%s  %s\n' "$ACTUAL_ARCHIVE_SHA" source.zip > evidence/blender-aurelian-master/source-archive.sha256
+          git rev-parse HEAD > evidence/blender-aurelian-master/input-sha.txt
+          git rev-parse HEAD > evidence/blender-aurelian-master/output-sha.txt
+
+      - name: Author Blender master, previews and GLBs
+        run: |
+          set -euo pipefail
+          export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 12m env LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1600x1200x24" blender -b --python tools/blender/aurelian_basin_master.py -- "$KAYKIT_ROOT" "$PWD/evidence/blender-aurelian-master/aurelian-basin-blueprint.json" "$PWD/evidence/blender-aurelian-master" 2>&1 | tee evidence/blender-aurelian-master/blender-authoring.log
+          grep -F "BLENDER_MASTER_EXPORTED=desktop" evidence/blender-aurelian-master/blender-authoring.log
+          grep -F "BLENDER_MASTER_EXPORTED=portrait" evidence/blender-aurelian-master/blender-authoring.log
+          grep -F "AURELIAN_DCC_PACKAGE_EXPORTED=" evidence/blender-aurelian-master/blender-authoring.log
+          test -s evidence/blender-aurelian-master/aurelian-basin-desktop.glb
+          test -s evidence/blender-aurelian-master/aurelian-basin-portrait.glb
+          test "$(stat -c%s evidence/blender-aurelian-master/aurelian-basin-desktop.glb)" -gt 500000
+          test "$(stat -c%s evidence/blender-aurelian-master/aurelian-basin-portrait.glb)" -gt 500000
+          cp evidence/blender-aurelian-master/aurelian-basin-desktop.glb game/art_target/blender_aurelian/
+          cp evidence/blender-aurelian-master/aurelian-basin-portrait.glb game/art_target/blender_aurelian/
+
+      - name: Gate Blender previews before Godot import
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          from PIL import Image, ImageStat
+          root = Path('evidence/blender-aurelian-master')
+          expected = {
+              'blender-desktop-preview.png': (1440, 900),
+              'blender-portrait-preview.png': (390, 844),
+          }
+          report = {}
+          for name, dims in expected.items():
+              path = root / name
+              if not path.exists() or path.stat().st_size < 20000:
+                  raise SystemExit(f'Missing or tiny Blender preview: {name}')
+              image = Image.open(path).convert('RGB')
+              if image.size != dims:
+                  raise SystemExit(f'Wrong Blender preview dimensions {name}: {image.size}')
+              stat = ImageStat.Stat(image)
+              luminance = sum(stat.mean) / 3.0
+              variance = sum(stat.var) / 3.0
+              sample = image.resize((240, 150))
+              pixels = list(sample.getdata())
+              near_white = sum(1 for pixel in pixels if min(pixel) > 245) / len(pixels)
+              if variance < 45.0 or luminance < 25.0 or luminance > 225.0 or near_white > 0.08:
+                  raise SystemExit(f'Blender preview QA failed {name}: luminance={luminance:.2f} variance={variance:.2f} near_white={near_white:.4f}')
+              if 'desktop' in name:
+                  slices = [image.crop((0, 0, 480, 900)), image.crop((480, 0, 960, 900)), image.crop((960, 0, 1440, 900))]
+              else:
+                  slices = [image.crop((0, 0, 390, 211)), image.crop((0, 211, 390, 422)), image.crop((0, 422, 390, 633)), image.crop((0, 633, 390, 844))]
+              slice_variance = [round(sum(ImageStat.Stat(part).var) / 3.0, 3) for part in slices]
+              if min(slice_variance) < 12.0:
+                  raise SystemExit(f'Composition band appears empty in {name}: {slice_variance}')
+              report[name] = {
+                  'bytes': path.stat().st_size,
+                  'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                  'mean_luminance': round(luminance, 3),
+                  'variance': round(variance, 3),
+                  'near_white_fraction': round(near_white, 5),
+                  'slice_variance': slice_variance,
+              }
+          (root / 'blender-preview-qa.json').write_text(json.dumps(report, indent=2) + '\n')
+          print('BLENDER_PREVIEW_GATE_OK')
+          PY
+
+      - name: Import Blender-authored GLBs into Godot
+        run: |
+          set -euo pipefail
+          "$GODOT" --headless --path game --editor --quit 2>&1 | tee evidence/blender-aurelian-master/godot-import.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|ERROR:" evidence/blender-aurelian-master/godot-import.log
+          test -d game/.godot/imported
+
+      - name: Capture exact Godot desktop and portrait proof
+        run: |
+          set -euo pipefail
+          export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 75s xvfb-run -a env CAPTURE_MODE=desktop CAPTURE_WIDTH=1440 CAPTURE_HEIGHT=900 CAPTURE_PATH="$PWD/evidence/blender-aurelian-master/godot-desktop-1440x900.png" CONTRACT_PATH="$PWD/evidence/blender-aurelian-master/godot-desktop-contract.json" "$GODOT" --path game res://scenes/art_target/blender_aurelian_capture.tscn 2>&1 | tee evidence/blender-aurelian-master/godot-desktop.log
+          timeout 75s xvfb-run -a env CAPTURE_MODE=portrait CAPTURE_WIDTH=390 CAPTURE_HEIGHT=844 CAPTURE_PATH="$PWD/evidence/blender-aurelian-master/godot-portrait-390x844.png" CONTRACT_PATH="$PWD/evidence/blender-aurelian-master/godot-portrait-contract.json" "$GODOT" --path game res://scenes/art_target/blender_aurelian_capture.tscn 2>&1 | tee evidence/blender-aurelian-master/godot-portrait.log
+          grep -F "DCC_GODOT_CAPTURE_SAVED=" evidence/blender-aurelian-master/godot-desktop.log
+          grep -F "DCC_GODOT_CAPTURE_SAVED=" evidence/blender-aurelian-master/godot-portrait.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load|ERROR:" evidence/blender-aurelian-master/godot-desktop.log evidence/blender-aurelian-master/godot-portrait.log
+
+      - name: Build exact evidence contract
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          from PIL import Image, ImageStat
+          root = Path('evidence/blender-aurelian-master')
+          expected = {
+              'godot-desktop-1440x900.png': (1440, 900),
+              'godot-portrait-390x844.png': (390, 844),
+          }
+          qa = {}
+          for name, dims in expected.items():
+              path = root / name
+              if not path.exists() or path.stat().st_size < 20000:
+                  raise SystemExit(f'Missing or tiny Godot PNG: {name}')
+              image = Image.open(path).convert('RGB')
+              if image.size != dims:
+                  raise SystemExit(f'Wrong Godot dimensions {name}: {image.size}')
+              stat = ImageStat.Stat(image)
+              luminance = sum(stat.mean) / 3.0
+              variance = sum(stat.var) / 3.0
+              pixels = list(image.resize((240, 150)).getdata())
+              near_white = sum(1 for pixel in pixels if min(pixel) > 245) / len(pixels)
+              if variance < 40.0 or luminance < 25.0 or luminance > 225.0 or near_white > 0.08:
+                  raise SystemExit(f'Godot image QA failed {name}: luminance={luminance:.2f} variance={variance:.2f} near_white={near_white:.4f}')
+              qa[name] = {
+                  'width': dims[0], 'height': dims[1], 'bytes': path.stat().st_size,
+                  'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                  'mean_luminance': round(luminance, 3), 'variance': round(variance, 3),
+                  'near_white_fraction': round(near_white, 5),
+              }
+          desktop_contract = json.loads((root / 'godot-desktop-contract.json').read_text())
+          portrait_contract = json.loads((root / 'godot-portrait-contract.json').read_text())
+          for contract in (desktop_contract, portrait_contract):
+              if contract['camera_nodes'] < 1 or contract['mesh_instances'] < 10:
+                  raise SystemExit(f'Invalid imported scene contract: {contract}')
+              if contract['camera']['projection'] != 'orthogonal':
+                  raise SystemExit('Imported camera is not orthogonal')
+          input_sha = (root / 'input-sha.txt').read_text().strip()
+          output_sha = (root / 'output-sha.txt').read_text().strip()
+          if input_sha != output_sha:
+              raise SystemExit('Input/output SHA mismatch')
+          final = {
+              'classification': 'PENDING_DIRECT_VISUAL_REVIEW',
+              'input_sha': input_sha,
+              'output_sha': output_sha,
+              'source_commit': '84fa4e91af6a88989be7c99e0891cede11f2ca38',
+              'blueprint_commit': '3c61f8ade5e582da9798ce8a6f1bc9ac69ecebe2',
+              'blender_preview_qa': json.loads((root / 'blender-preview-qa.json').read_text()),
+              'godot_image_qa': qa,
+              'desktop_contract': desktop_contract,
+              'portrait_contract': portrait_contract,
+          }
+          (root / 'final-contract.json').write_text(json.dumps(final, indent=2) + '\n')
+          PY
+          find game/art_target/blender_aurelian -type f -printf '%s\n' | awk '{s+=$1} END{print s+0}' > evidence/blender-aurelian-master/glb-bytes.txt
+          find evidence/blender-aurelian-master -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > evidence/blender-aurelian-master/SHA256SUMS.txt
+          test "$(find evidence/blender-aurelian-master -type f | wc -l)" -ge 22
+
+      - name: Upload exact DCC frame evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blender-aurelian-master-${{ github.run_id }}
+          path: evidence/blender-aurelian-master/**
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Report DCC frame run
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:310,body:`## Blender-authored Aurelian Basin run ${context.runId}\n\n- Event SHA: \`${context.sha}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`blender-aurelian-master-${context.runId}\`\n- Expected evidence: pinned source and blueprint, Blender desktop/portrait previews, authored GLBs, Godot import/runtime logs, exact desktop/portrait PNGs, contracts, hashes and final direct-review gate.\n\nNo gameplay, second asset family, main write, merge, deployment, paid tool, Fable or image generation was used.`})
