@@ -1,0 +1,115 @@
+name: Aurelian Accepted Map Assets
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/aurelian-map-assets.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+env:
+  KAYKIT_SHA: 84fa4e91af6a88989be7c99e0891cede11f2ca38
+  EXPECTED_ARCHIVE_SHA: cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028
+  BASE_SCRIPT_SHA: d001d96117fc9d1de20f3ff57d7a47e2441a0393
+  ACCEPTED_OVERRIDE_SHA: 5a9e99b059337684aebb1a7e57d0aa413b22d04d
+  ACCEPTED_DESKTOP_DHASH: e0e2656dabdb6393
+  ACCEPTED_PORTRAIT_DHASH: 31c6e6a218998361
+
+jobs:
+  generate-and-commit:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact integration branch
+        uses: actions/checkout@v4
+        with:
+          ref: art-target/aurelian-2d-world-integration
+          fetch-depth: 0
+
+      - name: Install deterministic Blender tooling
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends blender python3-numpy python3-pil unzip xvfb libegl1 libgl1-mesa-dri libglx-mesa0 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 >/dev/null
+          blender --version | head -1
+          BLENDER_PYTHONPATH="$(python3 - <<'PY'
+          import pathlib
+          import numpy
+          print(pathlib.Path(numpy.__file__).resolve().parent.parent)
+          PY
+          )"
+          echo "BLENDER_PYTHONPATH=$BLENDER_PYTHONPATH" >> "$GITHUB_ENV"
+          env PYTHONPATH="$BLENDER_PYTHONPATH" blender -b --python-expr "import numpy; print('BLENDER_NUMPY=' + numpy.__version__)"
+
+      - name: Reproduce and verify accepted map renders
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/kaykit /tmp/aurelian-base /tmp/aurelian-accepted /tmp/aurelian-output
+          mkdir -p /tmp/kaykit/src /tmp/aurelian-base /tmp/aurelian-accepted /tmp/aurelian-output public/art
+          curl -fsSL --retry 3 "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip" -o /tmp/kaykit/source.zip
+          test "$(sha256sum /tmp/kaykit/source.zip | cut -d' ' -f1)" = "$EXPECTED_ARCHIVE_SHA"
+          unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/src
+          KAYKIT_ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
+          curl -fsSL --retry 3 "https://raw.githubusercontent.com/tomat60/pixel-nations/${BASE_SCRIPT_SHA}/tools/blender/aurelian_basin_master.py" -o /tmp/aurelian-base/aurelian_basin_master.py
+          curl -fsSL --retry 3 "https://raw.githubusercontent.com/tomat60/pixel-nations/${ACCEPTED_OVERRIDE_SHA}/tools/blender/aurelian_autonomous_override.py" -o /tmp/aurelian-accepted/aurelian_autonomous_override.py
+          grep -F 'AUTONOMOUS_DCC_PASS_3' /tmp/aurelian-accepted/aurelian_autonomous_override.py
+          export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 15m env PYTHONPATH="$BLENDER_PYTHONPATH" LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1600x1200x24" blender -b --python /tmp/aurelian-accepted/aurelian_autonomous_override.py -- /tmp/aurelian-base/aurelian_basin_master.py "$KAYKIT_ROOT" /tmp/aurelian-output 2>&1 | tee /tmp/aurelian-output/blender.log
+          grep -F 'AUTONOMOUS_PREVIEW_EXPORTED=desktop' /tmp/aurelian-output/blender.log
+          grep -F 'AUTONOMOUS_PREVIEW_EXPORTED=portrait' /tmp/aurelian-output/blender.log
+          ACCEPTED_DESKTOP_DHASH="$ACCEPTED_DESKTOP_DHASH" ACCEPTED_PORTRAIT_DHASH="$ACCEPTED_PORTRAIT_DHASH" python3 - <<'PY'
+          import os
+          from pathlib import Path
+          from PIL import Image
+          root = Path('/tmp/aurelian-output')
+          expected = {
+              'desktop': ((1440, 900), os.environ['ACCEPTED_DESKTOP_DHASH']),
+              'portrait': ((390, 844), os.environ['ACCEPTED_PORTRAIT_DHASH']),
+          }
+          def dhash(path):
+              image = Image.open(path).convert('L').resize((9, 8), Image.Resampling.LANCZOS)
+              pixels = list(image.getdata())
+              value = 0
+              for y in range(8):
+                  row = pixels[y * 9:(y + 1) * 9]
+                  for x in range(8):
+                      value = (value << 1) | int(row[x] > row[x + 1])
+              return f'{value:016x}'
+          for mode, (dims, wanted_hash) in expected.items():
+              path = root / f'autonomous-{mode}-preview.png'
+              image = Image.open(path)
+              actual_hash = dhash(path)
+              if image.size != dims or actual_hash != wanted_hash:
+                  raise SystemExit(f'accepted map verification failed {mode}: dims={image.size}, dhash={actual_hash}')
+              print(f'ACCEPTED_MAP_VERIFIED={mode}:{image.size[0]}x{image.size[1]}:{actual_hash}')
+          PY
+          cp /tmp/aurelian-output/autonomous-desktop-preview.png public/art/aurelian-basin-map-desktop.png
+          cp /tmp/aurelian-output/autonomous-portrait-preview.png public/art/aurelian-basin-map-portrait.png
+
+      - name: Commit exact accepted assets to integration branch
+        run: |
+          set -euo pipefail
+          git config user.name "pixel-nations-steward[bot]"
+          git config user.email "pixel-nations-steward[bot]@users.noreply.github.com"
+          git add public/art/aurelian-basin-map-desktop.png public/art/aurelian-basin-map-portrait.png
+          if git diff --cached --quiet; then
+            echo AURELIAN_ASSETS_ALREADY_CURRENT
+          else
+            git commit -m "Add accepted Aurelian desktop and portrait map assets"
+            git push origin HEAD:art-target/aurelian-2d-world-integration
+            echo AURELIAN_ASSETS_COMMITTED
+          fi
+
+      - name: Report asset bootstrap
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:316,body:`## Accepted map asset bootstrap ${context.runId}\n\n- Event SHA: \`${context.sha}\`\n- Job status: \`${{ job.status }}\`\n- Target branch: \`art-target/aurelian-2d-world-integration\`\n- Desktop and portrait assets are committed only after exact dimensions and accepted dHash verification.\n\nNo public-main write, merge, deployment, payment or MAX was used.`})
