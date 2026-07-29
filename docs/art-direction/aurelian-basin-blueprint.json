@@ -1,0 +1,91 @@
+{
+  "status": "BLUEPRINT_CANDIDATE",
+  "source": {
+    "kaykit_commit": "84fa4e91af6a88989be7c99e0891cede11f2ca38",
+    "license": "CC0-1.0",
+    "uniform_scale": 11.71437541
+  },
+  "measured_aabb": {
+    "home": [11.9134, 10.8944, 12.3774],
+    "blacksmith": [16.9667, 11.5399, 16.5434],
+    "church": [16.2448, 19.2706, 17.0604]
+  },
+  "rules": {
+    "max_primary_silhouette_overlap": 0.30,
+    "terrain_continues_beyond_frame": true,
+    "floating_board_forbidden": true,
+    "min_world_separation": {
+      "home_home": 14.0,
+      "home_primary": 18.0,
+      "primary_primary": 22.0
+    },
+    "grounding": {
+      "root_to_ground_tolerance": 0.05,
+      "opaque_pads_forbidden": true
+    }
+  },
+  "lighting": {
+    "background": "#9aa9a2",
+    "ambient_color": "#d7d0bf",
+    "ambient_energy": 0.48,
+    "directional_color": "#fff1d4",
+    "directional_energy": 1.05,
+    "directional_rotation": [-48, -32, 0],
+    "tonemap": "Filmic",
+    "exposure": 0.92
+  },
+  "desktop": {
+    "output": [1440, 900],
+    "safe_margin": {"x": 0.05, "y": 0.06},
+    "terrain_occupancy": [0.94, 1.08],
+    "camera": {"position": [39, 34, 45], "target": [0, 3, 0], "projection": "orthographic", "orthographic_size": 30},
+    "regions": {
+      "approach": [0.04, 0.58, 0.28, 0.34],
+      "crossing": [0.27, 0.48, 0.16, 0.18],
+      "commons": [0.53, 0.42, 0.24, 0.25],
+      "church_landmark": [0.68, 0.12, 0.20, 0.28],
+      "blacksmith": [0.43, 0.47, 0.16, 0.20],
+      "barracks_frontier": [0.78, 0.40, 0.17, 0.24],
+      "homes_market_well": [0.54, 0.52, 0.28, 0.28]
+    },
+    "river": {
+      "clear_width_ratio_to_road": 3.8,
+      "bank_depth_ratio_to_road": 0.55,
+      "bend_points": [[0.00, 0.27], [0.22, 0.31], [0.39, 0.52], [0.66, 0.65], [1.00, 0.72]]
+    },
+    "road": {
+      "width_world": 5.0,
+      "path_points": [[0.08, 0.92], [0.24, 0.72], [0.36, 0.56], [0.55, 0.49], [0.65, 0.52]]
+    },
+    "crossing": {"deck_width_world": 6.0, "clear_span_world": 27.0, "abutment_depth_world": 2.2, "support_count": 2}
+  },
+  "portrait": {
+    "output": [390, 844],
+    "safe_margin": {"x": 0.08, "y": 0.045},
+    "terrain_occupancy": [1.10, 1.04],
+    "camera": {"position": [31, 42, 57], "target": [0, 4, 4], "projection": "orthographic", "orthographic_size": 52},
+    "vertical_bands": {
+      "approach": [0.70, 0.98],
+      "crossing": [0.54, 0.72],
+      "commons": [0.30, 0.55],
+      "landmark": [0.07, 0.31]
+    },
+    "regions": {
+      "approach": [0.12, 0.73, 0.76, 0.20],
+      "crossing": [0.17, 0.56, 0.66, 0.14],
+      "blacksmith": [0.08, 0.39, 0.36, 0.17],
+      "commons": [0.30, 0.33, 0.55, 0.20],
+      "homes_market_well": [0.46, 0.39, 0.46, 0.23],
+      "barracks_frontier": [0.04, 0.23, 0.34, 0.18],
+      "church_landmark": [0.42, 0.08, 0.47, 0.25]
+    },
+    "secondary_omissions": ["second_house_cluster", "large_rock_groups", "decorative_fence_runs", "nonessential_market_stalls"],
+    "route_order": ["approach", "crossing", "blacksmith", "commons", "church_landmark"]
+  },
+  "value_hierarchy": {
+    "terrain": {"range": [0.28, 0.55]},
+    "settlement": {"range": [0.48, 0.76]},
+    "founder_accent": {"range": [0.62, 0.86], "max_frame_area": 0.08},
+    "red_roof_max_visible_share": 0.35
+  }
+}
