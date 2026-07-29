@@ -21,28 +21,44 @@ output_dir.mkdir(parents=True, exist_ok=True)
 base.ASSETS["barracks"] = "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_barracks_red.gltf"
 base.LAYOUTS = {
     "desktop": {
-        "extent": (300.0, 230.0), "grid": (124, 96),
-        "river": [(-150,55),(-112,45),(-72,24),(-38,-5),(5,-20),(55,-32),(150,-38)], "water_z": -3.3,
-        "road_before": [(-125,-92),(-101,-76),(-80,-58),(-61,-42),(-45,-25)],
-        "road_after": [(-28,-7),(-8,5),(12,14),(34,23),(55,34)],
+        "extent": (380.0, 300.0), "grid": (152, 120),
+        "river": [(-190,72),(-150,59),(-112,45),(-72,24),(-38,-5),(5,-20),(55,-32),(120,-42),(190,-47)], "water_z": -3.3,
+        "road_before": [(-136,-103),(-108,-82),(-82,-61),(-61,-42),(-45,-25)],
+        "road_after": [(-28,-7),(-8,5),(12,14),(34,23),(58,36)],
         "bridge": {"position": (-36.5,-15.0), "rotation": 42.0, "length": 24.0},
-        "buildings": [("blacksmith",(-5,8),-12,9.5),("market",(26,18),12,9.0),("well",(39,31),0,8.5),("house_a",(20,47),22,9.3),("house_b",(49,43),-12,9.3),("barracks",(69,20),-25,8.0),("church",(75,67),8,9.8)],
-        "trees": [(-112,61,0),(-99,77,18),(-87,66,-15),(-76,84,22),(-63,70,5),(-120,88,-18),(-48,88,12),(-103,48,8),(-76,50,-20)],
-        "rocks": [(104,7,0),(118,24,30),(98,39,-18),(126,52,15)],
-        "camera": {"position": (132,-170,132), "target": (9,12,5), "ortho": 142.0, "resolution": (1440,900)},
-        "camera_change_reason": "Pass 1 expands terrain beyond frame and restores the lower-left route to a rear-right landmark."
+        "buildings": [
+            ("blacksmith",(-5,8),-12,9.5),
+            ("market",(26,18),12,9.0),
+            ("well",(39,31),0,8.5),
+            ("house_a",(18,51),22,9.2),
+            ("house_b",(47,47),-12,9.1),
+            ("barracks",(92,18),-25,6.0),
+            ("church",(69,78),8,10.5)
+        ],
+        "trees": [(-140,72,0),(-124,91,18),(-107,79,-15),(-91,101,22),(-74,84,5),(-148,108,-18),(-57,106,12),(-128,56,8),(-95,58,-20)],
+        "rocks": [(125,2,0),(143,23,30),(118,43,-18),(151,63,15)],
+        "camera": {"position": (132,-170,132), "target": (8,16,5), "ortho": 138.0, "resolution": (1440,900)},
+        "camera_change_reason": "Pass 2 extends terrain beyond the view and separates the frontier barracks from the rear church landmark."
     },
     "portrait": {
-        "extent": (180.0, 310.0), "grid": (82, 136),
-        "river": [(-90,-48),(-50,-42),(-15,-34),(20,-28),(55,-22),(90,-15)], "water_z": -3.3,
-        "road_before": [(0,-145),(-2,-118),(-4,-91),(-5,-66),(-4,-45)],
-        "road_after": [(0,-25),(1,-3),(5,24),(10,52),(14,78)],
+        "extent": (260.0, 380.0), "grid": (108, 158),
+        "river": [(-130,-52),(-88,-47),(-48,-42),(-15,-35),(20,-28),(62,-21),(104,-15),(130,-12)], "water_z": -3.3,
+        "road_before": [(-5,-112),(-5,-91),(-4,-72),(-4,-55),(-3,-43)],
+        "road_after": [(0,-25),(1,-4),(4,20),(7,46),(10,78),(9,96)],
         "bridge": {"position": (-2,-34), "rotation": 84.0, "length": 22.0},
-        "buildings": [("blacksmith",(-25,-1),-15,8.9),("market",(18,24),10,8.5),("well",(0,41),0,8.0),("house_a",(32,52),22,8.8),("barracks",(-32,64),-20,7.6),("church",(16,101),5,9.5)],
-        "trees": [(-67,86,0),(-58,108,16),(-72,129,-12),(-49,142,10),(65,118,-18),(72,145,20)],
-        "rocks": [(62,38,0),(70,68,28),(64,92,-16)],
-        "camera": {"position": (92,-205,164), "target": (0,8,10), "ortho": 204.0, "resolution": (390,844)},
-        "camera_change_reason": "Independent vertical route with foreground approach and rear church landmark."
+        "buildings": [
+            ("blacksmith",(-20,-2),-15,8.7),
+            ("market",(15,24),10,8.4),
+            ("well",(-1,42),0,7.8),
+            ("house_a",(24,55),22,8.5),
+            ("house_b",(31,76),-10,8.2),
+            ("barracks",(-38,72),-20,6.0),
+            ("church",(7,108),5,10.5)
+        ],
+        "trees": [(-92,103,0),(-77,126,16),(-101,150,-12),(-65,168,10),(88,137,-18),(102,166,20)],
+        "rocks": [(78,34,0),(94,67,28),(86,98,-16)],
+        "camera": {"position": (82,-184,150), "target": (0,28,9), "ortho": 176.0, "resolution": (390,844)},
+        "camera_change_reason": "Pass 2 tightens and raises portrait framing so the route enters from the lower band and resolves at an isolated rear church without exposing the terrain board."
     }
 }
 
@@ -128,7 +144,7 @@ def build_scene(mode, source, out):
     camera=setup_render(mode,preview)
     bpy.ops.render.render(write_still=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(out/f"autonomous-{mode}.blend"))
-    contract={"pass":"AUTONOMOUS_DCC_PASS_1","mode":mode,"source_commit":base.SOURCE_SHA,"camera":layout["camera"],"terrain_extent":layout["extent"],"bridge":layout["bridge"],"placements":placements,"preview_sha256":hashlib.sha256(preview.read_bytes()).hexdigest(),"camera_object":camera.name}
+    contract={"pass":"AUTONOMOUS_DCC_PASS_2","mode":mode,"source_commit":base.SOURCE_SHA,"camera":layout["camera"],"terrain_extent":layout["extent"],"bridge":layout["bridge"],"placements":placements,"preview_sha256":hashlib.sha256(preview.read_bytes()).hexdigest(),"camera_object":camera.name}
     (out/f"autonomous-{mode}-contract.json").write_text(json.dumps(contract,indent=2)+"\n")
     print(f"AUTONOMOUS_PREVIEW_EXPORTED={mode}:{preview}")
 
