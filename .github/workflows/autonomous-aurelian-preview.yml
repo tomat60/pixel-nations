@@ -1,0 +1,137 @@
+name: Autonomous Aurelian Blender Preview
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/autonomous-aurelian-preview.yml
+      - tools/blender/aurelian_autonomous_override.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  KAYKIT_SHA: 84fa4e91af6a88989be7c99e0891cede11f2ca38
+  EXPECTED_ARCHIVE_SHA: cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028
+  BASE_SCRIPT_SHA: d001d96117fc9d1de20f3ff57d7a47e2441a0393
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout autonomous branch
+        uses: actions/checkout@v4
+        with:
+          ref: art-target/autonomous-aurelian-v2
+          fetch-depth: 0
+
+      - name: Install Blender preview tooling
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends blender python3-pil unzip xvfb libegl1 libgl1-mesa-dri libglx-mesa0 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 >/dev/null
+          blender --version | head -1
+          python3 - <<'PY'
+          from PIL import Image
+          print('PIL_OK=' + Image.__version__)
+          PY
+
+      - name: Fetch exact KayKit and technical base
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/kaykit evidence/autonomous-aurelian-preview
+          mkdir -p /tmp/kaykit/src /tmp/aurelian-base evidence/autonomous-aurelian-preview
+          curl -fsSL --retry 3 "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip" -o /tmp/kaykit/source.zip
+          test "$(sha256sum /tmp/kaykit/source.zip | cut -d' ' -f1)" = "$EXPECTED_ARCHIVE_SHA"
+          unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/src
+          ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
+          echo "KAYKIT_ROOT=$ROOT" >> "$GITHUB_ENV"
+          curl -fsSL --retry 3 "https://raw.githubusercontent.com/tomat60/pixel-nations/${BASE_SCRIPT_SHA}/tools/blender/aurelian_basin_master.py" -o /tmp/aurelian-base/aurelian_basin_master.py
+          grep -F 'SOURCE_SHA = "84fa4e91af6a88989be7c99e0891cede11f2ca38"' /tmp/aurelian-base/aurelian_basin_master.py
+          curl -fsSL --retry 3 "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/${KAYKIT_SHA}/LICENSE.txt" -o evidence/autonomous-aurelian-preview/LICENSE.txt
+          grep -F 'Creative Commons Zero' evidence/autonomous-aurelian-preview/LICENSE.txt
+          git rev-parse HEAD > evidence/autonomous-aurelian-preview/input-sha.txt
+          git rev-parse HEAD > evidence/autonomous-aurelian-preview/output-sha.txt
+          printf '%s  %s\n' "$EXPECTED_ARCHIVE_SHA" source.zip > evidence/autonomous-aurelian-preview/source-archive.sha256
+
+      - name: Render autonomous Blender previews
+        run: |
+          set -euo pipefail
+          export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 12m env LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1600x1200x24" blender -b --python tools/blender/aurelian_autonomous_override.py -- /tmp/aurelian-base/aurelian_basin_master.py "$KAYKIT_ROOT" "$PWD/evidence/autonomous-aurelian-preview" 2>&1 | tee evidence/autonomous-aurelian-preview/blender.log
+          grep -F 'AUTONOMOUS_PREVIEW_EXPORTED=desktop' evidence/autonomous-aurelian-preview/blender.log
+          grep -F 'AUTONOMOUS_PREVIEW_EXPORTED=portrait' evidence/autonomous-aurelian-preview/blender.log
+          grep -F 'AUTONOMOUS_DCC_PASS_EXPORTED=' evidence/autonomous-aurelian-preview/blender.log
+
+      - name: Gate preview evidence
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, math
+          from pathlib import Path
+          from PIL import Image, ImageStat
+          root = Path('evidence/autonomous-aurelian-preview')
+          expected = {'autonomous-desktop-preview.png': (1440,900), 'autonomous-portrait-preview.png': (390,844)}
+          background = (77,92,89)
+          report = {}
+          for name, dims in expected.items():
+              path = root / name
+              if not path.exists() or path.stat().st_size < 20000:
+                  raise SystemExit(f'missing or tiny preview: {name}')
+              image = Image.open(path).convert('RGB')
+              if image.size != dims:
+                  raise SystemExit(f'wrong dimensions {name}: {image.size}')
+              stat = ImageStat.Stat(image)
+              luminance = sum(stat.mean)/3.0
+              variance = sum(stat.var)/3.0
+              sample = list(image.resize((240,150)).getdata())
+              near_white = sum(1 for p in sample if min(p)>245)/len(sample)
+              if not 35.0 <= luminance <= 205.0 or variance < 55.0 or near_white > 0.04:
+                  raise SystemExit(f'image QA failed {name}: lum={luminance:.2f} var={variance:.2f} white={near_white:.4f}')
+              corner_means=[]
+              w,h=image.size
+              for box in ((0,0,48,48),(w-48,0,w,48),(0,h-48,48,h),(w-48,h-48,w,h)):
+                  mean=ImageStat.Stat(image.crop(box)).mean
+                  distance=math.sqrt(sum((mean[i]-background[i])**2 for i in range(3)))
+                  corner_means.append(round(distance,3))
+              if min(corner_means) < 10.0:
+                  raise SystemExit(f'possible board/background edge in {name}: {corner_means}')
+              if 'desktop' in name:
+                  bands=[image.crop((0,0,480,900)),image.crop((480,0,960,900)),image.crop((960,0,1440,900))]
+              else:
+                  bands=[image.crop((0,0,390,211)),image.crop((0,211,390,422)),image.crop((0,422,390,633)),image.crop((0,633,390,844))]
+              band_variance=[round(sum(ImageStat.Stat(b).var)/3.0,3) for b in bands]
+              if min(band_variance) < 18.0:
+                  raise SystemExit(f'empty composition band in {name}: {band_variance}')
+              report[name]={'bytes':path.stat().st_size,'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'luminance':round(luminance,3),'variance':round(variance,3),'near_white':round(near_white,5),'corner_distance':corner_means,'band_variance':band_variance}
+          input_sha=(root/'input-sha.txt').read_text().strip()
+          output_sha=(root/'output-sha.txt').read_text().strip()
+          if input_sha != output_sha:
+              raise SystemExit('input/output SHA mismatch')
+          (root/'preview-qa.json').write_text(json.dumps({'classification':'PENDING_DIRECT_VISUAL_REVIEW','input_sha':input_sha,'output_sha':output_sha,'images':report},indent=2)+'\n')
+          for path in root.glob('autonomous-*-contract.json'):
+              json.loads(path.read_text())
+          print('AUTONOMOUS_PREVIEW_GATE_OK')
+          PY
+          find evidence/autonomous-aurelian-preview -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > evidence/autonomous-aurelian-preview/SHA256SUMS.txt
+
+      - name: Upload autonomous preview evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autonomous-aurelian-preview-${{ github.run_id }}
+          path: evidence/autonomous-aurelian-preview/**
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Report preview run
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:312,body:`## Autonomous Blender preview run ${context.runId}\n\n- Event SHA: \`${context.sha}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`autonomous-aurelian-preview-${context.runId}\`\n- Direct visual review is still required before Godot is unlocked.\n\nNo user operation, payment, MAX, main write, merge or deployment was used.`})
