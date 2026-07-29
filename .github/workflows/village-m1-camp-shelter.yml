@@ -1,0 +1,204 @@
+name: Village M1 Camp Shelter Visual Proof
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - tools/blender/village_m1_camp_shelter.py
+      - .github/workflows/village-m1-camp-shelter.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  KAYKIT_SHA: 84fa4e91af6a88989be7c99e0891cede11f2ca38
+  EXPECTED_ARCHIVE_SHA: cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028
+  BASE_SCRIPT_SHA: d001d96117fc9d1de20f3ff57d7a47e2441a0393
+
+jobs:
+  render-and-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact Village M1 branch
+        uses: actions/checkout@v4
+        with:
+          ref: art-target/village-m1-camp-shelter
+          fetch-depth: 0
+
+      - name: Install deterministic Blender tooling
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends blender python3-numpy python3-pil unzip xvfb libegl1 libgl1-mesa-dri libglx-mesa0 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 >/dev/null
+          blender --version | head -1
+          BLENDER_PYTHONPATH="$(python3 - <<'PY'
+          import pathlib, numpy
+          print(pathlib.Path(numpy.__file__).resolve().parent.parent)
+          PY
+          )"
+          echo "BLENDER_PYTHONPATH=$BLENDER_PYTHONPATH" >> "$GITHUB_ENV"
+          env PYTHONPATH="$BLENDER_PYTHONPATH" blender -b --python-expr "import numpy; print('BLENDER_NUMPY=' + numpy.__version__)"
+          python3 - <<'PY'
+          from PIL import Image
+          print('PIL_OK=' + Image.__version__)
+          PY
+
+      - name: Fetch pinned KayKit and base authoring utilities
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/kaykit /tmp/village-m1-base evidence/village-m1
+          mkdir -p /tmp/kaykit/src /tmp/village-m1-base evidence/village-m1
+          curl -fsSL --retry 3 "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip" -o /tmp/kaykit/source.zip
+          test "$(sha256sum /tmp/kaykit/source.zip | cut -d' ' -f1)" = "$EXPECTED_ARCHIVE_SHA"
+          unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/src
+          KAYKIT_ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
+          echo "KAYKIT_ROOT=$KAYKIT_ROOT" >> "$GITHUB_ENV"
+          curl -fsSL --retry 3 "https://raw.githubusercontent.com/tomat60/pixel-nations/${BASE_SCRIPT_SHA}/tools/blender/aurelian_basin_master.py" -o /tmp/village-m1-base/aurelian_basin_master.py
+          grep -F 'SOURCE_SHA = "84fa4e91af6a88989be7c99e0891cede11f2ca38"' /tmp/village-m1-base/aurelian_basin_master.py
+          test -f "$KAYKIT_ROOT/addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_home_A_red.gltf"
+          curl -fsSL --retry 3 "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/${KAYKIT_SHA}/LICENSE.txt" -o evidence/village-m1/LICENSE.txt
+          grep -F 'Creative Commons Zero' evidence/village-m1/LICENSE.txt
+          git rev-parse HEAD > evidence/village-m1/input-sha.txt
+          git rev-parse HEAD > evidence/village-m1/output-sha.txt
+          printf '%s  %s\n' "$EXPECTED_ARCHIVE_SHA" source.zip > evidence/village-m1/source-archive.sha256
+
+      - name: Render registered camp and shelter states
+        run: |
+          set -euo pipefail
+          export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 15m env PYTHONPATH="$BLENDER_PYTHONPATH" LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1600x1200x24" blender -b --python tools/blender/village_m1_camp_shelter.py -- /tmp/village-m1-base/aurelian_basin_master.py "$KAYKIT_ROOT" "$PWD/evidence/village-m1" 2>&1 | tee evidence/village-m1/blender.log
+          grep -F 'VILLAGE_M1_RENDERED=desktop:camp:' evidence/village-m1/blender.log
+          grep -F 'VILLAGE_M1_RENDERED=desktop:shelter:' evidence/village-m1/blender.log
+          grep -F 'VILLAGE_M1_RENDERED=portrait:camp:' evidence/village-m1/blender.log
+          grep -F 'VILLAGE_M1_RENDERED=portrait:shelter:' evidence/village-m1/blender.log
+          grep -F 'VILLAGE_M1_PACKAGE_RENDERED=' evidence/village-m1/blender.log
+
+      - name: Validate registered visual delta and build contact sheet
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, math
+          from pathlib import Path
+          from PIL import Image, ImageChops, ImageDraw, ImageStat
+
+          root = Path('evidence/village-m1')
+          modes = {'desktop': (1440, 900), 'portrait': (390, 844)}
+          report = {'classification': 'PENDING_DIRECT_VISUAL_REVIEW', 'modes': {}}
+
+          def dhash(image):
+              gray = image.convert('L').resize((9, 8), Image.Resampling.LANCZOS)
+              pixels = list(gray.getdata())
+              value = 0
+              for y in range(8):
+                  row = pixels[y * 9:(y + 1) * 9]
+                  for x in range(8):
+                      value = (value << 1) | int(row[x] > row[x + 1])
+              return value
+
+          contact_cells = []
+          for mode, dims in modes.items():
+              camp_path = root / f'village-m1-{mode}-camp.png'
+              shelter_path = root / f'village-m1-{mode}-shelter.png'
+              contract_path = root / f'village-m1-{mode}-contract.json'
+              for path in (camp_path, shelter_path, contract_path):
+                  if not path.exists():
+                      raise SystemExit(f'missing evidence: {path}')
+              camp = Image.open(camp_path).convert('RGB')
+              shelter = Image.open(shelter_path).convert('RGB')
+              if camp.size != dims or shelter.size != dims:
+                  raise SystemExit(f'wrong dimensions {mode}: camp={camp.size} shelter={shelter.size}')
+              if camp_path.stat().st_size < 20000 or shelter_path.stat().st_size < 20000:
+                  raise SystemExit(f'tiny render {mode}')
+
+              for label, image in [('camp', camp), ('shelter', shelter)]:
+                  stat = ImageStat.Stat(image)
+                  luminance = sum(stat.mean) / 3.0
+                  variance = sum(stat.var) / 3.0
+                  sample = list(image.resize((240, 150)).getdata())
+                  near_white = sum(1 for p in sample if min(p) > 245) / len(sample)
+                  if not 35 <= luminance <= 205 or variance < 65 or near_white > 0.04:
+                      raise SystemExit(f'image QA failed {mode}/{label}: lum={luminance:.2f} var={variance:.2f} white={near_white:.4f}')
+
+              diff = ImageChops.difference(camp, shelter)
+              threshold = diff.point(lambda v: 255 if v > 12 else 0).convert('L')
+              changed = sum(1 for value in threshold.getdata() if value > 0)
+              total = camp.width * camp.height
+              changed_ratio = changed / total
+              bbox = threshold.getbbox()
+              if bbox is None:
+                  raise SystemExit(f'no shelter delta for {mode}')
+              bbox_area_ratio = ((bbox[2] - bbox[0]) * (bbox[3] - bbox[1])) / total
+              if not 0.006 <= changed_ratio <= 0.24:
+                  raise SystemExit(f'non-localized shelter delta {mode}: changed_ratio={changed_ratio:.5f}')
+              if bbox_area_ratio > 0.48:
+                  raise SystemExit(f'shelter delta bounding box too broad {mode}: {bbox_area_ratio:.5f}')
+              hamming = (dhash(camp) ^ dhash(shelter)).bit_count()
+              if hamming < 2:
+                  raise SystemExit(f'shelter delta not perceptually clear {mode}: hamming={hamming}')
+
+              contract = json.loads(contract_path.read_text())
+              if contract.get('pass') != 'VILLAGE_M1_CAMP_SHELTER_1' or contract.get('mode') != mode:
+                  raise SystemExit(f'contract mismatch {mode}')
+              if contract['camera']['resolution'] != list(dims):
+                  raise SystemExit(f'camera resolution mismatch {mode}')
+
+              heat = diff.convert('L').point(lambda v: min(255, v * 4)).convert('RGB')
+              heat.save(root / f'village-m1-{mode}-delta.png')
+              report['modes'][mode] = {
+                  'dimensions': list(dims),
+                  'camp_bytes': camp_path.stat().st_size,
+                  'shelter_bytes': shelter_path.stat().st_size,
+                  'camp_sha256': hashlib.sha256(camp_path.read_bytes()).hexdigest(),
+                  'shelter_sha256': hashlib.sha256(shelter_path.read_bytes()).hexdigest(),
+                  'changed_pixel_ratio': round(changed_ratio, 6),
+                  'delta_bbox': list(bbox),
+                  'delta_bbox_area_ratio': round(bbox_area_ratio, 6),
+                  'dhash_hamming': hamming,
+                  'camera': contract['camera'],
+              }
+              contact_cells.extend([(f'{mode.upper()} · CAMP', camp), (f'{mode.upper()} · SHELTER', shelter)])
+
+          cell_w, cell_h = 720, 450
+          sheet = Image.new('RGB', (cell_w * 2, cell_h * 2), (20, 24, 20))
+          draw = ImageDraw.Draw(sheet)
+          for index, (label, image) in enumerate(contact_cells):
+              row, col = divmod(index, 2)
+              fitted = image.copy()
+              fitted.thumbnail((cell_w, cell_h - 34), Image.Resampling.LANCZOS)
+              x = col * cell_w + (cell_w - fitted.width) // 2
+              y = row * cell_h + 30 + (cell_h - 34 - fitted.height) // 2
+              sheet.paste(fitted, (x, y))
+              draw.text((col * cell_w + 12, row * cell_h + 8), label, fill=(245, 225, 180))
+          sheet.save(root / 'village-m1-contact-sheet.png')
+
+          input_sha = (root / 'input-sha.txt').read_text().strip()
+          output_sha = (root / 'output-sha.txt').read_text().strip()
+          if input_sha != output_sha:
+              raise SystemExit('input/output SHA mismatch')
+          report['input_sha'] = input_sha
+          report['output_sha'] = output_sha
+          (root / 'village-m1-qa.json').write_text(json.dumps(report, indent=2) + '\n')
+          print('VILLAGE_M1_TECHNICAL_GATE_OK')
+          PY
+          find evidence/village-m1 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > evidence/village-m1/SHA256SUMS.txt
+
+      - name: Upload Village M1 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: village-m1-camp-shelter-${{ github.run_id }}
+          path: evidence/village-m1/**
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Report Village M1 run
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:320,body:`## Village M1 visual proof ${context.runId}\n\n- Event SHA: \`${context.sha}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`village-m1-camp-shelter-${context.runId}\`\n- Product/runtime integration remains blocked until direct visual classification.\n\nNo main write, merge, deployment, payment, MAX or image generation was used.`})
