@@ -10,6 +10,7 @@ const cases = [
   { mode: "portrait", width: 390, height: 844, expectedArt: "/art/aurelian-basin-map-portrait.png" },
 ];
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const roundRect = (rect) => rect ? Object.fromEntries(Object.entries(rect).map(([key, value]) => [key, Math.round(value * 10) / 10])) : null;
 
 async function isAppRunning() {
   try {
@@ -49,6 +50,45 @@ async function ensureApp() {
   return processHandle;
 }
 
+async function measureFirstRun(page, testCase) {
+  const guide = page.locator('[data-qa="opening-guide"]');
+  const landSheet = page.locator('[data-qa="land-sheet"]');
+  const claimButton = page.locator('[data-qa="claim-button"]');
+  await guide.waitFor({ state: "visible", timeout: 5000 });
+  await landSheet.waitFor({ state: "visible", timeout: 5000 });
+  await claimButton.waitFor({ state: "visible", timeout: 5000 });
+
+  const [guideBox, sheetBox, claimBox] = await Promise.all([
+    guide.boundingBox(),
+    landSheet.boundingBox(),
+    claimButton.boundingBox(),
+  ]);
+  if (!guideBox || !sheetBox || !claimBox) throw new Error(`${testCase.mode} missing panel bounds`);
+
+  const separation = sheetBox.y - (guideBox.y + guideBox.height);
+  const claimInsideViewport = claimBox.x >= 0
+    && claimBox.y >= 0
+    && claimBox.x + claimBox.width <= testCase.width + 1
+    && claimBox.y + claimBox.height <= testCase.height + 1;
+
+  const metrics = {
+    guide: roundRect(guideBox),
+    landSheet: roundRect(sheetBox),
+    claimButton: roundRect(claimBox),
+    separation: Math.round(separation * 10) / 10,
+    claimInsideViewport,
+  };
+
+  if (testCase.mode === "portrait") {
+    if (guideBox.height > 135) throw new Error(`portrait OpeningGuide too tall: ${guideBox.height}`);
+    if (sheetBox.height > 230) throw new Error(`portrait LandSheet too tall: ${sheetBox.height}`);
+    if (separation < 220) throw new Error(`portrait visible map corridor too short: ${separation}`);
+    if (!claimInsideViewport) throw new Error(`portrait claim button outside viewport: ${JSON.stringify(metrics.claimButton)}`);
+  }
+
+  return metrics;
+}
+
 async function captureCase(browser, testCase) {
   const context = await browser.newContext({
     viewport: { width: testCase.width, height: testCase.height },
@@ -81,8 +121,8 @@ async function captureCase(browser, testCase) {
   await greenvalePlot.waitFor({ state: "visible", timeout: 5000 });
   const mapMode = await map.getAttribute("data-map-mode");
   const greenvalePlotVisible = await greenvalePlot.isVisible();
+  const firstRunMetrics = await measureFirstRun(page, testCase);
   const claimButton = page.getByRole("button", { name: /Claim this land|Choose this land/i }).first();
-  await claimButton.waitFor({ state: "visible", timeout: 5000 });
   await page.screenshot({ path: `${OUTPUT_DIR}/${testCase.mode}-01-first-run.png`, fullPage: false });
 
   await page.locator('[data-qa="plot-riverbend"]').click({ force: true });
@@ -101,6 +141,7 @@ async function captureCase(browser, testCase) {
     overflow,
     mapMode,
     greenvalePlotVisible,
+    firstRunMetrics,
     villageVisibleAfterClaim: await page.locator('[data-qa="village-scene"]').isVisible(),
   };
   await context.close();
