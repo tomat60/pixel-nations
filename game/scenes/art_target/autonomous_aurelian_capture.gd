@@ -41,7 +41,10 @@ func _ready() -> void:
     render_root = Node3D.new()
     render_root.name = "AutonomousProofWorld"
     render_viewport.add_child(render_root)
-    render_viewport.world_3d.environment = _make_environment()
+    var world_environment := WorldEnvironment.new()
+    world_environment.name = "AutonomousProofEnvironment"
+    world_environment.environment = _make_environment()
+    render_root.add_child(world_environment)
 
     var packed := load(SCENES[capture_mode]) as PackedScene
     if packed == null:
