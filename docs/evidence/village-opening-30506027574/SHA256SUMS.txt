@@ -1,0 +1,15 @@
+b1f2b00a939c368a636735cd09b2e1a5e0715fed1bbe874cdefe13b30f90871d  public/qa/village-opening-focused/files.txt
+0196aa0b7694ea4fbd4603237c8cfaac5c25248fa9d0de0c23959455801b62cf  public/qa/village-opening-focused/village-progression/frames/00-camp-settled-t001948.png
+a1fc00d02d69fb2f2f08a12764a297e90d4b8e13197c5014830e857d18a94421  public/qa/village-opening-focused/village-progression/frames/01-raise-shelter-after-t005393.png
+a6b36ffaa3ab78368957142fc1f726743b5f30ad8f797a0914fa086caec3f7cb  public/qa/village-opening-focused/village-progression/frames/01-raise-shelter-before-t003320.png
+b58f9505add25f40a4bcc82d2e9aa138b9ffc1a82405e34c3370f3a79fc0bdbb  public/qa/village-opening-focused/village-progression/frames/01-raise-shelter-plus-100-t003760.png
+b6d145ca08f524f7fa08b3b6db24c5a85cd0ba051ccbfe076b5022868f27338b  public/qa/village-opening-focused/village-progression/frames/01-raise-shelter-plus-1400-t005059.png
+e19ec65c4963fb45ad62c59322e2eceda5f3c42e74764658343f729298e7faec  public/qa/village-opening-focused/village-progression/frames/01-raise-shelter-plus-350-t004213.png
+d5eb9dc44e6ec4e30f1e32cec2ca6fe165df75ce1809396d35c126996e09e90d  public/qa/village-opening-focused/village-progression/frames/01-raise-shelter-plus-800-t004555.png
+8d9e4c9a32bc6801f4f90fff26949b298d239bfe567ea43d209efb189201b0b2  public/qa/village-opening-focused/village-progression/report.html
+a0e17f90182242f2cef9d6cac3f578b8731ea394e7942378dd82573c9c55958a  public/qa/village-opening-focused/village-progression/sequence-manifest.json
+2f99872c3ea637a19e34f6d66522fba900c56aa48ae86ed1c5548efb2edcd97d  public/qa/village-opening-focused/village-progression/videos/desktop-village-progression.webm
+790fe0d75f533ee6b94a352ec1c2af12229aad8a8a69f49682107fa7533e2291  public/qa/village-opening-focused/village-scene/01-camp-desktop.png
+28a3702d60cb7858dcd6e0dbb8580c297be9e01bb3e548c4047b6fdc7528bca4  public/qa/village-opening-focused/village-scene/01-camp-mobile.png
+fc8c0ba6f564104fe0e52e5c22a2a55ba5076f67cb69c8f26ef03b843626d261  public/qa/village-opening-focused/village-scene/02-shelter-desktop.png
+29c9d8c33548f450546fdbaa26d08acc91d666169df0871bf70209143d8463f7  public/qa/village-opening-focused/village-scene/02-shelter-mobile.png
