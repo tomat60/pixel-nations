@@ -58,8 +58,10 @@ async function captureScene(scene, name) {
 async function runShelterOrder(page) {
   await clickVisible(page, "Issue next order");
   await page.locator('[data-qa="orders-panel"]').waitFor({ state: "visible", timeout: 6000 });
+  const triggerTime = performance.now();
   await clickVisible(page, "Raise Shelter");
   await page.locator('[data-qa="village-scene"]').waitFor({ state: "visible", timeout: 6000 });
+  return triggerTime;
 }
 
 async function desktopAudit(browser) {
@@ -79,8 +81,7 @@ async function desktopAudit(browser) {
   const frames = [];
   frames.push(await captureScene(scene, "desktop-00-camp.png"));
 
-  const triggerTime = performance.now();
-  await runShelterOrder(page);
+  const triggerTime = await runShelterOrder(page);
   for (const offset of OFFSETS) {
     const remaining = triggerTime + offset - performance.now();
     if (remaining > 0) await sleep(remaining);
