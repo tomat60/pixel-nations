@@ -265,6 +265,148 @@ html {
   box-shadow: 0 16px 56px rgba(0, 0, 0, 0.45);
 }
 
+/* Village opening: keep the accepted live composition, but make the first order
+   read as one shelter under construction instead of an instant four-house hamlet. */
+@keyframes village-first-shelter-build {
+  0% {
+    opacity: 0.08;
+    transform: translate(-50%, -42%) scale(0.28) rotate(-8deg);
+    filter: saturate(0.55) brightness(0.72);
+  }
+  22% {
+    opacity: 0.42;
+    transform: translate(-50%, -47%) scale(0.48) rotate(-8deg);
+    filter: saturate(0.65) brightness(0.82);
+  }
+  55% {
+    opacity: 0.76;
+    transform: translate(-50%, -51%) scale(0.78) rotate(-8deg);
+    filter: saturate(0.85) brightness(0.94);
+  }
+  82% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.04) rotate(-8deg);
+    filter: none;
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(-8deg);
+    filter: none;
+  }
+}
+
+@keyframes village-first-shelter-scaffold {
+  0%, 12% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleX(0.15);
+  }
+  30%, 62% {
+    opacity: 0.82;
+    transform: translate(-50%, -50%) scaleX(1);
+  }
+  88%, 100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleX(1.04);
+  }
+}
+
+@keyframes village-first-shelter-path {
+  0% {
+    opacity: 0;
+    stroke-dasharray: 2 120;
+    stroke-dashoffset: 120;
+  }
+  42% {
+    opacity: 0.52;
+  }
+  100% {
+    opacity: 1;
+    stroke-dasharray: 140 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes village-first-shelter-ground {
+  0% {
+    opacity: 0;
+  }
+  45% {
+    opacity: 0.16;
+  }
+  100% {
+    opacity: 0.36;
+  }
+}
+
+[data-qa="village-structure-hut"] {
+  pointer-events: none;
+}
+
+/* At the first shelter milestone, only the primary home and one support pile exist. */
+[data-qa="village-structure-hut"] > div:nth-child(2),
+[data-qa="village-structure-hut"] > div:nth-child(3),
+[data-qa="village-structure-hut"] > div:nth-child(4),
+[data-qa="village-structure-hut"] > div:nth-child(6),
+[data-qa="village-structure-hut"] > div:nth-child(7) {
+  display: none;
+}
+
+[data-qa="village-structure-hut"] > div:first-child {
+  animation: village-first-shelter-build 1.45s cubic-bezier(0.2, 0.75, 0.2, 1) both;
+  transform-origin: 50% 82%;
+}
+
+[data-qa="village-structure-hut"]::before,
+[data-qa="village-structure-hut"]::after {
+  content: "";
+  position: absolute;
+  left: 24%;
+  top: 39%;
+  z-index: 4;
+  width: clamp(44px, 6.8vw, 72px);
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(120, 78, 38, 0.9);
+  box-shadow: 0 9px 0 rgba(120, 78, 38, 0.68), 0 -9px 0 rgba(120, 78, 38, 0.68);
+  animation: village-first-shelter-scaffold 1.45s ease-out both;
+  transform-origin: center;
+}
+
+[data-qa="village-structure-hut"]::after {
+  width: 3px;
+  height: clamp(38px, 5.6vw, 60px);
+  box-shadow: 14px 0 0 rgba(120, 78, 38, 0.72), -14px 0 0 rgba(120, 78, 38, 0.72);
+}
+
+/* The exact shelter spur is the only new road at this milestone. */
+g:has(> path[d="M27,41 Q32,50 38,58"]) {
+  animation: village-first-shelter-path 1.45s ease-out both;
+}
+
+path[d="M17,32 C25,29 34,30 38,35 C40,42 38,50 33,54 C26,57 18,54 16,47 C14,41 15,36 17,32 Z"] {
+  animation: village-first-shelter-ground 1.45s ease-out both;
+}
+
+/* Later orders gradually populate the same shelter district; no later mechanic is removed. */
+[data-qa="village-credibility-layer"]:has([data-qa="village-food-fields"]) [data-qa="village-structure-hut"] > div:nth-child(2),
+[data-qa="village-credibility-layer"]:has([data-qa="village-timber-yards"]) [data-qa="village-structure-hut"] > div:nth-child(3),
+[data-qa="village-credibility-layer"]:has([data-qa="village-storehouse-visual"]) [data-qa="village-structure-hut"] > div:nth-child(4),
+[data-qa="village-credibility-layer"]:has([data-qa="village-timber-yards"]) [data-qa="village-structure-hut"] > div:nth-child(6),
+[data-qa="village-credibility-layer"]:has([data-qa="village-storehouse-visual"]) [data-qa="village-structure-hut"] > div:nth-child(7) {
+  display: block;
+  animation: fade-up 0.7s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-qa="village-structure-hut"] > div:first-child,
+  [data-qa="village-structure-hut"]::before,
+  [data-qa="village-structure-hut"]::after,
+  g:has(> path[d="M27,41 Q32,50 38,58"]),
+  path[d="M17,32 C25,29 34,30 38,35 C40,42 38,50 33,54 C26,57 18,54 16,47 C14,41 15,36 17,32 Z"] {
+    animation-duration: 1ms;
+  }
+}
+
 @media (max-width: 767px) {
   [data-nextjs-dev-tools-button],
   [data-nextjs-dev-tools-indicator],
