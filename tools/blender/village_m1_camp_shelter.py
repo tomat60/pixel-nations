@@ -25,30 +25,30 @@ base.LAYOUTS = {
     "desktop": {
         "extent": (360.0, 300.0),
         "grid": (144, 120),
-        "river": [(178, -145), (154, -105), (143, -62), (146, -20), (159, 28), (180, 78)],
+        "river": [(86, -125), (77, -78), (72, -32), (74, 14), (82, 63), (96, 112)],
         "water_z": -3.3,
-        "road": [(-155, -110), (-112, -82), (-74, -53), (-42, -28), (-15, -11), (0, 0)],
-        "shelter_spur": [(5, 3), (14, 9), (24, 16)],
+        "road": [(-92, -57), (-66, -41), (-43, -27), (-25, -15), (-10, -6), (0, 0)],
+        "shelter_spur": [(4, 2), (10, 5), (17, 9)],
         "camp": (0.0, 0.0),
-        "tents": [(-17.0, 7.0, 18.0), (-7.0, -14.0, -14.0)],
-        "shelter": {"position": (27.0, 19.0), "rotation": -12.0, "scale": 8.6},
-        "trees": [(-118, 58, 0), (-98, 82, 18), (-77, 67, -16), (-58, 91, 22), (-132, 93, -12), (-92, 48, 8)],
-        "rocks": [(104, 24, 0), (125, 48, 28), (111, 72, -18)],
-        "camera": {"position": (118.0, -150.0, 112.0), "target": (2.0, 8.0, 6.0), "ortho": 112.0, "resolution": (1440, 900)},
+        "tents": [(-11.0, 7.0, 18.0), (-7.0, -9.0, -14.0)],
+        "shelter": {"position": (19.0, 11.0), "rotation": -12.0, "scale": 8.8},
+        "trees": [(-52, 34, 0), (-41, 46, 18), (-29, 38, -16), (-58, 53, 22), (55, 45, -12), (65, 60, 8)],
+        "rocks": [(51, -7, 0), (62, 8, 28), (58, 24, -18)],
+        "camera": {"position": (92.0, -118.0, 88.0), "target": (2.0, 4.0, 5.0), "ortho": 76.0, "resolution": (1440, 900)},
     },
     "portrait": {
         "extent": (220.0, 340.0),
         "grid": (94, 146),
-        "river": [(108, -165), (91, -115), (84, -70), (88, -20), (98, 45), (110, 105)],
+        "river": [(50, -108), (45, -67), (42, -26), (43, 14), (48, 57), (56, 99)],
         "water_z": -3.3,
-        "road": [(-5, -154), (-4, -116), (-3, -80), (-2, -48), (-1, -22), (0, -5)],
-        "shelter_spur": [(0, 1), (0, 14), (0, 29)],
-        "camp": (0.0, -5.0),
-        "tents": [(-14.0, 2.0, 16.0), (11.0, -17.0, -12.0)],
-        "shelter": {"position": (0.0, 38.0), "rotation": 4.0, "scale": 8.3},
-        "trees": [(-78, 62, 0), (-65, 94, 20), (-82, 128, -14), (-57, 153, 12), (72, 112, -18)],
-        "rocks": [(69, 31, 0), (82, 70, 28), (75, 105, -16)],
-        "camera": {"position": (70.0, -158.0, 138.0), "target": (0.0, 26.0, 7.0), "ortho": 136.0, "resolution": (390, 844)},
+        "road": [(-2, -80), (-2, -57), (-1, -36), (-1, -20), (0, -9), (0, -4)],
+        "shelter_spur": [(2, 0), (5, 7), (8, 14)],
+        "camp": (0.0, -4.0),
+        "tents": [(-9.0, 3.0, 16.0), (7.0, -9.0, -12.0)],
+        "shelter": {"position": (9.0, 17.0), "rotation": 4.0, "scale": 8.6},
+        "trees": [(-34, 30, 0), (-29, 47, 20), (-40, 64, -14), (34, 47, 12), (39, 66, -18)],
+        "rocks": [(34, 8, 0), (39, 24, 28), (35, 41, -16)],
+        "camera": {"position": (58.0, -118.0, 96.0), "target": (2.0, 8.0, 5.0), "ortho": 82.0, "resolution": (390, 844)},
     },
 }
 
@@ -58,6 +58,18 @@ def cube(name, location, dimensions, rotation, material):
     obj = bpy.context.object
     obj.name = name
     obj.dimensions = dimensions
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    obj.data.materials.append(material)
+    return obj
+
+
+def ground_patch(name, mode, x, y, size_x, size_y, rotation, material):
+    z = base.terrain_height(mode, x, y)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1.0, depth=0.12, location=(x, y, z + 0.06))
+    obj = bpy.context.object
+    obj.name = name
+    obj.scale = (size_x, size_y, 1.0)
+    obj.rotation_euler.z = math.radians(rotation)
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     obj.data.materials.append(material)
     return obj
@@ -154,7 +166,7 @@ def setup_render(mode, output_path):
     scene.render.filepath = str(output_path)
     scene.render.film_transparent = False
     scene.view_settings.view_transform = "Standard"
-    scene.view_settings.exposure = -0.15
+    scene.view_settings.exposure = -0.10
     world = bpy.data.worlds.new("VillageM1World")
     world.use_nodes = True
     world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.30, 0.36, 0.35, 1)
@@ -183,10 +195,11 @@ def build_mode(mode):
     layout = base.LAYOUTS[mode]
     materials = {
         "plain": base.make_material("VillageTerrainOlive", (0.31, 0.38, 0.21, 1), 0.98),
-        "ridge": base.make_material("VillageTerrainForest", (0.18, 0.29, 0.16, 1), 0.98),
-        "earth": base.make_material("VillageBankEarth", (0.36, 0.27, 0.17, 1), 0.98),
+        "ridge": base.make_material("VillageTerrainForest", (0.255, 0.34, 0.205, 1), 0.98),
+        "earth": base.make_material("VillageBankEarth", (0.36, 0.29, 0.20, 1), 0.98),
         "water": base.make_material("VillageRiverTeal", (0.05, 0.31, 0.37, 1), 0.35, 0.02),
         "road": base.make_material("VillageRoadOchre", (0.49, 0.36, 0.22, 1), 0.99),
+        "worn": base.make_material("VillageWornEarth", (0.43, 0.33, 0.21, 1), 0.99),
         "wood": base.make_material("CampWood", (0.28, 0.17, 0.08, 1), 0.93),
         "canvas": base.make_material("TentCanvas", (0.58, 0.45, 0.28, 1), 0.96),
         "dark": base.make_material("TentDoor", (0.15, 0.10, 0.07, 1), 0.98),
@@ -206,8 +219,8 @@ def build_mode(mode):
     materials["flame"] = flame
 
     base.create_terrain(mode, materials)
-    base.create_ribbon("VillageRiver", mode, layout["river"], 18.0, materials["water"], fixed_z=layout["water_z"])
-    base.create_ribbon("VillageApproachRoad", mode, layout["road"], 5.0, materials["road"], z_offset=0.12)
+    base.create_ribbon("VillageRiver", mode, layout["river"], 14.0, materials["water"], fixed_z=layout["water_z"])
+    base.create_ribbon("VillageApproachRoad", mode, layout["road"], 4.2, materials["road"], z_offset=0.12)
 
     placements = []
     for index, (x, y, rotation) in enumerate(layout["trees"]):
@@ -220,6 +233,7 @@ def build_mode(mode):
         placements.append(data)
 
     cx, cy = layout["camp"]
+    ground_patch("CampWornGround", mode, cx - 1.0, cy - 0.5, 14.0, 9.5, -8.0, materials["worn"])
     for index, (x, y, rotation) in enumerate(layout["tents"]):
         triangular_tent(f"CampTent_{index}", mode, x, y, rotation, materials)
     campfire(mode, cx, cy, materials)
@@ -236,11 +250,13 @@ def build_mode(mode):
         raise RuntimeError(f"Camp render failed for {mode}")
 
     shelter = layout["shelter"]
-    base.create_ribbon("ShelterPath", mode, layout["shelter_spur"], 3.0, materials["road"], z_offset=0.15)
+    base.create_ribbon("ShelterPath", mode, layout["shelter_spur"], 2.4, materials["road"], z_offset=0.15)
+    sx, sy = shelter["position"]
+    ground_patch("ShelterWornGround", mode, sx, sy, 10.5, 7.5, shelter["rotation"], materials["worn"])
     _, shelter_data = base.import_asset(source_root, "shelter_home", shelter["position"], shelter["rotation"], shelter["scale"])
     placements.append(shelter_data)
-    sx, sy = shelter["position"]
-    fence_posts(mode, [(sx - 7, sy - 3), (sx - 7, sy + 2), (sx + 7, sy - 3), (sx + 7, sy + 2)], materials)
+    fence_posts(mode, [(sx - 6, sy - 3), (sx - 6, sy + 2), (sx + 6, sy - 3), (sx + 6, sy + 2)], materials)
+    cube("ShelterTimberStack", (sx - 7.5, sy - 5.0, base.terrain_height(mode, sx - 7.5, sy - 5.0) + 0.55), (3.8, 1.4, 1.1), shelter["rotation"] + 8, materials["wood"])
 
     shelter_path = output_dir / f"village-m1-{mode}-shelter.png"
     bpy.context.scene.render.filepath = str(shelter_path)
