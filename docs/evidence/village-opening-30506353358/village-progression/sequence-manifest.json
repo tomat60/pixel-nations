@@ -1,0 +1,1502 @@
+{
+  "commitSha": "b153c872310aed86a3906664eef909f217901cf1",
+  "githubRunId": "30506353358",
+  "githubRef": "refs/pull/326/merge",
+  "villageV2Flag": "unset",
+  "appUrl": "http://localhost:3000",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "generatedAt": "2026-07-30T01:43:20.351Z",
+  "status": "passed",
+  "blockingFailure": null,
+  "video": {
+    "path": "videos/desktop-village-progression.webm",
+    "width": 1440,
+    "height": 900,
+    "byteSize": 3801075,
+    "sha256": "6c582d70d9e3504b8cc6c5affd753ee29da72343a021824d64166ca9c202c601"
+  },
+  "initialCamp": {
+    "frame": {
+      "phase": "settled",
+      "timestampMs": 3005.002314,
+      "path": "frames/00-camp-settled-t003005.png",
+      "sha256": "0196aa0b7694ea4fbd4603237c8cfaac5c25248fa9d0de0c23959455801b62cf"
+    },
+    "state": {
+      "completedOrders": [],
+      "settlementMarkers": [
+        "camp"
+      ],
+      "plots": [
+        {
+          "id": "camp",
+          "state": "built"
+        },
+        {
+          "id": "shelter",
+          "state": "building"
+        },
+        {
+          "id": "storehouse",
+          "state": "empty"
+        },
+        {
+          "id": "market",
+          "state": "empty"
+        },
+        {
+          "id": "council",
+          "state": "empty"
+        },
+        {
+          "id": "watch",
+          "state": "empty"
+        },
+        {
+          "id": "fields",
+          "state": "empty"
+        },
+        {
+          "id": "road",
+          "state": "empty"
+        }
+      ]
+    },
+    "selectors": {
+      "hearth": 1,
+      "shelter": 0,
+      "food": 0,
+      "timber": 0,
+      "storehouse": 0,
+      "market": 0,
+      "watch": 0,
+      "council": 0
+    }
+  },
+  "frameCount": 49,
+  "timestampsMonotonic": true,
+  "warnings": [
+    "scout-nearby: Scout changed the normalized Village image without changing tracked stage selectors; review as possible ambient or unrelated delta."
+  ],
+  "transitions": [
+    {
+      "transitionIndex": 1,
+      "orderId": "raise-shelter",
+      "label": "Raise Shelter",
+      "triggerTimestampMs": 4683.407672,
+      "settledTimestampMs": 6401.079993,
+      "measuredTransitionWindowMs": 1717.672321,
+      "expectedVisibleDelta": true,
+      "expectedStageKey": "shelter",
+      "visibleDelta": true,
+      "stateDelta": true,
+      "selectorDelta": true,
+      "expectedSelectorAppeared": true,
+      "beforeSettledSha256": "0bf5ada9924443b0145b4189daa8cb6e437f86212a1188f61092a7ad5bd7f73b",
+      "afterSettledSha256": "0315b66ed7f618f19a6df4a17802ffec807bbc5617147a298a5966926c888215",
+      "stateBefore": {
+        "completedOrders": [],
+        "settlementMarkers": [
+          "camp"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "building"
+          },
+          {
+            "id": "storehouse",
+            "state": "empty"
+          },
+          {
+            "id": "market",
+            "state": "empty"
+          },
+          {
+            "id": "council",
+            "state": "empty"
+          },
+          {
+            "id": "watch",
+            "state": "empty"
+          },
+          {
+            "id": "fields",
+            "state": "empty"
+          },
+          {
+            "id": "road",
+            "state": "empty"
+          }
+        ]
+      },
+      "stateAfter": {
+        "completedOrders": [
+          "raise-shelter"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "empty"
+          },
+          {
+            "id": "market",
+            "state": "empty"
+          },
+          {
+            "id": "council",
+            "state": "empty"
+          },
+          {
+            "id": "watch",
+            "state": "empty"
+          },
+          {
+            "id": "fields",
+            "state": "empty"
+          },
+          {
+            "id": "road",
+            "state": "empty"
+          }
+        ]
+      },
+      "selectorsBefore": {
+        "hearth": 1,
+        "shelter": 0,
+        "food": 0,
+        "timber": 0,
+        "storehouse": 0,
+        "market": 0,
+        "watch": 0,
+        "council": 0
+      },
+      "selectorsAfter": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 0,
+        "timber": 0,
+        "storehouse": 0,
+        "market": 0,
+        "watch": 0,
+        "council": 0
+      },
+      "warnings": [],
+      "frames": [
+        {
+          "phase": "before",
+          "timestampMs": 4354.37032,
+          "path": "frames/01-raise-shelter-before-t004354.png",
+          "sha256": "a6b36ffaa3ab78368957142fc1f726743b5f30ad8f797a0914fa086caec3f7cb"
+        },
+        {
+          "phase": "plus-100",
+          "timestampMs": 4806.996196,
+          "path": "frames/01-raise-shelter-plus-100-t004807.png",
+          "sha256": "a440ec9690fc8f1d484acdde053844c0a76a1fdb36a8631f7ee364f8b87278db",
+          "requestedOffsetMs": 100,
+          "measuredOffsetMs": 123.58852399999978
+        },
+        {
+          "phase": "plus-350",
+          "timestampMs": 5216.919279,
+          "path": "frames/01-raise-shelter-plus-350-t005217.png",
+          "sha256": "5c0ffefe5f051ae593cd2067eb221799e70578ff295beebe7497e318107c4b3a",
+          "requestedOffsetMs": 350,
+          "measuredOffsetMs": 533.5116069999995
+        },
+        {
+          "phase": "plus-800",
+          "timestampMs": 5547.108018,
+          "path": "frames/01-raise-shelter-plus-800-t005547.png",
+          "sha256": "39b586852b120ba067913edcb9ba68811236a4f6d41a3a3ce7933d053f1d67e1",
+          "requestedOffsetMs": 800,
+          "measuredOffsetMs": 863.7003459999996
+        },
+        {
+          "phase": "plus-1400",
+          "timestampMs": 6084.005135,
+          "path": "frames/01-raise-shelter-plus-1400-t006084.png",
+          "sha256": "cb2353c7f83a7955d0d88d63544c5a6175f807f7f77bf754463c6f435b2d22ab",
+          "requestedOffsetMs": 1400,
+          "measuredOffsetMs": 1400.597463
+        },
+        {
+          "phase": "after",
+          "timestampMs": 6401.079993,
+          "path": "frames/01-raise-shelter-after-t006401.png",
+          "sha256": "28141b3d9328ce816179006f93c788f6a235ea0680e4dbeea6b483d29a5e81db"
+        }
+      ]
+    },
+    {
+      "transitionIndex": 2,
+      "orderId": "gather-food",
+      "label": "Gather Food",
+      "triggerTimestampMs": 8607.377948,
+      "settledTimestampMs": 10282.028787,
+      "measuredTransitionWindowMs": 1674.650839,
+      "expectedVisibleDelta": true,
+      "expectedStageKey": "food",
+      "visibleDelta": true,
+      "stateDelta": true,
+      "selectorDelta": true,
+      "expectedSelectorAppeared": true,
+      "beforeSettledSha256": "0200a56219721a550201473d24f06d22e98740a56c87f2e51b08b08b08180f9e",
+      "afterSettledSha256": "dad16b47522e28f15c46c18e43afacddc0be88fda49db4678c103d151c8ffbd1",
+      "stateBefore": {
+        "completedOrders": [
+          "raise-shelter"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "empty"
+          },
+          {
+            "id": "market",
+            "state": "empty"
+          },
+          {
+            "id": "council",
+            "state": "empty"
+          },
+          {
+            "id": "watch",
+            "state": "empty"
+          },
+          {
+            "id": "fields",
+            "state": "empty"
+          },
+          {
+            "id": "road",
+            "state": "empty"
+          }
+        ]
+      },
+      "stateAfter": {
+        "completedOrders": [
+          "raise-shelter",
+          "gather-food"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "empty"
+          },
+          {
+            "id": "market",
+            "state": "empty"
+          },
+          {
+            "id": "council",
+            "state": "empty"
+          },
+          {
+            "id": "watch",
+            "state": "empty"
+          },
+          {
+            "id": "fields",
+            "state": "built"
+          },
+          {
+            "id": "road",
+            "state": "empty"
+          }
+        ]
+      },
+      "selectorsBefore": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 0,
+        "timber": 0,
+        "storehouse": 0,
+        "market": 0,
+        "watch": 0,
+        "council": 0
+      },
+      "selectorsAfter": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 1,
+        "timber": 0,
+        "storehouse": 0,
+        "market": 0,
+        "watch": 0,
+        "council": 0
+      },
+      "warnings": [],
+      "frames": [
+        {
+          "phase": "before",
+          "timestampMs": 8171.784895,
+          "path": "frames/02-gather-food-before-t008172.png",
+          "sha256": "b1261dd5e16891819f05d3bcfe40933da6980682f9fc7aaca4c3e8a4b6bebdef"
+        },
+        {
+          "phase": "plus-100",
+          "timestampMs": 8746.753341,
+          "path": "frames/02-gather-food-plus-100-t008747.png",
+          "sha256": "683b9a2d8296b6553a78869b4e28fd7a84fe9fced74879a47a80f8d3c55c9fd9",
+          "requestedOffsetMs": 100,
+          "measuredOffsetMs": 139.37539300000026
+        },
+        {
+          "phase": "plus-350",
+          "timestampMs": 9175.077342,
+          "path": "frames/02-gather-food-plus-350-t009175.png",
+          "sha256": "7ac5c11657864c46345db79dcd30ba585134bdb62ad0f41ddad8e35261e87b23",
+          "requestedOffsetMs": 350,
+          "measuredOffsetMs": 567.6993940000011
+        },
+        {
+          "phase": "plus-800",
+          "timestampMs": 9491.073134,
+          "path": "frames/02-gather-food-plus-800-t009491.png",
+          "sha256": "8e1e504c708586c85af69bf13acc6be12d06dbe7cb8c87063b7eb84696bc24fb",
+          "requestedOffsetMs": 800,
+          "measuredOffsetMs": 883.6951860000008
+        },
+        {
+          "phase": "plus-1400",
+          "timestampMs": 10006.526675,
+          "path": "frames/02-gather-food-plus-1400-t010007.png",
+          "sha256": "4a788f3c4256834421dc948aaf0581d921522d402edc6056881feceba79693aa",
+          "requestedOffsetMs": 1400,
+          "measuredOffsetMs": 1399.1487269999998
+        },
+        {
+          "phase": "after",
+          "timestampMs": 10282.028787,
+          "path": "frames/02-gather-food-after-t010282.png",
+          "sha256": "4a788f3c4256834421dc948aaf0581d921522d402edc6056881feceba79693aa"
+        }
+      ]
+    },
+    {
+      "transitionIndex": 3,
+      "orderId": "cut-timber",
+      "label": "Cut Timber",
+      "triggerTimestampMs": 12520.760405,
+      "settledTimestampMs": 14218.139924,
+      "measuredTransitionWindowMs": 1697.3795189999983,
+      "expectedVisibleDelta": true,
+      "expectedStageKey": "timber",
+      "visibleDelta": true,
+      "stateDelta": true,
+      "selectorDelta": true,
+      "expectedSelectorAppeared": true,
+      "beforeSettledSha256": "c0f0d928e0906a6eafeadd319074b638b125b110ba264222c8cd284d3e65b985",
+      "afterSettledSha256": "a65b07075f699e39143ce9c3674ce341302402f20a082b71c5b20f5ebb215620",
+      "stateBefore": {
+        "completedOrders": [
+          "raise-shelter",
+          "gather-food"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "empty"
+          },
+          {
+            "id": "market",
+            "state": "empty"
+          },
+          {
+            "id": "council",
+            "state": "empty"
+          },
+          {
+            "id": "watch",
+            "state": "empty"
+          },
+          {
+            "id": "fields",
+            "state": "built"
+          },
+          {
+            "id": "road",
+            "state": "empty"
+          }
+        ]
+      },
+      "stateAfter": {
+        "completedOrders": [
+          "raise-shelter",
+          "gather-food",
+          "cut-timber"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "building"
+          },
+          {
+            "id": "market",
+            "state": "empty"
+          },
+          {
+            "id": "council",
+            "state": "empty"
+          },
+          {
+            "id": "watch",
+            "state": "empty"
+          },
+          {
+            "id": "fields",
+            "state": "built"
+          },
+          {
+            "id": "road",
+            "state": "empty"
+          }
+        ]
+      },
+      "selectorsBefore": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 1,
+        "timber": 0,
+        "storehouse": 0,
+        "market": 0,
+        "watch": 0,
+        "council": 0
+      },
+      "selectorsAfter": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 1,
+        "timber": 1,
+        "storehouse": 0,
+        "market": 0,
+        "watch": 0,
+        "council": 0
+      },
+      "warnings": [],
+      "frames": [
+        {
+          "phase": "before",
+          "timestampMs": 12029.905011,
+          "path": "frames/03-cut-timber-before-t012030.png",
+          "sha256": "3fec0569949bc48c65b704dae6daa58a2858868695ada12f8dc9ca3fa2e7413a"
+        },
+        {
+          "phase": "plus-100",
+          "timestampMs": 12620.244254,
+          "path": "frames/03-cut-timber-plus-100-t012620.png",
+          "sha256": "391fdf8198a4c7c48f12f3445d182277f110a9f41fcc4f9aa9633b5b80016099",
+          "requestedOffsetMs": 100,
+          "measuredOffsetMs": 99.48384899999837
+        },
+        {
+          "phase": "plus-350",
+          "timestampMs": 13017.928479,
+          "path": "frames/03-cut-timber-plus-350-t013018.png",
+          "sha256": "3a8b9d87af01fc83e8d4b71876ccbdfb717b32c7bc937b2b6b9c0b3029363dbf",
+          "requestedOffsetMs": 350,
+          "measuredOffsetMs": 497.16807399999925
+        },
+        {
+          "phase": "plus-800",
+          "timestampMs": 13334.840767,
+          "path": "frames/03-cut-timber-plus-800-t013335.png",
+          "sha256": "0fce79733da0b31c879b306baa32065e9a81fb9e2ff1ef74990f17772705ebcc",
+          "requestedOffsetMs": 800,
+          "measuredOffsetMs": 814.0803619999988
+        },
+        {
+          "phase": "plus-1400",
+          "timestampMs": 13921.123303,
+          "path": "frames/03-cut-timber-plus-1400-t013921.png",
+          "sha256": "8c6797bb5929ba60ef0b2089d2d11b4bd85dbbeb7a05a8f2365624816d478cfa",
+          "requestedOffsetMs": 1400,
+          "measuredOffsetMs": 1400.3628979999994
+        },
+        {
+          "phase": "after",
+          "timestampMs": 14218.139924,
+          "path": "frames/03-cut-timber-after-t014218.png",
+          "sha256": "8c6797bb5929ba60ef0b2089d2d11b4bd85dbbeb7a05a8f2365624816d478cfa"
+        }
+      ]
+    },
+    {
+      "transitionIndex": 4,
+      "orderId": "scout-nearby",
+      "label": "Scout Nearby Land",
+      "triggerTimestampMs": 16602.819147,
+      "settledTimestampMs": 18416.683722,
+      "measuredTransitionWindowMs": 1813.8645750000032,
+      "expectedVisibleDelta": false,
+      "expectedStageKey": null,
+      "visibleDelta": true,
+      "stateDelta": true,
+      "selectorDelta": false,
+      "expectedSelectorAppeared": null,
+      "beforeSettledSha256": "428624bdeda0265656ba4441173a00a2ed959bde636c148ff6c084154915dc88",
+      "afterSettledSha256": "909fcf7ac567e9b3499e4ce8612de533b4469c0d88d1eeb9616619839f0c3c9d",
+      "stateBefore": {
+        "completedOrders": [
+          "raise-shelter",
+          "gather-food",
+          "cut-timber"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "building"
+          },
+          {
+            "id": "market",
+            "state": "empty"
+          },
+          {
+            "id": "council",
+            "state": "empty"
+          },
+          {
+            "id": "watch",
+            "state": "empty"
+          },
+          {
+            "id": "fields",
+            "state": "built"
+          },
+          {
+            "id": "road",
+            "state": "empty"
+          }
+        ]
+      },
+      "stateAfter": {
+        "completedOrders": [
+          "raise-shelter",
+          "gather-food",
+          "cut-timber",
+          "scout-nearby"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "building"
+          },
+          {
+            "id": "market",
+            "state": "empty"
+          },
+          {
+            "id": "council",
+            "state": "empty"
+          },
+          {
+            "id": "watch",
+            "state": "building"
+          },
+          {
+            "id": "fields",
+            "state": "built"
+          },
+          {
+            "id": "road",
+            "state": "empty"
+          }
+        ]
+      },
+      "selectorsBefore": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 1,
+        "timber": 1,
+        "storehouse": 0,
+        "market": 0,
+        "watch": 0,
+        "council": 0
+      },
+      "selectorsAfter": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 1,
+        "timber": 1,
+        "storehouse": 0,
+        "market": 0,
+        "watch": 0,
+        "council": 0
+      },
+      "warnings": [
+        "Scout changed the normalized Village image without changing tracked stage selectors; review as possible ambient or unrelated delta."
+      ],
+      "frames": [
+        {
+          "phase": "before",
+          "timestampMs": 16006.458812,
+          "path": "frames/04-scout-nearby-before-t016006.png",
+          "sha256": "9fbd09ee848a39237deac8e7a6021e2ce6427102ed0f103c131649241745e03a"
+        },
+        {
+          "phase": "plus-100",
+          "timestampMs": 16715.460465,
+          "path": "frames/04-scout-nearby-plus-100-t016715.png",
+          "sha256": "d6287ed267b823f37c95c55982acef9138722628d361f12796c6dd2ea48626da",
+          "requestedOffsetMs": 100,
+          "measuredOffsetMs": 112.64131800000177
+        },
+        {
+          "phase": "plus-350",
+          "timestampMs": 17185.843211,
+          "path": "frames/04-scout-nearby-plus-350-t017186.png",
+          "sha256": "7e1b834d746a906be0e54fc5225cd9c94dd27a39f84da0a3f6f6f96edd2f92b1",
+          "requestedOffsetMs": 350,
+          "measuredOffsetMs": 583.0240640000011
+        },
+        {
+          "phase": "plus-800",
+          "timestampMs": 17680.949764,
+          "path": "frames/04-scout-nearby-plus-800-t017681.png",
+          "sha256": "ee49d142f73de4014723950fc4dbd26e0899957627f7ff2bb7c48eff4d91db48",
+          "requestedOffsetMs": 800,
+          "measuredOffsetMs": 1078.1306170000025
+        },
+        {
+          "phase": "plus-1400",
+          "timestampMs": 18013.464742,
+          "path": "frames/04-scout-nearby-plus-1400-t018013.png",
+          "sha256": "63184fb111501cdbd8ab558792a6b1c95b212defeebadb548345f89755e6084a",
+          "requestedOffsetMs": 1400,
+          "measuredOffsetMs": 1410.6455950000018
+        },
+        {
+          "phase": "after",
+          "timestampMs": 18416.683722,
+          "path": "frames/04-scout-nearby-after-t018417.png",
+          "sha256": "63184fb111501cdbd8ab558792a6b1c95b212defeebadb548345f89755e6084a"
+        }
+      ]
+    },
+    {
+      "transitionIndex": 5,
+      "orderId": "build-storehouse",
+      "label": "Build Storehouse",
+      "triggerTimestampMs": 20978.889401,
+      "settledTimestampMs": 22673.449979,
+      "measuredTransitionWindowMs": 1694.5605780000005,
+      "expectedVisibleDelta": true,
+      "expectedStageKey": "storehouse",
+      "visibleDelta": true,
+      "stateDelta": true,
+      "selectorDelta": true,
+      "expectedSelectorAppeared": true,
+      "beforeSettledSha256": "085b7eca9a73c343e7bdeef7ed35df8cf5e73652d24c3b3934fc7e13965f7cae",
+      "afterSettledSha256": "62175bcf0a1f185936f9ce38ed3d91bbf3721f968bb750caf49372ffad4b10d2",
+      "stateBefore": {
+        "completedOrders": [
+          "raise-shelter",
+          "gather-food",
+          "cut-timber",
+          "scout-nearby"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "building"
+          },
+          {
+            "id": "market",
+            "state": "empty"
+          },
+          {
+            "id": "council",
+            "state": "empty"
+          },
+          {
+            "id": "watch",
+            "state": "building"
+          },
+          {
+            "id": "fields",
+            "state": "built"
+          },
+          {
+            "id": "road",
+            "state": "empty"
+          }
+        ]
+      },
+      "stateAfter": {
+        "completedOrders": [
+          "raise-shelter",
+          "gather-food",
+          "cut-timber",
+          "scout-nearby",
+          "build-storehouse"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter",
+          "storehouse"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "built"
+          },
+          {
+            "id": "market",
+            "state": "building"
+          },
+          {
+            "id": "council",
+            "state": "empty"
+          },
+          {
+            "id": "watch",
+            "state": "building"
+          },
+          {
+            "id": "fields",
+            "state": "built"
+          },
+          {
+            "id": "road",
+            "state": "empty"
+          }
+        ]
+      },
+      "selectorsBefore": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 1,
+        "timber": 1,
+        "storehouse": 0,
+        "market": 0,
+        "watch": 0,
+        "council": 0
+      },
+      "selectorsAfter": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 1,
+        "timber": 1,
+        "storehouse": 1,
+        "market": 0,
+        "watch": 0,
+        "council": 0
+      },
+      "warnings": [],
+      "frames": [
+        {
+          "phase": "before",
+          "timestampMs": 20292.604886,
+          "path": "frames/05-build-storehouse-before-t020293.png",
+          "sha256": "cd636183e781c4f01a80298580666ec823b858dd06ae354b4606208c729ebae0"
+        },
+        {
+          "phase": "plus-100",
+          "timestampMs": 21109.090247,
+          "path": "frames/05-build-storehouse-plus-100-t021109.png",
+          "sha256": "4d1c17b06e33376e3d73b8d978a4cb933374d4ee88a1a67af85d3f7816d746f8",
+          "requestedOffsetMs": 100,
+          "measuredOffsetMs": 130.20084599999973
+        },
+        {
+          "phase": "plus-350",
+          "timestampMs": 21509.444266,
+          "path": "frames/05-build-storehouse-plus-350-t021509.png",
+          "sha256": "01feaf65066b8d76ee2d5876fce11beaa12e640ae64010e8cb30c8103e31dd4e",
+          "requestedOffsetMs": 350,
+          "measuredOffsetMs": 530.5548649999982
+        },
+        {
+          "phase": "plus-800",
+          "timestampMs": 21900.275873,
+          "path": "frames/05-build-storehouse-plus-800-t021900.png",
+          "sha256": "f7ac3ac2f81fd4fc06b8664ef075e82a12cfc436c7f7d09d30709877e00e1b03",
+          "requestedOffsetMs": 800,
+          "measuredOffsetMs": 921.3864719999983
+        },
+        {
+          "phase": "plus-1400",
+          "timestampMs": 22377.504248,
+          "path": "frames/05-build-storehouse-plus-1400-t022378.png",
+          "sha256": "99a5dfea9bea2c07389dfa12bf4e642d5a888f199b031ede2551cddab5ecd206",
+          "requestedOffsetMs": 1400,
+          "measuredOffsetMs": 1398.6148470000007
+        },
+        {
+          "phase": "after",
+          "timestampMs": 22673.449979,
+          "path": "frames/05-build-storehouse-after-t022673.png",
+          "sha256": "99a5dfea9bea2c07389dfa12bf4e642d5a888f199b031ede2551cddab5ecd206"
+        }
+      ]
+    },
+    {
+      "transitionIndex": 6,
+      "orderId": "open-market",
+      "label": "Open Market Path",
+      "triggerTimestampMs": 24953.424133,
+      "settledTimestampMs": 26614.526386,
+      "measuredTransitionWindowMs": 1661.102253000001,
+      "expectedVisibleDelta": true,
+      "expectedStageKey": "market",
+      "visibleDelta": true,
+      "stateDelta": true,
+      "selectorDelta": true,
+      "expectedSelectorAppeared": true,
+      "beforeSettledSha256": "60b9e1dcf120706019b009c1b8b25376a714148f907a053b786b421a78ff2ca7",
+      "afterSettledSha256": "4e05d57bf06ab8d16468a758f8e18a33aad10279adc9a936450111efc73d6ee3",
+      "stateBefore": {
+        "completedOrders": [
+          "raise-shelter",
+          "gather-food",
+          "cut-timber",
+          "scout-nearby",
+          "build-storehouse"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter",
+          "storehouse"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "built"
+          },
+          {
+            "id": "market",
+            "state": "building"
+          },
+          {
+            "id": "council",
+            "state": "empty"
+          },
+          {
+            "id": "watch",
+            "state": "building"
+          },
+          {
+            "id": "fields",
+            "state": "built"
+          },
+          {
+            "id": "road",
+            "state": "empty"
+          }
+        ]
+      },
+      "stateAfter": {
+        "completedOrders": [
+          "raise-shelter",
+          "gather-food",
+          "cut-timber",
+          "scout-nearby",
+          "build-storehouse",
+          "open-market"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter",
+          "storehouse",
+          "market"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "built"
+          },
+          {
+            "id": "market",
+            "state": "built"
+          },
+          {
+            "id": "council",
+            "state": "building"
+          },
+          {
+            "id": "watch",
+            "state": "building"
+          },
+          {
+            "id": "fields",
+            "state": "built"
+          },
+          {
+            "id": "road",
+            "state": "built"
+          }
+        ]
+      },
+      "selectorsBefore": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 1,
+        "timber": 1,
+        "storehouse": 1,
+        "market": 0,
+        "watch": 0,
+        "council": 0
+      },
+      "selectorsAfter": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 1,
+        "timber": 1,
+        "storehouse": 1,
+        "market": 1,
+        "watch": 0,
+        "council": 0
+      },
+      "warnings": [],
+      "frames": [
+        {
+          "phase": "before",
+          "timestampMs": 24535.702291,
+          "path": "frames/06-open-market-before-t024536.png",
+          "sha256": "403617cccfa9106bfcfa0d2a27ae08b74ec33f4dde841db1f8c0d2164fb2ca57"
+        },
+        {
+          "phase": "plus-100",
+          "timestampMs": 25052.604013,
+          "path": "frames/06-open-market-plus-100-t025053.png",
+          "sha256": "27326634036a42db43d3bd6b27f5444e97bfbd089532a24f9679ef2478796ae5",
+          "requestedOffsetMs": 100,
+          "measuredOffsetMs": 99.17987999999968
+        },
+        {
+          "phase": "plus-350",
+          "timestampMs": 25454.00607,
+          "path": "frames/06-open-market-plus-350-t025454.png",
+          "sha256": "d285e5adb6714d74a34c4460415083ce0f6c0db9e7ab0177b3e07df7af61eb88",
+          "requestedOffsetMs": 350,
+          "measuredOffsetMs": 500.581936999999
+        },
+        {
+          "phase": "plus-800",
+          "timestampMs": 25786.280738,
+          "path": "frames/06-open-market-plus-800-t025786.png",
+          "sha256": "67c86fb918cbf108a42a9fbb90b2260ad22c14140882c60b3d8a372173d24c12",
+          "requestedOffsetMs": 800,
+          "measuredOffsetMs": 832.8566050000009
+        },
+        {
+          "phase": "plus-1400",
+          "timestampMs": 26352.481992,
+          "path": "frames/06-open-market-plus-1400-t026352.png",
+          "sha256": "ea1ae835596ed66a509c7abf7b8698bf8232bc0df8507e89ff846e3108de2d63",
+          "requestedOffsetMs": 1400,
+          "measuredOffsetMs": 1399.0578590000005
+        },
+        {
+          "phase": "after",
+          "timestampMs": 26614.526386,
+          "path": "frames/06-open-market-after-t026615.png",
+          "sha256": "ea1ae835596ed66a509c7abf7b8698bf8232bc0df8507e89ff846e3108de2d63"
+        }
+      ]
+    },
+    {
+      "transitionIndex": 7,
+      "orderId": "fortify-watch",
+      "label": "Fortify Watch",
+      "triggerTimestampMs": 28778.177803,
+      "settledTimestampMs": 30469.219894,
+      "measuredTransitionWindowMs": 1691.042091000003,
+      "expectedVisibleDelta": true,
+      "expectedStageKey": "watch",
+      "visibleDelta": true,
+      "stateDelta": true,
+      "selectorDelta": true,
+      "expectedSelectorAppeared": true,
+      "beforeSettledSha256": "5a352c03fdde8ccc7bac32a8a34563e10fe8ec7c99a85849e8ada04c93082ba9",
+      "afterSettledSha256": "507c2f179ae6e9028bb28f4c244c12e9b64cd801d43de53968cd565daf1e03d0",
+      "stateBefore": {
+        "completedOrders": [
+          "raise-shelter",
+          "gather-food",
+          "cut-timber",
+          "scout-nearby",
+          "build-storehouse",
+          "open-market"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter",
+          "storehouse",
+          "market"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "built"
+          },
+          {
+            "id": "market",
+            "state": "built"
+          },
+          {
+            "id": "council",
+            "state": "building"
+          },
+          {
+            "id": "watch",
+            "state": "building"
+          },
+          {
+            "id": "fields",
+            "state": "built"
+          },
+          {
+            "id": "road",
+            "state": "built"
+          }
+        ]
+      },
+      "stateAfter": {
+        "completedOrders": [
+          "raise-shelter",
+          "gather-food",
+          "cut-timber",
+          "scout-nearby",
+          "build-storehouse",
+          "open-market",
+          "fortify-watch"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter",
+          "storehouse",
+          "market",
+          "watch"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "built"
+          },
+          {
+            "id": "market",
+            "state": "built"
+          },
+          {
+            "id": "council",
+            "state": "building"
+          },
+          {
+            "id": "watch",
+            "state": "built"
+          },
+          {
+            "id": "fields",
+            "state": "built"
+          },
+          {
+            "id": "road",
+            "state": "built"
+          }
+        ]
+      },
+      "selectorsBefore": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 1,
+        "timber": 1,
+        "storehouse": 1,
+        "market": 1,
+        "watch": 0,
+        "council": 0
+      },
+      "selectorsAfter": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 1,
+        "timber": 1,
+        "storehouse": 1,
+        "market": 1,
+        "watch": 1,
+        "council": 0
+      },
+      "warnings": [],
+      "frames": [
+        {
+          "phase": "before",
+          "timestampMs": 28349.72564,
+          "path": "frames/07-fortify-watch-before-t028350.png",
+          "sha256": "9f5503578876d0dbc66ed4de202316d40e913ce26edd6942c707026fa456cbed"
+        },
+        {
+          "phase": "plus-100",
+          "timestampMs": 28912.940556,
+          "path": "frames/07-fortify-watch-plus-100-t028913.png",
+          "sha256": "a2256dcb4d867e1fb95abc4cbad9fa7124e65ce75109513eb460e8f670d09dc8",
+          "requestedOffsetMs": 100,
+          "measuredOffsetMs": 134.7627530000027
+        },
+        {
+          "phase": "plus-350",
+          "timestampMs": 29320.849318,
+          "path": "frames/07-fortify-watch-plus-350-t029321.png",
+          "sha256": "4d231c5bf9d59c49f9112f8ce5a392745b3c050baa3c0d6ca6d64c716c74926e",
+          "requestedOffsetMs": 350,
+          "measuredOffsetMs": 542.6715150000018
+        },
+        {
+          "phase": "plus-800",
+          "timestampMs": 29630.137207,
+          "path": "frames/07-fortify-watch-plus-800-t029630.png",
+          "sha256": "6648960b619dba94406cb58e76f4330ae5c33ac1d3a2d1c881956a3844da1969",
+          "requestedOffsetMs": 800,
+          "measuredOffsetMs": 851.9594040000011
+        },
+        {
+          "phase": "plus-1400",
+          "timestampMs": 30177.310494,
+          "path": "frames/07-fortify-watch-plus-1400-t030177.png",
+          "sha256": "dff91fd824e30059e84ce12ed3db03bfc72eb61d8a72bbcf5e8acc77d7435d26",
+          "requestedOffsetMs": 1400,
+          "measuredOffsetMs": 1399.1326910000025
+        },
+        {
+          "phase": "after",
+          "timestampMs": 30469.219894,
+          "path": "frames/07-fortify-watch-after-t030469.png",
+          "sha256": "dff91fd824e30059e84ce12ed3db03bfc72eb61d8a72bbcf5e8acc77d7435d26"
+        }
+      ]
+    },
+    {
+      "transitionIndex": 8,
+      "orderId": "form-council",
+      "label": "Form Council",
+      "triggerTimestampMs": 32756.690473,
+      "settledTimestampMs": 34459.638713,
+      "measuredTransitionWindowMs": 1702.9482400000015,
+      "expectedVisibleDelta": true,
+      "expectedStageKey": "council",
+      "visibleDelta": true,
+      "stateDelta": true,
+      "selectorDelta": true,
+      "expectedSelectorAppeared": true,
+      "beforeSettledSha256": "97f70540d5bee7e398eee77b00b2dce1d89ff820682938600d5233e2b319dff4",
+      "afterSettledSha256": "1c1861bf2cc5a8394b34dd4ff3a92f72a108e516178478c195c3242d3e489fba",
+      "stateBefore": {
+        "completedOrders": [
+          "raise-shelter",
+          "gather-food",
+          "cut-timber",
+          "scout-nearby",
+          "build-storehouse",
+          "open-market",
+          "fortify-watch"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter",
+          "storehouse",
+          "market",
+          "watch"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "built"
+          },
+          {
+            "id": "market",
+            "state": "built"
+          },
+          {
+            "id": "council",
+            "state": "building"
+          },
+          {
+            "id": "watch",
+            "state": "built"
+          },
+          {
+            "id": "fields",
+            "state": "built"
+          },
+          {
+            "id": "road",
+            "state": "built"
+          }
+        ]
+      },
+      "stateAfter": {
+        "completedOrders": [
+          "raise-shelter",
+          "gather-food",
+          "cut-timber",
+          "scout-nearby",
+          "build-storehouse",
+          "open-market",
+          "fortify-watch",
+          "form-council"
+        ],
+        "settlementMarkers": [
+          "camp",
+          "shelter",
+          "storehouse",
+          "market",
+          "watch",
+          "council"
+        ],
+        "plots": [
+          {
+            "id": "camp",
+            "state": "built"
+          },
+          {
+            "id": "shelter",
+            "state": "built"
+          },
+          {
+            "id": "storehouse",
+            "state": "built"
+          },
+          {
+            "id": "market",
+            "state": "built"
+          },
+          {
+            "id": "council",
+            "state": "built"
+          },
+          {
+            "id": "watch",
+            "state": "built"
+          },
+          {
+            "id": "fields",
+            "state": "built"
+          },
+          {
+            "id": "road",
+            "state": "built"
+          }
+        ]
+      },
+      "selectorsBefore": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 1,
+        "timber": 1,
+        "storehouse": 1,
+        "market": 1,
+        "watch": 1,
+        "council": 0
+      },
+      "selectorsAfter": {
+        "hearth": 1,
+        "shelter": 1,
+        "food": 1,
+        "timber": 1,
+        "storehouse": 1,
+        "market": 1,
+        "watch": 1,
+        "council": 1
+      },
+      "warnings": [],
+      "frames": [
+        {
+          "phase": "before",
+          "timestampMs": 32199.825629,
+          "path": "frames/08-form-council-before-t032200.png",
+          "sha256": "1ff508b54ec2289c1418069ab21ab7132edc5014984357d71e644b6a08e1f7d2"
+        },
+        {
+          "phase": "plus-100",
+          "timestampMs": 32856.958254,
+          "path": "frames/08-form-council-plus-100-t032857.png",
+          "sha256": "5d12551a90ef7a8010a0311eaf194ff0645805ee5c9424ab1ffc2996356fa8f8",
+          "requestedOffsetMs": 100,
+          "measuredOffsetMs": 100.26778099999865
+        },
+        {
+          "phase": "plus-350",
+          "timestampMs": 33267.912028,
+          "path": "frames/08-form-council-plus-350-t033268.png",
+          "sha256": "b699e6f83540fbd3b2a5f380c4cd7bf36366d3e140131c9dbe1ef0a13597f0c9",
+          "requestedOffsetMs": 350,
+          "measuredOffsetMs": 511.2215550000001
+        },
+        {
+          "phase": "plus-800",
+          "timestampMs": 33598.819531,
+          "path": "frames/08-form-council-plus-800-t033599.png",
+          "sha256": "ce63c7ecedf2c55c818e3fd8e317d8ff2880b6a42fde50b679cdf1ffb42d1609",
+          "requestedOffsetMs": 800,
+          "measuredOffsetMs": 842.1290580000023
+        },
+        {
+          "phase": "plus-1400",
+          "timestampMs": 34156.285392,
+          "path": "frames/08-form-council-plus-1400-t034156.png",
+          "sha256": "e6068b47b87d0b93fc3d16fcb5a2052d7852ce2ea3f8e4d60b7c351f6c0144d7",
+          "requestedOffsetMs": 1400,
+          "measuredOffsetMs": 1399.5949189999992
+        },
+        {
+          "phase": "after",
+          "timestampMs": 34459.638713,
+          "path": "frames/08-form-council-after-t034460.png",
+          "sha256": "e6068b47b87d0b93fc3d16fcb5a2052d7852ce2ea3f8e4d60b7c351f6c0144d7"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+public/qa/village-opening-focused/files.txt
+public/qa/village-opening-focused/village-progression/frames/00-camp-settled-t003005.png
+public/qa/village-opening-focused/village-progression/frames/01-raise-shelter-after-t006401.png
+public/qa/village-opening-focused/village-progression/frames/01-raise-shelter-before-t004354.png
+public/qa/village-opening-focused/village-progression/frames/01-raise-shelter-plus-100-t004807.png
+public/qa/village-opening-focused/village-progression/frames/01-raise-shelter-plus-1400-t006084.png
+public/qa/village-opening-focused/village-progression/frames/01-raise-shelter-plus-350-t005217.png
+public/qa/village-opening-focused/village-progression/frames/01-raise-shelter-plus-800-t005547.png
+public/qa/village-opening-focused/village-progression/report.html
+public/qa/village-opening-focused/village-progression/sequence-manifest.json
+public/qa/village-opening-focused/village-progression/videos/desktop-village-progression.webm
+public/qa/village-opening-focused/village-scene/01-camp-desktop.png
+public/qa/village-opening-focused/village-scene/01-camp-mobile.png
+public/qa/village-opening-focused/village-scene/02-shelter-desktop.png
+public/qa/village-opening-focused/village-scene/02-shelter-mobile.png
