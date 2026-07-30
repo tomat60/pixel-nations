@@ -143,7 +143,7 @@ html {
 }
 
 .world-sector-noise {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitchTiles'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
   opacity: 0.035;
 }
 
@@ -259,8 +259,8 @@ html {
     box-shadow 0.35s ease;
 }
 
-/* Village opening: preserve the accepted scene while making the first order
-   read as one home under construction rather than an instant four-house hamlet. */
+/* Preserve the current Village composition. The first order adds one home and
+   a local path; subsequent orders progressively restore the existing hamlet. */
 @keyframes village-first-shelter-build {
   0% {
     opacity: 0;
@@ -304,8 +304,8 @@ html {
 }
 
 @keyframes village-first-path-draw {
-  0% { stroke-dashoffset: 1; opacity: 0.12; }
-  45% { stroke-dashoffset: 0.38; opacity: 0.56; }
+  0% { stroke-dashoffset: 200; opacity: 0.12; }
+  45% { stroke-dashoffset: 76; opacity: 0.56; }
   100% { stroke-dashoffset: 0; opacity: 1; }
 }
 
@@ -362,10 +362,48 @@ html {
 }
 
 [data-qa="village-scene"] path[d="M27,41 Q32,50 38,58"] {
-  path-length: 1;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
   animation: village-first-path-draw 1.35s ease-out forwards;
+}
+
+/* Existing later orders restore density one home at a time without changing
+   state semantics or redesigning those buildings. */
+[data-qa="village-credibility-layer"]:has([data-qa="village-food-fields"])
+  [data-qa="village-structure-hut"] > div:nth-child(2),
+[data-qa="village-credibility-layer"]:has([data-qa="village-timber-yards"])
+  [data-qa="village-structure-hut"] > div:nth-child(3),
+[data-qa="village-credibility-layer"]:has([data-qa="village-storehouse-visual"])
+  [data-qa="village-structure-hut"] > div:nth-child(4) {
+  display: block;
+}
+
+[data-qa="village-credibility-layer"]:has([data-qa="village-food-fields"])
+  [data-qa="village-structure-hut"] > div:nth-child(6),
+[data-qa="village-credibility-layer"]:has([data-qa="village-timber-yards"])
+  [data-qa="village-structure-hut"] > div:nth-child(7) {
+  display: block;
+}
+
+[data-qa="village-credibility-layer"]:has(
+  [data-qa="village-food-fields"],
+  [data-qa="village-timber-yards"],
+  [data-qa="village-storehouse-visual"]
+) [data-qa="village-structure-hut"] > div:first-child {
+  animation: none;
+}
+
+[data-qa="village-credibility-layer"]:has(
+  [data-qa="village-food-fields"],
+  [data-qa="village-timber-yards"],
+  [data-qa="village-storehouse-visual"]
+) [data-qa="village-structure-hut"]::before,
+[data-qa="village-credibility-layer"]:has(
+  [data-qa="village-food-fields"],
+  [data-qa="village-timber-yards"],
+  [data-qa="village-storehouse-visual"]
+) [data-qa="village-structure-hut"]::after {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
