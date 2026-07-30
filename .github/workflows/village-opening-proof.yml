@@ -1,0 +1,65 @@
+name: Village Opening Focused Proof
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - app/globals.css
+      - .github/workflows/village-opening-proof.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact PR merge ref
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies and Chromium
+        run: |
+          set -euo pipefail
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Record current Village opening
+        run: |
+          set -euo pipefail
+          node scripts/qa-village-progression-video.mjs
+          npm run qa:village
+
+      - name: Collect focused evidence
+        run: |
+          set -euo pipefail
+          rm -rf public/qa/village-opening-focused
+          mkdir -p public/qa/village-opening-focused
+          find public/qa/village-progression public/qa/village-scene -type f \
+            \( -iname '*raise-shelter*' -o -iname '*camp*' -o -iname '*shelter*' -o -iname '*.webm' -o -name 'sequence-manifest.json' -o -name 'report.html' \) \
+            -print0 | while IFS= read -r -d '' file; do
+              target="public/qa/village-opening-focused/${file#public/qa/}"
+              mkdir -p "$(dirname "$target")"
+              cp "$file" "$target"
+            done
+          find public/qa/village-opening-focused -type f -print | sort > public/qa/village-opening-focused/files.txt
+          test "$(find public/qa/village-opening-focused -type f | wc -l)" -ge 8
+          sha256sum $(find public/qa/village-opening-focused -type f ! -name SHA256SUMS.txt | sort) > public/qa/village-opening-focused/SHA256SUMS.txt
+
+      - name: Upload focused evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: village-opening-focused-${{ github.run_id }}
+          path: public/qa/village-opening-focused/**
+          if-no-files-found: error
+          retention-days: 14
