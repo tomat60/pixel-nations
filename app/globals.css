@@ -143,7 +143,7 @@ html {
 }
 
 .world-sector-noise {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitchTiles'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
   opacity: 0.035;
 }
 
@@ -259,158 +259,121 @@ html {
     box-shadow 0.35s ease;
 }
 
-.claim-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(201, 169, 98, 0.35);
-  box-shadow: 0 16px 56px rgba(0, 0, 0, 0.45);
-}
-
-/* Village opening: keep the accepted live composition, but make the first order
-   read as one shelter under construction instead of an instant four-house hamlet. */
+/* Village opening: preserve the accepted scene while making the first order
+   read as one home under construction rather than an instant four-house hamlet. */
 @keyframes village-first-shelter-build {
   0% {
-    opacity: 0.08;
-    transform: translate(-50%, -42%) scale(0.28) rotate(-8deg);
-    filter: saturate(0.55) brightness(0.72);
+    opacity: 0;
+    filter: brightness(1.45) saturate(0.55);
+    transform: translate(-50%, -42%) scale(0.42);
   }
   22% {
-    opacity: 0.42;
-    transform: translate(-50%, -47%) scale(0.48) rotate(-8deg);
-    filter: saturate(0.65) brightness(0.82);
+    opacity: 0.38;
+    filter: brightness(1.35) saturate(0.68);
+    transform: translate(-50%, -46%) scale(0.58);
   }
-  55% {
-    opacity: 0.76;
-    transform: translate(-50%, -51%) scale(0.78) rotate(-8deg);
-    filter: saturate(0.85) brightness(0.94);
+  52% {
+    opacity: 0.72;
+    filter: brightness(1.18) saturate(0.82);
+    transform: translate(-50%, -49%) scale(0.82);
   }
-  82% {
+  78% {
+    opacity: 0.94;
+    filter: brightness(1.06) saturate(0.94);
+    transform: translate(-50%, -50%) scale(1.03);
+  }
+  100% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1.04) rotate(-8deg);
     filter: none;
-  }
-  100% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1) rotate(-8deg);
-    filter: none;
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
-@keyframes village-first-shelter-scaffold {
-  0%, 12% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scaleX(0.15);
-  }
-  30%, 62% {
-    opacity: 0.82;
-    transform: translate(-50%, -50%) scaleX(1);
-  }
-  88%, 100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scaleX(1.04);
-  }
+@keyframes village-first-shelter-dust {
+  0% { opacity: 0; transform: translate(-50%, -20%) scale(0.55); }
+  18% { opacity: 0.5; transform: translate(-50%, -35%) scale(0.85); }
+  55% { opacity: 0.28; transform: translate(-50%, -70%) scale(1.12); }
+  100% { opacity: 0; transform: translate(-50%, -105%) scale(1.35); }
 }
 
-@keyframes village-first-shelter-path {
-  0% {
-    opacity: 0;
-    stroke-dasharray: 2 120;
-    stroke-dashoffset: 120;
-  }
-  42% {
-    opacity: 0.52;
-  }
-  100% {
-    opacity: 1;
-    stroke-dasharray: 140 0;
-    stroke-dashoffset: 0;
-  }
+@keyframes village-first-shelter-support {
+  0% { opacity: 0; transform: translateY(12px) scaleY(0.2); }
+  28% { opacity: 0.88; transform: translateY(2px) scaleY(0.92); }
+  72% { opacity: 0.5; transform: translateY(0) scaleY(1); }
+  100% { opacity: 0; transform: translateY(-3px) scaleY(1); }
 }
 
-@keyframes village-first-shelter-ground {
-  0% {
-    opacity: 0;
-  }
-  45% {
-    opacity: 0.16;
-  }
-  100% {
-    opacity: 0.36;
-  }
+@keyframes village-first-path-draw {
+  0% { stroke-dashoffset: 1; opacity: 0.12; }
+  45% { stroke-dashoffset: 0.38; opacity: 0.56; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
 }
 
-[data-qa="village-structure-hut"] {
-  pointer-events: none;
+[data-qa="village-structure-hut"] > div:nth-child(n + 2):nth-child(-n + 4) {
+  display: none;
 }
 
-/* At the first shelter milestone, only the primary home and one support pile exist. */
-[data-qa="village-structure-hut"] > div:nth-child(2),
-[data-qa="village-structure-hut"] > div:nth-child(3),
-[data-qa="village-structure-hut"] > div:nth-child(4),
+[data-qa="village-structure-hut"] > div:first-child {
+  left: 27% !important;
+  top: 39% !important;
+  z-index: 3 !important;
+  transform-origin: 50% 88%;
+  animation: village-first-shelter-build 1.45s cubic-bezier(0.22, 0.78, 0.22, 1) both;
+}
+
+[data-qa="village-structure-hut"]::before {
+  content: "";
+  position: absolute;
+  left: 27%;
+  top: 45%;
+  z-index: 2;
+  width: clamp(54px, 7.8vw, 82px);
+  height: clamp(24px, 3.2vw, 36px);
+  border: 2px solid rgba(120, 83, 42, 0.75);
+  border-bottom-width: 4px;
+  transform-origin: 50% 100%;
+  animation: village-first-shelter-support 1.25s ease-out both;
+}
+
+[data-qa="village-structure-hut"]::after {
+  content: "";
+  position: absolute;
+  left: 27%;
+  top: 45%;
+  z-index: 4;
+  width: clamp(68px, 9vw, 96px);
+  height: clamp(30px, 4vw, 44px);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(203, 172, 114, 0.34), rgba(150, 112, 65, 0.12) 46%, transparent 72%);
+  filter: blur(5px);
+  animation: village-first-shelter-dust 1.35s ease-out both;
+}
+
+[data-qa="village-structure-hut"] > div:nth-child(5) {
+  left: 29% !important;
+  top: 50% !important;
+  width: 4.4rem !important;
+  opacity: 0.82;
+}
+
 [data-qa="village-structure-hut"] > div:nth-child(6),
 [data-qa="village-structure-hut"] > div:nth-child(7) {
   display: none;
 }
 
-[data-qa="village-structure-hut"] > div:first-child {
-  animation: village-first-shelter-build 1.45s cubic-bezier(0.2, 0.75, 0.2, 1) both;
-  transform-origin: 50% 82%;
-}
-
-[data-qa="village-structure-hut"]::before,
-[data-qa="village-structure-hut"]::after {
-  content: "";
-  position: absolute;
-  left: 24%;
-  top: 39%;
-  z-index: 4;
-  width: clamp(44px, 6.8vw, 72px);
-  height: 3px;
-  border-radius: 999px;
-  background: rgba(120, 78, 38, 0.9);
-  box-shadow: 0 9px 0 rgba(120, 78, 38, 0.68), 0 -9px 0 rgba(120, 78, 38, 0.68);
-  animation: village-first-shelter-scaffold 1.45s ease-out both;
-  transform-origin: center;
-}
-
-[data-qa="village-structure-hut"]::after {
-  width: 3px;
-  height: clamp(38px, 5.6vw, 60px);
-  box-shadow: 14px 0 0 rgba(120, 78, 38, 0.72), -14px 0 0 rgba(120, 78, 38, 0.72);
-}
-
-/* The exact shelter spur is the only new road at this milestone. */
-g:has(> path[d="M27,41 Q32,50 38,58"]) {
-  animation: village-first-shelter-path 1.45s ease-out both;
-}
-
-path[d="M17,32 C25,29 34,30 38,35 C40,42 38,50 33,54 C26,57 18,54 16,47 C14,41 15,36 17,32 Z"] {
-  animation: village-first-shelter-ground 1.45s ease-out both;
-}
-
-/* Later orders gradually populate the same shelter district; no later mechanic is removed. */
-[data-qa="village-credibility-layer"]:has([data-qa="village-food-fields"]) [data-qa="village-structure-hut"] > div:nth-child(2),
-[data-qa="village-credibility-layer"]:has([data-qa="village-timber-yards"]) [data-qa="village-structure-hut"] > div:nth-child(3),
-[data-qa="village-credibility-layer"]:has([data-qa="village-storehouse-visual"]) [data-qa="village-structure-hut"] > div:nth-child(4),
-[data-qa="village-credibility-layer"]:has([data-qa="village-timber-yards"]) [data-qa="village-structure-hut"] > div:nth-child(6),
-[data-qa="village-credibility-layer"]:has([data-qa="village-storehouse-visual"]) [data-qa="village-structure-hut"] > div:nth-child(7) {
-  display: block;
-  animation: fade-up 0.7s ease-out both;
+[data-qa="village-scene"] path[d="M27,41 Q32,50 38,58"] {
+  path-length: 1;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: village-first-path-draw 1.35s ease-out forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
   [data-qa="village-structure-hut"] > div:first-child,
   [data-qa="village-structure-hut"]::before,
   [data-qa="village-structure-hut"]::after,
-  g:has(> path[d="M27,41 Q32,50 38,58"]),
-  path[d="M17,32 C25,29 34,30 38,35 C40,42 38,50 33,54 C26,57 18,54 16,47 C14,41 15,36 17,32 Z"] {
-    animation-duration: 1ms;
-  }
-}
-
-@media (max-width: 767px) {
-  [data-nextjs-dev-tools-button],
-  [data-nextjs-dev-tools-indicator],
-  button[aria-label*="Next.js"] {
-    display: none !important;
+  [data-qa="village-scene"] path[d="M27,41 Q32,50 38,58"] {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
   }
 }
