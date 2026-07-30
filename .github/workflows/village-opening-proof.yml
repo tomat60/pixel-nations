@@ -9,15 +9,18 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   focused-proof:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - name: Checkout exact PR merge ref
+      - name: Checkout exact Village opening branch
         uses: actions/checkout@v4
+        with:
+          ref: fix/village-first-shelter-reveal
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -55,6 +58,32 @@ jobs:
           find public/qa/village-opening-focused -type f -print | sort > public/qa/village-opening-focused/files.txt
           test "$(find public/qa/village-opening-focused -type f | wc -l)" -ge 8
           sha256sum $(find public/qa/village-opening-focused -type f ! -name SHA256SUMS.txt | sort) > public/qa/village-opening-focused/SHA256SUMS.txt
+
+      - name: Publish exact review frames on evidence branch
+        env:
+          EVIDENCE_BRANCH: evidence/village-opening-${{ github.run_id }}
+          PRODUCT_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          review_root="docs/evidence/village-opening-${GITHUB_RUN_ID}"
+          rm -rf "$review_root"
+          mkdir -p "$review_root"
+          find public/qa/village-opening-focused -type f \
+            \( -iname '*.png' -o -iname '*.webm' -o -name 'sequence-manifest.json' -o -name 'SHA256SUMS.txt' -o -name 'files.txt' \) \
+            -print0 | while IFS= read -r -d '' file; do
+              target="$review_root/${file#public/qa/village-opening-focused/}"
+              mkdir -p "$(dirname "$target")"
+              cp "$file" "$target"
+            done
+          printf '%s\n' "$PRODUCT_SHA" > "$review_root/product-head-sha.txt"
+          git config user.name "pixel-nations-qa"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -b "$EVIDENCE_BRANCH"
+          git add "$review_root"
+          git commit -m "evidence(village): publish opening proof ${GITHUB_RUN_ID}"
+          git push origin "$EVIDENCE_BRANCH"
+          echo "EVIDENCE_BRANCH=$EVIDENCE_BRANCH"
+          echo "EVIDENCE_ROOT=$review_root"
 
       - name: Upload focused evidence
         uses: actions/upload-artifact@v4
