@@ -187,6 +187,18 @@ async function assertResetClears(page, evidence) {
   await page.screenshot({ path: `${SHOT_DIR}/${resetShot}`, fullPage: true }); evidence.push(resetShot);
 }
 
+async function renameScenarioVideos(videos) {
+  for (const [index, entry] of videos.entries()) {
+    const original = entry.video ? await entry.video.path().catch(() => null) : null;
+    if (!original) continue;
+    const target = index === 0
+      ? `${VIDEO_DIR}/post-crisis-countermove.webm`
+      : `${VIDEO_DIR}/post-crisis-countermove-${entry.prefix}.webm`;
+    await rm(target, { force: true });
+    await rename(original, target);
+  }
+}
+
 async function main() {
   await rm(OUT, { recursive: true, force: true });
   await mkdir(VIDEO_DIR, { recursive: true });
@@ -194,19 +206,35 @@ async function main() {
   const child = await ensureApp();
   const browser = await chromium.launch();
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, recordVideo: { dir: VIDEO_DIR, size: { width: 1440, height: 900 } } });
-  const page = await context.newPage();
-  const video = page.video();
+  const videos = [];
   const evidence = [];
 
+  async function newScenarioPage(prefix) {
+    const page = await context.newPage();
+    videos.push({ prefix, video: page.video() });
+    return page;
+  }
+
   try {
-    await runScenario(page, scenarios[0], evidence);
-    await runScenario(page, scenarios[1], evidence);
-    await assertResetClears(page, evidence);
+    let page = await newScenarioPage(scenarios[0].prefix);
+    try {
+      await runScenario(page, scenarios[0], evidence);
+    } finally {
+      await page.close().catch(() => {});
+    }
+
+    page = await newScenarioPage(scenarios[1].prefix);
+    try {
+      await runScenario(page, scenarios[1], evidence);
+      await assertResetClears(page, evidence);
+    } finally {
+      await page.close().catch(() => {});
+    }
+
     await writeFile(`${OUT}/post-crisis-countermove-summary.json`, `${JSON.stringify({ generatedAt: new Date().toISOString(), evidence, status: "ok" }, null, 2)}\n`);
   } finally {
     await context.close().catch(() => {});
-    const original = video ? await video.path().catch(() => null) : null;
-    if (original) await rename(original, `${VIDEO_DIR}/post-crisis-countermove.webm`);
+    await renameScenarioVideos(videos).catch((error) => console.warn(`Could not rename one or more scenario videos: ${error.message}`));
     await browser.close().catch(() => {});
     stopApp(child);
   }
