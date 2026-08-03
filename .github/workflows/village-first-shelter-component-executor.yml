@@ -1,0 +1,102 @@
+name: Village First Shelter Component Executor
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - app/play/components/VillageScene.tsx
+      - scripts/apply-village-first-shelter-component-fix.mjs
+      - .github/workflows/village-first-shelter-component-executor.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact implementation branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/village-first-shelter-component-v2
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply bounded component patch
+        run: |
+          set -euo pipefail
+          node scripts/apply-village-first-shelter-component-fix.mjs
+          changed="$(git diff --name-only)"
+          test "$changed" = "app/play/components/VillageScene.tsx"
+          grep -F 'data-home-count={visibleHuts.length}' app/play/components/VillageScene.tsx
+          grep -F '<ShelterCluster homeCount={shelterHomeCount} />' app/play/components/VillageScene.tsx
+          ! grep -F 'function ShelterCluster()' app/play/components/VillageScene.tsx
+
+      - name: Commit exact product patch to branch
+        run: |
+          set -euo pipefail
+          git config user.name "pixel-nations-steward"
+          git config user.email "actions@users.noreply.github.com"
+          git add app/play/components/VillageScene.tsx
+          if git diff --cached --quiet; then
+            echo "PRODUCT_PATCH_ALREADY_COMMITTED"
+          else
+            git commit -m "fix(village): stage shelter homes with progression"
+            git push origin HEAD:fix/village-first-shelter-component-v2
+          fi
+          git rev-parse HEAD | tee exact-head-sha.txt
+
+      - name: Build
+        run: npm run build
+
+      - name: Village scene QA
+        run: npm run qa:village
+
+      - name: Village progression video evidence
+        run: node scripts/qa-village-progression-video.mjs
+
+      - name: Verify exact progression contract
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const source = fs.readFileSync('app/play/components/VillageScene.tsx', 'utf8');
+          const required = [
+            'const shelterHomeCount = hasStorehouse',
+            '<ShelterCluster homeCount={shelterHomeCount} />',
+            'function ShelterCluster({ homeCount }: { homeCount: number })',
+            'data-home-count={visibleHuts.length}',
+            'huts.slice(0, Math.max(1, Math.min(homeCount, huts.length)))',
+            '{visibleHuts.length > 1 ? ('
+          ];
+          for (const item of required) {
+            if (!source.includes(item)) throw new Error(`Missing exact progression contract: ${item}`);
+          }
+          if (source.includes('function ShelterCluster()')) throw new Error('Old four-home ShelterCluster remains');
+          console.log('VILLAGE_FIRST_SHELTER_COMPONENT_CONTRACT_OK');
+          NODE
+          mkdir -p evidence/village-first-shelter-component
+          cp exact-head-sha.txt evidence/village-first-shelter-component/exact-head-sha.txt
+          cp -R public/qa/village-scene evidence/village-first-shelter-component/village-scene
+          cp -R public/qa/village-progression evidence/village-first-shelter-component/village-progression
+          git diff "$(cat exact-head-sha.txt)^" "$(cat exact-head-sha.txt)" -- app/play/components/VillageScene.tsx > evidence/village-first-shelter-component/product.patch
+          find evidence/village-first-shelter-component -type f -print0 | sort -z | xargs -0 sha256sum > evidence/village-first-shelter-component/SHA256SUMS.txt
+
+      - name: Upload exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: village-first-shelter-component-${{ github.run_id }}
+          path: evidence/village-first-shelter-component/**
+          if-no-files-found: warn
+          retention-days: 30
