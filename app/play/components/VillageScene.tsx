@@ -171,6 +171,13 @@ function SettlementCredibilityLayer({ state }: { state: PlayState }) {
   const hasMarket = state.settlementMarkers.includes("market");
   const hasCouncil = state.settlementMarkers.includes("council");
   const hasWatch = state.settlementMarkers.includes("watch");
+  const shelterHomeCount = hasStorehouse
+    ? 4
+    : hasFood && hasTimber
+      ? 3
+      : hasFood || hasTimber
+        ? 2
+        : 1;
   const institutionVisuals = getInstitutionVisuals(state.retentionRecords);
   const peopleCount = Math.min(12, 3 + state.completedOrders.length + Math.max(0, state.settlementMarkers.length - 1));
   const developmentValue = Math.max(0, Math.min(100, getDevelopmentScore(state)));
@@ -182,7 +189,7 @@ function SettlementCredibilityLayer({ state }: { state: PlayState }) {
         <div className="absolute left-1 top-0 h-4 w-7 rounded-r-md bg-amber-300/90 shadow-lg" />
       </div>
       <CampLife peopleCount={peopleCount} development={developmentValue} />
-      {hasShelter ? <ShelterCluster /> : null}
+      {hasShelter ? <ShelterCluster homeCount={shelterHomeCount} /> : null}
       {hasFood ? <FoodFields /> : null}
       {hasTimber ? <TimberAndFences /> : null}
       {hasStorehouse ? <StorehouseSupplies /> : null}
@@ -400,16 +407,17 @@ function SettlementBuilding({
   );
 }
 
-function ShelterCluster() {
+function ShelterCluster({ homeCount }: { homeCount: number }) {
   const huts: Array<{ left: number; top: number; rotation: number; w: string; h: string; smoke: boolean; back?: boolean }> = [
     { left: 24, top: 36, rotation: -8, w: "clamp(58px, 8.4vw, 88px)", h: "clamp(48px, 6.8vw, 72px)", smoke: true },
     { left: 32, top: 34, rotation: 6, w: "clamp(52px, 7.6vw, 80px)", h: "clamp(44px, 6.2vw, 66px)", smoke: true, back: true },
     { left: 34, top: 45, rotation: 11, w: "clamp(60px, 8.8vw, 94px)", h: "clamp(50px, 7.2vw, 78px)", smoke: false },
     { left: 22, top: 47, rotation: 3, w: "clamp(56px, 8vw, 84px)", h: "clamp(46px, 6.4vw, 70px)", smoke: false },
   ];
+  const visibleHuts = huts.slice(0, Math.max(1, Math.min(homeCount, huts.length)));
   return (
-    <div data-qa="village-structure-hut" className="absolute inset-0">
-      {huts.map((hut, index) => (
+    <div data-qa="village-structure-hut" data-home-count={visibleHuts.length} className="absolute inset-0">
+      {visibleHuts.map((hut, index) => (
         <div
           key={`${hut.left}-${hut.top}`}
           className="absolute -translate-x-1/2 -translate-y-1/2"
@@ -426,10 +434,14 @@ function ShelterCluster() {
           />
         </div>
       ))}
-      {/* yard props: wood pile + barrel, touching the shared yard/path area */}
-      <div className="absolute left-[26%] top-[52%] h-2 w-6 -translate-x-1/2 rounded-full bg-amber-900/80 shadow-md" />
-      <div className="absolute left-[26%] top-[50%] h-2 w-5 -translate-x-1/2 rounded-full bg-amber-800/75 shadow-sm" />
-      <div className="absolute left-[24%] top-[55%] h-3 w-2.5 -translate-x-1/2 rounded-sm bg-stone-700/80 shadow-md" />
+      {visibleHuts.length > 1 ? (
+        <>
+          {/* yard props arrive with the second home, keeping the first-shelter frame readable */}
+          <div className="absolute left-[26%] top-[52%] h-2 w-6 -translate-x-1/2 rounded-full bg-amber-900/80 shadow-md" />
+          <div className="absolute left-[26%] top-[50%] h-2 w-5 -translate-x-1/2 rounded-full bg-amber-800/75 shadow-sm" />
+          <div className="absolute left-[24%] top-[55%] h-3 w-2.5 -translate-x-1/2 rounded-sm bg-stone-700/80 shadow-md" />
+        </>
+      ) : null}
     </div>
   );
 }
