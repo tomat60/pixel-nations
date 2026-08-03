@@ -4,6 +4,17 @@ import { readFile, writeFile } from "node:fs/promises";
 const path = "app/play/components/VillageScene.tsx";
 let source = await readFile(path, "utf8");
 
+const alreadyApplied =
+  source.includes('function ShelterCluster({ homeCount }: { homeCount: number })') &&
+  source.includes('data-home-count={visibleHuts.length}') &&
+  source.includes('huts.slice(0, Math.max(1, Math.min(homeCount, huts.length)))') &&
+  source.includes('<ShelterCluster homeCount={shelterHomeCount} />');
+
+if (alreadyApplied) {
+  console.log("VILLAGE_FIRST_SHELTER_COMPONENT_PATCH_ALREADY_APPLIED");
+  process.exit(0);
+}
+
 const layerNeedle = `  const hasWatch = state.settlementMarkers.includes("watch");\n  const institutionVisuals = getInstitutionVisuals(state.retentionRecords);`;
 const layerReplacement = `  const hasWatch = state.settlementMarkers.includes("watch");\n  const shelterHomeCount = hasStorehouse\n    ? 4\n    : hasFood && hasTimber\n      ? 3\n      : hasFood || hasTimber\n        ? 2\n        : 1;\n  const institutionVisuals = getInstitutionVisuals(state.retentionRecords);`;
 
