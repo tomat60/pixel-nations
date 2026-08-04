@@ -2,6 +2,7 @@ import { chromium } from "playwright";
 import { existsSync } from "node:fs";
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { dismissFounderRecord, openAdvancedFounderRecord } from "./qa-founder-record-helper.mjs";
 
 const URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const KEY = "pixelNations.play.v1";
@@ -69,7 +70,7 @@ async function storedCount(page, count) {
 async function clearRun(page) {
   await page.evaluate((key) => window.localStorage.removeItem(key), KEY);
   await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
-  await page.locator('[data-qa="opening-guide"]').waitFor({ state: "visible", timeout: 5000 });
+  await page.locator('[data-qa="aurelian-village-scene"][data-aurelian-stage="camp"]').waitFor({ state: "visible", timeout: 5000 });
 }
 
 async function runCase(browser, item) {
@@ -82,6 +83,7 @@ async function runCase(browser, item) {
     await page.evaluate(({ key, state }) => window.localStorage.setItem(key, JSON.stringify(state)), { key: KEY, state: seed(item) });
     await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    await dismissFounderRecord(page, { depth: "founder-run", required: true });
 
     const panel = page.locator('[data-qa="imperial-turn-panel"][data-turn-count="0"]').first();
     await panel.waitFor({ state: "visible", timeout: 5000 });
@@ -112,6 +114,7 @@ async function runCase(browser, item) {
 
     await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    await dismissFounderRecord(page, { depth: "founder-run", required: true });
     await page.locator('[data-qa="imperial-turn-panel"][data-turn-count="2"]').waitFor({ state: "visible", timeout: 5000 });
     const reloadShot = `${item.posture}-03-reload.png`;
     await page.screenshot({ path: `${SHOTS}/${reloadShot}`, fullPage: true }); screenshots.push(reloadShot);
@@ -127,8 +130,8 @@ async function runCase(browser, item) {
       await stabilizeChoice.click({ force: true });
       await page.locator('[data-qa="empire-crisis-resolved"][data-crisis-recovery="stabilize-frontier"]').first().waitFor({ state: "visible", timeout: 5000 });
     }
-    const founderRecord = page.locator(`[data-qa="demo-complete-overlay"][data-posture="${item.posture}"]`).first();
-    await founderRecord.waitFor({ state: "visible", timeout: 5000 });
+    const founderRecord = await openAdvancedFounderRecord(page);
+    await page.locator(`[data-qa="demo-complete-overlay"][data-posture="${item.posture}"][data-record-depth="advanced"]`).waitFor({ state: "visible", timeout: 5000 });
     if (await page.locator('[data-qa="founder-record-turn"]').count() !== 3) throw new Error(`${item.posture}: Founder Record missing turn history`);
     await page.locator('[data-qa="continue-ruling"]').click({ force: true });
     await founderRecord.waitFor({ state: "hidden", timeout: 5000 });
