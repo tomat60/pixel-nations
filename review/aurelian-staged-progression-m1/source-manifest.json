@@ -1,0 +1,91 @@
+{
+  "accepted_source_head": "59fbebf4ba2d7cddb77a8ca4d93701b6bec4599a",
+  "source_commit": "84fa4e91af6a88989be7c99e0891cede11f2ca38",
+  "states": [
+    "camp",
+    "first_shelter",
+    "developed_settlement"
+  ],
+  "assets": {
+    "church": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_church_red.gltf",
+      "sha256": "e4dc40472c3c0039c0dde205630ebb3a4e51da2ddf55109a3c2f9a8ba91ad2c3"
+    },
+    "blacksmith": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_blacksmith_red.gltf",
+      "sha256": "5689a8f37fa59a956927b4deaeb6d8ee48228fe29c2c61b71048bec04a7b086f"
+    },
+    "barracks": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_barracks_red.gltf",
+      "sha256": "3a10bf352be40343281658a0cffa28cef84bb452636c08fe1cc68e35af1b2665"
+    },
+    "house_a": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/green/building_home_A_green.gltf",
+      "sha256": "43eec5e22564befc0ad5d283d92a577e0271682501c348ae3b22067e5b43a59e"
+    },
+    "house_b": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/yellow/building_home_B_yellow.gltf",
+      "sha256": "0e5d8c6ebc919f7fb5ade9b6956f5edfa5bca5c81cfecdd04e77d2633c367d64"
+    },
+    "market": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/yellow/building_market_yellow.gltf",
+      "sha256": "a3d5ede18799db7c46b0fa35cc1d22d5f71baed11331008ac4435f4d42c4e289"
+    },
+    "well": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/blue/building_well_blue.gltf",
+      "sha256": "66305823322b2e6a7f1cb8d8bf0d91ed9b94b8d96f61d0f7af77bd0d09f6463e"
+    },
+    "bridge": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/building_bridge_A.gltf",
+      "sha256": "7f3a7e8b3e72a66dec70d6a00eb87e62d3ca5c6892b9b965c675cb9d193e4d29"
+    },
+    "tree_a": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/tree_single_A.gltf",
+      "sha256": "ac913af6eaed6f15d26a2b75a877aa8dd10de90f26298f3f953abad86a4b4606"
+    },
+    "tree_b": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/tree_single_B.gltf",
+      "sha256": "1c038591301947c485937e9fdbab182c813ef32df48c02fad3daeb2f1f0421e0"
+    },
+    "rock_c": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+      "sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b"
+    },
+    "rock_e": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_E.gltf",
+      "sha256": "09e77f8cca93237863a1c6bac262bb473eb2706c0781035b01b031d1207e6d29"
+    },
+    "tent": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/tent.gltf",
+      "sha256": "d8920394ddec09d8afa0cfaa2dad1c75b55fd21819fbd7c31392b3b8dce5dca0"
+    },
+    "flag_red": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/flag_red.gltf",
+      "sha256": "c1f76b1ca3d47a30a868500ecbe2844e89b75b4bebc7283f41bd37561aa58c1f"
+    },
+    "barrel": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/barrel.gltf",
+      "sha256": "24673663eb53ffab6c8db612654856f051c4877bfc02ea25fee89cd95ee4d100"
+    },
+    "crate_big": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_A_big.gltf",
+      "sha256": "a96ce5522e45104b5a04cf9605ca30b9572cc79c7633d41f3434b9843010a225"
+    },
+    "crate_small": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_A_small.gltf",
+      "sha256": "3a7fee2b962949d44bdac360405f2cd9c442bf41eea65e057f08b6b2e2d6f6d8"
+    },
+    "lumber": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/resource_lumber.gltf",
+      "sha256": "601a69f44f0c4a9b5070a80bd4a20887960e01f1523a6125c1edc8ba19168f1f"
+    },
+    "sack": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/sack.gltf",
+      "sha256": "b61929d6161907aff4f1fd211cd0a8300d002d1a686ba43d07c4aff171fbd9f0"
+    },
+    "wheelbarrow": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/wheelbarrow.gltf",
+      "sha256": "bb037662a3e5be1f4fe597ffc4927d2a6ad88d307da10388cfb178ca5fdae63d"
+    }
+  }
+}
