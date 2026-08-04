@@ -2,6 +2,7 @@ import { chromium } from "playwright";
 import { existsSync } from "node:fs";
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { dismissFounderRecord, openAdvancedFounderRecord } from "./qa-founder-record-helper.mjs";
 
 const URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const KEY = "pixelNations.play.v1";
@@ -89,25 +90,28 @@ async function assertStoredRecovery(page, expected) {
 
 async function triggerCrisisAndRecover(page, recoveryId, screenshotName) {
   await loadSeed(page, crisisSeed());
+  await dismissFounderRecord(page, { depth: "founder-run", required: true });
   await page.locator('[data-qa="current-objective-text"]').getByText(/Imperial Turn 3\/3/i).waitFor({ state: "visible", timeout: 5000 });
   await page.locator('[data-qa="imperial-turn-action"][data-action-id="reinforce-ridge"]').first().click({ force: true });
   await page.locator('[data-qa="empire-crisis-panel"][data-crisis-reason="rival-pressure"]').waitFor({ state: "visible", timeout: 5000 });
   if (await page.locator('[data-qa="demo-complete-overlay"]').count() !== 0) throw new Error("Founder Record appeared before crisis recovery");
   await page.locator(`[data-qa="empire-crisis-choice"][data-crisis-recovery="${recoveryId}"]`).click({ force: true });
   await page.locator(`[data-qa="empire-crisis-resolved"][data-crisis-recovery="${recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
-  await page.locator(`[data-qa="demo-complete-overlay"][data-empire-crisis-recovery="${recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
-  await page.locator(`[data-qa="founder-record-crisis"][data-crisis-recovery="${recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
+  const advancedRecord = await openAdvancedFounderRecord(page);
+  await advancedRecord.locator(`[data-qa="founder-record-crisis"][data-crisis-recovery="${recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
   await assertStoredRecovery(page, recoveryId);
   await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
-  await page.locator(`[data-qa="demo-complete-overlay"][data-empire-crisis-recovery="${recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
+  await page.locator(`[data-qa="demo-complete-overlay"][data-record-depth="advanced"][data-empire-crisis-recovery="${recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
   await page.locator(`[data-qa="founder-record-crisis"][data-crisis-recovery="${recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
   await page.screenshot({ path: `${SHOT_DIR}/${screenshotName}`, fullPage: true });
 }
 
 async function assertSafeBypass(page) {
   await loadSeed(page, safeSeed());
+  await dismissFounderRecord(page, { depth: "founder-run", required: true });
   await page.locator('[data-qa="imperial-turn-action"][data-action-id="renew-border-charter"]').first().click({ force: true });
-  await page.locator('[data-qa="demo-complete-overlay"][data-empire-crisis="none"]').waitFor({ state: "visible", timeout: 5000 });
+  const advancedRecord = await openAdvancedFounderRecord(page);
+  await advancedRecord.locator('[data-qa="founder-record-posture"][data-posture="diplomatic"]').waitFor({ state: "visible", timeout: 5000 });
   if (await page.locator('[data-qa="empire-crisis-panel"]').count() !== 0) throw new Error("Safe path incorrectly triggered an empire crisis");
   await page.screenshot({ path: `${SHOT_DIR}/01-safe-bypass.png`, fullPage: true });
 }
