@@ -75,6 +75,7 @@ function useFounderRunPrimaryActionVisibility() {
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('[data-qa="play-shell"]');
     if (!root) return;
+    const playRoot = root;
 
     let frame = 0;
 
@@ -82,7 +83,7 @@ function useFounderRunPrimaryActionVisibility() {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
         const target = founderRunPrimarySelectors
-          .map((selector) => root.querySelector<HTMLElement>(selector))
+          .map((selector) => playRoot.querySelector<HTMLElement>(selector))
           .find((element) => element && element.getClientRects().length > 0);
 
         if (!target || isInsideViewport(target)) return;
@@ -91,7 +92,7 @@ function useFounderRunPrimaryActionVisibility() {
     }
 
     const observer = new MutationObserver(scheduleVisibilityCheck);
-    observer.observe(root, {
+    observer.observe(playRoot, {
       subtree: true,
       childList: true,
       attributes: true,
