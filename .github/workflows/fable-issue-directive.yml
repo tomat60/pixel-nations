@@ -124,6 +124,20 @@ jobs:
           echo "FABLE_TRUSTED_TOOLING_SHA=$(git rev-parse HEAD)"
           echo "FABLE_EVIDENCE_SHA=$evidence_sha"
 
+      - name: Stage approved Aurelian evidence inside the visual allowlist
+        if: contains(github.event.issue.body, 'AURELIAN_EVIDENCE_STAGING: v1')
+        run: |
+          set -euo pipefail
+          source_dir="evidence-repo/review/aurelian-staged-progression-m1"
+          target_dir="evidence-repo/docs/visual-evidence/aurelian-m2"
+          test -f "$source_dir/contact-sheet-desktop.png"
+          test -f "$source_dir/contact-sheet-portrait.png"
+          mkdir -p "$target_dir"
+          cp "$source_dir/contact-sheet-desktop.png" "$target_dir/contact-sheet-desktop.png"
+          cp "$source_dir/contact-sheet-portrait.png" "$target_dir/contact-sheet-portrait.png"
+          sha256sum "$target_dir/contact-sheet-desktop.png" "$target_dir/contact-sheet-portrait.png"
+          echo "FABLE_AURELIAN_EVIDENCE_STAGING=PASS"
+
       - name: Run validated Fable issue directive
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
