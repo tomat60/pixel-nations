@@ -28,6 +28,13 @@ const requiredSceneTokens = [
   'data-aurelian-stage={stageId}',
   'data-qa="aurelian-village-stage"',
   'const stageId = getAurelianSettlementStage(state) ?? "camp"',
+  'const stageEntries = Object.entries(stageVisuals) as Array<[AurelianSettlementStage, StageVisual]>',
+  'data-qa="aurelian-stage-image"',
+  'data-aurelian-image-stage={candidateId}',
+  'data-aurelian-active={isActive ? "true" : "false"}',
+  'priority',
+  'opacity-100',
+  'opacity-0',
 ];
 
 const requiredResolverTokens = [
@@ -45,6 +52,8 @@ const forbiddenPageTokens = [
 const forbiddenSceneTokens = [
   'function getAurelianStageId',
   'developedMarkers.some',
+  'src={visual.portrait}',
+  'src={visual.desktop}',
 ];
 
 for (const token of requiredPageTokens) {
@@ -60,7 +69,7 @@ for (const token of forbiddenPageTokens) {
   if (page.includes(token)) throw new Error(`Forbidden legacy product-path token remains: ${token}`);
 }
 for (const token of forbiddenSceneTokens) {
-  if (scene.includes(token)) throw new Error(`Duplicate Aurelian state logic remains in presentation: ${token}`);
+  if (scene.includes(token)) throw new Error(`Forbidden Aurelian presentation regression remains: ${token}`);
 }
 
 console.log("AURELIAN_PLAY_INTEGRATION_GUARD_OK");
