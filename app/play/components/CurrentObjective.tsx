@@ -87,7 +87,7 @@ function useFounderRunPrimaryActionVisibility() {
           .find((element) => element && element.getClientRects().length > 0);
 
         if (!target || isInsideViewport(target)) return;
-        target.scrollIntoView({ block: "nearest", inline: "nearest" });
+        target.scrollIntoView({ block: "center", inline: "nearest" });
       });
     }
 
