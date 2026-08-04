@@ -2,6 +2,7 @@ import { chromium } from "playwright";
 import { existsSync } from "node:fs";
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { assertAurelianRestart, dismissFounderRecord } from "./qa-founder-record-helper.mjs";
 
 const URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const KEY = "pixelNations.play.v1";
@@ -98,7 +99,7 @@ async function assertStored(page, predicateSource, args, label) {
 
 async function runScenario(page, scenario, evidence) {
   await loadSeed(page, founderSeed(scenario.recoveryId));
-  await page.locator(`[data-qa="demo-complete-overlay"][data-empire-crisis-recovery="${scenario.recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
+  await page.locator(`[data-qa="demo-complete-overlay"][data-record-depth="advanced"][data-empire-crisis-recovery="${scenario.recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
   await page.locator(`[data-qa="founder-record-crisis"][data-crisis-recovery="${scenario.recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
   const founderShot = `${scenario.prefix}-01-founder-record.png`;
   await page.screenshot({ path: `${SHOT_DIR}/${founderShot}`, fullPage: true }); evidence.push(founderShot);
@@ -122,6 +123,7 @@ async function runScenario(page, scenario, evidence) {
   await page.screenshot({ path: `${SHOT_DIR}/${resolvedShot}`, fullPage: true }); evidence.push(resolvedShot);
 
   await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
+  await dismissFounderRecord(page, { depth: "advanced", required: true });
   await page.locator(`[data-qa="world-post-crisis-consequence"][data-post-crisis-response="${scenario.responseId}"]`).waitFor({ state: "visible", timeout: 5000 });
   await page.locator('[data-qa="open-founder-record"]').waitFor({ state: "visible", timeout: 5000 });
   await assertStored(page, "(state, args) => state.postCrisisCountermoveOrigin === args.origin && state.postCrisisResponseId === args.responseId", scenario, `${scenario.origin} reload persistence`);
@@ -163,6 +165,7 @@ async function runPayoffSecureCheck(page, scenario, evidence) {
   await page.screenshot({ path: `${SHOT_DIR}/${securedShot}`, fullPage: true }); evidence.push(securedShot);
 
   await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
+  await dismissFounderRecord(page, { depth: "advanced", required: true });
   await page.locator('[data-qa="post-crisis-frontier-secured"]').waitFor({ state: "visible", timeout: 5000 });
   if (await page.locator('[data-qa="secure-post-crisis-frontier"]').count() !== 0) {
     throw new Error(`${scenario.origin} secure button still visible after reload`);
@@ -179,10 +182,10 @@ async function runPayoffSecureCheck(page, scenario, evidence) {
 
 async function assertResetClears(page, evidence) {
   await page.locator('[data-qa="open-founder-record"]').click({ force: true });
-  await page.locator('[data-qa="demo-complete-overlay"]').waitFor({ state: "visible", timeout: 5000 });
+  await page.locator('[data-qa="demo-complete-overlay"][data-record-depth="advanced"]').waitFor({ state: "visible", timeout: 5000 });
   await page.locator('[data-qa="restart-run"]').click({ force: true });
-  await page.locator('[data-qa="opening-guide"]').waitFor({ state: "visible", timeout: 5000 });
-  await assertStored(page, "(state) => Array.isArray(state.ownedPlotIds) && state.ownedPlotIds.length === 0 && state.empireCrisisRecoveryId === null && state.postCrisisCountermoveOrigin === null && state.postCrisisResponseId === null", {}, "reset clears post-crisis state");
+  await assertAurelianRestart(page);
+  await assertStored(page, "(state) => Array.isArray(state.ownedPlotIds) && state.ownedPlotIds.length === 1 && Array.isArray(state.completedOrders) && state.completedOrders.length === 0 && state.empireCrisisRecoveryId === null && state.postCrisisCountermoveOrigin === null && state.postCrisisResponseId === null", {}, "reset clears post-crisis state");
   const resetShot = "reset-05-new-empire-clear.png";
   await page.screenshot({ path: `${SHOT_DIR}/${resetShot}`, fullPage: true }); evidence.push(resetShot);
 }
