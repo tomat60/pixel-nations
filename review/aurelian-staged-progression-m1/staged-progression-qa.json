@@ -4,27 +4,27 @@
   "images": {
     "desktop": {
       "camp": {
-        "sha256": "3272ac2aa6bbfe41f1fb8061639b5221e378e7ebe6bfd0d35e4f425088fed23e",
+        "sha256": "cf6c44a9e304034c854ffa6579599bc0031f84a8eb9397be00158b8004a01c59",
         "dhash": "e0e052548bd36793",
-        "bytes": 1314531,
+        "bytes": 1314514,
         "width": 1440,
         "height": 900,
-        "variance": 112.92,
-        "unique_sample_colors": 1664
+        "variance": 112.919,
+        "unique_sample_colors": 1665
       },
       "first_shelter": {
-        "sha256": "3b41193db9f8da8fc4fbc29a780a531a65f227d484805972bb306c0253511e27",
+        "sha256": "9fc889d4fb3f3e45d8c7509ff9c55a23edc91eda159552aea898c4c12694a45b",
         "dhash": "e0e2644d8bd36793",
-        "bytes": 1317701,
+        "bytes": 1322606,
         "width": 1440,
         "height": 900,
-        "variance": 119.187,
-        "unique_sample_colors": 1727
+        "variance": 121.211,
+        "unique_sample_colors": 1781
       },
       "developed_settlement": {
-        "sha256": "29e7491ffd40c9091748d59d2e4260e4cd845ed5fe175d8f4690fef0517c8b06",
+        "sha256": "a54770deb8ed2b8caaa82d6d34f36a0a1d56544c5f559827f9d0819aeb1d3f5c",
         "dhash": "e0e2656dabdb6393",
-        "bytes": 1384817,
+        "bytes": 1384660,
         "width": 1440,
         "height": 900,
         "variance": 175.853,
@@ -33,71 +33,71 @@
     },
     "portrait": {
       "camp": {
-        "sha256": "2aa458e8e7931c5be876ddd8605219278874443f922bbe7fa83c052feecbe551",
+        "sha256": "fa08fadbb7ade031cc3058079a6d737ea9d9ff345c20742ee67a18389656aa0e",
         "dhash": "30c0c1802d918161",
-        "bytes": 338838,
+        "bytes": 338894,
         "width": 390,
         "height": 844,
         "variance": 80.66,
         "unique_sample_colors": 1318
       },
       "first_shelter": {
-        "sha256": "598d496ae9d5eb05dc41f1ef836acc25eb6be86abf6224e242de3e3ad1acc802",
-        "dhash": "30c0c1822c918161",
-        "bytes": 340628,
+        "sha256": "9dd7b8e3e37cbb84803596e18ca537a3adc3139d0447dec8be9cf7ff99adca19",
+        "dhash": "30c0c1822e918161",
+        "bytes": 341451,
         "width": 390,
         "height": 844,
-        "variance": 85.249,
-        "unique_sample_colors": 1369
+        "variance": 86.338,
+        "unique_sample_colors": 1408
       },
       "developed_settlement": {
-        "sha256": "c0e12d58f0501ad708a3b4271b9c1762584c01739a254029a2554f95b72ea512",
+        "sha256": "c9d2485c83cf05ba597d21e89c1aec026d65a0212708c135eceddd30457c9214",
         "dhash": "31c6e6a218998361",
-        "bytes": 372669,
+        "bytes": 372757,
         "width": 390,
         "height": 844,
-        "variance": 154.36,
-        "unique_sample_colors": 2560
+        "variance": 154.359,
+        "unique_sample_colors": 2559
       }
     }
   },
   "deltas": {
     "desktop": {
       "camp_to_first_shelter": {
-        "changed_pixel_ratio": 0.009072,
-        "mean_absolute_channel_error": 0.315524,
+        "changed_pixel_ratio": 0.007416,
+        "mean_absolute_channel_error": 0.22277,
         "p99_channel_error": 0.0,
-        "max_channel_error": 106
+        "max_channel_error": 84
       },
       "first_shelter_to_developed": {
-        "changed_pixel_ratio": 0.072667,
-        "mean_absolute_channel_error": 1.820773,
-        "p99_channel_error": 45.0,
+        "changed_pixel_ratio": 0.076944,
+        "mean_absolute_channel_error": 1.937478,
+        "p99_channel_error": 46.0,
         "max_channel_error": 156
       },
       "camp_to_developed": {
         "changed_pixel_ratio": 0.081596,
-        "mean_absolute_channel_error": 2.134419,
+        "mean_absolute_channel_error": 2.134402,
         "p99_channel_error": 48.0,
         "max_channel_error": 156
       }
     },
     "portrait": {
       "camp_to_first_shelter": {
-        "changed_pixel_ratio": 0.006896,
-        "mean_absolute_channel_error": 0.223745,
+        "changed_pixel_ratio": 0.007294,
+        "mean_absolute_channel_error": 0.204918,
         "p99_channel_error": 0.0,
         "max_channel_error": 135
       },
       "first_shelter_to_developed": {
-        "changed_pixel_ratio": 0.087462,
-        "mean_absolute_channel_error": 2.110594,
+        "changed_pixel_ratio": 0.09012,
+        "mean_absolute_channel_error": 2.154808,
         "p99_channel_error": 47.0,
         "max_channel_error": 194
       },
       "camp_to_developed": {
         "changed_pixel_ratio": 0.094358,
-        "mean_absolute_channel_error": 2.334329,
+        "mean_absolute_channel_error": 2.334279,
         "p99_channel_error": 49.0,
         "max_channel_error": 194
       }
