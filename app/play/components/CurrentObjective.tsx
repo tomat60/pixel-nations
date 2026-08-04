@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect } from "react";
 import {
   getEmpireCrisisOpen,
   getEmpireCrisisReasonLabel,
@@ -9,6 +12,13 @@ import {
   nationSectorThreshold,
   type PlayState,
 } from "../lib/play-state";
+
+const founderRunPrimarySelectors = [
+  '[data-qa="council-panel"] [data-qa="council-nation-ready"] [data-qa="found-nation-choice"]',
+  '[data-qa="council-panel"] [data-qa="frontier-objective-options"] [data-qa="frontier-objective-choice"]',
+  '[data-qa="council-panel"] [data-qa="empire-declaration-options"] [data-qa="empire-declaration-choice"]',
+  '[data-qa="world-sector-inspect"] [data-qa="claim-sector-button"]:not(:disabled)',
+] as const;
 
 export function CurrentObjective({
   state,
@@ -24,6 +34,8 @@ export function CurrentObjective({
   secondRunStarted: boolean;
   onOpenFounderRecord: () => void;
 }) {
+  useFounderRunPrimaryActionVisibility();
+
   const objective = founderRecordAvailable && !state.courtCaseDecisionId
     ? "Founder Run complete. Review the Founder Record or continue ruling through Council."
     : getCurrentObjectiveText(state);
@@ -56,6 +68,58 @@ export function CurrentObjective({
       ) : null}
       {secondRunStarted ? <p data-qa="second-run-started" className="mt-1.5 text-[8px] font-black uppercase tracking-[0.12em] text-emerald-100">Second history begun</p> : null}
     </aside>
+  );
+}
+
+function useFounderRunPrimaryActionVisibility() {
+  useEffect(() => {
+    const root = document.querySelector<HTMLElement>('[data-qa="play-shell"]');
+    if (!root) return;
+
+    let frame = 0;
+
+    function scheduleVisibilityCheck() {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const target = founderRunPrimarySelectors
+          .map((selector) => root.querySelector<HTMLElement>(selector))
+          .find((element) => element && element.getClientRects().length > 0);
+
+        if (!target || isInsideViewport(target)) return;
+        target.scrollIntoView({ block: "nearest", inline: "nearest" });
+      });
+    }
+
+    const observer = new MutationObserver(scheduleVisibilityCheck);
+    observer.observe(root, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: [
+        "disabled",
+        "data-sector-control",
+        "data-nation-ready",
+        "data-frontier-intent",
+        "data-empire-ready",
+      ],
+    });
+    scheduleVisibilityCheck();
+
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(frame);
+    };
+  }, []);
+}
+
+function isInsideViewport(element: HTMLElement) {
+  const margin = 8;
+  const rect = element.getBoundingClientRect();
+  return (
+    rect.top >= margin &&
+    rect.left >= margin &&
+    rect.bottom <= window.innerHeight - margin &&
+    rect.right <= window.innerWidth - margin
   );
 }
 
