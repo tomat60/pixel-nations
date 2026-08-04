@@ -64,6 +64,7 @@ base.LAYOUTS = {
         "camp": {
             "hearth": (8, 40),
             "spur": [(-2, 8), (5, 20), (9, 31), (12, 42)],
+            "shelter_spur": [(12, 42), (13, 46), (15, 49), (18, 51)],
             "props": [
                 ("tent", (23, 47), -12, 8.6),
                 ("flag_red", (2, 36), 0, 8.0),
@@ -99,6 +100,7 @@ base.LAYOUTS = {
         "camp": {
             "hearth": (1, 46),
             "spur": [(1, -4), (3, 16), (5, 34), (8, 50)],
+            "shelter_spur": [(8, 50), (11, 52), (15, 54), (18, 55)],
             "props": [
                 ("tent", (17, 53), -10, 7.8),
                 ("flag_red", (-9, 42), 0, 7.2),
@@ -251,7 +253,7 @@ def state_props(layout, state):
     if state == "camp":
         return list(layout["camp"]["props"])
     if state == "first_shelter":
-        keep = {"flag_red", "crate_big", "lumber", "sack", "barrel"}
+        keep = {"tent", "flag_red", "crate_big", "lumber", "sack", "barrel", "wheelbarrow"}
         return [placement for placement in layout["camp"]["props"] if placement[0] in keep]
     return []
 
@@ -274,6 +276,8 @@ def build_scene(mode, state, source, out):
     base.create_ribbon("RiverWater", mode, layout["river"], 19.0, materials["water"], fixed_z=layout["water_z"])
     base.create_ribbon("RoadApproach", mode, layout["road_before"], 5.0, materials["road"], z_offset=0.12)
     base.create_ribbon("RoadSettlement", mode, state_road_after(layout, state), 5.0, materials["road"], z_offset=0.12)
+    if state == "first_shelter":
+        base.create_ribbon("ShelterPath", mode, layout["camp"]["shelter_spur"], 3.6, materials["road"], z_offset=0.14)
     low_bridge(layout["bridge"], materials)
 
     placements = []
