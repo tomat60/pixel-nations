@@ -13,7 +13,7 @@
     "qa:village-v2-assets": "node scripts/qa-village-v2-assets.mjs",
     "qa:world": "node scripts/qa-world-scene.mjs",
     "qa:expansion": "node scripts/qa-expansion-loop.mjs",
-    "qa:founder-run": "node scripts/qa-founder-run.mjs",
+    "qa:founder-run": "node scripts/qa-founder-run.mjs && node scripts/qa-founder-run-visibility.mjs",
     "qa:public-evidence": "node scripts/pn-handoff.mjs --check-public-evidence",
     "pn:handoff": "node scripts/pn-handoff.mjs",
     "pn:quick": "npm run qa:smoke && npm run pn:handoff",
