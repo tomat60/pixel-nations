@@ -4,7 +4,7 @@
   "images": {
     "desktop": {
       "camp": {
-        "sha256": "cf6c44a9e304034c854ffa6579599bc0031f84a8eb9397be00158b8004a01c59",
+        "sha256": "9eb98717735f3e07cebf14156b33cc35a2e1c34c2f966be44883718700fc5215",
         "dhash": "e0e052548bd36793",
         "bytes": 1314514,
         "width": 1440,
@@ -13,7 +13,7 @@
         "unique_sample_colors": 1665
       },
       "first_shelter": {
-        "sha256": "9fc889d4fb3f3e45d8c7509ff9c55a23edc91eda159552aea898c4c12694a45b",
+        "sha256": "2a7b6b1591c31a81c46e90a974ac8624785c146633dedd871901e239736b3b88",
         "dhash": "e0e2644d8bd36793",
         "bytes": 1322606,
         "width": 1440,
@@ -22,7 +22,7 @@
         "unique_sample_colors": 1781
       },
       "developed_settlement": {
-        "sha256": "a54770deb8ed2b8caaa82d6d34f36a0a1d56544c5f559827f9d0819aeb1d3f5c",
+        "sha256": "780c5cefc8447d872d44309ed6866a820963fde0a4e73e9b85ba307ce9990153",
         "dhash": "e0e2656dabdb6393",
         "bytes": 1384660,
         "width": 1440,
@@ -33,7 +33,7 @@
     },
     "portrait": {
       "camp": {
-        "sha256": "fa08fadbb7ade031cc3058079a6d737ea9d9ff345c20742ee67a18389656aa0e",
+        "sha256": "7f41c30746e6bfd25b2e85d70988cb38a829bda40af725add4fc213d5872dc4b",
         "dhash": "30c0c1802d918161",
         "bytes": 338894,
         "width": 390,
@@ -42,7 +42,7 @@
         "unique_sample_colors": 1318
       },
       "first_shelter": {
-        "sha256": "9dd7b8e3e37cbb84803596e18ca537a3adc3139d0447dec8be9cf7ff99adca19",
+        "sha256": "6ef656add2eb18c87ea0d9dc8ecbead8956f9cd412a66c49f457afe40a2124df",
         "dhash": "30c0c1822e918161",
         "bytes": 341451,
         "width": 390,
@@ -51,7 +51,7 @@
         "unique_sample_colors": 1408
       },
       "developed_settlement": {
-        "sha256": "c9d2485c83cf05ba597d21e89c1aec026d65a0212708c135eceddd30457c9214",
+        "sha256": "ae5d946d2820e97b1832e40ef2408298b4f1ea374cfc01a3d6eec8dc8307f0ab",
         "dhash": "31c6e6a218998361",
         "bytes": 372757,
         "width": 390,
