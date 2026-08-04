@@ -5,7 +5,6 @@ import {
   getFrontierIntent,
   getFrontierObjectiveSecured,
   getImperialTurnNumber,
-  getNextRetentionDecision,
   getOwnedSectorIds,
   nationSectorThreshold,
   type PlayState,
@@ -25,7 +24,9 @@ export function CurrentObjective({
   secondRunStarted: boolean;
   onOpenFounderRecord: () => void;
 }) {
-  const objective = getCurrentObjectiveText(state);
+  const objective = founderRecordAvailable && !state.courtCaseDecisionId
+    ? "Founder Run complete. Review the Founder Record or continue ruling through Council."
+    : getCurrentObjectiveText(state);
   const placement = state.view === "council"
     ? "left-1/2 top-[4.4rem] w-[min(300px,calc(100%-1.25rem))] -translate-x-1/2 text-center md:left-[43%] md:top-[5rem]"
     : "right-2 top-[4.3rem] max-w-[190px] text-right md:right-4 md:top-[5rem] md:max-w-[320px]";
@@ -67,18 +68,17 @@ function getCurrentObjectiveText(state: PlayState): string {
     if (ownedSectors < nationSectorThreshold) return `Open World and claim ${nationSectorThreshold - ownedSectors} more connected sector${nationSectorThreshold - ownedSectors === 1 ? "" : "s"}.`;
     return "Open Council and choose the doctrine that founds your nation.";
   }
-  if (!state.foundingCeremonySeen) return "Witness the founding, then continue into your nation's first era.";
+  if (!state.foundingCeremonySeen) return "Witness the founding, then ratify the first national charter.";
 
   if (!getFirstEraComplete(state)) {
-    const decision = getNextRetentionDecision(state);
-    return decision ? `Resolve ${decision.title} to write the next season of your nation.` : "Complete the three first-era Council decisions.";
+    return "Open Council and ratify the first charter to bind stores, roads and law in one Founder Run step.";
   }
 
   const frontier = getFrontierIntent(state);
   if (!frontier) return "Choose the frontier objective that will justify your future empire.";
   if (!getFrontierObjectiveSecured(state)) return `Open World and secure ${frontier.target}.`;
   if (!state.empireDeclarationId) return "Return to Council and declare the empire your nation has become.";
-  if (!state.courtCaseDecisionId) return "Resolve the Charter Courts' first imperial dispute.";
+  if (!state.courtCaseDecisionId) return "Founder Run complete. Continue ruling to resolve the Charter Courts' first dispute.";
   if (!state.rivalResponseDecisionId) return "Answer the Obsidian March's rejection of your ruling.";
   if (!state.conflictEscalationDecisionId) return "Choose how your empire confronts the rival: arms, trade or envoys.";
   if (!state.standoffDecisionId) return "Resolve the first outcome of your chosen imperial posture.";
