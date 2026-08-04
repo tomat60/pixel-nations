@@ -5,6 +5,7 @@ import { BottomDock } from "./components/BottomDock";
 import { CouncilPanel } from "./components/CouncilPanel";
 import { CurrentObjective } from "./components/CurrentObjective";
 import { DemoCompleteOverlay } from "./components/DemoCompleteOverlay";
+import { FounderRunAccelerator } from "./components/FounderRunAccelerator";
 import { FoundingCeremony } from "./components/FoundingCeremony";
 import { LandSheet } from "./components/LandSheet";
 import { MapStage } from "./components/MapStage";
@@ -14,8 +15,6 @@ import { StrategicBranchOverlay } from "./components/StrategicBranchOverlay";
 import { TopBar } from "./components/TopBar";
 import { AurelianVillageScene } from "./components/AurelianVillageScene";
 import {
-  getEmpireCrisisOpen,
-  getImperialTurnComplete,
   getNationDecision,
   getPostCrisisCountermoveReady,
   getPostCrisisFrontierPayoffTarget,
@@ -47,14 +46,13 @@ export default function PlayPrototypePage() {
   const nationDecision = useMemo(() => getNationDecision(state), [state]);
   const isVillage = state.view === "village";
   const isWorld = state.view === "world";
-  const crisisOpen = getEmpireCrisisOpen(state);
-  const founderRecordReady = Boolean(state.empireDeclarationId && getImperialTurnComplete(state) && !crisisOpen);
+  const founderRecordReady = Boolean(state.empireDeclarationId);
   const postCrisisStarted = Boolean(state.postCrisisCountermoveOrigin);
   const postCrisisReady = getPostCrisisCountermoveReady(state);
   const postCrisisResponse = getPostCrisisResponseDecision(state);
   const postCrisisFrontierPayoffTarget = useMemo(() => getPostCrisisFrontierPayoffTarget(state), [state]);
   const postCrisisFrontierPayoffSecured = state.postCrisisFrontierPayoffSecured;
-  const demoComplete = founderRecordReady && !postCrisisStarted;
+  const demoComplete = founderRecordReady;
   const showFounderRecord = founderRecordReopened || (demoComplete && !demoOverlayDismissed);
   const showOpeningGuide = hydrated && state.view === "map" && state.ownedPlotIds.length === 0;
   const secondRunStarted = restartedRun && state.ownedPlotIds.length > 0;
@@ -90,7 +88,7 @@ export default function PlayPrototypePage() {
   }
 
   function continueRuling() {
-    dispatch({ type: "beginPostCrisisCountermove" });
+    setFounderRecordReopened(false);
     setDemoOverlayDismissed(true);
   }
 
@@ -118,6 +116,7 @@ export default function PlayPrototypePage() {
           {state.view === "council" ? <CouncilPanel state={state} dispatch={dispatch} /> : null}
           <StrategicBranchOverlay state={state} dispatch={dispatch} />
           {nationDecision && !state.foundingCeremonySeen ? <FoundingCeremony state={state} decision={nationDecision} dispatch={dispatch} /> : null}
+          {hydrated && state.view === "council" ? <FounderRunAccelerator state={state} dispatch={dispatch} /> : null}
           {hydrated && state.view === "council" && postCrisisReady && state.postCrisisCountermoveOrigin ? (
             <div className="absolute inset-x-3 bottom-20 z-40 md:inset-x-auto md:left-5 md:right-5 md:bottom-24">
               <PostCrisisCountermovePanel
