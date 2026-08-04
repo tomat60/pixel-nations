@@ -1,0 +1,106 @@
+{
+  "classification": "PENDING_DIRECT_VISUAL_REVIEW",
+  "accepted_source_head": "59fbebf4ba2d7cddb77a8ca4d93701b6bec4599a",
+  "images": {
+    "desktop": {
+      "camp": {
+        "sha256": "a96f6c04a105424edcdc0c893cd8525f5b05466a642ce8e5784514c7cf541d8c",
+        "dhash": "e0e052548bd36793",
+        "bytes": 1314514,
+        "width": 1440,
+        "height": 900,
+        "variance": 112.919,
+        "unique_sample_colors": 1665
+      },
+      "first_shelter": {
+        "sha256": "64f0df701328d86b77f3d40b04bdc133a746c3ac1ca95a599d3f56551d1e42be",
+        "dhash": "e0e2644d8bd36793",
+        "bytes": 1317625,
+        "width": 1440,
+        "height": 900,
+        "variance": 119.187,
+        "unique_sample_colors": 1728
+      },
+      "developed_settlement": {
+        "sha256": "eb7c0a1fbd05cfe7fe15557e9e1a707a7ede864bbbd67748573c76795b2a0df0",
+        "dhash": "e0e2656dabdb6393",
+        "bytes": 1384660,
+        "width": 1440,
+        "height": 900,
+        "variance": 175.853,
+        "unique_sample_colors": 2736
+      }
+    },
+    "portrait": {
+      "camp": {
+        "sha256": "8b9db4ea84cb26abeb1cf9cd04dbc1ee56eaa7b96d15f56c360829ebc48312a4",
+        "dhash": "30c0c1802d918161",
+        "bytes": 338894,
+        "width": 390,
+        "height": 844,
+        "variance": 80.66,
+        "unique_sample_colors": 1318
+      },
+      "first_shelter": {
+        "sha256": "b3ab45e0fa105ebad1e6f0595519c4443d4fa5db9baee828b6cd15c488b4a60c",
+        "dhash": "30c0c1822c918161",
+        "bytes": 340657,
+        "width": 390,
+        "height": 844,
+        "variance": 85.249,
+        "unique_sample_colors": 1369
+      },
+      "developed_settlement": {
+        "sha256": "8ff076508af263c1e5b280d56f2d5ba440161946b5c45def04c984e700519b8b",
+        "dhash": "31c6e6a218998361",
+        "bytes": 372757,
+        "width": 390,
+        "height": 844,
+        "variance": 154.359,
+        "unique_sample_colors": 2559
+      }
+    }
+  },
+  "deltas": {
+    "desktop": {
+      "camp_to_first_shelter": {
+        "changed_pixel_ratio": 0.009072,
+        "mean_absolute_channel_error": 0.315521,
+        "p99_channel_error": 0.0,
+        "max_channel_error": 106
+      },
+      "first_shelter_to_developed": {
+        "changed_pixel_ratio": 0.072667,
+        "mean_absolute_channel_error": 1.820759,
+        "p99_channel_error": 45.0,
+        "max_channel_error": 156
+      },
+      "camp_to_developed": {
+        "changed_pixel_ratio": 0.081596,
+        "mean_absolute_channel_error": 2.134402,
+        "p99_channel_error": 48.0,
+        "max_channel_error": 156
+      }
+    },
+    "portrait": {
+      "camp_to_first_shelter": {
+        "changed_pixel_ratio": 0.006896,
+        "mean_absolute_channel_error": 0.223742,
+        "p99_channel_error": 0.0,
+        "max_channel_error": 135
+      },
+      "first_shelter_to_developed": {
+        "changed_pixel_ratio": 0.087462,
+        "mean_absolute_channel_error": 2.110547,
+        "p99_channel_error": 47.0,
+        "max_channel_error": 194
+      },
+      "camp_to_developed": {
+        "changed_pixel_ratio": 0.094358,
+        "mean_absolute_channel_error": 2.334279,
+        "p99_channel_error": 49.0,
+        "max_channel_error": 194
+      }
+    }
+  }
+}
