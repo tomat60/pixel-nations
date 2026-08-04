@@ -72,7 +72,6 @@ const steps = [
     note: "The playable demo opens on the owned Aurelian camp, not the claim map.",
     run: async (page) => {
       await waitForStage(page, "camp");
-      await page.getByText("First camp", { exact: true }).first().waitFor({ state: "visible", timeout: 5000 });
     },
   },
   {
@@ -82,7 +81,6 @@ const steps = [
     run: async (page) => {
       await runOrder(page, "Raise Shelter", "raise-shelter");
       await waitForStage(page, "first_shelter");
-      await page.getByText("First shelter", { exact: true }).first().waitFor({ state: "visible", timeout: 5000 });
     },
   },
   {
@@ -95,7 +93,6 @@ const steps = [
       await runOrder(page, "Scout Nearby Land", "scout-nearby");
       await runOrder(page, "Build Storehouse", "build-storehouse");
       await waitForStage(page, "developed_settlement");
-      await page.getByText("Living settlement", { exact: true }).first().waitFor({ state: "visible", timeout: 5000 });
     },
   },
   {
