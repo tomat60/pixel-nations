@@ -1,0 +1,61 @@
+name: Aurelian Composition V2
+
+on:
+  pull_request:
+    branches: [art-target/aurelian-2d-foundation]
+    paths:
+      - tools/blender/aurelian_composition_v2_layout.json
+      - tools/blender/aurelian_composition_v2.py
+      - tools/qa/run_aurelian_composition_v2_proof.sh
+      - .github/workflows/aurelian-composition-v2.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Verify V2 scope and source contract
+        run: |
+          set -euo pipefail
+          layout="tools/blender/aurelian_composition_v2_layout.json"
+          renderer="tools/blender/aurelian_composition_v2.py"
+          proof="tools/qa/run_aurelian_composition_v2_proof.sh"
+          test -f "$layout"
+          test -f "$renderer"
+          test -f "$proof"
+          grep -F '"WORLD_LAYOUT"' "$layout"
+          grep -F '"CAMERAS"' "$layout"
+          grep -F '"landmark_spur"' "$layout"
+          grep -F '"home_primary"' "$layout"
+          grep -F 'def bridge(mat):' "$renderer"
+          grep -F 'BridgeAbutment' "$renderer"
+          grep -F 'world_layout_sha256' "$renderer"
+          python3 -m json.tool "$layout" >/dev/null
+          python3 -m py_compile "$renderer"
+          bash -n "$proof"
+          git diff --check
+
+      - name: Render and verify Aurelian Composition V2
+        run: |
+          set -euo pipefail
+          chmod +x tools/qa/run_aurelian_composition_v2_proof.sh
+          tools/qa/run_aurelian_composition_v2_proof.sh
+
+      - name: Upload exact-head V2 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aurelian-composition-v2-${{ github.run_id }}
+          path: evidence/aurelian-composition-v2/**
+          if-no-files-found: warn
+          retention-days: 30
