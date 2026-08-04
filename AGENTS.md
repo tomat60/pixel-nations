@@ -1,131 +1,158 @@
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any Next.js code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
 # Pixel Nations — Agent Guidance
 
-Pixel Nations is a premium black/gold strategy game landing page plus a playable MVP demo. The product sells a grand-strategy fantasy: a finite world where players own land and write history — not a crypto product, not a spreadsheet editor.
+Pixel Nations is a strategy game about a finite player-created world, not a crypto product and not a dashboard product.
 
-## Core fantasy
+## Mandatory authority gate
 
-- **10,000 lands** in a 100 × 100 world — finite, player-owned territory.
-- **Player progression**: claim land → found city/settlement → create nation → create empire.
-- **No NPC kingdoms** — players create history; the world is empty until founders act.
-- Current `/play` demo focus: Sector A-01 / Aurelian Basin, village growth, expansion, nation founding, and post-founding retention evidence.
-- Legacy demo state may still persist in `localStorage`; do not break existing claim identity or progression compatibility unless the task explicitly scopes it.
+Before planning or coding:
 
-## What agents must preserve
+1. Run `npm run pn:status`.
+2. Read `docs/PROJECT_CURRENT_STATE.md`.
+3. Read the accepted ADR relevant to the task.
+4. Read this file.
+5. Read the active execution issue named in current state.
+6. Read only the operating/QA documents needed for the scoped task.
 
-- **Premium strategy-game aesthetic** — black/gold, cinematic but minimal, tactical world-map feel.
-- **Honest world scale** — the demo is a window into the full 10,000-land world, not the whole world.
-- **Claim flow and persistence** — do not break tile selection, claim flow, village/play progression, or claimed land identity.
-- **World Atlas / Play scene quality bar** — strategic surfaces should feel like the atlas came alive, not like raw data panels.
+Authority order:
 
-## Language and tone
+1. `docs/PROJECT_CURRENT_STATE.md`
+2. accepted ADRs
+3. this `AGENTS.md`
+4. active execution issue named in current state
+5. exact-head evidence and merged PR for the current milestone
+6. operating/QA protocols
+7. older issues, Command Room comments, sprint briefs, runbooks, reports, and generated handoffs
 
-**Do not use** crypto, NFT, wallet, token, mint, ETH, or Web3 framing. This is a strategy game about land, cities, nations, and empires.
+Do not treat issue #79, an arbitrary open issue, a draft PR, or `public/qa/latest` as current authority unless `PROJECT_CURRENT_STATE.md` explicitly points to it.
 
-Copy should be cinematic but short — kingdom map, founder record, strategic world — not marketing fluff or ledger jargon.
+## Product truths
 
-## Active AI Command Room
+- Core fantasy: **one land can become an empire**.
+- Full world: 100 × 100 lands / 10,000 total.
+- Current region: Sector A-01 / Aurelian Basin.
+- No NPC kingdoms as the default world premise; players create history.
+- Avoid crypto, NFT, wallet, mint, token, ETH, Web3, payment, or pay-to-win framing unless a future explicit decision reopens it.
+- Preserve existing player identity, persistence, progression semantics, and rollback capability unless the active issue explicitly scopes a migration.
 
-The active coordination channel is GitHub issue **#79 — AI Command Room: Fable / Claude / Cursor collaboration channel**.
+## Current runtime direction
 
-This issue is not an automatic trigger by itself. It becomes active when a human, ChatGPT/control-plane, Cursor Automation, Claude, Fable, or another agent is explicitly pointed to it.
+- Godot is the target game runtime under accepted ADR-001.
+- Next.js `/play` is currently a functioning bridge, demo shell, and rollback surface.
+- Accepted Aurelian/Godot-derived stages may be hosted in `/play` while behavior and QA remain stable.
+- Do not restart broad React/SVG scene-engine development as the final visual direction.
+- Do not infer that all `/play` screens are visually accepted. Current state defines the exact acceptance boundary.
 
-When a prompt says to use the Command Room, issue #79, or AI coordination channel, agents must:
+## Current product baseline
 
-1. Read issue #79 before coding.
-2. Read `docs/PROJECT_OPERATING_RULES.md` and this `AGENTS.md`.
-3. For strategy requests, respond in issue #79 with recommendation and plan before implementation.
-4. For implementation requests, follow the output contract below.
-5. Reference issue #79 in branch reports, PR bodies, or strategy responses.
+Read the exact milestone and active issue from `PROJECT_CURRENT_STATE.md`.
 
-For the current strategic direction, #79 is the source of truth over older broad plans: prioritize a playable vertical slice before polish, and do not start full backend/auth/payment/multiplayer work unless explicitly scoped.
+At Authority Reset v0.1:
+
+- PR #335 integrated `camp → first shelter → developed settlement` into the real `/play` flow.
+- Aurelian M2 integration is accepted.
+- Current Village composition is `TEMPORARY_ACCEPTED`, not production-final.
+- Non-Village screens remain visually unapproved.
+- Active work is research and the binding Aurelian Composition V2 brief in issue #338.
+- Visual implementation remains blocked until that brief is accepted.
+
+These bullets are a convenience summary. `PROJECT_CURRENT_STATE.md` remains authoritative when they age.
 
 ## Control-plane safety guardrails
 
-These rules exist because accidental write actions and premature merges create cleanup work and can hide product risk.
+- Never write directly to `main` for risky or multi-file work.
+- Use a branch and PR unless the active issue explicitly authorizes another safe path.
+- Do not merge while a Product Lead Gate, review pending, owner rejection, missing evidence, or `do not merge` instruction remains unresolved.
+- Green CI, smoke, Vercel, screenshots, or a clean branch do not override a product or visual gate.
+- Do not create placeholder issues, dummy commits, temporary repo files, or harmless-looking write probes.
+- Confirm the exact action and target before every GitHub write.
+- If an accidental write occurs, repair it immediately and stop broader work until state is clean.
+- Do not modify `public/qa/latest/*` unless the active task explicitly requires regenerated public QA evidence.
 
-- If ChatGPT/control-plane, a reviewer, or the Command Room leaves a **Product Lead Gate**, **review pending**, **do not merge yet**, or equivalent blocker on a PR, that PR must not be merged until a later explicit **accepted for merge** verdict appears.
-- Green CI, Vercel, smoke, or screenshot QA is not enough to override an unresolved product gate. User-reported confusion and product-evidence gaps remain blockers until directly resolved or explicitly waived by the control plane.
-- Do not create placeholder issues, temporary files, dummy commits, or test write-actions in the repo. If the wrong GitHub action/tool is loaded, stop and load the correct action instead of probing with harmless-looking writes.
-- Before any GitHub write action, confirm the exact action name and target in the prompt or tool call: `create_pull_request` for PRs, `create_issue` only for real issues, `update_file` only for intended file changes, and `merge_pull_request` only after explicit merge acceptance.
-- If an accidental issue/file/commit is created, immediately close/remove it, report it, and do not continue with broader work until the branch or issue list is clean.
+## Fable protocol
 
-## Fable trigger protocol
+Do not rely on historical title phrases or labels as universal trigger rules.
 
-Fable issue automation requires the historical title trigger phrase **`FABLE RUN: cursor_prompts`**.
+A Fable run is operationally valid only when:
 
-- Labels such as `fable`, `planning`, or `play` are not enough by themselves.
-- If a Fable issue is opened without `cursor_prompts` in the title, do not assume Fable is slow; treat the issue as a failed trigger.
-- Correct by opening a new issue whose title starts with `FABLE RUN: cursor_prompts ...`, then confirm that `github-actions[bot]` comments `Fable run started`.
-- Close the failed-trigger issue as `not_planned` or superseded, with a comment linking to the corrected issue.
-- Do not let a silent Fable issue guide product decisions.
+1. the active issue contains the current workflow contract and required output section;
+2. the bot confirms the run started;
+3. exact evidence paths and immutable refs pass preflight;
+4. the final comment/result reports `VALIDATED_FABLE_OUTPUT` or another explicitly accepted terminal result;
+5. ChatGPT/control-plane accepts, rejects, or narrows the result for the next phase.
 
-## Fable visual/gamefeel evidence protocol
+`PREFLIGHT_FAILURE`, `NO_ARTIFACT`, a silent issue, or a started workflow without a terminal result is not usable advice.
 
-Fable is useful and should be used, but not as a blind visual reviewer.
+For visual/gamefeel review:
 
-For any Fable run about visual quality, gamefeel, art direction, onboarding clarity, or screen-readability:
+- provide exact evidence identity, filenames, ref/SHA, viewport/state, and whether video/manual interaction exists;
+- distinguish screenshot observations from motion/gamefeel conclusions;
+- do not let Fable claim access to evidence it did not receive;
+- do not let outputs reopen legacy routes or rejected visual techniques without current authorization;
+- preserve current-state scope and acceptance boundaries.
 
-1. The prompt must state that the **only current playable demo route is `/play`**.
-2. The prompt must state that current implementation scope is **`app/play/**` plus relevant `/play` QA scripts**.
-3. The prompt must include a current visual evidence inventory: workflow run, artifact name, screenshot filenames, and a short Product Lead read of what those screenshots show.
-4. The prompt must state whether there is direct video/manual gameplay capture. If not, Fable must mark gamefeel conclusions as screenshot-based and uncertain.
-5. The output must reference current `/play` evidence filenames or current `data-qa` selectors.
-6. Any Fable output that proposes work for legacy routes such as `/world`, `/dashboard`, `/settlement`, `/nation`, or `/empire` is automatically rejected unless the issue explicitly scopes legacy route compatibility.
-7. Any Fable output that references legacy files such as `app/lib/settlement-state.ts` as the current source of truth is automatically rejected.
+## How to work on this repository
 
-Fable should be used for structured critique and prompt generation after this evidence contract is satisfied. ChatGPT/control-plane remains responsible for accepting, rejecting, or narrowing Fable recommendations.
-
-## How to work on this repo
-
-1. **Read before coding**: `docs/PROJECT_OPERATING_RULES.md`, this `AGENTS.md`, and the current `/play` files relevant to the issue.
-2. **No vague cosmetic passes** — if the task is a visual improvement, it must be a meaningful scoped change with clear acceptance criteria, not a 5% color tweak loop.
-3. **Stay in scope** — do not redesign unrelated landing or legacy compatibility surfaces unless the prompt explicitly requires it.
-4. **Cost control** — avoid broad repo exploration, repeated weak iterations, unnecessary `npm run qa:screens`, and dependency installs without justification.
-5. **Ask for scope only when truly blocked** — if the goal, files, and acceptance criteria are defined in the prompt or docs, execute; do not re-litigate product strategy.
-6. **PR output contract** — Cursor Automation must not open PRs directly. Push the branch and comment with branch name, head SHA, validation result, and blocker/status. ChatGPT/control-plane opens the PR as ready for review through the GitHub connector.
+- No vague cosmetic passes.
+- Preserve behavior and QA semantics, not weak historical composition.
+- Stay inside the active issue's allowed scope.
+- Prefer deterministic inspection and evidence before paid or broad execution.
+- Avoid new dependencies and asset families unless explicitly justified.
+- Stop when the same technique fails repeatedly; change strategy instead of micro-polishing forever.
+- Do not broaden into backend, accounts, payments, multiplayer, combat, full economy, World/Nation/Empire, or unrelated surfaces unless the active issue explicitly authorizes it.
+- Every implementation contract needs allowed files/categories, forbidden actions, validation, cost mode, evidence, failure recovery, and a stop condition.
 
 ## Cursor Automation output contract
 
-Cursor Automation repeatedly created draft PRs even when prompted otherwise. To prevent recurring human-only cleanup work, Cursor Automation must follow this branch-only contract:
+Cursor Automation must:
 
-- Do **not** open pull requests.
-- Do **not** create draft pull requests.
-- Push the requested branch after validation passes.
-- Comment on the issue with branch name, head commit SHA, validation result, changed files, and any blocker.
-- Do **not** merge.
-- ChatGPT/control-plane is responsible for opening the PR as ready for review, reviewing CI/diff, and merging when accepted.
+- not open or merge pull requests unless the active issue explicitly overrides this rule;
+- push the requested branch after validation;
+- comment with branch, head SHA, changed files, validation, evidence, and blocker/status;
+- stop rather than broaden when the contract cannot be completed safely.
 
-## PR output contract for non-Cursor agents
+ChatGPT/control-plane owns PR opening, product review, and merge acceptance unless the active issue explicitly assigns those actions elsewhere.
 
-All non-Cursor coding agents must follow this output contract:
+## Non-Cursor agent PR contract
 
-- Open PRs against `main` as **ready for review** by default.
-- Do **not** create draft PRs unless the issue explicitly says `draft: true` or asks for a draft.
-- Do **not** merge your own PR.
-- Keep PR titles short and conventional, for example `feat: add minimal game state engine`.
-- Keep PR descriptions concrete: summary, changed files, validation, known debt.
-- If validation passes but a ready PR cannot be opened, do **not** open a draft PR. Push the branch, then comment on the issue with the branch name, head commit SHA, validation result, and the blocker. ChatGPT/control-plane will open or merge the PR from that branch.
-- Do not commit `public/qa/latest/*` artifacts unless the issue explicitly requires public QA evidence updates.
+Unless the active issue says otherwise:
 
-## Key files (current source of truth)
+- open a reviewable PR against `main`;
+- default to draft for risky, visual, architecture, workflow, or multi-step recovery work;
+- never merge your own PR;
+- keep the PR body concrete: outcome, scope, changed files, validation, evidence, known limitations, and acceptance status;
+- do not claim acceptance from implementation completion alone.
+
+## Key paths
 
 | Area | Path |
-|------|------|
-| Current playable demo | `app/play/**` |
+|---|---|
+| Current project authority | `docs/PROJECT_CURRENT_STATE.md` |
+| Documentation authority map | `docs/README.md` |
+| Accepted runtime ADR | `docs/ADR_001_GODOT_DESKTOP_FIRST.md` |
+| Current playable bridge | `app/play/**` |
 | Play state | `app/play/lib/**` |
 | Play scenes | `app/play/components/**`, `app/play/world/**` |
-| Play visual QA | `scripts/qa-play-screenshots.mjs` |
+| Godot project | `game/**` |
 | Operating rules | `docs/PROJECT_OPERATING_RULES.md` |
-| AI cost controls | `docs/AI_COST_CONTROL_CODEX.md` |
+| QA governance | `docs/QA_GOVERNANCE_PROTOCOL.md` |
+| Cost controls | `docs/AI_COST_CONTROL_CODEX.md` |
+| Status gate | `scripts/pn-status.mjs` |
 
-Do not use legacy route names or legacy state files as current planning anchors unless an issue explicitly scopes compatibility cleanup.
+Do not use legacy route names, old state files, old screenshots, or old issue comments as planning anchors unless a current source explicitly authorizes them.
 
 ## Reporting
 
-Keep final reports short and concrete: changed files, what changed, build status, QA status (if run), commit hash (if committed).
+Final reports must state:
+
+- exact branch and head SHA;
+- changed files;
+- validation and evidence actually inspected;
+- acceptance classification;
+- what remains unverified;
+- next allowed action from current state.
