@@ -92,8 +92,9 @@ async function claimSector(page, sectorId) {
   const claimButton = page.locator('[data-qa="claim-sector-button"]');
   await claimButton.waitFor({ state: "visible", timeout: 10000 });
   if (await claimButton.isDisabled()) {
+    const control = await page.locator(`[data-qa="world-sector-tile"][data-sector-id="${sectorId}"]`).getAttribute("data-sector-control");
     const eventText = await page.locator('[data-qa="current-objective-text"]').textContent().catch(() => "");
-    throw new FounderRunQaError(`claim sector ${sectorId}`, `Claim button disabled. Objective: ${eventText}`);
+    throw new FounderRunQaError(`claim sector ${sectorId}`, `Claim button disabled. Control: ${control}. Objective: ${eventText}`);
   }
   await clickLocator(claimButton, `claim sector ${sectorId}`);
   await page.locator(`[data-qa="world-sector-tile"][data-sector-id="${sectorId}"][data-sector-control="owned"]`).waitFor({
@@ -125,11 +126,12 @@ async function runFounderArc(browser, viewport) {
       await page.locator('[data-qa="aurelian-village-scene"][data-aurelian-stage="camp"]').waitFor({ state: "visible", timeout: 10000 });
     });
 
-    await check("settlement reaches the developed stage", async () => {
+    await check("settlement reaches the developed stage and forms a council", async () => {
       await runOrder(page, "raise-shelter", "first_shelter");
       await runOrder(page, "cut-timber", "first_shelter");
       await runOrder(page, "scout-nearby", "first_shelter");
       await runOrder(page, "build-storehouse", "developed_settlement");
+      await runOrder(page, "form-council", "developed_settlement");
     });
 
     await check("three connected sectors unlock the nation", async () => {
