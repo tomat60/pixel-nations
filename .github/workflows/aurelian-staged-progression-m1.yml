@@ -25,15 +25,37 @@ jobs:
           ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
 
-      - name: Apply deterministic first-shelter correction
+      - name: Consolidate accepted correction into clean source
         run: |
           set -euo pipefail
           python3 tools/qa/apply_aurelian_m1_visual_correction.py
           grep -F '"shelter_spur"' tools/blender/aurelian_staged_progression.py
           grep -F '"tent", "flag_red", "crate_big", "lumber", "sack", "barrel", "wheelbarrow"' tools/blender/aurelian_staged_progression.py
           grep -F 'ShelterPath' tools/blender/aurelian_staged_progression.py
+          rm tools/qa/apply_aurelian_m1_visual_correction.py
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('.github/workflows/aurelian-staged-progression-m1.yml')
+          text = path.read_text()
+          text = text.replace('      - tools/qa/apply_aurelian_m1_visual_correction.py\n', '')
+          start = text.index('      - name: Consolidate accepted correction into clean source\n')
+          end = text.index('      - name: Render and verify staged Aurelian progression\n')
+          text = text[:start] + text[end:]
+          text = text.replace(
+              '- The deterministic correction helper is applied and verified before rendering.',
+              '- The accepted first-shelter correction is embedded directly in the clean renderer source.',
+          )
+          path.write_text(text)
+          PY
           git diff --check
-          git diff -- tools/blender/aurelian_staged_progression.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/blender/aurelian_staged_progression.py \
+            tools/qa/apply_aurelian_m1_visual_correction.py \
+            .github/workflows/aurelian-staged-progression-m1.yml
+          git commit -m "Consolidate accepted Aurelian M1 correction"
+          git push origin "HEAD:${{ github.head_ref }}"
 
       - name: Render and verify staged Aurelian progression
         run: |
