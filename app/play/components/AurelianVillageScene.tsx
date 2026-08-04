@@ -93,7 +93,7 @@ export function AurelianVillageScene({ state, dispatch }: { state: PlayState; di
           >
             Issue next order
           </button>
-          <div className="absolute bottom-5 right-5 z-20 hidden max-w-[290px] rounded-3xl border border-amber-100/18 bg-black/48 p-3 shadow-2xl backdrop-blur-md lg:block">
+          <div className="absolute bottom-[5.5rem] right-5 z-20 hidden max-w-[290px] rounded-3xl border border-amber-100/18 bg-black/48 p-3 shadow-2xl backdrop-blur-md lg:block">
             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-200/55">Latest order</p>
             <p className="mt-1 text-sm font-black text-amber-50">{state.lastEvent}</p>
             <button
