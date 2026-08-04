@@ -32,6 +32,8 @@ const stageVisuals: Record<AurelianSettlementStage, StageVisual> = {
   },
 };
 
+const stageEntries = Object.entries(stageVisuals) as Array<[AurelianSettlementStage, StageVisual]>;
+
 export function AurelianVillageScene({ state, dispatch }: { state: PlayState; dispatch: (action: PlayAction) => void }) {
   const stageId = getAurelianSettlementStage(state) ?? "camp";
   const visual = stageVisuals[stageId];
@@ -45,22 +47,44 @@ export function AurelianVillageScene({ state, dispatch }: { state: PlayState; di
       className="absolute inset-0 overflow-hidden bg-[#5e6a50]"
     >
       <div data-qa="aurelian-village-stage" className="absolute inset-0">
-        <Image
-          src={visual.portrait}
-          alt={visual.alt}
-          fill
-          priority
-          sizes="(max-width: 767px) 100vw, 1px"
-          className="object-cover object-center md:hidden"
-        />
-        <Image
-          src={visual.desktop}
-          alt={visual.alt}
-          fill
-          priority
-          sizes="(min-width: 768px) 100vw, 1px"
-          className="hidden object-cover object-center md:block"
-        />
+        {stageEntries.map(([candidateId, candidate]) => {
+          const isActive = candidateId === stageId;
+          return (
+            <Image
+              key={`portrait-${candidateId}`}
+              src={candidate.portrait}
+              alt={isActive ? candidate.alt : ""}
+              aria-hidden={!isActive}
+              data-qa="aurelian-stage-image"
+              data-aurelian-image-stage={candidateId}
+              data-aurelian-viewport="portrait"
+              data-aurelian-active={isActive ? "true" : "false"}
+              fill
+              priority
+              sizes="(max-width: 767px) 100vw, 1px"
+              className={`pointer-events-none object-cover object-center transition-opacity duration-300 md:hidden ${isActive ? "opacity-100" : "opacity-0"}`}
+            />
+          );
+        })}
+        {stageEntries.map(([candidateId, candidate]) => {
+          const isActive = candidateId === stageId;
+          return (
+            <Image
+              key={`desktop-${candidateId}`}
+              src={candidate.desktop}
+              alt={isActive ? candidate.alt : ""}
+              aria-hidden={!isActive}
+              data-qa="aurelian-stage-image"
+              data-aurelian-image-stage={candidateId}
+              data-aurelian-viewport="desktop"
+              data-aurelian-active={isActive ? "true" : "false"}
+              fill
+              priority
+              sizes="(min-width: 768px) 100vw, 1px"
+              className={`pointer-events-none hidden object-cover object-center transition-opacity duration-300 md:block ${isActive ? "opacity-100" : "opacity-0"}`}
+            />
+          );
+        })}
         <div className="absolute inset-0 bg-gradient-to-b from-black/18 via-transparent to-black/26" />
       </div>
 
