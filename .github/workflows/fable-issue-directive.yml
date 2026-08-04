@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   issues: write
 
 defaults:
@@ -84,6 +85,25 @@ jobs:
             core.setOutput('requested', value.toLowerCase());
             core.setOutput('checkout', value || context.payload.repository.default_branch);
 
+      - name: Resolve optional Founder Run artifact evidence
+        id: founder_evidence
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+            const enabled = body.includes('FOUNDER_RUN_EVIDENCE_STAGING: v1');
+            const matches = [...body.matchAll(/^Founder Run evidence run:\s*(\d+)\s*$/gim)].map((match) => match[1]);
+            if (matches.length > 1) {
+              core.setFailed('Founder Run evidence run must appear at most once.');
+              return;
+            }
+            if (enabled && matches.length !== 1) {
+              core.setFailed('FOUNDER_RUN_EVIDENCE_STAGING: v1 requires exactly one `Founder Run evidence run: <run-id>` line.');
+              return;
+            }
+            core.setOutput('enabled', enabled ? 'true' : 'false');
+            core.setOutput('run_id', matches[0] || '');
+
       - name: Comment directive started
         uses: actions/github-script@v7
         with:
@@ -137,6 +157,58 @@ jobs:
           cp "$source_dir/contact-sheet-portrait.png" "$target_dir/contact-sheet-portrait.png"
           sha256sum "$target_dir/contact-sheet-desktop.png" "$target_dir/contact-sheet-portrait.png"
           echo "FABLE_AURELIAN_EVIDENCE_STAGING=PASS"
+
+      - name: Stage exact Founder Run evidence inside the visual allowlist
+        if: steps.founder_evidence.outputs.enabled == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.founder_evidence.outputs.run_id }}
+          EXPECTED_SHA: ${{ steps.evidence_ref.outputs.requested }}
+        run: |
+          set -euo pipefail
+          test -n "$EXPECTED_SHA"
+          actual_sha="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.head_sha')"
+          test "$actual_sha" = "$EXPECTED_SHA"
+
+          rm -rf /tmp/founder-run-evidence
+          mkdir -p /tmp/founder-run-evidence
+          gh run download "$RUN_ID" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name pixel-nations-play-evidence \
+            --dir /tmp/founder-run-evidence
+
+          source_dir="/tmp/founder-run-evidence/founder-run"
+          target_dir="evidence-repo/docs/visual-evidence/founder-run"
+          test -s "$source_dir/desktop-founder-run.webm"
+          test -s "$source_dir/mobile-founder-run.webm"
+          test -s "$source_dir/desktop-founder-record.png"
+          test -s "$source_dir/mobile-founder-record.png"
+          mkdir -p "$target_dir"
+
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq ffmpeg >/dev/null
+          fi
+
+          ffmpeg -y -loglevel error \
+            -i "$source_dir/desktop-founder-run.webm" \
+            -vf "fps=2,scale=360:-1,tile=5x2:padding=6:margin=6" \
+            -frames:v 1 -c:v libwebp -quality 82 \
+            "$target_dir/desktop-founder-run-contact.webp"
+          ffmpeg -y -loglevel error \
+            -i "$source_dir/mobile-founder-run.webm" \
+            -vf "fps=2,scale=190:-1,tile=5x2:padding=6:margin=6" \
+            -frames:v 1 -c:v libwebp -quality 84 \
+            "$target_dir/mobile-founder-run-contact.webp"
+          cp "$source_dir/desktop-founder-record.png" "$target_dir/desktop-founder-record.png"
+          cp "$source_dir/mobile-founder-record.png" "$target_dir/mobile-founder-record.png"
+
+          test -s "$target_dir/desktop-founder-run-contact.webp"
+          test -s "$target_dir/mobile-founder-run-contact.webp"
+          test -s "$target_dir/desktop-founder-record.png"
+          test -s "$target_dir/mobile-founder-record.png"
+          sha256sum "$target_dir"/*
+          echo "FABLE_FOUNDER_RUN_EVIDENCE_STAGING=PASS"
 
       - name: Run validated Fable issue directive
         env:
