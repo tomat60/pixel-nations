@@ -42,27 +42,45 @@ jobs:
         run: npm run build
 
       - name: Generate primary play evidence
+        id: primary
+        continue-on-error: true
         run: node scripts/qa-play-screenshots.mjs
 
       - name: Generate Village progression evidence
+        id: village
+        if: always()
+        continue-on-error: true
         run: npm run qa:village
 
       - name: Generate Village progression video evidence
+        id: progression
+        if: always()
+        continue-on-error: true
         run: node scripts/qa-village-progression-video.mjs
 
       - name: Generate posture evidence
+        if: always()
+        continue-on-error: true
         run: node scripts/qa-play-branches.mjs
 
       - name: Generate imperial cycle evidence
+        if: always()
+        continue-on-error: true
         run: node scripts/qa-imperial-turn.mjs
 
       - name: Generate first-run finale evidence
+        if: always()
+        continue-on-error: true
         run: node scripts/qa-demo-complete.mjs
 
       - name: Generate empire crisis evidence
+        if: always()
+        continue-on-error: true
         run: node scripts/qa-empire-crisis.mjs
 
       - name: Generate post-crisis counter-move evidence
+        if: always()
+        continue-on-error: true
         run: node scripts/qa-post-crisis-countermove.mjs
 
       - name: Upload play evidence
@@ -76,3 +94,53 @@ jobs:
             public/qa/village-progression
           if-no-files-found: error
           retention-days: 7
+
+      - name: Enforce Aurelian evidence gate
+        if: always()
+        env:
+          PRIMARY_OUTCOME: ${{ steps.primary.outcome }}
+          VILLAGE_OUTCOME: ${{ steps.village.outcome }}
+          PROGRESSION_OUTCOME: ${{ steps.progression.outcome }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from "node:fs/promises";
+
+          const failures = [];
+          const outcomes = {
+            primary: process.env.PRIMARY_OUTCOME,
+            village: process.env.VILLAGE_OUTCOME,
+            progression: process.env.PROGRESSION_OUTCOME,
+          };
+          for (const [name, outcome] of Object.entries(outcomes)) {
+            if (outcome !== "success") failures.push(`${name} step outcome: ${outcome}`);
+          }
+
+          async function readJson(path, label) {
+            try {
+              return JSON.parse(await readFile(path, "utf8"));
+            } catch (error) {
+              failures.push(`${label} missing or invalid: ${error.message}`);
+              return null;
+            }
+          }
+
+          const interactions = await readJson("public/qa/play-latest/interaction-log.json", "primary interaction log");
+          if (Array.isArray(interactions)) {
+            for (const item of interactions.filter((entry) => entry.status !== "ok")) {
+              failures.push(`primary ${item.viewport}/${item.stepId}: ${item.error ?? item.status}`);
+            }
+          }
+
+          const village = await readJson("public/qa/village-scene/village-scene-result.json", "Village result");
+          if (village && village.status !== "PASS") failures.push(`Village result: ${village.blockingStep || "unknown"}: ${village.error || village.status}`);
+
+          const progression = await readJson("public/qa/village-progression/sequence-manifest.json", "progression manifest");
+          if (progression && progression.status !== "passed") failures.push(`Progression result: ${progression.blockingFailure || progression.status}`);
+
+          if (failures.length) {
+            console.error("AURELIAN_VISUAL_QA_FAILED");
+            for (const failure of failures) console.error(`- ${failure}`);
+            process.exit(1);
+          }
+          console.log("AURELIAN_VISUAL_QA_PASSED");
+          NODE

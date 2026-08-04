@@ -1,0 +1,17 @@
+{
+  "classification": "PENDING_DIRECT_VISUAL_REVIEW",
+  "input_sha": "c8bece152c3b909ecaef6392f5942e05a9e94bfe",
+  "accepted_source_head": "59fbebf4ba2d7cddb77a8ca4d93701b6bec4599a",
+  "kaykit_commit": "84fa4e91af6a88989be7c99e0891cede11f2ca38",
+  "kaykit_archive_sha256": "cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028",
+  "base_script_commit": "d001d96117fc9d1de20f3ff57d7a47e2441a0393",
+  "viewports": {
+    "desktop": "1440x900",
+    "portrait": "390x844"
+  },
+  "states": [
+    "camp",
+    "first_shelter",
+    "developed_settlement"
+  ]
+}

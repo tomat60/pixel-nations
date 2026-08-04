@@ -12,7 +12,7 @@ import { OrdersPanel } from "./components/OrdersPanel";
 import { PostCrisisCountermovePanel } from "./components/PostCrisisCountermovePanel";
 import { StrategicBranchOverlay } from "./components/StrategicBranchOverlay";
 import { TopBar } from "./components/TopBar";
-import { VillageScene } from "./components/VillageScene";
+import { AurelianVillageScene } from "./components/AurelianVillageScene";
 import {
   getEmpireCrisisOpen,
   getImperialTurnComplete,
@@ -28,8 +28,17 @@ import {
 } from "./lib/play-state";
 import { WorldMapScene } from "./world/WorldMapScene";
 
+const aurelianInitialPlayState: PlayState = {
+  ...initialPlayState,
+  ownedPlotIds: [initialPlayState.selectedPlotId],
+  settlementMarkers: ["camp"],
+  view: "village",
+  lastEvent: "The first camp stands in Aurelian Basin. Raise one shelter to begin the settlement.",
+  chronicle: [{ season: 1, title: "The first camp", body: "One claimed land now holds the beginning of an empire." }],
+};
+
 export default function PlayPrototypePage() {
-  const [state, dispatch] = useReducer(playReducer, initialPlayState);
+  const [state, dispatch] = useReducer(playReducer, aurelianInitialPlayState);
   const [hydrated, setHydrated] = useState(false);
   const [demoOverlayDismissed, setDemoOverlayDismissed] = useState(false);
   const [founderRecordReopened, setFounderRecordReopened] = useState(false);
@@ -69,7 +78,7 @@ export default function PlayPrototypePage() {
   }, [founderRecordReady]);
 
   function restartRun() {
-    dispatch({ type: "reset" });
+    dispatch({ type: "hydrate", state: aurelianInitialPlayState });
     setDemoOverlayDismissed(false);
     setFounderRecordReopened(false);
     setRestartedRun(true);
@@ -100,7 +109,7 @@ export default function PlayPrototypePage() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(250,204,21,.18),transparent_30%),radial-gradient(circle_at_78%_22%,rgba(56,189,248,.15),transparent_32%),linear-gradient(180deg,#101711_0%,#050807_100%)]" />
       <section className="relative z-10 h-full p-2 md:p-4">
         <div data-qa="map-stage" className="relative h-full overflow-hidden rounded-[1.5rem] border border-amber-200/20 bg-[#1d2d23] shadow-[0_30px_90px_rgba(0,0,0,.45)] md:rounded-[2rem]">
-          {isVillage ? <VillageScene state={state} dispatch={dispatch} /> : isWorld ? <WorldMapScene state={state} dispatch={dispatch} /> : <MapStage state={state} dispatch={dispatch} />}
+          {isVillage ? <AurelianVillageScene state={state} dispatch={dispatch} /> : isWorld ? <WorldMapScene state={state} dispatch={dispatch} /> : <MapStage state={state} dispatch={dispatch} />}
           <TopBar state={state} />
           <CurrentObjective state={state} demoComplete={demoComplete} demoOverlayDismissed={demoOverlayDismissed} founderRecordAvailable={founderRecordReady} secondRunStarted={secondRunStarted} onOpenFounderRecord={openFounderRecord} />
           {showOpeningGuide ? <OpeningGuide selectedName={selected.name} /> : null}
@@ -183,6 +192,8 @@ function restorePlayState(): PlayState | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<PlayState>;
     if (!Array.isArray(parsed.ownedPlotIds) || !Array.isArray(parsed.completedOrders)) return null;
+    const isLegacyEmptyRun = parsed.ownedPlotIds.length === 0 && parsed.completedOrders.length === 0;
+    if (isLegacyEmptyRun) return aurelianInitialPlayState;
     return {
       ...initialPlayState,
       ...parsed,
