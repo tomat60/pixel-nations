@@ -1,6 +1,7 @@
 import Image, { type StaticImageData } from "next/image";
 import type { PlayAction, PlayState } from "../lib/play-state";
 import { getDevelopmentScore, getOwnedPlot, getPhase, getPopulation } from "../lib/play-state";
+import { getAurelianSettlementStage, type AurelianSettlementStage } from "../lib/aurelian-progression";
 import campDesktop from "../../../review/aurelian-staged-progression-m1/aurelian-camp-desktop.png";
 import campPortrait from "../../../review/aurelian-staged-progression-m1/aurelian-camp-portrait.png";
 import shelterDesktop from "../../../review/aurelian-staged-progression-m1/aurelian-first_shelter-desktop.png";
@@ -8,10 +9,9 @@ import shelterPortrait from "../../../review/aurelian-staged-progression-m1/aure
 import developedDesktop from "../../../review/aurelian-staged-progression-m1/aurelian-developed_settlement-desktop.png";
 import developedPortrait from "../../../review/aurelian-staged-progression-m1/aurelian-developed_settlement-portrait.png";
 
-type AurelianStageId = "camp" | "first_shelter" | "developed_settlement";
 type StageVisual = { desktop: StaticImageData; portrait: StaticImageData; label: string; alt: string };
 
-const stageVisuals: Record<AurelianStageId, StageVisual> = {
+const stageVisuals: Record<AurelianSettlementStage, StageVisual> = {
   camp: {
     desktop: campDesktop,
     portrait: campPortrait,
@@ -32,15 +32,8 @@ const stageVisuals: Record<AurelianStageId, StageVisual> = {
   },
 };
 
-export function getAurelianStageId(state: PlayState): AurelianStageId {
-  const developedMarkers = ["storehouse", "market", "council", "watch"] as const;
-  if (developedMarkers.some((marker) => state.settlementMarkers.includes(marker))) return "developed_settlement";
-  if (state.settlementMarkers.includes("shelter")) return "first_shelter";
-  return "camp";
-}
-
 export function AurelianVillageScene({ state, dispatch }: { state: PlayState; dispatch: (action: PlayAction) => void }) {
-  const stageId = getAurelianStageId(state);
+  const stageId = getAurelianSettlementStage(state) ?? "camp";
   const visual = stageVisuals[stageId];
   const owned = getOwnedPlot(state);
   const hasClaim = state.ownedPlotIds.length > 0;
