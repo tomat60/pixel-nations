@@ -16,7 +16,7 @@
     "qa:public-evidence": "node scripts/pn-handoff.mjs --check-public-evidence",
     "pn:handoff": "node scripts/pn-handoff.mjs",
     "pn:quick": "npm run qa:smoke && npm run pn:handoff",
-    "pn:finish": "npm run build && npm run qa:aurelian:progression && npm run qa:village && npm run qa:world && npm run qa:expansion && npm run qa:smoke && npm run qa:screens && npm run qa:smoke && npm run pn:handoff",
+    "pn:finish": "npm run build && npm run qa:aurelian:play && npm run qa:aurelian:progression && npm run qa:village && npm run qa:world && npm run qa:expansion && npm run qa:smoke && npm run qa:screens && npm run qa:smoke && npm run pn:handoff",
     "lint": "eslint",
     "pn:ops-report": "node scripts/pn-ops-report.mjs",
     "pn:visual-gate": "node scripts/pn-visual-gate.mjs",
@@ -26,7 +26,8 @@
     "pn:outbox": "node scripts/pn-report.mjs",
     "pn:confusion": "node scripts/pn-player-confusion.mjs",
     "pn:player-confusion": "node scripts/pn-player-confusion.mjs",
-    "pn:cloud-ready": "node scripts/pn-cloud-readiness.mjs"
+    "pn:cloud-ready": "node scripts/pn-cloud-readiness.mjs",
+    "qa:aurelian:play": "node scripts/qa-aurelian-play-integration.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.40.0",
