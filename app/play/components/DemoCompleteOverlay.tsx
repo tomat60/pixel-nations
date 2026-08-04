@@ -1,8 +1,12 @@
 import { strategicBranches } from "../lib/strategic-branches";
 import {
   getEmpireCrisisRecovery,
+  getEmpireDeclaration,
   getFounderRecordOutcomeLabel,
+  getFrontierIntent,
   getImperialTurnHistory,
+  getNationDecision,
+  getOwnedSectorIds,
   getRivalPressure,
   getStrategicOutcome,
   getStrategicPosture,
@@ -18,10 +22,16 @@ export function DemoCompleteOverlay({
   onContinue: () => void;
   onRestart: () => void;
 }) {
+  const empireDeclaration = getEmpireDeclaration(state);
+  if (!empireDeclaration) return null;
+
   const posture = getStrategicPosture(state);
   const outcome = getStrategicOutcome(state);
   const turns = getImperialTurnHistory(state);
-  if (!posture || !outcome || turns.length < 3) return null;
+
+  if (!posture || !outcome || turns.length < 3) {
+    return <FounderRunRecord state={state} onContinue={onContinue} onRestart={onRestart} />;
+  }
 
   const otherPostures = strategicBranches.filter((branch) => branch.postureId !== posture.postureId);
   const pressure = getRivalPressure(state);
@@ -29,7 +39,7 @@ export function DemoCompleteOverlay({
   const finalOutcomeLabel = getFounderRecordOutcomeLabel(state);
 
   return (
-    <section data-qa="demo-complete-overlay" data-posture={posture.postureId} data-empire-crisis={state.empireCrisisReason ?? "none"} data-empire-crisis-recovery={state.empireCrisisRecoveryId ?? "none"} className="absolute inset-0 z-50 flex items-center justify-center bg-black/72 p-3 backdrop-blur-md md:p-6">
+    <section data-qa="demo-complete-overlay" data-record-depth="advanced" data-posture={posture.postureId} data-empire-crisis={state.empireCrisisReason ?? "none"} data-empire-crisis-recovery={state.empireCrisisRecoveryId ?? "none"} className="absolute inset-0 z-50 flex items-center justify-center bg-black/72 p-3 backdrop-blur-md md:p-6">
       <div className="max-h-[calc(100%-1rem)] w-full max-w-3xl overflow-auto rounded-[2rem] border border-amber-200/35 bg-[radial-gradient(circle_at_18%_0%,rgba(251,191,36,.16),transparent_34%),linear-gradient(160deg,rgba(15,23,18,.98),rgba(5,8,7,.98))] p-4 shadow-[0_40px_120px_rgba(0,0,0,.72)] md:p-7">
         <p className="text-[9px] font-black uppercase tracking-[0.28em] text-amber-200/65">Founder Record · First Run Complete</p>
         <h2 className="mt-2 text-3xl font-black leading-none text-amber-50 md:text-5xl">Your first empire stands.</h2>
@@ -73,12 +83,70 @@ export function DemoCompleteOverlay({
           <p className="mt-1 text-xs leading-relaxed text-amber-50/60">A different posture changes the branch outcome, Imperial Turn actions, Influence, Rival Pressure and the final World state.</p>
         </div>
 
-        <div className="mt-5 grid gap-2 md:grid-cols-2">
-          <button type="button" data-qa="continue-ruling" onClick={onContinue} className="rounded-2xl border border-amber-100/20 bg-white/8 px-4 py-3 text-sm font-black text-amber-50 transition hover:bg-white/12">Continue Ruling</button>
-          <button type="button" data-qa="restart-run" onClick={onRestart} className="rounded-2xl bg-amber-300 px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-black/30 transition hover:bg-amber-200">Found a New Empire</button>
-        </div>
+        <RecordActions onContinue={onContinue} onRestart={onRestart} />
       </div>
     </section>
+  );
+}
+
+function FounderRunRecord({ state, onContinue, onRestart }: { state: PlayState; onContinue: () => void; onRestart: () => void }) {
+  const empireDeclaration = getEmpireDeclaration(state);
+  const nationDecision = getNationDecision(state);
+  const frontier = getFrontierIntent(state);
+  const sectors = getOwnedSectorIds(state);
+
+  if (!empireDeclaration) return null;
+
+  return (
+    <section data-qa="demo-complete-overlay" data-record-depth="founder-run" data-empire-declaration={empireDeclaration.id} className="absolute inset-0 z-50 flex items-center justify-center bg-black/72 p-3 backdrop-blur-md md:p-6">
+      <div className="max-h-[calc(100%-1rem)] w-full max-w-3xl overflow-auto rounded-[2rem] border border-amber-200/35 bg-[radial-gradient(circle_at_18%_0%,rgba(251,191,36,.18),transparent_34%),linear-gradient(160deg,rgba(15,23,18,.99),rgba(5,8,7,.99))] p-4 shadow-[0_40px_120px_rgba(0,0,0,.72)] md:p-7">
+        <p className="text-[9px] font-black uppercase tracking-[0.28em] text-amber-200/65">Founder Record · Core Arc Complete</p>
+        <h2 className="mt-2 text-3xl font-black leading-none text-amber-50 md:text-5xl">{empireDeclaration.title}</h2>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-amber-50/68 md:text-base">One land became a living settlement, three sectors became a nation, and one secured frontier became the first seed of an empire.</p>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-2">
+          <div className="rounded-3xl border border-amber-100/18 bg-black/30 p-4">
+            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-amber-100/55">Founding identity</p>
+            <p data-qa="founder-record-empire" className="mt-2 text-xl font-black text-amber-50">{empireDeclaration.label}</p>
+            <p data-qa="founder-record-nation" className="mt-1 text-sm font-black text-amber-100">{nationDecision?.label ?? "Aurelian Nation"}</p>
+            <p className="mt-2 text-xs leading-relaxed text-amber-50/58">{empireDeclaration.effect}</p>
+            <div className="mt-4 grid grid-cols-2 gap-2 text-center">
+              <Metric label="Sectors" value={sectors.length} />
+              <Metric label="Frontier" value={frontier?.target ?? "Secured"} />
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-amber-100/18 bg-black/30 p-4">
+            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-amber-100/55">First national charter</p>
+            <div className="mt-3 space-y-2">
+              {state.retentionRecords.map((record) => (
+                <div key={`${record.decisionId}-${record.choiceId}`} data-qa="founder-record-charter" data-decision-id={record.decisionId} data-choice-id={record.choiceId} className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5">
+                  <p className="text-sm font-black text-amber-50">{record.label}</p>
+                  <p className="mt-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-amber-100/45">{record.villageMarker} · {record.worldMarker}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-3xl border border-sky-200/20 bg-sky-300/8 p-4">
+          <p className="text-[9px] font-black uppercase tracking-[0.18em] text-sky-100/60">The game continues</p>
+          <p className="mt-1 text-lg font-black text-amber-50">Continue ruling to test law, rivals, escalation and imperial turns.</p>
+          <p className="mt-1 text-xs leading-relaxed text-amber-50/60">Those deeper systems remain intact, but they no longer block the first three-minute promise.</p>
+        </div>
+
+        <RecordActions onContinue={onContinue} onRestart={onRestart} />
+      </div>
+    </section>
+  );
+}
+
+function RecordActions({ onContinue, onRestart }: { onContinue: () => void; onRestart: () => void }) {
+  return (
+    <div className="mt-5 grid gap-2 md:grid-cols-2">
+      <button type="button" data-qa="continue-ruling" onClick={onContinue} className="rounded-2xl border border-amber-100/20 bg-white/8 px-4 py-3 text-sm font-black text-amber-50 transition hover:bg-white/12">Continue Ruling</button>
+      <button type="button" data-qa="restart-run" onClick={onRestart} className="rounded-2xl bg-amber-300 px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-black/30 transition hover:bg-amber-200">Found a New Empire</button>
+    </div>
   );
 }
 

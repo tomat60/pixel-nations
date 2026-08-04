@@ -58,6 +58,12 @@ jobs:
         continue-on-error: true
         run: node scripts/qa-village-progression-video.mjs
 
+      - name: Generate complete Founder Run evidence
+        id: founder
+        if: always()
+        continue-on-error: true
+        run: npm run qa:founder-run
+
       - name: Generate posture evidence
         if: always()
         continue-on-error: true
@@ -92,15 +98,17 @@ jobs:
             public/qa/play-latest
             public/qa/village-scene
             public/qa/village-progression
+            public/qa/founder-run
           if-no-files-found: error
           retention-days: 7
 
-      - name: Enforce Aurelian evidence gate
+      - name: Enforce Aurelian and Founder Run evidence gates
         if: always()
         env:
           PRIMARY_OUTCOME: ${{ steps.primary.outcome }}
           VILLAGE_OUTCOME: ${{ steps.village.outcome }}
           PROGRESSION_OUTCOME: ${{ steps.progression.outcome }}
+          FOUNDER_OUTCOME: ${{ steps.founder.outcome }}
         run: |
           node --input-type=module <<'NODE'
           import { readFile } from "node:fs/promises";
@@ -110,6 +118,7 @@ jobs:
             primary: process.env.PRIMARY_OUTCOME,
             village: process.env.VILLAGE_OUTCOME,
             progression: process.env.PROGRESSION_OUTCOME,
+            founder: process.env.FOUNDER_OUTCOME,
           };
           for (const [name, outcome] of Object.entries(outcomes)) {
             if (outcome !== "success") failures.push(`${name} step outcome: ${outcome}`);
@@ -137,10 +146,14 @@ jobs:
           const progression = await readJson("public/qa/village-progression/sequence-manifest.json", "progression manifest");
           if (progression && progression.status !== "passed") failures.push(`Progression result: ${progression.blockingFailure || progression.status}`);
 
+          const founder = await readJson("public/qa/founder-run/founder-run-result.json", "Founder Run result");
+          if (founder && founder.status !== "PASS") failures.push(`Founder Run result: ${founder.blockingStep || "unknown"}: ${founder.error || founder.status}`);
+          if (founder && (!Array.isArray(founder.viewports) || founder.viewports.length !== 2)) failures.push("Founder Run must include desktop and mobile evidence.");
+
           if (failures.length) {
-            console.error("AURELIAN_VISUAL_QA_FAILED");
+            console.error("PIXEL_NATIONS_PLAY_QA_FAILED");
             for (const failure of failures) console.error(`- ${failure}`);
             process.exit(1);
           }
-          console.log("AURELIAN_VISUAL_QA_PASSED");
+          console.log("PIXEL_NATIONS_PLAY_QA_PASSED");
           NODE
