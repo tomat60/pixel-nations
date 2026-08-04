@@ -3,6 +3,7 @@ import fs from "node:fs";
 
 const page = fs.readFileSync("app/play/page.tsx", "utf8");
 const scene = fs.readFileSync("app/play/components/AurelianVillageScene.tsx", "utf8");
+const resolver = fs.readFileSync("app/play/lib/aurelian-progression.ts", "utf8");
 
 const requiredPageTokens = [
   'import { AurelianVillageScene } from "./components/AurelianVillageScene";',
@@ -17,6 +18,7 @@ const requiredPageTokens = [
 ];
 
 const requiredSceneTokens = [
+  'getAurelianSettlementStage, type AurelianSettlementStage',
   'aurelian-camp-desktop.png',
   'aurelian-camp-portrait.png',
   'aurelian-first_shelter-desktop.png',
@@ -25,16 +27,24 @@ const requiredSceneTokens = [
   'aurelian-developed_settlement-portrait.png',
   'data-aurelian-stage={stageId}',
   'data-qa="aurelian-village-stage"',
-  'state.settlementMarkers.includes("shelter")',
-  'developedMarkers.some',
-  'return "developed_settlement"',
-  'return "first_shelter"',
+  'const stageId = getAurelianSettlementStage(state) ?? "camp"',
+];
+
+const requiredResolverTokens = [
+  'export type AurelianSettlementStage = "camp" | "first_shelter" | "developed_settlement"',
+  'if (state.ownedPlotIds.length === 0)',
+  'if (!state.settlementMarkers.includes("shelter"))',
   'return "camp"',
+  'return hasDevelopedSettlement ? "developed_settlement" : "first_shelter"',
 ];
 
 const forbiddenPageTokens = [
   'import { VillageScene } from "./components/VillageScene";',
   'useReducer(playReducer, initialPlayState)',
+];
+const forbiddenSceneTokens = [
+  'function getAurelianStageId',
+  'developedMarkers.some',
 ];
 
 for (const token of requiredPageTokens) {
@@ -43,8 +53,14 @@ for (const token of requiredPageTokens) {
 for (const token of requiredSceneTokens) {
   if (!scene.includes(token)) throw new Error(`Missing Aurelian scene token: ${token}`);
 }
+for (const token of requiredResolverTokens) {
+  if (!resolver.includes(token)) throw new Error(`Missing Aurelian resolver token: ${token}`);
+}
 for (const token of forbiddenPageTokens) {
   if (page.includes(token)) throw new Error(`Forbidden legacy product-path token remains: ${token}`);
+}
+for (const token of forbiddenSceneTokens) {
+  if (scene.includes(token)) throw new Error(`Duplicate Aurelian state logic remains in presentation: ${token}`);
 }
 
 console.log("AURELIAN_PLAY_INTEGRATION_GUARD_OK");
