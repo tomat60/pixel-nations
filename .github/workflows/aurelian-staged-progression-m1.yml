@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   issues: write
 
 jobs:
@@ -21,6 +21,7 @@ jobs:
       - name: Checkout exact candidate head
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
 
       - name: Render and verify staged Aurelian progression
@@ -38,6 +39,31 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: Publish visual-review files on candidate branch
+        if: success() && github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          source_dir="evidence/aurelian-staged-progression-m1"
+          review_dir="review/aurelian-staged-progression-m1"
+          rm -rf "$review_dir"
+          mkdir -p "$review_dir"
+          cp "$source_dir"/aurelian-*.png "$review_dir"/
+          cp "$source_dir"/contact-sheet-*.png "$review_dir"/
+          cp "$source_dir"/staged-progression-qa.json "$review_dir"/
+          cp "$source_dir"/evidence-manifest.json "$review_dir"/
+          cp "$source_dir"/source-manifest.json "$review_dir"/
+          cp "$source_dir"/SHA256SUMS.txt "$review_dir"/
+          printf '%s\n' "${{ github.event.pull_request.head.sha }}" > "$review_dir/render-source-head.txt"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$review_dir"
+          if git diff --cached --quiet; then
+            echo "VISUAL_REVIEW_FILES_UNCHANGED"
+          else
+            git commit -m "Publish Aurelian M1 visual review evidence [skip ci]"
+            git push origin "HEAD:${{ github.head_ref }}"
+          fi
+
       - name: Report proof run
         if: always()
         uses: actions/github-script@v7
@@ -47,5 +73,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: 328,
-              body: `## Aurelian staged progression M1 run ${context.runId}\n\n- Candidate head: \`${context.sha}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`aurelian-staged-progression-m1-${context.runId}\`\n- Contract: desktop and portrait renders for camp, first shelter and developed settlement from the accepted #315 source chain.\n- Developed renders must preserve the accepted #315 perceptual hashes.\n- Direct visual review of all six images remains mandatory.\n\nNo gameplay integration, main write, paid tool, MAX, Fable, image generation or second asset family was used.`
+              body: `## Aurelian staged progression M1 run ${context.runId}\n\n- Candidate head: \`${context.sha}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`aurelian-staged-progression-m1-${context.runId}\`\n- Contract: desktop and portrait renders for camp, first shelter and developed settlement from the accepted #315 source chain.\n- Developed renders must preserve the accepted #315 perceptual hashes.\n- Successful pull-request runs also publish the six PNGs and two contact sheets under \`review/aurelian-staged-progression-m1/\` for direct inspection.\n- Direct visual review of all six images remains mandatory.\n\nNo gameplay integration, main write, paid tool, MAX, Fable, image generation or second asset family was used.`
             })
