@@ -141,6 +141,19 @@ if (!existsSync(currentStatePath)) {
       continue;
     }
 
+    const commitPresent = run(`git cat-file -e ${sha}^{commit}`);
+    if (!commitPresent.ok) {
+      const shallow = run("git rev-parse --is-shallow-repository");
+      if (shallow.ok && shallow.text === "true") {
+        authorityWarnings.push(
+          `${label} ${sha} is outside this shallow checkout; ancestry not verified`,
+        );
+      } else {
+        authorityErrors.push(`${label} ${sha} is not available in repository history`);
+      }
+      continue;
+    }
+
     const ancestor = run(`git merge-base --is-ancestor ${sha} HEAD`);
     if (!ancestor.ok) {
       authorityErrors.push(`${label} ${sha} is not an ancestor of HEAD`);
