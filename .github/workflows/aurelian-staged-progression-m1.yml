@@ -25,37 +25,26 @@ jobs:
           ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
 
-      - name: Consolidate accepted correction into clean source
+      - name: Ensure accepted correction is embedded in clean source
         run: |
           set -euo pipefail
-          python3 tools/qa/apply_aurelian_m1_visual_correction.py
-          grep -F '"shelter_spur"' tools/blender/aurelian_staged_progression.py
-          grep -F '"tent", "flag_red", "crate_big", "lumber", "sack", "barrel", "wheelbarrow"' tools/blender/aurelian_staged_progression.py
-          grep -F 'ShelterPath' tools/blender/aurelian_staged_progression.py
-          rm tools/qa/apply_aurelian_m1_visual_correction.py
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path('.github/workflows/aurelian-staged-progression-m1.yml')
-          text = path.read_text()
-          text = text.replace('      - tools/qa/apply_aurelian_m1_visual_correction.py\n', '')
-          start = text.index('      - name: Consolidate accepted correction into clean source\n')
-          end = text.index('      - name: Render and verify staged Aurelian progression\n')
-          text = text[:start] + text[end:]
-          text = text.replace(
-              '- The deterministic correction helper is applied and verified before rendering.',
-              '- The accepted first-shelter correction is embedded directly in the clean renderer source.',
-          )
-          path.write_text(text)
-          PY
-          git diff --check
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tools/blender/aurelian_staged_progression.py \
-            tools/qa/apply_aurelian_m1_visual_correction.py \
-            .github/workflows/aurelian-staged-progression-m1.yml
-          git commit -m "Consolidate accepted Aurelian M1 correction"
-          git push origin "HEAD:${{ github.head_ref }}"
+          helper="tools/qa/apply_aurelian_m1_visual_correction.py"
+          renderer="tools/blender/aurelian_staged_progression.py"
+          if test -f "$helper"; then
+            python3 "$helper"
+            rm "$helper"
+            git diff --check
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add "$renderer" "$helper"
+            git commit -m "Consolidate accepted Aurelian M1 correction"
+            git push origin "HEAD:${{ github.head_ref }}"
+          fi
+          grep -F '"shelter_spur": [(12, 42), (13, 46), (15, 49), (18, 51)]' "$renderer"
+          grep -F '"shelter_spur": [(8, 50), (11, 52), (15, 54), (18, 55)]' "$renderer"
+          grep -F '"tent", "flag_red", "crate_big", "lumber", "sack", "barrel", "wheelbarrow"' "$renderer"
+          grep -F 'base.create_ribbon("ShelterPath", mode, layout["camp"]["shelter_spur"], 3.6, materials["road"], z_offset=0.14)' "$renderer"
+          test ! -e "$helper"
 
       - name: Render and verify staged Aurelian progression
         run: |
@@ -86,7 +75,7 @@ jobs:
           cp "$source_dir"/evidence-manifest.json "$review_dir"/
           cp "$source_dir"/source-manifest.json "$review_dir"/
           cp "$source_dir"/SHA256SUMS.txt "$review_dir"/
-          printf '%s\n' "${{ github.event.pull_request.head.sha }}" > "$review_dir/render-source-head.txt"
+          printf '%s\n' "$(git rev-parse HEAD)" > "$review_dir/render-source-head.txt"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "$review_dir"
@@ -106,5 +95,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: 328,
-              body: `## Aurelian staged progression M1 run ${context.runId}\n\n- Candidate head: \`${context.sha}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`aurelian-staged-progression-m1-${context.runId}\`\n- Contract: desktop and portrait renders for camp, first shelter and developed settlement from the accepted #315 source chain.\n- The deterministic correction helper is applied and verified before rendering.\n- Developed renders must preserve the accepted #315 perceptual hashes.\n- Successful pull-request runs publish the six PNGs and two contact sheets under \`review/aurelian-staged-progression-m1/\` for direct inspection.\n- Direct visual review of all six images remains mandatory.\n\nNo gameplay integration, main write, paid tool, MAX, Fable, image generation or second asset family was used.`
+              body: `## Aurelian staged progression M1 run ${context.runId}\n\n- Candidate head: \`${context.sha}\`\n- Job status: \`${{ job.status }}\`\n- Artifact: \`aurelian-staged-progression-m1-${context.runId}\`\n- Contract: desktop and portrait renders for camp, first shelter and developed settlement from the accepted #315 source chain.\n- The accepted first-shelter correction must be embedded directly in the renderer source before proof generation.\n- Developed renders must preserve the accepted #315 perceptual hashes.\n- Successful pull-request runs publish the six PNGs and two contact sheets under \`review/aurelian-staged-progression-m1/\` for direct inspection.\n- Direct visual review of all six images remains mandatory.\n\nNo gameplay integration, main write, paid tool, MAX, Fable, image generation or second asset family was used.`
             })
