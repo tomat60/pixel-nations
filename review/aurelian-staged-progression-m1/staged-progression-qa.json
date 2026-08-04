@@ -4,27 +4,27 @@
   "images": {
     "desktop": {
       "camp": {
-        "sha256": "a96f6c04a105424edcdc0c893cd8525f5b05466a642ce8e5784514c7cf541d8c",
+        "sha256": "3272ac2aa6bbfe41f1fb8061639b5221e378e7ebe6bfd0d35e4f425088fed23e",
         "dhash": "e0e052548bd36793",
-        "bytes": 1314514,
+        "bytes": 1314531,
         "width": 1440,
         "height": 900,
-        "variance": 112.919,
-        "unique_sample_colors": 1665
+        "variance": 112.92,
+        "unique_sample_colors": 1664
       },
       "first_shelter": {
-        "sha256": "64f0df701328d86b77f3d40b04bdc133a746c3ac1ca95a599d3f56551d1e42be",
+        "sha256": "3b41193db9f8da8fc4fbc29a780a531a65f227d484805972bb306c0253511e27",
         "dhash": "e0e2644d8bd36793",
-        "bytes": 1317625,
+        "bytes": 1317701,
         "width": 1440,
         "height": 900,
         "variance": 119.187,
-        "unique_sample_colors": 1728
+        "unique_sample_colors": 1727
       },
       "developed_settlement": {
-        "sha256": "eb7c0a1fbd05cfe7fe15557e9e1a707a7ede864bbbd67748573c76795b2a0df0",
+        "sha256": "29e7491ffd40c9091748d59d2e4260e4cd845ed5fe175d8f4690fef0517c8b06",
         "dhash": "e0e2656dabdb6393",
-        "bytes": 1384660,
+        "bytes": 1384817,
         "width": 1440,
         "height": 900,
         "variance": 175.853,
@@ -33,31 +33,31 @@
     },
     "portrait": {
       "camp": {
-        "sha256": "8b9db4ea84cb26abeb1cf9cd04dbc1ee56eaa7b96d15f56c360829ebc48312a4",
+        "sha256": "2aa458e8e7931c5be876ddd8605219278874443f922bbe7fa83c052feecbe551",
         "dhash": "30c0c1802d918161",
-        "bytes": 338894,
+        "bytes": 338838,
         "width": 390,
         "height": 844,
         "variance": 80.66,
         "unique_sample_colors": 1318
       },
       "first_shelter": {
-        "sha256": "b3ab45e0fa105ebad1e6f0595519c4443d4fa5db9baee828b6cd15c488b4a60c",
+        "sha256": "598d496ae9d5eb05dc41f1ef836acc25eb6be86abf6224e242de3e3ad1acc802",
         "dhash": "30c0c1822c918161",
-        "bytes": 340657,
+        "bytes": 340628,
         "width": 390,
         "height": 844,
         "variance": 85.249,
         "unique_sample_colors": 1369
       },
       "developed_settlement": {
-        "sha256": "8ff076508af263c1e5b280d56f2d5ba440161946b5c45def04c984e700519b8b",
+        "sha256": "c0e12d58f0501ad708a3b4271b9c1762584c01739a254029a2554f95b72ea512",
         "dhash": "31c6e6a218998361",
-        "bytes": 372757,
+        "bytes": 372669,
         "width": 390,
         "height": 844,
-        "variance": 154.359,
-        "unique_sample_colors": 2559
+        "variance": 154.36,
+        "unique_sample_colors": 2560
       }
     }
   },
@@ -65,19 +65,19 @@
     "desktop": {
       "camp_to_first_shelter": {
         "changed_pixel_ratio": 0.009072,
-        "mean_absolute_channel_error": 0.315521,
+        "mean_absolute_channel_error": 0.315524,
         "p99_channel_error": 0.0,
         "max_channel_error": 106
       },
       "first_shelter_to_developed": {
         "changed_pixel_ratio": 0.072667,
-        "mean_absolute_channel_error": 1.820759,
+        "mean_absolute_channel_error": 1.820773,
         "p99_channel_error": 45.0,
         "max_channel_error": 156
       },
       "camp_to_developed": {
         "changed_pixel_ratio": 0.081596,
-        "mean_absolute_channel_error": 2.134402,
+        "mean_absolute_channel_error": 2.134419,
         "p99_channel_error": 48.0,
         "max_channel_error": 156
       }
@@ -85,19 +85,19 @@
     "portrait": {
       "camp_to_first_shelter": {
         "changed_pixel_ratio": 0.006896,
-        "mean_absolute_channel_error": 0.223742,
+        "mean_absolute_channel_error": 0.223745,
         "p99_channel_error": 0.0,
         "max_channel_error": 135
       },
       "first_shelter_to_developed": {
         "changed_pixel_ratio": 0.087462,
-        "mean_absolute_channel_error": 2.110547,
+        "mean_absolute_channel_error": 2.110594,
         "p99_channel_error": 47.0,
         "max_channel_error": 194
       },
       "camp_to_developed": {
         "changed_pixel_ratio": 0.094358,
-        "mean_absolute_channel_error": 2.334279,
+        "mean_absolute_channel_error": 2.334329,
         "p99_channel_error": 49.0,
         "max_channel_error": 194
       }
