@@ -1,1 +1,0 @@
-Aurelian evidence is staged at workflow runtime from an immutable commit only when issue body contains `AURELIAN_EVIDENCE_STAGING: v1`.
