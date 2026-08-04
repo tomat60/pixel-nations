@@ -2,6 +2,7 @@ import { chromium } from "playwright";
 import { existsSync } from "node:fs";
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { dismissFounderRecord } from "./qa-founder-record-helper.mjs";
 
 const APP_URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const STORAGE_KEY = "pixelNations.play.v1";
@@ -96,7 +97,7 @@ async function resetStoredRun(page) {
   await page.evaluate((key) => window.localStorage.removeItem(key), STORAGE_KEY);
   await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
   await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-  await page.locator('[data-qa="opening-guide"]').waitFor({ state: "visible", timeout: 5000 });
+  await page.locator('[data-qa="aurelian-village-scene"][data-aurelian-stage="camp"]').waitFor({ state: "visible", timeout: 5000 });
   const postureStillVisible = await page.locator('[data-qa="posture-label"]').isVisible().catch(() => false);
   if (postureStillVisible) throw new Error("Posture overlay remained visible after clearing the saved run");
 }
@@ -119,6 +120,7 @@ async function runBranch(browser, branchCase) {
     );
     await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    await dismissFounderRecord(page, { depth: "founder-run", required: true });
 
     await page.locator(`[data-qa="posture-label"][data-posture="${branchCase.posture}"]`).first().waitFor({ state: "visible", timeout: 5000 });
     await page.locator(`[data-qa="post-empire-branch"][data-posture="${branchCase.posture}"][data-outcome="none"]`).waitFor({ state: "visible", timeout: 5000 });
@@ -137,6 +139,7 @@ async function runBranch(browser, branchCase) {
 
     await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    await dismissFounderRecord(page, { depth: "founder-run", required: true });
     await page.locator(`[data-qa="post-empire-branch"][data-posture="${branchCase.posture}"][data-outcome="${branchCase.outcomeId}"]`).waitFor({ state: "visible", timeout: 5000 });
     await page.locator(`[data-qa="post-empire-outcome"][data-outcome-id="${branchCase.outcomeId}"]`).waitFor({ state: "visible", timeout: 5000 });
 

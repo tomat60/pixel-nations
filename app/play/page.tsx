@@ -93,7 +93,17 @@ export default function PlayPrototypePage() {
   }
 
   function continueFounderRecord() {
-    if (founderRecordReopened || postCrisisStarted) {
+    const shouldBeginPostCrisisCountermove = Boolean(
+      state.empireCrisisRecoveryId &&
+        !state.postCrisisCountermoveOrigin &&
+        !state.postCrisisResponseId,
+    );
+
+    if (shouldBeginPostCrisisCountermove) {
+      dispatch({ type: "beginPostCrisisCountermove" });
+    }
+
+    if (founderRecordReopened || postCrisisStarted || shouldBeginPostCrisisCountermove) {
       setFounderRecordReopened(false);
       setDemoOverlayDismissed(true);
       return;

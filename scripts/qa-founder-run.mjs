@@ -143,8 +143,20 @@ async function isInsideViewport(locator) {
   }).catch(() => false);
 }
 
+async function waitForVisibilityController(locator, timeout = 750) {
+  const started = Date.now();
+  while (Date.now() - started < timeout) {
+    if (await isInsideViewport(locator)) return true;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return isInsideViewport(locator);
+}
+
 async function clickLocator(locator, step, tracker, { primary = false } = {}) {
-  const initiallyVisible = await isInsideViewport(locator);
+  let initiallyVisible = await isInsideViewport(locator);
+  if (primary && !initiallyVisible) {
+    initiallyVisible = await waitForVisibilityController(locator);
+  }
   if (!initiallyVisible) {
     tracker.requiredScrolls += 1;
     if (primary && !tracker.hiddenPrimaryCtas.includes(step)) tracker.hiddenPrimaryCtas.push(step);

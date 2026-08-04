@@ -65,26 +65,31 @@ jobs:
         run: npm run qa:founder-run
 
       - name: Generate posture evidence
+        id: posture
         if: always()
         continue-on-error: true
         run: node scripts/qa-play-branches.mjs
 
       - name: Generate imperial cycle evidence
+        id: imperial
         if: always()
         continue-on-error: true
         run: node scripts/qa-imperial-turn.mjs
 
       - name: Generate first-run finale evidence
+        id: finale
         if: always()
         continue-on-error: true
         run: node scripts/qa-demo-complete.mjs
 
       - name: Generate empire crisis evidence
+        id: crisis
         if: always()
         continue-on-error: true
         run: node scripts/qa-empire-crisis.mjs
 
       - name: Generate post-crisis counter-move evidence
+        id: post_crisis
         if: always()
         continue-on-error: true
         run: node scripts/qa-post-crisis-countermove.mjs
@@ -102,13 +107,18 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Enforce Aurelian and Founder Run evidence gates
+      - name: Enforce complete gameplay evidence gates
         if: always()
         env:
           PRIMARY_OUTCOME: ${{ steps.primary.outcome }}
           VILLAGE_OUTCOME: ${{ steps.village.outcome }}
           PROGRESSION_OUTCOME: ${{ steps.progression.outcome }}
           FOUNDER_OUTCOME: ${{ steps.founder.outcome }}
+          POSTURE_OUTCOME: ${{ steps.posture.outcome }}
+          IMPERIAL_OUTCOME: ${{ steps.imperial.outcome }}
+          FINALE_OUTCOME: ${{ steps.finale.outcome }}
+          CRISIS_OUTCOME: ${{ steps.crisis.outcome }}
+          POST_CRISIS_OUTCOME: ${{ steps.post_crisis.outcome }}
         run: |
           node --input-type=module <<'NODE'
           import { readFile } from "node:fs/promises";
@@ -119,6 +129,11 @@ jobs:
             village: process.env.VILLAGE_OUTCOME,
             progression: process.env.PROGRESSION_OUTCOME,
             founder: process.env.FOUNDER_OUTCOME,
+            posture: process.env.POSTURE_OUTCOME,
+            imperial: process.env.IMPERIAL_OUTCOME,
+            finale: process.env.FINALE_OUTCOME,
+            crisis: process.env.CRISIS_OUTCOME,
+            postCrisis: process.env.POST_CRISIS_OUTCOME,
           };
           for (const [name, outcome] of Object.entries(outcomes)) {
             if (outcome !== "success") failures.push(`${name} step outcome: ${outcome}`);
@@ -149,6 +164,18 @@ jobs:
           const founder = await readJson("public/qa/founder-run/founder-run-result.json", "Founder Run result");
           if (founder && founder.status !== "PASS") failures.push(`Founder Run result: ${founder.blockingStep || "unknown"}: ${founder.error || founder.status}`);
           if (founder && (!Array.isArray(founder.viewports) || founder.viewports.length !== 2)) failures.push("Founder Run must include desktop and mobile evidence.");
+
+          const advancedEvidence = [
+            ["public/qa/play-latest/branches/branch-summary.json", "posture evidence"],
+            ["public/qa/play-latest/imperial-turn/turn-summary.json", "Imperial Turn evidence"],
+            ["public/qa/play-latest/demo-complete/demo-summary.json", "advanced finale evidence"],
+            ["public/qa/play-latest/empire-crisis/empire-crisis-summary.json", "empire crisis evidence"],
+            ["public/qa/play-latest/post-crisis-countermove/post-crisis-countermove-summary.json", "post-crisis evidence"],
+          ];
+          for (const [path, label] of advancedEvidence) {
+            const summary = await readJson(path, label);
+            if (summary && summary.status && summary.status !== "ok") failures.push(`${label} status: ${summary.status}`);
+          }
 
           if (failures.length) {
             console.error("PIXEL_NATIONS_PLAY_QA_FAILED");

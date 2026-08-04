@@ -2,6 +2,7 @@ import { chromium } from "playwright";
 import { existsSync } from "node:fs";
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { assertAurelianRestart, dismissFounderRecord, openAdvancedFounderRecord } from "./qa-founder-record-helper.mjs";
 
 const URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const KEY = "pixelNations.play.v1";
@@ -44,7 +45,13 @@ async function storedFresh(page) {
   await page.waitForFunction((key) => {
     try {
       const state = JSON.parse(window.localStorage.getItem(key) ?? "{}");
-      return Array.isArray(state.ownedPlotIds) && state.ownedPlotIds.length === 0 && Array.isArray(state.imperialTurnActionIds) && state.imperialTurnActionIds.length === 0 && state.empireDeclarationId === null;
+      return Array.isArray(state.ownedPlotIds)
+        && state.ownedPlotIds.length === 1
+        && Array.isArray(state.completedOrders)
+        && state.completedOrders.length === 0
+        && Array.isArray(state.imperialTurnActionIds)
+        && state.imperialTurnActionIds.length === 0
+        && state.empireDeclarationId === null;
     } catch { return false; }
   }, KEY, { timeout: 5000 });
 }
@@ -73,6 +80,7 @@ async function main() {
     await page.evaluate(({ key, state }) => window.localStorage.setItem(key, JSON.stringify(state)), { key: KEY, state: completedSeed() });
     await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    await dismissFounderRecord(page, { depth: "founder-run", required: true });
 
     await page.locator('[data-qa="current-objective-text"]').getByText(/Imperial Turn 3\/3/i).waitFor({ state: "visible", timeout: 5000 });
     await page.locator('[data-qa="imperial-turn-action"][data-action-id="reinforce-ridge"]').first().click({ force: true });
@@ -86,8 +94,7 @@ async function main() {
       resolvedCrisis = true;
     }
 
-    const overlay = page.locator('[data-qa="demo-complete-overlay"]').first();
-    await overlay.waitFor({ state: "visible", timeout: 5000 });
+    const overlay = await openAdvancedFounderRecord(page);
     await page.locator('[data-qa="founder-record-posture"][data-posture="martial"]').waitFor({ state: "visible", timeout: 5000 });
     await page.locator('[data-qa="founder-record-outcome"][data-outcome="show-of-force"]').waitFor({ state: "visible", timeout: 5000 });
     if (await page.locator('[data-qa="founder-record-turn"]').count() !== 3) throw new Error("Founder Record does not contain three turns");
@@ -112,17 +119,14 @@ async function main() {
     await overlay.waitFor({ state: "visible", timeout: 5000 });
     await page.locator('[data-qa="restart-run"]').click({ force: true });
     await overlay.waitFor({ state: "hidden", timeout: 5000 });
-    await page.locator('[data-qa="opening-guide"]').waitFor({ state: "visible", timeout: 5000 });
-    await page.locator('[data-qa="current-objective-text"]').getByText(/Claim one land/i).waitFor({ state: "visible", timeout: 5000 });
+    await assertAurelianRestart(page);
+    await page.locator('[data-qa="current-objective-text"]').getByText(/Issue settlement orders/i).waitFor({ state: "visible", timeout: 5000 });
     await storedFresh(page);
-    const restartShot = "03-post-restart-fresh.png";
+    const restartShot = "03-post-restart-aurelian-camp.png";
     await page.screenshot({ path: `${SHOT_DIR}/${restartShot}`, fullPage: true }); evidence.push(restartShot);
 
-    await page.locator('[data-qa="plot-greenvale"]').click({ force: true });
-    await page.getByRole("button", { name: /Choose this land/i }).first().click({ force: true });
-    await page.locator('[data-qa="village-scene"]').waitFor({ state: "visible", timeout: 5000 });
+    const secondShot = "04-second-history-begun.png";
     await page.locator('[data-qa="second-run-started"]').waitFor({ state: "visible", timeout: 5000 });
-    const secondShot = "04-second-run-started.png";
     await page.screenshot({ path: `${SHOT_DIR}/${secondShot}`, fullPage: true }); evidence.push(secondShot);
 
     await writeFile(`${OUT}/demo-summary.json`, `${JSON.stringify({ generatedAt: new Date().toISOString(), evidence, status: "ok" }, null, 2)}\n`);
