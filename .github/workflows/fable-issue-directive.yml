@@ -125,7 +125,7 @@ jobs:
           echo "FABLE_EVIDENCE_SHA=$evidence_sha"
 
       - name: Stage approved Aurelian evidence inside the visual allowlist
-        if: contains(github.event.issue.body, 'AURELIAN_EVIDENCE_STAGING: v1')
+        if: "${{ contains(github.event.issue.body, 'AURELIAN_EVIDENCE_STAGING: v1') }}"
         run: |
           set -euo pipefail
           source_dir="evidence-repo/review/aurelian-staged-progression-m1"
