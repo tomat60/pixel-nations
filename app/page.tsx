@@ -3,10 +3,10 @@
 import { useRouter } from "next/navigation";
 
 const arc = [
-  { step: "01", title: "Claim land", desc: "Choose where your history begins." },
-  { step: "02", title: "Build settlement", desc: "Turn one land into the first civic core." },
-  { step: "03", title: "Found nation", desc: "Raise a banner and define the First Age." },
-  { step: "04", title: "Rule empire", desc: "Survive crisis and answer the rival." },
+  { step: "01", title: "Raise the first camp", desc: "Begin with one land already under your banner." },
+  { step: "02", title: "Build a settlement", desc: "Turn the camp into a living civic core." },
+  { step: "03", title: "Found a nation", desc: "Expand your borders and write the first charter." },
+  { step: "04", title: "Declare an empire", desc: "Secure the frontier, rule, and face what follows." },
 ];
 
 export default function Home() {
@@ -29,7 +29,7 @@ export default function Home() {
             </div>
           </a>
           <button type="button" onClick={enterPlay} className="rounded-2xl border border-amber-200/25 bg-amber-200/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-amber-100 transition hover:bg-amber-200/16">
-            Play Demo
+            Play
           </button>
         </nav>
       </header>
@@ -41,12 +41,17 @@ export default function Home() {
             One land can become an empire.
           </h1>
           <p className="mt-7 max-w-2xl text-base leading-8 text-zinc-400 md:text-lg">
-            Claim one land in Sector A-01, build a settlement, found a nation, declare an empire, survive crisis, and see your Founder Record shape the next consequence.
+            Begin at Aurelian Camp, raise a settlement, expand into a nation, declare an empire, and discover what your first decisions set in motion.
           </p>
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-            <button type="button" onClick={enterPlay} className="rounded-2xl border border-amber-200/55 bg-gradient-to-b from-amber-300/24 to-amber-800/14 px-8 py-4 text-sm font-black uppercase tracking-[0.2em] text-amber-50 shadow-[0_0_60px_rgba(251,191,36,.10)] transition hover:border-amber-100/70 hover:bg-amber-200/16">
-              Enter /play
+            <button
+              type="button"
+              data-qa="primary-play-demo"
+              onClick={enterPlay}
+              className="rounded-2xl border border-amber-200/55 bg-gradient-to-b from-amber-300/24 to-amber-800/14 px-8 py-4 text-sm font-black uppercase tracking-[0.2em] text-amber-50 shadow-[0_0_60px_rgba(251,191,36,.10)] transition hover:border-amber-100/70 hover:bg-amber-200/16"
+            >
+              Play Demo
             </button>
             <a href="mailto:tomat6@gmail.com?subject=Pixel%20Nations%20demo%20feedback&body=I%20visited%20the%20Pixel%20Nations%20demo.%0A%0AWhat%20felt%20exciting%3A%0A%0AWhat%20was%20confusing%3A%0A%0AWhat%20I%20would%20like%20next%3A%0A" className="rounded-2xl border border-white/10 bg-black/36 px-8 py-4 text-center text-sm font-black uppercase tracking-[0.2em] text-zinc-300 transition hover:border-amber-100/25 hover:text-amber-100">
               Send Feedback
@@ -65,9 +70,9 @@ export default function Home() {
         </div>
 
         <div className="mt-6 rounded-3xl border border-sky-200/12 bg-slate-950/52 p-5 backdrop-blur-md md:max-w-2xl">
-          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-sky-100/55">Current source of truth</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-sky-100/55">Playable now</p>
           <p className="mt-2 text-sm leading-6 text-zinc-300">
-            The playable game lives on <strong className="text-amber-100">/play</strong>. Legacy routes now redirect there so users, Fable, Cursor, and QA all follow the same product surface.
+            This pre-alpha proves the complete first journey from one camp to an empire. Your progress is saved in this browser, and you can found a new empire whenever you want a clean run.
           </p>
         </div>
       </section>
