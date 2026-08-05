@@ -20,7 +20,7 @@ jobs:
   play-visual-qa:
     name: Generate /play gameplay evidence
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
 
     steps:
       - name: Checkout
@@ -64,6 +64,12 @@ jobs:
         continue-on-error: true
         run: npm run qa:founder-run
 
+      - name: Generate settlement stewardship evidence
+        id: settlement
+        if: always()
+        continue-on-error: true
+        run: npm run qa:settlement
+
       - name: Generate posture evidence
         id: posture
         if: always()
@@ -104,6 +110,7 @@ jobs:
             public/qa/village-scene
             public/qa/village-progression
             public/qa/founder-run
+            public/qa/settlement-economy
           if-no-files-found: error
           retention-days: 7
 
@@ -114,6 +121,7 @@ jobs:
           VILLAGE_OUTCOME: ${{ steps.village.outcome }}
           PROGRESSION_OUTCOME: ${{ steps.progression.outcome }}
           FOUNDER_OUTCOME: ${{ steps.founder.outcome }}
+          SETTLEMENT_OUTCOME: ${{ steps.settlement.outcome }}
           POSTURE_OUTCOME: ${{ steps.posture.outcome }}
           IMPERIAL_OUTCOME: ${{ steps.imperial.outcome }}
           FINALE_OUTCOME: ${{ steps.finale.outcome }}
@@ -129,6 +137,7 @@ jobs:
             village: process.env.VILLAGE_OUTCOME,
             progression: process.env.PROGRESSION_OUTCOME,
             founder: process.env.FOUNDER_OUTCOME,
+            settlement: process.env.SETTLEMENT_OUTCOME,
             posture: process.env.POSTURE_OUTCOME,
             imperial: process.env.IMPERIAL_OUTCOME,
             finale: process.env.FINALE_OUTCOME,
@@ -164,6 +173,11 @@ jobs:
           const founder = await readJson("public/qa/founder-run/founder-run-result.json", "Founder Run result");
           if (founder && founder.status !== "PASS") failures.push(`Founder Run result: ${founder.blockingStep || "unknown"}: ${founder.error || founder.status}`);
           if (founder && (!Array.isArray(founder.viewports) || founder.viewports.length !== 2)) failures.push("Founder Run must include desktop and mobile evidence.");
+
+          const settlement = await readJson("public/qa/settlement-economy/settlement-economy-result.json", "settlement stewardship result");
+          if (settlement && settlement.status !== "PASS") failures.push(`Settlement result: ${settlement.blockingStep || "unknown"}: ${settlement.error || settlement.status}`);
+          if (settlement && (!Array.isArray(settlement.viewports) || settlement.viewports.length !== 2)) failures.push("Settlement stewardship must include desktop and mobile evidence.");
+          if (settlement && (!Array.isArray(settlement.screenshots) || settlement.screenshots.length !== 4)) failures.push("Settlement stewardship must include four screenshots.");
 
           const advancedEvidence = [
             ["public/qa/play-latest/branches/branch-summary.json", "posture evidence"],
