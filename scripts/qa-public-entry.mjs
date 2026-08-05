@@ -6,6 +6,7 @@ import { spawn } from "node:child_process";
 
 const APP_URL = process.env.QA_APP_URL ?? "http://127.0.0.1:3000";
 const OUTPUT_DIR = "public/qa/rc1";
+const STORAGE_KEY = "pixelNations.play.v1";
 const VIEWPORTS = [
   { id: "desktop", width: 1440, height: 900 },
   { id: "mobile", width: 390, height: 844 },
@@ -98,22 +99,50 @@ async function runViewport(browser, viewport) {
       await page.getByRole("button", { name: "Play Demo" }).click();
       await page.waitForURL(/\/play(?:\?|$)/, { timeout: 10000 });
       await page.locator('[data-qa="aurelian-village-scene"][data-aurelian-stage="camp"]').waitFor({ state: "visible", timeout: 10000 });
-      const shell = page.locator('[data-qa="play-shell"]');
-      await shell.waitFor({ state: "visible", timeout: 10000 });
-      const savedState = await page.evaluate(() => {
-        for (let index = 0; index < window.localStorage.length; index += 1) {
-          const key = window.localStorage.key(index);
-          if (!key) continue;
-          try {
-            const value = JSON.parse(window.localStorage.getItem(key) ?? "null");
-            if (Array.isArray(value?.settlementMarkers) && Array.isArray(value?.ownedPlotIds)) return { key, value };
-          } catch {}
-        }
-        return null;
-      });
-      if (!savedState?.value?.settlementMarkers?.includes("camp")) throw new Rc1Error("Aurelian Camp save", "Fresh entry did not persist the Camp state.");
-      if (savedState.value.empireDeclarationId) throw new Rc1Error("Aurelian Camp save", "Fresh entry retained an empire declaration.");
+      await page.locator('[data-qa="play-shell"]').waitFor({ state: "visible", timeout: 10000 });
+      await page.waitForFunction((key) => {
+        const raw = window.localStorage.getItem(key);
+        if (!raw) return false;
+        const value = JSON.parse(raw);
+        return Array.isArray(value?.settlementMarkers) && value.settlementMarkers.includes("camp") && !value.empireDeclarationId;
+      }, STORAGE_KEY);
       await page.screenshot({ path: `${OUTPUT_DIR}/${viewport.id}-aurelian-camp.png`, fullPage: true });
+    });
+
+    await check("Found a New Empire resets to a clean Camp", async () => {
+      await page.evaluate((key) => {
+        window.localStorage.setItem(key, JSON.stringify({
+          ownedPlotIds: ["aurelian-basin"],
+          ownedSectorIds: ["A-01", "A-02", "A-03", "A-04"],
+          completedOrders: ["raise-shelter", "build-storehouse", "form-council"],
+          settlementMarkers: ["camp", "shelter", "storehouse", "council"],
+          scoutedPlotIds: [],
+          resources: { food: 4, timber: 2, stone: 0, influence: 3 },
+          nationDecisionId: "trade-charter",
+          frontierIntentId: "northern-pass",
+          empireDeclarationId: "aurelian-compact",
+          foundingCeremonySeen: true,
+          season: 8,
+          view: "council",
+          retentionRecords: [
+            { season: 2, decisionId: "grain-levy", choiceId: "freedom", label: "Household Stores", villageMarker: "Granaries", worldMarker: "Open stores" },
+            { season: 3, decisionId: "open-roads", choiceId: "freedom", label: "Open Roads", villageMarker: "Road charter", worldMarker: "Open roads" },
+            { season: 4, decisionId: "scribe-patronage", choiceId: "authority", label: "Civic Record", villageMarker: "Scribe hall", worldMarker: "Written law" },
+          ],
+          chronicle: [],
+        }));
+      }, STORAGE_KEY);
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.locator('[data-qa="demo-complete-overlay"][data-record-depth="founder-run"]').waitFor({ state: "visible", timeout: 10000 });
+      await page.locator('[data-qa="restart-run"]').click();
+      await page.locator('[data-qa="aurelian-village-scene"][data-aurelian-stage="camp"]').waitFor({ state: "visible", timeout: 10000 });
+      await page.waitForFunction((key) => {
+        const raw = window.localStorage.getItem(key);
+        if (!raw) return false;
+        const value = JSON.parse(raw);
+        return !value.empireDeclarationId && value.view === "village" && value.settlementMarkers?.length === 1 && value.settlementMarkers[0] === "camp";
+      }, STORAGE_KEY);
+      await page.screenshot({ path: `${OUTPUT_DIR}/${viewport.id}-clean-restart.png`, fullPage: true });
     });
 
     return { id: viewport.id, width: viewport.width, height: viewport.height, checks };
@@ -138,8 +167,10 @@ async function writePackages(result) {
     requiredEvidence: [
       "desktop-homepage.png",
       "desktop-aurelian-camp.png",
+      "desktop-clean-restart.png",
       "mobile-homepage.png",
       "mobile-aurelian-camp.png",
+      "mobile-clean-restart.png",
       "public-entry-result.json",
     ],
     knownVisualLimitations: [
