@@ -45,27 +45,51 @@ jobs:
             return match[1].trim();
           }
 
+          function optionalField(name) {
+            return body.match(new RegExp(`^${name}:\\s*(.+)$`, 'mi'))?.[1]?.trim() ?? '';
+          }
+
+          function safePath(value, label) {
+            if (!/^[A-Za-z0-9._/-]+$/.test(value) || value.startsWith('/') || value.includes('..') || value.includes('//')) {
+              throw new Error(`${label} contains an unsafe path.`);
+            }
+          }
+
           const base = field('Base');
           const branch = field('Branch');
           const patchSha = field('Patch SHA256').toLowerCase();
           const allowed = field('Allowed files').split(',').map((value) => value.trim()).filter(Boolean);
+          const sourceRef = optionalField('Patch source ref');
+          const sourcePath = optionalField('Patch source path');
           const patchMatch = body.match(/BEGIN_PATCH_GZIP_BASE64\s*([A-Za-z0-9+/=\r\n]+?)\s*END_PATCH_GZIP_BASE64/i);
 
           if (!/^[0-9a-f]{40}$/.test(base)) throw new Error('Base must be a full 40-character commit SHA.');
           if (!/^gpt56\/[a-z0-9._/-]+$/.test(branch)) throw new Error('Branch must use the gpt56/ namespace and safe characters.');
           if (!/^[0-9a-f]{64}$/.test(patchSha)) throw new Error('Patch SHA256 must be 64 lowercase hexadecimal characters.');
           if (!allowed.length || allowed.length > 12) throw new Error('Allowed files must contain between 1 and 12 paths.');
-          if (allowed.some((path) => !/^[A-Za-z0-9._/-]+$/.test(path) || path.startsWith('/') || path.includes('..'))) {
-            throw new Error('Allowed files contains an unsafe path.');
+          for (const path of allowed) safePath(path, 'Allowed files');
+
+          const usesRepositorySource = Boolean(sourceRef || sourcePath);
+          if (usesRepositorySource && !(sourceRef && sourcePath)) {
+            throw new Error('Patch source ref and Patch source path must be supplied together.');
           }
-          if (!patchMatch) throw new Error('Missing patch payload markers.');
+          if (usesRepositorySource) {
+            if (!/^[A-Za-z0-9._/-]+$/.test(sourceRef) || sourceRef.startsWith('/') || sourceRef.includes('..') || sourceRef.includes('//') || sourceRef.includes('@{')) {
+              throw new Error('Patch source ref is unsafe.');
+            }
+            safePath(sourcePath, 'Patch source path');
+          } else {
+            if (!patchMatch) throw new Error('Missing repository patch source or inline patch payload markers.');
+            const encoded = patchMatch[1].replace(/\s+/g, '');
+            if (!encoded || !/^[A-Za-z0-9+/=]+$/.test(encoded)) throw new Error('Patch payload is not valid base64 text.');
+            fs.writeFileSync('/tmp/pixel-nations-patch.b64', encoded);
+          }
 
-          const encoded = patchMatch[1].replace(/\s+/g, '');
-          if (!encoded || !/^[A-Za-z0-9+/=]+$/.test(encoded)) throw new Error('Patch payload is not valid base64 text.');
-
-          fs.writeFileSync('/tmp/pixel-nations-patch.b64', encoded);
           fs.writeFileSync('/tmp/pixel-nations-allowed-files.txt', `${allowed.join('\n')}\n`);
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `base=${base}\nbranch=${branch}\npatch_sha=${patchSha}\n`);
+          fs.appendFileSync(
+            process.env.GITHUB_OUTPUT,
+            `base=${base}\nbranch=${branch}\npatch_sha=${patchSha}\nsource_ref=${sourceRef}\nsource_path=${sourcePath}\n`,
+          );
           NODE
 
       - name: Verify immutable base
@@ -81,11 +105,21 @@ jobs:
           fi
           git checkout --detach "$BASE_SHA"
 
+      - name: Load repository patch source
+        if: ${{ steps.directive.outputs.source_ref != '' }}
+        env:
+          SOURCE_REF: ${{ steps.directive.outputs.source_ref }}
+          SOURCE_PATH: ${{ steps.directive.outputs.source_path }}
+        run: |
+          git fetch origin "$SOURCE_REF" --no-tags
+          git show "FETCH_HEAD:$SOURCE_PATH" > /tmp/pixel-nations-patch.b64
+          test -s /tmp/pixel-nations-patch.b64
+
       - name: Decode, authenticate and allowlist patch
         env:
           EXPECTED_PATCH_SHA: ${{ steps.directive.outputs.patch_sha }}
         run: |
-          base64 --decode /tmp/pixel-nations-patch.b64 | gzip --decompress --stdout > /tmp/pixel-nations.patch
+          tr -d '[:space:]' < /tmp/pixel-nations-patch.b64 | base64 --decode | gzip --decompress --stdout > /tmp/pixel-nations.patch
           ACTUAL_PATCH_SHA="$(sha256sum /tmp/pixel-nations.patch | cut -d' ' -f1)"
           test "$ACTUAL_PATCH_SHA" = "$EXPECTED_PATCH_SHA"
 
@@ -159,4 +193,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "DETERMINISTIC_PATCH_REJECTED\n\nThe runner stopped before an accepted draft PR. Inspect the failed workflow step; do not retry without correcting the exact base, digest, allowlist, patch or build failure."
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "DETERMINISTIC_PATCH_REJECTED\n\nThe runner stopped before an accepted draft PR. Inspect the failed workflow step; do not retry without correcting the exact base, digest, allowlist, patch source or build failure."
