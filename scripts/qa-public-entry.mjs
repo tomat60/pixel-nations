@@ -55,6 +55,19 @@ function gitSha() {
   }
 }
 
+async function waitForDecodedCamp(page, viewport) {
+  const imageViewport = viewport.id === "desktop" ? "desktop" : "portrait";
+  await page.waitForFunction(({ imageViewport }) => {
+    const image = document.querySelector(
+      `[data-qa="aurelian-stage-image"][data-aurelian-image-stage="camp"][data-aurelian-viewport="${imageViewport}"][data-aurelian-active="true"]`,
+    );
+    if (!(image instanceof HTMLImageElement)) return false;
+    const style = window.getComputedStyle(image);
+    return image.complete && image.naturalWidth > 0 && style.display !== "none" && Number.parseFloat(style.opacity || "0") > 0;
+  }, { imageViewport }, { timeout: 15000 });
+  await page.waitForTimeout(350);
+}
+
 async function runViewport(browser, viewport) {
   const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height } });
   const page = await context.newPage();
@@ -100,6 +113,7 @@ async function runViewport(browser, viewport) {
       await page.waitForURL(/\/play(?:\?|$)/, { timeout: 10000 });
       await page.locator('[data-qa="aurelian-village-scene"][data-aurelian-stage="camp"]').waitFor({ state: "visible", timeout: 10000 });
       await page.locator('[data-qa="play-shell"]').waitFor({ state: "visible", timeout: 10000 });
+      await waitForDecodedCamp(page, viewport);
       await page.waitForFunction((key) => {
         const raw = window.localStorage.getItem(key);
         if (!raw) return false;
@@ -136,6 +150,7 @@ async function runViewport(browser, viewport) {
       await page.locator('[data-qa="demo-complete-overlay"][data-record-depth="founder-run"]').waitFor({ state: "visible", timeout: 10000 });
       await page.locator('[data-qa="restart-run"]').click();
       await page.locator('[data-qa="aurelian-village-scene"][data-aurelian-stage="camp"]').waitFor({ state: "visible", timeout: 10000 });
+      await waitForDecodedCamp(page, viewport);
       await page.waitForFunction((key) => {
         const raw = window.localStorage.getItem(key);
         if (!raw) return false;
