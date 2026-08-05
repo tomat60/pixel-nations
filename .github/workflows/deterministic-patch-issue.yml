@@ -1,0 +1,162 @@
+name: Pixel Nations Deterministic Patch Runner
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  apply-owner-patch:
+    if: >-
+      github.event.issue.user.login == 'tomat60' &&
+      startsWith(github.event.issue.title, 'TERMINAL PATCH:')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Parse and validate directive
+        id: directive
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const body = process.env.ISSUE_BODY ?? '';
+
+          function field(name) {
+            const match = body.match(new RegExp(`^${name}:\\s*(.+)$`, 'mi'));
+            if (!match) throw new Error(`Missing ${name}: field.`);
+            return match[1].trim();
+          }
+
+          const base = field('Base');
+          const branch = field('Branch');
+          const patchSha = field('Patch SHA256').toLowerCase();
+          const allowed = field('Allowed files').split(',').map((value) => value.trim()).filter(Boolean);
+          const patchMatch = body.match(/BEGIN_PATCH_GZIP_BASE64\s*([A-Za-z0-9+/=\r\n]+?)\s*END_PATCH_GZIP_BASE64/i);
+
+          if (!/^[0-9a-f]{40}$/.test(base)) throw new Error('Base must be a full 40-character commit SHA.');
+          if (!/^gpt56\/[a-z0-9._/-]+$/.test(branch)) throw new Error('Branch must use the gpt56/ namespace and safe characters.');
+          if (!/^[0-9a-f]{64}$/.test(patchSha)) throw new Error('Patch SHA256 must be 64 lowercase hexadecimal characters.');
+          if (!allowed.length || allowed.length > 12) throw new Error('Allowed files must contain between 1 and 12 paths.');
+          if (allowed.some((path) => !/^[A-Za-z0-9._/-]+$/.test(path) || path.startsWith('/') || path.includes('..'))) {
+            throw new Error('Allowed files contains an unsafe path.');
+          }
+          if (!patchMatch) throw new Error('Missing patch payload markers.');
+
+          const encoded = patchMatch[1].replace(/\s+/g, '');
+          if (!encoded || !/^[A-Za-z0-9+/=]+$/.test(encoded)) throw new Error('Patch payload is not valid base64 text.');
+
+          fs.writeFileSync('/tmp/pixel-nations-patch.b64', encoded);
+          fs.writeFileSync('/tmp/pixel-nations-allowed-files.txt', `${allowed.join('\n')}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `base=${base}\nbranch=${branch}\npatch_sha=${patchSha}\n`);
+          NODE
+
+      - name: Verify immutable base
+        env:
+          BASE_SHA: ${{ steps.directive.outputs.base }}
+          BRANCH_NAME: ${{ steps.directive.outputs.branch }}
+        run: |
+          git fetch origin main --no-tags
+          test "$(git rev-parse origin/main)" = "$BASE_SHA"
+          if git ls-remote --exit-code --heads origin "$BRANCH_NAME" >/dev/null 2>&1; then
+            echo "Target branch already exists: $BRANCH_NAME" >&2
+            exit 1
+          fi
+          git checkout --detach "$BASE_SHA"
+
+      - name: Decode, authenticate and allowlist patch
+        env:
+          EXPECTED_PATCH_SHA: ${{ steps.directive.outputs.patch_sha }}
+        run: |
+          base64 --decode /tmp/pixel-nations-patch.b64 | gzip --decompress --stdout > /tmp/pixel-nations.patch
+          ACTUAL_PATCH_SHA="$(sha256sum /tmp/pixel-nations.patch | cut -d' ' -f1)"
+          test "$ACTUAL_PATCH_SHA" = "$EXPECTED_PATCH_SHA"
+
+          git apply --numstat /tmp/pixel-nations.patch | cut -f3- > /tmp/pixel-nations-changed-files.txt
+          test -s /tmp/pixel-nations-changed-files.txt
+          while IFS= read -r path; do
+            grep -Fxq "$path" /tmp/pixel-nations-allowed-files.txt || {
+              echo "Patch touches forbidden path: $path" >&2
+              exit 1
+            }
+          done < /tmp/pixel-nations-changed-files.txt
+
+          git apply --check /tmp/pixel-nations.patch
+          git apply /tmp/pixel-nations.patch
+          git diff --check
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build patched product
+        run: npm run build
+
+      - name: Commit bounded branch
+        env:
+          BRANCH_NAME: ${{ steps.directive.outputs.branch }}
+        run: |
+          git switch -c "$BRANCH_NAME"
+          git config user.name "pixel-nations-patch-runner[bot]"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: apply bounded deterministic product patch"
+          git push --set-upstream origin "$BRANCH_NAME"
+
+      - name: Open draft pull request
+        id: pull_request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH_NAME: ${{ steps.directive.outputs.branch }}
+          BASE_SHA: ${{ steps.directive.outputs.base }}
+          PATCH_SHA: ${{ steps.directive.outputs.patch_sha }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          PR_URL="$(gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --draft \
+            --title "Build P2 settlement stewardship loop" \
+            --body "Deterministic owner-authorized patch from issue #${ISSUE_NUMBER}.\n\nBase: \`${BASE_SHA}\`\nPatch SHA-256: \`${PATCH_SHA}\`\n\nThe Patch Runner validated the immutable base, exact payload digest, changed-file allowlist, git applicability, whitespace and production build before creating this draft. Merge remains blocked for Product Lead review and complete gameplay QA.")"
+          echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Report success
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          PR_URL: ${{ steps.pull_request.outputs.url }}
+          BRANCH_NAME: ${{ steps.directive.outputs.branch }}
+        run: |
+          HEAD_SHA="$(git rev-parse HEAD)"
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "DETERMINISTIC_PATCH_APPLIED\n\n- Draft PR: ${PR_URL}\n- Branch: \`${BRANCH_NAME}\`\n- Head: \`${HEAD_SHA}\`\n- Build: passed\n\nMerge remains blocked pending full CI, complete Play Visual QA and direct evidence review."
+
+      - name: Report failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "DETERMINISTIC_PATCH_REJECTED\n\nThe runner stopped before an accepted draft PR. Inspect the failed workflow step; do not retry without correcting the exact base, digest, allowlist, patch or build failure."
