@@ -25,6 +25,8 @@ import { getSectorIndexFromId, getWorldSector } from "./world-engine";
 
 export type ViewId = "map" | "village" | "orders" | "world" | "council";
 export type OrderId = "raise-shelter" | "gather-food" | "cut-timber" | "scout-nearby" | "build-storehouse" | "open-market" | "form-council" | "fortify-watch";
+export type SettlementDistrictId = "fields" | "workyard" | "civic";
+export type SettlementFocusId = "stores" | "construction" | "charter";
 export type SettlementMarker = "camp" | "shelter" | "storehouse" | "market" | "council" | "watch";
 export type NationDecisionId = "trade-charter" | "border-guard" | "settler-rights";
 export type RetentionDecisionId = "grain-levy" | "open-roads" | "scribe-patronage";
@@ -41,6 +43,23 @@ export type EmpireCrisisRecoveryId = "stabilize-frontier" | "accept-concession";
 export type Resources = { food: number; timber: number; stone: number; influence: number };
 export type ChronicleEntry = { season: number; title: string; body: string };
 export type DevelopmentOrder = { id: OrderId; label: string; short: string; requiresClaim?: boolean };
+export type SettlementWorkers = { fields: number; workyard: number; civic: number };
+export type SettlementCycleRecord = {
+  cycle: number;
+  season: number;
+  focusId: SettlementFocusId;
+  workers: SettlementWorkers;
+  food: number;
+  timber: number;
+  stone: number;
+  influence: number;
+  upkeep: number;
+  shortage: boolean;
+  stabilityDelta: number;
+  prosperityDelta: number;
+  orderId?: OrderId;
+  summary: string;
+};
 export type NationDecision = { id: NationDecisionId; label: string; short: string; effect: string };
 export type RetentionChoice = { id: RetentionChoiceId; label: string; short: string; influenceDelta: number; villageMarker: string; worldMarker: string };
 export type RetentionDecision = { id: RetentionDecisionId; season: number; title: string; prompt: string; choices: RetentionChoice[] };
@@ -84,6 +103,11 @@ export type PlayState = {
   scoutedPlotIds: string[];
   chronicle: ChronicleEntry[];
   retentionRecords: RetentionRecord[];
+  settlementWorkers: SettlementWorkers;
+  settlementFocusId: SettlementFocusId;
+  settlementCycles: SettlementCycleRecord[];
+  settlementStability: number;
+  settlementProsperity: number;
 };
 
 export type PlayAction =
@@ -107,12 +131,20 @@ export type PlayAction =
   | { type: "hydrate"; state: PlayState }
   | { type: "runOrder"; orderId: OrderId }
   | { type: "setView"; view: ViewId }
+  | { type: "adjustSettlementWorker"; districtId: SettlementDistrictId; delta: -1 | 1 }
+  | { type: "setSettlementFocus"; focusId: SettlementFocusId }
+  | { type: "resolveSettlementCycle" }
   | { type: "reset" };
 
 export { canClaimSector, expansionInfluenceCost, getClaimableSectorIds, getNationReady, getOwnedSectorIds, nationSectorThreshold } from "./expansion-state";
 export const playV1StorageKey = "pixelNations.play.v1";
 export const empireCrisisPressureThreshold = 60;
 export const empireCrisisInfluenceThreshold = 3;
+
+export const settlementDistrictIds: SettlementDistrictId[] = ["fields", "workyard", "civic"];
+export const settlementFocusIds: SettlementFocusId[] = ["stores", "construction", "charter"];
+export const settlementTotalCrews = 6;
+export const settlementCycleHistoryLimit = 8;
 
 export const empireCrisisRecoveries: EmpireCrisisRecovery[] = [
   {
@@ -223,6 +255,8 @@ export const developmentOrders: DevelopmentOrder[] = [
   { id: "fortify-watch", label: "Fortify Watch", short: "Add a defensive watch marker near the homeland." },
 ];
 
+const settlementAdvancedOrderIds: OrderId[] = ["build-storehouse", "open-market", "form-council", "fortify-watch"];
+
 export const initialPlayState: PlayState = {
   selectedPlotId: starterPlotId,
   ownedPlotIds: [],
@@ -250,7 +284,142 @@ export const initialPlayState: PlayState = {
   scoutedPlotIds: [],
   chronicle: [{ season: 1, title: "The basin is charted", body: "Sector A-01 is only a small slice of the 10,000-land world." }],
   retentionRecords: [],
+  settlementWorkers: { fields: 2, workyard: 2, civic: 2 },
+  settlementFocusId: "stores",
+  settlementCycles: [],
+  settlementStability: 1,
+  settlementProsperity: 0,
 };
+
+export function clampSettlementWorkerValue(value: unknown): number {
+  const numeric = typeof value === "number" && Number.isFinite(value) ? Math.floor(value) : 0;
+  return Math.max(0, Math.min(settlementTotalCrews, numeric));
+}
+
+export function normalizeSettlementWorkers(input: Partial<SettlementWorkers> | null | undefined): SettlementWorkers {
+  const defaults: SettlementWorkers = { fields: 2, workyard: 2, civic: 2 };
+  const fields = clampSettlementWorkerValue(input?.fields ?? defaults.fields);
+  const workyard = clampSettlementWorkerValue(input?.workyard ?? defaults.workyard);
+  const civic = clampSettlementWorkerValue(input?.civic ?? defaults.civic);
+  const total = fields + workyard + civic;
+  if (total <= settlementTotalCrews) return { fields, workyard, civic };
+  // Scale down proportionally by trimming the largest districts first, deterministically.
+  const order: SettlementDistrictId[] = ["fields", "workyard", "civic"];
+  const values: SettlementWorkers = { fields, workyard, civic };
+  let overflow = total - settlementTotalCrews;
+  let index = 0;
+  while (overflow > 0) {
+    const districtId = order[index % order.length];
+    if (values[districtId] > 0) {
+      values[districtId] -= 1;
+      overflow -= 1;
+    }
+    index += 1;
+    if (index > 1000) break;
+  }
+  return values;
+}
+
+export function normalizeSettlementFocus(value: unknown): SettlementFocusId {
+  return value === "stores" || value === "construction" || value === "charter" ? value : "stores";
+}
+
+export function normalizeSettlementCycles(value: unknown): SettlementCycleRecord[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is SettlementCycleRecord => Boolean(item) && typeof item === "object")
+    .slice(-settlementCycleHistoryLimit);
+}
+
+export function clampSettlementStability(value: number): number {
+  return Math.max(0, Math.min(6, value));
+}
+
+export function clampSettlementProsperity(value: number): number {
+  return Math.max(0, Math.min(12, value));
+}
+
+export function getSettlementCrewTotal(workers: SettlementWorkers): number {
+  return workers.fields + workers.workyard + workers.civic;
+}
+
+export function getSettlementUnassignedCrews(workers: SettlementWorkers): number {
+  return Math.max(0, settlementTotalCrews - getSettlementCrewTotal(workers));
+}
+
+export function getSettlementFoodUpkeep(state: PlayState): number {
+  return 4 + Math.floor(state.settlementMarkers.length / 2);
+}
+
+export type SettlementForecast = {
+  food: number;
+  timber: number;
+  stone: number;
+  influence: number;
+  upkeep: number;
+  netFood: number;
+  shortage: boolean;
+  allCrewsAssigned: boolean;
+};
+
+export function getSettlementForecast(state: PlayState): SettlementForecast {
+  const workers = state.settlementWorkers;
+  const focusId = state.settlementFocusId;
+  let food = workers.fields * 2;
+  let timber = workers.workyard * 1;
+  let stone = workers.workyard >= 3 ? 1 : 0;
+  let influence = workers.civic * 1;
+
+  if (focusId === "stores") food += 2;
+  if (focusId === "construction") { timber += 2; stone += 1; }
+  if (focusId === "charter") influence += 2;
+
+  const upkeep = getSettlementFoodUpkeep(state);
+  const availableFood = state.resources.food + food;
+  const shortage = availableFood < upkeep;
+  const netFood = shortage ? 0 : availableFood - upkeep;
+  const allCrewsAssigned = getSettlementCrewTotal(workers) >= settlementTotalCrews;
+
+  return { food, timber, stone, influence, upkeep, netFood, shortage, allCrewsAssigned };
+}
+
+export function resolveSettlementCycleState(state: PlayState, orderId?: OrderId): { nextState: Pick<PlayState, "resources" | "settlementStability" | "settlementProsperity" | "settlementCycles" | "chronicle">; record: SettlementCycleRecord } | null {
+  if (!state.completedOrders.includes("raise-shelter")) return null;
+  if (getSettlementCrewTotal(state.settlementWorkers) < settlementTotalCrews) return null;
+  const forecast = getSettlementForecast(state);
+  const workers = { ...state.settlementWorkers };
+  const focusId = state.settlementFocusId;
+  const cycleNumber = (state.settlementCycles.at(-1)?.cycle ?? 0) + 1;
+
+  let resources: Resources;
+  let stabilityDelta = 0;
+  let prosperityDelta = 0;
+  let summary: string;
+
+  if (forecast.shortage) {
+    resources = { food: 0, timber: state.resources.timber + forecast.timber, stone: state.resources.stone + forecast.stone, influence: Math.max(0, state.resources.influence + forecast.influence - 2) };
+    stabilityDelta = -2;
+    prosperityDelta = -2;
+    summary = `Cycle ${cycleNumber}: shortage — food ran out, upkeep unmet (-${forecast.upkeep} food needed).`;
+  } else {
+    resources = { food: state.resources.food + forecast.food - forecast.upkeep, timber: state.resources.timber + forecast.timber, stone: state.resources.stone + forecast.stone, influence: state.resources.influence + forecast.influence };
+    const focusStabilityBonus = focusId === "stores" ? 1 : focusId === "charter" && workers.civic >= 2 ? 1 : 0;
+    stabilityDelta = focusStabilityBonus;
+    let prosperityGain = 1;
+    if (forecast.stone > 0) prosperityGain += 1;
+    if (forecast.timber + forecast.influence >= 6) prosperityGain += 1;
+    prosperityDelta = prosperityGain;
+    summary = `Cycle ${cycleNumber}: stable season — +${forecast.food} food, +${forecast.timber} timber, +${forecast.stone} stone, +${forecast.influence} influence.`;
+  }
+
+  const settlementStability = forecast.shortage ? clampSettlementStability(state.settlementStability + stabilityDelta) : clampSettlementStability(state.settlementStability + stabilityDelta);
+  const settlementProsperity = clampSettlementProsperity(state.settlementProsperity + prosperityDelta);
+  const record: SettlementCycleRecord = { cycle: cycleNumber, season: Math.min(12, state.season + 1), focusId, workers, food: forecast.food, timber: forecast.timber, stone: forecast.stone, influence: forecast.influence, upkeep: forecast.upkeep, shortage: forecast.shortage, stabilityDelta, prosperityDelta, orderId, summary };
+  const settlementCycles = [...state.settlementCycles, record].slice(-settlementCycleHistoryLimit);
+  const chronicle = pushChronicle(state, forecast.shortage ? "Season shortage" : "Season resolved", summary);
+
+  return { nextState: { resources, settlementStability, settlementProsperity, settlementCycles, chronicle }, record };
+}
 
 export function getSelectedPlot(state: PlayState): Plot { return plots.find((plot) => plot.id === state.selectedPlotId) ?? plots[0]; }
 export function getOwnedPlot(state: PlayState): Plot | undefined { return plots.find((plot) => state.ownedPlotIds.includes(plot.id)); }
@@ -282,8 +451,8 @@ export function getEmpireReady(state: PlayState) { return Boolean(getFirstEraCom
 export function getNextRetentionDecision(state: PlayState) { if (!state.nationDecisionId || !state.foundingCeremonySeen) return null; return retentionDecisions.find((decision) => !state.retentionRecords.some((record) => record.decisionId === decision.id)) ?? null; }
 export function getFirstEraComplete(state: PlayState) { return state.retentionRecords.length >= retentionDecisions.length; }
 export function getPhase(state: PlayState): "unclaimed" | "camp" | "hamlet" | "village" | "city-seed" | "nation-seed" { if (state.ownedPlotIds.length === 0) return "unclaimed"; if (state.nationDecisionId) return "nation-seed"; if (state.completedOrders.includes("form-council") && state.completedOrders.includes("open-market") && state.completedOrders.includes("fortify-watch")) return "city-seed"; if (state.completedOrders.includes("form-council") || state.completedOrders.length >= 6) return "village"; if (state.completedOrders.length >= 3) return "hamlet"; return "camp"; }
-export function getPopulation(state: PlayState) { if (state.ownedPlotIds.length === 0) return 0; return 18 + state.completedOrders.length * 9 + state.settlementMarkers.length * 7 + Math.max(0, getOwnedSectorIds(state).length - 1) * 11 + (state.nationDecisionId === "settler-rights" ? 18 : 0) + state.retentionRecords.length * 5 + (state.courtCaseDecisionId === "favor-frontier-settlers" ? 9 : 0); }
-export function getDevelopmentScore(state: PlayState) { return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5 + (state.nationDecisionId ? 14 : 0) + state.retentionRecords.length * 7 + (state.frontierIntentId ? 6 : 0) + (getFrontierObjectiveSecured(state) ? 10 : 0) + (state.empireDeclarationId ? 18 : 0) + (state.courtCaseDecisionId ? 9 : 0) + (state.rivalResponseDecisionId ? 12 : 0) + (state.conflictEscalationDecisionId ? 14 : 0) + (state.standoffDecisionId ? 16 : 0) + state.imperialTurnActionIds.length * 6 + (state.empireCrisisReason ? 4 : 0) + (state.empireCrisisRecoveryId ? 6 : 0) + (state.postCrisisCountermoveOrigin ? 4 : 0) + (state.postCrisisResponseId ? 6 : 0); }
+export function getPopulation(state: PlayState) { if (state.ownedPlotIds.length === 0) return 0; return 18 + state.completedOrders.length * 9 + state.settlementMarkers.length * 7 + Math.max(0, getOwnedSectorIds(state).length - 1) * 11 + (state.nationDecisionId === "settler-rights" ? 18 : 0) + state.retentionRecords.length * 5 + (state.courtCaseDecisionId === "favor-frontier-settlers" ? 9 : 0) + Math.min(12, state.settlementCycles.length * 2) + state.settlementStability; }
+export function getDevelopmentScore(state: PlayState) { return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5 + (state.nationDecisionId ? 14 : 0) + state.retentionRecords.length * 7 + (state.frontierIntentId ? 6 : 0) + (getFrontierObjectiveSecured(state) ? 10 : 0) + (state.empireDeclarationId ? 18 : 0) + (state.courtCaseDecisionId ? 9 : 0) + (state.rivalResponseDecisionId ? 12 : 0) + (state.conflictEscalationDecisionId ? 14 : 0) + (state.standoffDecisionId ? 16 : 0) + state.imperialTurnActionIds.length * 6 + (state.empireCrisisReason ? 4 : 0) + (state.empireCrisisRecoveryId ? 6 : 0) + (state.postCrisisCountermoveOrigin ? 4 : 0) + (state.postCrisisResponseId ? 6 : 0) + state.settlementProsperity + state.settlementStability + Math.min(8, state.settlementCycles.length * 2); }
 export function getEmpireCrisisRecovery(state: PlayState) { return empireCrisisRecoveries.find((decision) => decision.id === state.empireCrisisRecoveryId) ?? null; }
 export function getEmpireCrisisOpen(state: PlayState) { return Boolean(getImperialTurnComplete(state) && state.empireCrisisReason && !state.empireCrisisRecoveryId); }
 export function getEmpireCrisisResolved(state: PlayState) { return Boolean(state.empireCrisisReason && state.empireCrisisRecoveryId); }
@@ -353,14 +522,14 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
     case "hydrate": {
       const postCrisisOrigin = getPostCrisisCountermoveOriginDefinition(action.state.postCrisisCountermoveOrigin ?? null);
       const postCrisisResponse = getPostCrisisResponse(postCrisisOrigin, action.state.postCrisisResponseId ?? null);
-      return { ...initialPlayState, ...action.state, resources: { ...initialPlayState.resources, ...action.state.resources }, retentionRecords: action.state.retentionRecords ?? [], frontierIntentId: action.state.frontierIntentId ?? null, empireDeclarationId: action.state.empireDeclarationId ?? null, courtCaseDecisionId: action.state.courtCaseDecisionId ?? null, rivalResponseDecisionId: action.state.rivalResponseDecisionId ?? null, conflictEscalationDecisionId: action.state.conflictEscalationDecisionId ?? null, standoffDecisionId: action.state.standoffDecisionId ?? null, imperialTurnActionIds: action.state.imperialTurnActionIds ?? [], empireCrisisReason: action.state.empireCrisisReason ?? null, empireCrisisRecoveryId: action.state.empireCrisisRecoveryId ?? null, postCrisisCountermoveOrigin: postCrisisOrigin, postCrisisResponseId: postCrisisResponse?.id ?? null, postCrisisFrontierPayoffSecured: Boolean(action.state.postCrisisFrontierPayoffSecured) };
+      return { ...initialPlayState, ...action.state, resources: { ...initialPlayState.resources, ...action.state.resources }, retentionRecords: action.state.retentionRecords ?? [], frontierIntentId: action.state.frontierIntentId ?? null, empireDeclarationId: action.state.empireDeclarationId ?? null, courtCaseDecisionId: action.state.courtCaseDecisionId ?? null, rivalResponseDecisionId: action.state.rivalResponseDecisionId ?? null, conflictEscalationDecisionId: action.state.conflictEscalationDecisionId ?? null, standoffDecisionId: action.state.standoffDecisionId ?? null, imperialTurnActionIds: action.state.imperialTurnActionIds ?? [], empireCrisisReason: action.state.empireCrisisReason ?? null, empireCrisisRecoveryId: action.state.empireCrisisRecoveryId ?? null, postCrisisCountermoveOrigin: postCrisisOrigin, postCrisisResponseId: postCrisisResponse?.id ?? null, postCrisisFrontierPayoffSecured: Boolean(action.state.postCrisisFrontierPayoffSecured), settlementWorkers: normalizeSettlementWorkers(action.state.settlementWorkers), settlementFocusId: normalizeSettlementFocus(action.state.settlementFocusId), settlementCycles: normalizeSettlementCycles(action.state.settlementCycles), settlementStability: clampSettlementStability(typeof action.state.settlementStability === "number" ? action.state.settlementStability : initialPlayState.settlementStability), settlementProsperity: clampSettlementProsperity(typeof action.state.settlementProsperity === "number" ? action.state.settlementProsperity : initialPlayState.settlementProsperity) };
     }
     case "select": return { ...state, selectedPlotId: action.plotId, view: state.view === "village" ? "map" : state.view };
     case "setView": return { ...state, view: action.view };
     case "claim": {
       if (state.ownedPlotIds.includes(action.plotId)) return state;
       const plot = plots.find((item) => item.id === action.plotId);
-      return { ...resetEmpireCrisis(state), selectedPlotId: action.plotId, ownedPlotIds: [action.plotId], ownedSectorIds: [homelandSectorId], nationDecisionId: null, frontierIntentId: null, empireDeclarationId: null, courtCaseDecisionId: null, rivalResponseDecisionId: null, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [], foundingCeremonySeen: false, season: 2, view: "village", settlementMarkers: ["camp"], resources: { food: 3, timber: 2, stone: 0, influence: 1 }, chronicle: pushChronicle(state, "First banner raised", `${plot?.name ?? "A land"} became the first claimed homeland.`), retentionRecords: [], lastEvent: `${plot?.name ?? "A land"} is claimed. Enter Village, then choose Orders.` };
+      return { ...resetEmpireCrisis(state), selectedPlotId: action.plotId, ownedPlotIds: [action.plotId], ownedSectorIds: [homelandSectorId], nationDecisionId: null, frontierIntentId: null, empireDeclarationId: null, courtCaseDecisionId: null, rivalResponseDecisionId: null, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [], foundingCeremonySeen: false, season: 2, view: "village", settlementMarkers: ["camp"], resources: { food: 3, timber: 2, stone: 0, influence: 1 }, chronicle: pushChronicle(state, "First banner raised", `${plot?.name ?? "A land"} became the first claimed homeland.`), retentionRecords: [], settlementWorkers: { fields: 2, workyard: 2, civic: 2 }, settlementFocusId: "stores", settlementCycles: [], settlementStability: 1, settlementProsperity: 0, lastEvent: `${plot?.name ?? "A land"} is claimed. Enter Village, then choose Orders.` };
     }
     case "claimSector": {
       const sector = getWorldSector(getSectorIndexFromId(action.sectorId));
@@ -470,7 +639,53 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       if (state.postCrisisFrontierPayoffSecured) return state;
       return { ...state, postCrisisFrontierPayoffSecured: true, resources: { ...state.resources, influence: state.resources.influence + 1 }, view: "council", chronicle: pushChronicle(state, "Frontier payoff secured", `${target.label}: ${target.short}`), lastEvent: `Frontier payoff secured: ${target.label}.` };
     }
-    case "runOrder": { const result = orderResult(state, action.orderId); if (!result) return { ...state, lastEvent: "That order is already resolved or needs a claimed land." }; return { ...state, ...result, season: Math.min(12, state.season + 1), completedOrders: [...state.completedOrders, action.orderId], view: "village" }; }
+    case "adjustSettlementWorker": {
+      if (state.ownedPlotIds.length === 0 || !hasOrder(state, "raise-shelter")) return state;
+      const workers = { ...state.settlementWorkers };
+      const current = workers[action.districtId];
+      if (action.delta === -1) {
+        if (current <= 0) return state;
+        workers[action.districtId] = current - 1;
+        return { ...state, settlementWorkers: workers };
+      }
+      if (getSettlementCrewTotal(workers) >= settlementTotalCrews) return state;
+      workers[action.districtId] = current + 1;
+      return { ...state, settlementWorkers: workers };
+    }
+    case "setSettlementFocus": {
+      if (state.ownedPlotIds.length === 0 || !hasOrder(state, "raise-shelter")) return state;
+      return { ...state, settlementFocusId: normalizeSettlementFocus(action.focusId) };
+    }
+    case "resolveSettlementCycle": {
+      if (state.ownedPlotIds.length === 0 || !hasOrder(state, "raise-shelter")) return { ...state, lastEvent: "Raise shelter before stewarding the settlement." };
+      const result = resolveSettlementCycleState(state);
+      if (!result) return { ...state, lastEvent: "Assign all six crews before ending the season." };
+      return { ...state, ...result.nextState, season: Math.min(12, state.season + 1), lastEvent: result.record.summary };
+    }
+    case "runOrder": {
+      const isAdvancedProject = settlementAdvancedOrderIds.includes(action.orderId);
+      if (isAdvancedProject) {
+        if (!hasOrder(state, "raise-shelter")) {
+          return { ...state, lastEvent: "Raise shelter before beginning an advanced project." };
+        }
+        if (getSettlementCrewTotal(state.settlementWorkers) < settlementTotalCrews) {
+          return { ...state, lastEvent: "Assign all six crews before beginning an advanced project." };
+        }
+      }
+      const result = orderResult(state, action.orderId);
+      if (!result) return { ...state, lastEvent: "That order is already resolved or needs a claimed land." };
+      if (isAdvancedProject) {
+        const cycleResult = resolveSettlementCycleState(state, action.orderId);
+        if (cycleResult) {
+          const merged: PlayState = { ...state, ...cycleResult.nextState };
+          const finalResult = orderResult(merged, action.orderId);
+          if (finalResult) {
+            return { ...merged, ...finalResult, season: Math.min(12, merged.season + 1), completedOrders: [...merged.completedOrders, action.orderId], view: "village" };
+          }
+        }
+      }
+      return { ...state, ...result, season: Math.min(12, state.season + 1), completedOrders: [...state.completedOrders, action.orderId], view: "village" };
+    }
     case "reset": return initialPlayState;
     default: return state;
   }
