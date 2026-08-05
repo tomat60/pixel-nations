@@ -1,5 +1,6 @@
 name: Apply P2 Settlement Patch
 
+# Second deterministic push: workflow already exists in branch history.
 on:
   push:
     branches:
