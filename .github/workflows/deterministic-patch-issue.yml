@@ -35,6 +35,8 @@ jobs:
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
+          echo "parse directive" > /tmp/pixel-nations-stage
+          exec > >(tee /tmp/pixel-nations-parse.log) 2>&1
           node <<'NODE'
           const fs = require('node:fs');
           const body = process.env.ISSUE_BODY ?? '';
@@ -97,6 +99,8 @@ jobs:
           BASE_SHA: ${{ steps.directive.outputs.base }}
           BRANCH_NAME: ${{ steps.directive.outputs.branch }}
         run: |
+          echo "verify immutable base" > /tmp/pixel-nations-stage
+          exec > >(tee /tmp/pixel-nations-base.log) 2>&1
           git fetch origin main --no-tags
           test "$(git rev-parse origin/main)" = "$BASE_SHA"
           if git ls-remote --exit-code --heads origin "$BRANCH_NAME" >/dev/null 2>&1; then
@@ -111,6 +115,8 @@ jobs:
           SOURCE_REF: ${{ steps.directive.outputs.source_ref }}
           SOURCE_PATH: ${{ steps.directive.outputs.source_path }}
         run: |
+          echo "load repository patch source" > /tmp/pixel-nations-stage
+          exec > >(tee /tmp/pixel-nations-source.log) 2>&1
           git fetch origin "$SOURCE_REF" --no-tags
           git show "FETCH_HEAD:$SOURCE_PATH" > /tmp/pixel-nations-patch.b64
           test -s /tmp/pixel-nations-patch.b64
@@ -119,12 +125,18 @@ jobs:
         env:
           EXPECTED_PATCH_SHA: ${{ steps.directive.outputs.patch_sha }}
         run: |
+          echo "decode, authenticate and allowlist patch" > /tmp/pixel-nations-stage
+          exec > >(tee /tmp/pixel-nations-validation.log) 2>&1
           tr -d '[:space:]' < /tmp/pixel-nations-patch.b64 | base64 --decode | gzip --decompress --stdout > /tmp/pixel-nations.patch
           ACTUAL_PATCH_SHA="$(sha256sum /tmp/pixel-nations.patch | cut -d' ' -f1)"
+          echo "Expected patch SHA: $EXPECTED_PATCH_SHA"
+          echo "Actual patch SHA:   $ACTUAL_PATCH_SHA"
           test "$ACTUAL_PATCH_SHA" = "$EXPECTED_PATCH_SHA"
 
           git apply --numstat /tmp/pixel-nations.patch | cut -f3- > /tmp/pixel-nations-changed-files.txt
           test -s /tmp/pixel-nations-changed-files.txt
+          echo "Changed files:"
+          cat /tmp/pixel-nations-changed-files.txt
           while IFS= read -r path; do
             grep -Fxq "$path" /tmp/pixel-nations-allowed-files.txt || {
               echo "Patch touches forbidden path: $path" >&2
@@ -143,15 +155,21 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          echo "install dependencies" > /tmp/pixel-nations-stage
+          npm ci 2>&1 | tee /tmp/pixel-nations-install.log
 
       - name: Build patched product
-        run: npm run build
+        run: |
+          echo "build patched product" > /tmp/pixel-nations-stage
+          npm run build 2>&1 | tee /tmp/pixel-nations-build.log
 
       - name: Commit bounded branch
         env:
           BRANCH_NAME: ${{ steps.directive.outputs.branch }}
         run: |
+          echo "commit bounded branch" > /tmp/pixel-nations-stage
+          exec > >(tee /tmp/pixel-nations-commit.log) 2>&1
           git switch -c "$BRANCH_NAME"
           git config user.name "pixel-nations-patch-runner[bot]"
           git config user.email "actions@users.noreply.github.com"
@@ -168,6 +186,8 @@ jobs:
           PATCH_SHA: ${{ steps.directive.outputs.patch_sha }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
+          echo "open draft pull request" > /tmp/pixel-nations-stage
+          exec > >(tee /tmp/pixel-nations-pr.log) 2>&1
           PR_URL="$(gh pr create \
             --repo "$GITHUB_REPOSITORY" \
             --base main \
@@ -187,10 +207,38 @@ jobs:
           HEAD_SHA="$(git rev-parse HEAD)"
           gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "DETERMINISTIC_PATCH_APPLIED\n\n- Draft PR: ${PR_URL}\n- Branch: \`${BRANCH_NAME}\`\n- Head: \`${HEAD_SHA}\`\n- Build: passed\n\nMerge remains blocked pending full CI, complete Play Visual QA and direct evidence review."
 
-      - name: Report failure
+      - name: Report exact failure
         if: failure()
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "DETERMINISTIC_PATCH_REJECTED\n\nThe runner stopped before an accepted draft PR. Inspect the failed workflow step; do not retry without correcting the exact base, digest, allowlist, patch source or build failure."
+          STAGE="$(cat /tmp/pixel-nations-stage 2>/dev/null || echo 'checkout or unknown')"
+          LOG_FILE=""
+          case "$STAGE" in
+            "parse directive") LOG_FILE=/tmp/pixel-nations-parse.log ;;
+            "verify immutable base") LOG_FILE=/tmp/pixel-nations-base.log ;;
+            "load repository patch source") LOG_FILE=/tmp/pixel-nations-source.log ;;
+            "decode, authenticate and allowlist patch") LOG_FILE=/tmp/pixel-nations-validation.log ;;
+            "install dependencies") LOG_FILE=/tmp/pixel-nations-install.log ;;
+            "build patched product") LOG_FILE=/tmp/pixel-nations-build.log ;;
+            "commit bounded branch") LOG_FILE=/tmp/pixel-nations-commit.log ;;
+            "open draft pull request") LOG_FILE=/tmp/pixel-nations-pr.log ;;
+          esac
+          if [ -n "$LOG_FILE" ] && [ -f "$LOG_FILE" ]; then
+            tail -n 80 "$LOG_FILE" | sed -E 's/\x1B\[[0-9;]*[A-Za-z]//g' > /tmp/pixel-nations-failure-tail.log
+          else
+            echo "No step log was captured." > /tmp/pixel-nations-failure-tail.log
+          fi
+          {
+            echo "DETERMINISTIC_PATCH_REJECTED"
+            echo
+            echo "Failed stage: \`$STAGE\`"
+            echo
+            echo '```text'
+            cat /tmp/pixel-nations-failure-tail.log
+            echo '```'
+            echo
+            echo "No accepted product branch or draft PR was created by this run. Correct only the reported failure before retrying."
+          } > /tmp/pixel-nations-failure-comment.md
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file /tmp/pixel-nations-failure-comment.md
