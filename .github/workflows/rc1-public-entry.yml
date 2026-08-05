@@ -1,0 +1,89 @@
+name: Pixel Nations RC1 Public Entry
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: pixel-nations-rc1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  rc1-public-entry:
+    name: Verify public entry and RC1 package
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Generate RC1 public-entry evidence
+        id: rc1
+        env:
+          RC1_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: npm run qa:rc1
+
+      - name: Enforce RC1 manifest
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from "node:fs/promises";
+
+          const result = JSON.parse(await readFile("public/qa/rc1/public-entry-result.json", "utf8"));
+          const manifest = JSON.parse(await readFile("public/qa/rc1/release-manifest.json", "utf8"));
+          const failures = [];
+
+          if (result.status !== "PASS") failures.push(`public entry status: ${result.status}`);
+          if (!Array.isArray(result.viewports) || result.viewports.length !== 2) failures.push("desktop and mobile evidence are required");
+          for (const viewport of result.viewports ?? []) {
+            const failed = (viewport.checks ?? []).filter((check) => check.status !== "PASS");
+            for (const check of failed) failures.push(`${viewport.id}/${check.name}: ${check.error ?? check.status}`);
+          }
+          if (manifest.classification !== "RC1_ENTRY_ACCEPTED") failures.push(`manifest classification: ${manifest.classification}`);
+          if (!manifest.sourceSha || manifest.sourceSha === "unknown") failures.push("manifest source SHA is missing");
+          if (!Array.isArray(manifest.knownVisualLimitations) || manifest.knownVisualLimitations.length < 3) failures.push("known visual limitations are incomplete");
+          if (!Array.isArray(manifest.nonGoals) || manifest.nonGoals.length < 3) failures.push("RC1 non-goals are incomplete");
+
+          if (failures.length) {
+            console.error("PIXEL_NATIONS_RC1_FAILED");
+            for (const failure of failures) console.error(`- ${failure}`);
+            process.exit(1);
+          }
+          console.log("PIXEL_NATIONS_RC1_PASSED");
+          NODE
+
+      - name: Upload RC1 evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pixel-nations-rc1-evidence
+          path: public/qa/rc1
+          if-no-files-found: error
+          retention-days: 14
