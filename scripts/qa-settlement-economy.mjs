@@ -254,10 +254,22 @@ async function runViewport(browser, viewport) {
 
     await check("Focus changes forecast and balanced plan is restored", async () => {
       const panel = await openOrders(page, `${viewport.id}: focus forecast`);
-      const before = await panel.locator('[data-qa="settlement-cycle-preview"]').innerText();
+      const preview = panel.locator('[data-qa="settlement-cycle-preview"]');
+      const before = await preview.innerText();
       await panel.locator('[data-qa="settlement-focus"][data-focus-id="construction"]').click();
       await waitForState(page, "(state) => state.settlementFocusId === 'construction'", {}, `${viewport.id}: persist construction focus`);
-      const after = await panel.locator('[data-qa="settlement-cycle-preview"]').innerText();
+      await page.waitForFunction(
+        ({ beforeText }) => {
+          const construction = document.querySelector('[data-qa="settlement-focus"][data-focus-id="construction"]');
+          const text = document.querySelector('[data-qa="settlement-cycle-preview"]')?.textContent ?? "";
+          return construction?.getAttribute("aria-pressed") === "true" && text !== beforeText && text.includes("Stone") && text.includes("+2");
+        },
+        { beforeText: before },
+        { timeout: 5000 },
+      ).catch((error) => {
+        throw new SettlementQaError(`${viewport.id}: construction preview`, `Forecast did not render the construction plan: ${error.message}`);
+      });
+      const after = await preview.innerText();
       assert(before !== after && after.includes("Stone") && after.includes("+2"), `${viewport.id}: construction preview`, "Construction focus did not change the deterministic forecast.");
       await panel.locator('[data-qa="settlement-focus"][data-focus-id="stores"]').click();
       await panel.locator('[data-qa="settlement-worker-minus"][data-district-id="workyard"]').click();
@@ -334,7 +346,7 @@ async function runViewport(browser, viewport) {
       const sourceState = await readState(page, `${viewport.id}: source shortage seed`);
       const seeded = await seedShortage(page, sourceState);
       const panel = page.locator('[data-qa="orders-panel"]');
-      await panel.locator('[data-qa="settlement-cycle-preview"]').getByText("Shortage predicted", { exact: true }).waitFor({ state: "visible", timeout: 7000 });
+      await panel.locator('[data-qa="settlement-cycle-preview"]').getByText("Shortage", { exact: true }).waitFor({ state: "visible", timeout: 7000 });
       await panel.locator('[data-qa="resolve-settlement-cycle"]').click();
       await waitForState(page, "(state) => state.settlementCycles.length === 1 && state.settlementCycles[0].shortage === true", {}, `${viewport.id}: persist shortage`);
       const after = await readState(page, `${viewport.id}: shortage result`);
