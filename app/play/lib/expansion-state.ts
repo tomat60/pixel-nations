@@ -8,7 +8,7 @@ export const citySettlementCycleThreshold = 3;
 export const cityStabilityThreshold = 3;
 export const cityProsperityThreshold = 3;
 
-export type ExpansionBlockReason = "no-homeland" | "already-owned" | "insufficient-influence" | "not-adjacent";
+export type ExpansionBlockReason = "no-homeland" | "city-not-ready" | "already-owned" | "insufficient-influence" | "not-adjacent";
 
 export type ExpansionStatus = {
   ok: boolean;
@@ -59,6 +59,7 @@ export function canClaimSector(state: PlayState, sectorId: string): ExpansionSta
   const ownedSectorIds = getOwnedSectorIds(state);
   const claimableSectorIds = getClaimableSectorIds(state);
   if (state.ownedPlotIds.length === 0) return { ok: false, reason: "no-homeland", cost: expansionInfluenceCost, ownedSectorIds, claimableSectorIds };
+  if (!getCityReadiness(state).ready) return { ok: false, reason: "city-not-ready", cost: expansionInfluenceCost, ownedSectorIds, claimableSectorIds };
   if (ownedSectorIds.includes(sectorId)) return { ok: false, reason: "already-owned", cost: expansionInfluenceCost, ownedSectorIds, claimableSectorIds };
   if (!claimableSectorIds.includes(sectorId)) return { ok: false, reason: "not-adjacent", cost: expansionInfluenceCost, ownedSectorIds, claimableSectorIds };
   if (state.resources.influence < expansionInfluenceCost) return { ok: false, reason: "insufficient-influence", cost: expansionInfluenceCost, ownedSectorIds, claimableSectorIds };
@@ -67,6 +68,7 @@ export function canClaimSector(state: PlayState, sectorId: string): ExpansionSta
 
 export function expansionBlockedMessage(reason?: ExpansionBlockReason) {
   if (reason === "no-homeland") return "Claim a homeland before expanding sectors.";
+  if (reason === "city-not-ready") return "Build a functioning City Seed before expanding into connected sectors.";
   if (reason === "already-owned") return "That sector is already inside your borders.";
   if (reason === "insufficient-influence") return `Expansion needs ${expansionInfluenceCost} Influence.`;
   if (reason === "not-adjacent") return "Expansion must start from an adjacent sector.";
