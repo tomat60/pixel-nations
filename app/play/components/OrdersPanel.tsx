@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-
 import {
   developmentOrders,
   getPhase,
@@ -33,12 +31,6 @@ const advancedOrderIds: OrderId[] = ["build-storehouse", "open-market", "form-co
 export function OrdersPanel({ state, dispatch }: { state: PlayState; dispatch: (action: PlayAction) => void }) {
   if (state.ownedPlotIds.length === 0) return null;
 
-  const [previewFocusId, setPreviewFocusId] = useState<SettlementFocusId>(state.settlementFocusId);
-
-  useEffect(() => {
-    setPreviewFocusId(state.settlementFocusId);
-  }, [state.settlementFocusId]);
-
   const phase = getPhase(state);
   const availableOrders = developmentOrders.filter((order) => !state.completedOrders.includes(order.id));
   const nextRouteOrder = availableOrders.find((order) => order.id === "open-market" && state.completedOrders.length >= 5);
@@ -47,7 +39,7 @@ export function OrdersPanel({ state, dispatch }: { state: PlayState; dispatch: (
   const stewardshipUnlocked = state.completedOrders.includes("raise-shelter");
   const crewTotal = getSettlementCrewTotal(state.settlementWorkers);
   const unassignedCrews = getSettlementUnassignedCrews(state.settlementWorkers);
-  const forecast = getSettlementForecast({ ...state, settlementFocusId: previewFocusId });
+  const forecast = getSettlementForecast(state);
   const latestCycle = state.settlementCycles.at(-1) ?? null;
   const cycleReady = crewTotal === settlementTotalCrews;
 
@@ -152,10 +144,7 @@ export function OrdersPanel({ state, dispatch }: { state: PlayState; dispatch: (
                   data-qa="settlement-focus"
                   data-focus-id={focus.id}
                   aria-pressed={active}
-                  onClick={() => {
-                    setPreviewFocusId(focus.id);
-                    dispatch({ type: "setSettlementFocus", focusId: focus.id });
-                  }}
+                  onClick={() => dispatch({ type: "setSettlementFocus", focusId: focus.id })}
                   className={`rounded-xl border p-2 text-left transition ${active ? "border-amber-200/55 bg-amber-200/14" : "border-amber-100/12 bg-black/22 hover:border-amber-200/30"}`}
                 >
                   <p className="text-[9px] font-black text-amber-50">{focus.label}</p>
@@ -168,16 +157,16 @@ export function OrdersPanel({ state, dispatch }: { state: PlayState; dispatch: (
           <div data-qa="settlement-cycle-preview" className="mt-2 rounded-2xl border border-sky-100/18 bg-sky-950/24 p-2.5">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[8px] font-black uppercase tracking-[0.16em] text-sky-100/58">Next-cycle forecast</p>
-              <p className={`rounded-full px-2 py-1 text-[7px] font-black uppercase tracking-[0.12em] ${!cycleReady ? "bg-amber-200/12 text-amber-100" : forecast.shortage ? "bg-rose-300/14 text-rose-100" : "bg-emerald-300/14 text-emerald-100"}`}>
+              <p data-qa="settlement-forecast-status" className={`rounded-full px-2 py-1 text-[7px] font-black uppercase tracking-[0.12em] ${!cycleReady ? "bg-amber-200/12 text-amber-100" : forecast.shortage ? "bg-rose-300/14 text-rose-100" : "bg-emerald-300/14 text-emerald-100"}`}>
                 {!cycleReady ? "Assign crews" : forecast.shortage ? "Shortage" : "Stable"}
               </p>
             </div>
             <div className="mt-1.5 grid grid-cols-5 gap-1 text-center">
-              <ForecastStat label="Food" value={`+${forecast.food}`} />
-              <ForecastStat label="Wood" value={`+${forecast.timber}`} />
-              <ForecastStat label="Stone" value={`+${forecast.stone}`} />
-              <ForecastStat label="Influence" value={`+${forecast.influence}`} />
-              <ForecastStat label="Upkeep" value={`−${forecast.upkeep}`} />
+              <ForecastStat qa="settlement-forecast-food" label="Food" value={`+${forecast.food}`} />
+              <ForecastStat qa="settlement-forecast-timber" label="Wood" value={`+${forecast.timber}`} />
+              <ForecastStat qa="settlement-forecast-stone" label="Stone" value={`+${forecast.stone}`} />
+              <ForecastStat qa="settlement-forecast-influence" label="Influence" value={`+${forecast.influence}`} />
+              <ForecastStat qa="settlement-forecast-upkeep" label="Upkeep" value={`−${forecast.upkeep}`} />
             </div>
             <p className="mt-1.5 text-[9px] leading-relaxed text-amber-50/55">
               {!cycleReady
@@ -263,9 +252,9 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function ForecastStat({ label, value }: { label: string; value: string }) {
+function ForecastStat({ qa, label, value }: { qa: string; label: string; value: string }) {
   return (
-    <div className="min-w-0 rounded-xl border border-sky-100/10 bg-black/22 px-1 py-1.5">
+    <div data-qa={qa} className="min-w-0 rounded-xl border border-sky-100/10 bg-black/22 px-1 py-1.5">
       <p className="truncate text-[6px] font-black uppercase tracking-[0.08em] text-sky-100/48 md:text-[7px]">{label}</p>
       <p className="text-[10px] font-black text-amber-50 md:text-xs">{value}</p>
     </div>
