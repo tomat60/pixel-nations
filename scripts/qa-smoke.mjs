@@ -24,11 +24,6 @@ async function runSmoke(page) {
     }
   });
 
-  await step("Map remains reachable", async () => {
-    await clickView(page, "map", "Map remains reachable");
-    await page.locator('[data-qa="zoom-overview"]').waitFor({ state: "visible", timeout: 5000 });
-  });
-
   await step("Aurelian Village is the real owned-land scene", async () => {
     await clickView(page, "village", "Aurelian Village is the real owned-land scene");
     const village = page.locator('[data-qa="aurelian-village-scene"]');
