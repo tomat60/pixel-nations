@@ -182,9 +182,9 @@ export const frontierObjectives: FrontierObjective[] = [
 ];
 
 export const empireDeclarations: EmpireDeclaration[] = [
-  { id: "aurelian-compact", label: "Aurelian Compact", title: "The Aurelian Compact", short: "Bind city, frontier and nation into one imperial charter.", effect: "Empire seed formed through civic legitimacy." },
-  { id: "frontier-crown", label: "Frontier Crown", title: "The Frontier Crown", short: "Crown the secured pass as the first imperial mandate.", effect: "Empire seed formed through expansion legitimacy." },
-  { id: "basin-hegemony", label: "Basin Hegemony", title: "The Basin Hegemony", short: "Declare the basin a protected imperial sphere.", effect: "Empire seed formed through territorial legitimacy." },
+  { id: "aurelian-compact", label: "Aurelian Compact", title: "The Aurelian Compact", short: "Bind city, frontier and nation into one imperial charter.", effect: "+1 Stability; civic consolidation strengthens the imperial charter." },
+  { id: "frontier-crown", label: "Frontier Crown", title: "The Frontier Crown", short: "Crown the secured pass as the first imperial mandate.", effect: "+2 Influence, -1 Stability; outward mobilization trades cohesion for reach." },
+  { id: "basin-hegemony", label: "Basin Hegemony", title: "The Basin Hegemony", short: "Declare the basin a protected imperial sphere.", effect: "+1 Prosperity, -1 Influence; organized prosperity spends political capital." },
 ];
 
 export const imperialCourtCases: ImperialCourtCase[] = [{
@@ -601,7 +601,10 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       if (state.empireDeclarationId) return { ...state, view: "council", lastEvent: "The empire declaration is already recorded." };
       const declaration = empireDeclarations.find((item) => item.id === action.declarationId);
       if (!declaration) return { ...state, view: "council", lastEvent: "Unknown empire declaration." };
-      return { ...resetEmpireCrisis(state), empireDeclarationId: declaration.id, courtCaseDecisionId: null, rivalResponseDecisionId: null, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [], view: "council", chronicle: pushChronicle(state, "Empire declared", `${declaration.title}: ${declaration.effect}`), lastEvent: `Empire declared: ${declaration.title}.` };
+      const stabilityDelta = declaration.id === "aurelian-compact" ? 1 : declaration.id === "frontier-crown" ? -1 : 0;
+      const prosperityDelta = declaration.id === "basin-hegemony" ? 1 : 0;
+      const influenceDelta = declaration.id === "frontier-crown" ? 2 : declaration.id === "basin-hegemony" ? -1 : 0;
+      return { ...resetEmpireCrisis(state), empireDeclarationId: declaration.id, courtCaseDecisionId: null, rivalResponseDecisionId: null, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [], resources: { ...state.resources, influence: Math.max(0, state.resources.influence + influenceDelta) }, settlementStability: clampSettlementStability(state.settlementStability + stabilityDelta), settlementProsperity: clampSettlementProsperity(state.settlementProsperity + prosperityDelta), view: "council", chronicle: pushChronicle(state, "Empire declared", `${declaration.title}: ${declaration.effect}`), lastEvent: `Empire declared: ${declaration.title}. ${declaration.effect}` };
     }
     case "resolveCourtCase": {
       const courtCase = getImperialCourtCase(state);
