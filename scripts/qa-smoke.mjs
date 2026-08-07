@@ -13,18 +13,19 @@ async function ensureApp() { if (await appRunning()) return null; const command 
 async function writeResult(status, error) { result.status = status; result.generatedAt = new Date().toISOString(); if (error) { result.blockingStep = error.step ?? "unknown"; result.error = error.message; } await mkdir(OUTPUT_DIR, { recursive: true }); await writeFile(RESULT_PATH, `${JSON.stringify(result, null, 2)}\n`); }
 async function step(name, fn) { const started = Date.now(); try { await fn(); result.steps.push({ name, status: "PASS", durationMs: Date.now() - started }); } catch (err) { const error = err instanceof SmokeError ? err : new SmokeError(name, err.message); result.steps.push({ name, status: "FAIL", durationMs: Date.now() - started, error: error.message }); throw error; } }
 async function clickButton(page, name, stepName) { await page.getByRole("button", { name }).first().click({ timeout: 5000 }).catch(() => { throw new SmokeError(stepName, `Could not click button: ${name}`); }); }
+async function clickView(page, id, stepName) { await page.locator(`[data-qa="view-${id}"]`).click({ timeout: 5000 }).catch(() => { throw new SmokeError(stepName, `Could not open ${id} view`); }); }
 
 async function runSmoke(page) {
   await step("open current Aurelian shell", async () => {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
     await page.locator('[data-qa="play-shell"]').waitFor({ state: "visible", timeout: 5000 });
-    for (const name of [/^Map$/i, /^Village$/i, /^Orders$/i, /^World$/i, /^Council$/i]) {
-      await page.getByRole("button", { name }).first().waitFor({ state: "visible", timeout: 5000 });
+    for (const id of ["map", "village", "orders", "world", "council"]) {
+      await page.locator(`[data-qa="view-${id}"]`).waitFor({ state: "visible", timeout: 5000 });
     }
   });
 
   await step("map camera still changes", async () => {
-    await clickButton(page, /^Map$/i, "map camera still changes");
+    await clickView(page, "map", "map camera still changes");
     const svg = page.locator("svg[aria-label='Aurelian Basin fullscreen map']").first();
     await svg.waitFor({ state: "visible", timeout: 5000 });
     const before = await svg.getAttribute("viewBox");
@@ -35,7 +36,7 @@ async function runSmoke(page) {
   });
 
   await step("Aurelian Village is the real owned-land scene", async () => {
-    await clickButton(page, /^Village$/i, "Aurelian Village is the real owned-land scene");
+    await clickView(page, "village", "Aurelian Village is the real owned-land scene");
     const village = page.locator('[data-qa="aurelian-village-scene"]');
     await village.waitFor({ state: "visible", timeout: 5000 });
     if (await village.getAttribute("data-aurelian-stage") !== "camp") throw new SmokeError("Aurelian Village is the real owned-land scene", "Fresh Aurelian run did not begin at camp");
@@ -44,16 +45,16 @@ async function runSmoke(page) {
   await step("Raise Shelter visibly advances Village", async () => {
     const village = page.locator('[data-qa="aurelian-village-scene"]');
     const before = await village.getAttribute("data-aurelian-stage");
-    await clickButton(page, /^Orders$/i, "Raise Shelter visibly advances Village");
+    await clickView(page, "orders", "Raise Shelter visibly advances Village");
     await clickButton(page, /^Raise Shelter$/i, "Raise Shelter visibly advances Village");
-    await clickButton(page, /^Village$/i, "Raise Shelter visibly advances Village");
+    await clickView(page, "village", "Raise Shelter visibly advances Village");
     await village.waitFor({ state: "visible", timeout: 5000 });
     const after = await village.getAttribute("data-aurelian-stage");
     if (before === after || after !== "first_shelter") throw new SmokeError("Raise Shelter visibly advances Village", `Expected first_shelter after Raise Shelter, got ${after}`);
   });
 
   await step("World preserves the 10,000-land model", async () => {
-    await clickButton(page, /^World$/i, "World preserves the 10,000-land model");
+    await clickView(page, "world", "World preserves the 10,000-land model");
     const scene = page.locator('[data-qa="world-map-scene"]');
     await scene.waitFor({ state: "visible", timeout: 5000 });
     const sectors = await page.locator('[data-qa="world-sector-tile"]').count();
@@ -66,7 +67,7 @@ async function runSmoke(page) {
   });
 
   await step("Council remains reachable", async () => {
-    await clickButton(page, /^Council$/i, "Council remains reachable");
+    await clickView(page, "council", "Council remains reachable");
     await page.locator('[data-qa="council-panel"]').waitFor({ state: "visible", timeout: 5000 });
     await page.getByText("From land to empire", { exact: false }).first().waitFor({ state: "visible", timeout: 5000 });
   });
