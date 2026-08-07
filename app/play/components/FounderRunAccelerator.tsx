@@ -75,7 +75,7 @@ export function FounderRunAccelerator({
       <p className="text-[9px] font-black uppercase tracking-[0.22em] text-amber-200/65">Founder Run · First charter</p>
       <h2 className="mt-1 text-xl font-black text-amber-50">Ratify the nation in one decisive act.</h2>
       <p className="mt-2 text-xs leading-relaxed text-amber-50/68">
-        {charterSummary[doctrineId]} The existing three first-era laws will be written into the chronicle together, then the frontier opens.
+        {charterSummary[doctrineId]} The existing three first-era laws will be written into the chronicle together; national Stability and Prosperity then decide whether the frontier is ready.
       </p>
       <div className="mt-3 grid grid-cols-3 gap-2 text-center text-[9px] font-black uppercase tracking-[0.12em] text-amber-100/70">
         <span className="rounded-xl border border-amber-100/14 bg-white/6 px-2 py-2">Stores</span>
