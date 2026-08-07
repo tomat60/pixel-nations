@@ -1,0 +1,71 @@
+name: P6 Imperial Governance PR One Shot
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.head_ref == 'gpt56/p6-imperial-governance'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gpt56/p6-imperial-governance
+          fetch-depth: 0
+
+      - name: Apply exact P6 replacements
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path('app/play/lib/play-state.ts')
+          text = path.read_text()
+          replacements = [
+            ('effect: "+2 Influence; legitimacy rises because the charter settles the first border dispute."', 'effect: "+2 Influence, +1 Stability; legitimacy rises because the charter settles the first border dispute."'),
+            ('effect: "+1 Influence; frontier families become loyal but older wardens resent the ruling."', 'effect: "+1 Influence, +1 Prosperity, -1 Stability; frontier families gain room to grow while central cohesion softens."'),
+            ('effect: "+1 Influence; prosperity has priority over local control."', 'effect: "+1 Influence, +1 Prosperity; protected trade strengthens the imperial economy."'),
+            ('effect: "+2 Influence, +8 Rival Pressure; the empire makes its first hard conflict signal."', 'effect: "+2 Influence, +8 Rival Pressure, +1 Stability, -1 Prosperity; hard enforcement strengthens cohesion while disrupting growth."'),
+            ('effect: "-2 Influence, -6 Rival Pressure; peace is bought but the rival learns the court can be bargained with."', 'effect: "-2 Influence, -6 Rival Pressure, +1 Prosperity, -1 Stability; commerce continues while authority looks softer."'),
+            ('effect: "+1 Influence, -3 Rival Pressure; legitimacy becomes the weapon before armies move."', 'effect: "+1 Influence, -3 Rival Pressure, +1 Stability; public legitimacy reinforces national cohesion."'),
+            ('effect: "+1 Influence, +12 Rival Pressure; war-prep becomes the next visible frontier layer."', 'effect: "+1 Influence, +12 Rival Pressure, +1 Stability, -1 Prosperity; mobilization hardens cohesion while slowing civilian growth."'),
+            ('effect: "+3 Influence, +4 Rival Pressure; economic coercion becomes the first conflict lever."', 'effect: "+3 Influence, +4 Rival Pressure, +1 Prosperity; tariff control turns imperial leverage into organized growth."'),
+            ('effect: "+2 Influence, -5 Rival Pressure; diplomacy and law delay open war."', 'effect: "+2 Influence, -5 Rival Pressure, +1 Prosperity; diplomacy protects trade while delaying open war."'),
+            ('      return { ...resetEmpireCrisis(state), courtCaseDecisionId: decision.id, rivalResponseDecisionId: null, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [], resources: { ...state.resources, influence: state.resources.influence + decision.influenceDelta }, season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, courtCase.title, `${decision.label}: ${decision.effect}`), lastEvent: `Court case resolved: ${decision.label}.` };', '      const stabilityDelta = decision.id === "enforce-charter-law" ? 1 : decision.id === "favor-frontier-settlers" ? -1 : 0;\n      const prosperityDelta = decision.id === "favor-frontier-settlers" || decision.id === "protect-trade-passage" ? 1 : 0;\n      return { ...resetEmpireCrisis(state), courtCaseDecisionId: decision.id, rivalResponseDecisionId: null, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [], resources: { ...state.resources, influence: state.resources.influence + decision.influenceDelta }, settlementStability: clampSettlementStability(state.settlementStability + stabilityDelta), settlementProsperity: clampSettlementProsperity(state.settlementProsperity + prosperityDelta), season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, courtCase.title, `${decision.label}: ${decision.effect}`), lastEvent: `Court case resolved: ${decision.label}. ${decision.effect}` };'),
+            ('      return { ...resetEmpireCrisis(state), rivalResponseDecisionId: decision.id, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [], resources: { ...state.resources, influence: Math.max(0, state.resources.influence + decision.influenceDelta) }, season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, response.title, `${decision.label}: ${decision.effect}`), lastEvent: `Rival response answered: ${decision.label}.` };', '      const stabilityDelta = decision.id === "enforce-by-decree" || decision.id === "summon-border-assembly" ? 1 : decision.id === "offer-tribute-passage" ? -1 : 0;\n      const prosperityDelta = decision.id === "offer-tribute-passage" ? 1 : decision.id === "enforce-by-decree" ? -1 : 0;\n      return { ...resetEmpireCrisis(state), rivalResponseDecisionId: decision.id, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [], resources: { ...state.resources, influence: Math.max(0, state.resources.influence + decision.influenceDelta) }, settlementStability: clampSettlementStability(state.settlementStability + stabilityDelta), settlementProsperity: clampSettlementProsperity(state.settlementProsperity + prosperityDelta), season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, response.title, `${decision.label}: ${decision.effect}`), lastEvent: `Rival response answered: ${decision.label}. ${decision.effect}` };'),
+            ('      return { ...resetEmpireCrisis(state), conflictEscalationDecisionId: decision.id, standoffDecisionId: null, imperialTurnActionIds: [], resources: { ...state.resources, influence: Math.max(0, state.resources.influence + decision.influenceDelta) }, season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, escalation.title, `${decision.label}: ${decision.effect}`), lastEvent: `Conflict escalation chosen: ${decision.label}.` };', '      const stabilityDelta = decision.id === "raise-border-host" ? 1 : 0;\n      const prosperityDelta = decision.id === "raise-border-host" ? -1 : decision.id === "seize-pass-tariffs" || decision.id === "summon-rival-envoys" ? 1 : 0;\n      return { ...resetEmpireCrisis(state), conflictEscalationDecisionId: decision.id, standoffDecisionId: null, imperialTurnActionIds: [], resources: { ...state.resources, influence: Math.max(0, state.resources.influence + decision.influenceDelta) }, settlementStability: clampSettlementStability(state.settlementStability + stabilityDelta), settlementProsperity: clampSettlementProsperity(state.settlementProsperity + prosperityDelta), season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, escalation.title, `${decision.label}: ${decision.effect}`), lastEvent: `Conflict escalation chosen: ${decision.label}. ${decision.effect}` };'),
+          ]
+          for old, new in replacements:
+            if text.count(old) != 1:
+              raise SystemExit(f'Expected exactly one replacement target: {old[:100]}')
+            text = text.replace(old, new, 1)
+          path.write_text(text)
+          PY
+
+      - name: Verify bounded diff
+        run: |
+          git diff --check
+          changed="$(git diff --name-only)"
+          test "$changed" = "app/play/lib/play-state.ts"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      - name: Remove transports and commit product-only result
+        run: |
+          rm .github/workflows/p6-imperial-governance-one-shot.yml
+          rm .github/workflows/p6-imperial-governance-pr-one-shot.yml
+          git config user.name "pixel-nations-steward"
+          git config user.email "actions@users.noreply.github.com"
+          git add app/play/lib/play-state.ts .github/workflows/p6-imperial-governance-one-shot.yml .github/workflows/p6-imperial-governance-pr-one-shot.yml
+          git diff --cached --check
+          git commit -m "feat: apply P6 imperial governance"
+          git push origin HEAD:gpt56/p6-imperial-governance
