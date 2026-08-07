@@ -52,13 +52,34 @@ async function runSmoke(page) {
 async function main() {
   const proc = await ensureApp();
   let browser;
+  let page;
+  const runtimeDiagnostics = [];
   try {
     browser = await chromium.launch();
-    const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+    page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+    page.on("pageerror", (error) => {
+      const entry = { type: "pageerror", message: error.message, stack: error.stack ?? "" };
+      runtimeDiagnostics.push(entry);
+      console.error(`[browser pageerror] ${entry.stack || entry.message}`);
+    });
+    page.on("console", (message) => {
+      if (message.type() !== "error") return;
+      const entry = { type: "console", message: message.text() };
+      runtimeDiagnostics.push(entry);
+      console.error(`[browser console] ${entry.message}`);
+    });
     await runSmoke(page);
     await writeResult("PASS");
     console.log(`Mechanical smoke PASS. Result written to ${RESULT_PATH}`);
   } catch (err) {
+    if (page) {
+      await mkdir(OUTPUT_DIR, { recursive: true });
+      await page.screenshot({ path: `${OUTPUT_DIR}/smoke-runtime-failure.png`, fullPage: true }).catch(() => {});
+      await writeFile(
+        `${OUTPUT_DIR}/smoke-runtime-diagnostics.json`,
+        `${JSON.stringify({ generatedAt: new Date().toISOString(), runtimeDiagnostics }, null, 2)}\n`,
+      ).catch(() => {});
+    }
     await writeResult("FAIL", err);
     console.error(`Mechanical smoke FAIL at ${result.blockingStep}: ${result.error}`);
     process.exitCode = 1;
