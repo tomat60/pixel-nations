@@ -32,6 +32,7 @@ import {
 } from "../lib/play-state";
 import { LANDS_PER_SECTOR, SECTOR_COUNT, WORLD_LANDS } from "../lib/world-engine";
 import { buildWorldMapModel, getSectorLandSamples, type SectorKind, type WorldMapSector } from "./world-map-selectors";
+import { WorldTerrainRegion } from "./WorldTerrainRegion";
 
 type SectorControl = "owned" | "claimable" | "locked";
 type InstitutionWorldSignal = { label: string; district: string; mapEffect: string };
@@ -156,7 +157,7 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
       data-world-lands={WORLD_LANDS}
       data-sector-count={SECTOR_COUNT}
       data-visible-sector-count={regionalSectors.length}
-      data-regional-map="5x5"
+      data-regional-map="terrain-first"
       data-lands-per-sector={LANDS_PER_SECTOR}
       className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(56,189,248,.16),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(251,191,36,.14),transparent_26%),linear-gradient(180deg,#07111b_0%,#030708_100%)]"
     >
@@ -208,7 +209,7 @@ export function WorldMapScene({ state, dispatch }: { state: PlayState; dispatch:
         <div className="shrink-0 rounded-xl border border-sky-100/10 bg-black/12 p-2 md:p-2.5 lg:min-h-0">
           <WorldScaleProof ownedSectorIds={ownedSectorIds} selected={selected} visibleCount={regionalSectors.length} />
           <div className="mb-2 flex flex-wrap items-center gap-1.5"><p className="text-[8px] font-black uppercase tracking-[0.18em] text-sky-100/60">Aurelian region · 25 of 100 sectors</p><Legend label="Owned" tone="border-amber-200/80 bg-amber-300/20 text-amber-50" /><Legend label="Claimable" tone="border-lime-200/80 bg-lime-300/18 text-lime-50" /><Legend label="Locked" tone="border-slate-200/20 bg-slate-300/8 text-slate-100/65" />{nationFounded ? <Legend label="Nation" tone="border-emerald-200/80 bg-emerald-300/18 text-emerald-50" /> : null}{empireDeclaration ? <Legend label="Empire" tone="border-amber-200/80 bg-amber-300/20 text-amber-50" /> : null}{rivalResponseDecision ? <Legend label="Rival" tone="border-red-200/80 bg-red-300/18 text-red-50" /> : null}{conflictEscalationDecision ? <Legend label="Escalation" tone="border-orange-200/80 bg-orange-300/18 text-orange-50" /> : null}{obsidianPressure !== "none" ? <Legend label="Obsidian" tone="border-red-100/80 bg-red-400/20 text-red-50" /> : null}</div>
-          <div className="grid h-[400px] grid-cols-5 grid-rows-5 gap-2 sm:h-[520px] md:h-[620px] md:gap-2.5 lg:h-[calc(100%-4.6rem)] lg:min-h-[440px]">{regionalSectors.map((sector) => <SectorTile key={sector.id} sector={sector} control={getSectorControl(sector.id, ownedSectorIds, claimableSectorIds)} selected={sector.index === selected.index} nationFounded={nationFounded} institutionCount={institutionCount} objectiveTarget={sector.id === frontierTargetSectorId} objectiveComplete={frontierObjectiveComplete} obsidianPressure={obsidianPressure} onSelect={() => setSelectedIndex(sector.index)} canClaim={canClaimSector(state, sector.id).ok} />)}</div>
+          <WorldTerrainRegion sectors={regionalSectors} selectedSectorId={selected.id} ownedSectorIds={ownedSectorIds} claimableSectorIds={claimableSectorIds} canClaimSectorIds={regionalSectors.filter((sector) => canClaimSector(state, sector.id).ok).map((sector) => sector.id)} nationFounded={nationFounded} institutionCount={institutionCount} frontierTargetSectorId={frontierTargetSectorId} frontierObjectiveComplete={frontierObjectiveComplete} obsidianPressure={obsidianPressure} onSelect={(sector) => setSelectedIndex(sector.index)} />
         </div>
         <aside data-qa="world-sector-inspect" data-sector-control={selectedControl} className="shrink-0 rounded-xl border border-amber-100/14 bg-black/40 p-2.5 shadow-lg backdrop-blur-md md:p-3 lg:min-h-0 lg:overflow-auto">
           <p className="text-[8px] font-black uppercase tracking-[0.18em] text-amber-200/60">Sector inspect</p><div className="mt-1.5 flex items-start justify-between gap-2"><div><h3 className="text-lg font-black text-amber-50">{selected.id}</h3><p className="mt-0.5 text-xs font-black text-amber-100/80">{selected.name}</p></div><span className={`rounded-full border px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.12em] ${kindClasses[selected.kind]}`}>{kindLabels[selected.kind]}</span></div>
