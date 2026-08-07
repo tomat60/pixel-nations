@@ -1,0 +1,192 @@
+name: World V3 terrain-first one-shot
+on:
+  push:
+    branches: [visual/world-v3-terrain-first]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: visual/world-v3-terrain-first
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Create terrain region component and wire it into World
+        shell: bash
+        run: |
+          cat > app/play/world/WorldTerrainRegion.tsx <<'EOF'
+          "use client";
+
+          import type { WorldMapSector } from "./world-map-selectors";
+
+          type SectorControl = "owned" | "claimable" | "locked";
+          type Pressure = "none" | "active" | "contained";
+
+          const WIDTH = 1000;
+          const HEIGHT = 760;
+          const PAD_X = 38;
+          const PAD_Y = 34;
+          const CELL_W = (WIDTH - PAD_X * 2) / 5;
+          const CELL_H = (HEIGHT - PAD_Y * 2) / 5;
+
+          function jitter(x: number, y: number, axis: "x" | "y") {
+            if (x === 0 || x === 5 || y === 0 || y === 5) return 0;
+            const seed = Math.sin((x * 83.17 + y * 41.73) * (axis === "x" ? 1.19 : 1.73)) * 43758.5453;
+            const unit = seed - Math.floor(seed);
+            return (unit - 0.5) * (axis === "x" ? CELL_W * 0.22 : CELL_H * 0.2);
+          }
+
+          function vertex(x: number, y: number) {
+            return {
+              x: PAD_X + x * CELL_W + jitter(x, y, "x"),
+              y: PAD_Y + y * CELL_H + jitter(x, y, "y"),
+            };
+          }
+
+          function polygonFor(sector: WorldMapSector) {
+            const a = vertex(sector.x, sector.y);
+            const b = vertex(sector.x + 1, sector.y);
+            const c = vertex(sector.x + 1, sector.y + 1);
+            const d = vertex(sector.x, sector.y + 1);
+            return [a, b, c, d].map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+          }
+
+          function centerFor(sector: WorldMapSector) {
+            const a = vertex(sector.x, sector.y);
+            const b = vertex(sector.x + 1, sector.y);
+            const c = vertex(sector.x + 1, sector.y + 1);
+            const d = vertex(sector.x, sector.y + 1);
+            return { x: (a.x + b.x + c.x + d.x) / 4, y: (a.y + b.y + c.y + d.y) / 4 };
+          }
+
+          function fillFor(sector: WorldMapSector, control: SectorControl) {
+            if (control === "owned") return "rgba(217,165,70,.68)";
+            if (control === "claimable") return "rgba(132,184,112,.43)";
+            if (sector.kind === "rival") return "rgba(125,74,70,.46)";
+            if (sector.kind === "trade") return "rgba(56,133,145,.36)";
+            if (sector.kind === "danger") return "rgba(126,69,62,.34)";
+            return "rgba(74,101,84,.34)";
+          }
+
+          function strokeFor(control: SectorControl, selected: boolean, rival: boolean) {
+            if (selected) return "rgba(255,247,214,.98)";
+            if (control === "owned") return "rgba(248,205,117,.96)";
+            if (control === "claimable") return "rgba(190,231,151,.82)";
+            if (rival) return "rgba(239,145,130,.68)";
+            return "rgba(203,218,203,.20)";
+          }
+
+          export function WorldTerrainRegion({ sectors, selectedSectorId, ownedSectorIds, claimableSectorIds, canClaimSectorIds, nationFounded, institutionCount, frontierTargetSectorId, frontierObjectiveComplete, obsidianPressure, onSelect }: {
+            sectors: WorldMapSector[];
+            selectedSectorId: string;
+            ownedSectorIds: string[];
+            claimableSectorIds: string[];
+            canClaimSectorIds: string[];
+            nationFounded: boolean;
+            institutionCount: number;
+            frontierTargetSectorId: string | null;
+            frontierObjectiveComplete: boolean;
+            obsidianPressure: Pressure;
+            onSelect: (sector: WorldMapSector) => void;
+          }) {
+            const owned = new Set(ownedSectorIds);
+            const claimable = new Set(claimableSectorIds);
+            const canClaim = new Set(canClaimSectorIds);
+            const controlFor = (id: string): SectorControl => owned.has(id) ? "owned" : claimable.has(id) ? "claimable" : "locked";
+
+            const capital = sectors.find((s) => s.id === "A-01") ?? sectors[0];
+            const capitalCenter = centerFor(capital);
+            const roadTargets = ["A-02", "B-01", "B-02", "A-03", "C-02"].map((id) => sectors.find((s) => s.id === id)).filter(Boolean) as WorldMapSector[];
+
+            return (
+              <div data-qa="world-terrain-region" className="relative h-[430px] overflow-hidden rounded-[1.8rem] border border-sky-100/12 bg-[#07130f] shadow-[inset_0_0_80px_rgba(0,0,0,.65)] sm:h-[540px] md:h-[620px] lg:h-[calc(100%-2.5rem)] lg:min-h-[500px]">
+                <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="h-full w-full" preserveAspectRatio="xMidYMid meet" aria-label="Aurelian Basin terrain map">
+                  <defs>
+                    <linearGradient id="terrain-base" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stopColor="#15281e"/><stop offset=".48" stopColor="#10231d"/><stop offset="1" stopColor="#071715"/></linearGradient>
+                    <radialGradient id="capital-glow"><stop offset="0" stopColor="rgba(246,196,92,.28)"/><stop offset="1" stopColor="rgba(246,196,92,0)"/></radialGradient>
+                    <filter id="soft"><feGaussianBlur stdDeviation="7"/></filter>
+                  </defs>
+                  <rect width={WIDTH} height={HEIGHT} fill="url(#terrain-base)" />
+                  <path d="M25 565 C155 510 190 432 305 445 C425 460 462 565 575 542 C700 516 753 402 985 382 L1000 760 L0 760 Z" fill="rgba(8,73,79,.47)" />
+                  <path d="M18 552 C150 500 194 422 310 436 C430 451 468 554 580 532 C705 507 760 391 990 372" fill="none" stroke="rgba(91,190,192,.58)" strokeWidth="18" strokeLinecap="round" opacity=".72" />
+                  <path d="M18 552 C150 500 194 422 310 436 C430 451 468 554 580 532 C705 507 760 391 990 372" fill="none" stroke="rgba(177,229,216,.22)" strokeWidth="4" strokeLinecap="round" />
+                  <ellipse cx={capitalCenter.x} cy={capitalCenter.y} rx="205" ry="170" fill="url(#capital-glow)" filter="url(#soft)" />
+
+                  {sectors.map((sector) => {
+                    const control = controlFor(sector.id);
+                    const selected = sector.id === selectedSectorId;
+                    const center = centerFor(sector);
+                    const objective = sector.id === frontierTargetSectorId;
+                    const obsidian = obsidianPressure !== "none" && sector.id === "A-04";
+                    return (
+                      <g key={sector.id} role="button" tabIndex={0}
+                        data-qa="world-sector-tile" data-sector-id={sector.id} data-sector-x={sector.x} data-sector-y={sector.y}
+                        data-sector-kind={sector.kind} data-sector-control={control} data-sector-can-claim={canClaim.has(sector.id) ? "true" : "false"}
+                        data-sector-origin={sector.isOrigin ? "true" : "false"} data-sector-rival={sector.isRival ? "true" : "false"}
+                        data-sector-trade={sector.isTradeRich ? "true" : "false"} data-sector-danger={sector.isHighDanger ? "true" : "false"}
+                        data-nation-founded-owned={nationFounded && control === "owned" ? "true" : "false"}
+                        data-institution-capital={institutionCount > 0 && sector.isOrigin && control === "owned" ? "true" : "false"}
+                        data-frontier-objective={objective ? "true" : "false"} data-frontier-objective-complete={objective && frontierObjectiveComplete ? "true" : "false"}
+                        data-obsidian-pressure={obsidian ? obsidianPressure : "none"}
+                        aria-label={`Inspect sector ${sector.id} ${sector.name}`}
+                        onClick={() => onSelect(sector)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(sector); }}
+                        className="cursor-pointer outline-none">
+                        <polygon points={polygonFor(sector)} fill={fillFor(sector, control)} stroke={strokeFor(control, selected, sector.isRival)} strokeWidth={selected ? 6 : control === "owned" ? 4 : 2.2} vectorEffect="non-scaling-stroke" className="transition-[fill,stroke] duration-200 hover:brightness-125" />
+                        <text x={center.x} y={center.y - 4} textAnchor="middle" fill={control === "locked" ? "rgba(241,235,211,.58)" : "rgba(255,246,215,.94)"} fontSize="20" fontWeight="800">{sector.id}</text>
+                        <text x={center.x} y={center.y + 18} textAnchor="middle" fill="rgba(229,237,216,.56)" fontSize="11" fontWeight="700">{sector.biome}</text>
+                        {sector.isOrigin ? <><circle cx={center.x} cy={center.y - 42} r="13" fill="#f2c56e"/><path d={`M${center.x - 4} ${center.y - 50} L${center.x + 8} ${center.y - 42} L${center.x - 4} ${center.y - 34} Z`} fill="#3d2a13"/><text x={center.x} y={center.y - 63} textAnchor="middle" fill="#ffe8a3" fontSize="11" fontWeight="900">CAPITAL</text></> : null}
+                        {control === "claimable" ? <circle cx={center.x - 46} cy={center.y - 36} r="7" fill="#c6eda1" /> : null}
+                        {sector.isRival ? <path d={`M${center.x + 36} ${center.y - 47} l18 8 -18 8 z`} fill="#e18b78" /> : null}
+                        {objective ? <text data-qa="world-frontier-objective-marker" x={center.x + 45} y={center.y - 34} textAnchor="middle" fill={frontierObjectiveComplete ? "#b8efbe" : "#ffd08a"} fontSize="25" fontWeight="900">{frontierObjectiveComplete ? "✓" : "★"}</text> : null}
+                        {institutionCount > 0 && sector.isOrigin && control === "owned" ? <text data-qa="world-institution-capital-marker" x={center.x - 50} y={center.y + 48} fill="#e5c7ff" fontSize="18" fontWeight="900">◆{institutionCount}</text> : null}
+                        {obsidian ? <text data-qa="map-obsidian-pressure" data-obsidian-pressure={obsidianPressure} x={center.x + 50} y={center.y + 48} fill="#ff9f92" fontSize="22" fontWeight="900">◆</text> : null}
+                      </g>
+                    );
+                  })}
+
+                  {roadTargets.map((sector) => { const target = centerFor(sector); return <path key={sector.id} d={`M${capitalCenter.x} ${capitalCenter.y} Q${(capitalCenter.x + target.x) / 2 + 16} ${(capitalCenter.y + target.y) / 2 - 18} ${target.x} ${target.y}`} fill="none" stroke="rgba(225,188,119,.48)" strokeWidth="5" strokeLinecap="round" strokeDasharray="12 8" pointerEvents="none" />; })}
+                  <path d="M70 96 C220 46 345 78 452 42 C612 -12 745 60 936 28" fill="none" stroke="rgba(124,157,126,.24)" strokeWidth="30" strokeLinecap="round" pointerEvents="none" />
+                  <path d="M820 720 C822 607 900 540 980 486" fill="none" stroke="rgba(63,126,119,.26)" strokeWidth="46" strokeLinecap="round" pointerEvents="none" />
+                </svg>
+                <div className="pointer-events-none absolute left-3 top-3 rounded-xl border border-amber-100/14 bg-black/42 px-3 py-2 backdrop-blur-md">
+                  <p className="text-[8px] font-black uppercase tracking-[0.18em] text-amber-100/55">Aurelian Basin</p>
+                  <p className="mt-0.5 text-xs font-black text-amber-50">Borders follow the terrain. Roads radiate from A-01.</p>
+                </div>
+              </div>
+            );
+          }
+          EOF
+
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('app/play/world/WorldMapScene.tsx')
+          s = p.read_text()
+          anchor = 'import { buildWorldMapModel, getSectorLandSamples, type SectorKind, type WorldMapSector } from "./world-map-selectors";\n'
+          if 'WorldTerrainRegion' not in s:
+              s = s.replace(anchor, anchor + 'import { WorldTerrainRegion } from "./WorldTerrainRegion";\n')
+          old = '<div className="grid h-[400px] grid-cols-5 grid-rows-5 gap-2 sm:h-[520px] md:h-[620px] md:gap-2.5 lg:h-[calc(100%-4.6rem)] lg:min-h-[440px]">{regionalSectors.map((sector) => <SectorTile key={sector.id} sector={sector} control={getSectorControl(sector.id, ownedSectorIds, claimableSectorIds)} selected={sector.index === selected.index} nationFounded={nationFounded} institutionCount={institutionCount} objectiveTarget={sector.id === frontierTargetSectorId} objectiveComplete={frontierObjectiveComplete} obsidianPressure={obsidianPressure} onSelect={() => setSelectedIndex(sector.index)} canClaim={canClaimSector(state, sector.id).ok} />)}</div>'
+          new = '<WorldTerrainRegion sectors={regionalSectors} selectedSectorId={selected.id} ownedSectorIds={ownedSectorIds} claimableSectorIds={claimableSectorIds} canClaimSectorIds={regionalSectors.filter((sector) => canClaimSector(state, sector.id).ok).map((sector) => sector.id)} nationFounded={nationFounded} institutionCount={institutionCount} frontierTargetSectorId={frontierTargetSectorId} frontierObjectiveComplete={frontierObjectiveComplete} obsidianPressure={obsidianPressure} onSelect={(sector) => setSelectedIndex(sector.index)} />'
+          if old not in s:
+              raise SystemExit('World V2 grid anchor not found; refusing blind patch')
+          s = s.replace(old, new)
+          s = s.replace('data-regional-map="5x5"', 'data-regional-map="terrain-first"')
+          p.write_text(s)
+          PY
+      - run: npm run build
+      - name: Commit product-only candidate
+        shell: bash
+        run: |
+          git config user.name pixel-nations-steward
+          git config user.email actions@users.noreply.github.com
+          git rm .github/workflows/world-v3-one-shot.yml
+          git add app/play/world/WorldMapScene.tsx app/play/world/WorldTerrainRegion.tsx
+          git diff --cached --check
+          git commit -m "feat(world): replace regional grid with terrain-first basin"
+          git push origin HEAD:visual/world-v3-terrain-first
