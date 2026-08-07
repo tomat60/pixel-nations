@@ -37,6 +37,7 @@ async function ensureApp() { if (await appRunning()) return null; const command 
 function stopApp(p) { if (!p) return; if (process.platform === "win32") return p.kill("SIGTERM"); try { process.kill(-p.pid, "SIGTERM"); } catch { p.kill("SIGTERM"); } }
 async function readState(page, step) { await page.waitForFunction((key) => Boolean(window.localStorage.getItem(key)), STORAGE_KEY, { timeout: 10000 }).catch((error) => { throw new QaError(step, `Saved state unavailable: ${error.message}`); }); return page.evaluate((key) => JSON.parse(window.localStorage.getItem(key)), STORAGE_KEY); }
 async function waitForState(page, predicateSource, step) { await page.waitForFunction(({ key, predicateSource }) => { try { const state = JSON.parse(window.localStorage.getItem(key) ?? "{}"); const predicate = new Function("state", `return (${predicateSource})(state);`); return Boolean(predicate(state)); } catch { return false; } }, { key: STORAGE_KEY, predicateSource }, { timeout: 10000 }).catch((error) => { throw new QaError(step, error.message); }); }
+async function removeDemoCompleteOverlay(page) { const overlay = page.locator('[data-qa="demo-complete-overlay"]'); if (await overlay.count()) await overlay.evaluateAll((nodes) => nodes.forEach((node) => node.remove())); }
 
 async function seed(page, stage) {
   const base = await readState(page, "read fresh state");
@@ -69,6 +70,7 @@ async function seed(page, stage) {
   };
   await page.evaluate(({ key, state }) => window.localStorage.setItem(key, JSON.stringify(state)), { key: STORAGE_KEY, state });
   await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
+  await removeDemoCompleteOverlay(page);
 }
 
 async function clickChoice(page, choice, field, viewportId, stage) {
