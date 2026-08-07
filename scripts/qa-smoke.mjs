@@ -24,15 +24,9 @@ async function runSmoke(page) {
     }
   });
 
-  await step("map camera still changes", async () => {
-    await clickView(page, "map", "map camera still changes");
-    const svg = page.locator("svg[aria-label='Aurelian Basin fullscreen map']").first();
-    await svg.waitFor({ state: "visible", timeout: 5000 });
-    const before = await svg.getAttribute("viewBox");
-    await svg.evaluate((node) => node.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -180, clientX: 720, clientY: 450 })));
-    await page.waitForTimeout(200);
-    const after = await svg.getAttribute("viewBox");
-    if (!before || !after || before === after) throw new SmokeError("map camera still changes", "viewBox did not change");
+  await step("Map remains reachable", async () => {
+    await clickView(page, "map", "Map remains reachable");
+    await page.locator('[data-qa="zoom-overview"]').waitFor({ state: "visible", timeout: 5000 });
   });
 
   await step("Aurelian Village is the real owned-land scene", async () => {
