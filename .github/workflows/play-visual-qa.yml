@@ -4,10 +4,15 @@ on:
   pull_request:
     branches:
       - main
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches:
       - main
   workflow_dispatch:
+
+concurrency:
+  group: pixel-nations-play-qa-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -17,8 +22,43 @@ defaults:
     shell: bash
 
 jobs:
+  draft-core-qa:
+    name: Fast draft gameplay gate
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Run fast core regression set
+        run: |
+          set -euo pipefail
+          npm run qa:smoke
+          npm run qa:founder-run
+          npm run qa:city-nation
+          npm run qa:settlement
+          npm run --if-present qa:nation
+
   play-visual-qa:
     name: Generate /play gameplay evidence
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 35
 
@@ -195,7 +235,7 @@ jobs:
           const advancedEvidence = [
             ["public/qa/play-latest/branches/branch-summary.json", "posture evidence"],
             ["public/qa/play-latest/imperial-turn/turn-summary.json", "Imperial Turn evidence"],
-            ["public/qa/play-latest/demo-complete/demo-summary.json", "advanced finale evidence"],
+            ["public/qa/play-latest/demo-complete/demo_summary.json", "advanced finale evidence"],
             ["public/qa/play-latest/empire-crisis/empire-crisis-summary.json", "empire crisis evidence"],
             ["public/qa/play-latest/post-crisis-countermove/post-crisis-countermove-summary.json", "post-crisis evidence"],
           ];
