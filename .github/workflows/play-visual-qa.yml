@@ -235,7 +235,7 @@ jobs:
           const advancedEvidence = [
             ["public/qa/play-latest/branches/branch-summary.json", "posture evidence"],
             ["public/qa/play-latest/imperial-turn/turn-summary.json", "Imperial Turn evidence"],
-            ["public/qa/play-latest/demo-complete/demo_summary.json", "advanced finale evidence"],
+            ["public/qa/play-latest/demo-complete/demo-summary.json", "advanced finale evidence"],
             ["public/qa/play-latest/empire-crisis/empire-crisis-summary.json", "empire crisis evidence"],
             ["public/qa/play-latest/post-crisis-countermove/post-crisis-countermove-summary.json", "post-crisis evidence"],
           ];
