@@ -1,12 +1,15 @@
 name: P5 Empire Tradeoff One Shot
 
-# Existing-on-branch trigger pass.
 on:
   push:
     branches:
       - gpt56/p5-empire-founding-tradeoff
     paths:
       - .github/workflows/p5-empire-tradeoff-one-shot.yml
+  pull_request:
+    branches:
+      - main
+    types: [opened]
 
 permissions:
   contents: write
@@ -17,6 +20,7 @@ defaults:
 
 jobs:
   apply-p5:
+    if: github.event_name == 'push' || github.event.pull_request.head.ref == 'gpt56/p5-empire-founding-tradeoff'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
