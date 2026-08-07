@@ -1,19 +1,19 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-08-04
-Current state revision: Authority Reset v0.1
-Authority baseline SHA: 2d7e3bf180404fffc7725386a97ddbabc446177f
-Product baseline SHA: 4c52c7903a8ee8117f4582016ed72e7ced85798c
-Current milestone: Aurelian Integration M2
-Active execution issue: #338
-Next allowed action: Complete the bounded research and binding Aurelian Composition V2 art brief in issue #338. Do not start visual coding before that brief is accepted.
+Updated: 2026-08-07
+Current state revision: Visual Reset v0.2
+Authority baseline SHA: 7f855c9860954de50406503d3f3b5f1bbe2c64a3
+Product baseline SHA: 7f855c9860954de50406503d3f3b5f1bbe2c64a3
+Current milestone: Village V4 layered growth proof
+Active execution issue: #396
+Next allowed action: Produce and directly review one deterministic Village V4 art proof with an opaque terrain base, an initial Camp layer, and eight genuine order-delta layers in registered desktop and portrait compositions. Do not integrate runtime art before this proof passes.
 
 ## Purpose
 
 This file is the first and highest-priority source of current project state for every assistant, agent, and new session.
 
-It must stay short, current, and operational. Historical sprint summaries belong in their original issues, PRs, ADRs, and archived strategy documents — not appended here.
+It must stay short, current, and operational. Historical sprint summaries belong in their original issues, PRs, ADRs, and archived strategy documents.
 
 ## Current product truth
 
@@ -23,18 +23,20 @@ Pixel Nations is a strategy game built around:
 
 The full world contains 10,000 lands in a 100 × 100 structure. The current playable/demo area is Sector A-01 / Aurelian Basin.
 
-The real `/play` product path currently proves:
+The real `/play` product path on `main` preserves the eight settlement orders and later nation/empire continuity. Its current Village renderer exposes only three flattened visual states:
 
 `camp → first shelter → developed settlement`
 
-This sequence is integrated on `main` through PR #335 and product baseline commit `4c52c7903a8ee8117f4582016ed72e7ced85798c`.
+Exact-head video review proved that Gather Food, Cut Timber and Scout Nearby Land leave the shelter image unchanged, Build Storehouse swaps the whole frame to the completed settlement, and the remaining orders leave that image unchanged again.
 
 ## Current acceptance status
 
-- Aurelian M2 gameplay/state integration: `ACCEPTED`.
-- Current Aurelian Village composition: `TEMPORARY_ACCEPTED`.
-- Production-final Aurelian composition: `NOT YET ACCEPTED`.
-- Non-Village product screens: `NOT VISUALLY APPROVED`.
+- Gameplay/state continuity through P5: `ACCEPTED AS WORKING BASELINE`.
+- Current three-frame Aurelian Village composition: `OWNER_REJECTED`.
+- World V2 rectangular regional map: `OWNER_REJECTED`.
+- World V3 irregular-SVG technique from closed PR #397: `REJECTED UNMERGED`.
+- Production Village V4 art: `NOT YET ACCEPTED`.
+- Production World V4 art: `NOT YET STARTED`.
 - Current Next.js `/play` route: functioning product bridge, demo shell, and rollback surface.
 - Godot: strategic target runtime under accepted ADR-001.
 - React/SVG scene rebuilding as the final art direction: `BLOCKED`.
@@ -44,34 +46,41 @@ This sequence is integrated on `main` through PR #335 and product baseline commi
 
 ADR-001 remains binding: Godot is the target game runtime.
 
-The current Next.js `/play` implementation may host accepted Aurelian/Godot-derived stages as a bounded bridge while it preserves working gameplay, persistence, QA, public demonstration, and rollback capability.
+The current Next.js `/play` implementation may host accepted, Godot-compatible Aurelian art layers as a bounded bridge while it preserves working gameplay, persistence, QA, public demonstration, and rollback capability.
 
-This bridge does not reopen broad React/SVG scene-engine development. Product behavior may be preserved in the web shell while art/runtime work moves toward the accepted Godot direction.
+The same generated art files must be consumable by both the web bridge and the Godot art target. Do not create a second web-only visual world.
 
 ## Current active phase
 
-Issue #336 completed the exact-evidence Fable review.
+Issue #396 is the active visual-reset authority.
 
-Accepted review evidence:
+Exact reviewed evidence:
 
-- Fable run: `30935135352`
-- artifact: `8902846660`
-- digest: `sha256:6fa8fca3697be9b766abae7ec8bfdba56d1e5e5365cc6be2a17c619c5cb1ebd5`
-- evidence ref: `4c52c7903a8ee8117f4582016ed72e7ced85798c`
-- result: `VALIDATED_FABLE_OUTPUT`
+- Play Visual QA run: `31221809166`
+- exact PR head: `0b607ab83fef64227b4f005a4f11e27e75e74492`
+- artifact: `9010693147`
+- artifact digest: `sha256:26fde85d09086ed92c332b7a735274671372da56ca9f8740720cb97706d55312`
+- World V3 decision: `REJECT TECHNIQUE`
+- Village progression decision: `FAIL — NON-PROGRESSIVE THREE-FRAME SWAP`
 
-Binding findings:
+The active order is:
 
-- keep M2 merged as the gameplay/integration foundation;
-- improve desktop bridge bank landings, crossing angle, abutments/ramps, and approach road;
-- reorganize the developed settlement around one focal core, compact home cluster, complete path network, integrated landmark, and stronger silhouette hierarchy;
-- do not infer visual approval for World, Nation, Empire, Council, or other non-Village screens.
+1. Produce the Village V4 art proof.
+2. Review exact native desktop and portrait evidence; allow at most one correction.
+3. Integrate only after visual acceptance.
+4. Build World V4 in the same isometric terrain, material and lighting grammar.
 
-Execution has moved to issue #338:
+Council/P6 and other scope expansion remain paused until both visual blockers pass direct review.
 
-`Aurelian Composition V2: research and binding art brief`
+## Village V4 proof contract
 
-No visual implementation branch should begin until #338 produces one accepted, executable brief.
+The proof must contain one opaque terrain base plus nine cumulative transparent layers:
+
+`camp, shelter, food, timber, scout, storehouse, market, watch, council`
+
+Camp is the visible initial state. Each of the eight settlement orders must add a persistent spatial trace. No order may map to an unchanged art state.
+
+Desktop and portrait use separately composed but identically sequenced registered cameras. The developed footprint must grow around a civic/market core, connect visibly to the bridge, and occupy a meaningful share of buildable land.
 
 ## Source-of-truth precedence
 
@@ -80,41 +89,32 @@ When documents or issues conflict, use this order:
 1. `docs/PROJECT_CURRENT_STATE.md`
 2. accepted ADRs, especially `docs/ADR_001_GODOT_DESKTOP_FIRST.md`
 3. root `AGENTS.md`
-4. the active execution issue named in this file
-5. exact-head evidence and the merged PR for the current milestone
+4. active issue #396
+5. exact-head evidence for the current milestone
 6. operating and QA protocols
-7. older open issues, Command Room comments, sprint briefs, runbooks, and historical documents
+7. older issues, briefs, runbooks, and historical documents
 
-Issue #79 is historical coordination context. It is not the current execution authority unless this file explicitly reactivates it.
-
-An open issue, draft PR, generated handoff, or green CI run is not automatically current authority.
-
-## Current evidence rules
-
-Use exact-head evidence attached to the current milestone or active issue.
-
-`public/qa/latest/*` is not authoritative merely because its path contains `latest`. It may be used only when its generated date and referenced commit are current for the milestone being reviewed.
-
-Technical PASS does not equal visual acceptance. Visual work requires direct evidence review and an explicit verdict.
+An open issue, draft PR, generated handoff, green CI run, or stale `public/qa/latest` directory is not automatically current authority.
 
 ## Allowed work now
 
-- bounded research for #338;
-- art-direction decisions and the binding Composition V2 brief;
-- read-only audits;
-- authority/documentation fixes that do not change product behavior;
-- deterministic QA and evidence inspection;
-- a later narrow Composition V2 art-target branch only after #338 is accepted.
+- deterministic Blender/KayKit Village V4 art-target source;
+- registered desktop and portrait proof renders;
+- transparent layer extraction and pixel-reconstruction validation;
+- exact evidence manifests, contact sheets, provenance, and license checks;
+- authority/documentation fixes tied to #396;
+- one evidence-backed composition correction after direct review.
 
 ## Blocked work now
 
-- visual coding before #338 is accepted;
-- broad product redesign;
-- new asset family, image generation, or paid assets without a new explicit decision;
-- React/SVG fallback as final Village direction;
+- runtime integration before Village V4 art acceptance;
+- additional three-frame or full-frame-swap progression;
+- full-frame blur/crossfade presented as construction;
+- World V4 implementation before the Village V4 visual grammar is accepted;
+- more work on the rejected World V3 SVG grid;
+- Council/P6 expansion, broad product redesign, paid assets, or image generation without a new explicit decision;
 - gameplay, reducer, persistence, routing, backend, account, payment, multiplayer, combat, or economy expansion;
-- World/Nation/Empire implementation during the current Aurelian composition phase;
-- merging from green CI alone without the required product/visual gate.
+- merge from green CI alone without direct product/visual acceptance.
 
 ## Session start gate
 
@@ -124,32 +124,19 @@ Before meaningful work:
 2. Read this file.
 3. Read the accepted ADR relevant to the task.
 4. Read `AGENTS.md`.
-5. Read the active execution issue named above.
+5. Read issue #396 and the Village V4 production contract.
 6. Confirm allowed files, forbidden actions, validation, cost mode, and stop condition.
-7. Treat any older material that conflicts with this chain as historical.
 
 ## Update rule
 
-Update this file in the same PR, or in an immediate bounded follow-up, when any of these changes:
-
-- accepted milestone;
-- active execution issue;
-- product baseline;
-- runtime decision;
-- visual acceptance classification;
-- next allowed action;
-- major blocker.
-
-Do not append a new historical chapter. Replace the current fields and current sections.
+Update this file in the same PR, or in an immediate bounded follow-up, when the accepted milestone, active issue, product baseline, runtime decision, visual classification, next action, or major blocker changes.
 
 ## Current stop condition
 
-The current planning phase ends when issue #338 contains one accepted and executable Aurelian Composition V2 art brief with:
+Stop the art-proof phase after direct review returns one of:
 
-- concrete bridge and settlement composition constraints;
-- desktop/portrait parity rules;
-- allowed and forbidden scope;
-- model/tool and cost choice;
-- exact evidence contract;
-- binary acceptance gates;
-- at most one correction cycle.
+- `ACCEPT FOR LAYER INTEGRATION`;
+- `ONE COMPOSITION CORRECTION`;
+- `REJECT ART DIRECTION`.
+
+Do not spend the single correction on QA polish or renderer mechanics. It is reserved for an evidence-backed composition failure.
