@@ -1,0 +1,60 @@
+name: Pixel Nations Village V4 Art Proof
+
+on:
+  push:
+    branches:
+      - art/village-v4-nine-layer-proof
+    paths:
+      - .github/workflows/village-v4-art-proof.yml
+      - tools/blender/aurelian_village_v4_layers.py
+      - tools/art/village_v4_extract_layers.py
+      - tools/qa/run_aurelian_village_v4_proof.sh
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: village-v4-art-proof-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout exact art branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+
+      - name: Render registered desktop and portrait proof
+        run: bash tools/qa/run_aurelian_village_v4_proof.sh
+
+      - name: Upload exact full-frame and layer evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel-nations-village-v4-proof
+          path: |
+            ${{ runner.temp }}/pixel-nations-village-v4/render
+            game/art_target/village_v4
+            review/aurelian-village-v4-m1
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6
+
+      - name: Commit deterministic proof assets to the art branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game/art_target/village_v4 review/aurelian-village-v4-m1
+          if git diff --cached --quiet; then
+            echo "Village V4 proof assets are already current."
+          else
+            git commit -m "art: render Village V4 nine-layer proof [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
