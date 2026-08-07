@@ -1,0 +1,554 @@
+{
+  "classification": "PENDING_DIRECT_VISUAL_REVIEW",
+  "contract": "VILLAGE_V4_NINE_LAYER_PROOF",
+  "generated_at": "2026-08-07T22:26:38.119833+00:00",
+  "input_sha": "b7b49a524db2438bbd734ff82983d212f62d6fec",
+  "github_run_id": "31223356413",
+  "kaykit_commit": "84fa4e91af6a88989be7c99e0891cede11f2ca38",
+  "base_script_commit": "d001d96117fc9d1de20f3ff57d7a47e2441a0393",
+  "stages": [
+    "camp",
+    "shelter",
+    "food",
+    "timber",
+    "scout",
+    "storehouse",
+    "market",
+    "watch",
+    "council"
+  ],
+  "modes": {
+    "desktop": {
+      "resolution": [
+        2048,
+        1280
+      ],
+      "base": {
+        "path": "desktop/base-terrain.webp",
+        "sha256": "117fecba704cc1aaf3c7be3da20e8d085717b4a457882c32da6b07300322e04b",
+        "byte_size": 959598
+      },
+      "layers": [
+        {
+          "id": "camp",
+          "order": 1,
+          "path": "desktop/stage-01-camp.webp",
+          "sha256": "2cac9620fadd762cf355e321a9bd87dab1bced80f4435d695540630be0425658",
+          "byte_size": 46054,
+          "changed_pixel_ratio": 0.02250061,
+          "bounds": {
+            "pixels": [
+              53,
+              631,
+              1283,
+              838
+            ],
+            "normalized": [
+              0.025879,
+              0.492969,
+              0.626465,
+              0.654687
+            ],
+            "width_ratio": 0.600586,
+            "height_ratio": 0.161719,
+            "area_ratio": 0.097126
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "shelter",
+          "order": 2,
+          "path": "desktop/stage-02-shelter.webp",
+          "sha256": "2a321a721ba1dfadbf1cdf8b9aaa71f4efe4475ba42645fb14fd99bcd856df6c",
+          "byte_size": 26094,
+          "changed_pixel_ratio": 0.01256981,
+          "bounds": {
+            "pixels": [
+              751,
+              538,
+              1523,
+              717
+            ],
+            "normalized": [
+              0.366699,
+              0.420312,
+              0.743652,
+              0.560156
+            ],
+            "width_ratio": 0.376953,
+            "height_ratio": 0.139844,
+            "area_ratio": 0.052715
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "food",
+          "order": 3,
+          "path": "desktop/stage-03-food.webp",
+          "sha256": "2aa3b7e1d61467835d74314b90920823caed397146b4128a9fe5d53f15cb5bbe",
+          "byte_size": 98274,
+          "changed_pixel_ratio": 0.05174942,
+          "bounds": {
+            "pixels": [
+              255,
+              285,
+              1370,
+              689
+            ],
+            "normalized": [
+              0.124512,
+              0.222656,
+              0.668945,
+              0.538281
+            ],
+            "width_ratio": 0.544434,
+            "height_ratio": 0.315625,
+            "area_ratio": 0.171837
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "timber",
+          "order": 4,
+          "path": "desktop/stage-04-timber.webp",
+          "sha256": "5a4937d5af2f210421fb8c3ff7f511025153b2be9413c844a341b9ebabb49537",
+          "byte_size": 58678,
+          "changed_pixel_ratio": 0.02550278,
+          "bounds": {
+            "pixels": [
+              182,
+              633,
+              846,
+              866
+            ],
+            "normalized": [
+              0.088867,
+              0.494531,
+              0.413086,
+              0.676562
+            ],
+            "width_ratio": 0.324219,
+            "height_ratio": 0.182031,
+            "area_ratio": 0.059018
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "scout",
+          "order": 5,
+          "path": "desktop/stage-05-scout.webp",
+          "sha256": "825183ebe47a77c829dd83bf8c893760cd009a243a5b1d5c3f0e65ddb0f4fc2a",
+          "byte_size": 26272,
+          "changed_pixel_ratio": 0.01148796,
+          "bounds": {
+            "pixels": [
+              0,
+              23,
+              2048,
+              1278
+            ],
+            "normalized": [
+              0.0,
+              0.017969,
+              1.0,
+              0.998437
+            ],
+            "width_ratio": 1.0,
+            "height_ratio": 0.980469,
+            "area_ratio": 0.980469
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "storehouse",
+          "order": 6,
+          "path": "desktop/stage-06-storehouse.webp",
+          "sha256": "99dad7e8419643471155b5e750fca53c99a135f9b02145d04fa8e103fe2f6629",
+          "byte_size": 58116,
+          "changed_pixel_ratio": 0.02472725,
+          "bounds": {
+            "pixels": [
+              812,
+              692,
+              1776,
+              1065
+            ],
+            "normalized": [
+              0.396484,
+              0.540625,
+              0.867188,
+              0.832031
+            ],
+            "width_ratio": 0.470703,
+            "height_ratio": 0.291406,
+            "area_ratio": 0.137166
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "market",
+          "order": 7,
+          "path": "desktop/stage-07-market.webp",
+          "sha256": "a7571cf584e062744754fb4d2335b94e6c77642e639a475e2fb5c29efea51895",
+          "byte_size": 103070,
+          "changed_pixel_ratio": 0.04423218,
+          "bounds": {
+            "pixels": [
+              741,
+              527,
+              2016,
+              828
+            ],
+            "normalized": [
+              0.361816,
+              0.411719,
+              0.984375,
+              0.646875
+            ],
+            "width_ratio": 0.622559,
+            "height_ratio": 0.235156,
+            "area_ratio": 0.146399
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "watch",
+          "order": 8,
+          "path": "desktop/stage-08-watch.webp",
+          "sha256": "732cbda046065fb62b9d83382fa4d909f24454f0b8396ba5c816a111bb262f80",
+          "byte_size": 72574,
+          "changed_pixel_ratio": 0.02953224,
+          "bounds": {
+            "pixels": [
+              2,
+              51,
+              2048,
+              1278
+            ],
+            "normalized": [
+              0.000977,
+              0.039844,
+              1.0,
+              0.998437
+            ],
+            "width_ratio": 0.999023,
+            "height_ratio": 0.958594,
+            "area_ratio": 0.957658
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "council",
+          "order": 9,
+          "path": "desktop/stage-09-council.webp",
+          "sha256": "4db36e23e891dec0c17b9e0bd97c78932d6bd9b7937e4a000100a2849cda012f",
+          "byte_size": 79566,
+          "changed_pixel_ratio": 0.03876991,
+          "bounds": {
+            "pixels": [
+              1098,
+              250,
+              2048,
+              638
+            ],
+            "normalized": [
+              0.536133,
+              0.195312,
+              1.0,
+              0.498437
+            ],
+            "width_ratio": 0.463867,
+            "height_ratio": 0.303125,
+            "area_ratio": 0.14061
+          },
+          "reconstruction_max_channel_error": 0
+        }
+      ],
+      "developed_changed_pixel_ratio": 0.22824898,
+      "developed_bounds": {
+        "pixels": [
+          0,
+          23,
+          2048,
+          1278
+        ],
+        "normalized": [
+          0.0,
+          0.017969,
+          1.0,
+          0.998437
+        ],
+        "width_ratio": 1.0,
+        "height_ratio": 0.980469,
+        "area_ratio": 0.980469
+      },
+      "final_reconstruction_sha256": "22bf74856305e671d1c793d287f9b1f67a463a9274fe1b035917c0d404d9e171"
+    },
+    "portrait": {
+      "resolution": [
+        780,
+        1688
+      ],
+      "base": {
+        "path": "portrait/base-terrain.webp",
+        "sha256": "ba375914426b8c9320b5cee1275914ec8e5f045c88e9b304e4b51e0646c60b02",
+        "byte_size": 472884
+      },
+      "layers": [
+        {
+          "id": "camp",
+          "order": 1,
+          "path": "portrait/stage-01-camp.webp",
+          "sha256": "4b73438782d15be5ad0695b431218386a5a02300a4ab7d64379635b9472a5bf9",
+          "byte_size": 23522,
+          "changed_pixel_ratio": 0.01961204,
+          "bounds": {
+            "pixels": [
+              152,
+              915,
+              598,
+              1252
+            ],
+            "normalized": [
+              0.194872,
+              0.542062,
+              0.766667,
+              0.741706
+            ],
+            "width_ratio": 0.571795,
+            "height_ratio": 0.199645,
+            "area_ratio": 0.114156
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "shelter",
+          "order": 2,
+          "path": "portrait/stage-02-shelter.webp",
+          "sha256": "2bd8405de998c54178f5ec482c0af34c813b11f1f7dd5e351a4894d79655ff4a",
+          "byte_size": 17208,
+          "changed_pixel_ratio": 0.01414206,
+          "bounds": {
+            "pixels": [
+              203,
+              698,
+              430,
+              977
+            ],
+            "normalized": [
+              0.260256,
+              0.413507,
+              0.551282,
+              0.578791
+            ],
+            "width_ratio": 0.291026,
+            "height_ratio": 0.165284,
+            "area_ratio": 0.048102
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "food",
+          "order": 3,
+          "path": "portrait/stage-03-food.webp",
+          "sha256": "a6f8a3eed6c488d80064acae99a0f785bea7531209014330c2878b51a72221f6",
+          "byte_size": 26664,
+          "changed_pixel_ratio": 0.02136347,
+          "bounds": {
+            "pixels": [
+              360,
+              665,
+              780,
+              977
+            ],
+            "normalized": [
+              0.461538,
+              0.393957,
+              1.0,
+              0.578791
+            ],
+            "width_ratio": 0.538462,
+            "height_ratio": 0.184834,
+            "area_ratio": 0.099526
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "timber",
+          "order": 4,
+          "path": "portrait/stage-04-timber.webp",
+          "sha256": "cc695328c3ff2c152b4073bd5e13cf4997e47265d8dcfe278a50870fcd3611e6",
+          "byte_size": 25486,
+          "changed_pixel_ratio": 0.01945406,
+          "bounds": {
+            "pixels": [
+              0,
+              907,
+              357,
+              1076
+            ],
+            "normalized": [
+              0.0,
+              0.537322,
+              0.457692,
+              0.637441
+            ],
+            "width_ratio": 0.457692,
+            "height_ratio": 0.100118,
+            "area_ratio": 0.045823
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "scout",
+          "order": 5,
+          "path": "portrait/stage-05-scout.webp",
+          "sha256": "3818e8932ad8adfdab484dcde54cf7127d84b22a018cb37fbc5754e9279e12e4",
+          "byte_size": 10872,
+          "changed_pixel_ratio": 0.01385193,
+          "bounds": {
+            "pixels": [
+              150,
+              449,
+              773,
+              951
+            ],
+            "normalized": [
+              0.192308,
+              0.265995,
+              0.991026,
+              0.563389
+            ],
+            "width_ratio": 0.798718,
+            "height_ratio": 0.297393,
+            "area_ratio": 0.237533
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "storehouse",
+          "order": 6,
+          "path": "portrait/stage-06-storehouse.webp",
+          "sha256": "6bc0a0021dbcb02a880a140e61eaa466bfa3ee24ec1d7641e147155a01d26ece",
+          "byte_size": 27498,
+          "changed_pixel_ratio": 0.01852291,
+          "bounds": {
+            "pixels": [
+              345,
+              879,
+              780,
+              1167
+            ],
+            "normalized": [
+              0.442308,
+              0.520735,
+              1.0,
+              0.691351
+            ],
+            "width_ratio": 0.557692,
+            "height_ratio": 0.170616,
+            "area_ratio": 0.095151
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "market",
+          "order": 7,
+          "path": "portrait/stage-07-market.webp",
+          "sha256": "445bf0585fe558b20a15da271ee7edf31d57c3d6223f39b1c8f7bb177156e3ae",
+          "byte_size": 37810,
+          "changed_pixel_ratio": 0.03128873,
+          "bounds": {
+            "pixels": [
+              290,
+              643,
+              694,
+              904
+            ],
+            "normalized": [
+              0.371795,
+              0.380924,
+              0.889744,
+              0.535545
+            ],
+            "width_ratio": 0.517949,
+            "height_ratio": 0.154621,
+            "area_ratio": 0.080086
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "watch",
+          "order": 8,
+          "path": "portrait/stage-08-watch.webp",
+          "sha256": "d92e9e240e4214e90d9f71e226d2eacef888854998350efebe599c951095ce1d",
+          "byte_size": 44464,
+          "changed_pixel_ratio": 0.0384661,
+          "bounds": {
+            "pixels": [
+              0,
+              10,
+              772,
+              1294
+            ],
+            "normalized": [
+              0.0,
+              0.005924,
+              0.989744,
+              0.766588
+            ],
+            "width_ratio": 0.989744,
+            "height_ratio": 0.760664,
+            "area_ratio": 0.752862
+          },
+          "reconstruction_max_channel_error": 0
+        },
+        {
+          "id": "council",
+          "order": 9,
+          "path": "portrait/stage-09-council.webp",
+          "sha256": "b310f0991049094d4514db0d09b8386297ae854f123ef6487b71bfcf50a5dfb1",
+          "byte_size": 24076,
+          "changed_pixel_ratio": 0.01935077,
+          "bounds": {
+            "pixels": [
+              456,
+              407,
+              780,
+              723
+            ],
+            "normalized": [
+              0.584615,
+              0.241114,
+              1.0,
+              0.428318
+            ],
+            "width_ratio": 0.415385,
+            "height_ratio": 0.187204,
+            "area_ratio": 0.077762
+          },
+          "reconstruction_max_channel_error": 0
+        }
+      ],
+      "developed_changed_pixel_ratio": 0.17752841,
+      "developed_bounds": {
+        "pixels": [
+          0,
+          10,
+          780,
+          1294
+        ],
+        "normalized": [
+          0.0,
+          0.005924,
+          1.0,
+          0.766588
+        ],
+        "width_ratio": 1.0,
+        "height_ratio": 0.760664,
+        "area_ratio": 0.760664
+      },
+      "final_reconstruction_sha256": "d645201b35cdce64656773383050222c18ca3d1208f297b8640b0442aea25b7e"
+    }
+  }
+}

@@ -1,0 +1,2949 @@
+{
+  "classification": "PENDING_DIRECT_VISUAL_REVIEW",
+  "contract": "VILLAGE_V4_NINE_LAYER_PROOF",
+  "kaykit_commit": "84fa4e91af6a88989be7c99e0891cede11f2ca38",
+  "base_script_commit": "d001d96117fc9d1de20f3ff57d7a47e2441a0393",
+  "stages": [
+    "camp",
+    "shelter",
+    "food",
+    "timber",
+    "scout",
+    "storehouse",
+    "market",
+    "watch",
+    "council"
+  ],
+  "modes": {
+    "desktop": {
+      "resolution": [
+        2048,
+        1280
+      ],
+      "camera": {
+        "position": [
+          132,
+          -170,
+          132
+        ],
+        "target": [
+          12,
+          31,
+          6
+        ],
+        "ortho": 120.0,
+        "resolution": [
+          2048,
+          1280
+        ]
+      },
+      "terrain_extent": [
+        340.0,
+        250.0
+      ],
+      "bridge": {
+        "position": [
+          -43.0,
+          -6.0
+        ],
+        "rotation": 42.0,
+        "span": 25.0
+      },
+      "camera_object": "VillageV4DesktopCamera",
+      "frames": {
+        "base": {
+          "path": "desktop/base.png",
+          "sha256": "7d6b6f567482ce1a5f6c1bb124067cea4a98071f0d9272f477211d4315c3df03"
+        },
+        "camp": {
+          "path": "desktop/stage-01-camp.png",
+          "sha256": "37d0669098f29244beaa21153ca1d8b661ad9872d1b1e90753290e1c1d9fc565"
+        },
+        "shelter": {
+          "path": "desktop/stage-02-shelter.png",
+          "sha256": "454798d6e60704c3fcd2b5cc1f6744429b171992b6c39bbbe3ae475504428336"
+        },
+        "food": {
+          "path": "desktop/stage-03-food.png",
+          "sha256": "73ff22bdef88a88afb3e27414b0a8e470ebe0b3f4a8129afb9bff14592dcf9f1"
+        },
+        "timber": {
+          "path": "desktop/stage-04-timber.png",
+          "sha256": "524e1344f2abf213daba7b539c2c572f652a7dfe9de9cdaa12ee6ff83a9e340d"
+        },
+        "scout": {
+          "path": "desktop/stage-05-scout.png",
+          "sha256": "e516a62c5877105b7b2973cd6a5e83ebee3a229582b1363374eb35f0d1432317"
+        },
+        "storehouse": {
+          "path": "desktop/stage-06-storehouse.png",
+          "sha256": "48d614c264c7b017795b70162d6ac79e2c893311483b031cece7e429424d51d5"
+        },
+        "market": {
+          "path": "desktop/stage-07-market.png",
+          "sha256": "e57903b21f2695dbc85393dd27151aeb448ab6a9bcd834e87566b4b1b5fcfc1f"
+        },
+        "watch": {
+          "path": "desktop/stage-08-watch.png",
+          "sha256": "f58f610a0a7273d1909afc493d66de604186de4204005469bd489da8fb86ae21"
+        },
+        "council": {
+          "path": "desktop/stage-09-council.png",
+          "sha256": "0b94b549d253c23eb36fe1f6a83f10c72c91609d83123131fe095cb7da1bf793"
+        }
+      },
+      "placements": {
+        "camp": [
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              4.0,
+              29.0,
+              0.1555
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              3.6733,
+              28.673,
+              0.1553
+            ],
+            "world_aabb_max": [
+              4.3267,
+              29.327,
+              0.5254
+            ],
+            "world_aabb_size": [
+              0.6534,
+              0.654,
+              0.3701
+            ],
+            "semantic": "camp_hearth_stone_0"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              3.4142,
+              30.4142,
+              0.1721
+            ],
+            "rotation_z_degrees": 45,
+            "world_aabb_min": [
+              2.9228,
+              29.9228,
+              0.1719
+            ],
+            "world_aabb_max": [
+              3.9056,
+              30.9056,
+              0.5653
+            ],
+            "world_aabb_size": [
+              0.9829,
+              0.9829,
+              0.3935
+            ],
+            "semantic": "camp_hearth_stone_1"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              2.0,
+              31.0,
+              0.2279
+            ],
+            "rotation_z_degrees": 90,
+            "world_aabb_min": [
+              1.673,
+              30.6733,
+              0.2278
+            ],
+            "world_aabb_max": [
+              2.327,
+              31.3267,
+              0.5979
+            ],
+            "world_aabb_size": [
+              0.654,
+              0.6534,
+              0.3701
+            ],
+            "semantic": "camp_hearth_stone_2"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              0.5858,
+              30.4142,
+              0.2837
+            ],
+            "rotation_z_degrees": 135,
+            "world_aabb_min": [
+              0.0944,
+              29.9228,
+              0.2835
+            ],
+            "world_aabb_max": [
+              1.0772,
+              30.9056,
+              0.6769
+            ],
+            "world_aabb_size": [
+              0.9829,
+              0.9829,
+              0.3935
+            ],
+            "semantic": "camp_hearth_stone_3"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              0.0,
+              29.0,
+              0.2939
+            ],
+            "rotation_z_degrees": 180,
+            "world_aabb_min": [
+              -0.3267,
+              28.673,
+              0.2937
+            ],
+            "world_aabb_max": [
+              0.3267,
+              29.327,
+              0.6638
+            ],
+            "world_aabb_size": [
+              0.6534,
+              0.654,
+              0.3701
+            ],
+            "semantic": "camp_hearth_stone_4"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              0.5858,
+              27.5858,
+              0.2604
+            ],
+            "rotation_z_degrees": 225,
+            "world_aabb_min": [
+              0.0944,
+              27.0944,
+              0.2602
+            ],
+            "world_aabb_max": [
+              1.0772,
+              28.0772,
+              0.6536
+            ],
+            "world_aabb_size": [
+              0.9829,
+              0.9829,
+              0.3935
+            ],
+            "semantic": "camp_hearth_stone_5"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              2.0,
+              27.0,
+              0.2153
+            ],
+            "rotation_z_degrees": 270,
+            "world_aabb_min": [
+              1.673,
+              26.6733,
+              0.2151
+            ],
+            "world_aabb_max": [
+              2.327,
+              27.3267,
+              0.5852
+            ],
+            "world_aabb_size": [
+              0.654,
+              0.6534,
+              0.3701
+            ],
+            "semantic": "camp_hearth_stone_6"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              3.4142,
+              27.5858,
+              0.1766
+            ],
+            "rotation_z_degrees": 315,
+            "world_aabb_min": [
+              2.9228,
+              27.0944,
+              0.1764
+            ],
+            "world_aabb_max": [
+              3.9056,
+              28.0772,
+              0.5698
+            ],
+            "world_aabb_size": [
+              0.9829,
+              0.9829,
+              0.3935
+            ],
+            "semantic": "camp_hearth_stone_7"
+          },
+          {
+            "role": "tent",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/tent.gltf",
+            "source_sha256": "d8920394ddec09d8afa0cfaa2dad1c75b55fd21819fbd7c31392b3b8dce5dca0",
+            "position": [
+              18,
+              34,
+              -0.1912
+            ],
+            "rotation_z_degrees": -12,
+            "world_aabb_min": [
+              15.6744,
+              31.6744,
+              -0.1912
+            ],
+            "world_aabb_max": [
+              20.3256,
+              36.3256,
+              3.7304
+            ],
+            "world_aabb_size": [
+              4.6512,
+              4.6513,
+              3.9216
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "flag_red",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/flag_red.gltf",
+            "source_sha256": "c1f76b1ca3d47a30a868500ecbe2844e89b75b4bebc7283f41bd37561aa58c1f",
+            "position": [
+              -5,
+              29,
+              0.5006
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              -5.198,
+              28.0497,
+              0.5006
+            ],
+            "world_aabb_max": [
+              -4.802,
+              29.9503,
+              2.4984
+            ],
+            "world_aabb_size": [
+              0.3961,
+              1.9006,
+              1.9978
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "crate_big",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_A_big.gltf",
+            "source_sha256": "a96ce5522e45104b5a04cf9605ca30b9572cc79c7633d41f3434b9843010a225",
+            "position": [
+              10,
+              25,
+              0.0811
+            ],
+            "rotation_z_degrees": 16,
+            "world_aabb_min": [
+              9.1169,
+              24.1169,
+              0.0811
+            ],
+            "world_aabb_max": [
+              10.8831,
+              25.8831,
+              1.5091
+            ],
+            "world_aabb_size": [
+              1.7663,
+              1.7663,
+              1.428
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "crate_small",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_A_small.gltf",
+            "source_sha256": "3a7fee2b962949d44bdac360405f2cd9c442bf41eea65e057f08b6b2e2d6f6d8",
+            "position": [
+              15,
+              27,
+              -0.011
+            ],
+            "rotation_z_degrees": -12,
+            "world_aabb_min": [
+              14.4853,
+              26.4853,
+              -0.011
+            ],
+            "world_aabb_max": [
+              15.5147,
+              27.5147,
+              0.857
+            ],
+            "world_aabb_size": [
+              1.0295,
+              1.0295,
+              0.868
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "lumber",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/resource_lumber.gltf",
+            "source_sha256": "601a69f44f0c4a9b5070a80bd4a20887960e01f1523a6125c1edc8ba19168f1f",
+            "position": [
+              21,
+              23,
+              0.1359
+            ],
+            "rotation_z_degrees": 8,
+            "world_aabb_min": [
+              18.6792,
+              21.6472,
+              0.1359
+            ],
+            "world_aabb_max": [
+              23.3208,
+              24.3528,
+              1.4799
+            ],
+            "world_aabb_size": [
+              4.6417,
+              2.7056,
+              1.344
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "sack",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/sack.gltf",
+            "source_sha256": "b61929d6161907aff4f1fd211cd0a8300d002d1a686ba43d07c4aff171fbd9f0",
+            "position": [
+              4,
+              23,
+              0.1932
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              3.6911,
+              22.5373,
+              0.179
+            ],
+            "world_aabb_max": [
+              4.3089,
+              23.4627,
+              0.5541
+            ],
+            "world_aabb_size": [
+              0.6178,
+              0.9254,
+              0.3751
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "barrel",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/barrel.gltf",
+            "source_sha256": "24673663eb53ffab6c8db612654856f051c4877bfc02ea25fee89cd95ee4d100",
+            "position": [
+              13,
+              20,
+              0.1869
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              12.3855,
+              19.3855,
+              0.1869
+            ],
+            "world_aabb_max": [
+              13.6145,
+              20.6145,
+              1.4783
+            ],
+            "world_aabb_size": [
+              1.229,
+              1.229,
+              1.2914
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "wheelbarrow",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/wheelbarrow.gltf",
+            "source_sha256": "bb037662a3e5be1f4fe597ffc4927d2a6ad88d307da10388cfb178ca5fdae63d",
+            "position": [
+              27,
+              28,
+              0.1719
+            ],
+            "rotation_z_degrees": -20,
+            "world_aabb_min": [
+              25.7705,
+              26.2746,
+              0.1719
+            ],
+            "world_aabb_max": [
+              28.2295,
+              29.7254,
+              1.3401
+            ],
+            "world_aabb_size": [
+              2.4589,
+              3.4508,
+              1.1682
+            ],
+            "semantic_layer": "camp"
+          }
+        ],
+        "shelter": [
+          {
+            "role": "house_a",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/green/building_home_A_green.gltf",
+            "source_sha256": "43eec5e22564befc0ad5d283d92a577e0271682501c348ae3b22067e5b43a59e",
+            "position": [
+              22,
+              44,
+              -0.2721
+            ],
+            "rotation_z_degrees": 20,
+            "world_aabb_min": [
+              17.5963,
+              39.4396,
+              -0.2721
+            ],
+            "world_aabb_max": [
+              26.4037,
+              48.5604,
+              7.6329
+            ],
+            "world_aabb_size": [
+              8.8074,
+              9.1208,
+              7.905
+            ],
+            "semantic_layer": "shelter"
+          }
+        ],
+        "food": [
+          {
+            "role": "grain",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/building_grain.gltf",
+            "source_sha256": "f0369ab4750c4b60d34b6afdcef3d5545cb80d94c10c322d4a66aebe7b209d89",
+            "position": [
+              -24,
+              52,
+              4.1926
+            ],
+            "rotation_z_degrees": -8,
+            "world_aabb_min": [
+              -31.5139,
+              43.831,
+              4.1926
+            ],
+            "world_aabb_max": [
+              -16.4861,
+              60.169,
+              6.9492
+            ],
+            "world_aabb_size": [
+              15.0278,
+              16.3379,
+              2.7566
+            ],
+            "semantic_layer": "food"
+          },
+          {
+            "role": "house_b",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/yellow/building_home_B_yellow.gltf",
+            "source_sha256": "0e5d8c6ebc919f7fb5ade9b6956f5edfa5bca5c81cfecdd04e77d2633c367d64",
+            "position": [
+              -5,
+              59,
+              0.6117
+            ],
+            "rotation_z_degrees": -12,
+            "world_aabb_min": [
+              -9.2285,
+              54.0994,
+              0.6117
+            ],
+            "world_aabb_max": [
+              -0.7715,
+              63.9006,
+              10.5957
+            ],
+            "world_aabb_size": [
+              8.457,
+              9.8011,
+              9.984
+            ],
+            "semantic_layer": "food"
+          },
+          {
+            "role": "sack",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/sack.gltf",
+            "source_sha256": "b61929d6161907aff4f1fd211cd0a8300d002d1a686ba43d07c4aff171fbd9f0",
+            "position": [
+              -16,
+              43,
+              2.2184
+            ],
+            "rotation_z_degrees": 12,
+            "world_aabb_min": [
+              -16.3846,
+              42.501,
+              2.2046
+            ],
+            "world_aabb_max": [
+              -15.6154,
+              43.499,
+              2.5669
+            ],
+            "world_aabb_size": [
+              0.7693,
+              0.998,
+              0.3622
+            ],
+            "semantic_layer": "food"
+          },
+          {
+            "role": "bucket_water",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/bucket_water.gltf",
+            "source_sha256": "5e7ba97fe666f4a05d1933ea6d2d8555f5846ca4fc0f19e673e922d8441c8c4b",
+            "position": [
+              -10,
+              47,
+              1.4188
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              -10.392,
+              46.608,
+              1.4188
+            ],
+            "world_aabb_max": [
+              -9.608,
+              47.392,
+              2.0068
+            ],
+            "world_aabb_size": [
+              0.784,
+              0.784,
+              0.588
+            ],
+            "semantic_layer": "food"
+          }
+        ],
+        "timber": [
+          {
+            "role": "scaffolding",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/building_scaffolding.gltf",
+            "source_sha256": "1c11a7545694863a7edc58780ee60510b55676b97d6c5eee7e0dc7c256185c7a",
+            "position": [
+              -19,
+              7,
+              -1.0266
+            ],
+            "rotation_z_degrees": -16,
+            "world_aabb_min": [
+              -27.4289,
+              -1.93,
+              -1.0451
+            ],
+            "world_aabb_max": [
+              -10.5711,
+              15.93,
+              8.0454
+            ],
+            "world_aabb_size": [
+              16.8578,
+              17.86,
+              9.0905
+            ],
+            "semantic_layer": "timber"
+          },
+          {
+            "role": "tree_cut",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/tree_single_A_cut.gltf",
+            "source_sha256": "203a2a60e03d4e5dd16fd06571c81e9f7e3dd39e276bb59e0e004e839fc30f28",
+            "position": [
+              -34,
+              13,
+              -0.3017
+            ],
+            "rotation_z_degrees": 10,
+            "world_aabb_min": [
+              -34.7026,
+              12.3206,
+              -1.0405
+            ],
+            "world_aabb_max": [
+              -33.2974,
+              13.6794,
+              1.3372
+            ],
+            "world_aabb_size": [
+              1.4053,
+              1.3587,
+              2.3777
+            ],
+            "semantic_layer": "timber"
+          },
+          {
+            "role": "lumber",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/resource_lumber.gltf",
+            "source_sha256": "601a69f44f0c4a9b5070a80bd4a20887960e01f1523a6125c1edc8ba19168f1f",
+            "position": [
+              -11,
+              3,
+              -1.2046
+            ],
+            "rotation_z_degrees": 5,
+            "world_aabb_min": [
+              -13.4213,
+              1.6773,
+              -1.2046
+            ],
+            "world_aabb_max": [
+              -8.5787,
+              4.3227,
+              0.2234
+            ],
+            "world_aabb_size": [
+              4.8425,
+              2.6453,
+              1.428
+            ],
+            "semantic_layer": "timber"
+          },
+          {
+            "role": "lumber",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/resource_lumber.gltf",
+            "source_sha256": "601a69f44f0c4a9b5070a80bd4a20887960e01f1523a6125c1edc8ba19168f1f",
+            "position": [
+              -28,
+              2,
+              -4.6436
+            ],
+            "rotation_z_degrees": -8,
+            "world_aabb_min": [
+              -30.2846,
+              0.6684,
+              -4.6436
+            ],
+            "world_aabb_max": [
+              -25.7154,
+              3.3316,
+              -3.3206
+            ],
+            "world_aabb_size": [
+              4.5692,
+              2.6633,
+              1.323
+            ],
+            "semantic_layer": "timber"
+          },
+          {
+            "role": "pallet",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/pallet.gltf",
+            "source_sha256": "4e55587c2f2017e7e2965482b0976c75339e7dafcb627de2d275077bb6a97dc3",
+            "position": [
+              -4,
+              9,
+              0.0901
+            ],
+            "rotation_z_degrees": 16,
+            "world_aabb_min": [
+              -5.0761,
+              7.9239,
+              0.0901
+            ],
+            "world_aabb_max": [
+              -2.9239,
+              10.0761,
+              0.5541
+            ],
+            "world_aabb_size": [
+              2.1522,
+              2.1522,
+              0.464
+            ],
+            "semantic_layer": "timber"
+          },
+          {
+            "role": "ladder",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/ladder.gltf",
+            "source_sha256": "de1f471e8c11615388a9caad79aef97414903390ff54924b33bff2547bc19e72",
+            "position": [
+              -16,
+              17,
+              0.1684
+            ],
+            "rotation_z_degrees": -20,
+            "world_aabb_min": [
+              -16.7787,
+              16.5904,
+              0.1684
+            ],
+            "world_aabb_max": [
+              -15.2213,
+              17.4096,
+              4.8654
+            ],
+            "world_aabb_size": [
+              1.5574,
+              0.8192,
+              4.697
+            ],
+            "semantic_layer": "timber"
+          }
+        ],
+        "scout": [
+          {
+            "role": "flag_red",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/flag_red.gltf",
+            "source_sha256": "c1f76b1ca3d47a30a868500ecbe2844e89b75b4bebc7283f41bd37561aa58c1f",
+            "position": [
+              -61,
+              57,
+              13.1951
+            ],
+            "rotation_z_degrees": -6,
+            "world_aabb_min": [
+              -61.2551,
+              56.1683,
+              13.1951
+            ],
+            "world_aabb_max": [
+              -60.7449,
+              57.8317,
+              14.9154
+            ],
+            "world_aabb_size": [
+              0.5103,
+              1.6633,
+              1.7203
+            ],
+            "semantic_layer": "scout"
+          },
+          {
+            "role": "flag_red",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/flag_red.gltf",
+            "source_sha256": "c1f76b1ca3d47a30a868500ecbe2844e89b75b4bebc7283f41bd37561aa58c1f",
+            "position": [
+              65,
+              76,
+              0.8789
+            ],
+            "rotation_z_degrees": 10,
+            "world_aabb_min": [
+              64.69,
+              75.1645,
+              0.8789
+            ],
+            "world_aabb_max": [
+              65.31,
+              76.8355,
+              2.5992
+            ],
+            "world_aabb_size": [
+              0.6201,
+              1.671,
+              1.7203
+            ],
+            "semantic_layer": "scout"
+          },
+          {
+            "role": "target",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/target.gltf",
+            "source_sha256": "e92374d50c46b5816a1c118260d27ac49d3e52e8d7de6b0b7a9326a69c43cc44",
+            "position": [
+              50,
+              60,
+              1.1759
+            ],
+            "rotation_z_degrees": -14,
+            "world_aabb_min": [
+              49.1736,
+              59.3931,
+              1.1759
+            ],
+            "world_aabb_max": [
+              50.8264,
+              60.6069,
+              3.047
+            ],
+            "world_aabb_size": [
+              1.6528,
+              1.2139,
+              1.8712
+            ],
+            "semantic_layer": "scout"
+          },
+          {
+            "role": "crate_open",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_open.gltf",
+            "source_sha256": "e82806d7cd3d905c4915e81cad1973415aecec83a8d3ad968e0298d8920265ed",
+            "position": [
+              39,
+              53,
+              0.5948
+            ],
+            "rotation_z_degrees": 18,
+            "world_aabb_min": [
+              37.9629,
+              52.1952,
+              0.5638
+            ],
+            "world_aabb_max": [
+              40.0371,
+              53.8048,
+              1.6948
+            ],
+            "world_aabb_size": [
+              2.0743,
+              1.6097,
+              1.131
+            ],
+            "semantic_layer": "scout"
+          }
+        ],
+        "storehouse": [
+          {
+            "role": "storehouse",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/green/building_lumbermill_green.gltf",
+            "source_sha256": "fbbfa52b3a53cf3aa0df0f18f7a21709e7ae0c04d24862ec0e4b710f47debc7a",
+            "position": [
+              38,
+              10,
+              1.0944
+            ],
+            "rotation_z_degrees": -12,
+            "world_aabb_min": [
+              33.038,
+              5.6511,
+              1.072
+            ],
+            "world_aabb_max": [
+              42.962,
+              14.3489,
+              12.002
+            ],
+            "world_aabb_size": [
+              9.924,
+              8.6977,
+              10.9301
+            ],
+            "semantic_layer": "storehouse"
+          },
+          {
+            "role": "house_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_home_A_red.gltf",
+            "source_sha256": "158bcb4149f4d6db461774d7bd67d264262f30145762eddd0a8def8be292286c",
+            "position": [
+              50,
+              31,
+              4.0074
+            ],
+            "rotation_z_degrees": 18,
+            "world_aabb_min": [
+              46.0337,
+              26.8793,
+              4.0074
+            ],
+            "world_aabb_max": [
+              53.9663,
+              35.1207,
+              11.2614
+            ],
+            "world_aabb_size": [
+              7.9325,
+              8.2415,
+              7.254
+            ],
+            "semantic_layer": "storehouse"
+          },
+          {
+            "role": "crate_big",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_A_big.gltf",
+            "source_sha256": "a96ce5522e45104b5a04cf9605ca30b9572cc79c7633d41f3434b9843010a225",
+            "position": [
+              26,
+              5,
+              0.5259
+            ],
+            "rotation_z_degrees": 10,
+            "world_aabb_min": [
+              25.2702,
+              4.2702,
+              0.5259
+            ],
+            "world_aabb_max": [
+              26.7298,
+              5.7298,
+              1.7859
+            ],
+            "world_aabb_size": [
+              1.4597,
+              1.4597,
+              1.26
+            ],
+            "semantic_layer": "storehouse"
+          },
+          {
+            "role": "crate_small",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_A_small.gltf",
+            "source_sha256": "3a7fee2b962949d44bdac360405f2cd9c442bf41eea65e057f08b6b2e2d6f6d8",
+            "position": [
+              31,
+              1,
+              0.5633
+            ],
+            "rotation_z_degrees": -10,
+            "world_aabb_min": [
+              30.554,
+              0.554,
+              0.5633
+            ],
+            "world_aabb_max": [
+              31.446,
+              1.446,
+              1.3333
+            ],
+            "world_aabb_size": [
+              0.892,
+              0.892,
+              0.77
+            ],
+            "semantic_layer": "storehouse"
+          },
+          {
+            "role": "barrel",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/barrel.gltf",
+            "source_sha256": "24673663eb53ffab6c8db612654856f051c4877bfc02ea25fee89cd95ee4d100",
+            "position": [
+              45,
+              0,
+              1.5584
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              44.4157,
+              -0.5843,
+              1.5584
+            ],
+            "world_aabb_max": [
+              45.5843,
+              0.5843,
+              2.7864
+            ],
+            "world_aabb_size": [
+              1.1686,
+              1.1686,
+              1.2279
+            ],
+            "semantic_layer": "storehouse"
+          }
+        ],
+        "market": [
+          {
+            "role": "market",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/yellow/building_market_yellow.gltf",
+            "source_sha256": "a3d5ede18799db7c46b0fa35cc1d22d5f71baed11331008ac4435f4d42c4e289",
+            "position": [
+              19,
+              29,
+              -0.0164
+            ],
+            "rotation_z_degrees": 10,
+            "world_aabb_min": [
+              10.798,
+              22.4069,
+              -0.0626
+            ],
+            "world_aabb_max": [
+              27.202,
+              35.5931,
+              7.9868
+            ],
+            "world_aabb_size": [
+              16.4041,
+              13.1862,
+              8.0494
+            ],
+            "semantic_layer": "market"
+          },
+          {
+            "role": "well",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/blue/building_well_blue.gltf",
+            "source_sha256": "66305823322b2e6a7f1cb8d8bf0d91ed9b94b8d96f61d0f7af77bd0d09f6463e",
+            "position": [
+              10,
+              45,
+              -0.1571
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              7.5884,
+              42.2223,
+              -0.1572
+            ],
+            "world_aabb_max": [
+              12.4116,
+              47.7777,
+              5.9553
+            ],
+            "world_aabb_size": [
+              4.8233,
+              5.5554,
+              6.1125
+            ],
+            "semantic_layer": "market"
+          },
+          {
+            "role": "house_d",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/blue/building_home_B_blue.gltf",
+            "source_sha256": "bf503f4edcd3a744a021ccdd5b9215f6c8934ef87fa44d95632cb653422797eb",
+            "position": [
+              45,
+              51,
+              1.3721
+            ],
+            "rotation_z_degrees": -10,
+            "world_aabb_min": [
+              40.9482,
+              46.2495,
+              1.3721
+            ],
+            "world_aabb_max": [
+              49.0518,
+              55.7505,
+              11.2281
+            ],
+            "world_aabb_size": [
+              8.1036,
+              9.501,
+              9.856
+            ],
+            "semantic_layer": "market"
+          },
+          {
+            "role": "crate_open",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_open.gltf",
+            "source_sha256": "e82806d7cd3d905c4915e81cad1973415aecec83a8d3ad968e0298d8920265ed",
+            "position": [
+              30,
+              39,
+              0.1678
+            ],
+            "rotation_z_degrees": 12,
+            "world_aabb_min": [
+              29.0121,
+              38.2857,
+              0.1374
+            ],
+            "world_aabb_max": [
+              30.9879,
+              39.7143,
+              1.2478
+            ],
+            "world_aabb_size": [
+              1.9759,
+              1.4287,
+              1.1105
+            ],
+            "semantic_layer": "market"
+          }
+        ],
+        "watch": [
+          {
+            "role": "tower",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_tower_A_red.gltf",
+            "source_sha256": "9275233fb07f3906111f82da7ef43b5c81195922662396a2c4106095ea94bf27",
+            "position": [
+              66,
+              17,
+              9.278
+            ],
+            "rotation_z_degrees": -18,
+            "world_aabb_min": [
+              62.5574,
+              13.296,
+              9.278
+            ],
+            "world_aabb_max": [
+              69.4426,
+              20.704,
+              20.8942
+            ],
+            "world_aabb_size": [
+              6.8851,
+              7.408,
+              11.6162
+            ],
+            "semantic_layer": "watch"
+          },
+          {
+            "role": "barracks",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/blue/building_barracks_blue.gltf",
+            "source_sha256": "a4f3aaa7ebb33cf0d86a139941b350e580e3e1376e3ead99a5aaecb5de2f3817",
+            "position": [
+              64,
+              43,
+              6.2343
+            ],
+            "rotation_z_degrees": -24,
+            "world_aabb_min": [
+              59.1188,
+              37.959,
+              6.2343
+            ],
+            "world_aabb_max": [
+              68.8812,
+              48.041,
+              14.4346
+            ],
+            "world_aabb_size": [
+              9.7624,
+              10.0819,
+              8.2003
+            ],
+            "semantic_layer": "watch"
+          },
+          {
+            "role": "fence",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/fence_wood_straight.gltf",
+            "source_sha256": "5a2af87c5a6b90875e3bc11f289a321a5d4b2459975dba52351edbc58b2132e3",
+            "position": [
+              78,
+              31,
+              9.3481
+            ],
+            "rotation_z_degrees": 67,
+            "world_aabb_min": [
+              75.245,
+              29.6419,
+              9.0981
+            ],
+            "world_aabb_max": [
+              80.755,
+              32.3581,
+              11.8481
+            ],
+            "world_aabb_size": [
+              5.5099,
+              2.7161,
+              2.7501
+            ],
+            "semantic_layer": "watch"
+          },
+          {
+            "role": "fence",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/fence_wood_straight.gltf",
+            "source_sha256": "5a2af87c5a6b90875e3bc11f289a321a5d4b2459975dba52351edbc58b2132e3",
+            "position": [
+              76,
+              48,
+              5.8664
+            ],
+            "rotation_z_degrees": 72,
+            "world_aabb_min": [
+              73.1773,
+              46.8702,
+              5.6163
+            ],
+            "world_aabb_max": [
+              78.8227,
+              49.1298,
+              8.3664
+            ],
+            "world_aabb_size": [
+              5.6454,
+              2.2596,
+              2.7501
+            ],
+            "semantic_layer": "watch"
+          }
+        ],
+        "council": [
+          {
+            "role": "church",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_church_red.gltf",
+            "source_sha256": "e4dc40472c3c0039c0dde205630ebb3a4e51da2ddf55109a3c2f9a8ba91ad2c3",
+            "position": [
+              20,
+              75,
+              0.1662
+            ],
+            "rotation_z_degrees": 7,
+            "world_aabb_min": [
+              14.7706,
+              69.2769,
+              0.1661
+            ],
+            "world_aabb_max": [
+              25.2294,
+              80.7231,
+              14.9714
+            ],
+            "world_aabb_size": [
+              10.4587,
+              11.4462,
+              14.8053
+            ],
+            "semantic_layer": "council"
+          },
+          {
+            "role": "council_stage",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/building_stage_C.gltf",
+            "source_sha256": "9de7e1e3b336905b3eee72c7bc010b4fb803fa07b9adb91411d5aff0861e3446",
+            "position": [
+              5,
+              59,
+              0.12
+            ],
+            "rotation_z_degrees": -8,
+            "world_aabb_min": [
+              0.6916,
+              54.7841,
+              0.0811
+            ],
+            "world_aabb_max": [
+              9.3084,
+              63.2159,
+              6.588
+            ],
+            "world_aabb_size": [
+              8.6168,
+              8.4319,
+              6.5069
+            ],
+            "semantic_layer": "council"
+          },
+          {
+            "role": "house_e",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/yellow/building_home_A_yellow.gltf",
+            "source_sha256": "da777a7f28a34491df582f9ed00c652078b4386a0bbfd05695e42e6ae2b28a92",
+            "position": [
+              42,
+              73,
+              0.0034
+            ],
+            "rotation_z_degrees": 14,
+            "world_aabb_min": [
+              38.3439,
+              69.1754,
+              0.0034
+            ],
+            "world_aabb_max": [
+              45.6561,
+              76.8246,
+              6.9784
+            ],
+            "world_aabb_size": [
+              7.3121,
+              7.6492,
+              6.975
+            ],
+            "semantic_layer": "council"
+          },
+          {
+            "role": "flag_red",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/flag_red.gltf",
+            "source_sha256": "c1f76b1ca3d47a30a868500ecbe2844e89b75b4bebc7283f41bd37561aa58c1f",
+            "position": [
+              12,
+              62,
+              -0.0351
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              11.835,
+              61.2081,
+              -0.0351
+            ],
+            "world_aabb_max": [
+              12.165,
+              62.7919,
+              1.6298
+            ],
+            "world_aabb_size": [
+              0.3301,
+              1.5839,
+              1.6648
+            ],
+            "semantic_layer": "council"
+          }
+        ]
+      }
+    },
+    "portrait": {
+      "resolution": [
+        780,
+        1688
+      ],
+      "camera": {
+        "position": [
+          78,
+          -178,
+          145
+        ],
+        "target": [
+          0,
+          28,
+          8
+        ],
+        "ortho": 148.0,
+        "resolution": [
+          780,
+          1688
+        ]
+      },
+      "terrain_extent": [
+        210.0,
+        350.0
+      ],
+      "bridge": {
+        "position": [
+          -1.0,
+          -36.0
+        ],
+        "rotation": 84.0,
+        "span": 19.0
+      },
+      "camera_object": "VillageV4PortraitCamera",
+      "frames": {
+        "base": {
+          "path": "portrait/base.png",
+          "sha256": "330dc2b3a0840bdb127cf8c4ec0d4b464de009fbd1f4a214ceb7443551d2b248"
+        },
+        "camp": {
+          "path": "portrait/stage-01-camp.png",
+          "sha256": "962a1dd5d4655cd1ace4bdf17ea6d590f6affe2c192c820a7dd0c1895d687168"
+        },
+        "shelter": {
+          "path": "portrait/stage-02-shelter.png",
+          "sha256": "43f4114357bf7c5db88371734beabfaa76ced41ae768d3cd7cb21d235fb50e8e"
+        },
+        "food": {
+          "path": "portrait/stage-03-food.png",
+          "sha256": "add95cfd45e41076f2b3f31ae1228913490149e40788a1f547da6d09933026ff"
+        },
+        "timber": {
+          "path": "portrait/stage-04-timber.png",
+          "sha256": "96e86a4d2a05b211387cd2fabfd20b0f86305247c46f55da2eb52026027982b9"
+        },
+        "scout": {
+          "path": "portrait/stage-05-scout.png",
+          "sha256": "82f211bed7818c4bc00a0e28c57d8c3ffa7b3cf0e592cf45c309b27f497eec5f"
+        },
+        "storehouse": {
+          "path": "portrait/stage-06-storehouse.png",
+          "sha256": "8b7830bc3862c780c411bbd73a765ba67b5ccb5425bb67651a68c5d7d990d67f"
+        },
+        "market": {
+          "path": "portrait/stage-07-market.png",
+          "sha256": "a2c616a5248cb75fb9c509e3783628711a6390093f27bb12f44e3db775b7ef0d"
+        },
+        "watch": {
+          "path": "portrait/stage-08-watch.png",
+          "sha256": "fac5c58fcbc056d6bc13c7bfd7eafbe92d1551250e78500d07fcb02c619b0bd0"
+        },
+        "council": {
+          "path": "portrait/stage-09-council.png",
+          "sha256": "854f423ff54f691d076b724c54ac39d934ccd629c6a4b0685d9c5bf92ee096ba"
+        }
+      },
+      "placements": {
+        "camp": [
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              2.0,
+              20.0,
+              0.1786
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              1.6733,
+              19.673,
+              0.1785
+            ],
+            "world_aabb_max": [
+              2.3267,
+              20.327,
+              0.5485
+            ],
+            "world_aabb_size": [
+              0.6534,
+              0.654,
+              0.3701
+            ],
+            "semantic": "camp_hearth_stone_0"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              1.4142,
+              21.4142,
+              0.1798
+            ],
+            "rotation_z_degrees": 45,
+            "world_aabb_min": [
+              0.9228,
+              20.9228,
+              0.1796
+            ],
+            "world_aabb_max": [
+              1.9056,
+              21.9056,
+              0.5731
+            ],
+            "world_aabb_size": [
+              0.9829,
+              0.9829,
+              0.3935
+            ],
+            "semantic": "camp_hearth_stone_1"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              0.0,
+              22.0,
+              0.1881
+            ],
+            "rotation_z_degrees": 90,
+            "world_aabb_min": [
+              -0.327,
+              21.6733,
+              0.188
+            ],
+            "world_aabb_max": [
+              0.327,
+              22.3267,
+              0.558
+            ],
+            "world_aabb_size": [
+              0.654,
+              0.6534,
+              0.3701
+            ],
+            "semantic": "camp_hearth_stone_2"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              -1.4142,
+              21.4142,
+              0.1918
+            ],
+            "rotation_z_degrees": 135,
+            "world_aabb_min": [
+              -1.9056,
+              20.9228,
+              0.1917
+            ],
+            "world_aabb_max": [
+              -0.9228,
+              21.9056,
+              0.5851
+            ],
+            "world_aabb_size": [
+              0.9829,
+              0.9829,
+              0.3935
+            ],
+            "semantic": "camp_hearth_stone_3"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              -2.0,
+              20.0,
+              0.1769
+            ],
+            "rotation_z_degrees": 180,
+            "world_aabb_min": [
+              -2.3267,
+              19.673,
+              0.1767
+            ],
+            "world_aabb_max": [
+              -1.6733,
+              20.327,
+              0.5468
+            ],
+            "world_aabb_size": [
+              0.6534,
+              0.654,
+              0.3701
+            ],
+            "semantic": "camp_hearth_stone_4"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              -1.4142,
+              18.5858,
+              0.1594
+            ],
+            "rotation_z_degrees": 225,
+            "world_aabb_min": [
+              -1.9056,
+              18.0944,
+              0.1592
+            ],
+            "world_aabb_max": [
+              -0.9228,
+              19.0772,
+              0.5527
+            ],
+            "world_aabb_size": [
+              0.9829,
+              0.9829,
+              0.3935
+            ],
+            "semantic": "camp_hearth_stone_5"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              -0.0,
+              18.0,
+              0.1612
+            ],
+            "rotation_z_degrees": 270,
+            "world_aabb_min": [
+              -0.327,
+              17.6733,
+              0.1611
+            ],
+            "world_aabb_max": [
+              0.327,
+              18.3267,
+              0.5311
+            ],
+            "world_aabb_size": [
+              0.654,
+              0.6534,
+              0.3701
+            ],
+            "semantic": "camp_hearth_stone_6"
+          },
+          {
+            "role": "rock_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+            "source_sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b",
+            "position": [
+              1.4142,
+              18.5858,
+              0.1738
+            ],
+            "rotation_z_degrees": 315,
+            "world_aabb_min": [
+              0.9228,
+              18.0944,
+              0.1736
+            ],
+            "world_aabb_max": [
+              1.9056,
+              19.0772,
+              0.5671
+            ],
+            "world_aabb_size": [
+              0.9829,
+              0.9829,
+              0.3935
+            ],
+            "semantic": "camp_hearth_stone_7"
+          },
+          {
+            "role": "tent",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/tent.gltf",
+            "source_sha256": "d8920394ddec09d8afa0cfaa2dad1c75b55fd21819fbd7c31392b3b8dce5dca0",
+            "position": [
+              12,
+              25,
+              0.1924
+            ],
+            "rotation_z_degrees": -10,
+            "world_aabb_min": [
+              9.9078,
+              22.9078,
+              0.1924
+            ],
+            "world_aabb_max": [
+              14.0922,
+              27.0922,
+              3.8044
+            ],
+            "world_aabb_size": [
+              4.1843,
+              4.1843,
+              3.612
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "flag_red",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/flag_red.gltf",
+            "source_sha256": "c1f76b1ca3d47a30a868500ecbe2844e89b75b4bebc7283f41bd37561aa58c1f",
+            "position": [
+              -10,
+              20,
+              0.2471
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              -10.1788,
+              19.1421,
+              0.2471
+            ],
+            "world_aabb_max": [
+              -9.8212,
+              20.8579,
+              2.0506
+            ],
+            "world_aabb_size": [
+              0.3576,
+              1.7159,
+              1.8036
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "crate_big",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_A_big.gltf",
+            "source_sha256": "a96ce5522e45104b5a04cf9605ca30b9572cc79c7633d41f3434b9843010a225",
+            "position": [
+              5,
+              16,
+              0.2219
+            ],
+            "rotation_z_degrees": 15,
+            "world_aabb_min": [
+              4.2027,
+              15.2027,
+              0.222
+            ],
+            "world_aabb_max": [
+              5.7973,
+              16.7973,
+              1.524
+            ],
+            "world_aabb_size": [
+              1.5946,
+              1.5946,
+              1.302
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "crate_small",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_A_small.gltf",
+            "source_sha256": "3a7fee2b962949d44bdac360405f2cd9c442bf41eea65e057f08b6b2e2d6f6d8",
+            "position": [
+              10,
+              18,
+              0.2928
+            ],
+            "rotation_z_degrees": -10,
+            "world_aabb_min": [
+              9.5297,
+              17.5297,
+              0.2928
+            ],
+            "world_aabb_max": [
+              10.4703,
+              18.4703,
+              1.1048
+            ],
+            "world_aabb_size": [
+              0.9407,
+              0.9407,
+              0.812
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "lumber",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/resource_lumber.gltf",
+            "source_sha256": "601a69f44f0c4a9b5070a80bd4a20887960e01f1523a6125c1edc8ba19168f1f",
+            "position": [
+              15,
+              14,
+              0.54
+            ],
+            "rotation_z_degrees": 8,
+            "world_aabb_min": [
+              12.8605,
+              12.7529,
+              0.54
+            ],
+            "world_aabb_max": [
+              17.1395,
+              15.2471,
+              1.779
+            ],
+            "world_aabb_size": [
+              4.2791,
+              2.4942,
+              1.239
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "sack",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/sack.gltf",
+            "source_sha256": "b61929d6161907aff4f1fd211cd0a8300d002d1a686ba43d07c4aff171fbd9f0",
+            "position": [
+              -1,
+              14,
+              0.1227
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              -1.2823,
+              13.5772,
+              0.1097
+            ],
+            "world_aabb_max": [
+              -0.7177,
+              14.4228,
+              0.4525
+            ],
+            "world_aabb_size": [
+              0.5646,
+              0.8456,
+              0.3428
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "barrel",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/barrel.gltf",
+            "source_sha256": "24673663eb53ffab6c8db612654856f051c4877bfc02ea25fee89cd95ee4d100",
+            "position": [
+              8,
+              11,
+              0.3293
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              7.4359,
+              10.4359,
+              0.3293
+            ],
+            "world_aabb_max": [
+              8.5641,
+              11.5641,
+              1.5149
+            ],
+            "world_aabb_size": [
+              1.1283,
+              1.1283,
+              1.1856
+            ],
+            "semantic_layer": "camp"
+          },
+          {
+            "role": "wheelbarrow",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/wheelbarrow.gltf",
+            "source_sha256": "bb037662a3e5be1f4fe597ffc4927d2a6ad88d307da10388cfb178ca5fdae63d",
+            "position": [
+              19,
+              21,
+              0.688
+            ],
+            "rotation_z_degrees": -18,
+            "world_aabb_min": [
+              17.8904,
+              19.392,
+              0.688
+            ],
+            "world_aabb_max": [
+              20.1096,
+              22.608,
+              1.7808
+            ],
+            "world_aabb_size": [
+              2.2192,
+              3.216,
+              1.0928
+            ],
+            "semantic_layer": "camp"
+          }
+        ],
+        "shelter": [
+          {
+            "role": "house_a",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/green/building_home_A_green.gltf",
+            "source_sha256": "43eec5e22564befc0ad5d283d92a577e0271682501c348ae3b22067e5b43a59e",
+            "position": [
+              -18,
+              42,
+              2.0859
+            ],
+            "rotation_z_degrees": -18,
+            "world_aabb_min": [
+              -21.9154,
+              37.9321,
+              2.0859
+            ],
+            "world_aabb_max": [
+              -14.0846,
+              46.0679,
+              9.2469
+            ],
+            "world_aabb_size": [
+              7.8308,
+              8.1358,
+              7.161
+            ],
+            "semantic_layer": "shelter"
+          }
+        ],
+        "food": [
+          {
+            "role": "grain",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/building_grain.gltf",
+            "source_sha256": "f0369ab4750c4b60d34b6afdcef3d5545cb80d94c10c322d4a66aebe7b209d89",
+            "position": [
+              23,
+              46,
+              1.1709
+            ],
+            "rotation_z_degrees": 8,
+            "world_aabb_min": [
+              16.1301,
+              38.5312,
+              1.1709
+            ],
+            "world_aabb_max": [
+              29.8699,
+              53.4688,
+              3.6912
+            ],
+            "world_aabb_size": [
+              13.7397,
+              14.9375,
+              2.5203
+            ],
+            "semantic_layer": "food"
+          },
+          {
+            "role": "house_b",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/yellow/building_home_B_yellow.gltf",
+            "source_sha256": "0e5d8c6ebc919f7fb5ade9b6956f5edfa5bca5c81cfecdd04e77d2633c367d64",
+            "position": [
+              24,
+              63,
+              1.4875
+            ],
+            "rotation_z_degrees": -10,
+            "world_aabb_min": [
+              20.3165,
+              58.6814,
+              1.4875
+            ],
+            "world_aabb_max": [
+              27.6835,
+              67.3186,
+              10.4475
+            ],
+            "world_aabb_size": [
+              7.3669,
+              8.6372,
+              8.96
+            ],
+            "semantic_layer": "food"
+          },
+          {
+            "role": "sack",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/sack.gltf",
+            "source_sha256": "b61929d6161907aff4f1fd211cd0a8300d002d1a686ba43d07c4aff171fbd9f0",
+            "position": [
+              15,
+              37,
+              0.0959
+            ],
+            "rotation_z_degrees": 12,
+            "world_aabb_min": [
+              14.6428,
+              36.5367,
+              0.0832
+            ],
+            "world_aabb_max": [
+              15.3572,
+              37.4633,
+              0.4195
+            ],
+            "world_aabb_size": [
+              0.7143,
+              0.9267,
+              0.3363
+            ],
+            "semantic_layer": "food"
+          },
+          {
+            "role": "bucket_water",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/bucket_water.gltf",
+            "source_sha256": "5e7ba97fe666f4a05d1933ea6d2d8555f5846ca4fc0f19e673e922d8441c8c4b",
+            "position": [
+              10,
+              41,
+              -0.084
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              9.643,
+              40.643,
+              -0.084
+            ],
+            "world_aabb_max": [
+              10.357,
+              41.357,
+              0.4515
+            ],
+            "world_aabb_size": [
+              0.714,
+              0.714,
+              0.5355
+            ],
+            "semantic_layer": "food"
+          }
+        ],
+        "timber": [
+          {
+            "role": "scaffolding",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/building_scaffolding.gltf",
+            "source_sha256": "1c11a7545694863a7edc58780ee60510b55676b97d6c5eee7e0dc7c256185c7a",
+            "position": [
+              -24,
+              2,
+              -0.1919
+            ],
+            "rotation_z_degrees": -12,
+            "world_aabb_min": [
+              -31.4669,
+              -5.9896,
+              -0.209
+            ],
+            "world_aabb_max": [
+              -16.5331,
+              9.9896,
+              8.2321
+            ],
+            "world_aabb_size": [
+              14.9337,
+              15.9792,
+              8.4411
+            ],
+            "semantic_layer": "timber"
+          },
+          {
+            "role": "tree_cut",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/tree_single_A_cut.gltf",
+            "source_sha256": "203a2a60e03d4e5dd16fd06571c81e9f7e3dd39e276bb59e0e004e839fc30f28",
+            "position": [
+              -37,
+              12,
+              1.6416
+            ],
+            "rotation_z_degrees": 8,
+            "world_aabb_min": [
+              -37.6383,
+              11.3845,
+              0.9541
+            ],
+            "world_aabb_max": [
+              -36.3617,
+              12.6155,
+              3.1667
+            ],
+            "world_aabb_size": [
+              1.2766,
+              1.2311,
+              2.2126
+            ],
+            "semantic_layer": "timber"
+          },
+          {
+            "role": "lumber",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/resource_lumber.gltf",
+            "source_sha256": "601a69f44f0c4a9b5070a80bd4a20887960e01f1523a6125c1edc8ba19168f1f",
+            "position": [
+              -16,
+              -3,
+              -0.4466
+            ],
+            "rotation_z_degrees": 4,
+            "world_aabb_min": [
+              -18.1927,
+              -4.1704,
+              -0.4466
+            ],
+            "world_aabb_max": [
+              -13.8073,
+              -1.8296,
+              0.8554
+            ],
+            "world_aabb_size": [
+              4.3854,
+              2.3407,
+              1.302
+            ],
+            "semantic_layer": "timber"
+          },
+          {
+            "role": "lumber",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/resource_lumber.gltf",
+            "source_sha256": "601a69f44f0c4a9b5070a80bd4a20887960e01f1523a6125c1edc8ba19168f1f",
+            "position": [
+              -33,
+              -4,
+              0.0533
+            ],
+            "rotation_z_degrees": -7,
+            "world_aabb_min": [
+              -35.0912,
+              -5.1937,
+              0.0533
+            ],
+            "world_aabb_max": [
+              -30.9088,
+              -2.8063,
+              1.2713
+            ],
+            "world_aabb_size": [
+              4.1824,
+              2.3874,
+              1.218
+            ],
+            "semantic_layer": "timber"
+          },
+          {
+            "role": "pallet",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/pallet.gltf",
+            "source_sha256": "4e55587c2f2017e7e2965482b0976c75339e7dafcb627de2d275077bb6a97dc3",
+            "position": [
+              -8,
+              5,
+              -0.2236
+            ],
+            "rotation_z_degrees": 15,
+            "world_aabb_min": [
+              -8.9737,
+              4.0263,
+              -0.2236
+            ],
+            "world_aabb_max": [
+              -7.0263,
+              5.9737,
+              0.2004
+            ],
+            "world_aabb_size": [
+              1.9473,
+              1.9473,
+              0.424
+            ],
+            "semantic_layer": "timber"
+          },
+          {
+            "role": "ladder",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/ladder.gltf",
+            "source_sha256": "de1f471e8c11615388a9caad79aef97414903390ff54924b33bff2547bc19e72",
+            "position": [
+              -22,
+              14,
+              0.2733
+            ],
+            "rotation_z_degrees": -18,
+            "world_aabb_min": [
+              -22.7054,
+              13.6521,
+              0.2733
+            ],
+            "world_aabb_max": [
+              -21.2946,
+              14.3479,
+              4.5083
+            ],
+            "world_aabb_size": [
+              1.4108,
+              0.6958,
+              4.235
+            ],
+            "semantic_layer": "timber"
+          }
+        ],
+        "scout": [
+          {
+            "role": "flag_red",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/flag_red.gltf",
+            "source_sha256": "c1f76b1ca3d47a30a868500ecbe2844e89b75b4bebc7283f41bd37561aa58c1f",
+            "position": [
+              -39,
+              73,
+              12.3509
+            ],
+            "rotation_z_degrees": -6,
+            "world_aabb_min": [
+              -39.2387,
+              72.222,
+              12.3509
+            ],
+            "world_aabb_max": [
+              -38.7613,
+              73.778,
+              13.9603
+            ],
+            "world_aabb_size": [
+              0.4773,
+              1.556,
+              1.6093
+            ],
+            "semantic_layer": "scout"
+          },
+          {
+            "role": "flag_red",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/flag_red.gltf",
+            "source_sha256": "c1f76b1ca3d47a30a868500ecbe2844e89b75b4bebc7283f41bd37561aa58c1f",
+            "position": [
+              38,
+              84,
+              3.912
+            ],
+            "rotation_z_degrees": 10,
+            "world_aabb_min": [
+              37.71,
+              83.2184,
+              3.912
+            ],
+            "world_aabb_max": [
+              38.29,
+              84.7816,
+              5.5213
+            ],
+            "world_aabb_size": [
+              0.5801,
+              1.5632,
+              1.6093
+            ],
+            "semantic_layer": "scout"
+          },
+          {
+            "role": "target",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/target.gltf",
+            "source_sha256": "e92374d50c46b5816a1c118260d27ac49d3e52e8d7de6b0b7a9326a69c43cc44",
+            "position": [
+              29,
+              70,
+              2.6519
+            ],
+            "rotation_z_degrees": -12,
+            "world_aabb_min": [
+              28.2487,
+              69.462,
+              2.6519
+            ],
+            "world_aabb_max": [
+              29.7513,
+              70.538,
+              4.3722
+            ],
+            "world_aabb_size": [
+              1.5026,
+              1.076,
+              1.7203
+            ],
+            "semantic_layer": "scout"
+          },
+          {
+            "role": "crate_open",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_open.gltf",
+            "source_sha256": "e82806d7cd3d905c4915e81cad1973415aecec83a8d3ad968e0298d8920265ed",
+            "position": [
+              20,
+              63,
+              0.7961
+            ],
+            "rotation_z_degrees": 15,
+            "world_aabb_min": [
+              19.0699,
+              62.3025,
+              0.7679
+            ],
+            "world_aabb_max": [
+              20.9301,
+              63.6975,
+              1.7961
+            ],
+            "world_aabb_size": [
+              1.8602,
+              1.395,
+              1.0282
+            ],
+            "semantic_layer": "scout"
+          }
+        ],
+        "storehouse": [
+          {
+            "role": "storehouse",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/green/building_lumbermill_green.gltf",
+            "source_sha256": "fbbfa52b3a53cf3aa0df0f18f7a21709e7ae0c04d24862ec0e4b710f47debc7a",
+            "position": [
+              27,
+              5,
+              1.5135
+            ],
+            "rotation_z_degrees": -10,
+            "world_aabb_min": [
+              22.5026,
+              1.0627,
+              1.4928
+            ],
+            "world_aabb_max": [
+              31.4974,
+              8.9373,
+              11.569
+            ],
+            "world_aabb_size": [
+              8.9948,
+              7.8746,
+              10.0762
+            ],
+            "semantic_layer": "storehouse"
+          },
+          {
+            "role": "house_c",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_home_A_red.gltf",
+            "source_sha256": "158bcb4149f4d6db461774d7bd67d264262f30145762eddd0a8def8be292286c",
+            "position": [
+              32,
+              27,
+              3.6764
+            ],
+            "rotation_z_degrees": 16,
+            "world_aabb_min": [
+              28.512,
+              23.3639,
+              3.6764
+            ],
+            "world_aabb_max": [
+              35.488,
+              30.6361,
+              10.1864
+            ],
+            "world_aabb_size": [
+              6.9761,
+              7.2721,
+              6.51
+            ],
+            "semantic_layer": "storehouse"
+          },
+          {
+            "role": "crate_big",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_A_big.gltf",
+            "source_sha256": "a96ce5522e45104b5a04cf9605ca30b9572cc79c7633d41f3434b9843010a225",
+            "position": [
+              17,
+              0,
+              0.6525
+            ],
+            "rotation_z_degrees": 10,
+            "world_aabb_min": [
+              16.331,
+              -0.669,
+              0.6525
+            ],
+            "world_aabb_max": [
+              17.669,
+              0.669,
+              1.8075
+            ],
+            "world_aabb_size": [
+              1.338,
+              1.338,
+              1.155
+            ],
+            "semantic_layer": "storehouse"
+          },
+          {
+            "role": "crate_small",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_A_small.gltf",
+            "source_sha256": "3a7fee2b962949d44bdac360405f2cd9c442bf41eea65e057f08b6b2e2d6f6d8",
+            "position": [
+              22,
+              -4,
+              0.7934
+            ],
+            "rotation_z_degrees": -10,
+            "world_aabb_min": [
+              21.5864,
+              -4.4136,
+              0.7934
+            ],
+            "world_aabb_max": [
+              22.4136,
+              -3.5864,
+              1.5074
+            ],
+            "world_aabb_size": [
+              0.8271,
+              0.8271,
+              0.714
+            ],
+            "semantic_layer": "storehouse"
+          },
+          {
+            "role": "barrel",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/barrel.gltf",
+            "source_sha256": "24673663eb53ffab6c8db612654856f051c4877bfc02ea25fee89cd95ee4d100",
+            "position": [
+              34,
+              -5,
+              1.73
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              33.4661,
+              -5.5339,
+              1.73
+            ],
+            "world_aabb_max": [
+              34.5339,
+              -4.4661,
+              2.8521
+            ],
+            "world_aabb_size": [
+              1.0678,
+              1.0678,
+              1.1221
+            ],
+            "semantic_layer": "storehouse"
+          }
+        ],
+        "market": [
+          {
+            "role": "market",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/yellow/building_market_yellow.gltf",
+            "source_sha256": "a3d5ede18799db7c46b0fa35cc1d22d5f71baed11331008ac4435f4d42c4e289",
+            "position": [
+              2,
+              49,
+              0.147
+            ],
+            "rotation_z_degrees": 8,
+            "world_aabb_min": [
+              -5.1721,
+              43.3307,
+              0.1059
+            ],
+            "world_aabb_max": [
+              9.1721,
+              54.6693,
+              7.2718
+            ],
+            "world_aabb_size": [
+              14.3443,
+              11.3385,
+              7.166
+            ],
+            "semantic_layer": "market"
+          },
+          {
+            "role": "well",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/blue/building_well_blue.gltf",
+            "source_sha256": "66305823322b2e6a7f1cb8d8bf0d91ed9b94b8d96f61d0f7af77bd0d09f6463e",
+            "position": [
+              -8,
+              63,
+              0.693
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              -10.1835,
+              60.4851,
+              0.693
+            ],
+            "world_aabb_max": [
+              -5.8165,
+              65.5149,
+              6.2273
+            ],
+            "world_aabb_size": [
+              4.367,
+              5.0298,
+              5.5343
+            ],
+            "semantic_layer": "market"
+          },
+          {
+            "role": "house_d",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/blue/building_home_B_blue.gltf",
+            "source_sha256": "bf503f4edcd3a744a021ccdd5b9215f6c8934ef87fa44d95632cb653422797eb",
+            "position": [
+              27,
+              76,
+              1.9446
+            ],
+            "rotation_z_degrees": -9,
+            "world_aabb_min": [
+              23.4257,
+              71.7841,
+              1.9446
+            ],
+            "world_aabb_max": [
+              30.5743,
+              80.2159,
+              10.7766
+            ],
+            "world_aabb_size": [
+              7.1486,
+              8.4318,
+              8.832
+            ],
+            "semantic_layer": "market"
+          },
+          {
+            "role": "crate_open",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_open.gltf",
+            "source_sha256": "e82806d7cd3d905c4915e81cad1973415aecec83a8d3ad968e0298d8920265ed",
+            "position": [
+              15,
+              57,
+              0.1958
+            ],
+            "rotation_z_degrees": 12,
+            "world_aabb_min": [
+              14.1035,
+              56.3518,
+              0.1681
+            ],
+            "world_aabb_max": [
+              15.8965,
+              57.6482,
+              1.1758
+            ],
+            "world_aabb_size": [
+              1.7929,
+              1.2964,
+              1.0076
+            ],
+            "semantic_layer": "market"
+          }
+        ],
+        "watch": [
+          {
+            "role": "tower",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_tower_A_red.gltf",
+            "source_sha256": "9275233fb07f3906111f82da7ef43b5c81195922662396a2c4106095ea94bf27",
+            "position": [
+              -24,
+              82,
+              5.0328
+            ],
+            "rotation_z_degrees": -16,
+            "world_aabb_min": [
+              -27.1138,
+              78.6281,
+              5.0328
+            ],
+            "world_aabb_max": [
+              -20.8862,
+              85.3719,
+              15.7723
+            ],
+            "world_aabb_size": [
+              6.2276,
+              6.7438,
+              10.7395
+            ],
+            "semantic_layer": "watch"
+          },
+          {
+            "role": "barracks",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/blue/building_barracks_blue.gltf",
+            "source_sha256": "a4f3aaa7ebb33cf0d86a139941b350e580e3e1376e3ead99a5aaecb5de2f3817",
+            "position": [
+              -15,
+              101,
+              1.1877
+            ],
+            "rotation_z_degrees": -22,
+            "world_aabb_min": [
+              -19.5163,
+              96.32,
+              1.1877
+            ],
+            "world_aabb_max": [
+              -10.4837,
+              105.68,
+              8.8959
+            ],
+            "world_aabb_size": [
+              9.0325,
+              9.3599,
+              7.7082
+            ],
+            "semantic_layer": "watch"
+          },
+          {
+            "role": "fence",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/fence_wood_straight.gltf",
+            "source_sha256": "5a2af87c5a6b90875e3bc11f289a321a5d4b2459975dba52351edbc58b2132e3",
+            "position": [
+              -36,
+              94,
+              8.9802
+            ],
+            "rotation_z_degrees": 18,
+            "world_aabb_min": [
+              -37.0394,
+              91.4031,
+              8.7501
+            ],
+            "world_aabb_max": [
+              -34.9606,
+              96.5969,
+              11.2802
+            ],
+            "world_aabb_size": [
+              2.0789,
+              5.1938,
+              2.5301
+            ],
+            "semantic_layer": "watch"
+          },
+          {
+            "role": "fence",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/fence_wood_straight.gltf",
+            "source_sha256": "5a2af87c5a6b90875e3bc11f289a321a5d4b2459975dba52351edbc58b2132e3",
+            "position": [
+              -31,
+              110,
+              4.1365
+            ],
+            "rotation_z_degrees": 24,
+            "world_aabb_min": [
+              -32.2903,
+              107.4802,
+              3.9064
+            ],
+            "world_aabb_max": [
+              -29.7097,
+              112.5198,
+              6.4365
+            ],
+            "world_aabb_size": [
+              2.5807,
+              5.0395,
+              2.5301
+            ],
+            "semantic_layer": "watch"
+          }
+        ],
+        "council": [
+          {
+            "role": "church",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_church_red.gltf",
+            "source_sha256": "e4dc40472c3c0039c0dde205630ebb3a4e51da2ddf55109a3c2f9a8ba91ad2c3",
+            "position": [
+              7,
+              101,
+              -0.0124
+            ],
+            "rotation_z_degrees": 5,
+            "world_aabb_min": [
+              2.3845,
+              95.9148,
+              -0.0125
+            ],
+            "world_aabb_max": [
+              11.6155,
+              106.0852,
+              13.4768
+            ],
+            "world_aabb_size": [
+              9.2311,
+              10.1704,
+              13.4893
+            ],
+            "semantic_layer": "council"
+          },
+          {
+            "role": "council_stage",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/building_stage_C.gltf",
+            "source_sha256": "9de7e1e3b336905b3eee72c7bc010b4fb803fa07b9adb91411d5aff0861e3446",
+            "position": [
+              -12,
+              86,
+              0.9184
+            ],
+            "rotation_z_degrees": -6,
+            "world_aabb_min": [
+              -15.8144,
+              82.2735,
+              0.883
+            ],
+            "world_aabb_max": [
+              -8.1856,
+              89.7265,
+              6.7984
+            ],
+            "world_aabb_size": [
+              7.6288,
+              7.453,
+              5.9154
+            ],
+            "semantic_layer": "council"
+          },
+          {
+            "role": "house_e",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/yellow/building_home_A_yellow.gltf",
+            "source_sha256": "da777a7f28a34491df582f9ed00c652078b4386a0bbfd05695e42e6ae2b28a92",
+            "position": [
+              29,
+              104,
+              0.9535
+            ],
+            "rotation_z_degrees": 12,
+            "world_aabb_min": [
+              25.7627,
+              100.6012,
+              0.9535
+            ],
+            "world_aabb_max": [
+              32.2373,
+              107.3988,
+              7.2775
+            ],
+            "world_aabb_size": [
+              6.4745,
+              6.7977,
+              6.324
+            ],
+            "semantic_layer": "council"
+          },
+          {
+            "role": "flag_red",
+            "source_path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/flag_red.gltf",
+            "source_sha256": "c1f76b1ca3d47a30a868500ecbe2844e89b75b4bebc7283f41bd37561aa58c1f",
+            "position": [
+              -2,
+              89,
+              0.0324
+            ],
+            "rotation_z_degrees": 0,
+            "world_aabb_min": [
+              -2.154,
+              88.2609,
+              0.0324
+            ],
+            "world_aabb_max": [
+              -1.846,
+              89.7391,
+              1.5862
+            ],
+            "world_aabb_size": [
+              0.3081,
+              1.4783,
+              1.5538
+            ],
+            "semantic_layer": "council"
+          }
+        ]
+      }
+    }
+  },
+  "assets": {
+    "church": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_church_red.gltf",
+      "sha256": "e4dc40472c3c0039c0dde205630ebb3a4e51da2ddf55109a3c2f9a8ba91ad2c3"
+    },
+    "blacksmith": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_blacksmith_red.gltf",
+      "sha256": "5689a8f37fa59a956927b4deaeb6d8ee48228fe29c2c61b71048bec04a7b086f"
+    },
+    "barracks": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/blue/building_barracks_blue.gltf",
+      "sha256": "a4f3aaa7ebb33cf0d86a139941b350e580e3e1376e3ead99a5aaecb5de2f3817"
+    },
+    "house_a": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/green/building_home_A_green.gltf",
+      "sha256": "43eec5e22564befc0ad5d283d92a577e0271682501c348ae3b22067e5b43a59e"
+    },
+    "house_b": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/yellow/building_home_B_yellow.gltf",
+      "sha256": "0e5d8c6ebc919f7fb5ade9b6956f5edfa5bca5c81cfecdd04e77d2633c367d64"
+    },
+    "market": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/yellow/building_market_yellow.gltf",
+      "sha256": "a3d5ede18799db7c46b0fa35cc1d22d5f71baed11331008ac4435f4d42c4e289"
+    },
+    "well": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/blue/building_well_blue.gltf",
+      "sha256": "66305823322b2e6a7f1cb8d8bf0d91ed9b94b8d96f61d0f7af77bd0d09f6463e"
+    },
+    "bridge": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/building_bridge_A.gltf",
+      "sha256": "7f3a7e8b3e72a66dec70d6a00eb87e62d3ca5c6892b9b965c675cb9d193e4d29"
+    },
+    "tree_a": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/tree_single_A.gltf",
+      "sha256": "ac913af6eaed6f15d26a2b75a877aa8dd10de90f26298f3f953abad86a4b4606"
+    },
+    "tree_b": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/tree_single_B.gltf",
+      "sha256": "1c038591301947c485937e9fdbab182c813ef32df48c02fad3daeb2f1f0421e0"
+    },
+    "rock_c": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_C.gltf",
+      "sha256": "4cbf4a67fa176d2374b4863348fddf7879b892e612dd455ad14173f17172d45b"
+    },
+    "rock_e": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/rock_single_E.gltf",
+      "sha256": "09e77f8cca93237863a1c6bac262bb473eb2706c0781035b01b031d1207e6d29"
+    },
+    "tent": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/tent.gltf",
+      "sha256": "d8920394ddec09d8afa0cfaa2dad1c75b55fd21819fbd7c31392b3b8dce5dca0"
+    },
+    "flag_red": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/flag_red.gltf",
+      "sha256": "c1f76b1ca3d47a30a868500ecbe2844e89b75b4bebc7283f41bd37561aa58c1f"
+    },
+    "barrel": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/barrel.gltf",
+      "sha256": "24673663eb53ffab6c8db612654856f051c4877bfc02ea25fee89cd95ee4d100"
+    },
+    "bucket_water": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/bucket_water.gltf",
+      "sha256": "5e7ba97fe666f4a05d1933ea6d2d8555f5846ca4fc0f19e673e922d8441c8c4b"
+    },
+    "crate_big": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_A_big.gltf",
+      "sha256": "a96ce5522e45104b5a04cf9605ca30b9572cc79c7633d41f3434b9843010a225"
+    },
+    "crate_small": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_A_small.gltf",
+      "sha256": "3a7fee2b962949d44bdac360405f2cd9c442bf41eea65e057f08b6b2e2d6f6d8"
+    },
+    "crate_open": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/crate_open.gltf",
+      "sha256": "e82806d7cd3d905c4915e81cad1973415aecec83a8d3ad968e0298d8920265ed"
+    },
+    "ladder": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/ladder.gltf",
+      "sha256": "de1f471e8c11615388a9caad79aef97414903390ff54924b33bff2547bc19e72"
+    },
+    "lumber": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/resource_lumber.gltf",
+      "sha256": "601a69f44f0c4a9b5070a80bd4a20887960e01f1523a6125c1edc8ba19168f1f"
+    },
+    "pallet": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/pallet.gltf",
+      "sha256": "4e55587c2f2017e7e2965482b0976c75339e7dafcb627de2d275077bb6a97dc3"
+    },
+    "sack": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/sack.gltf",
+      "sha256": "b61929d6161907aff4f1fd211cd0a8300d002d1a686ba43d07c4aff171fbd9f0"
+    },
+    "target": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/target.gltf",
+      "sha256": "e92374d50c46b5816a1c118260d27ac49d3e52e8d7de6b0b7a9326a69c43cc44"
+    },
+    "wheelbarrow": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/props/wheelbarrow.gltf",
+      "sha256": "bb037662a3e5be1f4fe597ffc4927d2a6ad88d307da10388cfb178ca5fdae63d"
+    },
+    "tree_cut": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/decoration/nature/tree_single_A_cut.gltf",
+      "sha256": "203a2a60e03d4e5dd16fd06571c81e9f7e3dd39e276bb59e0e004e839fc30f28"
+    },
+    "grain": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/building_grain.gltf",
+      "sha256": "f0369ab4750c4b60d34b6afdcef3d5545cb80d94c10c322d4a66aebe7b209d89"
+    },
+    "scaffolding": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/building_scaffolding.gltf",
+      "sha256": "1c11a7545694863a7edc58780ee60510b55676b97d6c5eee7e0dc7c256185c7a"
+    },
+    "council_stage": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/building_stage_C.gltf",
+      "sha256": "9de7e1e3b336905b3eee72c7bc010b4fb803fa07b9adb91411d5aff0861e3446"
+    },
+    "fence": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/fence_wood_straight.gltf",
+      "sha256": "5a2af87c5a6b90875e3bc11f289a321a5d4b2459975dba52351edbc58b2132e3"
+    },
+    "storehouse": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/green/building_lumbermill_green.gltf",
+      "sha256": "fbbfa52b3a53cf3aa0df0f18f7a21709e7ae0c04d24862ec0e4b710f47debc7a"
+    },
+    "tower": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_tower_A_red.gltf",
+      "sha256": "9275233fb07f3906111f82da7ef43b5c81195922662396a2c4106095ea94bf27"
+    },
+    "house_c": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/red/building_home_A_red.gltf",
+      "sha256": "158bcb4149f4d6db461774d7bd67d264262f30145762eddd0a8def8be292286c"
+    },
+    "house_d": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/blue/building_home_B_blue.gltf",
+      "sha256": "bf503f4edcd3a744a021ccdd5b9215f6c8934ef87fa44d95632cb653422797eb"
+    },
+    "house_e": {
+      "path": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/yellow/building_home_A_yellow.gltf",
+      "sha256": "da777a7f28a34491df582f9ed00c652078b4386a0bbfd05695e42e6ae2b28a92"
+    }
+  }
+}
