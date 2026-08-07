@@ -6,9 +6,13 @@ import { spawn } from "node:child_process";
 const APP_URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const OUTPUT_DIR = "public/qa/world-scene";
 const REPORT_PATH = `${OUTPUT_DIR}/world-scene-result.json`;
+const viewports = [
+  { id: "desktop", width: 1440, height: 900 },
+  { id: "mobile", width: 390, height: 844 },
+];
 
 class WorldQaError extends Error { constructor(step, message) { super(message); this.step = step; } }
-const result = { status: "RUNNING", generatedAt: "", appUrl: APP_URL, blockingStep: "", error: "", counts: {}, inspected: [] };
+const result = { status: "RUNNING", generatedAt: "", appUrl: APP_URL, blockingStep: "", error: "", viewports: [] };
 
 async function appRunning() { try { const res = await fetch(APP_URL, { signal: AbortSignal.timeout(1500) }); return res.ok || res.status < 500; } catch { return false; } }
 async function ensureApp() {
@@ -22,7 +26,51 @@ async function ensureApp() {
   throw new WorldQaError("boot app", `Timed out waiting for ${APP_URL}`);
 }
 async function writeResult(status, error) { result.status = status; result.generatedAt = new Date().toISOString(); if (error) { result.blockingStep = error.step ?? "unknown"; result.error = error.message; } await mkdir(OUTPUT_DIR, { recursive: true }); await writeFile(REPORT_PATH, `${JSON.stringify(result, null, 2)}\n`); }
-async function clickButton(page, name, step) { await page.getByRole("button", { name }).first().click({ timeout: 5000 }).catch(() => { throw new WorldQaError(step, `Could not click button: ${name}`); }); }
+
+async function verifyViewport(browser, viewport) {
+  const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height } });
+  const page = await context.newPage();
+  await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
+  await page.locator('[data-qa="view-world"]').click({ timeout: 7000 });
+  const scene = page.locator('[data-qa="world-map-scene"]');
+  await scene.waitFor({ state: "visible", timeout: 7000 });
+
+  const modelSectorCount = await scene.getAttribute("data-sector-count");
+  const visibleSectorCount = await scene.getAttribute("data-visible-sector-count");
+  const worldLands = await scene.getAttribute("data-world-lands");
+  const landsPerSector = await scene.getAttribute("data-lands-per-sector");
+  const regionalMap = await scene.getAttribute("data-regional-map");
+  if (modelSectorCount !== "100") throw new WorldQaError(`${viewport.id} model sector count`, `Expected 100 model sectors, got ${modelSectorCount}`);
+  if (visibleSectorCount !== "25") throw new WorldQaError(`${viewport.id} visible sector count`, `Expected 25 regional sectors, got ${visibleSectorCount}`);
+  if (worldLands !== "10000" || landsPerSector !== "100") throw new WorldQaError(`${viewport.id} world scale`, `Bad scale: ${worldLands} lands / ${landsPerSector} per sector`);
+  if (regionalMap !== "5x5") throw new WorldQaError(`${viewport.id} regional contract`, `Expected 5x5 regional map, got ${regionalMap}`);
+
+  const tiles = page.locator('[data-qa="world-sector-tile"]');
+  const tileCount = await tiles.count();
+  if (tileCount !== 25) throw new WorldQaError(`${viewport.id} rendered regional tiles`, `Expected 25 rendered tiles, got ${tileCount}`);
+  const outsideRegion = await tiles.evaluateAll((nodes) => nodes.filter((node) => Number(node.getAttribute("data-sector-x")) >= 5 || Number(node.getAttribute("data-sector-y")) >= 5).length);
+  if (outsideRegion !== 0) throw new WorldQaError(`${viewport.id} regional bounds`, `${outsideRegion} rendered sectors escaped the 5x5 Aurelian window`);
+
+  const owned = await page.locator('[data-qa="world-sector-tile"][data-sector-control="owned"]').count();
+  const claimable = await page.locator('[data-qa="world-sector-tile"][data-sector-control="claimable"]').count();
+  const locked = await page.locator('[data-qa="world-sector-tile"][data-sector-control="locked"]').count();
+  if (owned < 1 || claimable < 1 || locked < 1) throw new WorldQaError(`${viewport.id} territorial readability`, `Expected owned/claimable/locked sectors, got ${owned}/${claimable}/${locked}`);
+  await page.locator('[data-qa="world-sector-tile"][data-sector-origin="true"][data-sector-control="owned"]').waitFor({ state: "visible", timeout: 5000 });
+
+  await page.locator('[data-qa="world-sector-tile"][data-sector-id="A-01"]').click();
+  await page.locator('[data-qa="world-sector-inspect"]').waitFor({ state: "visible", timeout: 5000 });
+  const localLands = await page.locator('[data-qa="sector-local-land"]').count();
+  const samples = await page.locator('[data-qa="world-land-sample"]').count();
+  if (localLands !== 100) throw new WorldQaError(`${viewport.id} local land grid`, `Expected 100 local lands, got ${localLands}`);
+  if (samples < 3) throw new WorldQaError(`${viewport.id} land samples`, `Expected generated land samples, got ${samples}`);
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  if (overflow > 1) throw new WorldQaError(`${viewport.id} horizontal overflow`, `Page overflows horizontally by ${overflow}px`);
+
+  await page.screenshot({ path: `${OUTPUT_DIR}/world-map-scene-${viewport.id}.png`, fullPage: true });
+  await context.close();
+  return { id: viewport.id, width: viewport.width, height: viewport.height, modelSectorCount: 100, visibleSectorCount: 25, owned, claimable, locked, localLands, samples, horizontalOverflow: overflow };
+}
 
 async function main() {
   const proc = await ensureApp();
@@ -30,48 +78,12 @@ async function main() {
   try {
     await mkdir(OUTPUT_DIR, { recursive: true });
     browser = await chromium.launch();
-    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-    const page = await context.newPage();
-    await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
-    await clickButton(page, /^World$/i, "open world scene");
-    await page.locator('[data-qa="world-map-scene"]').waitFor({ state: "visible", timeout: 5000 });
-
-    const tiles = page.locator('[data-qa="world-sector-tile"]');
-    const tileCount = await tiles.count();
-    if (tileCount !== 100) throw new WorldQaError("count sector tiles", `Expected 100 world-sector-tile nodes, got ${tileCount}`);
-
-    const counts = await tiles.evaluateAll((nodes) => nodes.reduce((acc, node) => {
-      const kind = node.getAttribute("data-sector-kind") ?? "missing";
-      acc[kind] = (acc[kind] ?? 0) + 1;
-      if (node.getAttribute("data-sector-origin") === "true") acc.originAttr = (acc.originAttr ?? 0) + 1;
-      if (node.getAttribute("data-sector-rival") === "true") acc.rivalAttr = (acc.rivalAttr ?? 0) + 1;
-      if (node.getAttribute("data-sector-trade") === "true") acc.tradeAttr = (acc.tradeAttr ?? 0) + 1;
-      if (node.getAttribute("data-sector-danger") === "true") acc.dangerAttr = (acc.dangerAttr ?? 0) + 1;
-      return acc;
-    }, {}));
-    result.counts = counts;
-    if ((counts.originAttr ?? 0) !== 1) throw new WorldQaError("origin sector", `Expected one origin sector, got ${counts.originAttr ?? 0}`);
-    if ((counts.rivalAttr ?? 0) < 1) throw new WorldQaError("rival sectors", "Expected at least one rival sector");
-    if ((counts.tradeAttr ?? 0) < 1) throw new WorldQaError("trade sectors", "Expected at least one trade-rich sector");
-    if ((counts.dangerAttr ?? 0) < 1) throw new WorldQaError("danger sectors", "Expected at least one high-danger sector");
-
-    const inspect = page.locator('[data-qa="world-sector-inspect"]');
-    await inspect.waitFor({ state: "visible", timeout: 5000 });
-    await tiles.nth(0).click();
-    await tiles.nth(44).click();
-    await tiles.nth(99).click();
-    const sampleCount = await page.locator('[data-qa="world-land-sample"]').count();
-    if (sampleCount < 3) throw new WorldQaError("land samples", `Expected generated land samples, got ${sampleCount}`);
-    const stillVisible = await page.locator('[data-qa="world-sector-tile"]').count();
-    if (stillVisible !== 100) throw new WorldQaError("grid remains visible", "Sector grid disappeared during inspection");
-    result.inspected = [0, 44, 99];
-    await page.screenshot({ path: `${OUTPUT_DIR}/world-map-scene.png`, fullPage: true });
-    await context.close();
+    for (const viewport of viewports) result.viewports.push(await verifyViewport(browser, viewport));
     await writeResult("PASS");
-    console.log(`World scene QA PASS. Result written to ${REPORT_PATH}`);
+    console.log(`World V2 QA PASS. Desktop/mobile evidence written to ${OUTPUT_DIR}`);
   } catch (error) {
     await writeResult("FAIL", error);
-    console.error(`World scene QA FAIL at ${result.blockingStep}: ${result.error}`);
+    console.error(`World V2 QA FAIL at ${result.blockingStep}: ${result.error}`);
     process.exitCode = 1;
   } finally {
     await browser?.close().catch(() => {});
