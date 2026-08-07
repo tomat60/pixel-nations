@@ -13,7 +13,6 @@ async function ensureApp() { if (await appRunning()) return null; const command 
 async function writeResult(status, error) { result.status = status; result.generatedAt = new Date().toISOString(); if (error) { result.blockingStep = error.step ?? "unknown"; result.error = error.message; } await mkdir(OUTPUT_DIR, { recursive: true }); await writeFile(RESULT_PATH, `${JSON.stringify(result, null, 2)}\n`); }
 async function step(name, fn) { const started = Date.now(); try { await fn(); result.steps.push({ name, status: "PASS", durationMs: Date.now() - started }); } catch (err) { const error = err instanceof SmokeError ? err : new SmokeError(name, err.message); result.steps.push({ name, status: "FAIL", durationMs: Date.now() - started, error: error.message }); throw error; } }
 async function clickButton(page, name, stepName) { await page.getByRole("button", { name }).first().click({ timeout: 5000 }).catch(() => { throw new SmokeError(stepName, `Could not click button: ${name}`); }); }
-async function readPlotStates(page) { return page.locator('[data-qa="village-plot"]').evaluateAll((nodes) => nodes.map((node) => `${node.getAttribute("data-qa-id")}:${node.getAttribute("data-qa-state")}`)); }
 
 async function runSmoke(page) {
   await step("open current Aurelian shell", async () => {
@@ -37,20 +36,20 @@ async function runSmoke(page) {
 
   await step("Aurelian Village is the real owned-land scene", async () => {
     await clickButton(page, /^Village$/i, "Aurelian Village is the real owned-land scene");
-    await page.locator('[data-qa="village-scene"]').waitFor({ state: "visible", timeout: 5000 });
-    const plotCount = await page.locator('[data-qa="village-plot"]').count();
-    if (plotCount < 6) throw new SmokeError("Aurelian Village is the real owned-land scene", `Expected village scene plots, got ${plotCount}`);
+    const village = page.locator('[data-qa="aurelian-village-scene"]');
+    await village.waitFor({ state: "visible", timeout: 5000 });
+    if (await village.getAttribute("data-aurelian-stage") !== "camp") throw new SmokeError("Aurelian Village is the real owned-land scene", "Fresh Aurelian run did not begin at camp");
   });
 
-  await step("Raise Shelter visibly changes Village", async () => {
-    const before = await readPlotStates(page);
-    await clickButton(page, /^Orders$/i, "Raise Shelter visibly changes Village");
-    await clickButton(page, /^Raise Shelter$/i, "Raise Shelter visibly changes Village");
-    await page.waitForTimeout(100);
-    await clickButton(page, /^Village$/i, "Raise Shelter visibly changes Village");
-    const after = await readPlotStates(page);
-    if (before.join("|") === after.join("|")) throw new SmokeError("Raise Shelter visibly changes Village", "No village-plot state changed after Raise Shelter");
-    await page.locator('[data-qa="village-plot"][data-qa-id="shelter"][data-qa-state="built"]').waitFor({ state: "visible", timeout: 5000 });
+  await step("Raise Shelter visibly advances Village", async () => {
+    const village = page.locator('[data-qa="aurelian-village-scene"]');
+    const before = await village.getAttribute("data-aurelian-stage");
+    await clickButton(page, /^Orders$/i, "Raise Shelter visibly advances Village");
+    await clickButton(page, /^Raise Shelter$/i, "Raise Shelter visibly advances Village");
+    await clickButton(page, /^Village$/i, "Raise Shelter visibly advances Village");
+    await village.waitFor({ state: "visible", timeout: 5000 });
+    const after = await village.getAttribute("data-aurelian-stage");
+    if (before === after || after !== "first_shelter") throw new SmokeError("Raise Shelter visibly advances Village", `Expected first_shelter after Raise Shelter, got ${after}`);
   });
 
   await step("World preserves the 10,000-land model", async () => {
