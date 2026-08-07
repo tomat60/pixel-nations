@@ -9,7 +9,7 @@ on:
   pull_request:
     branches:
       - main
-    types: [opened]
+    types: [opened, synchronize]
 
 permissions:
   contents: write
@@ -81,7 +81,7 @@ jobs:
         run: |
           test ! -f .github/workflows/p5-empire-tradeoff-one-shot.yml
           git diff --name-only > /tmp/changed.txt
-          printf '%s\n' 'app/play/lib/play-state.ts' > /tmp/expected.txt
+          printf '%s\n' '.github/workflows/p5-empire-tradeoff-one-shot.yml' 'app/play/lib/play-state.ts' > /tmp/expected.txt
           diff -u /tmp/expected.txt /tmp/changed.txt
           git config user.name "pixel-nations-steward"
           git config user.email "actions@users.noreply.github.com"
