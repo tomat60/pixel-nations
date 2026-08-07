@@ -1,0 +1,79 @@
+name: Aurelian V3 One-Shot Asset Transfer
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aurelian-v3-assets-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  transfer:
+    if: github.head_ref == 'integrate/aurelian-v3-assets'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact head branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Download accepted exact-head V3 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: aurelian-composition-v2-31179603425
+          path: /tmp/aurelian-v3
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: tomat60/pixel-nations
+          run-id: 31179603425
+
+      - name: Verify and stage exactly six accepted images
+        run: |
+          set -euo pipefail
+          target='review/aurelian-staged-progression-m1'
+          mkdir -p "$target"
+
+          verify_copy() {
+            name="$1"
+            expected="$2"
+            mapfile -t matches < <(find /tmp/aurelian-v3 -type f -name "$name" -print)
+            test "${#matches[@]}" -eq 1 || { echo "Expected one $name, found ${#matches[@]}"; exit 1; }
+            actual="$(sha256sum "${matches[0]}" | awk '{print $1}')"
+            test "$actual" = "$expected" || { echo "SHA mismatch for $name: $actual"; exit 1; }
+            cp "${matches[0]}" "$target/$name"
+          }
+
+          verify_copy aurelian-camp-desktop.png 7f45ab6a1de7b8c98c2b06b95746219f6f7187f7c13c1432dc574798c2619b7f
+          verify_copy aurelian-camp-portrait.png 5a69a305f1b69402bffbc100c86e59168793ec2689a9d599e36351576bcdabde
+          verify_copy aurelian-first_shelter-desktop.png f8ea5b3fd28b190980e16372172668b580eca8146a2cb223c0aac8a569b13655
+          verify_copy aurelian-first_shelter-portrait.png cf921a565b2ca2ff8b867cbbed4cb5e87acd738e401dfd1baec7448b720653cc
+          verify_copy aurelian-developed_settlement-desktop.png 81919e1acaeaac19b331e7eb25df887808d1f19c524bc6a97e6015d65267a30a
+          verify_copy aurelian-developed_settlement-portrait.png c73a35d3cc0e1a28679db2486bf53da978dcb650e16157753370642f3248709e
+
+          rm .github/workflows/aurelian-v3-assets-once.yml
+
+          changed="$(git status --short | awk '{print $2}' | sort)"
+          expected="$(printf '%s\n' \
+            .github/workflows/aurelian-v3-assets-once.yml \
+            review/aurelian-staged-progression-m1/aurelian-camp-desktop.png \
+            review/aurelian-staged-progression-m1/aurelian-camp-portrait.png \
+            review/aurelian-staged-progression-m1/aurelian-developed_settlement-desktop.png \
+            review/aurelian-staged-progression-m1/aurelian-developed_settlement-portrait.png \
+            review/aurelian-staged-progression-m1/aurelian-first_shelter-desktop.png \
+            review/aurelian-staged-progression-m1/aurelian-first_shelter-portrait.png | sort)"
+          test "$changed" = "$expected" || { echo 'Unexpected changed files:'; git status --short; exit 1; }
+
+      - name: Commit asset-only final diff
+        run: |
+          set -euo pipefail
+          git config user.name 'pixel-nations-steward'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Integrate accepted Aurelian V3 stage renders'
+          git push origin HEAD:${{ github.head_ref }}
