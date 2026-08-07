@@ -5,7 +5,7 @@ import { spawn } from "node:child_process";
 
 const APP_URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const OUTPUT_DIR = "public/qa/city-nation-continuity";
-const REPORT_PATH = `${OUTPUT_DIR}/result.json`;
+const REPORT_PATH = `${OUTPUT_DIR}/city-nation-continuity-result.json`;
 const VIEWPORTS = [
   { id: "desktop", width: 1440, height: 900 },
   { id: "mobile", width: 390, height: 844 },
