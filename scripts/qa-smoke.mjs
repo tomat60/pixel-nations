@@ -18,9 +18,7 @@ async function runSmoke(page) {
   await step("open current Aurelian shell", async () => {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
     await page.locator('[data-qa="play-shell"]').waitFor({ state: "visible", timeout: 5000 });
-    for (const id of ["map", "village", "orders", "world", "council"]) {
-      await page.locator(`[data-qa="view-${id}"]`).waitFor({ state: "visible", timeout: 5000 });
-    }
+    for (const id of ["map", "village", "orders", "world", "council"]) await page.locator(`[data-qa="view-${id}"]`).waitFor({ state: "visible", timeout: 5000 });
   });
 
   await step("Aurelian Village is the real owned-land scene", async () => {
@@ -30,15 +28,16 @@ async function runSmoke(page) {
     if (await village.getAttribute("data-aurelian-stage") !== "camp") throw new SmokeError("Aurelian Village is the real owned-land scene", "Fresh Aurelian run did not begin at camp");
   });
 
-  await step("World preserves the 10,000-land model", async () => {
-    await clickView(page, "world", "World preserves the 10,000-land model");
+  await step("World preserves 100-sector model through a 25-sector region", async () => {
+    await clickView(page, "world", "World preserves 100-sector model through a 25-sector region");
     const scene = page.locator('[data-qa="world-map-scene"]');
     await scene.waitFor({ state: "visible", timeout: 5000 });
     const sectors = await page.locator('[data-qa="world-sector-tile"]').count();
-    if (sectors !== 100) throw new SmokeError("World preserves the 10,000-land model", `Expected 100 rendered sectors on current World, got ${sectors}`);
-    if (await scene.getAttribute("data-world-lands") !== "10000") throw new SmokeError("World preserves the 10,000-land model", "World land count is not 10,000");
-    if (await scene.getAttribute("data-sector-count") !== "100") throw new SmokeError("World preserves the 10,000-land model", "Sector model count is not 100");
-    if (await scene.getAttribute("data-lands-per-sector") !== "100") throw new SmokeError("World preserves the 10,000-land model", "Lands-per-sector count is not 100");
+    if (sectors !== 25) throw new SmokeError("World preserves 100-sector model through a 25-sector region", `Expected 25 rendered regional sectors, got ${sectors}`);
+    if (await scene.getAttribute("data-world-lands") !== "10000") throw new SmokeError("World preserves 100-sector model through a 25-sector region", "World land count is not 10,000");
+    if (await scene.getAttribute("data-sector-count") !== "100") throw new SmokeError("World preserves 100-sector model through a 25-sector region", "Sector model count is not 100");
+    if (await scene.getAttribute("data-visible-sector-count") !== "25") throw new SmokeError("World preserves 100-sector model through a 25-sector region", "Visible regional sector count is not 25");
+    if (await scene.getAttribute("data-lands-per-sector") !== "100") throw new SmokeError("World preserves 100-sector model through a 25-sector region", "Lands-per-sector count is not 100");
     await page.locator('[data-qa="world-sector-tile"][data-sector-origin="true"][data-sector-control="owned"]').waitFor({ state: "visible", timeout: 5000 });
     await page.locator('[data-qa="sector-land-scale-card"][data-land-count="100"]').waitFor({ state: "visible", timeout: 5000 });
   });
