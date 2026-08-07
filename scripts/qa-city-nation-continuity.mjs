@@ -118,7 +118,7 @@ async function runViewport(browser, viewport) {
       await runOrder(page, "build-storehouse");
       await runOrder(page, "form-council");
       await openView(page, "council");
-      await expectVisible(page, '[data-qa="city-readiness-checklist"]', "city readiness checklist");
+      await expectVisible(page, '[data-qa="city-readiness"]', "city readiness checklist");
       await expectHidden(page, '[data-qa="council-nation-ready"]', "nation blocked before City Seed");
     });
 
@@ -127,9 +127,9 @@ async function runViewport(browser, viewport) {
       await runOrder(page, "fortify-watch");
       await openView(page, "council");
       await expectVisible(page, '[data-qa="city-seed-milestone"]', "City Seed milestone");
-      const checklist = page.locator('[data-qa="city-readiness-checklist"]');
+      const checklist = page.locator('[data-qa="city-readiness"]');
       if (await checklist.isVisible().catch(() => false)) {
-        const pending = await checklist.locator('[data-city-requirement-complete="false"]').count();
+        const pending = await checklist.locator('[data-qa="city-readiness-item"][data-complete="false"]').count();
         if (pending !== 0) throw new QaError("City Seed readiness", `${pending} city requirements remain incomplete`);
       }
       await expectHidden(page, '[data-qa="council-nation-ready"]', "nation blocked until three sectors");
