@@ -55,6 +55,7 @@ jobs:
           npm run qa:city-nation
           npm run qa:settlement
           npm run --if-present qa:nation
+          npm run --if-present qa:empire-founding
 
   play-visual-qa:
     name: Generate /play gameplay evidence
@@ -119,7 +120,14 @@ jobs:
       - name: Generate Nation stewardship evidence
         id: nation
         if: always()
+        continue-on-error: true
         run: npm run qa:nation
+
+      - name: Generate Empire founding tradeoff evidence
+        id: empire_founding
+        if: always()
+        continue-on-error: true
+        run: npm run qa:empire-founding
 
       - name: Generate posture evidence
         id: posture
@@ -164,6 +172,7 @@ jobs:
             public/qa/city-nation-continuity
             public/qa/settlement-economy
             public/qa/nation-stewardship
+            public/qa/empire-founding-tradeoff
           if-no-files-found: error
           retention-days: 7
 
@@ -176,6 +185,8 @@ jobs:
           FOUNDER_OUTCOME: ${{ steps.founder.outcome }}
           CITY_NATION_OUTCOME: ${{ steps.city_nation.outcome }}
           SETTLEMENT_OUTCOME: ${{ steps.settlement.outcome }}
+          NATION_OUTCOME: ${{ steps.nation.outcome }}
+          EMPIRE_FOUNDING_OUTCOME: ${{ steps.empire_founding.outcome }}
           POSTURE_OUTCOME: ${{ steps.posture.outcome }}
           IMPERIAL_OUTCOME: ${{ steps.imperial.outcome }}
           FINALE_OUTCOME: ${{ steps.finale.outcome }}
@@ -193,6 +204,8 @@ jobs:
             founder: process.env.FOUNDER_OUTCOME,
             cityNation: process.env.CITY_NATION_OUTCOME,
             settlement: process.env.SETTLEMENT_OUTCOME,
+            nation: process.env.NATION_OUTCOME,
+            empireFounding: process.env.EMPIRE_FOUNDING_OUTCOME,
             posture: process.env.POSTURE_OUTCOME,
             imperial: process.env.IMPERIAL_OUTCOME,
             finale: process.env.FINALE_OUTCOME,
@@ -237,6 +250,15 @@ jobs:
           if (settlement && settlement.status !== "PASS") failures.push(`Settlement result: ${settlement.blockingStep || "unknown"}: ${settlement.error || settlement.status}`);
           if (settlement && (!Array.isArray(settlement.viewports) || settlement.viewports.length !== 2)) failures.push("Settlement stewardship must include desktop and mobile evidence.");
           if (settlement && (!Array.isArray(settlement.screenshots) || settlement.screenshots.length !== 4)) failures.push("Settlement stewardship must include four screenshots.");
+
+          const nation = await readJson("public/qa/nation-stewardship/nation-stewardship-result.json", "Nation stewardship result");
+          if (nation && nation.status !== "PASS") failures.push(`Nation stewardship result: ${nation.blockingStep || "unknown"}: ${nation.error || nation.status}`);
+          if (nation && (!Array.isArray(nation.viewports) || nation.viewports.length !== 2)) failures.push("Nation stewardship must include desktop and mobile evidence.");
+
+          const empireFounding = await readJson("public/qa/empire-founding-tradeoff/empire-founding-tradeoff-result.json", "Empire founding tradeoff result");
+          if (empireFounding && empireFounding.status !== "PASS") failures.push(`Empire founding result: ${empireFounding.blockingStep || "unknown"}: ${empireFounding.error || empireFounding.status}`);
+          if (empireFounding && (!Array.isArray(empireFounding.viewports) || empireFounding.viewports.length !== 2)) failures.push("Empire founding tradeoff must include desktop and mobile evidence.");
+          if (empireFounding && (!Array.isArray(empireFounding.screenshots) || empireFounding.screenshots.length !== 2)) failures.push("Empire founding tradeoff must include two screenshots.");
 
           const advancedEvidence = [
             ["public/qa/play-latest/branches/branch-summary.json", "posture evidence"],
