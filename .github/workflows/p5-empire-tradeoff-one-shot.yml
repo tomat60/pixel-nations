@@ -1,5 +1,6 @@
 name: P5 Empire Tradeoff One Shot
 
+# Existing-on-branch trigger pass.
 on:
   push:
     branches:
