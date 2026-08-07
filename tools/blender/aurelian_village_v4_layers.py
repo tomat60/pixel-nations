@@ -81,22 +81,22 @@ base.LAYOUTS = {
         "grid": (154, 114),
         "river": [(-170, 74), (-128, 58), (-88, 38), (-52, 14), (-12, -5), (38, -20), (92, -31), (170, -39)],
         "water_z": -3.2,
-        "road_before": [(-137, -91), (-112, -72), (-87, -51), (-66, -31), (-49, -13)],
-        "bridge": {"position": (-43.0, -6.0), "rotation": 42.0, "span": 25.0},
-        "camera": {"position": (132, -170, 132), "target": (12, 31, 6), "ortho": 120.0, "resolution": (2048, 1280)},
+        "road_before": [(-137, -91), (-109, -70), (-82, -45), (-54, -22), (-31, -5)],
+        "bridge": {"position": (-25.0, 0.0), "rotation": 42.0, "span": 22.0},
+        "camera": {"position": (132, -170, 132), "target": (8, 32, 6), "ortho": 125.0, "resolution": (2048, 1280)},
         "trees": [(-130, 72, 0), (-111, 91, 18), (-91, 80, -14), (-116, 48, 10), (-84, 106, 22), (112, 85, -18), (135, 57, 15), (124, 105, -7)],
         "rocks": [(-120, 8, 0), (-100, 22, 24), (120, -2, -16), (138, 31, 18), (108, 112, -20)],
-        "hearth": (2, 29),
+        "hearth": (4, 29),
         "paths": {
-            "camp": [(-36, 1), (-25, 10), (-13, 19), (0, 29)],
-            "shelter": [(0, 29), (8, 34), (18, 39)],
-            "food": [(0, 29), (-9, 37), (-18, 48)],
-            "timber": [(0, 29), (-9, 18), (-16, 8)],
-            "scout": [(2, 30), (18, 43), (38, 58), (61, 72)],
-            "storehouse": [(3, 26), (17, 18), (34, 10)],
-            "market": [(-4, 26), (8, 22), (22, 27), (18, 42), (4, 45), (-4, 31)],
-            "watch": [(24, 28), (42, 24), (62, 18)],
-            "council": [(18, 43), (18, 57), (21, 72)],
+            "camp": [(-20, 4), (-13, 12), (-5, 21), (4, 29)],
+            "shelter": [(4, 29), (11, 34), (18, 39)],
+            "food": [(4, 29), (-2, 38), (-8, 47)],
+            "timber": [(4, 29), (-2, 20), (-7, 13)],
+            "scout": [(6, 30), (20, 39), (34, 50), (45, 59)],
+            "storehouse": [(6, 27), (18, 22), (30, 18)],
+            "market": [(0, 26), (8, 24), (18, 29), (16, 40), (5, 44), (0, 32)],
+            "watch": [(20, 31), (34, 28), (47, 24)],
+            "council": [(16, 42), (16, 54), (18, 65)],
         },
         "assets": {
             "camp": [
@@ -105,62 +105,64 @@ base.LAYOUTS = {
                 ("lumber", (21, 23), 8, 6.4), ("sack", (4, 23), 0, 5.8),
                 ("barrel", (13, 20), 0, 6.1), ("wheelbarrow", (27, 28), -20, 6.2),
             ],
-            "shelter": [("house_a", (22, 44), 20, 8.5)],
+            "shelter": [("house_a", (20, 43), 20, 8.5)],
             "food": [
-                ("grain", (-24, 52), -8, 7.0), ("house_b", (-5, 59), -12, 7.8),
-                ("sack", (-16, 43), 12, 5.6), ("bucket_water", (-10, 47), 0, 5.6),
+                ("grain", (-11, 52), -8, 5.2), ("house_b", (2, 58), -12, 7.4),
+                ("sack", (-8, 42), 12, 5.6), ("bucket_water", (-3, 47), 0, 5.6),
+                ("fence", (-18, 39), 78, 4.6), ("fence", (0, 46), -12, 4.6),
             ],
             "timber": [
-                ("scaffolding", (-19, 7), -16, 7.0), ("tree_cut", (-34, 13), 10, 7.2),
-                ("lumber", (-11, 3), 5, 6.8), ("lumber", (-28, 2), -8, 6.3),
-                ("pallet", (-4, 9), 16, 5.8), ("ladder", (-16, 17), -20, 6.1),
+                ("scaffolding", (-7, 13), -16, 7.0), ("tree_cut", (-20, 16), 10, 7.0),
+                ("lumber", (-1, 8), 5, 6.6), ("lumber", (-15, 7), -8, 6.1),
+                ("pallet", (1, 14), 16, 5.8), ("ladder", (-8, 21), -20, 6.1),
             ],
             "scout": [
-                ("flag_red", (-61, 57), -6, 6.2), ("flag_red", (65, 76), 10, 6.2),
-                ("target", (50, 60), -14, 6.2), ("crate_open", (39, 53), 18, 5.5),
+                ("tent", (43, 59), -16, 5.8), ("flag_red", (35, 52), -6, 6.2),
+                ("flag_red", (49, 63), 10, 6.2), ("target", (50, 54), -14, 6.2),
+                ("crate_open", (40, 55), 18, 5.5),
             ],
             "storehouse": [
-                ("storehouse", (38, 10), -12, 6.4), ("house_c", (50, 31), 18, 7.8),
-                ("crate_big", (26, 5), 10, 6.0), ("crate_small", (31, 1), -10, 5.5),
-                ("barrel", (45, 0), 0, 5.8),
+                ("storehouse", (31, 17), -12, 6.4), ("house_c", (40, 32), 18, 7.6),
+                ("crate_big", (23, 13), 10, 6.0), ("crate_small", (28, 10), -10, 5.5),
+                ("barrel", (38, 10), 0, 5.8),
             ],
             "market": [
-                ("market", (19, 29), 10, 8.2), ("well", (10, 45), 0, 7.4),
-                ("house_d", (45, 51), -10, 7.7), ("crate_open", (30, 39), 12, 5.4),
+                ("market", (18, 31), 10, 8.2), ("well", (8, 44), 0, 7.4),
+                ("house_d", (36, 49), -10, 7.5), ("crate_open", (28, 39), 12, 5.4),
             ],
             "watch": [
-                ("tower", (66, 17), -18, 5.3), ("barracks", (64, 43), -24, 5.0),
-                ("fence", (78, 31), 67, 5.0), ("fence", (76, 48), 72, 5.0),
+                ("tower", (47, 23), -18, 5.3), ("barracks", (48, 42), -24, 5.0),
+                ("fence", (55, 31), 67, 5.0), ("fence", (55, 46), 72, 5.0),
             ],
             "council": [
-                ("church", (20, 75), 7, 9.0), ("council_stage", (5, 59), -8, 6.6),
-                ("house_e", (42, 73), 14, 7.5), ("flag_red", (12, 62), 0, 6.0),
+                ("church", (18, 64), 7, 8.7), ("council_stage", (6, 56), -8, 6.6),
+                ("house_e", (36, 63), 14, 7.3), ("flag_red", (13, 59), 0, 6.0),
             ],
         },
-        "field": {"center": (-29, 34), "rotation": -9, "size": (22, 13)},
-        "plaza": {"center": (16, 34), "radius": 13.0},
+        "field": {"center": (-10, 42), "rotation": -9, "size": (20, 12)},
+        "plaza": {"center": (15, 35), "radius": 12.0},
     },
     "portrait": {
         "extent": (210.0, 350.0),
         "grid": (100, 164),
         "river": [(-105, -48), (-72, -43), (-40, -38), (-10, -32), (20, -25), (58, -18), (105, -10)],
         "water_z": -3.2,
-        "road_before": [(-2, -156), (-2, -126), (-2, -98), (-1, -70), (-1, -47)],
-        "bridge": {"position": (-1.0, -36.0), "rotation": 84.0, "span": 19.0},
-        "camera": {"position": (78, -178, 145), "target": (0, 28, 8), "ortho": 148.0, "resolution": (780, 1688)},
+        "road_before": [(0, -156), (0, -126), (0, -96), (0, -67), (0, -42)],
+        "bridge": {"position": (0.0, -30.0), "rotation": 90.0, "span": 17.0},
+        "camera": {"position": (18, -205, 150), "target": (0, 25, 7), "ortho": 132.0, "resolution": (780, 1688)},
         "trees": [(-70, 70, 0), (-58, 100, 16), (-76, 134, -12), (-56, 164, 10), (68, 96, -18), (79, 130, 20), (63, 174, -8)],
         "rocks": [(-72, 12, 0), (-67, 42, 24), (72, 18, -16), (77, 58, 18), (69, 158, -20)],
         "hearth": (0, 20),
         "paths": {
-            "camp": [(0, -27), (0, -12), (0, 4), (0, 20)],
-            "shelter": [(0, 20), (-8, 29), (-15, 39)],
-            "food": [(0, 20), (12, 30), (20, 43)],
-            "timber": [(0, 18), (-11, 9), (-22, 2)],
-            "scout": [(0, 21), (4, 40), (8, 62), (13, 84)],
-            "storehouse": [(0, 18), (12, 11), (24, 6)],
-            "market": [(-6, 30), (0, 43), (10, 50), (3, 61), (-10, 55), (-12, 41)],
-            "watch": [(8, 58), (-4, 72), (-19, 83)],
-            "council": [(2, 61), (5, 77), (7, 96)],
+            "camp": [(0, -22), (0, -8), (0, 7), (0, 20)],
+            "shelter": [(0, 20), (-5, 29), (-9, 37)],
+            "food": [(0, 20), (8, 31), (13, 42)],
+            "timber": [(0, 18), (-8, 13), (-15, 9)],
+            "scout": [(0, 22), (2, 38), (5, 52), (8, 66)],
+            "storehouse": [(0, 18), (8, 17), (16, 15)],
+            "market": [(-5, 30), (0, 41), (8, 48), (3, 57), (-8, 53), (-10, 40)],
+            "watch": [(5, 54), (-2, 65), (-10, 73)],
+            "council": [(2, 58), (4, 70), (5, 82)],
         },
         "assets": {
             "camp": [
@@ -169,40 +171,42 @@ base.LAYOUTS = {
                 ("lumber", (15, 14), 8, 5.9), ("sack", (-1, 14), 0, 5.3),
                 ("barrel", (8, 11), 0, 5.6), ("wheelbarrow", (19, 21), -18, 5.8),
             ],
-            "shelter": [("house_a", (-18, 42), -18, 7.7)],
+            "shelter": [("house_a", (-12, 38), -18, 7.5)],
             "food": [
-                ("grain", (23, 46), 8, 6.4), ("house_b", (24, 63), -10, 7.0),
-                ("sack", (15, 37), 12, 5.2), ("bucket_water", (10, 41), 0, 5.1),
+                ("grain", (14, 44), 8, 4.9), ("house_b", (12, 56), -10, 6.5),
+                ("sack", (9, 36), 12, 5.2), ("bucket_water", (5, 41), 0, 5.1),
+                ("fence", (18, 36), 82, 4.2), ("fence", (8, 49), -8, 4.2),
             ],
             "timber": [
-                ("scaffolding", (-24, 2), -12, 6.5), ("tree_cut", (-37, 12), 8, 6.7),
-                ("lumber", (-16, -3), 4, 6.2), ("lumber", (-33, -4), -7, 5.8),
-                ("pallet", (-8, 5), 15, 5.3), ("ladder", (-22, 14), -18, 5.5),
+                ("scaffolding", (-15, 10), -12, 6.2), ("tree_cut", (-23, 16), 8, 6.3),
+                ("lumber", (-10, 5), 4, 6.0), ("lumber", (-20, 4), -7, 5.6),
+                ("pallet", (-6, 11), 15, 5.3), ("ladder", (-14, 18), -18, 5.5),
             ],
             "scout": [
-                ("flag_red", (-39, 73), -6, 5.8), ("flag_red", (38, 84), 10, 5.8),
-                ("target", (29, 70), -12, 5.7), ("crate_open", (20, 63), 15, 5.0),
+                ("tent", (10, 66), -14, 5.4), ("flag_red", (-12, 61), -6, 5.8),
+                ("flag_red", (15, 69), 10, 5.8), ("target", (18, 61), -12, 5.7),
+                ("crate_open", (9, 58), 15, 5.0),
             ],
             "storehouse": [
-                ("storehouse", (27, 5), -10, 5.9), ("house_c", (32, 27), 16, 7.0),
-                ("crate_big", (17, 0), 10, 5.5), ("crate_small", (22, -4), -10, 5.1),
-                ("barrel", (34, -5), 0, 5.3),
+                ("storehouse", (16, 14), -10, 5.9), ("house_c", (18, 30), 16, 6.7),
+                ("crate_big", (9, 9), 10, 5.5), ("crate_small", (14, 6), -10, 5.1),
+                ("barrel", (21, 7), 0, 5.3),
             ],
             "market": [
-                ("market", (2, 49), 8, 7.3), ("well", (-8, 63), 0, 6.7),
-                ("house_d", (27, 76), -9, 6.9), ("crate_open", (15, 57), 12, 4.9),
+                ("market", (1, 48), 8, 7.1), ("well", (-8, 57), 0, 6.5),
+                ("house_d", (14, 64), -9, 6.5), ("crate_open", (9, 54), 12, 4.9),
             ],
             "watch": [
-                ("tower", (-24, 82), -16, 4.9), ("barracks", (-15, 101), -22, 4.7),
-                ("fence", (-36, 94), 18, 4.6), ("fence", (-31, 110), 24, 4.6),
+                ("tower", (-14, 70), -16, 4.9), ("barracks", (-8, 82), -22, 4.7),
+                ("fence", (-20, 76), 18, 4.6), ("fence", (-17, 88), 24, 4.6),
             ],
             "council": [
-                ("church", (7, 101), 5, 8.2), ("council_stage", (-12, 86), -6, 6.0),
-                ("house_e", (29, 104), 12, 6.8), ("flag_red", (-2, 89), 0, 5.6),
+                ("church", (5, 84), 5, 7.7), ("council_stage", (-8, 73), -6, 5.8),
+                ("house_e", (13, 87), 12, 6.4), ("flag_red", (-2, 77), 0, 5.6),
             ],
         },
-        "field": {"center": (29, 32), "rotation": 8, "size": (18, 12)},
-        "plaza": {"center": (0, 55), "radius": 10.5},
+        "field": {"center": (14, 39), "rotation": 8, "size": (15, 10)},
+        "plaza": {"center": (0, 52), "radius": 9.5},
     },
 }
 
@@ -255,12 +259,24 @@ def create_field(mode, config, materials):
     width, depth = config["size"]
     rotation = config["rotation"]
     z = base.terrain_height(mode, x, y)
-    cube("FoodFieldSoil", (x, y, z + 0.16), (width, depth, 0.28), rotation, materials["field_soil"])
+    cube("FoodFieldSoil", (x, y, z + 0.13), (width, depth, 0.22), rotation, materials["field_soil"])
     rad = math.radians(rotation)
+    along = Vector((math.cos(rad), math.sin(rad), 0))
     across = Vector((-math.sin(rad), math.cos(rad), 0))
-    for index in range(-3, 4):
-        point = Vector((x, y, z + 0.38)) + across * (index * depth / 8.0)
-        cube(f"FoodCropRow_{index + 3}", point, (width * 0.84, 0.42, 0.32), rotation, materials["crop"])
+    for row in range(-2, 3):
+        for column in range(-3, 4):
+            point = (
+                Vector((x, y, z + 0.42))
+                + across * (row * depth / 6.2)
+                + along * (column * width / 8.2)
+            )
+            cube(
+                f"FoodCrop_{row + 2}_{column + 3}",
+                point,
+                (width / 11.0, 0.54, 0.48),
+                rotation,
+                materials["crop"],
+            )
 
 
 def create_plaza(mode, config, materials):
@@ -373,7 +389,7 @@ def build_mode(mode, source, out):
         "road": base.make_material("RoadOchre", (0.50, 0.38, 0.23, 1), 0.99),
         "wood": base.make_material("HearthWood", (0.28, 0.17, 0.08, 1), 0.93),
         "field_soil": base.make_material("FieldSoil", (0.29, 0.19, 0.10, 1), 0.99),
-        "crop": base.make_material("FieldCrop", (0.66, 0.52, 0.18, 1), 0.96),
+        "crop": base.make_material("FieldCrop", (0.42, 0.55, 0.16, 1), 0.96),
         "flame": base.make_material("HearthFlame", (1.0, 0.36, 0.04, 1), 0.62),
     }
 
@@ -390,10 +406,24 @@ def build_mode(mode, source, out):
         ground_z=layout["water_z"] - 0.35,
         desired_span=bridge["span"],
     )
+    tree_scale = 6.0 if mode == "desktop" else 5.5
+    rock_scale = 6.5 if mode == "desktop" else 5.8
     for index, (x, y, rotation) in enumerate(layout["trees"]):
-        base.import_asset(source, "tree_a" if index % 2 == 0 else "tree_b", (x, y), rotation, 7.4 + (index % 3) * 0.5)
+        base.import_asset(
+            source,
+            "tree_a" if index % 2 == 0 else "tree_b",
+            (x, y),
+            rotation,
+            tree_scale + (index % 3) * 0.4,
+        )
     for index, (x, y, rotation) in enumerate(layout["rocks"]):
-        base.import_asset(source, "rock_c" if index % 2 == 0 else "rock_e", (x, y), rotation, 7.8 + (index % 2) * 0.7)
+        base.import_asset(
+            source,
+            "rock_c" if index % 2 == 0 else "rock_e",
+            (x, y),
+            rotation,
+            rock_scale + (index % 2) * 0.6,
+        )
 
     layer_objects = {}
     layer_placements = {}
