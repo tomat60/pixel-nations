@@ -175,7 +175,11 @@ async function openView(page, view, tracker) {
 
 async function runOrder(page, orderId, expectedStage, tracker) {
   await openView(page, "orders", tracker);
-  await clickLocator(page.locator(`[data-qa="order-${orderId}"]`), `run order ${orderId}`, tracker, { primary: true });
+  const standard = page.locator(`[data-qa="order-${orderId}"]`);
+  const priority = page.locator(`[data-qa="order-${orderId}-priority"]`);
+  const locator = await priority.count() ? priority : standard;
+  await clickLocator(locator, `run order ${orderId}`, tracker, { primary: true });
+  if (!expectedStage) return;
   await measuredWait(tracker, `wait for ${expectedStage}`, () => page.locator(`[data-qa="aurelian-village-scene"][data-aurelian-stage="${expectedStage}"]`).waitFor({
     state: "visible",
     timeout: 10000,
@@ -252,7 +256,19 @@ async function runFounderArc(browser, viewport) {
       await runOrder(page, "form-council", "developed_settlement", tracker);
     });
 
-    await check("three connected sectors unlock the nation", async () => {
+    await check("Open Market Path and Fortify Watch establish a functioning City Seed", async () => {
+      await runOrder(page, "open-market", null, tracker);
+      await runOrder(page, "fortify-watch", null, tracker);
+      await openView(page, "council", tracker);
+      await measuredWait(tracker, "wait for City Seed milestone", () => page.locator('[data-qa="city-seed-milestone"]').waitFor({ state: "visible", timeout: 10000 }));
+      const checklist = page.locator('[data-qa="city-readiness"]');
+      if (await checklist.isVisible().catch(() => false)) {
+        const pending = await checklist.locator('[data-qa="city-readiness-item"][data-complete="false"]').count();
+        if (pending !== 0) throw new FounderRunQaError("City Seed readiness", `${pending} city requirements remain incomplete`);
+      }
+    });
+
+    await check("functioning City Seed and three connected sectors unlock the nation", async () => {
       await openView(page, "world", tracker);
       await measuredWait(tracker, "wait for World map", () => page.locator('[data-qa="world-map-scene"]').waitFor({ state: "visible", timeout: 10000 }));
       await claimSector(page, "A-02", tracker);

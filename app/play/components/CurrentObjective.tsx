@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { getCityReadiness } from "../lib/expansion-state";
 import {
   getEmpireCrisisOpen,
   getEmpireCrisisReasonLabel,
@@ -128,9 +129,18 @@ function getCurrentObjectiveText(state: PlayState): string {
   if (state.ownedPlotIds.length === 0) return "Claim one land. Your empire starts here.";
   if (state.completedOrders.length < 3) return "Issue settlement orders until the camp becomes a visible village.";
 
-  const ownedSectors = getOwnedSectorIds(state).length;
   if (!state.nationDecisionId) {
-    if (ownedSectors < nationSectorThreshold) return `Open World and claim ${nationSectorThreshold - ownedSectors} more connected sector${nationSectorThreshold - ownedSectors === 1 ? "" : "s"}.`;
+    const cityReadiness = getCityReadiness(state);
+    const nextCivicRequirement = cityReadiness.nextRequirement;
+    if (nextCivicRequirement) {
+      const progress = nextCivicRequirement.current !== undefined && nextCivicRequirement.target !== undefined
+        ? ` (${Math.min(nextCivicRequirement.current, nextCivicRequirement.target)}/${nextCivicRequirement.target})`
+        : "";
+      return `Build the City Seed: ${nextCivicRequirement.label}${progress}.`;
+    }
+
+    const ownedSectors = getOwnedSectorIds(state).length;
+    if (ownedSectors < nationSectorThreshold) return `City Seed ready. Open World and claim ${nationSectorThreshold - ownedSectors} more connected sector${nationSectorThreshold - ownedSectors === 1 ? "" : "s"}.`;
     return "Open Council and choose the doctrine that founds your nation.";
   }
   if (!state.foundingCeremonySeen) return "Witness the founding, then ratify the first national charter.";

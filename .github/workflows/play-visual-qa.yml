@@ -64,6 +64,12 @@ jobs:
         continue-on-error: true
         run: npm run qa:founder-run
 
+      - name: Generate City to Nation continuity evidence
+        id: city_nation
+        if: always()
+        continue-on-error: true
+        run: npm run qa:city-nation
+
       - name: Generate settlement stewardship evidence
         id: settlement
         if: always()
@@ -110,6 +116,7 @@ jobs:
             public/qa/village-scene
             public/qa/village-progression
             public/qa/founder-run
+            public/qa/city-nation-continuity
             public/qa/settlement-economy
           if-no-files-found: error
           retention-days: 7
@@ -121,6 +128,7 @@ jobs:
           VILLAGE_OUTCOME: ${{ steps.village.outcome }}
           PROGRESSION_OUTCOME: ${{ steps.progression.outcome }}
           FOUNDER_OUTCOME: ${{ steps.founder.outcome }}
+          CITY_NATION_OUTCOME: ${{ steps.city_nation.outcome }}
           SETTLEMENT_OUTCOME: ${{ steps.settlement.outcome }}
           POSTURE_OUTCOME: ${{ steps.posture.outcome }}
           IMPERIAL_OUTCOME: ${{ steps.imperial.outcome }}
@@ -137,6 +145,7 @@ jobs:
             village: process.env.VILLAGE_OUTCOME,
             progression: process.env.PROGRESSION_OUTCOME,
             founder: process.env.FOUNDER_OUTCOME,
+            cityNation: process.env.CITY_NATION_OUTCOME,
             settlement: process.env.SETTLEMENT_OUTCOME,
             posture: process.env.POSTURE_OUTCOME,
             imperial: process.env.IMPERIAL_OUTCOME,
@@ -173,6 +182,10 @@ jobs:
           const founder = await readJson("public/qa/founder-run/founder-run-result.json", "Founder Run result");
           if (founder && founder.status !== "PASS") failures.push(`Founder Run result: ${founder.blockingStep || "unknown"}: ${founder.error || founder.status}`);
           if (founder && (!Array.isArray(founder.viewports) || founder.viewports.length !== 2)) failures.push("Founder Run must include desktop and mobile evidence.");
+
+          const cityNation = await readJson("public/qa/city-nation-continuity/city-nation-continuity-result.json", "City/Nation continuity result");
+          if (cityNation && cityNation.status !== "PASS") failures.push(`City/Nation result: ${cityNation.blockingStep || "unknown"}: ${cityNation.error || cityNation.status}`);
+          if (cityNation && (!Array.isArray(cityNation.viewports) || cityNation.viewports.length !== 2)) failures.push("City/Nation continuity must include desktop and mobile evidence.");
 
           const settlement = await readJson("public/qa/settlement-economy/settlement-economy-result.json", "settlement stewardship result");
           if (settlement && settlement.status !== "PASS") failures.push(`Settlement result: ${settlement.blockingStep || "unknown"}: ${settlement.error || settlement.status}`);
