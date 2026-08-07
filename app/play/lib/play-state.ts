@@ -450,6 +450,28 @@ export function getLatestImperialTurnAction(state: PlayState) { const history = 
 export function getEmpireReady(state: PlayState) { return Boolean(getFirstEraComplete(state) && state.nationDecisionId && getFrontierObjectiveSecured(state)); }
 export function getNextRetentionDecision(state: PlayState) { if (!state.nationDecisionId || !state.foundingCeremonySeen) return null; return retentionDecisions.find((decision) => !state.retentionRecords.some((record) => record.decisionId === decision.id)) ?? null; }
 export function getFirstEraComplete(state: PlayState) { return state.retentionRecords.length >= retentionDecisions.length; }
+export const nationFrontierStabilityThreshold = 2;
+export const nationFrontierProsperityThreshold = 2;
+export type NationFrontierReadiness = {
+  ready: boolean;
+  missing: "first-era" | "stability" | "prosperity" | null;
+  stability: number;
+  prosperity: number;
+};
+export function getNationFrontierReadiness(state: PlayState): NationFrontierReadiness {
+  const stability = state.settlementStability;
+  const prosperity = state.settlementProsperity;
+  if (!getFirstEraComplete(state)) {
+    return { ready: false, missing: "first-era", stability, prosperity };
+  }
+  if (stability < nationFrontierStabilityThreshold) {
+    return { ready: false, missing: "stability", stability, prosperity };
+  }
+  if (prosperity < nationFrontierProsperityThreshold) {
+    return { ready: false, missing: "prosperity", stability, prosperity };
+  }
+  return { ready: true, missing: null, stability, prosperity };
+}
 export function getPhase(state: PlayState): "unclaimed" | "camp" | "hamlet" | "village" | "city-seed" | "nation-seed" { if (state.ownedPlotIds.length === 0) return "unclaimed"; if (state.nationDecisionId) return "nation-seed"; if (state.completedOrders.includes("form-council") && state.completedOrders.includes("open-market") && state.completedOrders.includes("fortify-watch")) return "city-seed"; if (state.completedOrders.includes("form-council") || state.completedOrders.length >= 6) return "village"; if (state.completedOrders.length >= 3) return "hamlet"; return "camp"; }
 export function getPopulation(state: PlayState) { if (state.ownedPlotIds.length === 0) return 0; return 18 + state.completedOrders.length * 9 + state.settlementMarkers.length * 7 + Math.max(0, getOwnedSectorIds(state).length - 1) * 11 + (state.nationDecisionId === "settler-rights" ? 18 : 0) + state.retentionRecords.length * 5 + (state.courtCaseDecisionId === "favor-frontier-settlers" ? 9 : 0) + Math.min(12, state.settlementCycles.length * 2) + state.settlementStability; }
 export function getDevelopmentScore(state: PlayState) { return state.completedOrders.length * 8 + state.settlementMarkers.length * 6 + state.scoutedPlotIds.length * 2 + state.resources.influence * 3 + getOwnedSectorIds(state).length * 5 + (state.nationDecisionId ? 14 : 0) + state.retentionRecords.length * 7 + (state.frontierIntentId ? 6 : 0) + (getFrontierObjectiveSecured(state) ? 10 : 0) + (state.empireDeclarationId ? 18 : 0) + (state.courtCaseDecisionId ? 9 : 0) + (state.rivalResponseDecisionId ? 12 : 0) + (state.conflictEscalationDecisionId ? 14 : 0) + (state.standoffDecisionId ? 16 : 0) + state.imperialTurnActionIds.length * 6 + (state.empireCrisisReason ? 4 : 0) + (state.empireCrisisRecoveryId ? 6 : 0) + (state.postCrisisCountermoveOrigin ? 4 : 0) + (state.postCrisisResponseId ? 6 : 0) + state.settlementProsperity + state.settlementStability + Math.min(8, state.settlementCycles.length * 2); }
@@ -514,7 +536,12 @@ function resolveRetentionDecision(state: PlayState, decisionId: RetentionDecisio
   const choice = decision.choices.find((item) => item.id === choiceId);
   if (!choice) return null;
   const record: RetentionRecord = { season: decision.season, decisionId: decision.id, choiceId: choice.id, label: choice.label, villageMarker: choice.villageMarker, worldMarker: choice.worldMarker };
-  return { retentionRecords: [...state.retentionRecords, record], resources: { ...state.resources, influence: state.resources.influence + choice.influenceDelta }, chronicle: pushChronicle(state, decision.title, `${choice.label}: ${choice.short}`), lastEvent: `Season ${decision.season} resolved: ${choice.label}.` };
+  const stabilityDelta = choice.id === "authority" ? 1 : -1;
+  const prosperityDelta = choice.id === "authority" ? -1 : 1;
+  const settlementStability = clampSettlementStability(state.settlementStability + stabilityDelta);
+  const settlementProsperity = clampSettlementProsperity(state.settlementProsperity + prosperityDelta);
+  const tradeoff = `${stabilityDelta > 0 ? "+" : ""}${stabilityDelta} Stability, ${prosperityDelta > 0 ? "+" : ""}${prosperityDelta} Prosperity`;
+  return { retentionRecords: [...state.retentionRecords, record], resources: { ...state.resources, influence: state.resources.influence + choice.influenceDelta }, settlementStability, settlementProsperity, chronicle: pushChronicle(state, decision.title, `${choice.label}: ${choice.short} ${tradeoff}.`), lastEvent: `Season ${decision.season} resolved: ${choice.label}. ${tradeoff}.` };
 }
 
 export function playReducer(state: PlayState, action: PlayAction): PlayState {
@@ -556,6 +583,14 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
     case "advanceSeason": { const result = resolveRetentionDecision(state, action.decisionId, action.choiceId); if (!result) return { ...state, lastEvent: "No available nation season decision.", view: "council" }; return { ...state, ...result, season: Math.min(12, state.season + 1), view: "council" }; }
     case "setFrontierIntent": {
       if (!getFirstEraComplete(state)) return { ...state, view: "council", lastEvent: "Finish the first era before setting a frontier objective." };
+      const readiness = getNationFrontierReadiness(state);
+      if (!readiness.ready) {
+        const stabilityMissing = readiness.missing === "stability";
+        const label = stabilityMissing ? "Stability" : "Prosperity";
+        const current = stabilityMissing ? readiness.stability : readiness.prosperity;
+        const target = stabilityMissing ? nationFrontierStabilityThreshold : nationFrontierProsperityThreshold;
+        return { ...state, view: "council", lastEvent: `Frontier blocked. Restore ${label} to ${target} (${current}/${target}) through settlement stewardship.` };
+      }
       if (state.frontierIntentId) return { ...state, view: "council", lastEvent: "The next frontier objective is already recorded." };
       const objective = frontierObjectives.find((item) => item.id === action.intentId);
       if (!objective) return { ...state, view: "council", lastEvent: "Unknown frontier objective." };

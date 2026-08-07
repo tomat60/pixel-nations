@@ -21,6 +21,8 @@ import {
   getPostCrisisResponseDecision,
   getSelectedPlot,
   initialPlayState,
+  nationFrontierProsperityThreshold,
+  nationFrontierStabilityThreshold,
   playReducer,
   playV1StorageKey,
   type PlayState,
@@ -203,6 +205,7 @@ function restorePlayState(): PlayState | null {
     if (!Array.isArray(parsed.ownedPlotIds) || !Array.isArray(parsed.completedOrders)) return null;
     const isLegacyEmptyRun = parsed.ownedPlotIds.length === 0 && parsed.completedOrders.length === 0;
     if (isLegacyEmptyRun) return aurelianInitialPlayState;
+    const legacyFrontierProgress = Boolean(parsed.frontierIntentId);
     return {
       ...initialPlayState,
       ...parsed,
@@ -218,6 +221,8 @@ function restorePlayState(): PlayState | null {
       empireCrisisReason: parsed.empireCrisisReason ?? null,
       empireCrisisRecoveryId: parsed.empireCrisisRecoveryId ?? null,
       foundingCeremonySeen: Boolean(parsed.foundingCeremonySeen),
+      settlementStability: typeof parsed.settlementStability === "number" ? parsed.settlementStability : legacyFrontierProgress ? nationFrontierStabilityThreshold : initialPlayState.settlementStability,
+      settlementProsperity: typeof parsed.settlementProsperity === "number" ? parsed.settlementProsperity : legacyFrontierProgress ? nationFrontierProsperityThreshold : initialPlayState.settlementProsperity,
     };
   } catch {
     return null;

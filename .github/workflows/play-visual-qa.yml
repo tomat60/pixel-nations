@@ -116,6 +116,11 @@ jobs:
         continue-on-error: true
         run: npm run qa:settlement
 
+      - name: Generate Nation stewardship evidence
+        id: nation
+        if: always()
+        run: npm run qa:nation
+
       - name: Generate posture evidence
         id: posture
         if: always()
@@ -158,6 +163,7 @@ jobs:
             public/qa/founder-run
             public/qa/city-nation-continuity
             public/qa/settlement-economy
+            public/qa/nation-stewardship
           if-no-files-found: error
           retention-days: 7
 

@@ -6,6 +6,7 @@ import {
   getEmpireCrisisOpen,
   getEmpireCrisisReasonLabel,
   getFirstEraComplete,
+  getNationFrontierReadiness,
   getFrontierIntent,
   getFrontierObjectiveSecured,
   getImperialTurnNumber,
@@ -147,6 +148,16 @@ function getCurrentObjectiveText(state: PlayState): string {
 
   if (!getFirstEraComplete(state)) {
     return "Open Council and ratify the first charter to bind stores, roads and law in one Founder Run step.";
+  }
+
+  const nationFrontierReadiness = getNationFrontierReadiness(state);
+  if (!nationFrontierReadiness.ready) {
+    if (nationFrontierReadiness.missing === "stability") {
+      return `Return to Orders and End season until Stability reaches 2 (${nationFrontierReadiness.stability}/2).`;
+    }
+    if (nationFrontierReadiness.missing === "prosperity") {
+      return `Return to Orders and End season until Prosperity reaches 2 (${nationFrontierReadiness.prosperity}/2).`;
+    }
   }
 
   const frontier = getFrontierIntent(state);

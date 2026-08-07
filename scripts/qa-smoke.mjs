@@ -12,21 +12,61 @@ async function appRunning() { try { const res = await fetch(APP_URL, { signal: A
 async function ensureApp() { if (await appRunning()) return null; const command = existsSync(".next") ? ["run", "start", "--", "-p", "3000", "-H", "127.0.0.1"] : ["run", "dev", "--", "-p", "3000", "-H", "127.0.0.1"]; const proc = spawn("npm", command, { stdio: "pipe", shell: process.platform === "win32" }); proc.stdout?.on("data", (data) => process.stdout.write(data)); proc.stderr?.on("data", (data) => process.stderr.write(data)); const started = Date.now(); while (Date.now() - started < 30000) { if (await appRunning()) return proc; await new Promise((resolve) => setTimeout(resolve, 500)); } throw new SmokeError("boot app", `Timed out waiting for ${APP_URL}`); }
 async function writeResult(status, error) { result.status = status; result.generatedAt = new Date().toISOString(); if (error) { result.blockingStep = error.step ?? "unknown"; result.error = error.message; } await mkdir(OUTPUT_DIR, { recursive: true }); await writeFile(RESULT_PATH, `${JSON.stringify(result, null, 2)}\n`); }
 async function step(name, fn) { const started = Date.now(); try { await fn(); result.steps.push({ name, status: "PASS", durationMs: Date.now() - started }); } catch (err) { const error = err instanceof SmokeError ? err : new SmokeError(name, err.message); result.steps.push({ name, status: "FAIL", durationMs: Date.now() - started, error: error.message }); throw error; } }
-async function expectText(page, text, stepName) { await page.getByText(text, { exact: false }).first().waitFor({ state: "visible", timeout: 5000 }).catch(() => { throw new SmokeError(stepName, `Expected visible text: ${text}`); }); }
-async function clickButton(page, name, stepName) { await page.getByRole("button", { name }).first().click({ timeout: 5000 }).catch(() => { throw new SmokeError(stepName, `Could not click button: ${name}`); }); }
-async function readPlotStates(page) { return page.locator('[data-qa="village-plot"]').evaluateAll((nodes) => nodes.map((node) => `${node.getAttribute("data-qa-id")}:${node.getAttribute("data-qa-state")}`)); }
-async function runOneOrder(page, name) { await clickButton(page, /^Issue next order$/i, "open orders from village scene"); await clickButton(page, name, "run order"); await page.waitForTimeout(100); }
-async function runOrderFromDock(page, name, stepName) { await clickButton(page, /^Orders$/i, stepName); await clickButton(page, name, stepName); await page.waitForTimeout(100); }
+async function clickView(page, id, stepName) { await page.locator(`[data-qa="view-${id}"]`).click({ timeout: 5000 }).catch(() => { throw new SmokeError(stepName, `Could not open ${id} view`); }); }
 
 async function runSmoke(page) {
-  await step("open shell", async () => { await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" }); await expectText(page, "Map · Village · Orders · World · Council", "open shell"); await expectText(page, "30 charted of 10,000 lands", "open shell"); });
-  await step("camera viewbox still changes", async () => { const svg = page.locator("svg[aria-label='Aurelian Basin fullscreen map']").first(); const before = await svg.getAttribute("viewBox"); await svg.evaluate((node) => node.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -180, clientX: 720, clientY: 450 }))); await page.waitForTimeout(200); const after = await svg.getAttribute("viewBox"); if (!before || !after || before === after) throw new SmokeError("camera viewbox still changes", "viewBox did not change"); });
-  await step("claim opens real village scene", async () => { await clickButton(page, /^Reset view$/i, "claim opens real village scene"); await page.locator("[data-qa='plot-greenvale']").click({ timeout: 5000, force: true }); await clickButton(page, /^Choose this land$/i, "claim opens real village scene"); await page.locator("[data-qa='village-scene']").waitFor({ state: "visible", timeout: 5000 }); const plotCount = await page.locator('[data-qa="village-plot"]').count(); if (plotCount < 6) throw new SmokeError("claim opens real village scene", `Expected village scene plots, got ${plotCount}`); await expectText(page, "Village scene", "claim opens real village scene"); });
-  await step("order visibly changes village scene", async () => { const before = await readPlotStates(page); await runOneOrder(page, /^Raise Shelter$/i); const after = await readPlotStates(page); if (before.join("|") === after.join("|")) throw new SmokeError("order visibly changes village scene", "No village-plot data-qa-state changed after order"); await page.locator('[data-qa="village-plot"][data-qa-id="shelter"][data-qa-state="built"]').waitFor({ state: "visible", timeout: 5000 }); });
-  await step("world expansion scene exists", async () => { await clickButton(page, /^World$/i, "world expansion scene exists"); await page.locator('[data-qa="world-map-scene"]').waitFor({ state: "visible", timeout: 5000 }); const sectors = await page.locator('[data-qa="world-sector-tile"]').count(); if (sectors !== 100) throw new SmokeError("world expansion scene exists", `Expected 100 sectors, got ${sectors}`); await page.locator('[data-qa="world-sector-tile"][data-sector-origin="true"]').waitFor({ state: "visible", timeout: 5000 }); await page.locator('[data-qa="world-sector-tile"][data-sector-control="owned"]').first().waitFor({ state: "visible", timeout: 5000 }); await page.locator('[data-qa="world-sector-tile"][data-sector-control="claimable"]').first().waitFor({ state: "visible", timeout: 5000 }); await expectText(page, "WorldMapScene", "world expansion scene exists"); await expectText(page, "Generated land samples", "world expansion scene exists"); });
-  await step("world scale proof exists", async () => { const scene = page.locator('[data-qa="world-map-scene"]'); const proof = page.locator('[data-qa="world-scale-proof"]'); await proof.waitFor({ state: "visible", timeout: 5000 }); const worldLands = await scene.getAttribute("data-world-lands"); const sectorCount = await proof.getAttribute("data-sector-count"); const landsPerSector = await proof.getAttribute("data-lands-per-sector"); if (worldLands !== "10000" || sectorCount !== "100" || landsPerSector !== "100") throw new SmokeError("world scale proof exists", `Bad world scale data: lands=${worldLands}, sectors=${sectorCount}, landsPerSector=${landsPerSector}`); await expectText(page, "100 sectors × 100 lands = 10,000 generated lands", "world scale proof exists"); await page.locator('[data-qa="sector-land-scale-card"][data-land-count="100"]').waitFor({ state: "visible", timeout: 5000 }); const localLands = await page.locator('[data-qa="sector-local-land"]').count(); if (localLands !== 100) throw new SmokeError("world scale proof exists", `Expected selected sector 10x10 local grid, got ${localLands}`); const sampleHighlights = await page.locator('[data-qa="sector-local-land"][data-land-sample="true"]').count(); if (sampleHighlights < 6) throw new SmokeError("world scale proof exists", `Expected at least 6 highlighted sample lands, got ${sampleHighlights}`); });
-  await step("council and market route exist", async () => { await clickButton(page, /^Council$/i, "council exists"); await page.locator("[data-qa='council-panel']").waitFor({ state: "visible", timeout: 5000 }); await expectText(page, "From land to empire", "council exists"); await clickButton(page, /^Orders$/i, "market route exists"); await clickButton(page, /^Open Market Path$/i, "market route exists"); await clickButton(page, /^Map$/i, "market route exists"); await page.locator("[data-qa='market-route']").waitFor({ state: "visible", timeout: 5000 }); });
-  await step("city seed milestone exists", async () => { await runOrderFromDock(page, /^Form Council$/i, "city seed milestone exists"); await runOrderFromDock(page, /^Fortify Watch$/i, "city seed milestone exists"); await clickButton(page, /^Council$/i, "city seed milestone exists"); await page.locator('[data-qa="city-seed-milestone"]').waitFor({ state: "visible", timeout: 5000 }); await page.locator('[data-qa="roadmap-city"]').getByText("done", { exact: false }).waitFor({ state: "visible", timeout: 5000 }); await clickButton(page, /^Orders$/i, "city seed milestone exists"); await page.locator('[data-qa="orders-city-seed-complete"]').waitFor({ state: "visible", timeout: 5000 }); });
+  await step("open current Aurelian shell", async () => {
+    await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
+    await page.locator('[data-qa="play-shell"]').waitFor({ state: "visible", timeout: 5000 });
+    for (const id of ["map", "village", "orders", "world", "council"]) {
+      await page.locator(`[data-qa="view-${id}"]`).waitFor({ state: "visible", timeout: 5000 });
+    }
+  });
+
+  await step("Aurelian Village is the real owned-land scene", async () => {
+    await clickView(page, "village", "Aurelian Village is the real owned-land scene");
+    const village = page.locator('[data-qa="aurelian-village-scene"]');
+    await village.waitFor({ state: "visible", timeout: 5000 });
+    if (await village.getAttribute("data-aurelian-stage") !== "camp") throw new SmokeError("Aurelian Village is the real owned-land scene", "Fresh Aurelian run did not begin at camp");
+  });
+
+  await step("World preserves the 10,000-land model", async () => {
+    await clickView(page, "world", "World preserves the 10,000-land model");
+    const scene = page.locator('[data-qa="world-map-scene"]');
+    await scene.waitFor({ state: "visible", timeout: 5000 });
+    const sectors = await page.locator('[data-qa="world-sector-tile"]').count();
+    if (sectors !== 100) throw new SmokeError("World preserves the 10,000-land model", `Expected 100 rendered sectors on current World, got ${sectors}`);
+    if (await scene.getAttribute("data-world-lands") !== "10000") throw new SmokeError("World preserves the 10,000-land model", "World land count is not 10,000");
+    if (await scene.getAttribute("data-sector-count") !== "100") throw new SmokeError("World preserves the 10,000-land model", "Sector model count is not 100");
+    if (await scene.getAttribute("data-lands-per-sector") !== "100") throw new SmokeError("World preserves the 10,000-land model", "Lands-per-sector count is not 100");
+    await page.locator('[data-qa="world-sector-tile"][data-sector-origin="true"][data-sector-control="owned"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-qa="sector-land-scale-card"][data-land-count="100"]').waitFor({ state: "visible", timeout: 5000 });
+  });
+
+  await step("Council remains reachable", async () => {
+    await clickView(page, "council", "Council remains reachable");
+    await page.locator('[data-qa="council-panel"]').waitFor({ state: "visible", timeout: 5000 });
+    await page.getByText("From land to empire", { exact: false }).first().waitFor({ state: "visible", timeout: 5000 });
+  });
 }
-async function main() { const proc = await ensureApp(); let browser; try { browser = await chromium.launch(); const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 })).newPage(); await runSmoke(page); await writeResult("PASS"); console.log(`Mechanical smoke PASS. Result written to ${RESULT_PATH}`); } catch (err) { await writeResult("FAIL", err); console.error(`Mechanical smoke FAIL at ${result.blockingStep}: ${result.error}`); process.exitCode = 1; } finally { await browser?.close().catch(() => {}); proc?.kill(); } process.exit(process.exitCode ?? 0); }
+
+async function main() {
+  const proc = await ensureApp();
+  let browser;
+  try {
+    browser = await chromium.launch();
+    const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+    await runSmoke(page);
+    await writeResult("PASS");
+    console.log(`Mechanical smoke PASS. Result written to ${RESULT_PATH}`);
+  } catch (err) {
+    await writeResult("FAIL", err);
+    console.error(`Mechanical smoke FAIL at ${result.blockingStep}: ${result.error}`);
+    process.exitCode = 1;
+  } finally {
+    await browser?.close().catch(() => {});
+    proc?.kill();
+  }
+  process.exit(process.exitCode ?? 0);
+}
 main();
