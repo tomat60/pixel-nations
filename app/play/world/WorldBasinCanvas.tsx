@@ -41,7 +41,7 @@ function controlFor(id: string, owned: Set<string>, claimable: Set<string>): Sec
 }
 
 function markerClasses(sector: WorldMapSector, control: SectorControl, selected: boolean) {
-  const base = "group absolute z-30 -translate-x-1/2 -translate-y-1/2 rounded-full border text-left shadow-[0_10px_24px_rgba(0,0,0,.42)] transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-100";
+  const base = "pointer-events-auto group absolute z-30 -translate-x-1/2 -translate-y-1/2 rounded-full border text-left shadow-[0_10px_24px_rgba(0,0,0,.42)] transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-100";
   if (selected) return `${base} border-amber-50 bg-amber-200 text-stone-950 ring-4 ring-amber-100/25 scale-110`;
   if (control === "owned") return `${base} border-amber-200/90 bg-[#8f6228] text-amber-50 hover:bg-[#a87330]`;
   if (control === "claimable") return `${base} border-lime-200/85 bg-[#314b2c] text-lime-50 hover:bg-[#3d5d35]`;
