@@ -26,6 +26,9 @@ async function runSmoke(page) {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
     await page.locator('[data-qa="play-shell"]').waitFor({ state: "visible", timeout: 5000 });
     for (const id of ["map", "village", "orders", "world", "council"]) await page.locator(`[data-qa="view-${id}"]`).waitFor({ state: "visible", timeout: 5000 });
+    await page.waitForFunction(() => window.localStorage.length > 0, null, { timeout: 5000 }).catch(() => {
+      throw new SmokeError("open current Aurelian shell", "Play state did not finish hydration/persistence before navigation");
+    });
   });
 
   await step("Aurelian Village is the real owned-land scene", async () => {
