@@ -58,12 +58,16 @@ function gitSha() {
 async function waitForDecodedCamp(page, viewport) {
   const imageViewport = viewport.id === "desktop" ? "desktop" : "portrait";
   await page.waitForFunction(({ imageViewport }) => {
-    const image = document.querySelector(
+    const v4Image = document.querySelector(
+      `[data-qa="aurelian-v4-layer"][data-aurelian-v4-image-stage="camp"][data-aurelian-viewport="${imageViewport}"][data-aurelian-active="true"]`,
+    );
+    const legacyImage = document.querySelector(
       `[data-qa="aurelian-stage-image"][data-aurelian-image-stage="camp"][data-aurelian-viewport="${imageViewport}"][data-aurelian-active="true"]`,
     );
+    const image = v4Image ?? legacyImage;
     if (!(image instanceof HTMLImageElement)) return false;
     const style = window.getComputedStyle(image);
-    return image.complete && image.naturalWidth > 0 && style.display !== "none" && Number.parseFloat(style.opacity || "0") > 0;
+    return image.complete && image.naturalWidth > 0 && style.display !== "none" && Number.parseFloat(style.opacity || "1") > 0;
   }, { imageViewport }, { timeout: 15000 });
   await page.waitForTimeout(350);
 }
