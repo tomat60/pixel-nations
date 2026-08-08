@@ -78,7 +78,7 @@ export function WorldV3BasinScene({ state, dispatch }: { state: PlayState; dispa
           />
 
           {selected ? (
-            <div className="pointer-events-auto absolute right-3 top-3 z-50 w-[10.75rem] rounded-2xl border border-amber-100/18 bg-[#07110e]/88 p-2.5 shadow-2xl backdrop-blur-md sm:w-[13rem]">
+            <div className="pointer-events-none absolute right-3 top-3 z-50 w-[10.75rem] rounded-2xl border border-amber-100/18 bg-[#07110e]/88 p-2.5 shadow-2xl backdrop-blur-md sm:w-[13rem]">
               <p className="text-[7px] font-black uppercase tracking-[0.18em] text-amber-100/50">Selected ground</p>
               <div className="mt-1 flex items-start justify-between gap-2">
                 <div>
@@ -92,7 +92,7 @@ export function WorldV3BasinScene({ state, dispatch }: { state: PlayState; dispa
                 data-qa="world-v3-claim-sector"
                 disabled={!selectedClaim.ok}
                 onClick={() => dispatch({ type: "claimSector", sectorId: selected.id })}
-                className="mt-2 w-full rounded-xl bg-lime-200 px-2.5 py-2 text-[9px] font-black text-stone-950 shadow-md transition hover:bg-lime-100 disabled:cursor-default disabled:bg-white/10 disabled:text-white/38"
+                className="pointer-events-auto mt-2 w-full rounded-xl bg-lime-200 px-2.5 py-2 text-[9px] font-black text-stone-950 shadow-md transition hover:bg-lime-100 disabled:cursor-default disabled:bg-white/10 disabled:text-white/38"
               >
                 {selectedOwned ? "Inside your borders" : selectedClaim.ok ? `Claim · ${expansionInfluenceCost} Influence` : "Select adjacent frontier"}
               </button>
