@@ -192,9 +192,9 @@ export const imperialCourtCases: ImperialCourtCase[] = [{
   title: "North Ridge Passage Dispute",
   prompt: "The Charter Courts receive their first case: settlers, pass wardens and caravan brokers all claim rights over A-04 North Ridge.",
   decisions: [
-    { id: "enforce-charter-law", label: "Enforce Charter Law", short: "The court makes one imperial record override local patronage.", effect: "+2 Influence; legitimacy rises because the charter settles the first border dispute.", worldEffect: "North Ridge becomes a lawful imperial passage before the first conflict system.", influenceDelta: 2 },
-    { id: "favor-frontier-settlers", label: "Favor Frontier Settlers", short: "The court grants settlement rights to families who held the pass first.", effect: "+1 Influence; frontier families become loyal but older wardens resent the ruling.", worldEffect: "North Ridge becomes a settler-first route and future expansion pressure rises.", influenceDelta: 1 },
-    { id: "protect-trade-passage", label: "Protect Trade Passage", short: "The court keeps the route open for caravans and market agents.", effect: "+1 Influence; prosperity has priority over local control.", worldEffect: "North Ridge becomes a protected trade corridor for future prosperity systems.", influenceDelta: 1 },
+    { id: "enforce-charter-law", label: "Enforce Charter Law", short: "The court makes one imperial record override local patronage.", effect: "+2 Influence, +1 Stability; legitimacy rises because the charter settles the first border dispute.", worldEffect: "North Ridge becomes a lawful imperial passage before the first conflict system.", influenceDelta: 2 },
+    { id: "favor-frontier-settlers", label: "Favor Frontier Settlers", short: "The court grants settlement rights to families who held the pass first.", effect: "+1 Influence, +1 Prosperity, -1 Stability; frontier families gain room to grow while central cohesion softens.", worldEffect: "North Ridge becomes a settler-first route and future expansion pressure rises.", influenceDelta: 1 },
+    { id: "protect-trade-passage", label: "Protect Trade Passage", short: "The court keeps the route open for caravans and market agents.", effect: "+1 Influence, +1 Prosperity; protected trade strengthens the imperial economy.", worldEffect: "North Ridge becomes a protected trade corridor for future prosperity systems.", influenceDelta: 1 },
   ],
 }];
 
@@ -204,9 +204,9 @@ export const rivalResponses: RivalResponse[] = [{
   rival: "The Obsidian March",
   prompt: "The Obsidian March rejects the Charter Courts ruling and sends riders to contest North Ridge before the law becomes permanent.",
   decisions: [
-    { id: "enforce-by-decree", label: "Enforce by Decree", short: "Send imperial writs and wardens to prove the court has teeth.", effect: "+2 Influence, +8 Rival Pressure; the empire makes its first hard conflict signal.", worldEffect: "North Ridge is marked as a lawful border under active rival challenge.", influenceDelta: 2, pressureDelta: 8 },
-    { id: "offer-tribute-passage", label: "Offer Tribute Passage", short: "Pay for safe passage and delay open conflict.", effect: "-2 Influence, -6 Rival Pressure; peace is bought but the rival learns the court can be bargained with.", worldEffect: "North Ridge stays open through tribute, turning the first conflict into an economic pressure point.", influenceDelta: -2, pressureDelta: -6 },
-    { id: "summon-border-assembly", label: "Summon Border Assembly", short: "Call settlers, wardens and merchants to publicly defend the ruling.", effect: "+1 Influence, -3 Rival Pressure; legitimacy becomes the weapon before armies move.", worldEffect: "North Ridge becomes a public legitimacy test watched by neighboring powers.", influenceDelta: 1, pressureDelta: -3 },
+    { id: "enforce-by-decree", label: "Enforce by Decree", short: "Send imperial writs and wardens to prove the court has teeth.", effect: "+2 Influence, +8 Rival Pressure, +1 Stability, -1 Prosperity; hard enforcement strengthens cohesion while disrupting growth.", worldEffect: "North Ridge is marked as a lawful border under active rival challenge.", influenceDelta: 2, pressureDelta: 8 },
+    { id: "offer-tribute-passage", label: "Offer Tribute Passage", short: "Pay for safe passage and delay open conflict.", effect: "-2 Influence, -6 Rival Pressure, +1 Prosperity, -1 Stability; commerce continues while authority looks softer.", worldEffect: "North Ridge stays open through tribute, turning the first conflict into an economic pressure point.", influenceDelta: -2, pressureDelta: -6 },
+    { id: "summon-border-assembly", label: "Summon Border Assembly", short: "Call settlers, wardens and merchants to publicly defend the ruling.", effect: "+1 Influence, -3 Rival Pressure, +1 Stability; public legitimacy reinforces national cohesion.", worldEffect: "North Ridge becomes a public legitimacy test watched by neighboring powers.", influenceDelta: 1, pressureDelta: -3 },
   ],
 }];
 
@@ -215,9 +215,9 @@ export const conflictEscalations: ConflictEscalation[] = [{
   title: "The First Imperial Ultimatum",
   prompt: "After Enforce by Decree, the Obsidian March waits to see whether the Aurelian Empire chooses arms, tariffs, or envoys.",
   decisions: [
-    { id: "raise-border-host", label: "Raise the Border Host", short: "Muster wardens and levy banners at North Ridge before the first battle system exists.", effect: "+1 Influence, +12 Rival Pressure; war-prep becomes the next visible frontier layer.", worldEffect: "A border host musters at North Ridge, turning the conflict into military readiness without simulating battle yet.", influenceDelta: 1, pressureDelta: 12 },
-    { id: "seize-pass-tariffs", label: "Seize the Pass Tariffs", short: "Answer the March through toll houses, caravan controls and pressure on trade.", effect: "+3 Influence, +4 Rival Pressure; economic coercion becomes the first conflict lever.", worldEffect: "Tariff posts turn North Ridge into an economic choke point watched by rival merchants.", influenceDelta: 3, pressureDelta: 4 },
-    { id: "summon-rival-envoys", label: "Summon the Rival Envoys", short: "Force the rival into public law before soldiers decide the pass.", effect: "+2 Influence, -5 Rival Pressure; diplomacy and law delay open war.", worldEffect: "Envoys are summoned to the pass, keeping the conflict inside imperial legitimacy for now.", influenceDelta: 2, pressureDelta: -5 },
+    { id: "raise-border-host", label: "Raise the Border Host", short: "Muster wardens and levy banners at North Ridge before the first battle system exists.", effect: "+1 Influence, +12 Rival Pressure, +1 Stability, -1 Prosperity; mobilization hardens cohesion while slowing civilian growth.", worldEffect: "A border host musters at North Ridge, turning the conflict into military readiness without simulating battle yet.", influenceDelta: 1, pressureDelta: 12 },
+    { id: "seize-pass-tariffs", label: "Seize the Pass Tariffs", short: "Answer the March through toll houses, caravan controls and pressure on trade.", effect: "+3 Influence, +4 Rival Pressure, +1 Prosperity; tariff control turns imperial leverage into organized growth.", worldEffect: "Tariff posts turn North Ridge into an economic choke point watched by rival merchants.", influenceDelta: 3, pressureDelta: 4 },
+    { id: "summon-rival-envoys", label: "Summon the Rival Envoys", short: "Force the rival into public law before soldiers decide the pass.", effect: "+2 Influence, -5 Rival Pressure, +1 Prosperity; diplomacy protects trade while delaying open war.", worldEffect: "Envoys are summoned to the pass, keeping the conflict inside imperial legitimacy for now.", influenceDelta: 2, pressureDelta: -5 },
   ],
 }];
 
@@ -612,7 +612,9 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       if (state.courtCaseDecisionId) return { ...state, view: "council", lastEvent: "The first court case is already resolved." };
       const decision = courtCase.decisions.find((item) => item.id === action.decisionId);
       if (!decision) return { ...state, view: "council", lastEvent: "Unknown court ruling." };
-      return { ...resetEmpireCrisis(state), courtCaseDecisionId: decision.id, rivalResponseDecisionId: null, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [], resources: { ...state.resources, influence: state.resources.influence + decision.influenceDelta }, season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, courtCase.title, `${decision.label}: ${decision.effect}`), lastEvent: `Court case resolved: ${decision.label}.` };
+      const stabilityDelta = decision.id === "enforce-charter-law" ? 1 : decision.id === "favor-frontier-settlers" ? -1 : 0;
+      const prosperityDelta = decision.id === "favor-frontier-settlers" || decision.id === "protect-trade-passage" ? 1 : 0;
+      return { ...resetEmpireCrisis(state), courtCaseDecisionId: decision.id, rivalResponseDecisionId: null, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [], resources: { ...state.resources, influence: state.resources.influence + decision.influenceDelta }, settlementStability: clampSettlementStability(state.settlementStability + stabilityDelta), settlementProsperity: clampSettlementProsperity(state.settlementProsperity + prosperityDelta), season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, courtCase.title, `${decision.label}: ${decision.effect}`), lastEvent: `Court case resolved: ${decision.label}. ${decision.effect}` };
     }
     case "resolveRivalResponse": {
       const response = getRivalResponse(state);
@@ -620,7 +622,9 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       if (state.rivalResponseDecisionId) return { ...state, view: "council", lastEvent: "The first rival response is already answered." };
       const decision = response.decisions.find((item) => item.id === action.decisionId);
       if (!decision) return { ...state, view: "council", lastEvent: "Unknown rival response." };
-      return { ...resetEmpireCrisis(state), rivalResponseDecisionId: decision.id, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [], resources: { ...state.resources, influence: Math.max(0, state.resources.influence + decision.influenceDelta) }, season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, response.title, `${decision.label}: ${decision.effect}`), lastEvent: `Rival response answered: ${decision.label}.` };
+      const stabilityDelta = decision.id === "enforce-by-decree" || decision.id === "summon-border-assembly" ? 1 : decision.id === "offer-tribute-passage" ? -1 : 0;
+      const prosperityDelta = decision.id === "offer-tribute-passage" ? 1 : decision.id === "enforce-by-decree" ? -1 : 0;
+      return { ...resetEmpireCrisis(state), rivalResponseDecisionId: decision.id, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [], resources: { ...state.resources, influence: Math.max(0, state.resources.influence + decision.influenceDelta) }, settlementStability: clampSettlementStability(state.settlementStability + stabilityDelta), settlementProsperity: clampSettlementProsperity(state.settlementProsperity + prosperityDelta), season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, response.title, `${decision.label}: ${decision.effect}`), lastEvent: `Rival response answered: ${decision.label}. ${decision.effect}` };
     }
     case "resolveConflictEscalation": {
       const escalation = getConflictEscalation(state);
@@ -628,7 +632,9 @@ export function playReducer(state: PlayState, action: PlayAction): PlayState {
       if (state.conflictEscalationDecisionId) return { ...state, view: "council", lastEvent: "The first imperial ultimatum is already recorded." };
       const decision = escalation.decisions.find((item) => item.id === action.decisionId);
       if (!decision) return { ...state, view: "council", lastEvent: "Unknown conflict escalation." };
-      return { ...resetEmpireCrisis(state), conflictEscalationDecisionId: decision.id, standoffDecisionId: null, imperialTurnActionIds: [], resources: { ...state.resources, influence: Math.max(0, state.resources.influence + decision.influenceDelta) }, season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, escalation.title, `${decision.label}: ${decision.effect}`), lastEvent: `Conflict escalation chosen: ${decision.label}.` };
+      const stabilityDelta = decision.id === "raise-border-host" ? 1 : 0;
+      const prosperityDelta = decision.id === "raise-border-host" ? -1 : decision.id === "seize-pass-tariffs" || decision.id === "summon-rival-envoys" ? 1 : 0;
+      return { ...resetEmpireCrisis(state), conflictEscalationDecisionId: decision.id, standoffDecisionId: null, imperialTurnActionIds: [], resources: { ...state.resources, influence: Math.max(0, state.resources.influence + decision.influenceDelta) }, settlementStability: clampSettlementStability(state.settlementStability + stabilityDelta), settlementProsperity: clampSettlementProsperity(state.settlementProsperity + prosperityDelta), season: Math.min(12, state.season + 1), view: "council", chronicle: pushChronicle(state, escalation.title, `${decision.label}: ${decision.effect}`), lastEvent: `Conflict escalation chosen: ${decision.label}. ${decision.effect}` };
     }
     case "resolveStandoff": {
       const branch = getStrategicPosture(state);

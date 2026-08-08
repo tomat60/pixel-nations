@@ -56,6 +56,7 @@ jobs:
           npm run qa:settlement
           npm run --if-present qa:nation
           npm run --if-present qa:empire-founding
+          npm run --if-present qa:imperial-governance
 
   play-visual-qa:
     name: Generate /play gameplay evidence
@@ -129,6 +130,12 @@ jobs:
         continue-on-error: true
         run: npm run qa:empire-founding
 
+      - name: Generate Imperial Governance evidence
+        id: imperial_governance
+        if: always()
+        continue-on-error: true
+        run: npm run qa:imperial-governance
+
       - name: Generate posture evidence
         id: posture
         if: always()
@@ -173,6 +180,7 @@ jobs:
             public/qa/settlement-economy
             public/qa/nation-stewardship
             public/qa/empire-founding-tradeoff
+            public/qa/imperial-governance
           if-no-files-found: error
           retention-days: 7
 
@@ -187,6 +195,7 @@ jobs:
           SETTLEMENT_OUTCOME: ${{ steps.settlement.outcome }}
           NATION_OUTCOME: ${{ steps.nation.outcome }}
           EMPIRE_FOUNDING_OUTCOME: ${{ steps.empire_founding.outcome }}
+          IMPERIAL_GOVERNANCE_OUTCOME: ${{ steps.imperial_governance.outcome }}
           POSTURE_OUTCOME: ${{ steps.posture.outcome }}
           IMPERIAL_OUTCOME: ${{ steps.imperial.outcome }}
           FINALE_OUTCOME: ${{ steps.finale.outcome }}
@@ -206,6 +215,7 @@ jobs:
             settlement: process.env.SETTLEMENT_OUTCOME,
             nation: process.env.NATION_OUTCOME,
             empireFounding: process.env.EMPIRE_FOUNDING_OUTCOME,
+            imperialGovernance: process.env.IMPERIAL_GOVERNANCE_OUTCOME,
             posture: process.env.POSTURE_OUTCOME,
             imperial: process.env.IMPERIAL_OUTCOME,
             finale: process.env.FINALE_OUTCOME,
@@ -227,9 +237,7 @@ jobs:
 
           const interactions = await readJson("public/qa/play-latest/interaction-log.json", "primary interaction log");
           if (Array.isArray(interactions)) {
-            for (const item of interactions.filter((entry) => entry.status !== "ok")) {
-              failures.push(`primary ${item.viewport}/${item.stepId}: ${item.error ?? item.status}`);
-            }
+            for (const item of interactions.filter((entry) => entry.status !== "ok")) failures.push(`primary ${item.viewport}/${item.stepId}: ${item.error ?? item.status}`);
           }
 
           const village = await readJson("public/qa/village-scene/village-scene-result.json", "Village result");
@@ -259,6 +267,11 @@ jobs:
           if (empireFounding && empireFounding.status !== "PASS") failures.push(`Empire founding result: ${empireFounding.blockingStep || "unknown"}: ${empireFounding.error || empireFounding.status}`);
           if (empireFounding && (!Array.isArray(empireFounding.viewports) || empireFounding.viewports.length !== 2)) failures.push("Empire founding tradeoff must include desktop and mobile evidence.");
           if (empireFounding && (!Array.isArray(empireFounding.screenshots) || empireFounding.screenshots.length !== 2)) failures.push("Empire founding tradeoff must include two screenshots.");
+
+          const governance = await readJson("public/qa/imperial-governance/imperial-governance-result.json", "Imperial Governance result");
+          if (governance && governance.status !== "PASS") failures.push(`Imperial Governance result: ${governance.blockingStep || "unknown"}: ${governance.error || governance.status}`);
+          if (governance && (!Array.isArray(governance.viewports) || governance.viewports.length !== 2)) failures.push("Imperial Governance must include desktop and mobile evidence.");
+          if (governance && (!Array.isArray(governance.screenshots) || governance.screenshots.length !== 2)) failures.push("Imperial Governance must include exactly two screenshots.");
 
           const advancedEvidence = [
             ["public/qa/play-latest/branches/branch-summary.json", "posture evidence"],
