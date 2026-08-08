@@ -27,7 +27,7 @@ import {
   playV1StorageKey,
   type PlayState,
 } from "./lib/play-state";
-import { WorldMapScene } from "./world/WorldMapScene";
+import { WorldV3BasinScene } from "./world/WorldV3BasinScene";
 
 const aurelianInitialPlayState: PlayState = {
   ...initialPlayState,
@@ -119,7 +119,7 @@ export default function PlayPrototypePage() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(250,204,21,.18),transparent_30%),radial-gradient(circle_at_78%_22%,rgba(56,189,248,.15),transparent_32%),linear-gradient(180deg,#101711_0%,#050807_100%)]" />
       <section className="relative z-10 h-full p-2 md:p-4">
         <div data-qa="map-stage" className="relative h-full overflow-hidden rounded-[1.5rem] border border-amber-200/20 bg-[#1d2d23] shadow-[0_30px_90px_rgba(0,0,0,.45)] md:rounded-[2rem]">
-          {isVillage ? <AurelianVillageScene state={state} dispatch={dispatch} /> : isWorld ? <WorldMapScene state={state} dispatch={dispatch} /> : <MapStage state={state} dispatch={dispatch} />}
+          {isVillage ? <AurelianVillageScene state={state} dispatch={dispatch} /> : isWorld ? <WorldV3BasinScene state={state} dispatch={dispatch} /> : <MapStage state={state} dispatch={dispatch} />}
           <TopBar state={state} />
           <CurrentObjective state={state} demoComplete={demoComplete} demoOverlayDismissed={demoOverlayDismissed} founderRecordAvailable={founderRecordReady} secondRunStarted={secondRunStarted} onOpenFounderRecord={openFounderRecord} />
           {showOpeningGuide ? <OpeningGuide selectedName={selected.name} /> : null}
