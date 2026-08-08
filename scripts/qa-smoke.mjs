@@ -45,7 +45,7 @@ async function runSmoke(page) {
   await step("Council remains reachable", async () => {
     await clickView(page, "council", "Council remains reachable");
     await page.locator('[data-qa="council-panel"]').waitFor({ state: "visible", timeout: 5000 });
-    await page.getByText("From land to empire", { exact: false }).first().waitFor({ state: "visible", timeout: 5000 });
+    await page.getByRole("heading", { name: "Aurelian Council", exact: true }).waitFor({ state: "visible", timeout: 5000 });
   });
 }
 
