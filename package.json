@@ -18,7 +18,7 @@
     "qa:settlement": "node scripts/qa-settlement-economy.mjs",
     "qa:nation": "node scripts/qa-nation-stewardship.mjs",
     "qa:empire-founding": "node scripts/qa-empire-founding-tradeoff.mjs",
-    "qa:imperial-governance": "node scripts/qa-imperial-governance.mjs",
+    "qa:imperial-governance": "node scripts/qa-imperial-governance.mjs && node scripts/qa-imperial-governance-visual.mjs",
     "qa:rc1": "node scripts/qa-public-entry.mjs",
     "qa:public-evidence": "node scripts/pn-handoff.mjs --check-public-evidence",
     "pn:handoff": "node scripts/pn-handoff.mjs",
