@@ -15,6 +15,7 @@ export function BottomDock({ activeView, dispatch }: { activeView: ViewId; dispa
         <button
           key={item.id}
           data-qa={`view-${item.id}`}
+          data-active={activeView === item.id ? "true" : "false"}
           onClick={() => dispatch({ type: "setView", view: item.id })}
           className={`rounded-xl px-1 py-1.5 text-[9px] font-black uppercase tracking-wide transition md:px-2 md:py-2 md:text-xs ${activeView === item.id ? "bg-amber-300 text-stone-950 shadow-md ring-1 ring-amber-100/70" : "bg-white/4 text-amber-50/68 hover:bg-white/10"}`}
         >
