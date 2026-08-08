@@ -1,91 +1,96 @@
 import Image, { type StaticImageData } from "next/image";
 import type { PlayAction, PlayState } from "../lib/play-state";
 import { getDevelopmentScore, getOwnedPlot, getPhase, getPopulation } from "../lib/play-state";
-import { getAurelianSettlementStage, type AurelianSettlementStage } from "../lib/aurelian-progression";
-import campDesktop from "../../../review/aurelian-staged-progression-m1/aurelian-camp-desktop.png";
-import campPortrait from "../../../review/aurelian-staged-progression-m1/aurelian-camp-portrait.png";
-import shelterDesktop from "../../../review/aurelian-staged-progression-m1/aurelian-first_shelter-desktop.png";
-import shelterPortrait from "../../../review/aurelian-staged-progression-m1/aurelian-first_shelter-portrait.png";
-import developedDesktop from "../../../review/aurelian-staged-progression-m1/aurelian-developed_settlement-desktop.png";
-import developedPortrait from "../../../review/aurelian-staged-progression-m1/aurelian-developed_settlement-portrait.png";
+import {
+  aurelianVillageV4Stages,
+  getAurelianSettlementStage,
+  getAurelianVillageV4Stage,
+  type AurelianVillageV4Stage,
+} from "../lib/aurelian-progression";
 
-type StageVisual = { desktop: StaticImageData; portrait: StaticImageData; label: string; alt: string };
+import desktopBase from "../../../game/art_target/village_v4_reauthor/desktop/base-terrain.webp";
+import desktopCamp from "../../../game/art_target/village_v4_reauthor/desktop/stage-01-camp.webp";
+import desktopShelter from "../../../game/art_target/village_v4_reauthor/desktop/stage-02-shelter.webp";
+import desktopFood from "../../../game/art_target/village_v4_reauthor/desktop/stage-03-food.webp";
+import desktopTimber from "../../../game/art_target/village_v4_reauthor/desktop/stage-04-timber.webp";
+import desktopScout from "../../../game/art_target/village_v4_reauthor/desktop/stage-05-scout.webp";
+import desktopStorehouse from "../../../game/art_target/village_v4_reauthor/desktop/stage-06-storehouse.webp";
+import desktopMarket from "../../../game/art_target/village_v4_reauthor/desktop/stage-07-market.webp";
+import desktopWatch from "../../../game/art_target/village_v4_reauthor/desktop/stage-08-watch.webp";
+import desktopCouncil from "../../../game/art_target/village_v4_reauthor/desktop/stage-09-council.webp";
 
-const stageVisuals: Record<AurelianSettlementStage, StageVisual> = {
-  camp: {
-    desktop: campDesktop,
-    portrait: campPortrait,
-    label: "First camp",
-    alt: "A sparse camp beside the river and low bridge in Aurelian Basin",
-  },
-  first_shelter: {
-    desktop: shelterDesktop,
-    portrait: shelterPortrait,
-    label: "First shelter",
-    alt: "The first shelter connected to the retained camp in Aurelian Basin",
-  },
-  developed_settlement: {
-    desktop: developedDesktop,
-    portrait: developedPortrait,
-    label: "Living settlement",
-    alt: "The developed Aurelian settlement with homes, market, well and civic buildings",
-  },
-};
+import portraitBase from "../../../game/art_target/village_v4_reauthor/portrait/base-terrain.webp";
+import portraitCamp from "../../../game/art_target/village_v4_reauthor/portrait/stage-01-camp.webp";
+import portraitShelter from "../../../game/art_target/village_v4_reauthor/portrait/stage-02-shelter.webp";
+import portraitFood from "../../../game/art_target/village_v4_reauthor/portrait/stage-03-food.webp";
+import portraitTimber from "../../../game/art_target/village_v4_reauthor/portrait/stage-04-timber.webp";
+import portraitScout from "../../../game/art_target/village_v4_reauthor/portrait/stage-05-scout.webp";
+import portraitStorehouse from "../../../game/art_target/village_v4_reauthor/portrait/stage-06-storehouse.webp";
+import portraitMarket from "../../../game/art_target/village_v4_reauthor/portrait/stage-07-market.webp";
+import portraitWatch from "../../../game/art_target/village_v4_reauthor/portrait/stage-08-watch.webp";
+import portraitCouncil from "../../../game/art_target/village_v4_reauthor/portrait/stage-09-council.webp";
 
-const stageEntries = Object.entries(stageVisuals) as Array<[AurelianSettlementStage, StageVisual]>;
+type V4Layer = { id: AurelianVillageV4Stage; desktop: StaticImageData; portrait: StaticImageData };
+
+const v4Layers: V4Layer[] = [
+  { id: "camp", desktop: desktopCamp, portrait: portraitCamp },
+  { id: "shelter", desktop: desktopShelter, portrait: portraitShelter },
+  { id: "food", desktop: desktopFood, portrait: portraitFood },
+  { id: "timber", desktop: desktopTimber, portrait: portraitTimber },
+  { id: "scout", desktop: desktopScout, portrait: portraitScout },
+  { id: "storehouse", desktop: desktopStorehouse, portrait: portraitStorehouse },
+  { id: "market", desktop: desktopMarket, portrait: portraitMarket },
+  { id: "watch", desktop: desktopWatch, portrait: portraitWatch },
+  { id: "council", desktop: desktopCouncil, portrait: portraitCouncil },
+];
 
 export function AurelianVillageScene({ state, dispatch }: { state: PlayState; dispatch: (action: PlayAction) => void }) {
-  const stageId = getAurelianSettlementStage(state) ?? "camp";
-  const visual = stageVisuals[stageId];
+  const legacyStageId = getAurelianSettlementStage(state) ?? "camp";
+  const v4StageId = getAurelianVillageV4Stage(state) ?? "camp";
+  const activeIndex = Math.max(0, v4Layers.findIndex((layer) => layer.id === v4StageId));
+  const stageLabel = aurelianVillageV4Stages.find((stage) => stage.id === v4StageId)?.label ?? "First camp";
   const owned = getOwnedPlot(state);
   const hasClaim = state.ownedPlotIds.length > 0;
 
   return (
     <section
       data-qa="aurelian-village-scene"
-      data-aurelian-stage={stageId}
+      data-aurelian-stage={legacyStageId}
+      data-aurelian-v4-stage={v4StageId}
+      data-aurelian-v4-layer-count={activeIndex + 1}
       className="absolute inset-0 overflow-hidden bg-[#5e6a50]"
     >
       <div data-qa="aurelian-village-stage" className="absolute inset-0">
-        {stageEntries.map(([candidateId, candidate]) => {
-          const isActive = candidateId === stageId;
+        <VillageArtImage src={portraitBase} viewport="portrait" qa="aurelian-v4-base" active />
+        <VillageArtImage src={desktopBase} viewport="desktop" qa="aurelian-v4-base" active />
+
+        {v4Layers.map((layer, index) => {
+          const active = index <= activeIndex;
           return (
-            <Image
-              key={`portrait-${candidateId}`}
-              src={candidate.portrait}
-              alt={isActive ? candidate.alt : ""}
-              aria-hidden={!isActive}
-              data-qa="aurelian-stage-image"
-              data-aurelian-image-stage={candidateId}
-              data-aurelian-viewport="portrait"
-              data-aurelian-active={isActive ? "true" : "false"}
-              fill
-              priority
-              sizes="(max-width: 767px) 100vw, 1px"
-              className={`pointer-events-none object-cover object-center transition-opacity duration-300 md:hidden ${isActive ? "opacity-100" : "opacity-0"}`}
+            <VillageArtImage
+              key={`portrait-${layer.id}`}
+              src={layer.portrait}
+              viewport="portrait"
+              qa="aurelian-v4-layer"
+              stage={layer.id}
+              active={active}
             />
           );
         })}
-        {stageEntries.map(([candidateId, candidate]) => {
-          const isActive = candidateId === stageId;
+        {v4Layers.map((layer, index) => {
+          const active = index <= activeIndex;
           return (
-            <Image
-              key={`desktop-${candidateId}`}
-              src={candidate.desktop}
-              alt={isActive ? candidate.alt : ""}
-              aria-hidden={!isActive}
-              data-qa="aurelian-stage-image"
-              data-aurelian-image-stage={candidateId}
-              data-aurelian-viewport="desktop"
-              data-aurelian-active={isActive ? "true" : "false"}
-              fill
-              priority
-              sizes="(min-width: 768px) 100vw, 1px"
-              className={`pointer-events-none hidden object-cover object-center transition-opacity duration-300 md:block ${isActive ? "opacity-100" : "opacity-0"}`}
+            <VillageArtImage
+              key={`desktop-${layer.id}`}
+              src={layer.desktop}
+              viewport="desktop"
+              qa="aurelian-v4-layer"
+              stage={layer.id}
+              active={active}
             />
           );
         })}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/18 via-transparent to-black/26" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/16 via-transparent to-black/24" />
       </div>
 
       <div className="absolute left-3 right-3 top-[5.4rem] z-10 md:left-5 md:right-5 md:top-[5.9rem]">
@@ -95,7 +100,7 @@ export function AurelianVillageScene({ state, dispatch }: { state: PlayState; di
             <h2 className="truncate text-base font-black text-amber-50 md:text-xl">{owned?.name ?? "Aurelian homeland"}</h2>
           </div>
           <div className="hidden shrink-0 items-center gap-3 text-right md:flex">
-            <CompactStat label="Stage" value={visual.label} />
+            <CompactStat label="Stage" value={stageLabel} />
             <CompactStat label="People" value={getPopulation(state)} />
             <CompactStat label="Dev" value={getDevelopmentScore(state)} />
           </div>
@@ -104,7 +109,7 @@ export function AurelianVillageScene({ state, dispatch }: { state: PlayState; di
 
       <div className="absolute bottom-[7.7rem] left-3 z-20 rounded-xl border border-amber-100/18 bg-black/42 px-3 py-2 shadow-xl backdrop-blur-sm md:bottom-5 md:left-5">
         <p className="text-[8px] font-black uppercase tracking-[0.2em] text-amber-200/60">Settlement growth</p>
-        <p className="mt-0.5 text-sm font-black text-amber-50">{visual.label}</p>
+        <p className="mt-0.5 text-sm font-black text-amber-50">{stageLabel}</p>
         <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-amber-100/60">{getPhase(state)}</p>
       </div>
 
@@ -131,6 +136,37 @@ export function AurelianVillageScene({ state, dispatch }: { state: PlayState; di
         </>
       ) : null}
     </section>
+  );
+}
+
+function VillageArtImage({
+  src,
+  viewport,
+  qa,
+  stage,
+  active,
+}: {
+  src: StaticImageData;
+  viewport: "desktop" | "portrait";
+  qa: string;
+  stage?: AurelianVillageV4Stage;
+  active: boolean;
+}) {
+  const portrait = viewport === "portrait";
+  return (
+    <Image
+      src={src}
+      alt=""
+      aria-hidden="true"
+      data-qa={qa}
+      data-aurelian-v4-image-stage={stage}
+      data-aurelian-viewport={viewport}
+      data-aurelian-active={active ? "true" : "false"}
+      fill
+      priority
+      sizes={portrait ? "(max-width: 767px) 100vw, 1px" : "(min-width: 768px) 100vw, 1px"}
+      className={`pointer-events-none object-cover object-center transition-opacity duration-300 ${portrait ? "md:hidden" : "hidden md:block"} ${active ? "opacity-100" : "opacity-0"}`}
+    />
   );
 }
 
