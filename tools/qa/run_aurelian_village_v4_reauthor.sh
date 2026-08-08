@@ -36,6 +36,19 @@ curl -fsSL --retry 3 \
   "https://raw.githubusercontent.com/tomat60/pixel-nations/${PROOF_RENDERER_SHA}/tools/art/village_v4_extract_layers.py" \
   -o "$SOURCE_ROOT/village_v4_extract_layers.py"
 
+# Single evidence-backed M2 correction: tighten portrait framing only.
+# Desktop, topology, assets, roads, river and bridge remain frozen.
+python3 - <<'PY'
+from pathlib import Path
+p = Path("tools/blender/aurelian_village_v4_reauthor.py")
+s = p.read_text()
+old = '"camera": {"position": (22, -190, 151), "target": (0, 31, 7), "ortho": 108.0, "resolution": (780, 1688)}'
+new = '"camera": {"position": (22, -190, 151), "target": (0, 31, 7), "ortho": 94.0, "resolution": (780, 1688)}'
+if s.count(old) != 1:
+    raise SystemExit("Portrait camera contract changed; refusing broad correction.")
+p.write_text(s.replace(old, new))
+PY
+
 export XDG_RUNTIME_DIR="${RUNNER_TEMP:-/tmp}/pixel-nations-village-v4-reauthor-xdg"
 mkdir -p "$XDG_RUNTIME_DIR"
 chmod 700 "$XDG_RUNTIME_DIR"
