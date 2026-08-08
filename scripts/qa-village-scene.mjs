@@ -25,6 +25,8 @@ const result = {
   screenshots: [],
 };
 
+const v4Sequence = ["camp", "shelter", "food", "timber", "scout", "storehouse", "market", "watch", "council"];
+
 async function appRunning() {
   try {
     const res = await fetch(APP_URL, { signal: AbortSignal.timeout(1500) });
@@ -90,24 +92,41 @@ async function readSavedState(page, step) {
   return page.evaluate((key) => JSON.parse(window.localStorage.getItem(key)), STORAGE_KEY);
 }
 
-async function waitForStage(page, stage, step) {
-  await page.locator(`[data-qa="aurelian-village-scene"][data-aurelian-stage="${stage}"]`).waitFor({
+async function waitForV4Stage(page, stage, step) {
+  await page.locator(`[data-qa="aurelian-village-scene"][data-aurelian-v4-stage="${stage}"]`).waitFor({
     state: "visible",
     timeout: 7000,
   }).catch(() => {
-    throw new VillageQaError(step, `Expected Aurelian stage was not visible: ${stage}`);
+    throw new VillageQaError(step, `Expected Village V4 stage was not visible: ${stage}`);
   });
+}
+
+async function verifyLayerStack(page, expectedStage, step) {
+  const expectedIndex = v4Sequence.indexOf(expectedStage);
+  if (expectedIndex < 0) throw new VillageQaError(step, `Unknown expected V4 stage: ${expectedStage}`);
+  const scene = page.locator('[data-qa="aurelian-village-scene"]');
+  const count = Number(await scene.getAttribute("data-aurelian-v4-layer-count"));
+  if (count !== expectedIndex + 1) {
+    throw new VillageQaError(step, `Expected ${expectedIndex + 1} persistent V4 layers at ${expectedStage}, got ${count}`);
+  }
+  const viewport = (await page.viewportSize())?.width < 768 ? "portrait" : "desktop";
+  const layers = page.locator(`[data-qa="aurelian-v4-layer"][data-aurelian-viewport="${viewport}"]`);
+  if (await layers.count() !== 9) throw new VillageQaError(step, `Expected 9 ${viewport} V4 layers`);
+  for (let index = 0; index < 9; index += 1) {
+    const expectedActive = index <= expectedIndex ? "true" : "false";
+    const actual = await layers.nth(index).getAttribute("data-aurelian-active");
+    if (actual !== expectedActive) {
+      throw new VillageQaError(step, `Layer ${index + 1} at ${expectedStage}: expected active=${expectedActive}, got ${actual}`);
+    }
+  }
 }
 
 async function captureState(browser, page, name, expectedStage) {
   const step = `capture ${name}`;
-  await waitForStage(page, expectedStage, step);
-  await page.waitForTimeout(200);
+  await waitForV4Stage(page, expectedStage, step);
+  await verifyLayerStack(page, expectedStage, `${step} desktop layers`);
+  await page.waitForTimeout(250);
   const state = await readSavedState(page, step);
-  const actualStage = await page.locator('[data-qa="aurelian-village-scene"]').getAttribute("data-aurelian-stage");
-  if (actualStage !== expectedStage) {
-    throw new VillageQaError(step, `Expected stage ${expectedStage}, got ${actualStage}`);
-  }
 
   const desktopPath = `${OUTPUT_DIR}/${name}-desktop.png`;
   await page.screenshot({ path: desktopPath, fullPage: true });
@@ -118,8 +137,9 @@ async function captureState(browser, page, name, expectedStage) {
   }, { key: STORAGE_KEY, savedState: state });
   const mobilePage = await mobileContext.newPage();
   await mobilePage.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded" });
-  await waitForStage(mobilePage, expectedStage, `${step} mobile`);
-  await mobilePage.waitForTimeout(200);
+  await waitForV4Stage(mobilePage, expectedStage, `${step} mobile`);
+  await verifyLayerStack(mobilePage, expectedStage, `${step} mobile layers`);
+  await mobilePage.waitForTimeout(250);
 
   const overflow = await mobilePage.evaluate(() => ({
     innerWidth: window.innerWidth,
@@ -137,7 +157,7 @@ async function captureState(browser, page, name, expectedStage) {
   result.screenshots.push(desktopPath, mobilePath);
   result.captures.push({
     name,
-    stage: actualStage,
+    stage: expectedStage,
     completedOrders: state.completedOrders,
     settlementMarkers: state.settlementMarkers,
     desktop: desktopPath,
@@ -181,30 +201,37 @@ async function main() {
 
     await captureState(browser, page, "01-camp", "camp");
 
-    await runOrder(page, "Raise Shelter", "raise-shelter");
-    await captureState(browser, page, "02-first-shelter", "first_shelter");
+    const steps = [
+      ["Raise Shelter", "raise-shelter", "02-shelter", "shelter"],
+      ["Gather Food", "gather-food", "03-food", "food"],
+      ["Cut Timber", "cut-timber", "04-timber", "timber"],
+      ["Scout Nearby Land", "scout-nearby", "05-scout", "scout"],
+      ["Build Storehouse", "build-storehouse", "06-storehouse", "storehouse"],
+      ["Open Market Path", "open-market", "07-market", "market"],
+      ["Fortify Watch", "fortify-watch", "08-watch", "watch"],
+      ["Form Council", "form-council", "09-council", "council"],
+    ];
 
-    await runOrder(page, "Gather Food", "gather-food");
-    await runOrder(page, "Cut Timber", "cut-timber");
-    await runOrder(page, "Scout Nearby Land", "scout-nearby");
-    await runOrder(page, "Build Storehouse", "build-storehouse");
-    await captureState(browser, page, "03-developed-settlement", "developed_settlement");
+    for (const [label, orderId, captureName, stage] of steps) {
+      await runOrder(page, label, orderId);
+      await captureState(browser, page, captureName, stage);
+    }
 
-    if (result.captures.length !== 3 || result.screenshots.length !== 6) {
-      throw new VillageQaError("verify evidence count", `Expected 3 stages and 6 screenshots; got ${result.captures.length} stages and ${result.screenshots.length} screenshots`);
+    if (result.captures.length !== 9 || result.screenshots.length !== 18) {
+      throw new VillageQaError("verify evidence count", `Expected 9 stages and 18 screenshots; got ${result.captures.length} stages and ${result.screenshots.length} screenshots`);
     }
 
     const stages = result.captures.map((capture) => capture.stage).join("|");
-    if (stages !== "camp|first_shelter|developed_settlement") {
-      throw new VillageQaError("verify stage sequence", `Unexpected Aurelian sequence: ${stages}`);
+    if (stages !== v4Sequence.join("|")) {
+      throw new VillageQaError("verify stage sequence", `Unexpected Village V4 sequence: ${stages}`);
     }
 
     await context.close();
     await writeResult("PASS");
-    console.log(`Aurelian Village QA PASS. Three stages and six screenshots written to ${OUTPUT_DIR}`);
+    console.log(`Village V4 QA PASS. Nine persistent stages and eighteen screenshots written to ${OUTPUT_DIR}`);
   } catch (error) {
     await writeResult("FAIL", error);
-    console.error(`Aurelian Village QA FAIL at ${result.blockingStep}: ${result.error}`);
+    console.error(`Village V4 QA FAIL at ${result.blockingStep}: ${result.error}`);
     process.exitCode = 1;
   } finally {
     await browser?.close().catch(() => {});
