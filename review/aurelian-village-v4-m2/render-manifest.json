@@ -53,43 +53,43 @@
       "frames": {
         "base": {
           "path": "desktop/base.png",
-          "sha256": "97bedf1d06c65e7fac7db048df4f18e4d180ecc5a82befc6b4cb356180eea7ad"
+          "sha256": "71f7a34b16eaffbfc0dd3b84fb0772c48212804f4bc14906179887bc4ecf099f"
         },
         "camp": {
           "path": "desktop/stage-01-camp.png",
-          "sha256": "1f950232fcc209941c4acea59030d69913c4f7a3c3ec78a7eb6f509c5e1fa275"
+          "sha256": "59c4121ace4df78f3fa1d5446afecbce20bec46987866ff52bf2a7ae596e3229"
         },
         "shelter": {
           "path": "desktop/stage-02-shelter.png",
-          "sha256": "cfb4d1a73459170f18735233b49c928a71498e1f98c9caf3b1ec183e158cbda9"
+          "sha256": "702f32a18a589696a8296daf1ac8bc7c2598a04b0fea0ea02f83c24269644e82"
         },
         "food": {
           "path": "desktop/stage-03-food.png",
-          "sha256": "3911ef42e9fc702140464c827fd06e736975385398bc3eaaea1a07d75c977db0"
+          "sha256": "bf199b6b6f30392f7ea98b9932744989ecb77af1bdb0a1c0ae49a10de1675800"
         },
         "timber": {
           "path": "desktop/stage-04-timber.png",
-          "sha256": "0773c46e11712683568a01a8ecc35e9fbfa63ea4fa8c8bd6956367093f439e65"
+          "sha256": "19e4a63cc513c4fbe0f58df669d7a70021c98862c983fdd514015ef9a9a4fbe5"
         },
         "scout": {
           "path": "desktop/stage-05-scout.png",
-          "sha256": "830fce4c9b26190a033e5bcc76380dbaad41289c95aad31e25dc47be5d5dd5c5"
+          "sha256": "396bbb68295914e1715bac2f2ba38d9e1abbe341a359231d3d6d77ac8465c530"
         },
         "storehouse": {
           "path": "desktop/stage-06-storehouse.png",
-          "sha256": "34d254ebe7abf5896abff1bd8a6b123861b539eb39fba4fb01451bbe8fb056d4"
+          "sha256": "ab931e287c263d10bcfbe059ba383fd79001e01e9d609d9eb72f9b701ddfe48c"
         },
         "market": {
           "path": "desktop/stage-07-market.png",
-          "sha256": "b8e5201fd1c3d74021d7a32e932a510fd873c033e9dab54af1b7635341688f0b"
+          "sha256": "042a7a569e44f731f68413cea0f14e7aec6869b1cf331b51427abcbb7dd733cd"
         },
         "watch": {
           "path": "desktop/stage-08-watch.png",
-          "sha256": "850b280533d3fc938482407db13cca951e20f164d06d21944af1f9ce9c956f89"
+          "sha256": "7f466ed8162a06ed7bbdccca38828d8875b6489f982fafb607ba61a370aad659"
         },
         "council": {
           "path": "desktop/stage-09-council.png",
-          "sha256": "60e34cec08fccc221c45566d874fbf409acfbbe5249e3e090438d814b80744fd"
+          "sha256": "8ed5098dd1a7d9ea84d5c4ab4babe2b457efb80432519177648612e64fd9d09d"
         }
       },
       "placements": {
@@ -1560,7 +1560,7 @@
           31,
           7
         ],
-        "ortho": 108.0,
+        "ortho": 94.0,
         "resolution": [
           780,
           1688
@@ -1582,43 +1582,43 @@
       "frames": {
         "base": {
           "path": "portrait/base.png",
-          "sha256": "9c49f96d9e6dd976cc4a8cc305ceae5ce73c49bbc34af721ec96eaa835ddc0ef"
+          "sha256": "20873b02333b2922e11939ed8f10f06a07853df7f3828238061e24ad27e1e1a7"
         },
         "camp": {
           "path": "portrait/stage-01-camp.png",
-          "sha256": "d92c20e8b9b2d66e5d680ccc478bb60af8345881748fad29132c452df8759a3c"
+          "sha256": "308a8a8588c5f5dfa6f016e5c57cb6727e49172624e25d673705135945eb77ad"
         },
         "shelter": {
           "path": "portrait/stage-02-shelter.png",
-          "sha256": "8ca86a50c0f47848e80aa93a713e6317470b6c912def54ad2ebaf0883d867561"
+          "sha256": "5a7253b4a7e791d43be3f8738886934e8a47ea3a73c0c45332f70cddff532f0f"
         },
         "food": {
           "path": "portrait/stage-03-food.png",
-          "sha256": "9a0ed77054a27cac1986ac051ef99dc72429948a93c51daa4dd24c6fb0713395"
+          "sha256": "62e3b6d24f58095eb9c3749de8511ea54eee351140b96e6ab3d7d8d7fbf1576e"
         },
         "timber": {
           "path": "portrait/stage-04-timber.png",
-          "sha256": "1f9a413343ca9503254eb711e463d7a5f27f62edd6f9fc29411151cef5566f96"
+          "sha256": "0c9b895f6396728d500a354a45f9cf1f68e0aa11fd4c835644e26aa5cd96c1cf"
         },
         "scout": {
           "path": "portrait/stage-05-scout.png",
-          "sha256": "adf2d6ed30371708201b9d6a2bfc7ed20b0b7eea705d771260bba775e985dc65"
+          "sha256": "4283fe81e5728ab13a4d0c2c92f75d52dc08001bc54dc0d9237d40d814b82ea8"
         },
         "storehouse": {
           "path": "portrait/stage-06-storehouse.png",
-          "sha256": "cb04ac6c4f42b94c35e8ae1413c08e0951b0eeef7194fbc1a5e921262d0dcaff"
+          "sha256": "db20cbf91ef8d9538c621fe26489a6f46a6d9ad85f8e102e1369b7a4a9bd0c20"
         },
         "market": {
           "path": "portrait/stage-07-market.png",
-          "sha256": "f0faaf6116346fb3b09f40cee471c36e6dfbf35eda3f40f3c2e2440e0927b74c"
+          "sha256": "043b7c4ae670437ba9552e35ef9f466dcf63987baac17f3d1664282789f794c4"
         },
         "watch": {
           "path": "portrait/stage-08-watch.png",
-          "sha256": "93bcba47a5f64377c40c072c964597d7cda4b48cf52e8a1e3e3e001ccd60aaa1"
+          "sha256": "54252f3ef0800c8a762f010d3d88ce9c0570fe39998b7507fd891c851fb695f9"
         },
         "council": {
           "path": "portrait/stage-09-council.png",
-          "sha256": "c49ba70e721ec54983e2e6d251110204487dbb274526a958b7ea64b7b3cb4519"
+          "sha256": "e2ee4b5b6663f277c23e335b59431c9268c7195a8abbb5fad47d01f356b5f2d8"
         }
       },
       "placements": {

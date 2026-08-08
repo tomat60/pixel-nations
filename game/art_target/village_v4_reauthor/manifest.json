@@ -1,9 +1,9 @@
 {
   "classification": "PENDING_DIRECT_VISUAL_REVIEW",
   "contract": "VILLAGE_V4_NINE_LAYER_PROOF",
-  "generated_at": "2026-08-08T03:56:18.140384+00:00",
-  "input_sha": "a0838d2803a9d491452d889eb7c4f60c4bd2e9d2",
-  "github_run_id": "31238008720",
+  "generated_at": "2026-08-08T05:58:33.997800+00:00",
+  "input_sha": "d003ba6bc11be878eeb0b3eeecde59b1ca3d280c",
+  "github_run_id": "31242612360",
   "kaykit_commit": "84fa4e91af6a88989be7c99e0891cede11f2ca38",
   "base_script_commit": "d001d96117fc9d1de20f3ff57d7a47e2441a0393",
   "stages": [
@@ -33,8 +33,8 @@
           "id": "camp",
           "order": 1,
           "path": "desktop/stage-01-camp.webp",
-          "sha256": "37e9ed1417fe653bffb04618efe9c5597e063f3eaf170e287bfc868711e2f22a",
-          "byte_size": 53558,
+          "sha256": "138d188448075b7e5a3b8c974e954d16c399500641e713695385681e4e938e69",
+          "byte_size": 53568,
           "changed_pixel_ratio": 0.02526207,
           "bounds": {
             "pixels": [
@@ -59,8 +59,8 @@
           "id": "shelter",
           "order": 2,
           "path": "desktop/stage-02-shelter.webp",
-          "sha256": "9e09ec89745258849856c4c43bdfe412af2bdee410e1917beb4824c633891cb9",
-          "byte_size": 85194,
+          "sha256": "4b072103474093ce02be003025f4363871002317812dddfdc720c58e5845b40f",
+          "byte_size": 85222,
           "changed_pixel_ratio": 0.04711456,
           "bounds": {
             "pixels": [
@@ -85,9 +85,9 @@
           "id": "food",
           "order": 3,
           "path": "desktop/stage-03-food.webp",
-          "sha256": "112c35d10da83a16c438d460870f49a18ea01388afdd8cb95e2860dad1b3daef",
-          "byte_size": 135972,
-          "changed_pixel_ratio": 0.07051888,
+          "sha256": "56bda180253c2461a516973965d3df439520d80a9397c8d9e5f6c585656497fd",
+          "byte_size": 136274,
+          "changed_pixel_ratio": 0.07051926,
           "bounds": {
             "pixels": [
               544,
@@ -111,9 +111,9 @@
           "id": "timber",
           "order": 4,
           "path": "desktop/stage-04-timber.webp",
-          "sha256": "044e70e7f55f3be37a294248b35e6faaea14a44116020f7c22d79961c57a2adb",
-          "byte_size": 32714,
-          "changed_pixel_ratio": 0.01867561,
+          "sha256": "fad72fa56e9afdf9f7852f4239f37c43ee018587703401b9f13bc0b4890d5d40",
+          "byte_size": 32736,
+          "changed_pixel_ratio": 0.01867599,
           "bounds": {
             "pixels": [
               0,
@@ -137,8 +137,8 @@
           "id": "scout",
           "order": 5,
           "path": "desktop/stage-05-scout.webp",
-          "sha256": "563a3a8d7f790782513237be1ae05d8ccde0a77b00cbbf8f67574f4a67aebfea",
-          "byte_size": 36516,
+          "sha256": "de572f4a73f0f7caabd745dc09956f2b7011cc342e2a5cef57e0c221bd71a441",
+          "byte_size": 36484,
           "changed_pixel_ratio": 0.02180405,
           "bounds": {
             "pixels": [
@@ -163,8 +163,8 @@
           "id": "storehouse",
           "order": 6,
           "path": "desktop/stage-06-storehouse.webp",
-          "sha256": "152220e9f808d36dd7c5f0433af01192d53309d3e99f01b80bf59f9bc9521b0e",
-          "byte_size": 95780,
+          "sha256": "fab0162516e4b6479624e29d0d261638a471e0fbe3fe3ef7569dff43eef9e726",
+          "byte_size": 95818,
           "changed_pixel_ratio": 0.04861526,
           "bounds": {
             "pixels": [
@@ -189,9 +189,9 @@
           "id": "market",
           "order": 7,
           "path": "desktop/stage-07-market.webp",
-          "sha256": "d3be3925a34cde364d454957bcbf2814d373e0bbf13b3ae284af07c5bec732aa",
-          "byte_size": 208554,
-          "changed_pixel_ratio": 0.10904541,
+          "sha256": "39298049a82ea3b54f3f197da5a08cd39b6858ebe31ecb808e19573f843b4c35",
+          "byte_size": 208042,
+          "changed_pixel_ratio": 0.10904579,
           "bounds": {
             "pixels": [
               497,
@@ -215,9 +215,9 @@
           "id": "watch",
           "order": 8,
           "path": "desktop/stage-08-watch.webp",
-          "sha256": "9fc0d63dc5a94facb2e90fa3e0e90edf77c3b0cb3e6df08099ce54ab4a66250c",
-          "byte_size": 112122,
-          "changed_pixel_ratio": 0.04986458,
+          "sha256": "451f72a877c8486102a0efde80cc601abeecb37d87710874dfd431bec631e715",
+          "byte_size": 112048,
+          "changed_pixel_ratio": 0.04986954,
           "bounds": {
             "pixels": [
               7,
@@ -241,9 +241,9 @@
           "id": "council",
           "order": 9,
           "path": "desktop/stage-09-council.webp",
-          "sha256": "f7e6f9871127b6be68b9b9ddc46d1178d3d1fc739dc48a6feec74dceb01e20c1",
-          "byte_size": 139332,
-          "changed_pixel_ratio": 0.06652489,
+          "sha256": "c31dc571ea1f4a97dcbf9d3f5a1fe83ef78427a365567c5aee65c8bc87321ae7",
+          "byte_size": 139210,
+          "changed_pixel_ratio": 0.06652527,
           "bounds": {
             "pixels": [
               7,
@@ -282,7 +282,7 @@
         "height_ratio": 0.905469,
         "area_ratio": 0.905469
       },
-      "final_reconstruction_sha256": "a830c92515833660247167eea975d1659bf3d2f4429069a82653e76b1f6cc5f4"
+      "final_reconstruction_sha256": "bbf245b1ef73739647547fdcec1895bc79a0049952fe1ee011bcb1d16f591fc5"
     },
     "portrait": {
       "resolution": [
@@ -291,33 +291,33 @@
       ],
       "base": {
         "path": "portrait/base-terrain.webp",
-        "sha256": "3c76dadeb2133af165bd5ec102658ae34eaecd27eca8961f3d2e95863f2d49d8",
-        "byte_size": 463442
+        "sha256": "1c4da5cb5b82de3ea14c491728a436d1ae2e8d7dd46e1cbd4a723e6e326c2ce6",
+        "byte_size": 460506
       },
       "layers": [
         {
           "id": "camp",
           "order": 1,
           "path": "portrait/stage-01-camp.webp",
-          "sha256": "298bcc165bb89948cfb5e27ef0f714137d6b4f8c182812a283ffc8995ae5c884",
-          "byte_size": 34686,
-          "changed_pixel_ratio": 0.03205432,
+          "sha256": "eb0138c243ccab9a34145019818480bdc715c9fb887e6bf63b286051df2725e0",
+          "byte_size": 43488,
+          "changed_pixel_ratio": 0.0422401,
           "bounds": {
             "pixels": [
-              71,
-              1055,
-              642,
-              1446
+              24,
+              1086,
+              684,
+              1535
             ],
             "normalized": [
-              0.091026,
-              0.625,
-              0.823077,
-              0.856635
+              0.030769,
+              0.643365,
+              0.876923,
+              0.90936
             ],
-            "width_ratio": 0.732051,
-            "height_ratio": 0.231635,
-            "area_ratio": 0.169569
+            "width_ratio": 0.846154,
+            "height_ratio": 0.265995,
+            "area_ratio": 0.225073
           },
           "reconstruction_max_channel_error": 0
         },
@@ -325,25 +325,25 @@
           "id": "shelter",
           "order": 2,
           "path": "portrait/stage-02-shelter.webp",
-          "sha256": "f2b484d5167d8e3228d206fcbfca3c513761a3556c2774e9afb949ae8cd0d0f7",
-          "byte_size": 27194,
-          "changed_pixel_ratio": 0.02791651,
+          "sha256": "f614dc14f1b0a4b1b089ddc13d2b810c9f91b31990cb50b9f0288159f3159aab",
+          "byte_size": 27992,
+          "changed_pixel_ratio": 0.02798791,
           "bounds": {
             "pixels": [
               0,
-              760,
-              296,
-              1146
+              748,
+              279,
+              1190
             ],
             "normalized": [
               0.0,
-              0.450237,
-              0.379487,
-              0.67891
+              0.443128,
+              0.357692,
+              0.704976
             ],
-            "width_ratio": 0.379487,
-            "height_ratio": 0.228673,
-            "area_ratio": 0.086778
+            "width_ratio": 0.357692,
+            "height_ratio": 0.261848,
+            "area_ratio": 0.093661
           },
           "reconstruction_max_channel_error": 0
         },
@@ -351,25 +351,25 @@
           "id": "food",
           "order": 3,
           "path": "portrait/stage-03-food.webp",
-          "sha256": "0702b2e38a9b4389d80fc9d94754a72bb2a0ca4225d8b4e2873e4445fc4b01a4",
-          "byte_size": 35040,
-          "changed_pixel_ratio": 0.03878737,
+          "sha256": "5d946e0a296ecb6bc74c45e6d2d9534e235536f52c11a2888ac3527121f7f22f",
+          "byte_size": 38002,
+          "changed_pixel_ratio": 0.04593511,
           "bounds": {
             "pixels": [
-              260,
-              639,
+              240,
+              609,
               780,
-              1113
+              1152
             ],
             "normalized": [
-              0.333333,
-              0.378555,
+              0.307692,
+              0.360782,
               1.0,
-              0.65936
+              0.682464
             ],
-            "width_ratio": 0.666667,
-            "height_ratio": 0.280806,
-            "area_ratio": 0.187204
+            "width_ratio": 0.692308,
+            "height_ratio": 0.321682,
+            "area_ratio": 0.222703
           },
           "reconstruction_max_channel_error": 0
         },
@@ -377,25 +377,25 @@
           "id": "timber",
           "order": 4,
           "path": "portrait/stage-04-timber.webp",
-          "sha256": "69d20b0bf25a6b90e7e6812a156f3330e93ff24ad83952ef952394a1f1de8ac6",
-          "byte_size": 8434,
-          "changed_pixel_ratio": 0.00869942,
+          "sha256": "9cef44d739db40080444a35aea9ebb84366c9b273feab8e663b49efc5bdc5b65",
+          "byte_size": 6454,
+          "changed_pixel_ratio": 0.0069647,
           "bounds": {
             "pixels": [
               0,
-              1121,
-              232,
-              1235
+              1159,
+              206,
+              1270
             ],
             "normalized": [
               0.0,
-              0.6641,
-              0.297436,
-              0.731635
+              0.686611,
+              0.264103,
+              0.75237
             ],
-            "width_ratio": 0.297436,
-            "height_ratio": 0.067536,
-            "area_ratio": 0.020087
+            "width_ratio": 0.264103,
+            "height_ratio": 0.065758,
+            "area_ratio": 0.017367
           },
           "reconstruction_max_channel_error": 0
         },
@@ -403,25 +403,25 @@
           "id": "scout",
           "order": 5,
           "path": "portrait/stage-05-scout.webp",
-          "sha256": "6acf7d31e70964416225df453756df48458c4b7dff9c2215dd0d6ee37a33d4c7",
-          "byte_size": 16328,
-          "changed_pixel_ratio": 0.01802999,
+          "sha256": "2d3757a8a0187fd9ce52e6a08d449db9f67020ffb5965c0f2c40ceb5320fe768",
+          "byte_size": 15134,
+          "changed_pixel_ratio": 0.02102625,
           "bounds": {
             "pixels": [
-              276,
-              579,
+              259,
+              590,
               780,
-              1077
+              1111
             ],
             "normalized": [
-              0.353846,
-              0.343009,
+              0.332051,
+              0.349526,
               1.0,
-              0.638033
+              0.658175
             ],
-            "width_ratio": 0.646154,
-            "height_ratio": 0.295024,
-            "area_ratio": 0.190631
+            "width_ratio": 0.667949,
+            "height_ratio": 0.308649,
+            "area_ratio": 0.206162
           },
           "reconstruction_max_channel_error": 0
         },
@@ -429,25 +429,25 @@
           "id": "storehouse",
           "order": 6,
           "path": "portrait/stage-06-storehouse.webp",
-          "sha256": "7fa325feb4243f52eb786e4c9a0ad7af16a67f683633801ab2105b07082e8604",
-          "byte_size": 15692,
-          "changed_pixel_ratio": 0.016334,
+          "sha256": "baa1cb6408a6468d33a18276c6842b8e0371c257fe866c49516e1f6c0ef19e67",
+          "byte_size": 13610,
+          "changed_pixel_ratio": 0.01705554,
           "bounds": {
             "pixels": [
-              267,
-              937,
+              247,
+              1152,
               780,
-              1314
+              1308
             ],
             "normalized": [
-              0.342308,
-              0.555095,
+              0.316667,
+              0.682464,
               1.0,
-              0.778436
+              0.774882
             ],
-            "width_ratio": 0.657692,
-            "height_ratio": 0.223341,
-            "area_ratio": 0.14689
+            "width_ratio": 0.683333,
+            "height_ratio": 0.092417,
+            "area_ratio": 0.063152
           },
           "reconstruction_max_channel_error": 0
         },
@@ -455,25 +455,25 @@
           "id": "market",
           "order": 7,
           "path": "portrait/stage-07-market.webp",
-          "sha256": "c0d68ddfa36689453f14d1b02b2a2e935b9645c87f269a89e287cfdc3d350635",
-          "byte_size": 93818,
-          "changed_pixel_ratio": 0.08877598,
+          "sha256": "a78baf64cd1e4340f9ab3a2cbdcc0e09efabf3f585e7bddf7df34035fb570bd3",
+          "byte_size": 110332,
+          "changed_pixel_ratio": 0.11202986,
           "bounds": {
             "pixels": [
-              28,
-              689,
+              0,
+              666,
               780,
-              1064
+              1097
             ],
             "normalized": [
-              0.035897,
-              0.408175,
+              0.0,
+              0.39455,
               1.0,
-              0.630332
+              0.649882
             ],
-            "width_ratio": 0.964103,
-            "height_ratio": 0.222156,
-            "area_ratio": 0.214182
+            "width_ratio": 1.0,
+            "height_ratio": 0.255332,
+            "area_ratio": 0.255332
           },
           "reconstruction_max_channel_error": 0
         },
@@ -481,25 +481,25 @@
           "id": "watch",
           "order": 8,
           "path": "portrait/stage-08-watch.webp",
-          "sha256": "069ac08d92ada60b88c22e2dd2930720ab33eb8d7706fc3fb0aad525064a4a01",
-          "byte_size": 60502,
-          "changed_pixel_ratio": 0.0557867,
+          "sha256": "506b2245166d050417fbde2588bdb52bbdfef96783aeb34c407d9e7fda196766",
+          "byte_size": 74122,
+          "changed_pixel_ratio": 0.0731392,
           "bounds": {
             "pixels": [
-              210,
-              312,
-              752,
-              769
+              183,
+              233,
+              780,
+              759
             ],
             "normalized": [
-              0.269231,
-              0.184834,
-              0.964103,
-              0.455569
+              0.234615,
+              0.138033,
+              1.0,
+              0.449645
             ],
-            "width_ratio": 0.694872,
-            "height_ratio": 0.270735,
-            "area_ratio": 0.188126
+            "width_ratio": 0.765385,
+            "height_ratio": 0.311611,
+            "area_ratio": 0.238503
           },
           "reconstruction_max_channel_error": 0
         },
@@ -507,48 +507,48 @@
           "id": "council",
           "order": 9,
           "path": "portrait/stage-09-council.webp",
-          "sha256": "bec3a9dce74ce15fb6e5d40a9f0e6a41843a63ba11ac30ddbd61c24fa0c0931f",
-          "byte_size": 65696,
-          "changed_pixel_ratio": 0.05208561,
+          "sha256": "c18cee015d02c08cf0fe97444cb5e4db7955f42fd2985688f1e8cf6ae29cdfa8",
+          "byte_size": 77400,
+          "changed_pixel_ratio": 0.06453017,
           "bounds": {
             "pixels": [
               3,
-              321,
+              247,
               780,
-              1506
+              1613
             ],
             "normalized": [
               0.003846,
-              0.190166,
+              0.146327,
               1.0,
-              0.89218
+              0.955569
             ],
             "width_ratio": 0.996154,
-            "height_ratio": 0.702014,
-            "area_ratio": 0.699314
+            "height_ratio": 0.809242,
+            "area_ratio": 0.806129
           },
           "reconstruction_max_channel_error": 0
         }
       ],
-      "developed_changed_pixel_ratio": 0.27878236,
+      "developed_changed_pixel_ratio": 0.33600377,
       "developed_bounds": {
         "pixels": [
           0,
-          312,
+          233,
           780,
-          1506
+          1613
         ],
         "normalized": [
           0.0,
-          0.184834,
+          0.138033,
           1.0,
-          0.89218
+          0.955569
         ],
         "width_ratio": 1.0,
-        "height_ratio": 0.707346,
-        "area_ratio": 0.707346
+        "height_ratio": 0.817536,
+        "area_ratio": 0.817536
       },
-      "final_reconstruction_sha256": "ba7a194b2c0734dc62a6043fc82c2602581b0a916c655d30f346966684db9388"
+      "final_reconstruction_sha256": "710a263cdbfe5915c7e1f79f02240db021669c4e332ac6737c531e12d73b5b71"
     }
   }
 }
