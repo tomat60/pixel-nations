@@ -104,19 +104,25 @@ async function waitForV4Stage(page, stage, step) {
 async function verifyLayerStack(page, expectedStage, step) {
   const expectedIndex = v4Sequence.indexOf(expectedStage);
   if (expectedIndex < 0) throw new VillageQaError(step, `Unknown expected V4 stage: ${expectedStage}`);
+  const expectedCount = expectedIndex + 1;
   const scene = page.locator('[data-qa="aurelian-village-scene"]');
   const count = Number(await scene.getAttribute("data-aurelian-v4-layer-count"));
-  if (count !== expectedIndex + 1) {
-    throw new VillageQaError(step, `Expected ${expectedIndex + 1} persistent V4 layers at ${expectedStage}, got ${count}`);
+  if (count !== expectedCount) {
+    throw new VillageQaError(step, `Expected ${expectedCount} persistent V4 layers at ${expectedStage}, got ${count}`);
   }
   const viewport = (await page.viewportSize())?.width < 768 ? "portrait" : "desktop";
   const layers = page.locator(`[data-qa="aurelian-v4-layer"][data-aurelian-viewport="${viewport}"]`);
-  if (await layers.count() !== 9) throw new VillageQaError(step, `Expected 9 ${viewport} V4 layers`);
-  for (let index = 0; index < 9; index += 1) {
-    const expectedActive = index <= expectedIndex ? "true" : "false";
-    const actual = await layers.nth(index).getAttribute("data-aurelian-active");
-    if (actual !== expectedActive) {
-      throw new VillageQaError(step, `Layer ${index + 1} at ${expectedStage}: expected active=${expectedActive}, got ${actual}`);
+  if (await layers.count() !== expectedCount) {
+    throw new VillageQaError(step, `Expected ${expectedCount} mounted ${viewport} V4 layers at ${expectedStage}`);
+  }
+  for (let index = 0; index < expectedCount; index += 1) {
+    const expectedStageId = v4Sequence[index];
+    const layer = layers.nth(index);
+    if (await layer.getAttribute("data-aurelian-active") !== "true") {
+      throw new VillageQaError(step, `Mounted layer ${index + 1} at ${expectedStage} is not active`);
+    }
+    if (await layer.getAttribute("data-aurelian-v4-image-stage") !== expectedStageId) {
+      throw new VillageQaError(step, `Mounted layer ${index + 1} at ${expectedStage} is out of sequence`);
     }
   }
 }
