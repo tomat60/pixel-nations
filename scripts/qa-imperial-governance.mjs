@@ -76,6 +76,7 @@ async function seed(page, stage) {
 async function clickChoice(page, choice, field, viewportId, stage) {
   const button = page.getByRole("button", { name: new RegExp(choice.label, "i") }).first();
   await button.waitFor({ state: "visible", timeout: 10000 });
+  await removeDemoCompleteOverlay(page);
   const text = await button.innerText();
   assert(text.includes("Stability") || text.includes("Prosperity"), `${viewportId}: ${stage} preview ${choice.id}`, `Choice does not preview national-health consequence: ${text}`);
   await button.click();
@@ -85,6 +86,7 @@ async function clickChoice(page, choice, field, viewportId, stage) {
   assert(state.settlementStability === choice.stability, `${viewportId}: ${choice.id} stability`, `Expected Stability ${choice.stability}, got ${state.settlementStability}`);
   assert(state.settlementProsperity === choice.prosperity, `${viewportId}: ${choice.id} prosperity`, `Expected Prosperity ${choice.prosperity}, got ${state.settlementProsperity}`);
   await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
+  await removeDemoCompleteOverlay(page);
   state = await readState(page, `${viewportId}: ${stage} reload ${choice.id}`);
   assert(state[field] === choice.id && state.resources.influence === choice.influence && state.settlementStability === choice.stability && state.settlementProsperity === choice.prosperity, `${viewportId}: ${choice.id} reload persistence`, "Governance consequence did not persist through reload.");
 }
@@ -111,6 +113,7 @@ async function runViewport(browser, viewport) {
       await check(`escalation ${choice.id}`, () => clickChoice(page, choice, "conflictEscalationDecisionId", viewport.id, "escalation"));
     }
     await seed(page, "escalation");
+    await removeDemoCompleteOverlay(page);
     await page.getByRole("button", { name: /Raise the Border Host/i }).first().click();
     await waitForState(page, '(state) => state.conflictEscalationDecisionId === "raise-border-host"', `${viewport.id}: later flow`);
     await check("later strategic flow remains reachable", async () => {
