@@ -12,7 +12,14 @@ async function appRunning() { try { const res = await fetch(APP_URL, { signal: A
 async function ensureApp() { if (await appRunning()) return null; if (!existsSync(".next")) execFileSync("npm", ["run", "build"], { stdio: "inherit", shell: process.platform === "win32" }); const command = ["run", "start", "--", "-p", "3000", "-H", "127.0.0.1"]; const proc = spawn("npm", command, { stdio: "pipe", shell: process.platform === "win32" }); proc.stdout?.on("data", (data) => process.stdout.write(data)); proc.stderr?.on("data", (data) => process.stderr.write(data)); const started = Date.now(); while (Date.now() - started < 30000) { if (await appRunning()) return proc; await new Promise((resolve) => setTimeout(resolve, 500)); } throw new SmokeError("boot app", `Timed out waiting for ${APP_URL}`); }
 async function writeResult(status, error) { result.status = status; result.generatedAt = new Date().toISOString(); if (error) { result.blockingStep = error.step ?? "unknown"; result.error = error.message; } await mkdir(OUTPUT_DIR, { recursive: true }); await writeFile(RESULT_PATH, `${JSON.stringify(result, null, 2)}\n`); }
 async function step(name, fn) { const started = Date.now(); try { await fn(); result.steps.push({ name, status: "PASS", durationMs: Date.now() - started }); } catch (err) { const error = err instanceof SmokeError ? err : new SmokeError(name, err.message); result.steps.push({ name, status: "FAIL", durationMs: Date.now() - started, error: error.message }); throw error; } }
-async function clickView(page, id, stepName) { await page.locator(`[data-qa="view-${id}"]`).click({ timeout: 5000 }).catch(() => { throw new SmokeError(stepName, `Could not open ${id} view`); }); }
+async function clickView(page, id, stepName) {
+  const view = page.locator(`[data-qa="view-${id}"]`);
+  await view.click({ timeout: 5000 }).catch(() => { throw new SmokeError(stepName, `Could not open ${id} view`); });
+  await view.waitFor({ state: "visible", timeout: 5000 });
+  await page.locator(`[data-qa="view-${id}"][data-active="true"]`).waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+    throw new SmokeError(stepName, `${id} view did not become active after navigation`);
+  });
+}
 
 async function runSmoke(page) {
   await step("open current Aurelian shell", async () => {
@@ -31,7 +38,7 @@ async function runSmoke(page) {
   await step("World preserves 100-sector model through a 25-sector region", async () => {
     await clickView(page, "world", "World preserves 100-sector model through a 25-sector region");
     const scene = page.locator('[data-qa="world-map-scene"]');
-    await scene.waitFor({ state: "visible", timeout: 10000 });
+    await scene.waitFor({ state: "visible", timeout: 5000 });
     const sectors = await page.locator('[data-qa="world-sector-tile"]').count();
     if (sectors !== 25) throw new SmokeError("World preserves 100-sector model through a 25-sector region", `Expected 25 rendered regional sectors, got ${sectors}`);
     if (await scene.getAttribute("data-world-lands") !== "10000") throw new SmokeError("World preserves 100-sector model through a 25-sector region", "World land count is not 10,000");
