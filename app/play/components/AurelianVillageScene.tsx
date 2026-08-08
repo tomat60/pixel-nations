@@ -48,6 +48,7 @@ export function AurelianVillageScene({ state, dispatch }: { state: PlayState; di
   const legacyStageId = getAurelianSettlementStage(state) ?? "camp";
   const v4StageId = getAurelianVillageV4Stage(state) ?? "camp";
   const activeIndex = Math.max(0, v4Layers.findIndex((layer) => layer.id === v4StageId));
+  const activeLayers = v4Layers.slice(0, activeIndex + 1);
   const stageLabel = aurelianVillageV4Stages.find((stage) => stage.id === v4StageId)?.label ?? "First camp";
   const owned = getOwnedPlot(state);
   const hasClaim = state.ownedPlotIds.length > 0;
@@ -57,39 +58,33 @@ export function AurelianVillageScene({ state, dispatch }: { state: PlayState; di
       data-qa="aurelian-village-scene"
       data-aurelian-stage={legacyStageId}
       data-aurelian-v4-stage={v4StageId}
-      data-aurelian-v4-layer-count={activeIndex + 1}
+      data-aurelian-v4-layer-count={activeLayers.length}
       className="absolute inset-0 overflow-hidden bg-[#5e6a50]"
     >
       <div data-qa="aurelian-village-stage" className="absolute inset-0">
-        <VillageArtImage src={portraitBase} viewport="portrait" qa="aurelian-v4-base" active />
-        <VillageArtImage src={desktopBase} viewport="desktop" qa="aurelian-v4-base" active />
+        <VillageArtImage src={portraitBase} viewport="portrait" qa="aurelian-v4-base" priority />
+        <VillageArtImage src={desktopBase} viewport="desktop" qa="aurelian-v4-base" priority />
 
-        {v4Layers.map((layer, index) => {
-          const active = index <= activeIndex;
-          return (
-            <VillageArtImage
-              key={`portrait-${layer.id}`}
-              src={layer.portrait}
-              viewport="portrait"
-              qa="aurelian-v4-layer"
-              stage={layer.id}
-              active={active}
-            />
-          );
-        })}
-        {v4Layers.map((layer, index) => {
-          const active = index <= activeIndex;
-          return (
-            <VillageArtImage
-              key={`desktop-${layer.id}`}
-              src={layer.desktop}
-              viewport="desktop"
-              qa="aurelian-v4-layer"
-              stage={layer.id}
-              active={active}
-            />
-          );
-        })}
+        {activeLayers.map((layer, index) => (
+          <VillageArtImage
+            key={`portrait-${layer.id}`}
+            src={layer.portrait}
+            viewport="portrait"
+            qa="aurelian-v4-layer"
+            stage={layer.id}
+            priority={index === activeLayers.length - 1}
+          />
+        ))}
+        {activeLayers.map((layer, index) => (
+          <VillageArtImage
+            key={`desktop-${layer.id}`}
+            src={layer.desktop}
+            viewport="desktop"
+            qa="aurelian-v4-layer"
+            stage={layer.id}
+            priority={index === activeLayers.length - 1}
+          />
+        ))}
         <div className="absolute inset-0 bg-gradient-to-b from-black/16 via-transparent to-black/24" />
       </div>
 
@@ -144,13 +139,13 @@ function VillageArtImage({
   viewport,
   qa,
   stage,
-  active,
+  priority,
 }: {
   src: StaticImageData;
   viewport: "desktop" | "portrait";
   qa: string;
   stage?: AurelianVillageV4Stage;
-  active: boolean;
+  priority?: boolean;
 }) {
   const portrait = viewport === "portrait";
   return (
@@ -161,11 +156,11 @@ function VillageArtImage({
       data-qa={qa}
       data-aurelian-v4-image-stage={stage}
       data-aurelian-viewport={viewport}
-      data-aurelian-active={active ? "true" : "false"}
+      data-aurelian-active="true"
       fill
-      priority
+      priority={priority}
       sizes={portrait ? "(max-width: 767px) 100vw, 1px" : "(min-width: 768px) 100vw, 1px"}
-      className={`pointer-events-none object-cover object-center transition-opacity duration-300 ${portrait ? "md:hidden" : "hidden md:block"} ${active ? "opacity-100" : "opacity-0"}`}
+      className={`pointer-events-none object-cover object-center ${portrait ? "md:hidden" : "hidden md:block"}`}
     />
   );
 }
