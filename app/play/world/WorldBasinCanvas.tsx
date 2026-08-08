@@ -129,7 +129,7 @@ export function WorldBasinCanvas({
 
       <div data-qa="world-basin-capital-aura" aria-hidden="true" className="absolute left-[5%] top-[5%] z-[6] h-[24%] w-[23%] rounded-full bg-[radial-gradient(circle,rgba(245,194,92,.26),rgba(245,194,92,.07)_45%,transparent_72%)] blur-[2px]" />
 
-      <div className="absolute left-4 top-4 z-40 max-w-[14rem] rounded-2xl border border-amber-100/12 bg-black/30 px-3 py-2 backdrop-blur-md">
+      <div className="pointer-events-none absolute left-4 top-4 z-40 max-w-[14rem] rounded-2xl border border-amber-100/12 bg-black/30 px-3 py-2 backdrop-blur-md">
         <p className="text-[8px] font-black uppercase tracking-[0.22em] text-amber-100/55">Aurelian Basin</p>
         <p className="mt-0.5 text-xs font-black text-amber-50">Terrain, roads and pressure first</p>
         <p className="mt-1 text-[9px] leading-snug text-amber-50/48">Sector state rides on the landscape instead of defining its shape.</p>
