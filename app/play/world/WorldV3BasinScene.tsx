@@ -61,7 +61,7 @@ export function WorldV3BasinScene({ state, dispatch }: { state: PlayState; dispa
       {basinReady ? (
         <div
           data-qa="world-v3-basin-runtime"
-          className="absolute bottom-[4.9rem] left-2 right-2 top-[13rem] z-20 md:bottom-[5.8rem] md:left-3 md:right-3 md:top-[9.2rem] lg:right-[335px]"
+          className="pointer-events-none absolute bottom-[4.9rem] left-2 right-2 top-[13rem] z-20 md:bottom-[5.8rem] md:left-3 md:right-3 md:top-[9.2rem] lg:right-[335px]"
         >
           <WorldBasinCanvas
             sectors={sectors}
