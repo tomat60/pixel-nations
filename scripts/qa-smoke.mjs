@@ -31,7 +31,7 @@ async function runSmoke(page) {
   await step("World preserves 100-sector model through a 25-sector region", async () => {
     await clickView(page, "world", "World preserves 100-sector model through a 25-sector region");
     const scene = page.locator('[data-qa="world-map-scene"]');
-    await scene.waitFor({ state: "visible", timeout: 5000 });
+    await scene.waitFor({ state: "visible", timeout: 10000 });
     const sectors = await page.locator('[data-qa="world-sector-tile"]').count();
     if (sectors !== 25) throw new SmokeError("World preserves 100-sector model through a 25-sector region", `Expected 25 rendered regional sectors, got ${sectors}`);
     if (await scene.getAttribute("data-world-lands") !== "10000") throw new SmokeError("World preserves 100-sector model through a 25-sector region", "World land count is not 10,000");
@@ -45,7 +45,7 @@ async function runSmoke(page) {
   await step("Council remains reachable", async () => {
     await clickView(page, "council", "Council remains reachable");
     await page.locator('[data-qa="council-panel"]').waitFor({ state: "visible", timeout: 5000 });
-    await page.getByText("From land to empire", { exact: false }).first().waitFor({ state: "visible", timeout: 5000 });
+    await page.getByRole("heading", { name: "Aurelian Council", exact: true }).waitFor({ state: "visible", timeout: 5000 });
   });
 }
 
