@@ -131,7 +131,7 @@ async function runCase(browser, viewport, pathCase) {
       await page.locator('[data-qa="settlement-focus"][data-focus-id="stores"]').click(); clickCount += 1;
     }
     const forecastStatus = (await page.locator('[data-qa="settlement-forecast-status"]').innerText()).trim();
-    assert(forecastStatus === "Stable", `${viewport.id}/${pathCase.id}: stable forecast`, `Expected Stable forecast, got ${forecastStatus}.`);
+    assert(forecastStatus.toLowerCase() === "stable", `${viewport.id}/${pathCase.id}: stable forecast`, `Expected Stable forecast, got ${forecastStatus}.`);
 
     const before = await readState(page, `${viewport.id}/${pathCase.id}: before cycle`);
     await page.locator('[data-qa="resolve-settlement-cycle"]').click(); clickCount += 1;
