@@ -40,7 +40,10 @@ export function WorldV3BasinScene({ state, dispatch }: { state: PlayState; dispa
     const root = semanticSceneRef.current;
     if (!root) return;
     const legacyTiles = root.querySelectorAll<HTMLElement>('[data-qa="world-sector-tile"]');
-    legacyTiles.forEach((tile) => tile.setAttribute("data-qa", "world-sector-tile-legacy"));
+    legacyTiles.forEach((tile) => {
+      tile.setAttribute("data-qa", "world-sector-tile-legacy");
+      tile.style.display = "none";
+    });
     setBasinReady(true);
   }, []);
 
