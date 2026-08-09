@@ -154,7 +154,10 @@ function getCurrentObjectiveText(state: PlayState): string {
   }
 
   const nationFrontierReadiness = getNationFrontierReadiness(state);
-  if (!nationFrontierReadiness.ready && nationFrontierReadiness.missing) {
+  if (
+    !nationFrontierReadiness.ready &&
+    (nationFrontierReadiness.missing === "stability" || nationFrontierReadiness.missing === "prosperity")
+  ) {
     return getFrontierRecoveryGuidance(state, nationFrontierReadiness.missing).objective;
   }
 
