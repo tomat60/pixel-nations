@@ -57,12 +57,13 @@ export function FounderRunAccelerator({
   if (!visible || !nationDecision || !decision) return null;
 
   const doctrineId = nationDecision.id;
-  const recommendedChoice = charterByDoctrine[doctrineId].find((step) => step.decisionId === decision.id)?.choiceId ?? decision.choices[0]?.id;
+  const decisionId = decision.id;
+  const recommendedChoice = charterByDoctrine[doctrineId].find((step) => step.decisionId === decisionId)?.choiceId ?? decision.choices[0]?.id;
 
   function chooseStewardship(choiceId: RetentionChoiceId) {
     dispatch({
       type: "advanceSeason",
-      decisionId: decision.id,
+      decisionId,
       choiceId,
     });
   }
@@ -81,7 +82,7 @@ export function FounderRunAccelerator({
     <section
       data-qa="founder-run-accelerator"
       data-founder-doctrine={doctrineId}
-      data-stewardship-decision={decision.id}
+      data-stewardship-decision={decisionId}
       data-stewardship-progress={state.retentionRecords.length}
       className="absolute inset-x-3 bottom-20 z-50 rounded-3xl border border-amber-200/35 bg-[linear-gradient(145deg,rgba(37,27,12,.97),rgba(4,8,9,.97))] p-4 shadow-[0_28px_90px_rgba(0,0,0,.62)] backdrop-blur-md md:inset-x-auto md:bottom-24 md:left-5 md:w-[430px]"
     >
@@ -97,7 +98,7 @@ export function FounderRunAccelerator({
               key={choice.id}
               type="button"
               data-qa="stewardship-choice"
-              data-decision-id={decision.id}
+              data-decision-id={decisionId}
               data-choice-id={choice.id}
               data-recommended={choice.id === recommendedChoice ? "true" : "false"}
               data-stability-delta={stabilityDelta}
