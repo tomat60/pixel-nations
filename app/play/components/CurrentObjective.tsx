@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { getCityReadiness } from "../lib/expansion-state";
+import { getFrontierRecoveryGuidance } from "../lib/frontier-recovery-guidance";
 import {
   getEmpireCrisisOpen,
   getEmpireCrisisReasonLabel,
@@ -153,13 +154,11 @@ function getCurrentObjectiveText(state: PlayState): string {
   }
 
   const nationFrontierReadiness = getNationFrontierReadiness(state);
-  if (!nationFrontierReadiness.ready) {
-    if (nationFrontierReadiness.missing === "stability") {
-      return `Return to Orders and End season until Stability reaches 2 (${nationFrontierReadiness.stability}/2).`;
-    }
-    if (nationFrontierReadiness.missing === "prosperity") {
-      return `Return to Orders and End season until Prosperity reaches 2 (${nationFrontierReadiness.prosperity}/2).`;
-    }
+  if (
+    !nationFrontierReadiness.ready &&
+    (nationFrontierReadiness.missing === "stability" || nationFrontierReadiness.missing === "prosperity")
+  ) {
+    return getFrontierRecoveryGuidance(state, nationFrontierReadiness.missing).objective;
   }
 
   const frontier = getFrontierIntent(state);
