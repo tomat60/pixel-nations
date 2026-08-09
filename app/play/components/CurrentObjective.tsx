@@ -144,10 +144,12 @@ function getCurrentObjectiveText(state: PlayState): string {
     if (ownedSectors < nationSectorThreshold) return `City Seed ready. Open World and claim ${nationSectorThreshold - ownedSectors} more connected sector${nationSectorThreshold - ownedSectors === 1 ? "" : "s"}.`;
     return "Open Council and choose the doctrine that founds your nation.";
   }
-  if (!state.foundingCeremonySeen) return "Witness the founding, then ratify the first national charter.";
+  if (!state.foundingCeremonySeen) return "Witness the founding, then choose how the new nation will be governed.";
 
   if (!getFirstEraComplete(state)) {
-    return "Open Council and ratify the first charter to bind stores, roads and law in one Founder Run step.";
+    const latestStewardship = state.retentionRecords.at(-1);
+    if (!latestStewardship) return "Choose the first Council stewardship decision for the new nation.";
+    return `Stewardship recorded: ${latestStewardship.label}. Choose the next Council decision (${state.retentionRecords.length}/3).`;
   }
 
   const nationFrontierReadiness = getNationFrontierReadiness(state);
