@@ -11,6 +11,7 @@ import { LandSheet } from "./components/LandSheet";
 import { MapStage } from "./components/MapStage";
 import { OrdersPanel } from "./components/OrdersPanel";
 import { PostCrisisCountermovePanel } from "./components/PostCrisisCountermovePanel";
+import { PreviousFounderRecordOverlay } from "./components/PreviousFounderRecordOverlay";
 import { StrategicBranchOverlay } from "./components/StrategicBranchOverlay";
 import { TopBar } from "./components/TopBar";
 import { AurelianVillageScene } from "./components/AurelianVillageScene";
@@ -27,6 +28,12 @@ import {
   playV1StorageKey,
   type PlayState,
 } from "./lib/play-state";
+import {
+  createPreviousFounderRecordSnapshot,
+  parsePreviousFounderRecordSnapshot,
+  previousFounderRecordV1StorageKey,
+  type PreviousFounderRecordSnapshot,
+} from "./lib/previous-founder-record";
 import { WorldV3BasinScene } from "./world/WorldV3BasinScene";
 
 const aurelianInitialPlayState: PlayState = {
@@ -44,6 +51,8 @@ export default function PlayPrototypePage() {
   const [demoOverlayDismissed, setDemoOverlayDismissed] = useState(false);
   const [founderRecordReopened, setFounderRecordReopened] = useState(false);
   const [restartedRun, setRestartedRun] = useState(false);
+  const [previousFounderRecord, setPreviousFounderRecord] = useState<PreviousFounderRecordSnapshot | null>(null);
+  const [previousFounderRecordOpen, setPreviousFounderRecordOpen] = useState(false);
   const selected = useMemo(() => getSelectedPlot(state), [state]);
   const nationDecision = useMemo(() => getNationDecision(state), [state]);
   const isVillage = state.view === "village";
@@ -62,6 +71,7 @@ export default function PlayPrototypePage() {
   useEffect(() => {
     const restored = restorePlayState();
     if (restored) dispatch({ type: "hydrate", state: restored });
+    setPreviousFounderRecord(parsePreviousFounderRecordSnapshot(window.localStorage.getItem(previousFounderRecordV1StorageKey)));
     setHydrated(true);
   }, []);
 
@@ -78,9 +88,15 @@ export default function PlayPrototypePage() {
   }, [founderRecordReady]);
 
   function restartRun() {
+    const snapshot = createPreviousFounderRecordSnapshot(state);
+    if (snapshot) {
+      window.localStorage.setItem(previousFounderRecordV1StorageKey, JSON.stringify(snapshot));
+      setPreviousFounderRecord(snapshot);
+    }
     dispatch({ type: "hydrate", state: aurelianInitialPlayState });
     setDemoOverlayDismissed(false);
     setFounderRecordReopened(false);
+    setPreviousFounderRecordOpen(false);
     setRestartedRun(true);
   }
 
@@ -122,6 +138,16 @@ export default function PlayPrototypePage() {
           {isVillage ? <AurelianVillageScene state={state} dispatch={dispatch} /> : isWorld ? <WorldV3BasinScene state={state} dispatch={dispatch} /> : <MapStage state={state} dispatch={dispatch} />}
           <TopBar state={state} />
           <CurrentObjective state={state} demoComplete={demoComplete} demoOverlayDismissed={demoOverlayDismissed} founderRecordAvailable={founderRecordReady} secondRunStarted={secondRunStarted} onOpenFounderRecord={openFounderRecord} />
+          {hydrated && previousFounderRecord && !founderRecordReady ? (
+            <button
+              type="button"
+              data-qa="open-previous-founder-record"
+              onClick={() => setPreviousFounderRecordOpen(true)}
+              className="absolute bottom-20 left-3 z-40 rounded-xl border border-amber-100/18 bg-black/56 px-3 py-2 text-[9px] font-black uppercase tracking-[0.14em] text-amber-100/75 shadow-lg backdrop-blur-md transition hover:bg-black/70 md:bottom-24 md:left-5 md:text-[10px]"
+            >
+              Previous Founder Record
+            </button>
+          ) : null}
           {showOpeningGuide ? <OpeningGuide selectedName={selected.name} /> : null}
           {state.view === "map" ? <LandSheet selected={selected} state={state} dispatch={dispatch} /> : null}
           {state.view === "orders" && state.ownedPlotIds.length > 0 ? <OrdersPanel state={state} dispatch={dispatch} /> : null}
@@ -174,6 +200,9 @@ export default function PlayPrototypePage() {
             </section>
           ) : null}
           {hydrated && state.view === "council" && showFounderRecord ? <DemoCompleteOverlay state={state} onContinue={continueFounderRecord} onRestart={restartRun} /> : null}
+          {hydrated && previousFounderRecord && previousFounderRecordOpen ? (
+            <PreviousFounderRecordOverlay record={previousFounderRecord} onClose={() => setPreviousFounderRecordOpen(false)} />
+          ) : null}
           <BottomDock activeView={state.view} dispatch={dispatch} />
         </div>
       </section>
