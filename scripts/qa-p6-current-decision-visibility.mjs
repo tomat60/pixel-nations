@@ -15,22 +15,22 @@ const VIEWPORTS = [
 const STAGES = [
   {
     id: "court",
-    selector: '[data-qa="court-case-options"]',
+    selector: '[data-qa="court-case-options"] button',
     state: { courtCaseDecisionId: null, rivalResponseDecisionId: null, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [] },
   },
   {
     id: "rival",
-    selector: '[data-qa="rival-response-options"]',
+    selector: '[data-qa="rival-response-options"] button',
     state: { courtCaseDecisionId: "enforce-charter-law", rivalResponseDecisionId: null, conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [] },
   },
   {
     id: "escalation",
-    selector: '[data-qa="conflict-escalation-options"]',
+    selector: '[data-qa="conflict-escalation-options"] button',
     state: { courtCaseDecisionId: "enforce-charter-law", rivalResponseDecisionId: "enforce-by-decree", conflictEscalationDecisionId: null, standoffDecisionId: null, imperialTurnActionIds: [] },
   },
   {
     id: "standoff",
-    selector: '[data-qa="standoff-step"]',
+    selector: '[data-qa="standoff-step"] button',
     state: { courtCaseDecisionId: "enforce-charter-law", rivalResponseDecisionId: "enforce-by-decree", conflictEscalationDecisionId: "raise-border-host", standoffDecisionId: null, imperialTurnActionIds: [] },
   },
   {
@@ -132,7 +132,7 @@ async function measure(page, viewportId, stage) {
   await page.screenshot({ path: shot, fullPage: false });
   result.screenshots.push(shot);
 
-  assert(second.fullyVisible, `${viewportId}: ${stage.id} visibility`, `Active target is not fully visible inside its ${second.relevantViewport} viewport (scrollTop ${second.council.scrollTop}).`);
+  assert(second.fullyVisible, `${viewportId}: ${stage.id} visibility`, `Active action is not fully visible inside its ${second.relevantViewport} viewport (scrollTop ${second.council.scrollTop}).`);
   assert(!second.horizontalOverflow, `${viewportId}: ${stage.id} overflow`, "Horizontal page overflow detected.");
   assert(scrollDriftPx <= 2, `${viewportId}: ${stage.id} jitter`, `Council scroll drifted ${scrollDriftPx}px after settling.`);
 
