@@ -117,7 +117,7 @@ async function runScenario(page, scenario, evidence) {
 
   await page.locator(`[data-qa="post-crisis-response"][data-post-crisis-response="${scenario.responseId}"]`).click({ force: true });
   await page.locator(`[data-qa="world-post-crisis-consequence"][data-post-crisis-response="${scenario.responseId}"]`).waitFor({ state: "visible", timeout: 5000 });
-  await page.locator('[data-qa="current-objective-text"]').getByText(/answered the rival counter-move/i).waitFor({ state: "visible", timeout: 5000 });
+  await page.locator('[data-qa="current-objective-text"]').getByText(/secure frontier payoff before reviewing the founder record/i).waitFor({ state: "visible", timeout: 5000 });
   await assertStored(page, "(state, args) => state.postCrisisCountermoveOrigin === args.origin && state.postCrisisResponseId === args.responseId && state.resources.influence === args.expectedInfluence && Array.isArray(state.chronicle) && state.chronicle[0]?.title === 'Post-crisis counter-move'", scenario, `${scenario.origin} resolved persistence`);
   const resolvedShot = `${scenario.prefix}-03-response-resolved.png`;
   await page.screenshot({ path: `${SHOT_DIR}/${resolvedShot}`, fullPage: true }); evidence.push(resolvedShot);
