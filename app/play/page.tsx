@@ -138,7 +138,7 @@ export default function PlayPrototypePage() {
           {isVillage ? <AurelianVillageScene state={state} dispatch={dispatch} /> : isWorld ? <WorldV3BasinScene state={state} dispatch={dispatch} /> : <MapStage state={state} dispatch={dispatch} />}
           <TopBar state={state} />
           <CurrentObjective state={state} demoComplete={demoComplete} demoOverlayDismissed={demoOverlayDismissed} founderRecordAvailable={founderRecordReady} secondRunStarted={secondRunStarted} onOpenFounderRecord={openFounderRecord} />
-          {hydrated && previousFounderRecord && !founderRecordReady ? (
+          {hydrated && previousFounderRecord && !showFounderRecord && !previousFounderRecordOpen ? (
             <button
               type="button"
               data-qa="open-previous-founder-record"
@@ -199,7 +199,14 @@ export default function PlayPrototypePage() {
               )}
             </section>
           ) : null}
-          {hydrated && state.view === "council" && showFounderRecord ? <DemoCompleteOverlay state={state} onContinue={continueFounderRecord} onRestart={restartRun} /> : null}
+          {hydrated && state.view === "council" && showFounderRecord ? (
+            <DemoCompleteOverlay
+              state={state}
+              onContinue={continueFounderRecord}
+              onRestart={restartRun}
+              onOpenPreviousFounderRecord={previousFounderRecord ? () => setPreviousFounderRecordOpen(true) : undefined}
+            />
+          ) : null}
           {hydrated && previousFounderRecord && previousFounderRecordOpen ? (
             <PreviousFounderRecordOverlay record={previousFounderRecord} onClose={() => setPreviousFounderRecordOpen(false)} />
           ) : null}
