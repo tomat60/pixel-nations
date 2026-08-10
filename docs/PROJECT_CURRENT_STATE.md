@@ -2,14 +2,14 @@
 
 Status: ACTIVE
 Updated: 2026-08-10
-Current state revision: Aurelian Topology Lock v0.4
+Current state revision: Aurelian Shared Geography Phase 1 v0.5
 Authority source: this file on the current `main`
 Product baseline SHA: `c94423d5a9c60f1982ae2935551fc1905d46e719`
-Current milestone: Aurelian Shared Geography — Phase 0 topology lock
+Current milestone: Aurelian Shared Geography — Phase 1 continuity proof
 Active execution issue: #415
 Active implementation PR: none
-Last completed milestone: P11 / #422 / #421
-Next allowed action: Produce one topology/composition board for the Aurelian Basin, review it directly, and classify it `PASS / CORRECTION REQUIRED / REJECTED`. Do not start P12 or Godot scene implementation before board PASS.
+Last completed milestone: #415 Phase 0 topology lock — PASS
+Next allowed action: Execute exactly one desktop-first Godot shared-geography proof from `docs/AURELIAN_BASIN_TOPOLOGY_V1.md`, then stop for direct Village/Map/World still + raw camera-switch video + transform-manifest review. No P12 and no product integration before proof acceptance.
 
 ## Purpose
 
@@ -30,38 +30,87 @@ The accepted web product preserves the full founder progression through Founder 
 ## Current acceptance status
 
 - P4–P11 product work: `ACCEPTED / MERGED`.
-- P11 / #422: `ACCEPTED / MERGED` as `c94423d5a9c60f1982ae2935551fc1905d46e719`.
-- P11 execution issue #421: `CLOSED / COMPLETED`.
-- Current `main`: product baseline `c94423d5a9c60f1982ae2935551fc1905d46e719`; documentation head may be newer.
-- Vercel deployment status for the current main documentation head: `SUCCESS` when last checked by the steward.
-- Public-origin HTTP checks for `/`, `/play`, and `/world`: `PASS` with 200 responses; `/world` canonicalizes to `/play`.
-- Public browser-render smoke for the product baseline: `PRODUCTION UNVERIFIED` from the current control environment because the available Playwright package has no Chromium executable installed. This is missing release evidence, not evidence of an outage.
+- P11 / #422: `ACCEPTED / MERGED` as product baseline `c94423d5a9c60f1982ae2935551fc1905d46e719`.
+- #415 Phase 0 topology/composition board: `PASS` after direct review.
+- Shared topology authority: `docs/AURELIAN_BASIN_TOPOLOGY_V1.md`.
+- #415 shared Aurelian geography contract: `ACTIVE — PHASE 1 CONTINUITY PROOF`.
 - Current Village: `MECHANICALLY ACCEPTED BENCHMARK`; preserve its nine-stage progression and rollback value.
-- Current bridge and independent Village/Map/World geography: `VISUALLY REJECTED FOR FINAL DIRECTION`.
-- #415 shared Aurelian geography contract: `ACTIVE — PHASE 0 TOPOLOGY LOCK`.
+- Current bridge and independent web Village/Map/World geography: `VISUALLY REJECTED FOR FINAL DIRECTION`.
+- Vercel deployment status for the last checked current-main documentation head: `SUCCESS`.
+- Public-origin HTTP checks for `/`, `/play`, and `/world`: last recorded `PASS` with 200 responses; `/world` canonicalizes to `/play`.
+- Public browser-render smoke remains `PRODUCTION UNVERIFIED` from the current control environment because a runnable browser executable has not been available there. This is missing evidence, not evidence of an outage.
 - Backend, accounts, payments, crypto/NFT/wallet/token, multiplayer, combat, and full economy: `OUT OF CURRENT SCOPE`.
 
 ## Runtime and visual direction
 
 ADR-001 remains binding: Godot is the target game runtime. Next.js `/play` remains the functioning demo shell and rollback surface until replacement evidence is accepted.
 
-Village, Map and World must use one Aurelian Basin geography with the same river, bridge, roads, Greenvale origin, North Ridge, terrain zones, landmarks and transforms. Do not resume separate React/CSS/SVG scene patching as the final visual direction.
+Village, Map and World must use one `AurelianBasin` geography with the same river, bridge, roads, Greenvale origin, North Ridge, terrain zones, landmarks and transforms. The three views are camera/LOD presentations of that shared scene, never separately authored geography.
+
+The accepted Phase 0 topology intentionally preserves useful gameplay-semantic relationships while rejecting the contradictory river/bridge placement of the current independent web visuals.
 
 ## Current active phase
 
-The only active product-direction task is #415 Phase 0. Produce a topology/composition board before implementation.
+The only active product-direction task is #415 Phase 1.
 
-The board must establish:
+Build one borderless, desktop-first Godot continuity proof from the accepted topology contract. This is a visual/scene proof, not gameplay integration.
 
-1. one canonical top-down Aurelian Basin coordinate plane;
-2. the river path, banks, shoreline/coast or outer-water boundary;
-3. one bridge crossing approximately perpendicular to local river flow, with both ends on dry ground and connected approach roads;
-4. Greenvale, North Ridge/highland, forest/work edge, fields/plains and the main route relationships;
-5. Village, Map and World camera frames cut from the same geography;
-6. a compact node/transform naming contract proving that the three views will not reauthor geography;
-7. the semantic role of Village, Map and World while preserving the 10,000-land product truth.
+Required shared geography:
 
-This is a composition and topology gate, not final art. Stop after direct review. One named correction pass is allowed before rejection.
+1. one continuous Aurelian Basin terrain;
+2. the locked canonical river path and readable banks/shoreline;
+3. `Bridge_GildedCrossing` with dry-ground west/east landings and connected roads;
+4. Greenvale west of the river;
+5. forest/work edge north-west of Greenvale;
+6. North Ridge/highland north-east across the river;
+7. fields/plains south / south-east of Greenvale;
+8. southern marsh transition and coast/outer-water outflow;
+9. `Camera_Village`, `Camera_Map`, and `Camera_World` cut from the same scene and transforms.
+
+## Phase 1 execution contract
+
+### Tool / cost
+
+- Strategy/review: GPT-5.6 Sol.
+- Executor: GPT-5.5/Codex-class bounded implementation through Cursor only after a precise prompt is reviewed.
+- MAX: OFF.
+- Paid assets/tools: blocked.
+- Image generation as production/runtime art: blocked.
+- Target extra spend for first proof: 0 USD.
+
+### Allowed files
+
+- `game/scenes/aurelian/**`
+- `game/assets/aurelian-basin/**`
+- `game/tests/**`
+- narrowly scoped evidence/export workflow only if required
+- transform/provenance manifest required to prove shared geometry
+
+### Forbidden
+
+- `app/play/**` visual rebuilding;
+- reducer/state/persistence/gameplay changes;
+- P12 or further retention/onboarding mechanics;
+- backend, accounts, payments, multiplayer, combat, full economy, crypto;
+- separate Village/Map/World terrain or orientation-specific geography;
+- full-frame generated image as runtime art;
+- mixed unverified asset packs;
+- paid assets or MAX without a separately proven need;
+- merge based only on CI or screenshot presence.
+
+### Required evidence
+
+- desktop Village still;
+- desktop Map still;
+- desktop World still;
+- one 15–30 second raw video switching among the three cameras;
+- transform manifest proving identical river, bridge and landmark transforms;
+- exact head SHA, Godot version, renderer and native viewport/export identity;
+- import/build/tests.
+
+Direct evidence review must answer whether an uninformed viewer reads one believable strategy-game landscape and whether the bridge is physically credible at Village scale.
+
+One named evidence-backed correction pass is allowed. Do not micro-polish repeatedly.
 
 ## Mandatory PR and release ownership
 
@@ -71,7 +120,7 @@ For every PR open/head change, ChatGPT/control-plane must re-fetch the live SHA,
 
 A green status alone is insufficient. Required screenshots, JSON, manifests, and videos must be opened and reviewed directly on the exact head.
 
-After every merge, verify accepted head → merge SHA → new `main` → checks → deployment → real public routes. Localhost RC1 and pre-merge preview are not post-release proof. If the public origin cannot be fully tested, record `PRODUCTION UNVERIFIED` and the exact missing evidence.
+After every merge, verify accepted head → merge SHA → new `main` → checks → deployment → real public routes as applicable. Localhost RC1 and pre-merge preview are not post-release proof. If the public origin cannot be fully tested, record `PRODUCTION UNVERIFIED` and the exact missing evidence.
 
 Do not begin another product PR or merge while the current PR/release is failing, unreviewed or unresolved. Escalate to the user only for a genuine product-direction choice or authority blocker, not routine QA detection.
 
@@ -83,27 +132,29 @@ When sources conflict:
 2. accepted ADRs, especially `docs/ADR_001_GODOT_DESKTOP_FIRST.md`
 3. root `AGENTS.md`
 4. the active execution issue named here
-5. exact-head evidence and the accepted PR for the current milestone
-6. operating and QA protocols
-7. older issues, draft PRs, comments, sprint briefs, runbooks and historical documents
+5. `docs/AURELIAN_BASIN_TOPOLOGY_V1.md` for shared-geography transforms/composition
+6. exact-head evidence and the accepted PR for the current milestone
+7. operating and QA protocols
+8. older issues, draft PRs, comments, sprint briefs, runbooks and historical documents
 
 An open issue, draft PR, generated handoff or green CI run is not automatically authority.
 
 ## Allowed work now
 
-- one #415 topology/composition board and its compact topology/transform contract;
-- direct board review and at most one named correction pass;
-- read-only inventory of reusable state/persistence/demo-shell code and verified asset provenance;
-- control-plane documentation and release verification;
-- retrying independent public browser-render checks when the environment can run a real browser.
+- one #415 Phase 1 shared-geography Godot proof inside the allowed files;
+- exact transform/provenance manifest and deterministic tests needed for the proof;
+- direct evidence capture/review;
+- at most one named correction pass after direct review;
+- read-only inventory/reuse of verified state, behavior and licensed asset provenance where #415 allows it;
+- control-plane documentation and release verification.
 
 ## Blocked work now
 
 - P12 or any further retention/onboarding/gameplay mechanics;
-- Godot scene implementation before direct topology-board PASS;
+- product integration of the Godot candidate before direct Phase 1 acceptance;
 - independent React/CSS/SVG Map or World rebuilding as final product art;
-- product UI changes while the topology gate is unresolved;
-- image generation, paid assets, paid tools, and MAX;
+- product UI changes unrelated to Phase 1 evidence;
+- image generation as runtime art, paid assets, paid tools, and MAX;
 - backend, accounts, payments, multiplayer, combat, full economy, or crypto;
 - merge from green CI alone.
 
@@ -112,7 +163,7 @@ An open issue, draft PR, generated handoff or green CI run is not automatically 
 Before meaningful work:
 
 1. Run `npm run pn:status` when a checkout is available.
-2. Read this file, the relevant ADR, root `AGENTS.md`, and #415.
+2. Read this file, `docs/AURELIAN_BASIN_TOPOLOGY_V1.md`, the relevant ADR, root `AGENTS.md`, and #415.
 3. Re-fetch live GitHub state; never trust cached PR SHA or check status.
 4. State tool/model, MAX, cost, allowed scope, forbidden actions, validation, and stop condition.
 
@@ -122,10 +173,10 @@ Replace the current fields and sections in this file whenever the accepted miles
 
 ## Current stop condition
 
-Phase 0 ends only when the topology/composition board is directly reviewed and classified:
+Phase 1 ends only after the exact shared-scene candidate is directly reviewed with required stills, raw video and transform evidence and classified:
 
-- `PASS`: authorize one bounded Phase 1 shared-geography proof under #415;
+- `PASS`: authorize one bounded Phase 2 Map interaction integration under #415;
 - `CORRECTION REQUIRED`: perform the one named correction pass and review again;
-- `REJECTED`: stop the technique without product integration.
+- `REJECTED`: stop the technique before product integration.
 
 No P12 is allowed in any outcome.
