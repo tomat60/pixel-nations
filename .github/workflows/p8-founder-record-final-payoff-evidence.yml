@@ -1,0 +1,52 @@
+name: P8 Founder Record Final Payoff Evidence
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  p8-founder-record-final-payoff:
+    name: Verify Founder Record final frontier legacy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify P8 Founder Record final legacy
+        run: node scripts/qa-p8-founder-record-final-payoff.mjs
+
+      - name: Upload P8 Founder Record evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel-nations-p8-founder-record-final-payoff-evidence
+          path: public/qa/p8-founder-record-final-payoff
+          if-no-files-found: error
+          retention-days: 7
