@@ -72,13 +72,28 @@ async function ensureApp() { if (await appReady()) return null; const child = st
 function stopApp(child) { if (!child) return; if (process.platform === "win32") return child.kill("SIGTERM"); try { process.kill(-child.pid, "SIGTERM"); } catch { child.kill("SIGTERM"); } }
 
 async function loadSeed(page, state) {
-  await page.goto(`${URL}/play?qa-preseed=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 10000 });
-  await page.evaluate(() => {
+  const seedToken = `pixel-nations.qa.empire-crisis.seeded.${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  await page.addInitScript(({ key, state, seedToken }) => {
+    if (window.sessionStorage.getItem(seedToken)) return;
     window.localStorage.clear();
     window.sessionStorage.clear();
-  });
-  await page.evaluate(({ key, state }) => window.localStorage.setItem(key, JSON.stringify(state)), { key: KEY, state });
+    window.localStorage.setItem(key, JSON.stringify(state));
+    window.sessionStorage.setItem(seedToken, "true");
+  }, { key: KEY, state, seedToken });
   await page.goto(`${URL}/play?qa-seed=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 10000 });
+  await page.waitForFunction(({ key, empireDeclarationId, imperialTurnCount }) => {
+    try {
+      const stored = JSON.parse(window.localStorage.getItem(key) ?? "{}");
+      return stored.empireDeclarationId === empireDeclarationId
+        && stored.imperialTurnActionIds?.length === imperialTurnCount;
+    } catch {
+      return false;
+    }
+  }, {
+    key: KEY,
+    empireDeclarationId: state.empireDeclarationId,
+    imperialTurnCount: state.imperialTurnActionIds.length,
+  }, { timeout: 10000 });
   await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
 }
 
