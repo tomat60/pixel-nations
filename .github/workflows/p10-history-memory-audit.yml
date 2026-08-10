@@ -1,0 +1,52 @@
+name: P10 History Memory Audit
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  p10-history-memory-audit:
+    name: Verify replay prior-history discoverability
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify replay prior-history discoverability
+        run: node scripts/qa-p10-history-memory-audit.mjs
+
+      - name: Upload P10 history-memory evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel-nations-p10-history-memory-audit
+          path: public/qa/p10-history-memory-audit
+          if-no-files-found: error
+          retention-days: 7
