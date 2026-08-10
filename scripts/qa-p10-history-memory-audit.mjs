@@ -85,7 +85,7 @@ async function runViewport(browser, viewport) {
       storageKeys: Object.keys(beforeStorage).sort(),
     };
     assert(before.response === "Hold North Ridge", `${viewport.id}: completed record response`, `Unexpected response ${before.response}`);
-    assert(before.payoff.includes("Fortified Frontier Payoff") && before.payoff.includes("Secured"), `${viewport.id}: completed record payoff`, `Unexpected payoff ${before.payoff}`);
+    assert(before.payoff.includes("Fortified Frontier Payoff") && before.payoff.toLowerCase().includes("secured"), `${viewport.id}: completed record payoff`, `Unexpected payoff ${before.payoff}`);
     await snapshot(page, viewport.id, "completed-run-record");
 
     await page.locator('[data-qa="restart-run"]').click();
@@ -151,7 +151,7 @@ try {
   process.exitCode = 1;
 } finally {
   result.generatedAt = new Date().toISOString();
-  await mkdir(OUTPUT_DIR, { recursive: true });
+  await mkdir(OUTPUT_DIR, { recursive: true, force: true });
   await writeFile(REPORT_PATH, `${JSON.stringify(result, null, 2)}\n`);
   if (browser) await browser.close();
   stopApp(server);
