@@ -271,4 +271,9 @@ html {
   button[aria-label*="Next.js"] {
     display: none !important;
   }
+
+  [data-qa="open-previous-founder-record"] {
+    top: 11rem;
+    bottom: auto;
+  }
 }
