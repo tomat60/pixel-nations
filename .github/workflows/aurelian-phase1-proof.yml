@@ -1,0 +1,172 @@
+name: Aurelian Phase 1 Shared Geography Proof
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/scenes/aurelian/**"
+      - "game/tests/aurelian_phase1_topology_test.gd"
+      - ".github/workflows/aurelian-phase1-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GODOT_VERSION: "4.7.1"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  KAYKIT_SHA: "84fa4e91af6a88989be7c99e0891cede11f2ca38"
+  EVIDENCE: "evidence/aurelian-phase1"
+
+jobs:
+  phase1-proof:
+    name: Build and capture shared Aurelian geography
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install render dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends unzip xvfb ffmpeg python3-pil libegl1 libgl1-mesa-dri libglx-mesa0 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 >/dev/null
+
+      - name: Download pinned Godot
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/godot
+          curl -fsSL --retry 3 "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          echo "GODOT_VERSION=$(${GODOT_BIN} --version)"
+
+      - name: Vendor exact KayKit CC0 proof subset
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/kaykit game/assets/aurelian-basin/kaykit "${EVIDENCE}"
+          mkdir -p /tmp/kaykit game/assets/aurelian-basin/kaykit "${EVIDENCE}"
+          git clone --quiet --filter=blob:none --no-checkout https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0.git /tmp/kaykit/source
+          git -C /tmp/kaykit/source checkout --quiet --detach "${KAYKIT_SHA}"
+          test "$(git -C /tmp/kaykit/source rev-parse HEAD)" = "${KAYKIT_SHA}"
+          python3 - <<'PY'
+          import hashlib, json, os, shutil
+          from pathlib import Path
+          root=Path('/tmp/kaykit/source')
+          prefix=Path('addons/kaykit_medieval_hexagon_pack/Assets/gltf')
+          out=Path('game/assets/aurelian-basin/kaykit')
+          allow=[
+            'buildings/neutral/building_bridge_A.gltf',
+            'buildings/blue/building_blacksmith_blue.gltf',
+            'buildings/blue/building_barracks_blue.gltf',
+            'buildings/blue/building_church_blue.gltf',
+            'decoration/props/flag_blue.gltf',
+            'decoration/nature/tree_single_A.gltf','decoration/nature/tree_single_B.gltf',
+            'decoration/nature/hill_single_A.gltf','decoration/nature/hill_single_B.gltf',
+            'decoration/nature/rock_single_A.gltf','decoration/nature/rock_single_C.gltf',
+          ]
+          copied={}
+          for rel in allow:
+            gltf=root/prefix/rel
+            payload=json.loads(gltf.read_text())
+            deps=[Path(rel)]
+            for group in ('buffers','images'):
+              for item in payload.get(group,[]):
+                uri=item.get('uri')
+                if isinstance(uri,str) and not uri.startswith('data:'):
+                  deps.append(Path(rel).parent/uri)
+            for dep in deps:
+              src=(root/prefix/dep).resolve()
+              dst=out/dep
+              dst.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copy2(src,dst)
+              copied[dep.as_posix()]=hashlib.sha256(dst.read_bytes()).hexdigest()
+          license_src=root/'LICENSE.txt'
+          license_dst=Path('game/assets/aurelian-basin/KAYKIT_CC0_LICENSE.txt')
+          shutil.copy2(license_src,license_dst)
+          manifest={'source_commit':os.environ['KAYKIT_SHA'],'license':'CC0-1.0','allowlisted_gltf':allow,'files':copied}
+          Path(os.environ['EVIDENCE']).mkdir(parents=True,exist_ok=True)
+          Path(os.environ['EVIDENCE'],'kaykit-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print('KAYKIT_PHASE1_VENDOR_PASS',len(copied))
+          PY
+
+      - name: Import Godot and run topology tests
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE}/godot-import.log" 2>&1 || { cat "${EVIDENCE}/godot-import.log"; exit 1; }
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "${EVIDENCE}/godot-import.log"
+          "${GODOT_BIN}" --headless --path game --script res://tests/run_all.gd > "${EVIDENCE}/godot-tests.log" 2>&1
+          grep -F "PIXEL_NATIONS_GODOT_TESTS: PASS" "${EVIDENCE}/godot-tests.log"
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_phase1_topology_test.gd > "${EVIDENCE}/phase1-topology-test.log" 2>&1
+          grep -F "AURELIAN_PHASE1_TOPOLOGY_TEST: PASS" "${EVIDENCE}/phase1-topology-test.log"
+
+      - name: Capture Village Map and World stills
+        run: |
+          set -euo pipefail
+          for preset in village map world; do
+            timeout 60s xvfb-run -a -s "-screen 0 1440x900x24" env \
+              AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE}" \
+              AURELIAN_CAPTURE_PRESET="$preset" \
+              "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+              --resolution 1440x900 --position 0,0 --disable-vsync \
+              res://scenes/aurelian/phase1_shared_geography.tscn \
+              > "${EVIDENCE}/${preset}.log" 2>&1
+            grep -F "AURELIAN_PHASE1_STILL=${preset}:" "${EVIDENCE}/${preset}.log"
+            test -s "${EVIDENCE}/${preset}-1440x900.png"
+          done
+
+      - name: Capture raw camera-switch video
+        run: |
+          set -euo pipefail
+          timeout 90s xvfb-run -a -s "-screen 0 1440x900x24" env \
+            AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE}" \
+            AURELIAN_CAPTURE_SEQUENCE=1 \
+            "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+            --resolution 1440x900 --position 0,0 --disable-vsync --fixed-fps 30 \
+            --write-movie "$PWD/${EVIDENCE}/camera-switch.avi" \
+            res://scenes/aurelian/phase1_shared_geography.tscn \
+            > "${EVIDENCE}/camera-switch.log" 2>&1
+          grep -F "AURELIAN_PHASE1_SEQUENCE_COMPLETE=540" "${EVIDENCE}/camera-switch.log"
+          test -s "${EVIDENCE}/camera-switch.avi"
+          ffmpeg -y -loglevel error -i "${EVIDENCE}/camera-switch.avi" -c:v libx264 -pix_fmt yuv420p "${EVIDENCE}/camera-switch.mp4"
+
+      - name: Validate visual evidence and manifest
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          from PIL import Image, ImageStat
+          root=Path(os.environ['EVIDENCE'])
+          report={}
+          for preset in ('village','map','world'):
+            path=root/f'{preset}-1440x900.png'
+            image=Image.open(path).convert('RGB')
+            if image.size != (1440,900): raise SystemExit(f'{preset}: wrong size {image.size}')
+            stat=ImageStat.Stat(image)
+            variance=sum(stat.var)/3
+            colors=len(set(image.resize((240,150)).getdata()))
+            if path.stat().st_size < 50000 or variance < 80 or colors < 256:
+              raise SystemExit(f'{preset}: weak/blank evidence bytes={path.stat().st_size} variance={variance:.2f} colors={colors}')
+            report[preset]={'bytes':path.stat().st_size,'variance':round(variance,3),'sample_colors':colors}
+          manifest=json.loads((root/'transform-manifest.json').read_text())
+          if manifest['bridge']['topology_endpoints'] != [[455,340],[575,340]]: raise SystemExit('bridge contract drift')
+          if set(manifest['cameras']) != {'village','map','world'}: raise SystemExit('camera contract drift')
+          if len(manifest['river_centerline']) != 9: raise SystemExit('river contract drift')
+          (root/'evidence-qa.json').write_text(json.dumps({'status':'PASS','stills':report,'video_seconds':18,'transform_manifest':'PASS'},indent=2)+'\n')
+          print('AURELIAN_PHASE1_EVIDENCE_QA=PASS')
+          PY
+          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE}/camera-switch.mp4" | tee "${EVIDENCE}/video-duration.txt"
+
+      - name: Upload exact-head Phase 1 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aurelian-phase1-${{ github.sha }}
+          path: evidence/aurelian-phase1/**
+          if-no-files-found: error
+          retention-days: 30
