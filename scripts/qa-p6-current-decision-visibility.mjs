@@ -106,13 +106,15 @@ async function measure(page, viewportId, stage) {
     const targetRect = node.getBoundingClientRect();
     const councilRect = council.getBoundingClientRect();
     const margin = 8;
-    const viewportTop = Math.max(councilRect.top + margin, margin);
-    const viewportBottom = Math.min(councilRect.bottom - margin, window.innerHeight - margin);
-    const viewportLeft = Math.max(councilRect.left + margin, margin);
-    const viewportRight = Math.min(councilRect.right - margin, window.innerWidth - margin);
+    const insideCouncil = council.contains(node);
+    const viewportTop = insideCouncil ? Math.max(councilRect.top + margin, margin) : margin;
+    const viewportBottom = insideCouncil ? Math.min(councilRect.bottom - margin, window.innerHeight - margin) : window.innerHeight - margin;
+    const viewportLeft = insideCouncil ? Math.max(councilRect.left + margin, margin) : margin;
+    const viewportRight = insideCouncil ? Math.min(councilRect.right - margin, window.innerWidth - margin) : window.innerWidth - margin;
     const fullyVisible = targetRect.top >= viewportTop && targetRect.bottom <= viewportBottom && targetRect.left >= viewportLeft && targetRect.right <= viewportRight;
     const horizontalOverflow = document.documentElement.scrollWidth > window.innerWidth + 1;
     return {
+      relevantViewport: insideCouncil ? "council" : "browser",
       council: { scrollTop: council.scrollTop, clientHeight: council.clientHeight, scrollHeight: council.scrollHeight, top: councilRect.top, bottom: councilRect.bottom },
       target: { top: targetRect.top, bottom: targetRect.bottom, left: targetRect.left, right: targetRect.right, height: targetRect.height },
       fullyVisible,
@@ -130,7 +132,7 @@ async function measure(page, viewportId, stage) {
   await page.screenshot({ path: shot, fullPage: false });
   result.screenshots.push(shot);
 
-  assert(second.fullyVisible, `${viewportId}: ${stage.id} visibility`, `Active target is not fully visible inside Council viewport (scrollTop ${second.council.scrollTop}).`);
+  assert(second.fullyVisible, `${viewportId}: ${stage.id} visibility`, `Active target is not fully visible inside its ${second.relevantViewport} viewport (scrollTop ${second.council.scrollTop}).`);
   assert(!second.horizontalOverflow, `${viewportId}: ${stage.id} overflow`, "Horizontal page overflow detected.");
   assert(scrollDriftPx <= 2, `${viewportId}: ${stage.id} jitter`, `Council scroll drifted ${scrollDriftPx}px after settling.`);
 
