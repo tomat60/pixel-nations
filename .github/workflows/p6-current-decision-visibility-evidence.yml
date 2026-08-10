@@ -1,0 +1,51 @@
+name: P6 Current Decision Visibility Evidence
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  p6-current-decision-visibility:
+    name: Verify current imperial decision visibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify P6 current-decision visibility
+        run: node scripts/qa-p6-current-decision-visibility.mjs
+
+      - name: Upload P6 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel-nations-p6-current-decision-visibility-evidence
+          path: public/qa/p6-current-decision-visibility
+          if-no-files-found: error
+          retention-days: 7
