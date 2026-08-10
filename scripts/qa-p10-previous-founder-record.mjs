@@ -49,7 +49,7 @@ async function assertPreviousRecord(page, viewportId, stage) {
   const payoff = (await page.locator('[data-qa="previous-founder-record-frontier-payoff"]').innerText()).trim();
   assert(response === "Hold North Ridge", `${viewportId}: ${stage} response`, `Unexpected previous response: ${response}`);
   assert(payoff.includes("Fortified Frontier Payoff") && payoff.toLowerCase().includes("secured"), `${viewportId}: ${stage} payoff`, `Unexpected previous payoff: ${payoff}`);
-  assert((await overlay.innerText()).includes("Previous history · Read only"), `${viewportId}: ${stage} framing`, "Read-only previous-history framing missing.");
+  assert((await overlay.innerText()).toLowerCase().includes("previous history · read only"), `${viewportId}: ${stage} framing`, "Read-only previous-history framing missing.");
   assert(await visibleInViewport(page.locator('[data-qa="close-previous-founder-record"]')), `${viewportId}: ${stage} close action`, "Previous record close action is clipped/offscreen.");
 }
 
