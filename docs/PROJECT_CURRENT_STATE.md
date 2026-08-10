@@ -1,19 +1,21 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-08-04
-Current state revision: Authority Reset v0.1
-Authority baseline SHA: 2d7e3bf180404fffc7725386a97ddbabc446177f
-Product baseline SHA: 4c52c7903a8ee8117f4582016ed72e7ced85798c
-Current milestone: Aurelian Integration M2
-Active execution issue: #338
-Next allowed action: Complete the bounded research and binding Aurelian Composition V2 art brief in issue #338. Do not start visual coding before that brief is accepted.
+Updated: 2026-08-10
+Current state revision: Release Steward Reset v0.2
+Authority source: this file on the current `main`
+Product baseline SHA: `86ef0ede57e2585b527651e3c5719d0a33c35d68`
+Current milestone: P11 closure → Aurelian Shared Geography
+Active execution issue: #421
+Active implementation PR: #422
+Next execution issue after release verification: #415
+Next allowed action: Complete #422 only on its live exact head, directly review its desktop/mobile evidence, run the READY/RC1 gate, merge only on full PASS, then verify the resulting `main`, deployment, and public routes. After that, update this file to #415 and create the topology/composition board. Do not start P12.
 
 ## Purpose
 
-This file is the first and highest-priority source of current project state for every assistant, agent, and new session.
+This file is the first and highest-priority source of current project state for every assistant, agent, automation, and new session.
 
-It must stay short, current, and operational. Historical sprint summaries belong in their original issues, PRs, ADRs, and archived strategy documents — not appended here.
+Keep it short, current, and operational. Historical sprint summaries stay in their issues, PRs, ADRs, and archived documents.
 
 ## Current product truth
 
@@ -23,133 +25,105 @@ Pixel Nations is a strategy game built around:
 
 The full world contains 10,000 lands in a 100 × 100 structure. The current playable/demo area is Sector A-01 / Aurelian Basin.
 
-The real `/play` product path currently proves:
-
-`camp → first shelter → developed settlement`
-
-This sequence is integrated on `main` through PR #335 and product baseline commit `4c52c7903a8ee8117f4582016ed72e7ced85798c`.
+The accepted web product currently preserves the complete founder progression through Founder Record and one previous read-only history. P4–P10 are merged. P11 is the final bounded continuity closure before the visual reset resumes.
 
 ## Current acceptance status
 
-- Aurelian M2 gameplay/state integration: `ACCEPTED`.
-- Current Aurelian Village composition: `TEMPORARY_ACCEPTED`.
-- Production-final Aurelian composition: `NOT YET ACCEPTED`.
-- Non-Village product screens: `NOT VISUALLY APPROVED`.
-- Current Next.js `/play` route: functioning product bridge, demo shell, and rollback surface.
-- Godot: strategic target runtime under accepted ADR-001.
-- React/SVG scene rebuilding as the final art direction: `BLOCKED`.
+- P4–P10 product work: `ACCEPTED / MERGED`.
+- P11 / #422: `PENDING EXACT-HEAD QA AND DIRECT ARTIFACT REVIEW`.
+- Current `main`: product baseline `86ef0ede57e2585b527651e3c5719d0a33c35d68`.
+- Vercel status for the product baseline: `SUCCESS`.
+- Independent public-origin smoke for the baseline: `PRODUCTION UNVERIFIED` from the current control environment; this is not evidence of an outage.
+- Current Village: `MECHANICALLY ACCEPTED BENCHMARK`; preserve its nine-stage progression and rollback value.
+- Current bridge and independent Village/Map/World geography: `VISUALLY REJECTED FOR FINAL DIRECTION`.
+- #415 shared Aurelian geography contract: `ACCEPTED NEXT DIRECTION`, implementation not yet started.
 - Backend, accounts, payments, crypto/NFT/wallet/token, multiplayer, combat, and full economy: `OUT OF CURRENT SCOPE`.
 
-## Runtime interpretation
+## Runtime and visual direction
 
-ADR-001 remains binding: Godot is the target game runtime.
+ADR-001 remains binding: Godot is the target game runtime. Next.js `/play` remains the functioning demo shell and rollback surface until replacement evidence is accepted.
 
-The current Next.js `/play` implementation may host accepted Aurelian/Godot-derived stages as a bounded bridge while it preserves working gameplay, persistence, QA, public demonstration, and rollback capability.
-
-This bridge does not reopen broad React/SVG scene-engine development. Product behavior may be preserved in the web shell while art/runtime work moves toward the accepted Godot direction.
+Village, Map, and World must use one Aurelian Basin geography with the same river, bridge, roads, landmarks, and transforms. Do not resume separate React/CSS/SVG scene patching as the final visual direction.
 
 ## Current active phase
 
-Issue #336 completed the exact-evidence Fable review.
+Finish the already-open bounded P11 only because it closes an explicit P10 continuity defect. It does not reopen a retention roadmap.
 
-Accepted review evidence:
+P11 acceptance requires on one live exact head:
 
-- Fable run: `30935135352`
-- artifact: `8902846660`
-- digest: `sha256:6fa8fca3697be9b766abae7ec8bfdba56d1e5e5365cc6be2a17c619c5cb1ebd5`
-- evidence ref: `4c52c7903a8ee8117f4582016ed72e7ced85798c`
-- result: `VALIDATED_FABLE_OUTPUT`
+- CI, Play, P11, P10, P8, P7, P6, P5, and P4 checks;
+- direct review of fresh desktop and mobile JSON/screenshots;
+- no state mutation, action overlap, horizontal overflow, stale overlay, blank/error state, or scroll trap;
+- READY-event RC1 and exact-head merge;
+- post-merge `main`, deployment, and public-origin gate.
 
-Binding findings:
+After P11 release verification:
 
-- keep M2 merged as the gameplay/integration foundation;
-- improve desktop bridge bank landings, crossing angle, abutments/ramps, and approach road;
-- reorganize the developed settlement around one focal core, compact home cluster, complete path network, integrated landmark, and stronger silhouette hierarchy;
-- do not infer visual approval for World, Nation, Empire, Council, or other non-Village screens.
+1. Close #421.
+2. Set #415 as the only active execution issue.
+3. Produce one topology/composition board before Godot implementation.
+4. Do not create P12 or another mechanics/retention/onboarding feature.
 
-Execution has moved to issue #338:
+## Mandatory PR and release ownership
 
-`Aurelian Composition V2: research and binding art brief`
+The user is not responsible for finding failed or stuck PRs.
 
-No visual implementation branch should begin until #338 produces one accepted, executable brief.
+For every PR open/head change, ChatGPT/control-plane must re-fetch the live SHA, inspect authority/scope, full diff, mergeability, checks, failed logs, and required artifacts, then assign `PENDING / BLOCKED / REJECTED / READY`.
+
+After every merge, it must verify accepted head → merge SHA → new `main` → deployment → real public routes. Localhost RC1 and pre-merge preview are not post-release proof. If the public origin cannot be tested, record `PRODUCTION UNVERIFIED` and the exact missing evidence.
+
+Do not begin another product PR or merge while the current PR/release is failing, unreviewed, or unresolved.
 
 ## Source-of-truth precedence
 
-When documents or issues conflict, use this order:
+When sources conflict:
 
 1. `docs/PROJECT_CURRENT_STATE.md`
 2. accepted ADRs, especially `docs/ADR_001_GODOT_DESKTOP_FIRST.md`
 3. root `AGENTS.md`
-4. the active execution issue named in this file
-5. exact-head evidence and the merged PR for the current milestone
+4. the active execution issue named here
+5. exact-head evidence and the accepted PR for the current milestone
 6. operating and QA protocols
-7. older open issues, Command Room comments, sprint briefs, runbooks, and historical documents
+7. older issues, draft PRs, comments, sprint briefs, runbooks, and historical documents
 
-Issue #79 is historical coordination context. It is not the current execution authority unless this file explicitly reactivates it.
-
-An open issue, draft PR, generated handoff, or green CI run is not automatically current authority.
-
-## Current evidence rules
-
-Use exact-head evidence attached to the current milestone or active issue.
-
-`public/qa/latest/*` is not authoritative merely because its path contains `latest`. It may be used only when its generated date and referenced commit are current for the milestone being reviewed.
-
-Technical PASS does not equal visual acceptance. Visual work requires direct evidence review and an explicit verdict.
+An open issue, draft PR, generated handoff, or green CI run is not automatically authority.
 
 ## Allowed work now
 
-- bounded research for #338;
-- art-direction decisions and the binding Composition V2 brief;
-- read-only audits;
-- authority/documentation fixes that do not change product behavior;
-- deterministic QA and evidence inspection;
-- a later narrow Composition V2 art-target branch only after #338 is accepted.
+- exact-head diagnosis and the smallest deterministic P11 test/CI correction;
+- direct P11 artifact review and release verification;
+- control-plane documentation fixes;
+- closing superseded PR #400 without merge;
+- after P11 release PASS only: the #415 topology/composition board.
 
 ## Blocked work now
 
-- visual coding before #338 is accepted;
-- broad product redesign;
-- new asset family, image generation, or paid assets without a new explicit decision;
-- React/SVG fallback as final Village direction;
-- gameplay, reducer, persistence, routing, backend, account, payment, multiplayer, combat, or economy expansion;
-- World/Nation/Empire implementation during the current Aurelian composition phase;
-- merging from green CI alone without the required product/visual gate.
+- P12 or any further retention/onboarding/gameplay mechanics;
+- another product PR before P11/release classification;
+- Godot implementation before direct topology-board PASS;
+- independent React/CSS/SVG Map or World rebuilding;
+- image generation, Fable, paid assets, and MAX;
+- backend, accounts, payments, multiplayer, combat, full economy, or crypto;
+- merge from green CI alone.
 
 ## Session start gate
 
 Before meaningful work:
 
-1. Run `npm run pn:status`.
-2. Read this file.
-3. Read the accepted ADR relevant to the task.
-4. Read `AGENTS.md`.
-5. Read the active execution issue named above.
-6. Confirm allowed files, forbidden actions, validation, cost mode, and stop condition.
-7. Treat any older material that conflicts with this chain as historical.
+1. Run `npm run pn:status` when a checkout is available.
+2. Read this file, relevant ADR, root `AGENTS.md`, and the active issue.
+3. Re-fetch live GitHub state; never trust cached PR SHA or check status.
+4. State tool/model, MAX, cost, allowed scope, forbidden actions, validation, and stop condition.
 
 ## Update rule
 
-Update this file in the same PR, or in an immediate bounded follow-up, when any of these changes:
-
-- accepted milestone;
-- active execution issue;
-- product baseline;
-- runtime decision;
-- visual acceptance classification;
-- next allowed action;
-- major blocker.
-
-Do not append a new historical chapter. Replace the current fields and current sections.
+Replace the current fields/sections in this file whenever the accepted milestone, active issue/PR, product baseline, visual acceptance, next allowed action, or major blocker changes. Do not append history.
 
 ## Current stop condition
 
-The current planning phase ends when issue #338 contains one accepted and executable Aurelian Composition V2 art brief with:
+This phase ends only when #422 is either:
 
-- concrete bridge and settlement composition constraints;
-- desktop/portrait parity rules;
-- allowed and forbidden scope;
-- model/tool and cost choice;
-- exact evidence contract;
-- binary acceptance gates;
-- at most one correction cycle.
+- `ACCEPTED / MERGED / POST-RELEASE PASS`, after which #415 becomes active; or
+- `REJECTED / CLOSED` with the P10 baseline preserved and #415 explicitly activated.
+
+No P12 is allowed in either case.

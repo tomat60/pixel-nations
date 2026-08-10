@@ -50,6 +50,29 @@ Do **not** start with vague exploration across the whole repo unless the prompt 
 
 ---
 
+## Mandatory PR lifecycle and release gate
+
+No pull request may be left for the user to discover as failed, stale, or unsafe. ChatGPT/control-plane owns the complete lifecycle.
+
+### On every PR open or head change
+
+- Re-fetch exact head/base SHA and discard older evidence.
+- Verify authority/scope, base drift, mergeability, full diff, changed files, dependencies, workflow permissions, secrets, and unexpected changes.
+- Inspect all required checks. A failing check requires exact job/step/log diagnosis; do not blind-rerun unchanged deterministic failures.
+- Review required artifacts directly. Green CI or an uploaded screenshot bundle is not product acceptance.
+- Record `PENDING / BLOCKED / REJECTED / READY`. Do not begin the next product PR while the active one is failing or unreviewed.
+
+### After every merge
+
+- Confirm accepted head → merge commit → resulting `main` SHA.
+- Check `main` status and the deployment tied to that SHA.
+- Smoke the actual public `/`, `/play`, and `/world` routes required by the change.
+- Localhost RC1 and pre-merge preview are not post-release proof.
+- If the public origin cannot be tested, use `PRODUCTION UNVERIFIED` with the exact missing evidence; never guess.
+- Block the next product merge until the release is `PASS` or has an explicit verification blocker.
+
+GitHub workflows are the immediate event-driven layer. The active Pixel Nations steward is the owner layer: it reads failures, diagnoses root cause, makes the smallest safe correction, and reports only meaningful milestones or blockers. The user is not the fallback monitor.
+
 ## Cursor Automation branch-only output contract
 
 Cursor Automation repeatedly created draft PRs even when instructed to open ready PRs. To prevent recurring human-only cleanup work, Cursor Automation must use branch-only handoff.
