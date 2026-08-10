@@ -20,10 +20,10 @@ const founderRunPrimarySelectors = [
   '[data-qa="council-panel"] [data-qa="council-nation-ready"] [data-qa="found-nation-choice"]',
   '[data-qa="council-panel"] [data-qa="frontier-objective-options"] [data-qa="frontier-objective-choice"]',
   '[data-qa="council-panel"] [data-qa="empire-declaration-options"] [data-qa="empire-declaration-choice"]',
-  '[data-qa="council-panel"] [data-qa="court-case-options"]',
-  '[data-qa="council-panel"] [data-qa="rival-response-options"]',
-  '[data-qa="council-panel"] [data-qa="conflict-escalation-options"]',
-  '[data-qa="council-panel"] [data-qa="standoff-step"]',
+  '[data-qa="council-panel"] [data-qa="court-case-options"] button',
+  '[data-qa="council-panel"] [data-qa="rival-response-options"] button',
+  '[data-qa="council-panel"] [data-qa="conflict-escalation-options"] button',
+  '[data-qa="council-panel"] [data-qa="standoff-step"] button',
   '[data-qa="world-sector-inspect"] [data-qa="claim-sector-button"]:not(:disabled)',
 ] as const;
 
