@@ -7,6 +7,8 @@ import {
   getImperialTurnHistory,
   getNationDecision,
   getOwnedSectorIds,
+  getPostCrisisFrontierPayoffTarget,
+  getPostCrisisResponseDecision,
   getRivalPressure,
   getStrategicOutcome,
   getStrategicPosture,
@@ -36,6 +38,8 @@ export function DemoCompleteOverlay({
   const otherPostures = strategicBranches.filter((branch) => branch.postureId !== posture.postureId);
   const pressure = getRivalPressure(state);
   const crisisRecovery = getEmpireCrisisRecovery(state);
+  const postCrisisResponse = getPostCrisisResponseDecision(state);
+  const postCrisisPayoff = getPostCrisisFrontierPayoffTarget(state);
   const finalOutcomeLabel = getFounderRecordOutcomeLabel(state);
 
   return (
@@ -57,6 +61,20 @@ export function DemoCompleteOverlay({
                   <p className="text-[8px] font-black uppercase tracking-[0.16em] text-red-100/65">Crisis recovery</p>
                   <p className="mt-1 text-sm font-black text-amber-50">{crisisRecovery.label}</p>
                   <p className="mt-1 text-xs leading-relaxed text-amber-50/58">{crisisRecovery.worldEffect}</p>
+                </div>
+              ) : null}
+              {postCrisisResponse ? (
+                <div data-qa="founder-record-final-legacy" data-response-id={postCrisisResponse.id} data-payoff-secured={state.postCrisisFrontierPayoffSecured ? "true" : "false"} className="mt-3 rounded-2xl border border-sky-100/22 bg-sky-300/8 p-3">
+                  <p className="text-[8px] font-black uppercase tracking-[0.16em] text-sky-100/65">Final frontier legacy</p>
+                  <p data-qa="founder-record-post-crisis-response" className="mt-1 text-sm font-black text-amber-50">{postCrisisResponse.label}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-amber-50/58">{postCrisisResponse.short}</p>
+                  {state.postCrisisFrontierPayoffSecured && postCrisisPayoff ? (
+                    <div data-qa="founder-record-frontier-payoff" data-payoff-id={postCrisisPayoff.id} data-secured="true" className="mt-2 rounded-xl border border-emerald-100/20 bg-emerald-300/8 px-3 py-2">
+                      <p className="text-[8px] font-black uppercase tracking-[0.14em] text-emerald-100/60">Secured</p>
+                      <p className="mt-0.5 text-sm font-black text-amber-50">{postCrisisPayoff.label}</p>
+                      <p className="mt-1 text-[11px] leading-relaxed text-amber-50/55">{postCrisisPayoff.short}</p>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
               <div className="mt-4 grid grid-cols-2 gap-2 text-center">
