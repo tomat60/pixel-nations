@@ -184,6 +184,7 @@ function getCurrentObjectiveText(state: PlayState): string {
   if (turn < 3) return `Take Imperial Turn ${turn + 1}/3 and shape the character of your empire.`;
   if (getEmpireCrisisOpen(state)) return `Resolve the Empire Crisis: ${getEmpireCrisisReasonLabel(state.empireCrisisReason)}.`;
   if (state.postCrisisCountermoveOrigin && !state.postCrisisResponseId) return "Answer the Obsidian March's post-crisis counter-move.";
+  if (state.postCrisisResponseId && !state.postCrisisFrontierPayoffSecured) return "Secure frontier payoff before reviewing the Founder Record.";
   if (state.postCrisisResponseId) return "Your first empire answered the rival counter-move. Review its Founder Record or begin another history.";
   if (state.empireCrisisRecoveryId) return "Your first empire survived its crisis. Review its Founder Record or begin another history.";
   return "Your first empire stands. Review its Founder Record or begin a different history.";
