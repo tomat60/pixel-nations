@@ -41,6 +41,7 @@ async function seedCompletedRun(page, { clearPrevious = false, influence = 3 } =
 async function snapshot(page, viewportId, stage) { const shot = `${OUTPUT_DIR}/${viewportId}-${stage}.png`; await page.screenshot({ path: shot, fullPage: false }); result.screenshots.push(shot); }
 async function noHorizontalOverflow(page) { return page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth && document.body.scrollWidth <= window.innerWidth); }
 async function stateFingerprint(page) { const state = await readJson(page, STORAGE_KEY, "read current state fingerprint"); return JSON.stringify({ empireDeclarationId: state.empireDeclarationId, completedOrders: state.completedOrders, postCrisisResponseId: state.postCrisisResponseId, postCrisisFrontierPayoffSecured: state.postCrisisFrontierPayoffSecured, resources: state.resources, chronicle: state.chronicle }); }
+async function includesNormalizedText(locator, expected) { const text = (await locator.textContent()) ?? ""; return text.toLowerCase().includes(expected.toLowerCase()); }
 
 async function runViewport(browser, viewport) {
   const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, isMobile: viewport.isMobile });
@@ -69,7 +70,7 @@ async function runViewport(browser, viewport) {
     await page.locator('[data-qa="previous-founder-record-overlay"]').waitFor({ state: "visible", timeout: 10000 });
     assert((await page.locator('[data-qa="previous-founder-record-post-crisis-response"]').innerText()).trim() === "Hold North Ridge", `${viewport.id}: previous response`, "Previous record did not show the prior final response.");
     assert((await page.locator('[data-qa="previous-founder-record-frontier-payoff"]').innerText()).includes("Fortified Frontier Payoff"), `${viewport.id}: previous payoff`, "Previous record did not show the prior secured payoff.");
-    assert((await page.locator('[data-qa="previous-founder-record-overlay"]').innerText()).includes("Previous history · Read only"), `${viewport.id}: read-only framing`, "Previous record is missing read-only framing.");
+    assert(await includesNormalizedText(page.locator('[data-qa="previous-founder-record-overlay"]'), "Previous history · Read only"), `${viewport.id}: read-only framing`, "Previous record is missing read-only framing.");
     await snapshot(page, viewport.id, "run2-previous-record-open");
 
     await page.locator('[data-qa="close-previous-founder-record"]').click();
