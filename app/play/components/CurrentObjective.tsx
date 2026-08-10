@@ -20,6 +20,10 @@ const founderRunPrimarySelectors = [
   '[data-qa="council-panel"] [data-qa="council-nation-ready"] [data-qa="found-nation-choice"]',
   '[data-qa="council-panel"] [data-qa="frontier-objective-options"] [data-qa="frontier-objective-choice"]',
   '[data-qa="council-panel"] [data-qa="empire-declaration-options"] [data-qa="empire-declaration-choice"]',
+  '[data-qa="council-panel"] [data-qa="court-case-options"]',
+  '[data-qa="council-panel"] [data-qa="rival-response-options"]',
+  '[data-qa="council-panel"] [data-qa="conflict-escalation-options"]',
+  '[data-qa="council-panel"] [data-qa="standoff-step"]',
   '[data-qa="world-sector-inspect"] [data-qa="claim-sector-button"]:not(:disabled)',
 ] as const;
 
@@ -89,7 +93,7 @@ function useFounderRunPrimaryActionVisibility() {
           .map((selector) => playRoot.querySelector<HTMLElement>(selector))
           .find((element) => element && element.getClientRects().length > 0);
 
-        if (!target || isInsideViewport(target)) return;
+        if (!target || isInsideRelevantViewport(target)) return;
         target.scrollIntoView({ block: "center", inline: "nearest" });
       });
     }
@@ -105,6 +109,10 @@ function useFounderRunPrimaryActionVisibility() {
         "data-nation-ready",
         "data-frontier-intent",
         "data-empire-ready",
+        "data-court-case-decision",
+        "data-rival-response-decision",
+        "data-conflict-escalation-decision",
+        "data-standoff-decision",
       ],
     });
     scheduleVisibilityCheck();
@@ -116,15 +124,17 @@ function useFounderRunPrimaryActionVisibility() {
   }, []);
 }
 
-function isInsideViewport(element: HTMLElement) {
+function isInsideRelevantViewport(element: HTMLElement) {
   const margin = 8;
   const rect = element.getBoundingClientRect();
-  return (
-    rect.top >= margin &&
-    rect.left >= margin &&
-    rect.bottom <= window.innerHeight - margin &&
-    rect.right <= window.innerWidth - margin
-  );
+  const council = element.closest<HTMLElement>('[data-qa="council-panel"]');
+  const bounds = council?.getBoundingClientRect();
+  const top = Math.max(margin, bounds?.top ?? margin);
+  const left = Math.max(margin, bounds?.left ?? margin);
+  const bottom = Math.min(window.innerHeight - margin, (bounds?.bottom ?? window.innerHeight) - margin);
+  const right = Math.min(window.innerWidth - margin, (bounds?.right ?? window.innerWidth) - margin);
+
+  return rect.top >= top && rect.left >= left && rect.bottom <= bottom && rect.right <= right;
 }
 
 function getCurrentObjectiveText(state: PlayState): string {
