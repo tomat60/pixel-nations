@@ -43,6 +43,7 @@ jobs:
         run: node scripts/qa-p6-current-decision-visibility.mjs
 
       - name: Upload P6 evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pixel-nations-p6-current-decision-visibility-evidence
