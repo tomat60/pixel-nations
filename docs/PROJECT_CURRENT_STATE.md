@@ -1,15 +1,15 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-08-10
-Current state revision: Aurelian Shared Geography Phase 1 v0.5
+Updated: 2026-08-11
+Current state revision: Aurelian Shared Geography Phase 1 Rejection v0.6
 Authority source: this file on the current `main`
 Product baseline SHA: `c94423d5a9c60f1982ae2935551fc1905d46e719`
-Current milestone: Aurelian Shared Geography — Phase 1 continuity proof
+Current milestone: Aurelian Shared Geography — Phase 1 technique recovery
 Active execution issue: #415
 Active implementation PR: none
 Last completed milestone: #415 Phase 0 topology lock — PASS
-Next allowed action: Execute exactly one desktop-first Godot shared-geography proof from `docs/AURELIAN_BASIN_TOPOLOGY_V1.md`, then stop for direct Village/Map/World still + raw camera-switch video + transform-manifest review. No P12 and no product integration before proof acceptance.
+Next allowed action: Under #415, perform a read-only postmortem of rejected PR #426 and define one materially different shared-geography implementation contract. No second Godot candidate, Phase 2 integration, P12, or web visual replacement is authorized before that contract is directly reviewed.
 
 ## Purpose
 
@@ -33,7 +33,8 @@ The accepted web product preserves the full founder progression through Founder 
 - P11 / #422: `ACCEPTED / MERGED` as product baseline `c94423d5a9c60f1982ae2935551fc1905d46e719`.
 - #415 Phase 0 topology/composition board: `PASS` after direct review.
 - Shared topology authority: `docs/AURELIAN_BASIN_TOPOLOGY_V1.md`.
-- #415 shared Aurelian geography contract: `ACTIVE — PHASE 1 CONTINUITY PROOF`.
+- #415 Phase 1 candidate / PR #426 at `9c30232307578e8c0481ef7d191d0c0f522c4cbc`: `REJECTED / CLOSED WITHOUT MERGE` after direct still, manifest and 18 s video review.
+- #415 shared Aurelian geography contract: `ACTIVE — PHASE 1 TECHNIQUE RECOVERY`; implementation and Phase 2 integration are blocked.
 - Current Village: `MECHANICALLY ACCEPTED BENCHMARK`; preserve its nine-stage progression and rollback value.
 - Current bridge and independent web Village/Map/World geography: `VISUALLY REJECTED FOR FINAL DIRECTION`.
 - Vercel deployment status for the last checked current-main documentation head: `SUCCESS`.
@@ -51,9 +52,11 @@ The accepted Phase 0 topology intentionally preserves useful gameplay-semantic r
 
 ## Current active phase
 
-The only active product-direction task is #415 Phase 1.
+The only active product-direction task is #415 Phase 1 technique recovery.
 
-Build one borderless, desktop-first Godot continuity proof from the accepted topology contract. This is a visual/scene proof, not gameplay integration.
+PR #426 proved mechanical shared transforms but failed the required visual result: the continuous river and connected roads were not legible, the bridge read as a floating isolated prefab, the coast/outflow was detached, and Village/Map/World were sparse zoom levels rather than one believable Basin. Its dedicated run also failed because captured stills were 1440×810 instead of the asserted 1440×900.
+
+Do not iterate the rejected primitive polygon/ribbon technique. The next artifact is a read-only postmortem plus one materially different implementation contract; it is not another scene candidate.
 
 Required shared geography:
 
@@ -141,17 +144,17 @@ An open issue, draft PR, generated handoff or green CI run is not automatically 
 
 ## Allowed work now
 
-- one #415 Phase 1 shared-geography Godot proof inside the allowed files;
-- exact transform/provenance manifest and deterministic tests needed for the proof;
-- direct evidence capture/review;
-- at most one named correction pass after direct review;
+- read-only postmortem of PR #426 exact-head evidence;
+- one materially different #415 implementation contract addressing continuous terrain, visible river/banks, connected bridge approaches and camera occupancy;
+- direct review of that contract before any second scene candidate;
 - read-only inventory/reuse of verified state, behavior and licensed asset provenance where #415 allows it;
 - control-plane documentation and release verification.
 
 ## Blocked work now
 
 - P12 or any further retention/onboarding/gameplay mechanics;
-- product integration of the Godot candidate before direct Phase 1 acceptance;
+- any second Godot scene candidate before the replacement implementation contract is directly accepted;
+- product integration or Phase 2 after the rejected Phase 1 candidate;
 - independent React/CSS/SVG Map or World rebuilding as final product art;
 - product UI changes unrelated to Phase 1 evidence;
 - image generation as runtime art, paid assets, paid tools, and MAX;
@@ -173,10 +176,12 @@ Replace the current fields and sections in this file whenever the accepted miles
 
 ## Current stop condition
 
-Phase 1 ends only after the exact shared-scene candidate is directly reviewed with required stills, raw video and transform evidence and classified:
+The first Phase 1 candidate is `REJECTED`; PR #426 is closed without merge and the primitive polygon/ribbon technique is stopped before product integration.
 
-- `PASS`: authorize one bounded Phase 2 Map interaction integration under #415;
-- `CORRECTION REQUIRED`: perform the one named correction pass and review again;
-- `REJECTED`: stop the technique before product integration.
+Technique recovery stops after one replacement implementation contract is directly reviewed and classified:
 
-No P12 is allowed in any outcome.
+- `ACCEPTED`: authorize one new bounded Phase 1 candidate using the materially different contract;
+- `CORRECTION REQUIRED`: revise the contract once, without scene implementation;
+- `REJECTED`: keep Godot candidate work blocked and return to #415 strategy review.
+
+No Phase 2, P12, independent web visual rebuild, paid tooling, MAX, or image generation is allowed in any outcome.
