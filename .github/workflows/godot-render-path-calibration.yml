@@ -1,0 +1,212 @@
+name: Godot Zero-Art Render-Path Calibration
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/scenes/calibration/render_path/**"
+      - "game/tests/render_path_calibration/**"
+      - ".github/workflows/godot-render-path-calibration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EVIDENCE_DIR: "evidence/godot-render-path-calibration"
+
+jobs:
+  calibrate-render-path:
+    name: Prove main viewport, SubViewport, still and movie capture
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout exact calibration head
+        uses: actions/checkout@v4
+        with:
+          ref: \${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "\${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "\${{ github.event.pull_request.head.sha }}"
+          fi
+
+      - name: Install deterministic capture tooling
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            unzip xvfb ffmpeg python3-pil \
+            libegl1 libgl1-mesa-dri libglx-mesa0 libx11-6 libxcursor1 \
+            libxinerama1 libxi6 libxrandr2 >/dev/null
+          ffmpeg -version | head -1 | tee "${EVIDENCE_DIR}/ffmpeg-version.txt"
+
+      - name: Download pinned Godot 4.7.1
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/godot
+          curl -fsSL --retry 3 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Import project and run foundation tests
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit \
+            > "${EVIDENCE_DIR}/godot-import.log" 2>&1
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          "${GODOT_BIN}" --headless --path game --script res://tests/run_all.gd \
+            > "${EVIDENCE_DIR}/foundation-tests.log" 2>&1
+          grep -F "PIXEL_NATIONS_GODOT_TESTS: PASS" "${EVIDENCE_DIR}/foundation-tests.log"
+          "${GODOT_BIN}" --headless --path game \
+            --script res://tests/render_path_calibration/render_path_calibration_test.gd \
+            > "${EVIDENCE_DIR}/calibration-test.log" 2>&1
+          grep -F "GODOT_RENDER_PATH_CALIBRATION_TEST: PASS" "${EVIDENCE_DIR}/calibration-test.log"
+
+      - name: Capture exact 1440x900 main and SubViewport stills
+        run: |
+          set -euo pipefail
+          timeout 120s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+            LIBGL_ALWAYS_SOFTWARE=1 \
+            CALIBRATION_CAPTURE=1 \
+            CALIBRATION_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}" \
+            "${GODOT_BIN}" --path game --audio-driver Dummy \
+            --rendering-method gl_compatibility --resolution 1440x900 \
+            --position 0,0 \
+            res://scenes/calibration/render_path/render_path_calibration.tscn \
+            > "${EVIDENCE_DIR}/capture.log" 2>&1
+          grep -F "CALIBRATION_RUNTIME_ASSERTIONS=PASS" "${EVIDENCE_DIR}/capture.log"
+          grep -F "CALIBRATION_STILLS=PASS" "${EVIDENCE_DIR}/capture.log"
+          grep -F "CALIBRATION_MAIN_CAMERA_CURRENT=true" "${EVIDENCE_DIR}/capture.log"
+          grep -F "CALIBRATION_SUB_CAMERA_CURRENT=true" "${EVIDENCE_DIR}/capture.log"
+          test -s "${EVIDENCE_DIR}/main-viewport.png"
+          test -s "${EVIDENCE_DIR}/subviewport.png"
+
+      - name: Capture six second main to SubViewport movie
+        run: |
+          set -euo pipefail
+          timeout 120s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+            LIBGL_ALWAYS_SOFTWARE=1 \
+            CALIBRATION_MOVIE=1 \
+            "${GODOT_BIN}" --path game --audio-driver Dummy \
+            --rendering-method gl_compatibility --resolution 1440x900 \
+            --position 0,0 --disable-vsync --fixed-fps 30 \
+            --write-movie "$PWD/${EVIDENCE_DIR}/viewport-switch.avi" \
+            res://scenes/calibration/render_path/render_path_calibration.tscn \
+            > "${EVIDENCE_DIR}/movie.log" 2>&1
+          grep -F "CALIBRATION_MOVIE_SWITCH=SUBVIEWPORT" "${EVIDENCE_DIR}/movie.log"
+          grep -F "CALIBRATION_MOVIE_COMPLETE=180" "${EVIDENCE_DIR}/movie.log"
+          test -s "${EVIDENCE_DIR}/viewport-switch.avi"
+          ffmpeg -y -loglevel error -i "${EVIDENCE_DIR}/viewport-switch.avi" \
+            -c:v libx264 -pix_fmt yuv420p "${EVIDENCE_DIR}/viewport-switch.mp4"
+          ffmpeg -y -loglevel error -ss 1 -i "${EVIDENCE_DIR}/viewport-switch.mp4" \
+            -frames:v 1 "${EVIDENCE_DIR}/movie-main-frame.png"
+          ffmpeg -y -loglevel error -ss 4 -i "${EVIDENCE_DIR}/viewport-switch.mp4" \
+            -frames:v 1 "${EVIDENCE_DIR}/movie-subviewport-frame.png"
+          ffprobe -v error -show_entries stream=width,height,r_frame_rate,nb_frames,codec_name \
+            -show_entries format=duration -of json "${EVIDENCE_DIR}/viewport-switch.mp4" \
+            > "${EVIDENCE_DIR}/video-metadata.json"
+
+      - name: Classify exact render path
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from PIL import Image, ImageStat
+
+          root = Path(os.environ["EVIDENCE_DIR"])
+          exact_head = (root / "exact-head.txt").read_text().strip()
+          targets = {
+              "main_viewport": root / "main-viewport.png",
+              "subviewport": root / "subviewport.png",
+              "movie_main": root / "movie-main-frame.png",
+              "movie_subviewport": root / "movie-subviewport-frame.png",
+          }
+          stats = {}
+          def inspect(name, path):
+              image = Image.open(path).convert("RGB")
+              if image.size != (1440, 900):
+                  raise SystemExit(f"{name}: wrong dimensions {image.size}")
+              sample = image.resize((240, 150))
+              pixels = list(sample.getdata())
+              non_black = sum(1 for r, g, b in pixels if max(r, g, b) > 20)
+              unique_colors = len(set(pixels))
+              variance = sum(ImageStat.Stat(sample).var) / 3.0
+              data = {
+                  "bytes": path.stat().st_size,
+                  "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                  "width": image.width,
+                  "height": image.height,
+                  "sample_non_black_pixels": non_black,
+                  "sample_unique_colors": unique_colors,
+                  "variance": round(variance, 3),
+              }
+              stats[name] = data
+              return path.stat().st_size >= 10000 and non_black >= 30000 and unique_colors >= 20 and variance >= 50.0
+
+          visible = {name: inspect(name, path) for name, path in targets.items()}
+          if not visible["main_viewport"]:
+              classification = "BLOCKED_MAIN_VIEWPORT"
+          elif not visible["subviewport"]:
+              classification = "BLOCKED_SUBVIEWPORT"
+          elif not visible["movie_main"] or not visible["movie_subviewport"]:
+              classification = "BLOCKED_MOVIE_CAPTURE"
+          else:
+              classification = "PASS"
+
+          runtime_path = root / "runtime.json"
+          runtime = json.loads(runtime_path.read_text())
+          runtime["exact_head"] = exact_head
+          runtime_path.write_text(json.dumps(runtime, indent=2) + "\n")
+          video = json.loads((root / "video-metadata.json").read_text())
+          duration = float(video["format"]["duration"])
+          stream = video["streams"][0]
+          if not 5.5 <= duration <= 6.5:
+              raise SystemExit(f"movie duration drift: {duration}")
+          if int(stream["width"]) != 1440 or int(stream["height"]) != 900:
+              raise SystemExit(f"movie dimensions drift: {stream}")
+
+          qa = {
+              "classification": classification,
+              "exact_head": exact_head,
+              "stills_and_frames": stats,
+              "visible": visible,
+              "movie_seconds": duration,
+              "movie_stream": stream,
+          }
+          (root / "capture-qa.json").write_text(json.dumps(qa, indent=2) + "\n")
+          print(f"GODOT_RENDER_PATH_CLASSIFICATION={classification}")
+          if classification != "PASS":
+              raise SystemExit(classification)
+          PY
+
+      - name: Write evidence hashes
+        if: always()
+        run: |
+          set -euo pipefail
+          find "${EVIDENCE_DIR}" -type f ! -name SHA256SUMS.txt -print0 | sort -z | \
+            xargs -0 sha256sum > "${EVIDENCE_DIR}/SHA256SUMS.txt"
+
+      - name: Upload exact-head calibration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-render-path-calibration-\${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/godot-render-path-calibration/**
+          if-no-files-found: error
+          retention-days: 30
