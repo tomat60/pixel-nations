@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/calibration/render_path/render_path_calibration.gd" id="1"]
+
+[node name="RenderPathCalibration" type="Node3D"]
+script = ExtResource("1")
