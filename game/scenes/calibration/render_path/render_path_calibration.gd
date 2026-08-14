@@ -152,11 +152,11 @@ func _camera_manifest(camera: Camera3D, viewport: Viewport) -> Dictionary:
 		"cull_mask": camera.cull_mask,
 		"position": [camera.global_position.x, camera.global_position.y, camera.global_position.z],
 		"basis": [
-			[camera.global_basis.x.x, camera.global_basis.x.y, camera.global_basis.x.z],
-			[camera.global_basis.y.x, camera.global_basis.y.y, camera.global_basis.y.z],
-			[camera.global_basis.z.x, camera.global_basis.z.y, camera.global_basis.z.z]
+			[camera.global_transform.basis.x.x, camera.global_transform.basis.x.y, camera.global_transform.basis.x.z],
+			[camera.global_transform.basis.y.x, camera.global_transform.basis.y.y, camera.global_transform.basis.y.z],
+			[camera.global_transform.basis.z.x, camera.global_transform.basis.z.y, camera.global_transform.basis.z.z]
 		],
-		"viewport_size": [viewport.size.x, viewport.size.y],
+		"viewport_size": [viewport.get_visible_rect().size.x, viewport.get_visible_rect().size.y],
 		"update_mode": evidence_subviewport.render_target_update_mode if viewport == evidence_subviewport else "main_always"
 	}
 
