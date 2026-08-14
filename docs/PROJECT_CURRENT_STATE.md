@@ -2,14 +2,14 @@
 
 Status: ACTIVE
 Updated: 2026-08-14
-Current state revision: Godot Render-Path Calibration Passed v1.0
+Current state revision: Aurelian Scene Import Calibration Contract v1.0
 Authority source: this file on the current `main`
 Product baseline SHA: `c94423d5a9c60f1982ae2935551fc1905d46e719`
-Current milestone: Render-path calibration PASS, Aurelian strategy review
+Current milestone: Scene-specific Aurelian import/composition calibration gate
 Active execution issue: #415
 Active implementation PR: none
 Last completed milestone: PR #432 zero-art render-path calibration — PASS / CLOSED WITHOUT MERGE
-Next allowed action: Strategy review in #415 only. Use PR #432 PASS to constrain read-only diagnosis of PR #429's scene-specific black output and define a fresh bounded recovery contract through a normal PR. No Aurelian implementation candidate is authorized until that contract is accepted.
+Next allowed action: Execute exactly one bounded scene-specific import/composition calibration under `docs/AURELIAN_SCENE_IMPORT_CALIBRATION_CONTRACT_V1.md`, then stop for exact-head artifact review. This does not authorize a new Aurelian candidate.
 
 ## Purpose
 
@@ -39,11 +39,12 @@ The accepted web product preserves the full founder progression through Founder 
 - #415 shared Aurelian geography implementation: `BLOCKED`; Phase 2 remains blocked.
 - Zero-art Godot render-path calibration contract: `CONSUMED / PASS` under `docs/GODOT_RENDER_PATH_CALIBRATION_CONTRACT_V1.md`.
 - PR #432 at `3d9845747db151e45a9dac32d9e8b7ef34b6d5a5`: `PASS / CLOSED WITHOUT MERGE`. Artifact `9227723971` directly proved visible 1440×900 main viewport, SubViewport, still readback and six-second movie capture in Godot 4.7.1 Compatibility on Mesa llvmpipe; all hashes and exact-head checks passed. The generic CI render path is accepted, so PR #429's black evidence is scene/import/runtime-composition specific.
+- Scene-specific Aurelian import/composition calibration contract: `ACCEPTED / ONE BOUNDED DIAGNOSTIC CALIBRATION` under `docs/AURELIAN_SCENE_IMPORT_CALIBRATION_CONTRACT_V1.md`. It uses pinned artifact `9222116061` only as rough-reference input and does not authorize Basin implementation.
 - Current Village: `MECHANICALLY ACCEPTED BENCHMARK`; preserve its nine-stage progression and rollback value.
 - Current bridge and independent web Village/Map/World geography: `VISUALLY REJECTED FOR FINAL DIRECTION`.
 - Vercel deployment status for the last checked current-main documentation head: `SUCCESS`.
-- Public-origin HTTP checks for `/`, `/play`, and `/world`: last recorded `PASS` with 200 responses; `/world` canonicalizes to `/play`.
-- Public browser-render smoke remains `PRODUCTION UNVERIFIED` from the current control environment because a runnable browser executable has not been available there. This is missing evidence, not evidence of an outage.
+- Current Vercel deployment for `main@9f2eb113b4fd6e0a4736a7bddbddf6c4226aad86`: `SUCCESS`.
+- Public `/`, `/play`, and `/world` on the SHA-linked Vercel deployment redirect to Vercel SSO. Public production remains `PRODUCTION UNVERIFIED`; this is missing anonymous-origin evidence, not evidence of an outage.
 - Backend, accounts, payments, crypto/NFT/wallet/token, multiplayer, combat, and full economy: `OUT OF CURRENT SCOPE`.
 
 ## Runtime and visual direction
@@ -56,11 +57,11 @@ The accepted Phase 0 topology intentionally preserves useful gameplay-semantic r
 
 ## Current active phase
 
-The only active task is #415 strategy review after the zero-art render-path calibration PASS.
+The only active task is one scene-specific Aurelian import/composition calibration under the accepted bounded contract.
 
 PR #426 proved mechanical shared transforms but failed the required visual result. PR #429 then implemented the terrain-first Blender to one GLB to Godot recovery technique. Its exact-head run completed Blender authoring/export, pinned asset provenance, one GLB import, foundation tests, recovery contract tests, four still captures and an 18 second movie, but deterministic visual QA failed because every still was identical black output. Direct review of all stills and representative video frames confirmed no visible landscape. The single allowed visual correction pass did not change that result.
 
-Do not iterate PR #426, PR #429 or the closed PR #432 evidence branch. Preserve PR #429 deterministic source/export/manifests only as rough reference. The accepted calibration excludes a generic Compatibility/llvmpipe framebuffer failure; strategy review must now isolate the smallest scene/import/runtime-composition difference that can explain PR #429. A new Aurelian implementation candidate requires a fresh bounded strategy contract and explicit authority recorded in this file.
+Do not iterate PR #426, PR #429 or the closed PR #432 evidence branch. The active calibration may consume only the pinned PR #429 artifact and must isolate sentinel, import inventory, diagnostic material, original material, SubViewport, camera and projection stages one variable at a time. A new Aurelian implementation candidate still requires a later fresh recovery contract and explicit authority recorded in this file.
 
 Required shared geography:
 
@@ -95,6 +96,12 @@ Required shared geography:
 
 PR #432 exact head `3d9845747db151e45a9dac32d9e8b7ef34b6d5a5` received direct `PASS`. Main viewport, SubViewport, PNG still capture and movie capture are all visible and deterministic at 1440×900. The result permits only the current strategy review. It does not authorize an Aurelian candidate, integration or Phase 2.
 
+## Active scene import calibration
+
+Use `docs/AURELIAN_SCENE_IMPORT_CALIBRATION_CONTRACT_V1.md`. The calibration must keep the PR #432 sentinel visible while adding the pinned #429 GLB in isolated stages. Required outcomes distinguish artifact, empty import, invalid bounds, camera/culling, materials/textures, SubViewport composition, or an identified original scene-composition difference.
+
+The implementation PR is evidence-only and must close without merge after direct review. Blender regeneration, GLB edits, Aurelian visual correction, gameplay, integration and Phase 2 remain blocked.
+
 ## Mandatory PR and release ownership
 
 The user is not responsible for finding failed, drifting, or stuck PRs.
@@ -124,9 +131,8 @@ An open issue, draft PR, generated handoff or green CI run is not automatically 
 
 ## Allowed work now
 
-- strategy review in #415 constrained by PR #432 exact-head PASS;
-- read-only diagnosis and inventory of PR #429 rough-reference source/export/manifests/tests;
-- one bounded recovery-contract proposal through control-plane documentation;
+- exactly one scene-specific import/composition calibration under `docs/AURELIAN_SCENE_IMPORT_CALIBRATION_CONTRACT_V1.md`;
+- exact-head direct review of its stills, movie, inventories, JSON, hashes and logs;
 - release verification.
 
 ## Blocked work now
@@ -157,6 +163,6 @@ Replace the current fields and sections in this file whenever the accepted miles
 
 PR #426 and PR #429 remain `REJECTED / CLOSED WITHOUT MERGE`. Their implementation techniques are stopped.
 
-PR #432 calibration is `PASS / CLOSED WITHOUT MERGE`. Stop before any Aurelian implementation candidate until a fresh bounded strategy contract is accepted into this file through a normal PR. Phase 2, integration and product merge remain blocked.
+PR #432 calibration is `PASS / CLOSED WITHOUT MERGE`. Stop after one exact-head scene-import calibration artifact is directly reviewed and classified. The calibration does not authorize an Aurelian candidate, integration or Phase 2; those require a later fresh recovery contract.
 
 No P12, independent web visual rebuild, paid tooling, MAX, or image generation is allowed.
