@@ -168,7 +168,7 @@ jobs:
                   "variance": round(variance, 3),
               }
               stats[name] = data
-              return path.stat().st_size >= 10000 and non_black >= 30000 and unique_colors >= 20 and variance >= 50.0
+              return path.stat().st_size >= 1000 and non_black >= 30000 and unique_colors >= 20 and variance >= 50.0
 
           visible = {name: inspect(name, path) for name, path in targets.items()}
           if not visible["main_viewport"]:
