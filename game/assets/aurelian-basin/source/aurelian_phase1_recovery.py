@@ -102,7 +102,8 @@ def terrain_height(x, y):
     coast_drop = 0.0
     if y < -41.0:
         t = min(1.0, (-41.0 - y) / 13.0)
-        coast_drop = -4.4 * (t * t * (3.0 - 2.0 * t))
+        # Preserve dry outflow banks while the river channel remains below coastal water.
+        coast_drop = -2.4 * (t * t * (3.0 - 2.0 * t))
     return base + nw + ne + shoulder + fields_low + marsh_low + greenvale_low + channel + banks + coast_drop
 
 
