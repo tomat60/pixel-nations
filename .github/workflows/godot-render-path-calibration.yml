@@ -27,7 +27,7 @@ jobs:
       - name: Checkout exact calibration head
         uses: actions/checkout@v4
         with:
-          ref: \${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
       - name: Record exact head
@@ -35,8 +35,8 @@ jobs:
           set -euo pipefail
           mkdir -p "${EVIDENCE_DIR}"
           git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
-          if [ "\${{ github.event_name }}" = "pull_request" ]; then
-            test "$(git rev-parse HEAD)" = "\${{ github.event.pull_request.head.sha }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
           fi
 
       - name: Install deterministic capture tooling
@@ -206,7 +206,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: godot-render-path-calibration-\${{ github.event.pull_request.head.sha || github.sha }}
+          name: godot-render-path-calibration-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/godot-render-path-calibration/**
           if-no-files-found: error
           retention-days: 30
