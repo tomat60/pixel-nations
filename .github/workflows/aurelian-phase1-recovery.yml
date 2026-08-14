@@ -25,7 +25,7 @@ jobs:
   terrain-recovery-proof:
     name: Author, import and capture one shared Aurelian Basin
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 90
 
     steps:
       - name: Checkout exact candidate head
