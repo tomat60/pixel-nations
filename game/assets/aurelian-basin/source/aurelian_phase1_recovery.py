@@ -166,16 +166,17 @@ def create_terrain(materials):
     river_world = [(p.x, p.y) for p in RIVER_WORLD]
     for poly in terrain.data.polygons:
         center = sum((terrain.data.vertices[v].co for v in poly.vertices), Vector()) / len(poly.vertices)
+        center_xy = Vector((center.x, center.y))
         river_distance = distance_to_polyline(center.x, center.y, river_world)
         if river_distance < 4.2:
             poly.material_index = order.index("bank")
-        elif (center - NW_RIDGE).length < 18.0:
+        elif (center_xy - NW_RIDGE).length < 18.0:
             poly.material_index = order.index("forest_ground")
-        elif center.z > 4.5 or (center - NE_RIDGE).length < 19.0:
+        elif center.z > 4.5 or (center_xy - NE_RIDGE).length < 19.0:
             poly.material_index = order.index("ridge")
-        elif (center - FIELDS).length < 22.0:
+        elif (center_xy - FIELDS).length < 22.0:
             poly.material_index = order.index("field")
-        elif (center - MARSH).length < 19.0 or center.y < -37.0:
+        elif (center_xy - MARSH).length < 19.0 or center.y < -37.0:
             poly.material_index = order.index("marsh")
         else:
             poly.material_index = order.index("meadow")
