@@ -125,9 +125,20 @@ func _build_main_world() -> bool:
 	return true
 
 func _activate_camera(preset: String) -> void:
+	if not cameras.has(preset):
+		push_error("AURELIAN_RECOVERY_CAMERA_MISSING: %s" % preset)
+		get_tree().quit(37)
+		return
 	for key in cameras.keys():
-		(cameras[key] as Camera3D).current = String(key) == preset
-	print("AURELIAN_RECOVERY_CAMERA=%s" % preset)
+		(cameras[key] as Camera3D).current = false
+	var camera := cameras[preset] as Camera3D
+	camera.make_current()
+	var active := get_viewport().get_camera_3d()
+	if active != camera:
+		push_error("AURELIAN_RECOVERY_CAMERA_NOT_CURRENT: requested=%s active=%s" % [preset, active.name if active != null else "none"])
+		get_tree().quit(38)
+		return
+	print("AURELIAN_RECOVERY_CAMERA=%s active=%s viewport=%s" % [preset, active.name, get_viewport().name])
 
 func _capture_still(preset: String) -> void:
 	if evidence_dir.is_empty():
@@ -151,9 +162,18 @@ func _capture_still(preset: String) -> void:
 	if not _populate_world(scene_root):
 		return
 	var camera := _make_camera(preset, scene_root)
-	camera.current = true
+	camera.make_current()
 
-	for _frame in range(8):
+	for _frame in range(2):
+		await get_tree().process_frame
+	var active := viewport.get_camera_3d()
+	if active != camera:
+		push_error("AURELIAN_RECOVERY_EVIDENCE_CAMERA_NOT_CURRENT: requested=%s active=%s" % [preset, active.name if active != null else "none"])
+		get_tree().quit(39)
+		return
+	print("AURELIAN_RECOVERY_EVIDENCE_CAMERA=%s active=%s viewport=%s" % [preset, active.name, viewport.name])
+
+	for _frame in range(6):
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var image := viewport.get_texture().get_image()
