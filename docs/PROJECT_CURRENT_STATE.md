@@ -115,7 +115,7 @@ Required shared geography:
 
 Direct evidence review must answer whether an uninformed viewer reads one believable strategy-game landscape and whether the bridge is physically credible at Village scale.
 
-One named evidence-backed correction pass is allowed. Do not micro-polish repeatedly.
+The single named evidence-backed correction pass was consumed by PR #429 and failed. No further implementation correction is authorized without a fresh accepted strategy contract.
 
 ## Mandatory PR and release ownership
 
@@ -155,7 +155,7 @@ An open issue, draft PR, generated handoff or green CI run is not automatically 
 
 - P12 or any further retention/onboarding/gameplay mechanics;
 - any additional Godot candidate without a fresh accepted strategy contract;
-- product integration or Phase 2 before direct PASS of the recovery candidate;
+- product integration or Phase 2 until a future candidate receives direct PASS under fresh authority;
 - independent React/CSS/SVG Map or World rebuilding as final product art;
 - product UI changes unrelated to Phase 1 evidence;
 - image generation as runtime art, paid assets, paid tools, and MAX;
