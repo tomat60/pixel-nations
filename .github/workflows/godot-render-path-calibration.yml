@@ -77,6 +77,17 @@ jobs:
             > "${EVIDENCE_DIR}/calibration-test.log" 2>&1
           grep -F "GODOT_RENDER_PATH_CALIBRATION_TEST: PASS" "${EVIDENCE_DIR}/calibration-test.log"
 
+      - name: Pin the calibration-only runtime viewport to 1440x900
+        run: |
+          set -euo pipefail
+          sed -i 's/window\/size\/viewport_width=1280/window\/size\/viewport_width=1440/' game/project.godot
+          sed -i 's/window\/size\/viewport_height=720/window\/size\/viewport_height=900/' game/project.godot
+          sed -i 's/window\/size\/window_width_override=1280/window\/size\/window_width_override=1440/' game/project.godot
+          sed -i 's/window\/size\/window_height_override=720/window\/size\/window_height_override=900/' game/project.godot
+          grep -F 'window/size/viewport_width=1440' game/project.godot
+          grep -F 'window/size/viewport_height=900' game/project.godot
+          grep -F 'window/size/window_width_override=1440' game/project.godot
+          grep -F 'window/size/window_height_override=900' game/project.godot
       - name: Capture exact 1440x900 main and SubViewport stills
         run: |
           set -euo pipefail
