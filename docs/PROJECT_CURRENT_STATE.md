@@ -2,14 +2,14 @@
 
 Status: ACTIVE
 Updated: 2026-08-14
-Current state revision: Aurelian Shared Geography Phase 1 Recovery Rejected v0.8
+Current state revision: Godot Render-Path Calibration Contract v0.9
 Authority source: this file on the current `main`
 Product baseline SHA: `c94423d5a9c60f1982ae2935551fc1905d46e719`
-Current milestone: Aurelian Shared Geography Phase 1 recovery rejected, strategy review
+Current milestone: Zero-art Godot render-path calibration gate
 Active execution issue: #415
 Active implementation PR: none
 Last completed milestone: PR #429 Phase 1 recovery candidate — REJECTED / CLOSED WITHOUT MERGE
-Next allowed action: Strategy review in #415 only. Diagnose why the accepted recovery candidate produced black Godot evidence after its single correction pass, preserve the accepted rough-reference source/export/manifests, and require fresh authority before any further implementation candidate. No Phase 2, P12, web visual replacement, paid tooling, MAX or image generation.
+Next allowed action: Execute exactly one bounded zero-art Godot render-path calibration under `docs/GODOT_RENDER_PATH_CALIBRATION_CONTRACT_V1.md`, then stop for exact-head artifact and direct visual review. No Aurelian implementation candidate is authorized by this calibration.
 
 ## Purpose
 
@@ -36,7 +36,8 @@ The accepted web product preserves the full founder progression through Founder 
 - #415 Phase 1 candidate / PR #426 at `9c30232307578e8c0481ef7d191d0c0f522c4cbc`: `REJECTED / CLOSED WITHOUT MERGE` after direct still, manifest and 18 s video review.
 - #415 replacement technique contract: `CONSUMED` by PR #429 under `docs/AURELIAN_BASIN_PHASE1_RECOVERY_CONTRACT_V1.md`.
 - #415 Phase 1 recovery candidate / PR #429 at `be801c6aad0ea836210ef85929d8bc95c3152525`: `REJECTED / CLOSED WITHOUT MERGE`. Deterministic source/export, one GLB, manifests, import and topology contracts are accepted only as rough reference. All four 1440×900 stills and reviewed 18 s video frames were black after the single allowed correction pass.
-- #415 shared Aurelian geography contract: `BLOCKED / RETURNED TO STRATEGY REVIEW`; Phase 2 remains blocked.
+- #415 shared Aurelian geography implementation: `BLOCKED`; Phase 2 remains blocked.
+- Zero-art Godot render-path calibration contract: `ACCEPTED / ONE BOUNDED INFRASTRUCTURE CALIBRATION` under `docs/GODOT_RENDER_PATH_CALIBRATION_CONTRACT_V1.md`.
 - Current Village: `MECHANICALLY ACCEPTED BENCHMARK`; preserve its nine-stage progression and rollback value.
 - Current bridge and independent web Village/Map/World geography: `VISUALLY REJECTED FOR FINAL DIRECTION`.
 - Vercel deployment status for the last checked current-main documentation head: `SUCCESS`.
@@ -54,11 +55,11 @@ The accepted Phase 0 topology intentionally preserves useful gameplay-semantic r
 
 ## Current active phase
 
-The only active product-direction task is #415 strategy review after the rejected Phase 1 recovery candidate.
+The only active task is one zero-art Godot render-path calibration to isolate the black-frame failure before any further #415 implementation strategy.
 
 PR #426 proved mechanical shared transforms but failed the required visual result. PR #429 then implemented the terrain-first Blender to one GLB to Godot recovery technique. Its exact-head run completed Blender authoring/export, pinned asset provenance, one GLB import, foundation tests, recovery contract tests, four still captures and an 18 second movie, but deterministic visual QA failed because every still was identical black output. Direct review of all stills and representative video frames confirmed no visible landscape. The single allowed visual correction pass did not change that result.
 
-Do not iterate PR #426 or PR #429 implementation branches. Preserve PR #429 deterministic source/export/manifests only as rough reference. A new implementation candidate requires a fresh strategy decision and explicit authority recorded in this file.
+Do not iterate PR #426 or PR #429 implementation branches. Preserve PR #429 deterministic source/export/manifests only as rough reference. The calibration must use built-in Godot resources only and may distinguish main viewport, SubViewport, still capture and movie capture. A new Aurelian implementation candidate still requires a later fresh strategy decision and explicit authority recorded in this file.
 
 Required shared geography:
 
@@ -72,50 +73,31 @@ Required shared geography:
 8. southern marsh transition and coast/outer-water outflow;
 9. `Camera_Village`, `Camera_Map`, and `Camera_World` cut from the same scene and transforms.
 
-## Phase 1 execution contract
+## Render-path calibration contract
 
 ### Tool / cost
 
 - Strategy/review: GPT-5.6 Sol.
-- Executor: GPT-5.5/Codex-class bounded implementation through Cursor only after a precise prompt is reviewed.
+- Executor: one bounded Codex-class implementation through a normal branch and draft PR.
+- Godot: 4.7.1 Compatibility in the same llvmpipe CI class as PR #429.
 - MAX: OFF.
-- Paid assets/tools: blocked.
-- Image generation as production/runtime art: blocked.
-- Target extra spend for first proof: 0 USD.
+- Paid assets/tools and image generation: blocked.
+- Target extra spend: 0 USD.
 
 ### Allowed files
 
-- `game/scenes/aurelian/**`
-- `game/assets/aurelian-basin/**`
-- `game/tests/**`
-- narrowly scoped evidence/export workflow only if required
-- transform/provenance manifest required to prove shared geometry
+- `game/scenes/calibration/render_path/**`
+- `game/tests/render_path_calibration/**`
+- exactly one narrow `.github/workflows/godot-render-path-calibration.yml`
+- control-plane documentation
 
-### Forbidden
+### Required evidence and classification
 
-- `app/play/**` visual rebuilding;
-- reducer/state/persistence/gameplay changes;
-- P12 or further retention/onboarding mechanics;
-- backend, accounts, payments, multiplayer, combat, full economy, crypto;
-- separate Village/Map/World terrain or orientation-specific geography;
-- full-frame generated image as runtime art;
-- mixed unverified asset packs;
-- paid assets or MAX without a separately proven need;
-- merge based only on CI or screenshot presence.
+Use only built-in deterministic Godot resources. Prove main viewport and SubViewport separately, then exact PNG and short movie capture. Upload exact-head stills, representative frames, runtime/camera/capture JSON, hashes and complete logs.
 
-### Required evidence
+Direct review must classify `PASS`, `BLOCKED_MAIN_VIEWPORT`, `BLOCKED_SUBVIEWPORT`, `BLOCKED_STILL_CAPTURE`, `BLOCKED_MOVIE_CAPTURE` or `INVALID`.
 
-- desktop Village still;
-- desktop Map still;
-- desktop World still;
-- one 15–30 second raw video switching among the three cameras;
-- transform manifest proving identical river, bridge and landmark transforms;
-- exact head SHA, Godot version, renderer and native viewport/export identity;
-- import/build/tests.
-
-Direct evidence review must answer whether an uninformed viewer reads one believable strategy-game landscape and whether the bridge is physically credible at Village scale.
-
-The single named evidence-backed correction pass was consumed by PR #429 and failed. No further implementation correction is authorized without a fresh accepted strategy contract.
+A calibration `PASS` permits only the next strategy review. It does not authorize an Aurelian candidate, integration or Phase 2. See `docs/GODOT_RENDER_PATH_CALIBRATION_CONTRACT_V1.md` for the complete binding contract.
 
 ## Mandatory PR and release ownership
 
@@ -146,15 +128,15 @@ An open issue, draft PR, generated handoff or green CI run is not automatically 
 
 ## Allowed work now
 
-- strategy review in #415 based on exact-head PR #429 logs and artifacts;
-- read-only diagnosis of the black Godot render path and inventory of the accepted rough-reference Blender source, GLB, manifests and tests;
-- a bounded strategy or recovery contract update through a normal branch and PR;
+- exactly one zero-art Godot render-path calibration under `docs/GODOT_RENDER_PATH_CALIBRATION_CONTRACT_V1.md`;
+- exact-head direct review of its PNG, movie, JSON, hashes and logs;
+- read-only inventory of PR #429 rough-reference source/export/manifests;
 - control-plane documentation and release verification.
 
 ## Blocked work now
 
 - P12 or any further retention/onboarding/gameplay mechanics;
-- any additional Godot candidate without a fresh accepted strategy contract;
+- any Aurelian or product-art Godot candidate without a later fresh accepted strategy contract;
 - product integration or Phase 2 until a future candidate receives direct PASS under fresh authority;
 - independent React/CSS/SVG Map or World rebuilding as final product art;
 - product UI changes unrelated to Phase 1 evidence;
@@ -179,6 +161,6 @@ Replace the current fields and sections in this file whenever the accepted miles
 
 PR #426 and PR #429 remain `REJECTED / CLOSED WITHOUT MERGE`. Their implementation techniques are stopped.
 
-The current stop condition is strategy review in #415. No implementation candidate, Phase 2, integration or product merge is authorized until a fresh strategy contract is accepted into this file through a normal PR.
+Stop after one exact-head zero-art calibration artifact is directly reviewed and classified. No Aurelian implementation candidate, Phase 2, integration or product merge is authorized by the calibration; those require a later fresh strategy contract.
 
 No P12, independent web visual rebuild, paid tooling, MAX, or image generation is allowed.
