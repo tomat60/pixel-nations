@@ -89,9 +89,12 @@ jobs:
             "$KAYKIT_ROOT" "$PWD/${EXPORT_DIR}" \
             2>&1 | tee "${EVIDENCE_DIR}/blender-author.log"
           grep -F "AURELIAN_RECOVERY_AUTHORING=PASS" "${EVIDENCE_DIR}/blender-author.log"
+          test -s "${EXPORT_DIR}/aurelian_basin_phase1_recovery.blend"
           test -s "${EXPORT_DIR}/aurelian_basin_phase1_recovery.glb"
           test -s "${EXPORT_DIR}/transform-manifest.json"
           test -s "${EXPORT_DIR}/source-manifest.json"
+          # Keep the authored .blend as evidence but outside Godot's import scan.
+          mv "${EXPORT_DIR}/aurelian_basin_phase1_recovery.blend" "${EVIDENCE_DIR}/aurelian_basin_phase1_recovery.blend"
           cp "${EXPORT_DIR}/transform-manifest.json" "${EVIDENCE_DIR}/transform-manifest.json"
           cp "${EXPORT_DIR}/source-manifest.json" "${EVIDENCE_DIR}/source-manifest.json"
           sha256sum "${EXPORT_DIR}/aurelian_basin_phase1_recovery.glb" > "${EVIDENCE_DIR}/glb.sha256"
