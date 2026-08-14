@@ -1,15 +1,15 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-08-11
-Current state revision: Aurelian Shared Geography Phase 1 Recovery Contract v0.7
+Updated: 2026-08-14
+Current state revision: Aurelian Shared Geography Phase 1 Recovery Rejected v0.8
 Authority source: this file on the current `main`
 Product baseline SHA: `c94423d5a9c60f1982ae2935551fc1905d46e719`
-Current milestone: Aurelian Shared Geography — Phase 1 replacement continuity proof
+Current milestone: Aurelian Shared Geography Phase 1 recovery rejected, strategy review
 Active execution issue: #415
 Active implementation PR: none
-Last completed milestone: #415 Phase 1 recovery contract — ACCEPTED
-Next allowed action: Execute exactly one bounded replacement candidate from `docs/AURELIAN_BASIN_PHASE1_RECOVERY_CONTRACT_V1.md`, then stop for exact-head deterministic and direct visual evidence review. No Phase 2, P12, web visual replacement, paid tooling, MAX or image generation before candidate PASS.
+Last completed milestone: PR #429 Phase 1 recovery candidate — REJECTED / CLOSED WITHOUT MERGE
+Next allowed action: Strategy review in #415 only. Diagnose why the accepted recovery candidate produced black Godot evidence after its single correction pass, preserve the accepted rough-reference source/export/manifests, and require fresh authority before any further implementation candidate. No Phase 2, P12, web visual replacement, paid tooling, MAX or image generation.
 
 ## Purpose
 
@@ -34,8 +34,9 @@ The accepted web product preserves the full founder progression through Founder 
 - #415 Phase 0 topology/composition board: `PASS` after direct review.
 - Shared topology authority: `docs/AURELIAN_BASIN_TOPOLOGY_V1.md`.
 - #415 Phase 1 candidate / PR #426 at `9c30232307578e8c0481ef7d191d0c0f522c4cbc`: `REJECTED / CLOSED WITHOUT MERGE` after direct still, manifest and 18 s video review.
-- #415 replacement technique contract: `ACCEPTED` in `docs/AURELIAN_BASIN_PHASE1_RECOVERY_CONTRACT_V1.md`.
-- #415 shared Aurelian geography contract: `ACTIVE — ONE BOUNDED PHASE 1 REPLACEMENT CANDIDATE`; Phase 2 remains blocked.
+- #415 replacement technique contract: `CONSUMED` by PR #429 under `docs/AURELIAN_BASIN_PHASE1_RECOVERY_CONTRACT_V1.md`.
+- #415 Phase 1 recovery candidate / PR #429 at `be801c6aad0ea836210ef85929d8bc95c3152525`: `REJECTED / CLOSED WITHOUT MERGE`. Deterministic source/export, one GLB, manifests, import and topology contracts are accepted only as rough reference. All four 1440×900 stills and reviewed 18 s video frames were black after the single allowed correction pass.
+- #415 shared Aurelian geography contract: `BLOCKED / RETURNED TO STRATEGY REVIEW`; Phase 2 remains blocked.
 - Current Village: `MECHANICALLY ACCEPTED BENCHMARK`; preserve its nine-stage progression and rollback value.
 - Current bridge and independent web Village/Map/World geography: `VISUALLY REJECTED FOR FINAL DIRECTION`.
 - Vercel deployment status for the last checked current-main documentation head: `SUCCESS`.
@@ -53,11 +54,11 @@ The accepted Phase 0 topology intentionally preserves useful gameplay-semantic r
 
 ## Current active phase
 
-The only active product-direction task is #415 Phase 1 replacement continuity proof.
+The only active product-direction task is #415 strategy review after the rejected Phase 1 recovery candidate.
 
-PR #426 proved mechanical shared transforms but failed the required visual result: the continuous river and connected roads were not legible, the bridge read as a floating isolated prefab, the coast/outflow was detached, and Village/Map/World were sparse zoom levels rather than one believable Basin. Its dedicated run also failed because captured stills were 1440×810 instead of the asserted 1440×900.
+PR #426 proved mechanical shared transforms but failed the required visual result. PR #429 then implemented the terrain-first Blender to one GLB to Godot recovery technique. Its exact-head run completed Blender authoring/export, pinned asset provenance, one GLB import, foundation tests, recovery contract tests, four still captures and an 18 second movie, but deterministic visual QA failed because every still was identical black output. Direct review of all stills and representative video frames confirmed no visible landscape. The single allowed visual correction pass did not change that result.
 
-Do not iterate the rejected primitive polygon/ribbon technique. The accepted recovery contract requires one terrain-first canonical Blender scene exported once to Godot, with a carved river channel, integrated banks/coast, physically connected bridge approaches and three cameras over the same imported geometry.
+Do not iterate PR #426 or PR #429 implementation branches. Preserve PR #429 deterministic source/export/manifests only as rough reference. A new implementation candidate requires a fresh strategy decision and explicit authority recorded in this file.
 
 Required shared geography:
 
@@ -145,16 +146,15 @@ An open issue, draft PR, generated handoff or green CI run is not automatically 
 
 ## Allowed work now
 
-- one bounded #415 replacement candidate following `docs/AURELIAN_BASIN_PHASE1_RECOVERY_CONTRACT_V1.md`;
-- deterministic Blender export, Godot import, transform/provenance and exact-viewport evidence needed by that contract;
-- direct still, bridge close-up, video, JSON and manifest review;
-- read-only inventory/reuse of verified state, behavior and licensed asset provenance where #415 allows it;
+- strategy review in #415 based on exact-head PR #429 logs and artifacts;
+- read-only diagnosis of the black Godot render path and inventory of the accepted rough-reference Blender source, GLB, manifests and tests;
+- a bounded strategy or recovery contract update through a normal branch and PR;
 - control-plane documentation and release verification.
 
 ## Blocked work now
 
 - P12 or any further retention/onboarding/gameplay mechanics;
-- any additional Godot candidate beyond the one bounded recovery candidate;
+- any additional Godot candidate without a fresh accepted strategy contract;
 - product integration or Phase 2 before direct PASS of the recovery candidate;
 - independent React/CSS/SVG Map or World rebuilding as final product art;
 - product UI changes unrelated to Phase 1 evidence;
@@ -177,12 +177,8 @@ Replace the current fields and sections in this file whenever the accepted miles
 
 ## Current stop condition
 
-PR #426 remains `REJECTED`; its primitive polygon/ribbon technique is stopped.
+PR #426 and PR #429 remain `REJECTED / CLOSED WITHOUT MERGE`. Their implementation techniques are stopped.
 
-The recovery phase stops after one exact-head replacement candidate is directly reviewed:
+The current stop condition is strategy review in #415. No implementation candidate, Phase 2, integration or product merge is authorized until a fresh strategy contract is accepted into this file through a normal PR.
 
-- `PASS`: one believable Basin, continuous carved river, connected bridge approaches and route hierarchy are readable in Village, Map and World; only then may Phase 2 be proposed;
-- `CORRECTION REQUIRED`: perform one named evidence-backed correction pass;
-- `REJECTED`: close without merge and return #415 to strategy review.
-
-No Phase 2, P12, independent web visual rebuild, paid tooling, MAX, or image generation is allowed before PASS.
+No P12, independent web visual rebuild, paid tooling, MAX, or image generation is allowed.
