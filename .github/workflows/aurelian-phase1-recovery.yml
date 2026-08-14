@@ -67,7 +67,7 @@ jobs:
           ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
           test -n "$ROOT"
           echo "KAYKIT_ROOT=$ROOT" >> "$GITHUB_ENV"
-          cp "$ROOT/LICENSE.txt" "${EVIDENCE_DIR}/KAYKIT_CC0_LICENSE.txt"
+          cp "$ROOT/addons/kaykit_medieval_hexagon_pack/LICENSE.txt" "${EVIDENCE_DIR}/KAYKIT_CC0_LICENSE.txt"
           grep -F "Creative Commons Zero" "${EVIDENCE_DIR}/KAYKIT_CC0_LICENSE.txt"
           printf '%s  source.zip\n' "${KAYKIT_ARCHIVE_SHA}" > "${EVIDENCE_DIR}/kaykit-archive.sha256"
 
