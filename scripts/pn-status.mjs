@@ -31,6 +31,14 @@ function field(text, label) {
   return match ? match.slice(match.indexOf(prefix) + prefix.length).trim() : "";
 }
 
+function normalizeInlineCode(value) {
+  const trimmed = value.trim();
+  if (trimmed.length >= 2 && trimmed.startsWith("`") && trimmed.endsWith("`")) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
 function validSha(value) {
   return /^[0-9a-f]{40}$/i.test(value);
 }
@@ -88,8 +96,8 @@ if (!existsSync(currentStatePath)) {
 } else {
   currentState = readFileSync(currentStatePath, "utf8");
   updated = field(currentState, "Updated");
-  authorityBaseline = field(currentState, "Authority baseline SHA");
-  productBaseline = field(currentState, "Product baseline SHA");
+  authorityBaseline = normalizeInlineCode(field(currentState, "Authority baseline SHA"));
+  productBaseline = normalizeInlineCode(field(currentState, "Product baseline SHA"));
   currentMilestone = field(currentState, "Current milestone");
   activeIssue = field(currentState, "Active execution issue");
   nextAllowedAction = field(currentState, "Next allowed action");
@@ -132,6 +140,19 @@ if (!existsSync(currentStatePath)) {
     }
   }
 
+  const shallow = run("git rev-parse --is-shallow-repository");
+  const isShallow = shallow.ok && shallow.text === "true";
+  const isCi = process.env.GITHUB_ACTIONS === "true" || process.env.CI === "true";
+
+  if (isShallow) {
+    const hydrate = run("git fetch --no-tags --depth=64 origin main");
+    if (!hydrate.ok) {
+      const message = "unable to hydrate shallow main history for authority ancestry checks";
+      if (isCi) authorityErrors.push(message);
+      else authorityWarnings.push(message);
+    }
+  }
+
   for (const [label, sha] of [
     ["authority baseline", authorityBaseline],
     ["product baseline", productBaseline],
@@ -143,8 +164,7 @@ if (!existsSync(currentStatePath)) {
 
     const commitPresent = run(`git cat-file -e ${sha}^{commit}`);
     if (!commitPresent.ok) {
-      const shallow = run("git rev-parse --is-shallow-repository");
-      if (shallow.ok && shallow.text === "true") {
+      if (isShallow && !isCi) {
         authorityWarnings.push(
           `${label} ${sha} is outside this shallow checkout; ancestry not verified`,
         );
