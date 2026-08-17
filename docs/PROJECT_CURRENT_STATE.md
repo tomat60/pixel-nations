@@ -1,21 +1,19 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-08-14
-Current state revision: Aurelian Scene Import Calibration Contract v1.0
+Updated: 2026-08-17
+Current state revision: Aurelian Exact-GLB Product-Camera Render Replay Gate v1.0
 Authority source: this file on the current `main`
 Product baseline SHA: `c94423d5a9c60f1982ae2935551fc1905d46e719`
-Current milestone: Scene-specific Aurelian import/composition calibration gate
+Current milestone: Exact #429 GLB product-camera render replay
 Active execution issue: #415
 Active implementation PR: none
-Last completed milestone: PR #432 zero-art render-path calibration — PASS / CLOSED WITHOUT MERGE
-Next allowed action: Execute exactly one bounded scene-specific import/composition calibration under `docs/AURELIAN_SCENE_IMPORT_CALIBRATION_CONTRACT_V1.md`, then stop for exact-head artifact review. This does not authorize a new Aurelian candidate.
+Last completed milestone: PR #435 scene-specific import/composition calibration, `PASS_SCENE_COMPOSITION_ISOLATED / CLOSED WITHOUT MERGE`
+Next allowed action: Execute exactly one bounded product-camera render replay under `docs/AURELIAN_PHASE1_RENDER_REPLAY_CONTRACT_V1.md`, then stop for exact-head direct visual review. This does not authorize a new Aurelian candidate or product integration.
 
 ## Purpose
 
-This file is the first and highest-priority source of current project state for every assistant, agent, automation, and new session.
-
-Keep it short, current, and operational. Historical sprint summaries stay in issues, PRs, ADRs and archived documents.
+This file is the first and highest-priority source of current project state for every assistant, agent, automation, and new session. Keep it short, current, and operational.
 
 ## Current product truth
 
@@ -25,45 +23,38 @@ Pixel Nations is a strategy game built around:
 
 The full world contains 10,000 lands in a 100 × 100 structure. The current playable/demo area is Sector A-01 / Aurelian Basin.
 
-The accepted web product preserves the full founder progression through Founder Record and one previous read-only history. P4–P11 are accepted and merged. P11 closed the bounded P10 continuity defect; it does not authorize P12 or another retention roadmap.
-
-## Current acceptance status
-
-- P4–P11 product work: `ACCEPTED / MERGED`.
-- P11 / #422: `ACCEPTED / MERGED` as product baseline `c94423d5a9c60f1982ae2935551fc1905d46e719`.
-- #415 Phase 0 topology/composition board: `PASS` after direct review.
-- Shared topology authority: `docs/AURELIAN_BASIN_TOPOLOGY_V1.md`.
-- #415 Phase 1 candidate / PR #426 at `9c30232307578e8c0481ef7d191d0c0f522c4cbc`: `REJECTED / CLOSED WITHOUT MERGE` after direct still, manifest and 18 s video review.
-- #415 replacement technique contract: `CONSUMED` by PR #429 under `docs/AURELIAN_BASIN_PHASE1_RECOVERY_CONTRACT_V1.md`.
-- #415 Phase 1 recovery candidate / PR #429 at `be801c6aad0ea836210ef85929d8bc95c3152525`: `REJECTED / CLOSED WITHOUT MERGE`. Deterministic source/export, one GLB, manifests, import and topology contracts are accepted only as rough reference. All four 1440×900 stills and reviewed 18 s video frames were black after the single allowed correction pass.
-- #415 shared Aurelian geography implementation: `BLOCKED`; Phase 2 remains blocked.
-- Zero-art Godot render-path calibration contract: `CONSUMED / PASS` under `docs/GODOT_RENDER_PATH_CALIBRATION_CONTRACT_V1.md`.
-- PR #432 at `3d9845747db151e45a9dac32d9e8b7ef34b6d5a5`: `PASS / CLOSED WITHOUT MERGE`. Artifact `9227723971` directly proved visible 1440×900 main viewport, SubViewport, still readback and six-second movie capture in Godot 4.7.1 Compatibility on Mesa llvmpipe; all hashes and exact-head checks passed. The generic CI render path is accepted, so PR #429's black evidence is scene/import/runtime-composition specific.
-- Scene-specific Aurelian import/composition calibration contract: `ACCEPTED / ONE BOUNDED DIAGNOSTIC CALIBRATION` under `docs/AURELIAN_SCENE_IMPORT_CALIBRATION_CONTRACT_V1.md`. It uses pinned artifact `9222116061` only as rough-reference input and does not authorize Basin implementation.
-- Current Village: `MECHANICALLY ACCEPTED BENCHMARK`; preserve its nine-stage progression and rollback value.
-- Current bridge and independent web Village/Map/World geography: `VISUALLY REJECTED FOR FINAL DIRECTION`.
-- Vercel deployment status for the last checked current-main documentation head: `SUCCESS`.
-- Current Vercel deployment for `main@9f2eb113b4fd6e0a4736a7bddbddf6c4226aad86`: `SUCCESS`.
-- Public `/`, `/play`, and `/world` on the SHA-linked Vercel deployment redirect to Vercel SSO. Public production remains `PRODUCTION UNVERIFIED`; this is missing anonymous-origin evidence, not evidence of an outage.
-- Backend, accounts, payments, crypto/NFT/wallet/token, multiplayer, combat, and full economy: `OUT OF CURRENT SCOPE`.
-
-## Runtime and visual direction
+The accepted web product preserves the founder progression through Founder Record and one previous read-only history. P4-P11 are accepted and merged. P11 does not authorize P12.
 
 ADR-001 remains binding: Godot is the target game runtime. Next.js `/play` remains the functioning demo shell and rollback surface until replacement evidence is accepted.
 
-Village, Map and World must use one `AurelianBasin` geography with the same river, bridge, roads, Greenvale origin, North Ridge, terrain zones, landmarks and transforms. The three views are camera/LOD presentations of that shared scene, never separately authored geography.
+## Current Aurelian acceptance status
 
-The accepted Phase 0 topology intentionally preserves useful gameplay-semantic relationships while rejecting the contradictory river/bridge placement of the current independent web visuals.
+- Phase 0 topology/composition board: `PASS` after direct review.
+- Shared topology authority: `docs/AURELIAN_BASIN_TOPOLOGY_V1.md`.
+- PR #426 first shared-geography technique: `REJECTED / CLOSED WITHOUT MERGE`.
+- PR #429 terrain-first Blender to one GLB recovery candidate at `be801c6aad0ea836210ef85929d8bc95c3152525`: `REJECTED / CLOSED WITHOUT MERGE` because all four captured stills and its 18 second movie were black. Its deterministic authoring/export/import/topology evidence remains rough technical reference only.
+- PR #432 zero-art render-path calibration at `3d9845747db151e45a9dac32d9e8b7ef34b6d5a5`: `PASS / CLOSED WITHOUT MERGE`. Godot 4.7.1 Compatibility on Mesa llvmpipe can render main viewport, SubViewport, PNG readback and movie capture.
+- PR #435 scene import/composition calibration at `34c05e857b7c7e36e796025e6d104eaf98d96ba7`: `PASS_SCENE_COMPOSITION_ISOLATED / CLOSED WITHOUT MERGE` after direct still, movie, inventory, camera, hash and provenance review.
+- #435 exact run: `32030900002`.
+- #435 exact artifact: `9288859851`, digest `sha256:8bd3e7120d9a926d7e5171959392c825c60c8432dfd16d5abf19cf41759939f5`.
+- Pinned #429 source artifact: `9222116061`, digest `sha256:d810b371584d1da404b1c34e64270c5d38158c74a7d775560b16fa2228cb6990`.
+- Pinned #429 GLB SHA256: `2014fadc94cbc6a53f30c097788036775c878b6e6540d30d108ddb40c8b903e7`.
+- #435 inventory proves 62 meshes, 67 surfaces and finite global AABB. The exact GLB is visible with original materials in deterministic perspective framing, in the main viewport, in a dedicated 1440×900 SubViewport, in its actively consumed TextureRect path, and in orthographic comparison.
+- Exact black-output cause isolated: #429 `game/scenes/aurelian/aurelian_phase1_recovery.gd` explicitly set `environment.tonemap_exposure = 0.0`. Its rejected artifact stills are literal all-zero RGB frames. The same exact GLB renders visibly in #435 with normal exposure. Therefore the previous black evidence is not evidence that the GLB itself is empty or unrenderable.
+- This diagnostic PASS does NOT visually accept #429 composition, art quality, bridge, roads, terrain, Village, Map or World.
+- Shared Aurelian geography implementation remains `BLOCKED` pending truthful product-camera replay and direct review. Phase 2 remains blocked.
+- Current Village web shell remains `MECHANICALLY ACCEPTED BENCHMARK`; preserve its nine-stage progression and rollback value.
+- Current independent web bridge / Village / Map / World geography remains `VISUALLY REJECTED FOR FINAL DIRECTION`.
 
-## Current active phase
+## Active phase
 
-The only active task is one scene-specific Aurelian import/composition calibration under the accepted bounded contract.
+The only active task is one exact-GLB product-camera render replay under `docs/AURELIAN_PHASE1_RENDER_REPLAY_CONTRACT_V1.md`.
 
-PR #426 proved mechanical shared transforms but failed the required visual result. PR #429 then implemented the terrain-first Blender to one GLB to Godot recovery technique. Its exact-head run completed Blender authoring/export, pinned asset provenance, one GLB import, foundation tests, recovery contract tests, four still captures and an 18 second movie, but deterministic visual QA failed because every still was identical black output. Direct review of all stills and representative video frames confirmed no visible landscape. The single allowed visual correction pass did not change that result.
+The replay must use the exact pinned #429 GLB without Blender regeneration or GLB edits and must reproduce the intended #429 Village / Map / World / Bridge camera contract with normal exposure. Its purpose is to reveal the first truthful product-camera images of that existing scene before spending on another art implementation.
 
-Do not iterate PR #426, PR #429 or the closed PR #432 evidence branch. The active calibration may consume only the pinned PR #429 artifact and must isolate sentinel, import inventory, diagnostic material, original material, SubViewport, camera and projection stages one variable at a time. A new Aurelian implementation candidate still requires a later fresh recovery contract and explicit authority recorded in this file.
+If the replay is visually rejected, do not patch the scene repeatedly. Stop and authorize a fresh art-direction/recovery contract. If it is materially salvageable, authorize a separate bounded salvage contract. The replay itself never integrates product code.
 
-Required shared geography:
+## Required shared geography truth
 
 1. one continuous Aurelian Basin terrain;
 2. the locked canonical river path and readable banks/shoreline;
@@ -75,44 +66,27 @@ Required shared geography:
 8. southern marsh transition and coast/outer-water outflow;
 9. `Camera_Village`, `Camera_Map`, and `Camera_World` cut from the same scene and transforms.
 
-## Completed render-path calibration
+## Tool / cost policy now
 
-### Tool / cost
-
-- Strategy/review: GPT-5.6 Sol.
-- Executor: completed in PR #432; evidence branch closed without merge.
-- Godot: 4.7.1 Compatibility in the same llvmpipe CI class as PR #429.
+- Strategy, review and control plane: GPT-5.6 Sol.
+- Replay executor: deterministic GitHub Actions + Godot 4.7.1 Compatibility.
+- Cursor: blocked for this replay unless fresh authority later requires it.
+- Blender / KayKit regeneration: blocked.
 - MAX: OFF.
-- Paid assets/tools and image generation: blocked.
+- Paid assets/tools, Fable and image generation: blocked.
 - Target extra spend: 0 USD.
-
-### Allowed files
-
-- Calibration implementation files are no longer active scope.
-- Strategy review may read PR #429 and PR #432 source, logs and artifacts.
-- Any new authority must be introduced through control-plane documentation on a normal branch and PR.
-
-### Required evidence and classification
-
-PR #432 exact head `3d9845747db151e45a9dac32d9e8b7ef34b6d5a5` received direct `PASS`. Main viewport, SubViewport, PNG still capture and movie capture are all visible and deterministic at 1440×900. The result permits only the current strategy review. It does not authorize an Aurelian candidate, integration or Phase 2.
-
-## Active scene import calibration
-
-Use `docs/AURELIAN_SCENE_IMPORT_CALIBRATION_CONTRACT_V1.md`. The calibration must keep the PR #432 sentinel visible while adding the pinned #429 GLB in isolated stages. Required outcomes distinguish artifact, empty import, invalid bounds, camera/culling, materials/textures, SubViewport composition, or an identified original scene-composition difference.
-
-The implementation PR is evidence-only and must close without merge after direct review. Blender regeneration, GLB edits, Aurelian visual correction, gameplay, integration and Phase 2 remain blocked.
 
 ## Mandatory PR and release ownership
 
 The user is not responsible for finding failed, drifting, or stuck PRs.
 
-For every PR open/head change, ChatGPT/control-plane must re-fetch the live SHA, inspect authority and scope, full diff, base drift, mergeability, checks, failed logs, and required artifacts, then assign `PENDING / BLOCKED / REJECTED / READY`.
+For every PR open/head change, control-plane must re-fetch the live SHA, inspect authority and scope, full diff, base drift, mergeability, checks, failed logs and required artifacts, then assign `PENDING / BLOCKED / REJECTED / READY`.
 
-A green status alone is insufficient. Required screenshots, JSON, manifests, and videos must be opened and reviewed directly on the exact head.
+A green status alone is insufficient. Required screenshots, JSON, manifests and videos must be opened and reviewed directly on the exact head.
 
-After every merge, verify accepted head → merge SHA → new `main` → checks → deployment → real public routes as applicable. Localhost RC1 and pre-merge preview are not post-release proof. If the public origin cannot be fully tested, record `PRODUCTION UNVERIFIED` and the exact missing evidence.
+After every merge, verify accepted head → merge SHA → new `main` → checks → deployment → real public routes as applicable. Localhost or preview is not post-release proof. If public origin cannot be fully tested, record `PRODUCTION UNVERIFIED` and the exact missing evidence.
 
-Do not begin another product PR or merge while the current PR/release is failing, unreviewed or unresolved. Escalate to the user only for a genuine product-direction choice or authority blocker, not routine QA detection.
+Do not begin another product PR or merge while the current PR/release is failing, unreviewed or unresolved. Escalate to the user only for a genuine product-direction or subjective visual acceptance choice, not routine QA detection.
 
 ## Source-of-truth precedence
 
@@ -121,29 +95,28 @@ When sources conflict:
 1. `docs/PROJECT_CURRENT_STATE.md`
 2. accepted ADRs, especially `docs/ADR_001_GODOT_DESKTOP_FIRST.md`
 3. root `AGENTS.md`
-4. the active execution issue named here
-5. `docs/AURELIAN_BASIN_TOPOLOGY_V1.md` for shared-geography transforms/composition
-6. exact-head evidence and the accepted PR for the current milestone
+4. active issue named here
+5. `docs/AURELIAN_BASIN_TOPOLOGY_V1.md`
+6. exact-head evidence and accepted PR for the current milestone
 7. operating and QA protocols
-8. older issues, draft PRs, comments, sprint briefs, runbooks and historical documents
-
-An open issue, draft PR, generated handoff or green CI run is not automatically authority.
+8. older issues, draft PRs, comments and historical documents
 
 ## Allowed work now
 
-- exactly one scene-specific import/composition calibration under `docs/AURELIAN_SCENE_IMPORT_CALIBRATION_CONTRACT_V1.md`;
-- exact-head direct review of its stills, movie, inventories, JSON, hashes and logs;
-- release verification.
+- exactly one product-camera render replay under `docs/AURELIAN_PHASE1_RENDER_REPLAY_CONTRACT_V1.md`;
+- exact-head direct review of Village / Map / World / Bridge stills, movie, manifests, hashes, logs and QA JSON;
+- release verification for accepted control-plane merges.
 
 ## Blocked work now
 
-- P12 or any further retention/onboarding/gameplay mechanics;
-- any Aurelian or product-art Godot candidate without a later fresh accepted strategy contract;
-- product integration or Phase 2 until a future candidate receives direct PASS under fresh authority;
+- any new Blender or Aurelian art candidate;
+- edits to the pinned #429 GLB;
+- P12 or further gameplay/retention/onboarding mechanics;
+- product integration or Phase 2;
 - independent React/CSS/SVG Map or World rebuilding as final product art;
-- product UI changes unrelated to Phase 1 evidence;
-- image generation as runtime art, paid assets, paid tools, and MAX;
-- backend, accounts, payments, multiplayer, combat, full economy, or crypto;
+- `app/play/**` visual changes;
+- paid tooling/assets, MAX, Fable or image generation;
+- backend, accounts, payments, multiplayer, combat, full economy or crypto;
 - merge from green CI alone.
 
 ## Session start gate
@@ -151,18 +124,10 @@ An open issue, draft PR, generated handoff or green CI run is not automatically 
 Before meaningful work:
 
 1. Run `npm run pn:status` when a checkout is available.
-2. Read this file, `docs/AURELIAN_BASIN_TOPOLOGY_V1.md`, the relevant ADR, root `AGENTS.md`, and #415.
+2. Read this file, the replay contract, `docs/AURELIAN_BASIN_TOPOLOGY_V1.md`, ADR-001, root `AGENTS.md`, and #415.
 3. Re-fetch live GitHub state; never trust cached PR SHA or check status.
-4. State tool/model, MAX, cost, allowed scope, forbidden actions, validation, and stop condition.
-
-## Update rule
-
-Replace the current fields and sections in this file whenever the accepted milestone, active issue/PR, product baseline, visual acceptance, next allowed action, or major blocker changes. Do not append history.
+4. State model/tool, MAX, cost, allowed scope, forbidden actions, validation and stop condition.
 
 ## Current stop condition
 
-PR #426 and PR #429 remain `REJECTED / CLOSED WITHOUT MERGE`. Their implementation techniques are stopped.
-
-PR #432 calibration is `PASS / CLOSED WITHOUT MERGE`. Stop after one exact-head scene-import calibration artifact is directly reviewed and classified. The calibration does not authorize an Aurelian candidate, integration or Phase 2; those require a later fresh recovery contract.
-
-No P12, independent web visual rebuild, paid tooling, MAX, or image generation is allowed.
+Stop the replay after one exact-head artifact receives direct review and one classification under its contract. No new Aurelian candidate, integration, P12, Phase 2, paid tooling, MAX or image generation is authorized by the replay itself.
