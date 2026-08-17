@@ -1,0 +1,279 @@
+name: Aurelian Import Composition Calibration
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/scenes/calibration/aurelian_import/**"
+      - ".github/workflows/aurelian-import-calibration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EVIDENCE_DIR: "evidence/aurelian-import-calibration"
+  SOURCE_RUN_ID: "31808264198"
+  SOURCE_ARTIFACT_ID: "9222116061"
+  SOURCE_ARTIFACT_DIGEST: "sha256:d810b371584d1da404b1c34e64270c5d38158c74a7d775560b16fa2228cb6990"
+  SOURCE_GLB_SHA256: "2014fadc94cbc6a53f30c097788036775c878b6e6540d30d108ddb40c8b903e7"
+  SOURCE_HEAD: "be801c6aad0ea836210ef85929d8bc95c3152525"
+
+jobs:
+  calibrate-aurelian-import:
+    name: Isolate pinned Aurelian GLB render boundary
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout exact calibration head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact calibration head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+
+      - name: Verify pinned source artifact metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl -fsSL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${SOURCE_ARTIFACT_ID}" \
+            > "${EVIDENCE_DIR}/source-artifact-metadata.json"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ['EVIDENCE_DIR'])/'source-artifact-metadata.json'
+          data=json.loads(p.read_text())
+          expected_id=int(os.environ['SOURCE_ARTIFACT_ID'])
+          if data.get('id') != expected_id:
+              raise SystemExit(f"artifact id mismatch: {data.get('id')} != {expected_id}")
+          if data.get('digest') != os.environ['SOURCE_ARTIFACT_DIGEST']:
+              raise SystemExit(f"artifact digest mismatch: {data.get('digest')}")
+          if data.get('expired'):
+              raise SystemExit('pinned artifact expired')
+          print('AURELIAN_IMPORT_ARTIFACT_METADATA=PASS')
+          PY
+
+      - name: Download exact rejected-429 artifact
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: 9222116061
+          path: /tmp/aurelian429
+          github-token: ${{ github.token }}
+          repository: tomat60/pixel-nations
+          run-id: 31808264198
+
+      - name: Verify and stage exact GLB input
+        run: |
+          set -euo pipefail
+          test -s /tmp/aurelian429/aurelian_basin_phase1_recovery.glb
+          test "$(sha256sum /tmp/aurelian429/aurelian_basin_phase1_recovery.glb | cut -d' ' -f1)" = "${SOURCE_GLB_SHA256}"
+          test "$(tr -d '\r\n' < /tmp/aurelian429/exact-head.txt)" = "${SOURCE_HEAD}"
+          mkdir -p game/calibration_input
+          cp /tmp/aurelian429/aurelian_basin_phase1_recovery.glb \
+            game/calibration_input/aurelian_basin_phase1_recovery.glb
+          printf '%s\n' "${SOURCE_GLB_SHA256}" > "${EVIDENCE_DIR}/source-glb.sha256"
+          cp /tmp/aurelian429/transform-manifest.json "${EVIDENCE_DIR}/source-transform-manifest.json"
+          cp /tmp/aurelian429/runtime-manifest.json "${EVIDENCE_DIR}/source-runtime-manifest.json"
+          echo "AURELIAN_IMPORT_SOURCE_GLB=PASS"
+
+      - name: Install deterministic capture tooling
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            unzip xvfb ffmpeg python3-pil \
+            libegl1 libgl1-mesa-dri libglx-mesa0 libx11-6 libxcursor1 \
+            libxinerama1 libxi6 libxrandr2 >/dev/null
+          ffmpeg -version | head -1 | tee "${EVIDENCE_DIR}/ffmpeg-version.txt"
+
+      - name: Download pinned Godot 4.7.1
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/godot
+          curl -fsSL --retry 3 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Import exact GLB and run foundation tests
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit \
+            > "${EVIDENCE_DIR}/godot-import.log" 2>&1
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          "${GODOT_BIN}" --headless --path game --script res://tests/run_all.gd \
+            > "${EVIDENCE_DIR}/foundation-tests.log" 2>&1
+          grep -F "PIXEL_NATIONS_GODOT_TESTS: PASS" "${EVIDENCE_DIR}/foundation-tests.log"
+
+      - name: Pin calibration runtime viewport to 1440x900
+        run: |
+          set -euo pipefail
+          sed -i 's/window\/size\/viewport_width=1280/window\/size\/viewport_width=1440/' game/project.godot
+          sed -i 's/window\/size\/viewport_height=720/window\/size\/viewport_height=900/' game/project.godot
+          sed -i 's/window\/size\/window_width_override=1280/window\/size\/window_width_override=1440/' game/project.godot
+          sed -i 's/window\/size\/window_height_override=720/window\/size\/window_height_override=900/' game/project.godot
+          grep -F 'window/size/viewport_width=1440' game/project.godot
+          grep -F 'window/size/viewport_height=900' game/project.godot
+
+      - name: Capture isolated exact stages
+        run: |
+          set -euo pipefail
+          status=0
+          for stage in sentinel perspective_override perspective_original sub_override sub_original ortho_original; do
+            echo "=== STAGE ${stage} ==="
+            if ! timeout 120s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+              LIBGL_ALWAYS_SOFTWARE=1 \
+              AURELIAN_IMPORT_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}" \
+              AURELIAN_IMPORT_STAGE="$stage" \
+              "${GODOT_BIN}" --path game --audio-driver Dummy \
+              --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 \
+              res://scenes/calibration/aurelian_import/aurelian_import_calibration.tscn \
+              > "${EVIDENCE_DIR}/${stage}.log" 2>&1; then
+              status=1
+              cat "${EVIDENCE_DIR}/${stage}.log"
+            fi
+          done
+          exit "$status"
+
+      - name: Capture ten second stage-switch movie
+        run: |
+          set -euo pipefail
+          timeout 150s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+            LIBGL_ALWAYS_SOFTWARE=1 \
+            AURELIAN_IMPORT_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}" \
+            AURELIAN_IMPORT_STAGE=movie \
+            "${GODOT_BIN}" --path game --audio-driver Dummy \
+            --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 \
+            --disable-vsync --fixed-fps 30 \
+            --write-movie "$PWD/${EVIDENCE_DIR}/stage-switch.avi" \
+            res://scenes/calibration/aurelian_import/aurelian_import_calibration.tscn \
+            > "${EVIDENCE_DIR}/movie.log" 2>&1
+          grep -F "AURELIAN_IMPORT_MOVIE_STAGE=sentinel" "${EVIDENCE_DIR}/movie.log"
+          grep -F "AURELIAN_IMPORT_MOVIE_STAGE=override" "${EVIDENCE_DIR}/movie.log"
+          grep -F "AURELIAN_IMPORT_MOVIE_STAGE=original" "${EVIDENCE_DIR}/movie.log"
+          grep -F "AURELIAN_IMPORT_MOVIE_STAGE=ortho" "${EVIDENCE_DIR}/movie.log"
+          grep -F "AURELIAN_IMPORT_MOVIE_COMPLETE=300" "${EVIDENCE_DIR}/movie.log"
+          ffmpeg -y -loglevel error -i "${EVIDENCE_DIR}/stage-switch.avi" \
+            -c:v libx264 -pix_fmt yuv420p "${EVIDENCE_DIR}/stage-switch.mp4"
+          for pair in "1 movie-sentinel" "3 movie-override" "6 movie-original" "9 movie-ortho"; do
+            set -- $pair
+            ffmpeg -y -loglevel error -ss "$1" -i "${EVIDENCE_DIR}/stage-switch.mp4" \
+              -frames:v 1 "${EVIDENCE_DIR}/$2.png"
+          done
+          ffprobe -v error -show_entries stream=width,height,r_frame_rate,codec_name \
+            -show_entries format=duration -of json "${EVIDENCE_DIR}/stage-switch.mp4" \
+            > "${EVIDENCE_DIR}/video-metadata.json"
+
+      - name: Validate provenance, sentinel continuity and evidence dimensions
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, math, os
+          from pathlib import Path
+          from PIL import Image, ImageStat, ImageChops
+
+          root=Path(os.environ['EVIDENCE_DIR'])
+          expected=[
+            'sentinel-main.png',
+            'perspective_override-main.png',
+            'perspective_original-main.png',
+            'sub_override.png','sub_override-consumed-main.png',
+            'sub_original.png','sub_original-consumed-main.png',
+            'ortho_original-main.png',
+            'movie-sentinel.png','movie-override.png','movie-original.png','movie-ortho.png',
+          ]
+          report={}
+          for name in expected:
+              p=root/name
+              if not p.exists() or p.stat().st_size < 1000:
+                  raise SystemExit(f'missing/weak evidence: {name}')
+              im=Image.open(p).convert('RGB')
+              if im.size != (1440,900):
+                  raise SystemExit(f'wrong dimensions {name}: {im.size}')
+              sample=im.resize((240,150))
+              pixels=list(sample.getdata())
+              yellow=sum(1 for r,g,b in pixels if r>150 and g>110 and b<130)
+              unique=len(set(pixels))
+              variance=sum(ImageStat.Stat(sample).var)/3.0
+              if yellow < 15:
+                  raise SystemExit(f'sentinel missing from {name}: yellow={yellow}')
+              report[name]={
+                  'bytes':p.stat().st_size,
+                  'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),
+                  'yellow_sample_pixels':yellow,
+                  'sample_unique_colors':unique,
+                  'variance':round(variance,3),
+              }
+
+          inv=json.loads((root/'inventory-perspective_override.json').read_text())
+          if int(inv['mesh_count']) <= 0 or int(inv['surface_count']) <= 0:
+              raise SystemExit('import inventory contains no usable mesh surfaces')
+          aabb=inv['global_aabb']
+          values=[*aabb['position'],*aabb['size'],*aabb['center']]
+          if not all(math.isfinite(float(v)) for v in values):
+              raise SystemExit('non-finite imported bounds')
+          if max(float(v) for v in aabb['size']) <= 0:
+              raise SystemExit('zero imported bounds')
+
+          video=json.loads((root/'video-metadata.json').read_text())
+          duration=float(video['format']['duration'])
+          stream=video['streams'][0]
+          if not 9.5 <= duration <= 10.5:
+              raise SystemExit(f'movie duration drift: {duration}')
+          if int(stream['width']) != 1440 or int(stream['height']) != 900:
+              raise SystemExit(f'movie dimensions drift: {stream}')
+
+          qa={
+              'status':'VALID_FOR_DIRECT_REVIEW',
+              'exact_head':(root/'exact-head.txt').read_text().strip(),
+              'source_artifact_id':int(os.environ['SOURCE_ARTIFACT_ID']),
+              'source_artifact_digest':os.environ['SOURCE_ARTIFACT_DIGEST'],
+              'source_glb_sha256':os.environ['SOURCE_GLB_SHA256'],
+              'source_head':os.environ['SOURCE_HEAD'],
+              'import_mesh_count':inv['mesh_count'],
+              'import_surface_count':inv['surface_count'],
+              'global_aabb':aabb,
+              'images':report,
+              'movie_seconds':duration,
+              'classification':'PENDING_DIRECT_REVIEW'
+          }
+          (root/'calibration-qa.json').write_text(json.dumps(qa,indent=2)+'\n')
+          print('AURELIAN_IMPORT_CALIBRATION_EVIDENCE=VALID_FOR_DIRECT_REVIEW')
+          PY
+
+      - name: Write exact evidence hashes
+        if: always()
+        run: |
+          set -euo pipefail
+          find "${EVIDENCE_DIR}" -type f ! -name SHA256SUMS.txt -print0 | sort -z | \
+            xargs -0 sha256sum > "${EVIDENCE_DIR}/SHA256SUMS.txt"
+
+      - name: Upload exact-head calibration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aurelian-import-calibration-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/aurelian-import-calibration/**
+          if-no-files-found: error
+          retention-days: 30
