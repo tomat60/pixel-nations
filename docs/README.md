@@ -41,11 +41,12 @@ The current chain is intentionally explicit:
 - runtime decision: `ADR_001_GODOT_DESKTOP_FIRST.md`
 - agent rules: root `AGENTS.md`
 - active execution issue: GitHub issue #415
+- current capability-first implementation contract: `AURELIAN_CAPABILITY_FIRST_IMPLEMENTATION_REFERENCE_V1.md`
 - topology authority: `AURELIAN_BASIN_TOPOLOGY_V1.md`
-- art-direction authority: `AURELIAN_BASIN_ART_DIRECTION_RECOVERY_V1.md`
+- qualitative art-direction constraints: `AURELIAN_BASIN_ART_DIRECTION_RECOVERY_V1.md`, except where superseded by the capability-first contract
 - accepted moodboard direction: `AURELIAN_BASIN_MOODBOARD_V1.md`
 - accepted web product baseline: P11 / PR #422 / commit `c94423d5a9c60f1982ae2935551fc1905d46e719`
-- current milestone: exactly one bespoke non-production Aurelian Village / Map / World visual target before any implementation reference
+- current milestone: exactly one real, capability-constrained Aurelian Village / Map / World Godot/Blender implementation reference
 
 Older issues remain useful historical context only when a current authority explicitly references them.
 
@@ -72,9 +73,11 @@ Use the narrowest relevant document. Do not read every historical strategy file 
 - P4-P11 mechanics/continuity are accepted in the web baseline.
 - Current Village progression is a mechanically accepted benchmark, not authority to preserve its rejected bridge/geography.
 - Current independent web Village/Map/World geography is not production-final visual authority.
-- Current work is art direction only: one shared Aurelian Basin visual target under issue #415.
-- Village, Map and World must be views of the same locked geography.
-- No Godot/Blender Aurelian implementation is authorized before `ART_DIRECTION_PASS`.
+- Village, Map and current strategic World must use one locked Aurelian geography.
+- The previous free-form image-generation visual-target gate is retired as implementation authority because it created capability drift and an execution deadlock.
+- One capability-first Godot/Blender implementation reference is allowed after its control-plane contract merges.
+- The reference must stay inside the proven Godot 4.7.1 / Compatibility / deterministic Blender-GLB / pinned zero-cost asset envelope.
+- World for the first polished vertical slice is Aurelian strategic context, not a finished 10,000-land global renderer.
 - Do not restart broad React/SVG/CSS scene-engine development as final art.
 - No P12 or unrelated feature expansion while #415 is active.
 
@@ -95,7 +98,17 @@ Before using generated evidence, verify:
 
 Green CI, smoke PASS, generated screenshots, and a clean branch are regression evidence. They do not independently approve product direction or visual quality.
 
-For the current #415 milestone, acceptance requires direct review of one bespoke Village / Map / World visual-target package against the locked topology, art-direction recovery brief and moodboard. The result must be exactly `ART_DIRECTION_PASS`, `ART_DIRECTION_CORRECTION_REQUIRED`, or `ART_DIRECTION_REJECT`. No implementation reference may start before PASS.
+For the current #415 milestone, acceptance requires direct review of one exact-head capability-first implementation-reference package containing Village / Map / World stills, a raw camera-switch video, settlement-state evidence, transform/provenance manifests and Godot import/test evidence.
+
+The result must be exactly:
+
+- `IMPLEMENTATION_REFERENCE_PASS`
+- `IMPLEMENTATION_REFERENCE_CORRECTION_REQUIRED`
+- `IMPLEMENTATION_REFERENCE_REJECT`
+
+One bounded correction maximum before changing technique.
+
+Free-form generated concept art is moodboard/reference only and cannot satisfy this gate.
 
 ## Issues and pull requests
 
@@ -121,7 +134,8 @@ They must not override the current chain. This includes, among other things:
 - prior Command Room directions;
 - stale QA handoffs and reports;
 - rejected or rough-reference visual PRs;
-- rejected Godot visual techniques, except where #415 explicitly permits reuse of behavior, licensed provenance or lessons learned.
+- rejected Godot visual techniques, except where #415 explicitly permits reuse of behavior, licensed provenance or lessons learned;
+- free-form generated visual targets that are not proven against the current engine/asset envelope.
 
 When historical material is used, state why it is relevant and which current source authorizes its use.
 
