@@ -43,6 +43,10 @@ function validSha(value) {
   return /^[0-9a-f]{40}$/i.test(value);
 }
 
+function validRefName(value) {
+  return /^[A-Za-z0-9._/-]+$/.test(value);
+}
+
 function parseDate(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
   const parsed = new Date(`${value}T00:00:00Z`);
@@ -143,13 +147,21 @@ if (!existsSync(currentStatePath)) {
   const shallow = run("git rev-parse --is-shallow-repository");
   const isShallow = shallow.ok && shallow.text === "true";
   const isCi = process.env.GITHUB_ACTIONS === "true" || process.env.CI === "true";
+  let ancestryTarget = "HEAD";
 
-  if (isShallow) {
-    const hydrate = run("git fetch --no-tags --depth=64 origin main");
-    if (!hydrate.ok) {
-      const message = "unable to hydrate shallow main history for authority ancestry checks";
-      if (isCi) authorityErrors.push(message);
-      else authorityWarnings.push(message);
+  if (isShallow && isCi) {
+    const baseRef = process.env.GITHUB_BASE_REF || "main";
+    if (!validRefName(baseRef)) {
+      authorityErrors.push(`invalid CI base ref for authority hydration: ${baseRef}`);
+    } else {
+      const hydrate = run(`git fetch --no-tags --depth=64 origin ${baseRef}`);
+      if (!hydrate.ok) {
+        authorityErrors.push(
+          `unable to hydrate shallow ${baseRef} history for authority ancestry checks`,
+        );
+      } else {
+        ancestryTarget = "FETCH_HEAD";
+      }
     }
   }
 
@@ -174,15 +186,17 @@ if (!existsSync(currentStatePath)) {
       continue;
     }
 
-    const ancestor = run(`git merge-base --is-ancestor ${sha} HEAD`);
+    const ancestor = run(`git merge-base --is-ancestor ${sha} ${ancestryTarget}`);
     if (!ancestor.ok) {
-      authorityErrors.push(`${label} ${sha} is not an ancestor of HEAD`);
+      authorityErrors.push(
+        `${label} ${sha} is not an ancestor of ${ancestryTarget}`,
+      );
     }
   }
 
   if (validSha(authorityBaseline)) {
     const commitsSinceAuthority = run(
-      `git rev-list --count ${authorityBaseline}..HEAD`,
+      `git rev-list --count ${authorityBaseline}..${ancestryTarget}`,
     );
     const count = Number(commitsSinceAuthority.text);
     if (commitsSinceAuthority.ok && Number.isFinite(count) && count > 25) {
