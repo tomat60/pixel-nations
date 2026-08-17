@@ -2,8 +2,9 @@
 
 Status: ACTIVE
 Updated: 2026-08-17
-Current state revision: Aurelian Moodboard Direction v1.1
+Current state revision: Aurelian Moodboard Direction v1.2
 Authority source: this file on the current `main`
+Authority baseline SHA: `94e873695bc149f1e14c7bec7ebeaa7ef1d91eb4`
 Product baseline SHA: `c94423d5a9c60f1982ae2935551fc1905d46e719`
 Current milestone: Bespoke Aurelian Basin visual target before implementation reference
 Active execution issue: #415
@@ -147,9 +148,10 @@ After every merge verify accepted head → merge SHA → new `main` → checks �
 
 Before meaningful work:
 
-1. Read this file, art-direction recovery, moodboard, topology authority, ADR-001, root `AGENTS.md`, and #415.
-2. Re-fetch live GitHub state.
-3. State model/tool, MAX, cost, allowed scope, forbidden actions, validation and stop condition.
+1. Run `npm run pn:status` when a checkout is available. A failure blocks product work until the authority chain is repaired.
+2. Read this file, art-direction recovery, moodboard, topology authority, ADR-001, root `AGENTS.md`, and #415.
+3. Re-fetch live GitHub state.
+4. State model/tool, MAX, cost, allowed scope, forbidden actions, validation and stop condition.
 
 ## Current stop condition
 
