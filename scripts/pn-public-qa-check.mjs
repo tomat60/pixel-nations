@@ -120,5 +120,5 @@ if (checks.every((check) => check.pass)) {
 }
 
 console.log("PUBLIC_QA_CHECK=FAIL");
-console.log("Stop product work until public QA check passes.");
+console.log("PUBLIC_QA_REFERENCE_NOT_CURRENT: do not use public/qa/latest as current authority. Follow PROJECT_CURRENT_STATE and exact-head milestone evidence unless the active task explicitly requires refreshed public QA evidence.");
 process.exit(1);
