@@ -90,85 +90,85 @@ jobs:
 
       - name: Generate Village progression evidence
         id: village
-        if: always()
+        if: ${{ always() && !cancelled() }}
         continue-on-error: true
         run: npm run qa:village
 
       - name: Generate Village progression video evidence
         id: progression
-        if: always()
+        if: ${{ always() && !cancelled() }}
         continue-on-error: true
         run: node scripts/qa-village-progression-video.mjs
 
       - name: Generate complete Founder Run evidence
         id: founder
-        if: always()
+        if: ${{ always() && !cancelled() }}
         continue-on-error: true
         run: npm run qa:founder-run
 
       - name: Generate City to Nation continuity evidence
         id: city_nation
-        if: always()
+        if: ${{ always() && !cancelled() }}
         continue-on-error: true
         run: npm run qa:city-nation
 
       - name: Generate settlement stewardship evidence
         id: settlement
-        if: always()
+        if: ${{ always() && !cancelled() }}
         continue-on-error: true
         run: npm run qa:settlement
 
       - name: Generate Nation stewardship evidence
         id: nation
-        if: always()
+        if: ${{ always() && !cancelled() }}
         continue-on-error: true
         run: npm run qa:nation
 
       - name: Generate Empire founding tradeoff evidence
         id: empire_founding
-        if: always()
+        if: ${{ always() && !cancelled() }}
         continue-on-error: true
         run: npm run qa:empire-founding
 
       - name: Generate Imperial Governance evidence
         id: imperial_governance
-        if: always()
+        if: ${{ always() && !cancelled() }}
         continue-on-error: true
         run: npm run qa:imperial-governance
 
       - name: Generate posture evidence
         id: posture
-        if: always()
+        if: ${{ always() && !cancelled() }}
         continue-on-error: true
         run: node scripts/qa-play-branches.mjs
 
       - name: Generate imperial cycle evidence
         id: imperial
-        if: always()
+        if: ${{ always() && !cancelled() }}
         continue-on-error: true
         run: node scripts/qa-imperial-turn.mjs
 
       - name: Generate first-run finale evidence
         id: finale
-        if: always()
+        if: ${{ always() && !cancelled() }}
         continue-on-error: true
         run: node scripts/qa-demo-complete.mjs
 
       - name: Generate empire crisis evidence
         id: crisis
-        if: always()
+        if: ${{ always() && !cancelled() }}
         continue-on-error: true
         run: node scripts/qa-empire-crisis.mjs
 
       - name: Generate post-crisis counter-move evidence
         id: post_crisis
-        if: always()
+        if: ${{ always() && !cancelled() }}
         continue-on-error: true
         run: node scripts/qa-post-crisis-countermove.mjs
 
       - name: Upload play evidence
         uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ always() && !cancelled() }}
         with:
           name: pixel-nations-play-evidence
           path: |
@@ -185,7 +185,7 @@ jobs:
           retention-days: 7
 
       - name: Enforce complete gameplay evidence gates
-        if: always()
+        if: ${{ always() && !cancelled() }}
         env:
           PRIMARY_OUTCOME: ${{ steps.primary.outcome }}
           VILLAGE_OUTCOME: ${{ steps.village.outcome }}
