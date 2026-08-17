@@ -23,7 +23,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(evidence_dir)
 
 	if stage == "movie":
-		if not _setup_movie():
+		if not await _setup_movie():
 			return
 		set_process(true)
 		return
@@ -62,8 +62,8 @@ func _run_still_stage() -> void:
 		return
 	_write_json(evidence_dir.path_join("inventory-%s.json" % stage), inventory)
 	var bounds := _dict_to_aabb(inventory["global_aabb"])
-	var sentinel_scale := max(max(bounds.size.x, bounds.size.y), bounds.size.z) / 11.0
-	_setup_sentinel_world(self, _sentinel_position(bounds), max(sentinel_scale, 2.0))
+	var sentinel_scale: float = maxf(maxf(bounds.size.x, bounds.size.y), bounds.size.z) / 11.0
+	_setup_sentinel_world(self, _sentinel_position(bounds), maxf(sentinel_scale, 2.0))
 	var use_override := stage == "perspective_override"
 	if use_override:
 		_apply_override(imported)
@@ -99,8 +99,8 @@ func _run_subviewport_stage(use_override: bool) -> void:
 	var label := "sub_override" if use_override else "sub_original"
 	_write_json(evidence_dir.path_join("inventory-%s.json" % label), inventory)
 	var bounds := _dict_to_aabb(inventory["global_aabb"])
-	var sentinel_scale := max(max(bounds.size.x, bounds.size.y), bounds.size.z) / 11.0
-	_setup_sentinel_world(world_root, _sentinel_position(bounds), max(sentinel_scale, 2.0))
+	var sentinel_scale: float = maxf(maxf(bounds.size.x, bounds.size.y), bounds.size.z) / 11.0
+	_setup_sentinel_world(world_root, _sentinel_position(bounds), maxf(sentinel_scale, 2.0))
 	if use_override:
 		_apply_override(imported)
 	var camera := _make_bounds_camera(world_root, bounds, false)
@@ -136,8 +136,8 @@ func _setup_movie() -> bool:
 		get_tree().quit(6)
 		return false
 	movie_bounds = _dict_to_aabb(inventory["global_aabb"])
-	var sentinel_scale := max(max(movie_bounds.size.x, movie_bounds.size.y), movie_bounds.size.z) / 11.0
-	_setup_sentinel_world(self, _sentinel_position(movie_bounds), max(sentinel_scale, 2.0))
+	var sentinel_scale: float = maxf(maxf(movie_bounds.size.x, movie_bounds.size.y), movie_bounds.size.z) / 11.0
+	_setup_sentinel_world(self, _sentinel_position(movie_bounds), maxf(sentinel_scale, 2.0))
 	movie_camera = _make_bounds_camera(self, movie_bounds, false)
 	movie_meshes = _collect_meshes(movie_imported)
 	movie_override = _diagnostic_override_material()
@@ -158,7 +158,7 @@ func _process(_delta: float) -> void:
 		print("AURELIAN_IMPORT_MOVIE_STAGE=original")
 	elif movie_frame == 225:
 		movie_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-		movie_camera.size = max(movie_bounds.size.x, movie_bounds.size.z) * 1.35
+		movie_camera.size = maxf(movie_bounds.size.x, movie_bounds.size.z) * 1.35
 		print("AURELIAN_IMPORT_MOVIE_STAGE=ortho")
 	elif movie_frame >= MOVIE_FRAMES:
 		print("AURELIAN_IMPORT_MOVIE_COMPLETE=%d" % MOVIE_FRAMES)
@@ -230,14 +230,14 @@ func _make_bounds_camera(parent: Node, bounds: AABB, orthographic: bool) -> Came
 	camera.name = "BoundsCamera"
 	camera.cull_mask = 1
 	camera.near = 0.05
-	var center := bounds.get_center()
-	var max_dim := max(max(bounds.size.x, bounds.size.y), bounds.size.z)
-	var distance := max(max_dim * 2.2, 30.0)
+	var center: Vector3 = bounds.get_center()
+	var max_dim: float = maxf(maxf(bounds.size.x, bounds.size.y), bounds.size.z)
+	var distance: float = maxf(max_dim * 2.2, 30.0)
 	camera.position = center + Vector3(distance * 0.85, distance * 0.68, distance)
-	camera.far = max(distance * 8.0, 2000.0)
+	camera.far = maxf(distance * 8.0, 2000.0)
 	if orthographic:
 		camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-		camera.size = max(bounds.size.x, bounds.size.z) * 1.35
+		camera.size = maxf(bounds.size.x, bounds.size.z) * 1.35
 	else:
 		camera.projection = Camera3D.PROJECTION_PERSPECTIVE
 		camera.fov = 40.0
@@ -330,9 +330,9 @@ func _count_nodes(root: Node) -> int:
 	return count
 
 func _transform_aabb(local: AABB, transform: Transform3D) -> AABB:
-	var p := local.position
-	var s := local.size
-	var points := [
+	var p: Vector3 = local.position
+	var s: Vector3 = local.size
+	var points: Array[Vector3] = [
 		p,
 		p + Vector3(s.x, 0, 0),
 		p + Vector3(0, s.y, 0),
@@ -342,7 +342,7 @@ func _transform_aabb(local: AABB, transform: Transform3D) -> AABB:
 		p + Vector3(0, s.y, s.z),
 		p + s
 	]
-	var first := transform * points[0]
+	var first: Vector3 = transform * points[0]
 	var result := AABB(first, Vector3.ZERO)
 	for index in range(1, points.size()):
 		result = result.expand(transform * points[index])
