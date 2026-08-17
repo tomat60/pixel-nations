@@ -3,10 +3,10 @@ extends Node3D
 
 const TOPOLOGY_CENTER := Vector2(500.0, 450.0)
 const TOPOLOGY_SCALE := 0.022
-const GRID_MIN := Vector2(-100.0, -80.0)
-const GRID_MAX := Vector2(1100.0, 1020.0)
-const GRID_X := 60
-const GRID_Y := 55
+const GRID_MIN := Vector2(-500.0, -350.0)
+const GRID_MAX := Vector2(1500.0, 1250.0)
+const GRID_X := 72
+const GRID_Y := 58
 
 const RIVER_POINTS := [
 	Vector2(505, 0), Vector2(500, 105), Vector2(520, 215), Vector2(505, 315),
@@ -227,9 +227,9 @@ func _build_water() -> void:
 	var outer_water := MeshInstance3D.new()
 	outer_water.name = "CoastWater"
 	var plane := PlaneMesh.new()
-	plane.size = Vector2(18.0, 10.0)
+	plane.size = Vector2(22.0, 14.0)
 	outer_water.mesh = plane
-	outer_water.position = topology_to_world(Vector2(610, 1060), -0.08)
+	outer_water.position = topology_to_world(Vector2(610, 1120), -0.08)
 	outer_water.material_override = _material(Color("#365f68"), 0.34)
 	add_child(outer_water)
 
@@ -308,11 +308,11 @@ func _build_greenvale(stage: int) -> void:
 	add_child(settlement)
 	var origin := LANDMARKS["GreenvaleOrigin"]
 	_add_claim_marker(settlement, origin)
-	_add_building(settlement, origin + Vector2(-22, 18), Vector3(0.62, 0.42, 0.52), "Shelter")
 	if stage >= 1:
+		_add_building(settlement, origin + Vector2(-22, 18), Vector3(0.62, 0.42, 0.52), "Shelter")
 		_add_building(settlement, origin + Vector2(24, 10), Vector3(0.76, 0.52, 0.62), "Workshop")
-		_add_building(settlement, origin + Vector2(-4, -34), Vector3(0.70, 0.48, 0.58), "Storehouse")
 	if stage >= 2:
+		_add_building(settlement, origin + Vector2(-4, -34), Vector3(0.70, 0.48, 0.58), "Storehouse")
 		_add_building(settlement, origin + Vector2(42, -30), Vector3(0.82, 0.58, 0.68), "Hall")
 		_add_building(settlement, origin + Vector2(-48, -26), Vector3(0.68, 0.46, 0.56), "Home")
 		_add_fields(settlement, origin + Vector2(-65, 56), 4)
@@ -461,6 +461,11 @@ func _write_manifests() -> void:
 	var route_payload := {}
 	for route_name in ROUTES.keys():
 		route_payload[route_name] = ROUTES[route_name].map(func(point): return [point.x, point.y])
+	var camera_payload := {}
+	for preset in CAMERA_CONTRACT.keys():
+		var definition: Dictionary = CAMERA_CONTRACT[preset]
+		var center: Vector2 = definition["center"]
+		camera_payload[preset] = {"center": [center.x, center.y], "size": float(definition["size"])}
 	var manifest := {
 		"contract": "AURELIAN_CAPABILITY_REFERENCE_V1",
 		"topology_authority": "docs/AURELIAN_BASIN_TOPOLOGY_V1.md",
@@ -473,7 +478,7 @@ func _write_manifests() -> void:
 			"sequence": "road -> dry approach -> ramp/abutment -> deck -> ramp/abutment -> dry approach -> road",
 		},
 		"routes": route_payload,
-		"cameras": CAMERA_CONTRACT,
+		"cameras": camera_payload,
 		"settlement_stage": settlement_stage,
 		"terrain_samples": {
 			"GreenvaleOrigin": terrain_height_at(LANDMARKS["GreenvaleOrigin"]),
