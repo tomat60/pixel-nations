@@ -31,8 +31,20 @@ function field(text, label) {
   return match ? match.slice(match.indexOf(prefix) + prefix.length).trim() : "";
 }
 
+function normalizeInlineCode(value) {
+  const trimmed = value.trim();
+  if (trimmed.length >= 2 && trimmed.startsWith("`") && trimmed.endsWith("`")) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
 function validSha(value) {
   return /^[0-9a-f]{40}$/i.test(value);
+}
+
+function validRefName(value) {
+  return /^[A-Za-z0-9._/-]+$/.test(value);
 }
 
 function parseDate(value) {
@@ -88,8 +100,8 @@ if (!existsSync(currentStatePath)) {
 } else {
   currentState = readFileSync(currentStatePath, "utf8");
   updated = field(currentState, "Updated");
-  authorityBaseline = field(currentState, "Authority baseline SHA");
-  productBaseline = field(currentState, "Product baseline SHA");
+  authorityBaseline = normalizeInlineCode(field(currentState, "Authority baseline SHA"));
+  productBaseline = normalizeInlineCode(field(currentState, "Product baseline SHA"));
   currentMilestone = field(currentState, "Current milestone");
   activeIssue = field(currentState, "Active execution issue");
   nextAllowedAction = field(currentState, "Next allowed action");
@@ -132,6 +144,27 @@ if (!existsSync(currentStatePath)) {
     }
   }
 
+  const shallow = run("git rev-parse --is-shallow-repository");
+  const isShallow = shallow.ok && shallow.text === "true";
+  const isCi = process.env.GITHUB_ACTIONS === "true" || process.env.CI === "true";
+  let ancestryTarget = "HEAD";
+
+  if (isShallow && isCi) {
+    const baseRef = process.env.GITHUB_BASE_REF || "main";
+    if (!validRefName(baseRef)) {
+      authorityErrors.push(`invalid CI base ref for authority hydration: ${baseRef}`);
+    } else {
+      const hydrate = run(`git fetch --no-tags --depth=64 origin ${baseRef}`);
+      if (!hydrate.ok) {
+        authorityErrors.push(
+          `unable to hydrate shallow ${baseRef} history for authority ancestry checks`,
+        );
+      } else {
+        ancestryTarget = "FETCH_HEAD";
+      }
+    }
+  }
+
   for (const [label, sha] of [
     ["authority baseline", authorityBaseline],
     ["product baseline", productBaseline],
@@ -143,8 +176,7 @@ if (!existsSync(currentStatePath)) {
 
     const commitPresent = run(`git cat-file -e ${sha}^{commit}`);
     if (!commitPresent.ok) {
-      const shallow = run("git rev-parse --is-shallow-repository");
-      if (shallow.ok && shallow.text === "true") {
+      if (isShallow && !isCi) {
         authorityWarnings.push(
           `${label} ${sha} is outside this shallow checkout; ancestry not verified`,
         );
@@ -154,15 +186,17 @@ if (!existsSync(currentStatePath)) {
       continue;
     }
 
-    const ancestor = run(`git merge-base --is-ancestor ${sha} HEAD`);
+    const ancestor = run(`git merge-base --is-ancestor ${sha} ${ancestryTarget}`);
     if (!ancestor.ok) {
-      authorityErrors.push(`${label} ${sha} is not an ancestor of HEAD`);
+      authorityErrors.push(
+        `${label} ${sha} is not an ancestor of ${ancestryTarget}`,
+      );
     }
   }
 
   if (validSha(authorityBaseline)) {
     const commitsSinceAuthority = run(
-      `git rev-list --count ${authorityBaseline}..HEAD`,
+      `git rev-list --count ${authorityBaseline}..${ancestryTarget}`,
     );
     const count = Number(commitsSinceAuthority.text);
     if (commitsSinceAuthority.ok && Number.isFinite(count) && count > 25) {

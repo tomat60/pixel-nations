@@ -19,6 +19,8 @@ Before planning or coding:
 5. Read the active execution issue named in current state.
 6. Read only the operating/QA documents needed for the scoped task.
 
+If `npm run pn:status` reports `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`, stop product work and repair the authority chain first. Do not work around the gate by trusting prose that says `ACTIVE`.
+
 Authority order:
 
 1. `docs/PROJECT_CURRENT_STATE.md`
@@ -48,20 +50,11 @@ Do not treat issue #79, an arbitrary open issue, a draft PR, or `public/qa/lates
 - Do not restart broad React/SVG scene-engine development as the final visual direction.
 - Do not infer that all `/play` screens are visually accepted. Current state defines the exact acceptance boundary.
 
-## Current product baseline
+## Current milestone rule
 
-Read the exact milestone and active issue from `PROJECT_CURRENT_STATE.md`.
+Do not duplicate a milestone snapshot in this file. Read the exact milestone, active issue, active PR, acceptance boundary and next allowed action from `docs/PROJECT_CURRENT_STATE.md` on the current checkout.
 
-At Authority Reset v0.1:
-
-- PR #335 integrated `camp → first shelter → developed settlement` into the real `/play` flow.
-- Aurelian M2 integration is accepted.
-- Current Village composition is `TEMPORARY_ACCEPTED`, not production-final.
-- Non-Village screens remain visually unapproved.
-- Active work is research and the binding Aurelian Composition V2 brief in issue #338.
-- Visual implementation remains blocked until that brief is accepted.
-
-These bullets are a convenience summary. `PROJECT_CURRENT_STATE.md` remains authoritative when they age.
+When the milestone changes, update `PROJECT_CURRENT_STATE.md`; do not add another convenience summary here. Historical PR or issue references in this file are examples only unless current state explicitly reactivates them.
 
 ## Control-plane safety guardrails
 

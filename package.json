@@ -35,7 +35,7 @@
     "pn:outbox": "node scripts/pn-report.mjs",
     "pn:confusion": "node scripts/pn-player-confusion.mjs",
     "pn:player-confusion": "node scripts/pn-player-confusion.mjs",
-    "pn:cloud-ready": "node scripts/pn-cloud-readiness.mjs",
+    "pn:cloud-ready": "npm run pn:status && node scripts/pn-cloud-readiness.mjs",
     "qa:aurelian:play": "node scripts/qa-aurelian-play-integration.mjs"
   },
   "dependencies": {
