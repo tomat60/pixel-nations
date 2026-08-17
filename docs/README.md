@@ -1,7 +1,7 @@
 # Pixel Nations Docs Map
 
 Status: ACTIVE
-Updated: 2026-08-10
+Updated: 2026-08-17
 Purpose: prevent old sprint briefs, runbooks, generated handoffs, and open issues from acting like current instructions.
 
 ## Start here
@@ -41,9 +41,11 @@ The current chain is intentionally explicit:
 - runtime decision: `ADR_001_GODOT_DESKTOP_FIRST.md`
 - agent rules: root `AGENTS.md`
 - active execution issue: GitHub issue #415
-- shared-geography topology contract: `AURELIAN_BASIN_TOPOLOGY_V1.md`
+- topology authority: `AURELIAN_BASIN_TOPOLOGY_V1.md`
+- art-direction authority: `AURELIAN_BASIN_ART_DIRECTION_RECOVERY_V1.md`
+- accepted moodboard direction: `AURELIAN_BASIN_MOODBOARD_V1.md`
 - accepted web product baseline: P11 / PR #422 / commit `c94423d5a9c60f1982ae2935551fc1905d46e719`
-- current milestone: #415 Phase 1 shared-geography continuity proof
+- current milestone: exactly one bespoke non-production Aurelian Village / Map / World visual target before any implementation reference
 
 Older issues remain useful historical context only when a current authority explicitly references them.
 
@@ -67,11 +69,12 @@ Use the narrowest relevant document. Do not read every historical strategy file 
 
 - Godot is the target game runtime under ADR-001.
 - Next.js `/play` is the functioning bridge, demo shell, mechanics benchmark and rollback surface until a Godot candidate passes its acceptance gates.
-- P4–P11 mechanics/continuity are accepted in the web baseline.
+- P4-P11 mechanics/continuity are accepted in the web baseline.
 - Current Village progression is a mechanically accepted benchmark, not authority to preserve its rejected bridge/geography.
 - Current independent web Village/Map/World geography is not production-final visual authority.
-- Active visual work is one shared Aurelian Basin geography under issue #415.
-- Village, Map and World must be camera/LOD views of the same shared scene and transforms.
+- Current work is art direction only: one shared Aurelian Basin visual target under issue #415.
+- Village, Map and World must be views of the same locked geography.
+- No Godot/Blender Aurelian implementation is authorized before `ART_DIRECTION_PASS`.
 - Do not restart broad React/SVG/CSS scene-engine development as final art.
 - No P12 or unrelated feature expansion while #415 is active.
 
@@ -92,7 +95,7 @@ Before using generated evidence, verify:
 
 Green CI, smoke PASS, generated screenshots, and a clean branch are regression evidence. They do not independently approve product direction or visual quality.
 
-For #415 Phase 1, acceptance specifically requires direct review of exact-head Village/Map/World stills, raw camera-switch video, and the shared transform manifest. Screenshot presence or a green workflow is not enough.
+For the current #415 milestone, acceptance requires direct review of one bespoke Village / Map / World visual-target package against the locked topology, art-direction recovery brief and moodboard. The result must be exactly `ART_DIRECTION_PASS`, `ART_DIRECTION_CORRECTION_REQUIRED`, or `ART_DIRECTION_REJECT`. No implementation reference may start before PASS.
 
 ## Issues and pull requests
 
@@ -126,7 +129,20 @@ When historical material is used, state why it is relevant and which current sou
 
 `PROJECT_CURRENT_STATE.md` must be updated when the accepted milestone, active issue, product baseline, runtime interpretation, visual classification, blocker, or next allowed action changes.
 
-Do not append another timeline to it. Replace the current state.
+Do not append another timeline to it. Replace the current state, while preserving the required authority header schema.
+
+Required header fields are:
+
+- `Status`
+- `Updated`
+- `Current state revision`
+- `Authority baseline SHA`
+- `Product baseline SHA`
+- `Current milestone`
+- `Active execution issue`
+- `Next allowed action`
+
+A rewrite that drops any required field is invalid even if the prose is otherwise current.
 
 `npm run pn:status` must fail or warn clearly when:
 
@@ -135,6 +151,8 @@ Do not append another timeline to it. Replace the current state.
 - the current-state date is too old;
 - the repository has moved materially beyond the recorded authority baseline;
 - the `latest` handoff is stale.
+
+`Pixel Nations CI` must run `npm run pn:status` on PR heads and `main` so a broken authority schema cannot merge silently.
 
 ## Handoff and report workflow
 
