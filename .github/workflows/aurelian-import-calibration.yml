@@ -59,9 +59,8 @@ jobs:
           from pathlib import Path
           p=Path(os.environ['EVIDENCE_DIR'])/'source-artifact-metadata.json'
           data=json.loads(p.read_text())
-          expected_id=int(os.environ['SOURCE_ARTIFACT_ID'])
-          if data.get('id') != expected_id:
-              raise SystemExit(f"artifact id mismatch: {data.get('id')} != {expected_id}")
+          if data.get('id') != int(os.environ['SOURCE_ARTIFACT_ID']):
+              raise SystemExit(f"artifact id mismatch: {data.get('id')}")
           if data.get('digest') != os.environ['SOURCE_ARTIFACT_DIGEST']:
               raise SystemExit(f"artifact digest mismatch: {data.get('digest')}")
           if data.get('expired'):
@@ -81,15 +80,19 @@ jobs:
       - name: Verify and stage exact GLB input
         run: |
           set -euo pipefail
-          test -s /tmp/aurelian429/aurelian_basin_phase1_recovery.glb
-          test "$(sha256sum /tmp/aurelian429/aurelian_basin_phase1_recovery.glb | cut -d' ' -f1)" = "${SOURCE_GLB_SHA256}"
-          test "$(tr -d '\r\n' < /tmp/aurelian429/exact-head.txt)" = "${SOURCE_HEAD}"
+          mapfile -t artifact_roots < <(find /tmp/aurelian429 -mindepth 1 -maxdepth 1 -type d | sort)
+          test "${#artifact_roots[@]}" -eq 1
+          ARTIFACT_ROOT="${artifact_roots[0]}"
+          echo "AURELIAN_IMPORT_ARTIFACT_ROOT=${ARTIFACT_ROOT}"
+          test -s "${ARTIFACT_ROOT}/aurelian_basin_phase1_recovery.glb"
+          test "$(sha256sum "${ARTIFACT_ROOT}/aurelian_basin_phase1_recovery.glb" | cut -d' ' -f1)" = "${SOURCE_GLB_SHA256}"
+          test "$(tr -d '\r\n' < "${ARTIFACT_ROOT}/exact-head.txt")" = "${SOURCE_HEAD}"
           mkdir -p game/calibration_input
-          cp /tmp/aurelian429/aurelian_basin_phase1_recovery.glb \
+          cp "${ARTIFACT_ROOT}/aurelian_basin_phase1_recovery.glb" \
             game/calibration_input/aurelian_basin_phase1_recovery.glb
           printf '%s\n' "${SOURCE_GLB_SHA256}" > "${EVIDENCE_DIR}/source-glb.sha256"
-          cp /tmp/aurelian429/transform-manifest.json "${EVIDENCE_DIR}/source-transform-manifest.json"
-          cp /tmp/aurelian429/runtime-manifest.json "${EVIDENCE_DIR}/source-runtime-manifest.json"
+          cp "${ARTIFACT_ROOT}/transform-manifest.json" "${EVIDENCE_DIR}/source-transform-manifest.json"
+          cp "${ARTIFACT_ROOT}/runtime-manifest.json" "${EVIDENCE_DIR}/source-runtime-manifest.json"
           echo "AURELIAN_IMPORT_SOURCE_GLB=PASS"
 
       - name: Install deterministic capture tooling
@@ -116,8 +119,9 @@ jobs:
       - name: Import exact GLB and run foundation tests
         run: |
           set -euo pipefail
-          "${GODOT_BIN}" --headless --path game --editor --quit \
-            > "${EVIDENCE_DIR}/godot-import.log" 2>&1
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1 || {
+            cat "${EVIDENCE_DIR}/godot-import.log"; exit 1;
+          }
           if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "${EVIDENCE_DIR}/godot-import.log"; then
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
@@ -139,22 +143,19 @@ jobs:
       - name: Capture isolated exact stages
         run: |
           set -euo pipefail
-          status=0
           for stage in sentinel perspective_override perspective_original sub_override sub_original ortho_original; do
             echo "=== STAGE ${stage} ==="
-            if ! timeout 120s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+            timeout 120s xvfb-run -a -s "-screen 0 1600x1000x24" env \
               LIBGL_ALWAYS_SOFTWARE=1 \
               AURELIAN_IMPORT_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}" \
               AURELIAN_IMPORT_STAGE="$stage" \
               "${GODOT_BIN}" --path game --audio-driver Dummy \
               --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 \
               res://scenes/calibration/aurelian_import/aurelian_import_calibration.tscn \
-              > "${EVIDENCE_DIR}/${stage}.log" 2>&1; then
-              status=1
-              cat "${EVIDENCE_DIR}/${stage}.log"
-            fi
+              > "${EVIDENCE_DIR}/${stage}.log" 2>&1 || {
+                cat "${EVIDENCE_DIR}/${stage}.log"; exit 1;
+              }
           done
-          exit "$status"
 
       - name: Capture ten second stage-switch movie
         run: |
@@ -191,7 +192,7 @@ jobs:
           python3 - <<'PY'
           import hashlib, json, math, os
           from pathlib import Path
-          from PIL import Image, ImageStat, ImageChops
+          from PIL import Image, ImageStat
 
           root=Path(os.environ['EVIDENCE_DIR'])
           expected=[
