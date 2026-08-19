@@ -116,6 +116,9 @@ jobs:
           cp "${EXPORT_DIR}/source-manifest.json" "${EVIDENCE_DIR}/source-manifest.json"
           sha256sum "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb" > "${EVIDENCE_DIR}/glb.sha256"
           stat -c '%s' "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb" > "${EVIDENCE_DIR}/glb-bytes.txt"
+          test -s "${EXPORT_DIR}/aurelian_authored_terrain_v1.blend"
+          mv "${EXPORT_DIR}/aurelian_authored_terrain_v1.blend" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1.blend"
+          test ! -e "${EXPORT_DIR}/aurelian_authored_terrain_v1.blend"
 
       - name: Download pinned Godot 4.7.1
         timeout-minutes: 5
@@ -136,7 +139,7 @@ jobs:
           "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1 || {
             cat "${EVIDENCE_DIR}/godot-import.log"; exit 1;
           }
-          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "${EVIDENCE_DIR}/godot-import.log"; then
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
