@@ -120,7 +120,7 @@ async function runBranch(browser, branchCase) {
     );
     await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await dismissFounderRecord(page, { depth: "founder-run", required: true });
+    await dismissFounderRecord(page, { depth: "founder-run" });
 
     await page.locator(`[data-qa="posture-label"][data-posture="${branchCase.posture}"]`).first().waitFor({ state: "visible", timeout: 5000 });
     await page.locator(`[data-qa="post-empire-branch"][data-posture="${branchCase.posture}"][data-outcome="none"]`).waitFor({ state: "visible", timeout: 5000 });
@@ -139,7 +139,7 @@ async function runBranch(browser, branchCase) {
 
     await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await dismissFounderRecord(page, { depth: "founder-run", required: true });
+    await dismissFounderRecord(page, { depth: "founder-run" });
     await page.locator(`[data-qa="post-empire-branch"][data-posture="${branchCase.posture}"][data-outcome="${branchCase.outcomeId}"]`).waitFor({ state: "visible", timeout: 5000 });
     await page.locator(`[data-qa="post-empire-outcome"][data-outcome-id="${branchCase.outcomeId}"]`).waitFor({ state: "visible", timeout: 5000 });
 
