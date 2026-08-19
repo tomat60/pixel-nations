@@ -4,3 +4,4 @@
 
 [node name="AurelianAuthoredTerrainV1" type="Node3D"]
 script = ExtResource("1_authored")
+; Infra recovery sync: force fresh hosted runner after apt dependency stall.
