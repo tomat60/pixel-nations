@@ -1,0 +1,256 @@
+name: Aurelian Authored Terrain V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/assets/aurelian-basin/source/aurelian_authored_terrain_v1.py"
+      - "game/scenes/aurelian/aurelian_authored_terrain_v1.gd"
+      - "game/scenes/aurelian/aurelian_authored_terrain_v1.tscn"
+      - "game/tests/aurelian_authored_terrain_v1_test.gd"
+      - ".github/workflows/aurelian-authored-terrain-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aurelian-authored-terrain-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  KAYKIT_SHA: "84fa4e91af6a88989be7c99e0891cede11f2ca38"
+  KAYKIT_ARCHIVE_SHA: "cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EXPORT_DIR: "game/assets/aurelian-basin/export"
+  EVIDENCE_DIR: "evidence/aurelian-authored-terrain-v1"
+
+jobs:
+  authored-terrain-proof:
+    name: Author Blender terrain, import in Godot, capture shared views
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact input head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+
+      - name: Install deterministic authoring and render tooling
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            blender unzip xvfb ffmpeg python3-pil \
+            libegl1 libgl1-mesa-dri libglx-mesa0 libx11-6 libxcursor1 \
+            libxinerama1 libxi6 libxrandr2 >/dev/null
+          blender --version | head -1 | tee "${EVIDENCE_DIR}/blender-version.txt"
+          ffmpeg -version | head -1 | tee "${EVIDENCE_DIR}/ffmpeg-version.txt"
+
+      - name: Fetch exact KayKit CC0 source
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/kaykit
+          mkdir -p /tmp/kaykit/src
+          curl -fsSL --retry 3 \
+            "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip" \
+            -o /tmp/kaykit/source.zip
+          test "$(sha256sum /tmp/kaykit/source.zip | cut -d' ' -f1)" = "${KAYKIT_ARCHIVE_SHA}"
+          unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/src
+          ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
+          test -n "$ROOT"
+          echo "KAYKIT_ROOT=$ROOT" >> "$GITHUB_ENV"
+          curl -fsSL --retry 3 \
+            "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/${KAYKIT_SHA}/LICENSE.txt" \
+            -o "${EVIDENCE_DIR}/KAYKIT_CC0_LICENSE.txt"
+          grep -F "Creative Commons Zero" "${EVIDENCE_DIR}/KAYKIT_CC0_LICENSE.txt"
+
+      - name: Author irregular Basin and export one GLB
+        run: |
+          set -euo pipefail
+          rm -rf "${EXPORT_DIR}"
+          mkdir -p "${EXPORT_DIR}"
+          export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 14m env LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1600x1200x24" \
+            blender -b --python game/assets/aurelian-basin/source/aurelian_authored_terrain_v1.py -- \
+            "$KAYKIT_ROOT" "$PWD/${EXPORT_DIR}" \
+            2>&1 | tee "${EVIDENCE_DIR}/blender-author.log"
+          grep -F "AURELIAN_AUTHORED_TERRAIN=PASS" "${EVIDENCE_DIR}/blender-author.log"
+          test -s "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb"
+          test -s "${EXPORT_DIR}/transform-manifest.json"
+          test -s "${EXPORT_DIR}/source-manifest.json"
+          cp "${EXPORT_DIR}/transform-manifest.json" "${EVIDENCE_DIR}/transform-manifest.json"
+          cp "${EXPORT_DIR}/source-manifest.json" "${EVIDENCE_DIR}/source-manifest.json"
+          sha256sum "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb" > "${EVIDENCE_DIR}/glb.sha256"
+          stat -c '%s' "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb" > "${EVIDENCE_DIR}/glb-bytes.txt"
+
+      - name: Download pinned Godot 4.7.1
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/godot
+          curl -fsSL --retry 3 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Import GLB and run Godot contracts
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1 || {
+            cat "${EVIDENCE_DIR}/godot-import.log"; exit 1;
+          }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          "${GODOT_BIN}" --headless --path game --script res://tests/run_all.gd \
+            > "${EVIDENCE_DIR}/godot-foundation-tests.log" 2>&1
+          grep -F "PIXEL_NATIONS_GODOT_TESTS: PASS" "${EVIDENCE_DIR}/godot-foundation-tests.log"
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_authored_terrain_v1_test.gd \
+            > "${EVIDENCE_DIR}/aurelian-authored-test.log" 2>&1
+          grep -F "AURELIAN_AUTHORED_TERRAIN_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian-authored-test.log"
+
+      - name: Capture Village Map World and bridge evidence
+        run: |
+          set -euo pipefail
+          for preset in village map world bridge; do
+            timeout 90s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+              AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}" \
+              AURELIAN_CAPTURE_PRESET="$preset" \
+              "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+              res://scenes/aurelian/aurelian_authored_terrain_v1.tscn \
+              > "${EVIDENCE_DIR}/${preset}.log" 2>&1
+            grep -F "AURELIAN_AUTHORED_STILL=${preset}:" "${EVIDENCE_DIR}/${preset}.log"
+            test -s "${EVIDENCE_DIR}/${preset}-1440x900.png"
+            if grep -E "SCRIPT ERROR|Parse Error|Failed to load|^ERROR:" "${EVIDENCE_DIR}/${preset}.log"; then
+              cat "${EVIDENCE_DIR}/${preset}.log"
+              exit 1
+            fi
+          done
+
+      - name: Capture 18 second Village to Map to World sequence
+        run: |
+          set -euo pipefail
+          timeout 120s xvfb-run -a -s "-screen 0 1280x720x24" env \
+            AURELIAN_CAPTURE_SEQUENCE=1 \
+            "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+            --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 30 \
+            --write-movie "$PWD/${EVIDENCE_DIR}/camera-switch.avi" \
+            res://scenes/aurelian/aurelian_authored_terrain_v1.tscn \
+            > "${EVIDENCE_DIR}/camera-switch.log" 2>&1
+          grep -F "AURELIAN_AUTHORED_SEQUENCE_COMPLETE=540" "${EVIDENCE_DIR}/camera-switch.log"
+          test -s "${EVIDENCE_DIR}/camera-switch.avi"
+          ffmpeg -y -loglevel error -i "${EVIDENCE_DIR}/camera-switch.avi" \
+            -c:v libx264 -pix_fmt yuv420p "${EVIDENCE_DIR}/camera-switch.mp4"
+          ffprobe -v error -show_entries stream=width,height,r_frame_rate,codec_name \
+            -show_entries format=duration -of json "${EVIDENCE_DIR}/camera-switch.mp4" \
+            > "${EVIDENCE_DIR}/video-metadata.json"
+
+      - name: Validate evidence package
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from PIL import Image, ImageStat, ImageChops
+
+          root = Path(os.environ['EVIDENCE_DIR'])
+          report = {}
+          images = {}
+          for preset in ('village','map','world','bridge'):
+              path = root / f'{preset}-1440x900.png'
+              image = Image.open(path).convert('RGB')
+              if image.size != (1440,900):
+                  raise SystemExit(f'{preset}: wrong size {image.size}')
+              stat = ImageStat.Stat(image)
+              variance = sum(stat.var) / 3.0
+              sample = image.resize((240,150))
+              colors = len(set(sample.getdata()))
+              if path.stat().st_size < 70000 or variance < 70.0 or colors < 300:
+                  raise SystemExit(f'{preset}: weak/blank evidence bytes={path.stat().st_size} variance={variance:.2f} colors={colors}')
+              report[preset] = {
+                  'bytes': path.stat().st_size,
+                  'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                  'variance': round(variance,3),
+                  'sample_colors': colors,
+              }
+              images[preset] = sample
+
+          for a,b in (('village','map'),('map','world'),('village','bridge')):
+              diff = ImageStat.Stat(ImageChops.difference(images[a], images[b]))
+              mean_delta = sum(diff.mean) / 3.0
+              if mean_delta < 2.0:
+                  raise SystemExit(f'camera evidence too similar: {a}/{b} delta={mean_delta:.3f}')
+
+          manifest = json.loads((root/'transform-manifest.json').read_text())
+          if manifest.get('contract') != 'AURELIAN_AUTHORED_TERRAIN_V1':
+              raise SystemExit('wrong transform contract')
+          if manifest.get('rectangular_outer_water_plane') is not False:
+              raise SystemExit('rectangular outer water reintroduced')
+          if manifest.get('runtime_generated_terrain') is not False:
+              raise SystemExit('runtime-generated terrain reintroduced')
+          if manifest.get('bridge',{}).get('endpoints') != [[455,340],[575,340]]:
+              raise SystemExit('bridge topology drift')
+          if len(manifest.get('river_centerline',[])) != 9:
+              raise SystemExit('river topology drift')
+          if len(manifest.get('outflow_extension',[])) < 2:
+              raise SystemExit('outflow extension missing')
+
+          video = json.loads((root/'video-metadata.json').read_text())
+          duration = float(video['format']['duration'])
+          stream = video['streams'][0]
+          if not 17.5 <= duration <= 18.5:
+              raise SystemExit(f'video duration wrong: {duration}')
+          if int(stream['width']) != 1280 or int(stream['height']) != 720:
+              raise SystemExit(f'video dimensions wrong: {stream}')
+
+          qa = {
+              'status': 'PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_VISUAL_REVIEW',
+              'exact_head': (root/'exact-head.txt').read_text().strip(),
+              'stills': report,
+              'video_seconds': duration,
+              'authored_terrain': True,
+              'rectangular_outer_water_plane': False,
+          }
+          (root/'evidence-qa.json').write_text(json.dumps(qa, indent=2)+'\n')
+
+          canvas = Image.new('RGB',(720,450),(32,32,32))
+          for i,preset in enumerate(('village','map','world','bridge')):
+              thumb = Image.open(root/f'{preset}-1440x900.png').convert('RGB').resize((360,225))
+              canvas.paste(thumb,((i%2)*360,(i//2)*225))
+          canvas.save(root/'review-contact-sheet.jpg',quality=92)
+          print('AURELIAN_AUTHORED_TERRAIN_EVIDENCE_QA=PASS')
+          PY
+
+      - name: Stage exact GLB and provenance
+        if: always()
+        run: |
+          if [ -s "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb" ]; then
+            cp "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1.glb"
+          fi
+          find "${EVIDENCE_DIR}" -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > "${EVIDENCE_DIR}/SHA256SUMS.txt"
+
+      - name: Upload authored terrain evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aurelian-authored-terrain-v1-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/aurelian-authored-terrain-v1/**
+          if-no-files-found: error
+          retention-days: 30
