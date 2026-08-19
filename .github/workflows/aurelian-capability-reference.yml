@@ -58,34 +58,36 @@ jobs:
         run: |
           set -euo pipefail
           for preset in village map world; do
-            timeout 70s xvfb-run -a -s "-screen 0 1440x900x24" env \
+            timeout 70s xvfb-run -a -s "-screen 0 1440x810x24" env \
               LIBGL_ALWAYS_SOFTWARE=1 \
               AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE}" \
               AURELIAN_CAPTURE_PRESET="$preset" \
               AURELIAN_SETTLEMENT_STAGE=2 \
               "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
-              --resolution 1440x900 --position 0,0 --disable-vsync \
+              --resolution 1440x810 --position 0,0 --disable-vsync \
               res://scenes/aurelian/reference_v1/aurelian_reference_v1.tscn \
               > "${EVIDENCE}/${preset}.log" 2>&1
             grep -F "AURELIAN_REFERENCE_STILL=${preset}:" "${EVIDENCE}/${preset}.log"
             test -s "${EVIDENCE}/${preset}-1440x900.png"
+            mv "${EVIDENCE}/${preset}-1440x900.png" "${EVIDENCE}/${preset}-1440x810.png"
           done
 
       - name: Capture three settlement visual states
         run: |
           set -euo pipefail
           for stage in 0 1 2; do
-            timeout 70s xvfb-run -a -s "-screen 0 1440x900x24" env \
+            timeout 70s xvfb-run -a -s "-screen 0 1440x810x24" env \
               LIBGL_ALWAYS_SOFTWARE=1 \
               AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE}" \
               AURELIAN_CAPTURE_PRESET=village \
               AURELIAN_CAPTURE_SUFFIX="stage${stage}" \
               AURELIAN_SETTLEMENT_STAGE="$stage" \
               "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
-              --resolution 1440x900 --position 0,0 --disable-vsync \
+              --resolution 1440x810 --position 0,0 --disable-vsync \
               res://scenes/aurelian/reference_v1/aurelian_reference_v1.tscn \
               > "${EVIDENCE}/village-stage${stage}.log" 2>&1
             test -s "${EVIDENCE}/village-stage${stage}-1440x900.png"
+            mv "${EVIDENCE}/village-stage${stage}-1440x900.png" "${EVIDENCE}/village-stage${stage}-1440x810.png"
           done
 
       - name: Capture raw Village Map World camera sequence
@@ -118,24 +120,24 @@ jobs:
 
           def inspect(path):
               image = Image.open(path).convert('RGB')
-              if image.size != (1440, 900):
+              if image.size != (1440, 810):
                   raise SystemExit(f'{path.name}: wrong size {image.size}')
               stat = ImageStat.Stat(image)
               variance = sum(stat.var) / 3
-              colors = len(set(image.resize((240, 150)).getdata()))
+              colors = len(set(image.resize((240, 135)).getdata()))
               if path.stat().st_size < 50000 or variance < 70 or colors < 220:
                   raise SystemExit(f'{path.name}: weak/blank evidence bytes={path.stat().st_size} variance={variance:.2f} colors={colors}')
               return image, {'bytes': path.stat().st_size, 'variance': round(variance, 3), 'sample_colors': colors}
 
           primary = {}
           for preset in ('village', 'map', 'world'):
-              image, metrics = inspect(root / f'{preset}-1440x900.png')
+              image, metrics = inspect(root / f'{preset}-1440x810.png')
               primary[preset] = image
               report[preset] = metrics
 
           stages = {}
           for stage in (0, 1, 2):
-              image, metrics = inspect(root / f'village-stage{stage}-1440x900.png')
+              image, metrics = inspect(root / f'village-stage{stage}-1440x810.png')
               stages[stage] = image
               report[f'stage{stage}'] = metrics
 
