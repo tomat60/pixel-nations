@@ -5,31 +5,59 @@
     "Greenvale_flag",
     "Greenvale_blacksmith",
     "Greenvale_barracks",
-    "Greenvale_church"
+    "Greenvale_church",
+    "Greenvale_cottage_west",
+    "Greenvale_cottage_south",
+    "Greenvale_workshop_north"
   ],
+  "derived_nodes": {
+    "Greenvale_cottage_west": {
+      "source": "Greenvale_blacksmith",
+      "scale": 0.68
+    },
+    "Greenvale_cottage_south": {
+      "source": "Greenvale_barracks",
+      "scale": 0.62
+    },
+    "Greenvale_workshop_north": {
+      "source": "Greenvale_blacksmith",
+      "scale": 0.60
+    }
+  },
   "states": {
     "claimed": {
       "visible": ["Greenvale_flag"],
       "meaning": "claimed land with a single territorial marker"
     },
     "founded": {
-      "visible": ["Greenvale_flag", "Greenvale_blacksmith", "Greenvale_barracks"],
+      "visible": ["Greenvale_flag", "Greenvale_blacksmith", "Greenvale_barracks", "Greenvale_cottage_west"],
       "meaning": "first functioning settlement around the road to Gilded Crossing"
     },
     "developed": {
-      "visible": ["Greenvale_flag", "Greenvale_blacksmith", "Greenvale_barracks", "Greenvale_church"],
-      "meaning": "established village with a clear civic hierarchy"
+      "visible": [
+        "Greenvale_flag",
+        "Greenvale_blacksmith",
+        "Greenvale_barracks",
+        "Greenvale_church",
+        "Greenvale_cottage_west",
+        "Greenvale_cottage_south",
+        "Greenvale_workshop_north"
+      ],
+      "meaning": "established village with a clear civic hierarchy and secondary buildings"
     }
   },
   "layout_topology": {
-    "Greenvale_blacksmith": [308, 307],
-    "Greenvale_barracks": [394, 307],
+    "Greenvale_blacksmith": [310, 307],
+    "Greenvale_barracks": [392, 304],
     "Greenvale_church": [344, 236],
-    "Greenvale_flag": [354, 276]
+    "Greenvale_flag": [354, 276],
+    "Greenvale_cottage_west": [292, 265],
+    "Greenvale_cottage_south": [370, 350],
+    "Greenvale_workshop_north": [405, 250]
   },
   "presentation_adjustments": {
-    "NorthRidge_hill_a": 0.72,
-    "NorthRidge_hill_b": 0.72,
-    "Bridge_GildedCrossing": 1.08
+    "NorthRidge_hill_a": 0.38,
+    "NorthRidge_hill_b": 0.38,
+    "Bridge_GildedCrossing": 1.10
   }
 }
