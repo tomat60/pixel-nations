@@ -24,9 +24,21 @@ func _init() -> void:
 	_check(PRODUCTION_SCRIPT.STATE_MANIFEST_PATH == STATE_MANIFEST_PATH, "script_manifest_path")
 
 	var all_nodes: Array = manifest.get("all_nodes", [])
-	_check(all_nodes.size() == 4, "all_nodes_count")
-	for node_name in ["Greenvale_flag", "Greenvale_blacksmith", "Greenvale_barracks", "Greenvale_church"]:
+	_check(all_nodes.size() == 7, "all_nodes_count")
+	for node_name in [
+		"Greenvale_flag", "Greenvale_blacksmith", "Greenvale_barracks", "Greenvale_church",
+		"Greenvale_cottage_west", "Greenvale_cottage_south", "Greenvale_workshop_north"
+	]:
 		_check(all_nodes.has(node_name), "node_%s" % node_name)
+
+	var derived: Dictionary = manifest.get("derived_nodes", {})
+	_check(derived.size() == 3, "derived_nodes_count")
+	for node_name in ["Greenvale_cottage_west", "Greenvale_cottage_south", "Greenvale_workshop_north"]:
+		_check(derived.has(node_name), "derived_%s" % node_name)
+		if derived.has(node_name):
+			var spec: Dictionary = derived[node_name]
+			_check(String(spec.get("source", "")).begins_with("Greenvale_"), "derived_source_%s" % node_name)
+			_check(float(spec.get("scale", 1.0)) < 0.8, "derived_scale_%s" % node_name)
 
 	var states: Dictionary = manifest.get("states", {})
 	for state_name in ["claimed", "founded", "developed"]:
@@ -37,15 +49,15 @@ func _init() -> void:
 		var founded: Array = (states["founded"] as Dictionary).get("visible", [])
 		var developed: Array = (states["developed"] as Dictionary).get("visible", [])
 		_check(claimed == ["Greenvale_flag"], "claimed_single_marker")
-		_check(founded.size() == 3, "founded_structure_count")
-		_check(developed.size() == 4, "developed_structure_count")
+		_check(founded.size() == 4, "founded_structure_count")
+		_check(developed.size() == 7, "developed_structure_count")
 		for node_name in claimed:
 			_check(founded.has(node_name), "claimed_subset_founded_%s" % node_name)
 		for node_name in founded:
 			_check(developed.has(node_name), "founded_subset_developed_%s" % node_name)
 
 	var layout: Dictionary = manifest.get("layout_topology", {})
-	_check(layout.size() == 4, "layout_count")
+	_check(layout.size() == 7, "layout_count")
 	for node_name in all_nodes:
 		_check(layout.has(node_name), "layout_%s" % node_name)
 		if layout.has(node_name):
@@ -55,8 +67,8 @@ func _init() -> void:
 				_check(float(coords[0]) < 455.0, "greenvale_west_of_bridge_%s" % node_name)
 
 	var adjustments: Dictionary = manifest.get("presentation_adjustments", {})
-	_check(float(adjustments.get("NorthRidge_hill_a", 1.0)) < 1.0, "hill_a_reduced")
-	_check(float(adjustments.get("NorthRidge_hill_b", 1.0)) < 1.0, "hill_b_reduced")
+	_check(float(adjustments.get("NorthRidge_hill_a", 1.0)) <= 0.4, "hill_a_strongly_reduced")
+	_check(float(adjustments.get("NorthRidge_hill_b", 1.0)) <= 0.4, "hill_b_strongly_reduced")
 	_check(float(adjustments.get("Bridge_GildedCrossing", 1.0)) > 1.0, "bridge_strengthened")
 
 	var bridge_world: Vector3 = PRODUCTION_SCRIPT.topology_to_godot(Vector2(515.0, 340.0), 0.0)
