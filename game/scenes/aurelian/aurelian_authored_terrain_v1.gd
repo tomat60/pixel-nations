@@ -60,15 +60,15 @@ func _load_basin() -> Node3D:
 func _make_environment() -> Environment:
 	var environment := Environment.new()
 	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color("#465653")
+	environment.background_color = Color("#27332f")
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color("#d2cbb8")
-	environment.ambient_light_energy = 0.62
+	environment.ambient_light_color = Color("#b8b29f")
+	environment.ambient_light_energy = 0.34
 	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	environment.tonemap_exposure = 1.0
+	environment.tonemap_exposure = 0.82
 	environment.fog_enabled = true
-	environment.fog_light_color = Color("#b4b8aa")
-	environment.fog_density = 0.0018
+	environment.fog_light_color = Color("#777f75")
+	environment.fog_density = 0.0012
 	return environment
 
 func _populate_world(parent: Node) -> bool:
@@ -86,16 +86,16 @@ func _populate_world(parent: Node) -> bool:
 	var sun := DirectionalLight3D.new()
 	sun.name = "LateMorningSun"
 	sun.rotation_degrees = Vector3(-52.0, -38.0, 0.0)
-	sun.light_color = Color("#ffe0af")
-	sun.light_energy = 1.02
+	sun.light_color = Color("#f3d4a8")
+	sun.light_energy = 0.62
 	sun.shadow_enabled = true
 	parent.add_child(sun)
 
 	var fill := DirectionalLight3D.new()
 	fill.name = "CoolFill"
 	fill.rotation_degrees = Vector3(-62.0, 138.0, 0.0)
-	fill.light_color = Color("#91a5aa")
-	fill.light_energy = 0.22
+	fill.light_color = Color("#809096")
+	fill.light_energy = 0.10
 	parent.add_child(fill)
 	return true
 
