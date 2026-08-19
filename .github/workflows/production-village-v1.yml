@@ -1,0 +1,286 @@
+name: Production Village V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/scenes/aurelian/production_village_v1.gd"
+      - "game/scenes/aurelian/production_village_v1.tscn"
+      - "game/scenes/aurelian/production_village_v1_state_manifest.json"
+      - "game/tests/production_village_v1_test.gd"
+      - ".github/workflows/production-village-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-village-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  KAYKIT_SHA: "84fa4e91af6a88989be7c99e0891cede11f2ca38"
+  KAYKIT_ARCHIVE_SHA: "cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028"
+  BLENDER_VERSION: "4.3.2"
+  BLENDER_BIN: "/tmp/blender/blender-4.3.2-linux-x64/blender"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EXPORT_DIR: "game/assets/aurelian-basin/export"
+  EVIDENCE_DIR: "evidence/production-village-v1"
+
+jobs:
+  production-village:
+    name: Build and capture Greenvale progression
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+
+      - name: Fetch pinned Blender
+        timeout-minutes: 6
+        run: |
+          set -euo pipefail
+          command -v curl
+          command -v tar
+          command -v unzip
+          command -v xvfb-run
+          command -v mediainfo
+          rm -rf /tmp/blender
+          mkdir -p /tmp/blender
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://download.blender.org/release/Blender4.3/blender-${BLENDER_VERSION}-linux-x64.tar.xz" \
+            -o /tmp/blender/blender.tar.xz
+          tar -xJf /tmp/blender/blender.tar.xz -C /tmp/blender
+          test -x "${BLENDER_BIN}"
+          "${BLENDER_BIN}" --version | head -1 | tee "${EVIDENCE_DIR}/blender-version.txt"
+          python3 -m pip install --disable-pip-version-check --no-cache-dir --user pillow
+
+      - name: Fetch pinned KayKit CC0 source
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/kaykit
+          mkdir -p /tmp/kaykit/src
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip" \
+            -o /tmp/kaykit/source.zip
+          test "$(sha256sum /tmp/kaykit/source.zip | cut -d' ' -f1)" = "${KAYKIT_ARCHIVE_SHA}"
+          unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/src
+          ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
+          test -n "$ROOT"
+          echo "KAYKIT_ROOT=$ROOT" >> "$GITHUB_ENV"
+
+      - name: Rebuild accepted authored Basin GLB
+        timeout-minutes: 14
+        run: |
+          set -euo pipefail
+          rm -rf "${EXPORT_DIR}"
+          mkdir -p "${EXPORT_DIR}"
+          export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 12m env LIBGL_ALWAYS_SOFTWARE=1 \
+            "${BLENDER_BIN}" -b --python game/assets/aurelian-basin/source/aurelian_authored_terrain_v1.py -- \
+            "$KAYKIT_ROOT" "$PWD/${EXPORT_DIR}" \
+            2>&1 | tee "${EVIDENCE_DIR}/blender-author.log"
+          grep -F "AURELIAN_AUTHORED_TERRAIN=PASS" "${EVIDENCE_DIR}/blender-author.log"
+          test -s "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb"
+          cp "${EXPORT_DIR}/transform-manifest.json" "${EVIDENCE_DIR}/transform-manifest.json"
+          cp "${EXPORT_DIR}/source-manifest.json" "${EVIDENCE_DIR}/source-manifest.json"
+          cp game/scenes/aurelian/production_village_v1_state_manifest.json "${EVIDENCE_DIR}/village-state-manifest.json"
+          mv "${EXPORT_DIR}/aurelian_authored_terrain_v1.blend" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1.blend"
+          test ! -e "${EXPORT_DIR}/aurelian_authored_terrain_v1.blend"
+
+      - name: Download pinned Godot 4.7.1
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/godot
+          mkdir -p /tmp/godot
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Import GLB and run contracts
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1 || {
+            cat "${EVIDENCE_DIR}/godot-import.log"; exit 1;
+          }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_authored_terrain_v1_test.gd \
+            > "${EVIDENCE_DIR}/aurelian-foundation-test.log" 2>&1
+          grep -F "AURELIAN_AUTHORED_TERRAIN_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian-foundation-test.log"
+          "${GODOT_BIN}" --headless --path game --script res://tests/production_village_v1_test.gd \
+            > "${EVIDENCE_DIR}/production-village-test.log" 2>&1
+          grep -F "PRODUCTION_VILLAGE_V1_TEST: PASS" "${EVIDENCE_DIR}/production-village-test.log"
+
+      - name: Capture claimed founded developed Village
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          for state in claimed founded developed; do
+            timeout 90s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+              AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}" \
+              AURELIAN_CAPTURE_PRESET=village \
+              AURELIAN_VILLAGE_STATE="$state" \
+              "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+              res://scenes/aurelian/production_village_v1.tscn \
+              > "${EVIDENCE_DIR}/village-${state}.log" 2>&1
+            grep -F "PRODUCTION_VILLAGE_STILL=village:${state}:" "${EVIDENCE_DIR}/village-${state}.log"
+            test -s "${EVIDENCE_DIR}/village-${state}-1440x900.png"
+          done
+
+      - name: Capture bridge Map World regressions
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          for preset in bridge map world; do
+            timeout 90s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+              AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}" \
+              AURELIAN_CAPTURE_PRESET="$preset" \
+              AURELIAN_VILLAGE_STATE=developed \
+              "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+              res://scenes/aurelian/production_village_v1.tscn \
+              > "${EVIDENCE_DIR}/${preset}.log" 2>&1
+            grep -F "PRODUCTION_VILLAGE_STILL=${preset}:developed:" "${EVIDENCE_DIR}/${preset}.log"
+            test -s "${EVIDENCE_DIR}/${preset}-1440x900.png"
+          done
+
+      - name: Capture 18 second Village progression
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          timeout 120s xvfb-run -a -s "-screen 0 1280x720x24" env \
+            AURELIAN_CAPTURE_VILLAGE_SEQUENCE=1 \
+            "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+            --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 30 \
+            --write-movie "$PWD/${EVIDENCE_DIR}/village-progression.avi" \
+            res://scenes/aurelian/production_village_v1.tscn \
+            > "${EVIDENCE_DIR}/village-progression.log" 2>&1
+          grep -F "PRODUCTION_VILLAGE_SEQUENCE_COMPLETE=540" "${EVIDENCE_DIR}/village-progression.log"
+          test -s "${EVIDENCE_DIR}/village-progression.avi"
+          mediainfo --Output=JSON "${EVIDENCE_DIR}/village-progression.avi" > "${EVIDENCE_DIR}/video-metadata.json"
+
+      - name: Validate Production Village evidence
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, re
+          from pathlib import Path
+          from PIL import Image, ImageStat, ImageChops
+
+          root = Path(os.environ['EVIDENCE_DIR'])
+          names = [
+              'village-claimed','village-founded','village-developed',
+              'bridge','map','world'
+          ]
+          images = {}
+          report = {}
+          for name in names:
+              path = root / f'{name}-1440x900.png'
+              image = Image.open(path).convert('RGB')
+              if image.size != (1440,900):
+                  raise SystemExit(f'{name}: wrong size {image.size}')
+              variance = sum(ImageStat.Stat(image).var) / 3.0
+              sample = image.resize((240,150))
+              colors = len(set(sample.getdata()))
+              if path.stat().st_size < 70000 or variance < 60.0 or colors < 250:
+                  raise SystemExit(f'{name}: weak evidence bytes={path.stat().st_size} variance={variance:.2f} colors={colors}')
+              images[name] = sample
+              report[name] = {
+                  'bytes': path.stat().st_size,
+                  'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                  'variance': round(variance,3),
+                  'sample_colors': colors,
+              }
+
+          for a,b in [('village-claimed','village-founded'),('village-founded','village-developed')]:
+              diff = ImageChops.difference(images[a], images[b])
+              if diff.getbbox() is None:
+                  raise SystemExit(f'village states identical: {a}/{b}')
+              changed = sum(1 for pixel in diff.getdata() if pixel != (0,0,0))
+              if changed < 40:
+                  raise SystemExit(f'village state delta too small: {a}/{b} changed={changed}')
+
+          state = json.loads((root/'village-state-manifest.json').read_text())
+          if state.get('contract') != 'PRODUCTION_VILLAGE_V1':
+              raise SystemExit('wrong village state contract')
+          states = state.get('states', {})
+          if list(states.keys()) != ['claimed','founded','developed']:
+              raise SystemExit(f'wrong state order: {list(states.keys())}')
+          counts = [len(states[name].get('visible', [])) for name in ('claimed','founded','developed')]
+          if not counts[0] < counts[1] < counts[2]:
+              raise SystemExit(f'village structure progression invalid: {counts}')
+
+          transform = json.loads((root/'transform-manifest.json').read_text())
+          if transform.get('rectangular_outer_water_plane') is not False:
+              raise SystemExit('rectangular water regression')
+          if transform.get('bridge',{}).get('endpoints') != [[455,340],[575,340]]:
+              raise SystemExit('bridge topology drift')
+          if int(transform.get('terrain_face_cells',0)) < 6200:
+              raise SystemExit('terrain coverage regression')
+
+          def number(value):
+              match = re.search(r'-?\d+(?:\.\d+)?', str(value or ''))
+              if not match:
+                  raise SystemExit(f'video metadata number missing: {value!r}')
+              return float(match.group(0))
+
+          video = json.loads((root/'video-metadata.json').read_text())
+          tracks = video.get('media', {}).get('track', [])
+          general = next((track for track in tracks if track.get('@type') == 'General'), {})
+          stream = next((track for track in tracks if track.get('@type') == 'Video'), {})
+          duration = number(general.get('Duration') or stream.get('Duration'))
+          if duration > 1000.0:
+              duration /= 1000.0
+          if not 17.5 <= duration <= 18.5:
+              raise SystemExit(f'video duration wrong: {duration}')
+
+          qa = {
+              'status': 'PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_VISUAL_REVIEW',
+              'exact_head': (root/'exact-head.txt').read_text().strip(),
+              'stills': report,
+              'village_state_counts': counts,
+              'video_seconds': duration,
+          }
+          (root/'evidence-qa.json').write_text(json.dumps(qa, indent=2)+'\n')
+
+          canvas = Image.new('RGB',(1080,450),(32,32,32))
+          for i,name in enumerate(names):
+              thumb = Image.open(root/f'{name}-1440x900.png').convert('RGB').resize((360,225))
+              canvas.paste(thumb,((i%3)*360,(i//3)*225))
+          canvas.save(root/'review-contact-sheet.jpg',quality=92)
+          print('PRODUCTION_VILLAGE_V1_EVIDENCE_QA=PASS')
+          PY
+
+      - name: Upload Production Village artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-village-v1-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/production-village-v1
+          if-no-files-found: error
+          retention-days: 7
