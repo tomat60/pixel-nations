@@ -74,8 +74,10 @@ def point_in_polygon(point, polygon):
     for i in range(len(polygon)):
         xi, yi = polygon[i]
         xj, yj = polygon[j]
-        if ((yi > y) != (yj > y)) and x < (xj - xi) * (y - yi) / max(1e-9, yj - yi) + xi:
-            inside = not inside
+        if (yi > y) != (yj > y):
+            crossing_x = (xj - xi) * (y - yi) / (yj - yi) + xi
+            if x < crossing_x:
+                inside = not inside
         j = i
     return inside
 
@@ -141,29 +143,29 @@ def make_material(name, color, roughness=0.94):
 
 def make_materials():
     return {
-        "meadow": make_material("Aurelian_Meadow", (0.31, 0.38, 0.20, 1.0)),
-        "forest": make_material("Aurelian_ForestGround", (0.16, 0.25, 0.15, 1.0)),
-        "ridge": make_material("Aurelian_Ridge", (0.34, 0.34, 0.31, 1.0)),
-        "fields": make_material("Aurelian_Fields", (0.49, 0.40, 0.20, 1.0)),
-        "marsh": make_material("Aurelian_Marsh", (0.22, 0.31, 0.24, 1.0)),
-        "bank": make_material("Aurelian_Bank", (0.36, 0.29, 0.20, 1.0)),
-        "road": make_material("Aurelian_Road", (0.39, 0.28, 0.17, 1.0)),
-        "water": make_material("Aurelian_Water", (0.055, 0.24, 0.28, 1.0), 0.36),
-        "crop": make_material("Aurelian_Crops", (0.58, 0.47, 0.19, 1.0)),
+        "meadow": make_material("Aurelian_Meadow", (0.20, 0.27, 0.12, 1.0)),
+        "forest": make_material("Aurelian_ForestGround", (0.10, 0.17, 0.08, 1.0)),
+        "ridge": make_material("Aurelian_Ridge", (0.24, 0.23, 0.20, 1.0)),
+        "fields": make_material("Aurelian_Fields", (0.36, 0.28, 0.12, 1.0)),
+        "marsh": make_material("Aurelian_Marsh", (0.13, 0.20, 0.15, 1.0)),
+        "bank": make_material("Aurelian_Bank", (0.28, 0.21, 0.14, 1.0)),
+        "road": make_material("Aurelian_Road", (0.28, 0.19, 0.11, 1.0)),
+        "water": make_material("Aurelian_Water", (0.045, 0.15, 0.18, 1.0), 0.42),
+        "crop": make_material("Aurelian_Crops", (0.42, 0.34, 0.14, 1.0)),
     }
 
 
 def material_key(point):
     river_distance = distance_to_polyline(point, RIVER_POINTS)
-    if river_distance < 58.0:
+    if river_distance < 52.0:
         return "bank"
-    if math.hypot(point[0] - LANDMARKS["NorthRidge"][0], point[1] - LANDMARKS["NorthRidge"][1]) < 190:
+    if math.hypot(point[0] - LANDMARKS["NorthRidge"][0], point[1] - LANDMARKS["NorthRidge"][1]) < 145:
         return "ridge"
-    if math.hypot(point[0] - LANDMARKS["ForestWorkEdge"][0], point[1] - LANDMARKS["ForestWorkEdge"][1]) < 205:
+    if math.hypot(point[0] - LANDMARKS["ForestWorkEdge"][0], point[1] - LANDMARKS["ForestWorkEdge"][1]) < 175:
         return "forest"
-    if math.hypot(point[0] - LANDMARKS["FieldsPlains"][0], point[1] - LANDMARKS["FieldsPlains"][1]) < 205:
+    if math.hypot(point[0] - LANDMARKS["FieldsPlains"][0], point[1] - LANDMARKS["FieldsPlains"][1]) < 175:
         return "fields"
-    if point[1] > 625 and (math.hypot(point[0] - LANDMARKS["SouthMarsh"][0], point[1] - LANDMARKS["SouthMarsh"][1]) < 235 or river_distance < 125):
+    if point[1] > 625 and (math.hypot(point[0] - LANDMARKS["SouthMarsh"][0], point[1] - LANDMARKS["SouthMarsh"][1]) < 220 or river_distance < 115):
         return "marsh"
     return "meadow"
 
@@ -191,11 +193,15 @@ def create_authored_terrain(materials):
             faces.append(tuple(grid[key] for key in keys))
             face_centers.append((x + step * 0.5, y + step * 0.5))
 
+    if len(faces) < 6200:
+        raise RuntimeError(f"Aurelian Basin terrain coverage unexpectedly sparse: {len(faces)} cells")
+
     mesh = bpy.data.meshes.new("AurelianAuthoredTerrainMesh")
     mesh.from_pydata(verts, [], faces)
     mesh.update()
     obj = bpy.data.objects.new("AurelianAuthoredTerrain", mesh)
     bpy.context.collection.objects.link(obj)
+    obj["terrain_face_cells"] = len(faces)
 
     order = ["meadow", "forest", "ridge", "fields", "marsh", "bank"]
     for key in order:
@@ -261,8 +267,8 @@ def create_roads(materials):
         road = create_strip(
             name,
             points,
-            lambda _p, _i, _n: 16.0 if name in ("GreenvaleCrossing", "EastTradeRoute") else 13.0,
-            lambda center, _edge, _i, _n: terrain_height((center.x, center.y)) + 0.085,
+            lambda _p, _i, _n: 12.0 if name in ("GreenvaleCrossing", "EastTradeRoute") else 10.0,
+            lambda center, _edge, _i, _n: terrain_height((center.x, center.y)) + 0.065,
             materials["road"],
         )
         road.parent = root
@@ -311,10 +317,10 @@ def create_greenvale():
     root = bpy.data.objects.new("GreenvaleOrigin", None)
     bpy.context.collection.objects.link(root)
     placements = [
-        ("blacksmith", (340, 292), 1.15, -15),
-        ("barracks", (370, 298), 1.20, 12),
-        ("church", (355, 262), 1.45, 2),
-        ("flag", (356, 308), 0.72, 0),
+        ("blacksmith", (315, 300), 0.88, -12),
+        ("barracks", (382, 305), 0.92, 10),
+        ("church", (350, 245), 1.02, 2),
+        ("flag", (365, 278), 0.50, 0),
     ]
     for key, point, span, rotation in placements:
         import_asset(key, point, span, rotation, f"Greenvale_{key}").parent = root
@@ -322,9 +328,10 @@ def create_greenvale():
 
 
 def create_bridge():
-    root = import_asset("bridge", LANDMARKS["Bridge_GildedCrossing"], 2.55, 90.0, "Bridge_GildedCrossing")
+    root = import_asset("bridge", LANDMARKS["Bridge_GildedCrossing"], 2.25, 90.0, "Bridge_GildedCrossing")
+    root.scale.x *= 0.42
     p = topo_to_world(LANDMARKS["Bridge_GildedCrossing"], terrain_height(LANDMARKS["Bridge_GildedCrossing"]))
-    root.location.z = p.z + 0.18
+    root.location.z = p.z + 0.14
     return root
 
 
@@ -339,8 +346,8 @@ def create_landmarks():
     ridge = bpy.data.objects.new("NorthRidge", None)
     bpy.context.collection.objects.link(ridge)
     for key, point, span, rotation in [
-        ("hill_a", (675, 215), 2.9, -12), ("hill_b", (720, 195), 2.6, 16),
-        ("rock_a", (690, 230), 1.05, 31), ("rock_c", (745, 225), 0.98, -28),
+        ("hill_a", (675, 215), 2.5, -12), ("hill_b", (720, 195), 2.3, 16),
+        ("rock_a", (690, 230), 0.92, 31), ("rock_c", (745, 225), 0.86, -28),
     ]:
         import_asset(key, point, span, rotation, f"NorthRidge_{key}").parent = ridge
 
@@ -354,8 +361,8 @@ def create_field_rows(materials):
         points = [(center[0] - 72, y), (center[0] + 82, y + 8)]
         row = create_strip(
             f"FieldRow_{i:02d}", points,
-            lambda _p, _i, _n: 6.0,
-            lambda c, _e, _i, _n: terrain_height((c.x, c.y)) + 0.07,
+            lambda _p, _i, _n: 4.0,
+            lambda c, _e, _i, _n: terrain_height((c.x, c.y)) + 0.06,
             materials["crop"],
         )
         row.parent = root
@@ -372,6 +379,8 @@ def add_semantic_anchors():
 
 
 def write_manifests(glb_path, blend_path):
+    terrain = bpy.data.objects.get("AurelianAuthoredTerrain")
+    terrain_face_cells = int(terrain.get("terrain_face_cells", 0)) if terrain else 0
     manifest = {
         "contract": "AURELIAN_AUTHORED_TERRAIN_V1",
         "topology_plane": [1000, 900],
@@ -386,6 +395,7 @@ def write_manifests(glb_path, blend_path):
         "visual_technique": "authored irregular Blender terrain mesh + imported KayKit props",
         "rectangular_outer_water_plane": False,
         "runtime_generated_terrain": False,
+        "terrain_face_cells": terrain_face_cells,
     }
     manifest["blend_sha256"] = hashlib.sha256(blend_path.read_bytes()).hexdigest()
     manifest["glb_sha256"] = hashlib.sha256(glb_path.read_bytes()).hexdigest()
