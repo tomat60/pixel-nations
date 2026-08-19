@@ -1,0 +1,83 @@
+extends SceneTree
+
+const STATE_MANIFEST_PATH := "res://scenes/aurelian/production_village_v1_state_manifest.json"
+const PRODUCTION_SCRIPT := preload("res://scenes/aurelian/production_village_v1.gd")
+
+var failures: Array[String] = []
+
+func _init() -> void:
+	var file := FileAccess.open(STATE_MANIFEST_PATH, FileAccess.READ)
+	if file == null:
+		_fail("state_manifest_open")
+		_finish()
+		return
+	var payload = JSON.parse_string(file.get_as_text())
+	if not payload is Dictionary:
+		_fail("state_manifest_parse")
+		_finish()
+		return
+	var manifest := payload as Dictionary
+
+	_check(String(manifest.get("contract", "")) == "PRODUCTION_VILLAGE_V1", "contract")
+	_check(String(manifest.get("default_state", "")) == "developed", "default_state")
+	_check(PRODUCTION_SCRIPT.VILLAGE_STATES == ["claimed", "founded", "developed"], "script_state_order")
+	_check(PRODUCTION_SCRIPT.STATE_MANIFEST_PATH == STATE_MANIFEST_PATH, "script_manifest_path")
+
+	var all_nodes: Array = manifest.get("all_nodes", [])
+	_check(all_nodes.size() == 4, "all_nodes_count")
+	for node_name in ["Greenvale_flag", "Greenvale_blacksmith", "Greenvale_barracks", "Greenvale_church"]:
+		_check(all_nodes.has(node_name), "node_%s" % node_name)
+
+	var states: Dictionary = manifest.get("states", {})
+	for state_name in ["claimed", "founded", "developed"]:
+		_check(states.has(state_name), "state_%s_present" % state_name)
+
+	if states.has("claimed") and states.has("founded") and states.has("developed"):
+		var claimed: Array = (states["claimed"] as Dictionary).get("visible", [])
+		var founded: Array = (states["founded"] as Dictionary).get("visible", [])
+		var developed: Array = (states["developed"] as Dictionary).get("visible", [])
+		_check(claimed == ["Greenvale_flag"], "claimed_single_marker")
+		_check(founded.size() == 3, "founded_structure_count")
+		_check(developed.size() == 4, "developed_structure_count")
+		for node_name in claimed:
+			_check(founded.has(node_name), "claimed_subset_founded_%s" % node_name)
+		for node_name in founded:
+			_check(developed.has(node_name), "founded_subset_developed_%s" % node_name)
+
+	var layout: Dictionary = manifest.get("layout_topology", {})
+	_check(layout.size() == 4, "layout_count")
+	for node_name in all_nodes:
+		_check(layout.has(node_name), "layout_%s" % node_name)
+		if layout.has(node_name):
+			var coords: Array = layout[node_name]
+			_check(coords.size() == 2, "layout_coords_%s" % node_name)
+			if coords.size() == 2:
+				_check(float(coords[0]) < 455.0, "greenvale_west_of_bridge_%s" % node_name)
+
+	var adjustments: Dictionary = manifest.get("presentation_adjustments", {})
+	_check(float(adjustments.get("NorthRidge_hill_a", 1.0)) < 1.0, "hill_a_reduced")
+	_check(float(adjustments.get("NorthRidge_hill_b", 1.0)) < 1.0, "hill_b_reduced")
+	_check(float(adjustments.get("Bridge_GildedCrossing", 1.0)) > 1.0, "bridge_strengthened")
+
+	var bridge_world: Vector3 = PRODUCTION_SCRIPT.topology_to_godot(Vector2(515.0, 340.0), 0.0)
+	var greenvale_world: Vector3 = PRODUCTION_SCRIPT.topology_to_godot(Vector2(354.0, 285.0), 0.0)
+	_check(greenvale_world.x < bridge_world.x, "greenvale_west_of_bridge_world")
+	_check(greenvale_world.z > bridge_world.z, "greenvale_northwest_relation")
+	_finish()
+
+func _check(condition: bool, label: String) -> void:
+	if not condition:
+		_fail(label)
+
+func _fail(label: String) -> void:
+	failures.append(label)
+
+func _finish() -> void:
+	if failures.is_empty():
+		print("PRODUCTION_VILLAGE_V1_TEST: PASS")
+		quit(0)
+		return
+	for failure in failures:
+		push_error("PRODUCTION_VILLAGE_V1_TEST_FAILURE: %s" % failure)
+	print("PRODUCTION_VILLAGE_V1_TEST: FAIL (%d)" % failures.size())
+	quit(1)
