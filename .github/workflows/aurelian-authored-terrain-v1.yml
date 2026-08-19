@@ -21,6 +21,8 @@ concurrency:
 env:
   KAYKIT_SHA: "84fa4e91af6a88989be7c99e0891cede11f2ca38"
   KAYKIT_ARCHIVE_SHA: "cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028"
+  BLENDER_VERSION: "4.3.3"
+  BLENDER_BIN: "/tmp/blender/blender-4.3.3-linux-x64/blender"
   GODOT_RELEASE: "4.7.1-stable"
   GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
   EXPORT_DIR: "game/assets/aurelian-basin/export"
@@ -30,7 +32,7 @@ jobs:
   authored-terrain-proof:
     name: Author Blender terrain, import in Godot, capture shared views
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 55
 
     steps:
       - name: Checkout exact candidate head
@@ -48,23 +50,39 @@ jobs:
             test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
           fi
 
-      - name: Install deterministic authoring and render tooling
+      - name: Fetch pinned Blender and verify preinstalled render tooling
+        timeout-minutes: 6
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends \
-            blender unzip xvfb ffmpeg python3-pil \
-            libegl1 libgl1-mesa-dri libglx-mesa0 libx11-6 libxcursor1 \
-            libxinerama1 libxi6 libxrandr2 >/dev/null
-          blender --version | head -1 | tee "${EVIDENCE_DIR}/blender-version.txt"
+          command -v curl
+          command -v tar
+          command -v ffmpeg
+          command -v ffprobe
+          command -v xvfb-run
+          command -v python3
+          rm -rf /tmp/blender
+          mkdir -p /tmp/blender
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://download.blender.org/release/Blender4.3/blender-${BLENDER_VERSION}-linux-x64.tar.xz" \
+            -o /tmp/blender/blender.tar.xz
+          sha256sum /tmp/blender/blender.tar.xz | tee "${EVIDENCE_DIR}/blender-archive.sha256"
+          tar -xJf /tmp/blender/blender.tar.xz -C /tmp/blender
+          test -x "${BLENDER_BIN}"
+          "${BLENDER_BIN}" --version | head -1 | tee "${EVIDENCE_DIR}/blender-version.txt"
           ffmpeg -version | head -1 | tee "${EVIDENCE_DIR}/ffmpeg-version.txt"
+          python3 -m pip install --disable-pip-version-check --no-cache-dir --user pillow
+          python3 - <<'PY'
+          from PIL import Image
+          print('PIL_READY=PASS')
+          PY
 
       - name: Fetch exact KayKit CC0 source
+        timeout-minutes: 5
         run: |
           set -euo pipefail
           rm -rf /tmp/kaykit
           mkdir -p /tmp/kaykit/src
-          curl -fsSL --retry 3 \
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
             "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip" \
             -o /tmp/kaykit/source.zip
           test "$(sha256sum /tmp/kaykit/source.zip | cut -d' ' -f1)" = "${KAYKIT_ARCHIVE_SHA}"
@@ -72,12 +90,13 @@ jobs:
           ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
           test -n "$ROOT"
           echo "KAYKIT_ROOT=$ROOT" >> "$GITHUB_ENV"
-          curl -fsSL --retry 3 \
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
             "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/${KAYKIT_SHA}/LICENSE.txt" \
             -o "${EVIDENCE_DIR}/KAYKIT_CC0_LICENSE.txt"
           grep -F "Creative Commons Zero" "${EVIDENCE_DIR}/KAYKIT_CC0_LICENSE.txt"
 
       - name: Author irregular Basin and export one GLB
+        timeout-minutes: 14
         run: |
           set -euo pipefail
           rm -rf "${EXPORT_DIR}"
@@ -85,8 +104,8 @@ jobs:
           export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
           mkdir -p "$XDG_RUNTIME_DIR"
           chmod 700 "$XDG_RUNTIME_DIR"
-          timeout 14m env LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1600x1200x24" \
-            blender -b --python game/assets/aurelian-basin/source/aurelian_authored_terrain_v1.py -- \
+          timeout 12m env LIBGL_ALWAYS_SOFTWARE=1 \
+            "${BLENDER_BIN}" -b --python game/assets/aurelian-basin/source/aurelian_authored_terrain_v1.py -- \
             "$KAYKIT_ROOT" "$PWD/${EXPORT_DIR}" \
             2>&1 | tee "${EVIDENCE_DIR}/blender-author.log"
           grep -F "AURELIAN_AUTHORED_TERRAIN=PASS" "${EVIDENCE_DIR}/blender-author.log"
@@ -99,10 +118,11 @@ jobs:
           stat -c '%s' "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb" > "${EVIDENCE_DIR}/glb-bytes.txt"
 
       - name: Download pinned Godot 4.7.1
+        timeout-minutes: 5
         run: |
           set -euo pipefail
           mkdir -p /tmp/godot
-          curl -fsSL --retry 3 \
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
             -o /tmp/godot/godot.zip
           unzip -q /tmp/godot/godot.zip -d /tmp/godot
@@ -110,6 +130,7 @@ jobs:
           "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
 
       - name: Import GLB and run Godot contracts
+        timeout-minutes: 6
         run: |
           set -euo pipefail
           "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1 || {
@@ -127,6 +148,7 @@ jobs:
           grep -F "AURELIAN_AUTHORED_TERRAIN_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian-authored-test.log"
 
       - name: Capture Village Map World and bridge evidence
+        timeout-minutes: 8
         run: |
           set -euo pipefail
           for preset in village map world bridge; do
@@ -145,6 +167,7 @@ jobs:
           done
 
       - name: Capture 18 second Village to Map to World sequence
+        timeout-minutes: 5
         run: |
           set -euo pipefail
           timeout 120s xvfb-run -a -s "-screen 0 1280x720x24" env \
@@ -163,6 +186,7 @@ jobs:
             > "${EVIDENCE_DIR}/video-metadata.json"
 
       - name: Validate evidence package
+        timeout-minutes: 3
         run: |
           set -euo pipefail
           python3 - <<'PY'
