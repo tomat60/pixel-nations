@@ -3,6 +3,7 @@ extends Node3D
 const GLB_PATH := "res://assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb"
 const TOPOLOGY_SCALE := 0.018
 const TOPOLOGY_CENTER := Vector2(500.0, 450.0)
+const TOPOLOGY_Z_SIGN := -1.0
 const STILL_SIZE := Vector2i(1440, 900)
 const CAMERA_CONTRACT := {
 	"village": {"center": Vector2(425, 315), "size": 8.4},
@@ -20,7 +21,7 @@ static func topology_to_godot(point: Vector2, height: float = 0.0) -> Vector3:
 	return Vector3(
 		(point.x - TOPOLOGY_CENTER.x) * TOPOLOGY_SCALE,
 		height,
-		(point.y - TOPOLOGY_CENTER.y) * TOPOLOGY_SCALE
+		(point.y - TOPOLOGY_CENTER.y) * TOPOLOGY_SCALE * TOPOLOGY_Z_SIGN
 	)
 
 func _ready() -> void:
