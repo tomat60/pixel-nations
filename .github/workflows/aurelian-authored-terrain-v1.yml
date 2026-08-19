@@ -56,10 +56,10 @@ jobs:
           set -euo pipefail
           command -v curl
           command -v tar
-          command -v ffmpeg
-          command -v ffprobe
+          command -v mediainfo
           command -v xvfb-run
           command -v python3
+          command -v unzip
           rm -rf /tmp/blender
           mkdir -p /tmp/blender
           curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
@@ -69,7 +69,7 @@ jobs:
           tar -xJf /tmp/blender/blender.tar.xz -C /tmp/blender
           test -x "${BLENDER_BIN}"
           "${BLENDER_BIN}" --version | head -1 | tee "${EVIDENCE_DIR}/blender-version.txt"
-          ffmpeg -version | head -1 | tee "${EVIDENCE_DIR}/ffmpeg-version.txt"
+          mediainfo --Version | head -1 | tee "${EVIDENCE_DIR}/mediainfo-version.txt"
           python3 -m pip install --disable-pip-version-check --no-cache-dir --user pillow
           python3 - <<'PY'
           from PIL import Image
@@ -179,18 +179,14 @@ jobs:
             > "${EVIDENCE_DIR}/camera-switch.log" 2>&1
           grep -F "AURELIAN_AUTHORED_SEQUENCE_COMPLETE=540" "${EVIDENCE_DIR}/camera-switch.log"
           test -s "${EVIDENCE_DIR}/camera-switch.avi"
-          ffmpeg -y -loglevel error -i "${EVIDENCE_DIR}/camera-switch.avi" \
-            -c:v libx264 -pix_fmt yuv420p "${EVIDENCE_DIR}/camera-switch.mp4"
-          ffprobe -v error -show_entries stream=width,height,r_frame_rate,codec_name \
-            -show_entries format=duration -of json "${EVIDENCE_DIR}/camera-switch.mp4" \
-            > "${EVIDENCE_DIR}/video-metadata.json"
+          mediainfo --Output=JSON "${EVIDENCE_DIR}/camera-switch.avi" > "${EVIDENCE_DIR}/video-metadata.json"
 
       - name: Validate evidence package
         timeout-minutes: 3
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import hashlib, json, os
+          import hashlib, json, os, re
           from pathlib import Path
           from PIL import Image, ImageStat, ImageChops
 
@@ -236,13 +232,25 @@ jobs:
           if len(manifest.get('outflow_extension',[])) < 2:
               raise SystemExit('outflow extension missing')
 
+          def number(value):
+              match = re.search(r'-?\d+(?:\.\d+)?', str(value or ''))
+              if not match:
+                  raise SystemExit(f'video metadata number missing: {value!r}')
+              return float(match.group(0))
+
           video = json.loads((root/'video-metadata.json').read_text())
-          duration = float(video['format']['duration'])
-          stream = video['streams'][0]
+          tracks = video.get('media', {}).get('track', [])
+          general = next((track for track in tracks if track.get('@type') == 'General'), {})
+          stream = next((track for track in tracks if track.get('@type') == 'Video'), {})
+          duration = number(general.get('Duration') or stream.get('Duration'))
+          if duration > 1000.0:
+              duration /= 1000.0
+          width = int(number(stream.get('Width')))
+          height = int(number(stream.get('Height')))
           if not 17.5 <= duration <= 18.5:
               raise SystemExit(f'video duration wrong: {duration}')
-          if int(stream['width']) != 1280 or int(stream['height']) != 720:
-              raise SystemExit(f'video dimensions wrong: {stream}')
+          if width != 1280 or height != 720:
+              raise SystemExit(f'video dimensions wrong: {width}x{height}')
 
           qa = {
               'status': 'PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_VISUAL_REVIEW',
