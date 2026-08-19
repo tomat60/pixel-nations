@@ -8,7 +8,7 @@ const TOPOLOGY_Z_SIGN := -1.0
 const STILL_SIZE := Vector2i(1440, 900)
 const VILLAGE_STATES := ["claimed", "founded", "developed"]
 const CAMERA_CONTRACT := {
-	"village": {"center": Vector2(420, 305), "size": 7.8},
+	"village": {"center": Vector2(390, 320), "size": 7.2},
 	"map": {"center": Vector2(500, 435), "size": 16.2},
 	"world": {"center": Vector2(500, 500), "size": 22.0},
 	"bridge": {"center": Vector2(515, 340), "size": 4.8},
@@ -115,6 +115,27 @@ func _named_node(root: Node, node_name: String) -> Node3D:
 		return null
 	return node as Node3D
 
+func _ensure_derived_nodes(basin: Node3D) -> bool:
+	var derived_nodes: Dictionary = state_contract.get("derived_nodes", {})
+	for derived_name_variant in derived_nodes.keys():
+		var derived_name := String(derived_name_variant)
+		if basin.find_child(derived_name, true, false) != null:
+			continue
+		var spec: Dictionary = derived_nodes[derived_name_variant]
+		var source_name := String(spec.get("source", ""))
+		var source := _named_node(basin, source_name)
+		if source == null:
+			return false
+		var clone := source.duplicate() as Node3D
+		if clone == null:
+			push_error("PRODUCTION_VILLAGE_DERIVED_DUPLICATE_FAILED: %s" % derived_name)
+			return false
+		clone.name = derived_name
+		var multiplier := float(spec.get("scale", 1.0))
+		clone.scale = source.scale * Vector3(multiplier, multiplier, multiplier)
+		source.get_parent().add_child(clone)
+	return true
+
 func _apply_presentation_adjustments(basin: Node3D) -> bool:
 	var adjustments: Dictionary = state_contract.get("presentation_adjustments", {})
 	for node_name_variant in adjustments.keys():
@@ -160,11 +181,14 @@ func _populate_world(parent: Node) -> Node3D:
 		get_tree().quit(44)
 		return null
 	parent.add_child(basin)
-	if not _apply_presentation_adjustments(basin):
+	if not _ensure_derived_nodes(basin):
 		get_tree().quit(45)
 		return null
-	if not _apply_village_state(basin, village_state):
+	if not _apply_presentation_adjustments(basin):
 		get_tree().quit(46)
+		return null
+	if not _apply_village_state(basin, village_state):
+		get_tree().quit(47)
 		return null
 
 	var world_environment := WorldEnvironment.new()
@@ -213,7 +237,7 @@ func _build_main_world() -> bool:
 func _activate_camera(preset: String) -> void:
 	if not cameras.has(preset):
 		push_error("PRODUCTION_VILLAGE_CAMERA_MISSING: %s" % preset)
-		get_tree().quit(47)
+		get_tree().quit(48)
 		return
 	for key in cameras.keys():
 		(cameras[key] as Camera3D).current = false
@@ -224,7 +248,7 @@ func _activate_camera(preset: String) -> void:
 func _capture_still(preset: String) -> void:
 	if evidence_dir.is_empty():
 		push_error("PRODUCTION_VILLAGE_MISSING_EVIDENCE_DIR")
-		get_tree().quit(48)
+		get_tree().quit(49)
 		return
 	DirAccess.make_dir_recursive_absolute(evidence_dir)
 
@@ -252,11 +276,11 @@ func _capture_still(preset: String) -> void:
 	var image := viewport.get_texture().get_image()
 	if image == null or image.is_empty():
 		push_error("PRODUCTION_VILLAGE_EMPTY_CAPTURE: %s" % preset)
-		get_tree().quit(49)
+		get_tree().quit(50)
 		return
 	if image.get_size() != STILL_SIZE:
 		push_error("PRODUCTION_VILLAGE_WRONG_CAPTURE_SIZE: %s %s" % [preset, image.get_size()])
-		get_tree().quit(50)
+		get_tree().quit(51)
 		return
 	var basename := preset
 	if preset == "village":
@@ -265,7 +289,7 @@ func _capture_still(preset: String) -> void:
 	var result := image.save_png(output_path)
 	if result != OK:
 		push_error("PRODUCTION_VILLAGE_CAPTURE_SAVE_FAILED: %s" % output_path)
-		get_tree().quit(51)
+		get_tree().quit(52)
 		return
 	print("PRODUCTION_VILLAGE_STILL=%s:%s:%s" % [preset, village_state, output_path])
 	get_tree().quit(0)
@@ -276,10 +300,10 @@ func _process(_delta: float) -> void:
 	progression_frame += 1
 	if progression_frame == 180:
 		if not _apply_village_state(main_basin, "founded"):
-			get_tree().quit(52)
+			get_tree().quit(53)
 	elif progression_frame == 360:
 		if not _apply_village_state(main_basin, "developed"):
-			get_tree().quit(53)
+			get_tree().quit(54)
 	elif progression_frame >= 540:
 		print("PRODUCTION_VILLAGE_SEQUENCE_COMPLETE=540")
 		get_tree().quit(0)
