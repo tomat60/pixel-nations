@@ -1,6 +1,7 @@
 extends SceneTree
 
 const MANIFEST_PATH := "res://assets/aurelian-basin/export/transform-manifest.json"
+const REFERENCE_SCRIPT := preload("res://scenes/aurelian/aurelian_authored_terrain_v1.gd")
 const EXPECTED_LANDMARKS := {
 	"GreenvaleOrigin": [354.0, 285.0],
 	"Bridge_GildedCrossing": [515.0, 340.0],
@@ -35,6 +36,7 @@ func _init() -> void:
 	_check(bool(manifest.get("rectangular_outer_water_plane", true)) == false, "no_rectangular_outer_water")
 	_check(bool(manifest.get("runtime_generated_terrain", true)) == false, "authored_not_runtime_terrain")
 	_check(String(manifest.get("kaykit_source_commit", "")) == "84fa4e91af6a88989be7c99e0891cede11f2ca38", "kaykit_pin")
+	_check(int(manifest.get("terrain_face_cells", 0)) >= 6200, "terrain_coverage")
 
 	var landmarks: Dictionary = manifest.get("landmarks", {})
 	for landmark_name in EXPECTED_LANDMARKS.keys():
@@ -71,6 +73,14 @@ func _init() -> void:
 
 	var outline: Array = manifest.get("basin_outline", [])
 	_check(outline.size() >= 12, "irregular_basin_outline")
+
+	var bridge_world: Vector3 = REFERENCE_SCRIPT.topology_to_godot(Vector2(515.0, 340.0), 0.0)
+	_check(abs(bridge_world.x - 0.27) < 0.001, "coordinate_bridge_x")
+	_check(abs(bridge_world.z - 1.98) < 0.001, "coordinate_bridge_z")
+	var north_world: Vector3 = REFERENCE_SCRIPT.topology_to_godot(Vector2(445.0, 65.0), 0.0)
+	var coast_world: Vector3 = REFERENCE_SCRIPT.topology_to_godot(Vector2(610.0, 875.0), 0.0)
+	_check(north_world.z > bridge_world.z, "coordinate_north_is_positive_z")
+	_check(coast_world.z < bridge_world.z, "coordinate_coast_is_negative_z")
 	_finish()
 
 func _array_close(actual, expected: Array, epsilon: float = 0.001) -> bool:
