@@ -21,8 +21,8 @@ concurrency:
 env:
   KAYKIT_SHA: "84fa4e91af6a88989be7c99e0891cede11f2ca38"
   KAYKIT_ARCHIVE_SHA: "cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028"
-  BLENDER_VERSION: "4.3.3"
-  BLENDER_BIN: "/tmp/blender/blender-4.3.3-linux-x64/blender"
+  BLENDER_VERSION: "4.3.2"
+  BLENDER_BIN: "/tmp/blender/blender-4.3.2-linux-x64/blender"
   GODOT_RELEASE: "4.7.1-stable"
   GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
   EXPORT_DIR: "game/assets/aurelian-basin/export"
