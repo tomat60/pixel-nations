@@ -55,6 +55,25 @@ func _material(color_value: String, emission_strength: float = 0.0) -> StandardM
 		material.emission_energy_multiplier = emission_strength
 	return material
 
+func _marker_mesh(shape: String, radius: float, height: float) -> PrimitiveMesh:
+	if shape == "claimable_ring" or shape == "selected_ring":
+		var torus := TorusMesh.new()
+		torus.inner_radius = radius * 0.58
+		torus.outer_radius = radius
+		torus.rings = 32
+		torus.ring_segments = 12
+		return torus
+	if shape == "scouted_diamond":
+		var diamond := BoxMesh.new()
+		diamond.size = Vector3(radius * 1.35, height, radius * 1.35)
+		return diamond
+	var claimed := CylinderMesh.new()
+	claimed.top_radius = radius
+	claimed.bottom_radius = radius
+	claimed.height = height
+	claimed.radial_segments = 6
+	return claimed
+
 func _build_map_overlays() -> Node3D:
 	var root := Node3D.new()
 	root.name = "ProductionMapOverlays"
@@ -65,19 +84,33 @@ func _build_map_overlays() -> Node3D:
 		if coords.size() != 2:
 			push_error("PRODUCTION_MAP_OVERLAY_TOPOLOGY_INVALID")
 			continue
-		var marker := MeshInstance3D.new()
+		var marker := Node3D.new()
 		marker.name = String(overlay.get("id", "UnknownOverlay"))
-		var mesh := CylinderMesh.new()
+		var shape := String(overlay.get("shape", "claimed_hex"))
 		var radius := float(overlay.get("radius", 0.20))
-		mesh.top_radius = radius
-		mesh.bottom_radius = radius
-		mesh.height = float(overlay.get("height", 0.055))
-		mesh.radial_segments = 32
-		marker.mesh = mesh
-		marker.material_override = _material(
+		var height := float(overlay.get("height", 0.055))
+		var glyph := MeshInstance3D.new()
+		glyph.name = "SemanticGlyph"
+		glyph.mesh = _marker_mesh(shape, radius, height)
+		glyph.material_override = _material(
 			String(overlay.get("color", "#ffffffaa")),
 			float(overlay.get("emission", 0.0))
 		)
+		if shape == "scouted_diamond":
+			glyph.rotation.y = PI / 4.0
+		marker.add_child(glyph)
+		if shape == "selected_ring":
+			var pin := MeshInstance3D.new()
+			pin.name = "SelectionPin"
+			var pin_mesh := CylinderMesh.new()
+			pin_mesh.top_radius = radius * 0.18
+			pin_mesh.bottom_radius = radius * 0.32
+			pin_mesh.height = height * 3.0
+			pin_mesh.radial_segments = 12
+			pin.mesh = pin_mesh
+			pin.position.y = height * 1.25
+			pin.material_override = _material(String(overlay.get("color", "#f4d36fff")), 0.5)
+			marker.add_child(pin)
 		marker.position = topology_to_godot(
 			Vector2(float(coords[0]), float(coords[1])),
 			float(overlay.get("world_height", 0.22))

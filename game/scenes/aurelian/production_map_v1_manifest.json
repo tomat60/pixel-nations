@@ -3,14 +3,14 @@
   "source_scene": "res://scenes/aurelian/production_village_v1.tscn",
   "shared_geography": "aurelian_authored_terrain_v1.glb",
   "semantics": {
-    "claimable": "existing land can be claimed",
-    "selected": "existing candidate land is selected",
-    "claimed": "existing land claim is owned",
-    "scouted": "existing land has been scouted"
+    "claimable": "open ring: existing land can be claimed",
+    "selected": "bright ring and pin: existing candidate land is selected",
+    "claimed": "solid green hex: existing land claim is owned",
+    "scouted": "cyan diamond: existing land has been scouted"
   },
   "states": {
     "no_selection": {
-      "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_SouthMarshScouted"]
+      "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable"]
     },
     "selected": {
       "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_EastRouteSelected", "Land_SouthMarshScouted"]
@@ -23,38 +23,42 @@
     {
       "id": "Land_GreenvaleClaimed",
       "semantic": "claimed",
+      "shape": "claimed_hex",
       "topology": [354, 285],
-      "color": "#65a66fcc",
-      "radius": 0.25,
-      "height": 0.06,
+      "color": "#4d9a5fff",
+      "radius": 0.23,
+      "height": 0.075,
       "world_height": 0.69
     },
     {
       "id": "Land_NorthgateClaimable",
       "semantic": "claimable",
+      "shape": "claimable_ring",
       "topology": [445, 65],
-      "color": "#d8c78d99",
-      "radius": 0.20,
+      "color": "#ead99fff",
+      "radius": 0.22,
       "height": 0.045,
       "world_height": 0.40
     },
     {
       "id": "Land_EastRouteSelected",
       "semantic": "selected",
+      "shape": "selected_ring",
       "topology": [760, 410],
-      "color": "#f4d36fcc",
+      "color": "#ffd84fff",
       "radius": 0.28,
-      "height": 0.07,
+      "height": 0.075,
       "world_height": 0.38,
-      "emission": 0.35
+      "emission": 0.45
     },
     {
       "id": "Land_SouthMarshScouted",
       "semantic": "scouted",
+      "shape": "scouted_diamond",
       "topology": [365, 690],
-      "color": "#69a9b3aa",
-      "radius": 0.20,
-      "height": 0.045,
+      "color": "#55b9c8ff",
+      "radius": 0.22,
+      "height": 0.07,
       "world_height": -0.02
     }
   ],
