@@ -2,15 +2,15 @@
 
 Status: ACTIVE
 Updated: 2026-08-20
-Current state revision: Production Village v1 accepted
+Current state revision: Production Map v1 authorized
 Authority source: this file on the current `main`
-Authority baseline SHA: `2d6b2fbc2c42042f8c83faaf7c8e4f55ee689a29`
+Authority baseline SHA: `967d03edf640bc2ea8c7d150f0342d49614b6cdc`
 Product baseline SHA: `2d6b2fbc2c42042f8c83faaf7c8e4f55ee689a29`
-Current milestone: Post-Production Village v1 milestone selection
+Current milestone: Production Map v1 on the accepted shared Aurelian Basin
 Active execution issue: #415
 Active implementation PR: none
 Last completed milestone: PR #451 `PRODUCTION_VILLAGE_PASS`, accepted head `572a43313c4795574e4e93544e1e44d1c8f30610`, merged as `2d6b2fbc2c42042f8c83faaf7c8e4f55ee689a29`
-Next allowed action: merge this authority record after exact-head checks, then perform one bounded strategy/contract review to select the next milestone. No new product implementation is authorized until that contract is accepted.
+Next allowed action: after this contract/current-state update is merged and post-merge checks are healthy, execute exactly one bounded Production Map v1 slice under `docs/AURELIAN_PRODUCTION_MAP_V1_CONTRACT.md`, then stop for direct evidence review.
 
 ## Product truth
 
@@ -33,6 +33,7 @@ The following are now accepted implementation inputs:
 - Art direction: `docs/AURELIAN_BASIN_ART_DIRECTION_RECOVERY_V1.md`.
 - Moodboard direction: `docs/AURELIAN_BASIN_MOODBOARD_V1.md`.
 - Capability-first implementation contract: `docs/AURELIAN_CAPABILITY_FIRST_IMPLEMENTATION_REFERENCE_V1.md`.
+- Production Map v1 contract: `docs/AURELIAN_PRODUCTION_MAP_V1_CONTRACT.md`.
 - PR #449 authored Blender terrain + KayKit + GLB + Godot integration reference: `IMPLEMENTATION_REFERENCE_PASS / PRODUCTION_VISUAL_NOT_YET_ACCEPTED`.
 - PR #449 accepted head: `eee84c982dd08dc294464793f595a72b1510169b`.
 - PR #449 merge / current accepted foundation SHA: `bb38e6e80b1d757002bdde82266b29df882e9d8a`.
@@ -209,6 +210,6 @@ If `pn:status` returns `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`,
 
 ## Current stop condition
 
-This authority update stops when it is merged and post-merge authority/CI are healthy.
+This contract/current-state update stops when it is merged and post-merge authority/CI are healthy.
 
-Then perform one bounded strategy/contract review to select the next highest-value milestone. Do not begin new product implementation, broader Map/World polish, P12 or gameplay expansion until that next contract is accepted.
+Then execute exactly one bounded Production Map v1 slice. That slice stops for direct `PRODUCTION_MAP_*` classification before Production World, P12, broader Village polish or new mechanics.
