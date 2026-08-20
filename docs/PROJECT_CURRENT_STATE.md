@@ -1,16 +1,16 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-08-19
-Current state revision: Production Village v1.0
+Updated: 2026-08-20
+Current state revision: Production Village v1 accepted
 Authority source: this file on the current `main`
-Authority baseline SHA: `bb38e6e80b1d757002bdde82266b29df882e9d8a`
-Product baseline SHA: `c94423d5a9c60f1982ae2935551fc1905d46e719`
-Current milestone: Production Village v1 on the accepted authored Aurelian Basin
+Authority baseline SHA: `2d6b2fbc2c42042f8c83faaf7c8e4f55ee689a29`
+Product baseline SHA: `2d6b2fbc2c42042f8c83faaf7c8e4f55ee689a29`
+Current milestone: Post-Production Village v1 milestone selection
 Active execution issue: #415
 Active implementation PR: none
-Last completed milestone: PR #449 `IMPLEMENTATION_REFERENCE_PASS / PRODUCTION_VISUAL_NOT_YET_ACCEPTED`, merged as `bb38e6e80b1d757002bdde82266b29df882e9d8a`
-Next allowed action: after this authority update is merged and post-merge checks are healthy, execute exactly one Production Village v1 slice on the accepted authored Aurelian Basin, then stop for direct visual/product review.
+Last completed milestone: PR #451 `PRODUCTION_VILLAGE_PASS`, accepted head `572a43313c4795574e4e93544e1e44d1c8f30610`, merged as `2d6b2fbc2c42042f8c83faaf7c8e4f55ee689a29`
+Next allowed action: merge this authority record after exact-head checks, then perform one bounded strategy/contract review to select the next milestone. No new product implementation is authorized until that contract is accepted.
 
 ## Product truth
 
@@ -67,29 +67,38 @@ Do not reopen these paths unless a new documented blocker proves the accepted #4
 
 ## Current visual truth
 
-PR #449 is an implementation-reference pass, not a final art pass.
+PR #451 is a bounded Production Village v1 pass, not a final art pass.
 
-Known visible weaknesses are expected to be addressed only where they directly affect Production Village v1:
+Direct review accepted the state progression and settlement hierarchy. Remaining visual weaknesses are real but do not reopen PR #451:
 
-- Greenvale is still a static small prop cluster, not visible settlement progression;
-- the Gilded Crossing bridge is technically present but not yet a strong visual landmark;
-- some KayKit hill/rock landmark massing is too dominant and visually crude;
-- roads and terrain-zone boundaries still read as implementation-reference geometry rather than polished production terrain;
-- lighting/material balance is acceptable for implementation reference but not final production quality.
+- Greenvale is now readable as claimed, founded and developed, while the building family and composition remain deliberately simple;
+- the Gilded Crossing is readable and connected, but bridge, bank and road transitions still need future refinement;
+- terrain-zone boundaries remain visibly coarse;
+- Map and World passed only as shared-geography regression evidence, not as final production views;
+- lighting and material balance remain below final production quality.
 
-Do not spend the next sprint polishing the whole Basin. Village first.
+Do not continue visual polish or start a broader Map/World pass until a fresh bounded milestone contract is accepted.
 
-## Production Village v1 objective
+## Accepted Production Village v1 result
 
-The next slice must prove that one land visibly becomes a settlement in the accepted shared Aurelian geography.
+PR #451 proved that one land visibly becomes a settlement in the accepted shared Aurelian geography.
 
-The player-facing sequence to prove is:
+Accepted sequence:
 
 `claimed land -> founded settlement -> developed village`
 
-The slice must preserve Greenvale west of the river and keep Gilded Crossing, fields/work context and the road connection readable from the Village camera.
+Accepted evidence identity:
 
-### Required production behavior
+- exact head: `572a43313c4795574e4e93544e1e44d1c8f30610`;
+- focused workflow run: `32296769557`;
+- artifact: `9381563241`;
+- artifact digest: `sha256:5c693872753d62681c8fc3bedb67fb2a2dfc88099ad08699bd83c83cb738562c`;
+- merge commit / product baseline: `2d6b2fbc2c42042f8c83faaf7c8e4f55ee689a29`;
+- final classification after direct still and video review: `PRODUCTION_VILLAGE_PASS`.
+
+The accepted candidate keeps Greenvale west of the river, increases visible settlement nodes from 1 to 4 to 7, preserves the Gilded Crossing, fields/work context and road connection, and keeps Map/World on the same geography. It is a bounded milestone pass, not a final art-quality claim.
+
+### Accepted production behavior
 
 1. One shared authored Aurelian Basin remains the source geography.
 2. Greenvale has three deterministic visual states: claimed, founded, developed.
@@ -100,7 +109,7 @@ The slice must preserve Greenvale west of the river and keep Gilded Crossing, fi
 7. Village camera composition must feel like an authored place, not a debug diorama.
 8. Map and World must continue to use the same geometry, but do not polish them beyond preventing regressions in this slice.
 
-## Scope for Production Village v1
+## Accepted scope boundary for Production Village v1
 
 Allowed:
 
@@ -132,9 +141,9 @@ Forbidden:
 - Extra spend target: 0 USD.
 - Cursor is executor, not strategist.
 
-## Production Village evidence gate
+## Accepted Production Village evidence
 
-One exact candidate head must provide:
+The accepted exact candidate head provided:
 
 - claimed-state Village still;
 - founded-state Village still;
@@ -147,19 +156,13 @@ One exact candidate head must provide:
 - Godot import/tests with no script/import errors;
 - direct visual review.
 
-Classification:
-
-- `PRODUCTION_VILLAGE_PASS`
-- `PRODUCTION_VILLAGE_CORRECTION_REQUIRED`
-- `PRODUCTION_VILLAGE_REJECT`
-
-One bounded correction maximum. If the same visual technique still cannot produce a convincing Village after that correction, stop coding and create a focused art-direction/design brief before another implementation sprint.
+Final classification: `PRODUCTION_VILLAGE_PASS` after the single allowed bounded correction. No additional correction or polish pass is authorized on PR #451.
 
 ## Acceptance standard
 
 Green CI is necessary but never sufficient.
 
-Production Village v1 passes only if:
+Production Village v1 passed because direct review confirmed:
 
 - the claimed -> founded -> developed progression is immediately understandable;
 - Greenvale looks spatially coherent and believable enough for the demo;
@@ -208,4 +211,4 @@ If `pn:status` returns `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`,
 
 This authority update stops when it is merged and post-merge authority/CI are healthy.
 
-Then immediately begin exactly one Production Village v1 implementation slice. That slice stops for direct `PRODUCTION_VILLAGE_*` classification before any broader Map/World polish or gameplay expansion.
+Then perform one bounded strategy/contract review to select the next highest-value milestone. Do not begin new product implementation, broader Map/World polish, P12 or gameplay expansion until that next contract is accepted.
