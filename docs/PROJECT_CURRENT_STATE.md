@@ -1,16 +1,16 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-08-20
-Current state revision: Production Map v1 authorized
+Updated: 2026-08-21
+Current state revision: Production Map v1 accepted
 Authority source: this file on the current `main`
-Authority baseline SHA: `967d03edf640bc2ea8c7d150f0342d49614b6cdc`
-Product baseline SHA: `2d6b2fbc2c42042f8c83faaf7c8e4f55ee689a29`
-Current milestone: Production Map v1 on the accepted shared Aurelian Basin
+Authority baseline SHA: `4c4054b9c475255cb88c9cf4bcdd887f12cfedf5`
+Product baseline SHA: `4c4054b9c475255cb88c9cf4bcdd887f12cfedf5`
+Current milestone: Post-Production Map bounded strategy review
 Active execution issue: #415
 Active implementation PR: none
-Last completed milestone: PR #451 `PRODUCTION_VILLAGE_PASS`, accepted head `572a43313c4795574e4e93544e1e44d1c8f30610`, merged as `2d6b2fbc2c42042f8c83faaf7c8e4f55ee689a29`
-Next allowed action: after this contract/current-state update is merged and post-merge checks are healthy, execute exactly one bounded Production Map v1 slice under `docs/AURELIAN_PRODUCTION_MAP_V1_CONTRACT.md`, then stop for direct evidence review.
+Last completed milestone: PR #454 `PRODUCTION_MAP_PASS`, accepted head `2966295b92ff97692e9594f28dfa86538f2da042`, merged as `4c4054b9c475255cb88c9cf4bcdd887f12cfedf5`
+Next allowed action: after this current-state synchronization is merged and post-merge checks are healthy, execute exactly one bounded strategy/contract review to choose the next milestone. Do not start Production World, P12, broader visual polish or new mechanics before that contract is accepted.
 
 ## Product truth
 
@@ -109,6 +109,23 @@ The accepted candidate keeps Greenvale west of the river, increases visible sett
 6. The nearby work/field identity must remain visible enough to explain why this place can grow.
 7. Village camera composition must feel like an authored place, not a debug diorama.
 8. Map and World must continue to use the same geometry, but do not polish them beyond preventing regressions in this slice.
+
+## Accepted Production Map v1 result
+
+PR #454 proved the existing select, claim and scout semantics on the accepted shared Aurelian geography.
+
+Accepted evidence identity:
+
+- exact head: `2966295b92ff97692e9594f28dfa86538f2da042`;
+- focused workflow run: `32347229891`;
+- artifact: `9398507284`;
+- artifact digest: `sha256:ea95dbca206b6e7fabf6cbe27844a2c058a057fd4b551760dfbc60b0e12c20e6`;
+- merge commit / product baseline: `4c4054b9c475255cb88c9cf4bcdd887f12cfedf5`;
+- final classification after direct still, manifest and 22 second video review: `PRODUCTION_MAP_PASS`.
+
+The single allowed bounded correction made claimable, selected, claimed and scouted states distinct through restrained shape and color differences. Map remains terrain-first, and Village and World preserve the accepted shared geography. This is a bounded milestone pass, not a final Map art-quality claim.
+
+Public web release status remains `PRODUCTION_UNVERIFIED`: Vercel reports success for the merge SHA, but this runtime cannot verify anonymous `/`, `/play` and `/world` or retrieve push-triggered Actions for the merge SHA. This is an evidence gap, not evidence of an outage, and #415 explicitly allowed the bounded Godot merge despite the gap.
 
 ## Accepted scope boundary for Production Village v1
 
@@ -210,6 +227,6 @@ If `pn:status` returns `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`,
 
 ## Current stop condition
 
-This contract/current-state update stops when it is merged and post-merge authority/CI are healthy.
+This current-state synchronization stops when it is merged and post-merge authority/CI are healthy.
 
-Then execute exactly one bounded Production Map v1 slice. That slice stops for direct `PRODUCTION_MAP_*` classification before Production World, P12, broader Village polish or new mechanics.
+Then execute exactly one bounded strategy/contract review. No Production World implementation, P12, broader Village/Map polish or new mechanics are authorized until that review selects and accepts the next milestone.
