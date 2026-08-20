@@ -4,7 +4,7 @@ Status: ACTIVE
 Updated: 2026-08-21
 Current state revision: Production Map v1 accepted, Production World v1 authorized by view-role contract
 Authority source: this file on the current `main`
-Authority baseline SHA before this update: `4c4054b9c475255cb88c9cf4bcdd887f12cfedf5`
+Authority baseline SHA: `4c4054b9c475255cb88c9cf4bcdd887f12cfedf5`
 Product baseline SHA: `4c4054b9c475255cb88c9cf4bcdd887f12cfedf5`
 Current milestone: lock Village / Map / World decision roles, then execute one bounded Production World v1 slice
 Active execution issue: #415
