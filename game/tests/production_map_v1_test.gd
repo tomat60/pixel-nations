@@ -42,16 +42,19 @@ func _initialize() -> void:
 		if states.has(state_name):
 			for visible_id in (states[state_name] as Dictionary).get("visible", []):
 				_check(ids.has(String(visible_id)), "state_%s_node_%s" % [state_name, visible_id])
-	_check(not ((states.get("no_selection", {}) as Dictionary).get("visible", []) as Array).has("Land_EastfoldSelected"), "no_selection_has_no_selected_marker")
-	_check(((states.get("selected", {}) as Dictionary).get("visible", []) as Array).has("Land_EastfoldSelected"), "selected_marker_present")
+	_check(not ((states.get("no_selection", {}) as Dictionary).get("visible", []) as Array).has("Land_EastRouteSelected"), "no_selection_has_no_selected_marker")
+	_check(((states.get("selected", {}) as Dictionary).get("visible", []) as Array).has("Land_EastRouteSelected"), "selected_marker_present")
 
 	var invariants: Dictionary = manifest.get("transform_invariants", {})
 	var expected := {
-		"GreenvaleOrigin": [355.0, 285.0],
+		"GreenvaleOrigin": [354.0, 285.0],
 		"GildedCrossing": [515.0, 340.0],
-		"NorthRidge": [445.0, 65.0],
+		"NorthRidge": [700.0, 205.0],
+		"ForestWorkEdge": [245.0, 205.0],
+		"FieldsPlains": [405.0, 505.0],
+		"SouthMarsh": [365.0, 690.0],
 		"CoastOutflow": [610.0, 875.0],
-		"Northgate": [505.0, 170.0],
+		"Northgate": [445.0, 65.0],
 	}
 	for key in expected.keys():
 		_check(_array_close(invariants.get(key, []), expected[key]), "invariant_%s" % key)

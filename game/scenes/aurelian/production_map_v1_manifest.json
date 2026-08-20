@@ -13,7 +13,7 @@
       "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_SouthMarshScouted"]
     },
     "selected": {
-      "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_EastfoldSelected", "Land_SouthMarshScouted"]
+      "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_EastRouteSelected", "Land_SouthMarshScouted"]
     },
     "status_distinctions": {
       "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_SouthMarshScouted"]
@@ -23,50 +23,50 @@
     {
       "id": "Land_GreenvaleClaimed",
       "semantic": "claimed",
-      "topology": [355, 285],
+      "topology": [354, 285],
       "color": "#65a66fcc",
       "radius": 0.25,
       "height": 0.06,
-      "world_height": 0.24
+      "world_height": 0.69
     },
     {
       "id": "Land_NorthgateClaimable",
       "semantic": "claimable",
-      "topology": [505, 170],
+      "topology": [445, 65],
       "color": "#d8c78d99",
       "radius": 0.20,
       "height": 0.045,
-      "world_height": 0.22
+      "world_height": 0.40
     },
     {
-      "id": "Land_EastfoldSelected",
+      "id": "Land_EastRouteSelected",
       "semantic": "selected",
-      "topology": [640, 360],
+      "topology": [760, 410],
       "color": "#f4d36fcc",
       "radius": 0.28,
       "height": 0.07,
-      "world_height": 0.25,
+      "world_height": 0.38,
       "emission": 0.35
     },
     {
       "id": "Land_SouthMarshScouted",
       "semantic": "scouted",
-      "topology": [565, 705],
+      "topology": [365, 690],
       "color": "#69a9b3aa",
       "radius": 0.20,
       "height": 0.045,
-      "world_height": 0.22
+      "world_height": -0.02
     }
   ],
   "transform_invariants": {
-    "GreenvaleOrigin": [355, 285],
+    "GreenvaleOrigin": [354, 285],
     "GildedCrossing": [515, 340],
-    "NorthRidge": [445, 65],
-    "ForestWorkEdge": [220, 470],
-    "FieldsPlains": [310, 620],
-    "SouthMarsh": [565, 705],
+    "NorthRidge": [700, 205],
+    "ForestWorkEdge": [245, 205],
+    "FieldsPlains": [405, 505],
+    "SouthMarsh": [365, 690],
     "CoastOutflow": [610, 875],
-    "Northgate": [505, 170]
+    "Northgate": [445, 65]
   },
   "forbidden_changes": [
     "new reducer action",
