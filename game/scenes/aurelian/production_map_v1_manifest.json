@@ -1,0 +1,77 @@
+{
+  "contract": "PRODUCTION_MAP_V1",
+  "source_scene": "res://scenes/aurelian/production_village_v1.tscn",
+  "shared_geography": "aurelian_authored_terrain_v1.glb",
+  "semantics": {
+    "claimable": "existing land can be claimed",
+    "selected": "existing candidate land is selected",
+    "claimed": "existing land claim is owned",
+    "scouted": "existing land has been scouted"
+  },
+  "states": {
+    "no_selection": {
+      "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_SouthMarshScouted"]
+    },
+    "selected": {
+      "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_EastfoldSelected", "Land_SouthMarshScouted"]
+    },
+    "status_distinctions": {
+      "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_SouthMarshScouted"]
+    }
+  },
+  "overlays": [
+    {
+      "id": "Land_GreenvaleClaimed",
+      "semantic": "claimed",
+      "topology": [355, 285],
+      "color": "#65a66fcc",
+      "radius": 0.25,
+      "height": 0.06,
+      "world_height": 0.24
+    },
+    {
+      "id": "Land_NorthgateClaimable",
+      "semantic": "claimable",
+      "topology": [505, 170],
+      "color": "#d8c78d99",
+      "radius": 0.20,
+      "height": 0.045,
+      "world_height": 0.22
+    },
+    {
+      "id": "Land_EastfoldSelected",
+      "semantic": "selected",
+      "topology": [640, 360],
+      "color": "#f4d36fcc",
+      "radius": 0.28,
+      "height": 0.07,
+      "world_height": 0.25,
+      "emission": 0.35
+    },
+    {
+      "id": "Land_SouthMarshScouted",
+      "semantic": "scouted",
+      "topology": [565, 705],
+      "color": "#69a9b3aa",
+      "radius": 0.20,
+      "height": 0.045,
+      "world_height": 0.22
+    }
+  ],
+  "transform_invariants": {
+    "GreenvaleOrigin": [355, 285],
+    "GildedCrossing": [515, 340],
+    "NorthRidge": [445, 65],
+    "ForestWorkEdge": [220, 470],
+    "FieldsPlains": [310, 620],
+    "SouthMarsh": [565, 705],
+    "CoastOutflow": [610, 875],
+    "Northgate": [505, 170]
+  },
+  "forbidden_changes": [
+    "new reducer action",
+    "persistence schema change",
+    "independent map geography",
+    "world polish"
+  ]
+}
