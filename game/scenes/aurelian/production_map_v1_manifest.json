@@ -1,0 +1,81 @@
+{
+  "contract": "PRODUCTION_MAP_V1",
+  "source_scene": "res://scenes/aurelian/production_village_v1.tscn",
+  "shared_geography": "aurelian_authored_terrain_v1.glb",
+  "semantics": {
+    "claimable": "open ring: existing land can be claimed",
+    "selected": "bright ring and pin: existing candidate land is selected",
+    "claimed": "solid green hex: existing land claim is owned",
+    "scouted": "cyan diamond: existing land has been scouted"
+  },
+  "states": {
+    "no_selection": {
+      "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable"]
+    },
+    "selected": {
+      "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_EastRouteSelected", "Land_SouthMarshScouted"]
+    },
+    "status_distinctions": {
+      "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_SouthMarshScouted"]
+    }
+  },
+  "overlays": [
+    {
+      "id": "Land_GreenvaleClaimed",
+      "semantic": "claimed",
+      "shape": "claimed_hex",
+      "topology": [354, 285],
+      "color": "#4d9a5fff",
+      "radius": 0.23,
+      "height": 0.075,
+      "world_height": 0.69
+    },
+    {
+      "id": "Land_NorthgateClaimable",
+      "semantic": "claimable",
+      "shape": "claimable_ring",
+      "topology": [445, 65],
+      "color": "#ead99fff",
+      "radius": 0.22,
+      "height": 0.045,
+      "world_height": 0.40
+    },
+    {
+      "id": "Land_EastRouteSelected",
+      "semantic": "selected",
+      "shape": "selected_ring",
+      "topology": [760, 410],
+      "color": "#ffd84fff",
+      "radius": 0.28,
+      "height": 0.075,
+      "world_height": 0.38,
+      "emission": 0.45
+    },
+    {
+      "id": "Land_SouthMarshScouted",
+      "semantic": "scouted",
+      "shape": "scouted_diamond",
+      "topology": [365, 690],
+      "color": "#55b9c8ff",
+      "radius": 0.22,
+      "height": 0.07,
+      "world_height": -0.02
+    }
+  ],
+  "transform_invariants": {
+    "GreenvaleOrigin": [354, 285],
+    "GildedCrossing": [515, 340],
+    "NorthRidge": [700, 205],
+    "ForestWorkEdge": [245, 205],
+    "FieldsPlains": [405, 505],
+    "SouthMarsh": [365, 690],
+    "CoastOutflow": [610, 875],
+    "Northgate": [445, 65]
+  },
+  "forbidden_changes": [
+    "new reducer action",
+    "persistence schema change",
+    "independent map geography",
+    "world polish"
+  ]
+}
