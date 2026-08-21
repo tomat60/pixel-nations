@@ -161,6 +161,7 @@ func _emit_action(action_name: String) -> void:
 
 func _process(_delta: float) -> void:
 	if not automated_input_mode:
+		super(_delta)
 		return
 	automated_frame += 1
 	if automated_frame == 120:
