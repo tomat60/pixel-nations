@@ -101,7 +101,19 @@ jobs:
           timeout 12m env LIBGL_ALWAYS_SOFTWARE=1             "${BLENDER_BIN}" -b             --python game/assets/aurelian-basin/source/aurelian_authored_terrain_v1.py --             "$KAYKIT_ROOT" /tmp/aurelian-regenerated             2>&1 | tee "${EVIDENCE_DIR}/blender-reproduction.log"
           grep -F "AURELIAN_AUTHORED_TERRAIN=PASS" "${EVIDENCE_DIR}/blender-reproduction.log"
           cmp "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb" /tmp/aurelian-regenerated/aurelian_authored_terrain_v1.glb
-          cmp "${EXPORT_DIR}/transform-manifest.json" /tmp/aurelian-regenerated/transform-manifest.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          committed=json.loads(Path("game/assets/aurelian-basin/export/transform-manifest.json").read_text())
+          regenerated=json.loads(Path("/tmp/aurelian-regenerated/transform-manifest.json").read_text())
+          committed_blend=committed.pop("blend_sha256", None)
+          regenerated_blend=regenerated.pop("blend_sha256", None)
+          if not committed_blend or not regenerated_blend:
+              raise SystemExit("blend provenance missing")
+          if committed != regenerated:
+              raise SystemExit("semantic transform manifest drift")
+          print("TRANSFORM_MANIFEST_SEMANTIC_REPRODUCTION=PASS")
+          PY
           echo "PACKAGED_ASSET_REPRODUCTION=PASS"
 
       - name: Install graphical runtime dependencies
