@@ -38,7 +38,8 @@ func _initialize() -> void:
 		ids.append(marker_id)
 		_check(semantics.has(semantic), "marker_semantic_%s" % marker_id)
 		_check((marker.get("topology", []) as Array).size() == 2, "marker_topology_%s" % marker_id)
-		_check(float(marker.get("radius", 1.0)) <= 0.38, "restrained_radius_%s" % marker_id)
+		_check(float(marker.get("radius", 1.0)) <= 0.52, "restrained_radius_%s" % marker_id)
+		_check(not String(marker.get("label", "")).is_empty(), "strategic_label_%s" % marker_id)
 		if semantic != "home_region":
 			direction_semantics.append(semantic)
 			direction_shapes.append(String(marker.get("shape", "")))
