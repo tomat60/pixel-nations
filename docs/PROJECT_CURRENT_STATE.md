@@ -2,15 +2,15 @@
 
 Status: ACTIVE
 Updated: 2026-08-21
-Current state revision: Production Map v1 accepted, Production World v1 authorized by view-role contract
+Current state revision: Production World v1 accepted, next product milestone pending bounded strategy contract
 Authority source: this file on the current `main`
-Authority baseline SHA: `4c4054b9c475255cb88c9cf4bcdd887f12cfedf5`
-Product baseline SHA: `4c4054b9c475255cb88c9cf4bcdd887f12cfedf5`
-Current milestone: lock Village / Map / World decision roles, then execute one bounded Production World v1 slice
+Authority baseline SHA: `5082c387fb7be436c5fc6073efc5ec88a2572850`
+Product baseline SHA: `5082c387fb7be436c5fc6073efc5ec88a2572850`
+Current milestone: record Production World v1 acceptance, then perform one bounded strategy review
 Active execution issue: #415
-Active implementation PR: authority/view-role update only until merged
-Last completed milestone: PR #454 `PRODUCTION_MAP_PASS`, accepted head `2966295b92ff97692e9594f28dfa86538f2da042`, merged as `4c4054b9c475255cb88c9cf4bcdd887f12cfedf5`
-Next allowed action: after this authority update merges and post-merge checks are healthy, execute exactly one bounded Production World v1 slice under `docs/AURELIAN_VIEW_ROLES_V1.md`, then stop for direct evidence review.
+Active implementation PR: authority update only until merged
+Last completed milestone: PR #457 `PRODUCTION_WORLD_PASS`, accepted head `88c8ffc706d06b2fa4ff73f6d0fe961aee9a803f`, merged as `5082c387fb7be436c5fc6073efc5ec88a2572850`
+Next allowed action: after this authority update merges and post-merge checks are healthy, perform exactly one bounded strategy review and accept a precise next-milestone contract before any new product implementation.
 
 ## Product truth
 
@@ -50,7 +50,7 @@ Accepted implementation inputs:
 - Village / Map / World role contract: `docs/AURELIAN_VIEW_ROLES_V1.md`;
 - PR #449 authored Blender terrain + KayKit + GLB + Godot integration reference: `IMPLEMENTATION_REFERENCE_PASS / PRODUCTION_VISUAL_NOT_YET_ACCEPTED`;
 - PR #451: `PRODUCTION_VILLAGE_PASS`;
-- PR #454: `PRODUCTION_MAP_PASS`.
+- PR #454: `PRODUCTION_MAP_PASS`;\n- PR #457: `PRODUCTION_WORLD_PASS`.
 
 The accepted shared-world pipeline proves:
 
@@ -106,64 +106,32 @@ Evidence identity:
 
 Map role now means nearby territorial choice: select, scout, claim, inspect and connect land around the current settlement. It must remain terrain-first and may not become a dense permanent grid or a second Village builder.
 
-## Next bounded milestone: Production World v1
+## Accepted Production World v1
 
-The next slice must prove that World has a unique strategic job and is not merely a farther Map camera.
+PR #457 accepted result:
 
-Player question:
+- Aurelian Basin reads as the current strategic home region;
+- three sparse directions communicate trade, expansion and frontier pressure with distinct shape, color, route and label language;
+- neutral, selected-trade and all-directions states are legible;
+- the raw sequence proves the layer relationship: `World WHY -> Map WHERE -> Village HOW`;
+- accepted Village and Map geography remains unchanged.
 
-`Where should my nation push next, and what larger opportunity or pressure should I respond to?`
+Evidence identity:
 
-Production World v1 must prove only:
+- accepted head: `88c8ffc706d06b2fa4ff73f6d0fe961aee9a803f`;
+- focused run: `32434867134`;
+- artifact: `9430433706`;
+- artifact digest: `sha256:0865b3d67ad2df1e01198809a8d8a4b0f88ec8127f227528f4ce2eead2dc286d`;
+- merge: `5082c387fb7be436c5fc6073efc5ec88a2572850`;
+- final classification: `PRODUCTION_WORLD_PASS`.
 
-1. Aurelian Basin reads as the player's current strategic home region.
-2. Three sparse strategic directions are legible around it, representing distinct high-level intents such as trade, expansion and pressure / unknown frontier.
-3. Selecting one direction communicates strategic intent without changing the underlying shared geography.
-4. Returning to Map and Village makes the layer relationship understandable:
-   `World WHY -> Map WHERE -> Village HOW`.
+The first meaningful candidate was technically complete but visually read as a distant Map because its strategic markers were too small and abstract. The single permitted bounded correction added restrained strategic routes, labels and clearer direction glyphs. Direct review accepted the corrected exact-head stills and 22-second raw sequence.
 
-Do not imply that the full 10,000-land world is already rendered.
+World v1 proves the role, not a finished global renderer. Diplomacy, combat, economy expansion, P12, independent World geography and a fake 10,000-land presentation remain blocked.
 
-### Allowed World v1 scope
+## Next strategy gate
 
-- `game/scenes/aurelian/**`;
-- `game/tests/**` for World semantics, shared transforms and evidence;
-- one focused Production World evidence workflow if needed;
-- minimal manifests required to prove marker meaning and shared geography.
-
-### Forbidden in World v1
-
-- P12 / Phase 2 gameplay expansion;
-- new diplomacy engine;
-- combat / war simulation;
-- economy rewrite;
-- backend, accounts, payments or multiplayer;
-- crypto / NFT / wallet / mint / token / pay-to-win direction;
-- final 10,000-land renderer;
-- independent World geography;
-- broad Village or Map polish;
-- new paid asset family;
-- image generation as implementation authority;
-- MAX.
-
-### Required World v1 evidence
-
-- neutral World still;
-- selected-strategic-direction still;
-- still showing all three strategic direction types distinctly but sparsely;
-- accepted Village regression still;
-- accepted Map regression still;
-- 15-30 second raw sequence: neutral World -> select direction -> return to Map / Village framing;
-- exact-head manifest / tests proving shared geography and marker semantics;
-- direct visual and product review.
-
-Classification:
-
-- `PRODUCTION_WORLD_PASS`;
-- `PRODUCTION_WORLD_CORRECTION_REQUIRED`;
-- `PRODUCTION_WORLD_REJECT`.
-
-One bounded correction maximum.
+No new product slice is authorized yet. The next action is one bounded strategy review that must choose a single milestone, define its player question, allowed files, forbidden scope, exact evidence and stop condition, then record that contract through the normal branch and PR flow.
 
 ## Product interaction hierarchy
 
@@ -282,4 +250,4 @@ If `pn:status` returns `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`,
 
 This authority update stops when it is merged and post-merge state is healthy.
 
-Then execute exactly one bounded Production World v1 slice. Stop for direct `PRODUCTION_WORLD_*` classification before P12, broader Village / Map polish or any fake full-world renderer.
+Then perform exactly one bounded strategy review. Do not start another product implementation until its contract is accepted on `main`. P12, broad Village / Map / World polish and any fake full-world renderer remain blocked.
