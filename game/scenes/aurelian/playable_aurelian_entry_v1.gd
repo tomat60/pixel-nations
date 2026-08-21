@@ -6,6 +6,9 @@ const PLAYABLE_MANIFEST_PATH := "res://scenes/aurelian/playable_aurelian_entry_v
 const ENTRY_STATES := [
 	"world_neutral",
 	"world_trade_selected",
+	"map_east_route_selected",
+	"map_east_route_claimed",
+	"village_claimed",
 	"map_east_route",
 	"village_route_context",
 ]
@@ -39,13 +42,15 @@ func _ready() -> void:
 		get_window().size = STILL_SIZE
 	if ENTRY_STATES.has(evidence_state):
 		entry_state = evidence_state
-		decision_state = evidence_state
 	else:
 		var restored := SESSION.load_session()
 		entry_state = String(restored.get("entry_state", "world_neutral"))
 		restored_intent = String(restored.get("selected_intent", "none"))
-		decision_state = entry_state
 		print("AURELIAN_SESSION_V2_LOAD=%s:%s:%s:%s" % [String(restored.get("status", "unknown")), String(restored.get("adapter", "unknown")), entry_state, restored_intent])
+	if not ENTRY_STATES.has(entry_state):
+		entry_state = "world_neutral"
+		restored_intent = "none"
+	decision_state = _decision_state_for_entry(entry_state)
 	_configure_state_environment(entry_state)
 	super()
 	if cameras.is_empty():
@@ -61,7 +66,35 @@ func _ready() -> void:
 	elif DisplayServer.get_name() == "headless" and not automated_input_mode:
 		call_deferred("_complete_headless_smoke")
 
+func _decision_state_for_entry(state_name: String) -> String:
+	match state_name:
+		"map_east_route_selected", "map_east_route_claimed":
+			return "map_east_route"
+		"village_claimed":
+			return "village_route_context"
+		_:
+			return state_name
+
 func _configure_state_environment(state_name: String) -> void:
+	match state_name:
+		"map_east_route_selected":
+			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
+			OS.set_environment("AURELIAN_MAP_STATE", "selected")
+			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
+			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
+			return
+		"map_east_route_claimed":
+			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
+			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
+			OS.set_environment("AURELIAN_VILLAGE_STATE", "claimed")
+			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
+			return
+		"village_claimed":
+			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
+			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
+			OS.set_environment("AURELIAN_VILLAGE_STATE", "claimed")
+			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
+			return
 	var states: Dictionary = decision_contract.get("states", {})
 	if not states.has(state_name):
 		return
@@ -140,28 +173,40 @@ func _build_runtime_hud() -> void:
 	content.add_child(controls_label)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_right"):
-		_advance_entry()
+	if event.is_action_pressed("ui_accept"):
+		_accept_entry()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_right"):
+		_right_entry()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_left") or event.is_action_pressed("ui_cancel"):
 		_previous_entry()
 		get_viewport().set_input_as_handled()
 
-func _advance_entry() -> void:
+func _accept_entry() -> void:
 	match entry_state:
 		"world_neutral":
 			_apply_entry_state("world_trade_selected")
+		"map_east_route_selected", "map_east_route":
+			_apply_entry_state("map_east_route_claimed")
+
+func _right_entry() -> void:
+	match entry_state:
 		"world_trade_selected":
-			_apply_entry_state("map_east_route")
+			_apply_entry_state("map_east_route_selected")
+		"map_east_route_claimed":
+			_apply_entry_state("village_claimed")
 		"map_east_route":
 			_apply_entry_state("village_route_context")
 
 func _previous_entry() -> void:
 	match entry_state:
+		"village_claimed":
+			_apply_entry_state("map_east_route_claimed")
+		"map_east_route_claimed", "map_east_route_selected", "map_east_route":
+			_apply_entry_state("world_trade_selected")
 		"village_route_context":
 			_apply_entry_state("map_east_route")
-		"map_east_route":
-			_apply_entry_state("world_trade_selected")
 		"world_trade_selected":
 			_apply_entry_state("world_neutral")
 
@@ -171,7 +216,7 @@ func _apply_entry_state(state_name: String) -> void:
 		return
 	entry_state = state_name
 	main_world_overlay_root.visible = state_name.begins_with("world_")
-	main_overlay_root.visible = state_name == "map_east_route"
+	main_overlay_root.visible = state_name.begins_with("map_")
 	main_decision_overlay_root.visible = state_name == "village_route_context"
 	match state_name:
 		"world_neutral":
@@ -180,9 +225,20 @@ func _apply_entry_state(state_name: String) -> void:
 		"world_trade_selected":
 			_apply_world_state(main_world_overlay_root, "selected_trade")
 			_activate_camera("world")
-		"map_east_route":
+		"map_east_route_selected", "map_east_route":
 			_apply_map_state(main_overlay_root, "selected")
 			_activate_camera("map")
+		"map_east_route_claimed":
+			_apply_map_state(main_overlay_root, "east_route_claimed")
+			if not _apply_village_state(main_basin, "claimed"):
+				push_error("AURELIAN_FIRST_LAND_CLAIM_VILLAGE_STATE_FAILED")
+			_activate_camera("map")
+			print("AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE")
+		"village_claimed":
+			_apply_map_state(main_overlay_root, "east_route_claimed")
+			if not _apply_village_state(main_basin, "claimed"):
+				push_error("AURELIAN_FIRST_LAND_CLAIM_VILLAGE_STATE_FAILED")
+			_activate_camera("village")
 		"village_route_context":
 			_activate_camera("village")
 	_update_runtime_hud()
@@ -201,18 +257,30 @@ func _update_runtime_hud() -> void:
 		"world_neutral":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "Choose Aurelian's strategic direction"
-			controls_label.text = "[ENTER / RIGHT] Select eastern Trade"
+			controls_label.text = "[ENTER] Select eastern Trade"
 		"world_trade_selected":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "Trade selected: eastern route opportunity"
-			controls_label.text = "[ENTER / RIGHT] Open Map    [LEFT] Clear"
-		"map_east_route":
+			controls_label.text = "[RIGHT] Open Map    [LEFT] Clear"
+		"map_east_route_selected":
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "East Route selected near Gilded Crossing"
-			controls_label.text = "[ENTER / RIGHT] Open Village    [LEFT] World"
+			controls_label.text = "[ENTER] Claim East Route    [LEFT] World"
+		"map_east_route_claimed":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "East Route claimed for Aurelian"
+			controls_label.text = "[RIGHT] Open claimed land    [LEFT] World"
+		"village_claimed":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "East Route is claimed: establish the first settlement"
+			controls_label.text = "[LEFT / ESC] Return to claimed Map"
+		"map_east_route":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Legacy East Route selection restored"
+			controls_label.text = "[ENTER] Claim East Route    [RIGHT] Legacy Village    [LEFT] World"
 		"village_route_context":
 			layer_label.text = "VILLAGE  |  HOW"
-			intent_label.text = "Greenvale route capacity connects to the crossing"
+			intent_label.text = "Legacy Greenvale route context"
 			controls_label.text = "[LEFT / ESC] Return to Map"
 
 func _emit_action(action_name: String) -> void:
@@ -235,11 +303,13 @@ func _process(_delta: float) -> void:
 	elif automated_frame == 270:
 		_emit_action("ui_right")
 	elif automated_frame == 420:
-		_emit_action("ui_right")
+		_emit_action("ui_accept")
 	elif automated_frame == 570:
-		_emit_action("ui_left")
+		_emit_action("ui_right")
 	elif automated_frame == 690:
 		_emit_action("ui_left")
-	elif automated_frame >= 810:
-		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=810")
+	elif automated_frame == 810:
+		_emit_action("ui_left")
+	elif automated_frame >= 930:
+		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=930")
 		get_tree().quit(0)
