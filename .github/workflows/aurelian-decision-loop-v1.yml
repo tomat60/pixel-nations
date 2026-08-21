@@ -1,0 +1,285 @@
+name: Aurelian Decision Loop V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/scenes/aurelian/aurelian_decision_loop_v1.gd"
+      - "game/scenes/aurelian/aurelian_decision_loop_v1.tscn"
+      - "game/scenes/aurelian/aurelian_decision_loop_v1_manifest.json"
+      - "game/tests/aurelian_decision_loop_v1_test.gd"
+      - ".github/workflows/aurelian-decision-loop-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aurelian-decision-loop-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  KAYKIT_SHA: "84fa4e91af6a88989be7c99e0891cede11f2ca38"
+  KAYKIT_ARCHIVE_SHA: "cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028"
+  BLENDER_VERSION: "4.3.2"
+  BLENDER_BIN: "/tmp/blender/blender-4.3.2-linux-x64/blender"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EXPORT_DIR: "game/assets/aurelian-basin/export"
+  EVIDENCE_DIR: "evidence/aurelian-decision-loop-v1"
+
+jobs:
+  decision-loop:
+    name: Build and capture Aurelian Decision Loop
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+
+      - name: Fetch pinned Blender
+        timeout-minutes: 6
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/blender
+          mkdir -p /tmp/blender
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://download.blender.org/release/Blender4.3/blender-${BLENDER_VERSION}-linux-x64.tar.xz" \
+            -o /tmp/blender/blender.tar.xz
+          tar -xJf /tmp/blender/blender.tar.xz -C /tmp/blender
+          test -x "${BLENDER_BIN}"
+          "${BLENDER_BIN}" --version | head -1 | tee "${EVIDENCE_DIR}/blender-version.txt"
+          python3 -m pip install --disable-pip-version-check --no-cache-dir --user pillow
+
+      - name: Fetch pinned KayKit CC0 source
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/kaykit
+          mkdir -p /tmp/kaykit/src
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip" \
+            -o /tmp/kaykit/source.zip
+          test "$(sha256sum /tmp/kaykit/source.zip | cut -d' ' -f1)" = "${KAYKIT_ARCHIVE_SHA}"
+          unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/src
+          ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
+          test -n "$ROOT"
+          echo "KAYKIT_ROOT=$ROOT" >> "$GITHUB_ENV"
+
+      - name: Recreate accepted shared Basin export
+        timeout-minutes: 14
+        run: |
+          set -euo pipefail
+          rm -rf "${EXPORT_DIR}"
+          mkdir -p "${EXPORT_DIR}"
+          export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 12m env LIBGL_ALWAYS_SOFTWARE=1 \
+            "${BLENDER_BIN}" -b --python game/assets/aurelian-basin/source/aurelian_authored_terrain_v1.py -- \
+            "$KAYKIT_ROOT" "$PWD/${EXPORT_DIR}" \
+            2>&1 | tee "${EVIDENCE_DIR}/blender-author.log"
+          grep -F "AURELIAN_AUTHORED_TERRAIN=PASS" "${EVIDENCE_DIR}/blender-author.log"
+          test -s "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb"
+          cp "${EXPORT_DIR}/transform-manifest.json" "${EVIDENCE_DIR}/transform-manifest.json"
+          cp "${EXPORT_DIR}/source-manifest.json" "${EVIDENCE_DIR}/source-manifest.json"
+          mv "${EXPORT_DIR}/aurelian_authored_terrain_v1.blend" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1.blend"
+          cp game/scenes/aurelian/production_map_v1_manifest.json "${EVIDENCE_DIR}/map-state-manifest.json"
+          cp game/scenes/aurelian/production_world_v1_manifest.json "${EVIDENCE_DIR}/world-state-manifest.json"
+          cp game/scenes/aurelian/production_village_v1_state_manifest.json "${EVIDENCE_DIR}/village-state-manifest.json"
+          cp game/scenes/aurelian/aurelian_decision_loop_v1_manifest.json "${EVIDENCE_DIR}/decision-loop-manifest.json"
+
+      - name: Download pinned Godot
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/godot
+          mkdir -p /tmp/godot
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Import shared GLB and run contracts
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1 || {
+            cat "${EVIDENCE_DIR}/godot-import.log"; exit 1;
+          }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test; do
+            "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" \
+              > "${EVIDENCE_DIR}/${test}.log" 2>&1
+          done
+          grep -F "AURELIAN_AUTHORED_TERRAIN_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1_test.log"
+          grep -F "PRODUCTION_VILLAGE_V1_TEST: PASS" "${EVIDENCE_DIR}/production_village_v1_test.log"
+          grep -F "PRODUCTION_MAP_V1_TEST: PASS" "${EVIDENCE_DIR}/production_map_v1_test.log"
+          grep -F "PRODUCTION_WORLD_V1_TEST: PASS" "${EVIDENCE_DIR}/production_world_v1_test.log"
+          grep -F "AURELIAN_DECISION_LOOP_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_decision_loop_v1_test.log"
+
+      - name: Capture Decision Loop states
+        timeout-minutes: 9
+        run: |
+          set -euo pipefail
+          specs=(
+            "world-neutral:world_neutral:world:world"
+            "world-trade-selected:world_trade_selected:world:world"
+            "map-east-route:map_east_route:map:map"
+            "village-route-context:village_route_context:village:village-developed"
+            "map-regression:map_regression:map:map"
+            "village-regression:village_regression:village:village-developed"
+          )
+          for spec in "${specs[@]}"; do
+            IFS=: read -r output state preset source <<< "$spec"
+            timeout 90s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+              AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}" \
+              AURELIAN_DECISION_STATE="$state" \
+              "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+              res://scenes/aurelian/aurelian_decision_loop_v1.tscn \
+              > "${EVIDENCE_DIR}/${output}.log" 2>&1
+            grep -F "PRODUCTION_VILLAGE_STILL=${preset}:developed:" "${EVIDENCE_DIR}/${output}.log"
+            mv "${EVIDENCE_DIR}/${source}-1440x900.png" "${EVIDENCE_DIR}/${output}-1440x900.png"
+          done
+
+      - name: Capture 24 second Decision Loop sequence
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          timeout 120s xvfb-run -a -s "-screen 0 1280x720x24" env \
+            AURELIAN_CAPTURE_DECISION_LOOP=1 \
+            "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+            --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 30 \
+            --write-movie "$PWD/${EVIDENCE_DIR}/decision-loop-sequence.avi" \
+            res://scenes/aurelian/aurelian_decision_loop_v1.tscn \
+            > "${EVIDENCE_DIR}/decision-loop-sequence.log" 2>&1
+          grep -F "AURELIAN_DECISION_LOOP_HANDOFF=WORLD_TRADE" "${EVIDENCE_DIR}/decision-loop-sequence.log"
+          grep -F "AURELIAN_DECISION_LOOP_HANDOFF=MAP_EAST_ROUTE" "${EVIDENCE_DIR}/decision-loop-sequence.log"
+          grep -F "AURELIAN_DECISION_LOOP_HANDOFF=VILLAGE_ROUTE_CONTEXT" "${EVIDENCE_DIR}/decision-loop-sequence.log"
+          grep -F "AURELIAN_DECISION_LOOP_SEQUENCE_COMPLETE=720" "${EVIDENCE_DIR}/decision-loop-sequence.log"
+          test -s "${EVIDENCE_DIR}/decision-loop-sequence.avi"
+          mediainfo --Output=JSON "${EVIDENCE_DIR}/decision-loop-sequence.avi" > "${EVIDENCE_DIR}/video-metadata.json"
+
+      - name: Validate deterministic evidence
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, re
+          from pathlib import Path
+          from PIL import Image, ImageStat, ImageChops
+
+          root = Path(os.environ['EVIDENCE_DIR'])
+          names = [
+              'world-neutral', 'world-trade-selected', 'map-east-route',
+              'village-route-context', 'map-regression', 'village-regression'
+          ]
+          images, report = {}, {}
+          for name in names:
+              path = root / f'{name}-1440x900.png'
+              image = Image.open(path).convert('RGB')
+              if image.size != (1440, 900):
+                  raise SystemExit(f'{name}: wrong size {image.size}')
+              variance = sum(ImageStat.Stat(image).var) / 3.0
+              sample = image.resize((240,150))
+              colors = len(set(sample.getdata()))
+              if path.stat().st_size < 70000 or variance < 60.0 or colors < 250:
+                  raise SystemExit(f'{name}: weak evidence bytes={path.stat().st_size} variance={variance:.2f} colors={colors}')
+              images[name] = sample
+              report[name] = {
+                  'bytes': path.stat().st_size,
+                  'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                  'variance': round(variance, 3),
+                  'sample_colors': colors,
+              }
+
+          for a,b in [
+              ('world-neutral','world-trade-selected'),
+              ('map-east-route','map-regression'),
+              ('village-route-context','village-regression'),
+          ]:
+              diff = ImageChops.difference(images[a], images[b])
+              changed = sum(1 for pixel in diff.getdata() if pixel != (0,0,0))
+              if changed < 20:
+                  raise SystemExit(f'decision state delta too small: {a}/{b} changed={changed}')
+
+          decision = json.loads((root/'decision-loop-manifest.json').read_text())
+          if decision.get('contract') != 'AURELIAN_DECISION_LOOP_V1':
+              raise SystemExit('wrong Decision Loop contract')
+          handoff = decision.get('handoff', {})
+          expected = {
+              'world_marker': 'Direction_EastTrade',
+              'map_marker': 'Land_EastRouteSelected',
+              'village_state': 'developed',
+              'crossing': 'GildedCrossing',
+          }
+          if any(handoff.get(key) != value for key,value in expected.items()):
+              raise SystemExit(f'wrong handoff identity: {handoff}')
+
+          transform = json.loads((root/'transform-manifest.json').read_text())
+          if transform.get('bridge',{}).get('endpoints') != [[455,340],[575,340]]:
+              raise SystemExit('bridge topology drift')
+          if transform.get('rectangular_outer_water_plane') is not False:
+              raise SystemExit('rectangular water regression')
+
+          video = json.loads((root/'video-metadata.json').read_text())
+          tracks = video.get('media',{}).get('track',[])
+          general = next((x for x in tracks if x.get('@type') == 'General'), {})
+          stream = next((x for x in tracks if x.get('@type') == 'Video'), {})
+          raw = general.get('Duration') or stream.get('Duration')
+          match = re.search(r'-?\d+(?:\.\d+)?', str(raw or ''))
+          if not match:
+              raise SystemExit('video duration missing')
+          duration = float(match.group(0))
+          if duration > 1000:
+              duration /= 1000
+          if not 23.5 <= duration <= 24.5:
+              raise SystemExit(f'video duration wrong: {duration}')
+
+          qa = {
+              'status': 'PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_VISUAL_REVIEW',
+              'exact_head': (root/'exact-head.txt').read_text().strip(),
+              'stills': report,
+              'video_seconds': duration,
+              'decision_chain': [
+                  'Direction_EastTrade',
+                  'Land_EastRouteSelected',
+                  'GreenvaleTradeRouteContext',
+              ],
+              'view_role_loop': ['WORLD_WHY', 'MAP_WHERE', 'VILLAGE_HOW'],
+          }
+          (root/'evidence-qa.json').write_text(json.dumps(qa, indent=2)+'\n')
+
+          canvas = Image.new('RGB',(1080,450),(32,32,32))
+          for i,name in enumerate(names):
+              thumb = Image.open(root/f'{name}-1440x900.png').convert('RGB').resize((360,225))
+              canvas.paste(thumb,((i%3)*360,(i//3)*225))
+          canvas.save(root/'review-contact-sheet.jpg',quality=92)
+          print('AURELIAN_DECISION_LOOP_V1_EVIDENCE_QA=PASS')
+          PY
+
+      - name: Upload Aurelian Decision Loop artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aurelian-decision-loop-v1-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/aurelian-decision-loop-v1
+          if-no-files-found: error
+          retention-days: 7
