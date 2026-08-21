@@ -2,15 +2,15 @@
 
 Status: ACTIVE
 Updated: 2026-08-21
-Current state revision: Godot Web Export Playability v1 accepted, Aurelian Session Persistence v1 contract pending acceptance
+Current state revision: Godot Aurelian Session Persistence v1 rejected, strategy review required
 Authority source: this file on the current `main`
-Authority baseline SHA: `e6b3a05727d8bfe407b2d88f4c0795c3d6f13cff`
+Authority baseline SHA: `d8e2c2a002419f8062d8423089c5f9c37fa08b65`
 Product baseline SHA: `822496de91a42babc596a8e4cc101503fbc52e14`
-Current milestone: accept the bounded Godot Aurelian Session Persistence v1 contract
+Current milestone: record the rejected persistence candidate and return #415 to bounded strategy review
 Active execution issue: #415
-Active implementation PR: authority and session-persistence contract update only until merged
+Active implementation PR: authority-only rejection record until merged
 Last completed milestone: PR #469 `GODOT_WEB_EXPORT_PLAYABILITY_PASS`, accepted head `fe1460a9b9abc04d50e85d4257ed7e43acf0449a`, merged as `822496de91a42babc596a8e4cc101503fbc52e14`
-Next allowed action: after this contract merges and post-merge checks are healthy, execute exactly one bounded Godot Aurelian Session Persistence v1 candidate, review exact-head native and browser restore evidence directly and classify it.
+Next allowed action: after this authority update merges and post-merge checks are healthy, perform one bounded strategy review of the Web persistence mechanism before authorizing any new candidate.
 
 ## Product truth
 
@@ -212,11 +212,27 @@ The first artifact exceeded the binding evidence duration and remained rough ref
 
 This proves local Web export playability only. It does not authorize `app/play/**` integration, public route replacement, deployment claims, persistence, economy, P12 or a later product slice.
 
+## Rejected Godot Aurelian Session Persistence v1
+
+PR #472 is `GODOT_AURELIAN_SESSION_PERSISTENCE_REJECT` and was closed without merge.
+
+Evidence identity:
+
+- rejected head: `accddcf88fd7ede177194bc7fd35dfe660136a9b`;
+- focused run: `32450779968`;
+- artifact: `9435664456`;
+- artifact digest: `sha256:5424a0e98b100c8d715769924a778f19e4bb497c08bb0bfc64a5f19bc59f8b05`;
+- final classification: `GODOT_AURELIAN_SESSION_PERSISTENCE_REJECT`.
+
+The native path is accepted only as rough technical reference: schema and fallback tests pass, Linux and Web exports contain the helper, native restart restores `map_east_route:east_trade`, and input continues to `village_route_context`. Directly reviewed native stills preserve accepted Village, Map, World and shared geography.
+
+The binding same-origin Chromium requirement failed. The exact browser sequence reached `world_neutral -> world_trade_selected -> map_east_route`, then reload returned to `world_neutral` instead of restoring `map_east_route:east_trade`. Pre-product Xvfb failures were repaired only in the evidence workflow. The one bounded product correction was already used for deterministic GDScript correctness, so no further product correction or merge is authorized on this technique.
+
 ## Next bounded milestone
 
-The single authorized next product slice is Godot Aurelian Session Persistence v1 under `docs/GODOT_AURELIAN_SESSION_PERSISTENCE_V1_CONTRACT.md` after that contract is accepted on `main`.
+No new product implementation is authorized. The next step is one bounded strategy review of the rejected Web persistence path, including the browser storage synchronization boundary and whether a revised cross-runtime contract is viable without changing `app/play/**`, public routes or the accepted Aurelian visuals.
 
-It must persist only the accepted eastern Trade intent and current World / Map / Village entry state through native restart and same-origin Chromium reload. It may not modify `app/play/**`, public routes, accepted visuals, gameplay progression, economy or hosting integration.
+Any later persistence candidate requires a fresh contract accepted on `main`. P12, economy, account or cloud save, public web integration, broad visual polish and later product milestones remain blocked.
 
 ## Product interaction hierarchy
 
@@ -333,6 +349,6 @@ If `pn:status` returns `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`,
 
 ## Current stop condition
 
-This contract update stops when it is merged and post-merge state is healthy.
+This authority update stops when the PR #472 rejection is recorded on `main` and post-merge state is healthy.
 
-Then execute exactly one bounded Godot Aurelian Session Persistence v1 candidate. Stop after direct exact-head native and browser artifact review and classify `GODOT_AURELIAN_SESSION_PERSISTENCE_PASS` or `GODOT_AURELIAN_SESSION_PERSISTENCE_REJECT`. No public integration or later product milestone is authorized. P12, broad Village / Map / World polish, trade economy, full-save migration, public web integration and any fake full-world renderer remain blocked.
+After that, only one bounded strategy review is authorized. No new persistence implementation, public integration or later product milestone may begin before a fresh contract is accepted on `main`. P12, broad Village / Map / World polish, trade economy, full-save migration, public web integration and any fake full-world renderer remain blocked.
