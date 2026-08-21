@@ -1,5 +1,7 @@
 extends "res://scenes/aurelian/aurelian_decision_loop_v1.gd"
 
+const SESSION := preload("res://scenes/aurelian/aurelian_session_persistence_v1.gd")
+
 const PLAYABLE_MANIFEST_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
 const ENTRY_STATES := [
 	"world_neutral",
@@ -16,6 +18,8 @@ var intent_label: Label
 var controls_label: Label
 var automated_input_mode := false
 var automated_frame := 0
+var persistence_enabled := true
+var restored_intent := "none"
 
 func _ready() -> void:
 	if DisplayServer.get_name() == "headless" and not ResourceLoader.exists(GLB_PATH):
@@ -28,6 +32,7 @@ func _ready() -> void:
 		return
 	automated_input_mode = OS.get_environment("AURELIAN_CAPTURE_PLAYABLE_ENTRY") == "1"
 	var evidence_state := OS.get_environment("AURELIAN_PLAYABLE_EVIDENCE_STATE").to_lower()
+	persistence_enabled = evidence_state.is_empty() and not automated_input_mode
 	if not OS.get_environment("AURELIAN_EVIDENCE_DIR").is_empty():
 		get_window().content_scale_size = STILL_SIZE
 		get_window().content_scale_aspect = Window.CONTENT_SCALE_ASPECT_IGNORE
@@ -35,6 +40,12 @@ func _ready() -> void:
 	if ENTRY_STATES.has(evidence_state):
 		entry_state = evidence_state
 		decision_state = evidence_state
+	else:
+		var restored := SESSION.load_session()
+		entry_state = String(restored.get("entry_state", "world_neutral"))
+		restored_intent = String(restored.get("selected_intent", "none"))
+		decision_state = entry_state
+		print("AURELIAN_SESSION_LOAD=%s:%s:%s" % [String(restored.get("status", "unknown")), entry_state, restored_intent])
 	_configure_state_environment(entry_state)
 	super()
 	if cameras.is_empty():
@@ -175,6 +186,13 @@ func _apply_entry_state(state_name: String) -> void:
 		"village_route_context":
 			_activate_camera("village")
 	_update_runtime_hud()
+	if persistence_enabled:
+		restored_intent = "none" if entry_state == "world_neutral" else "east_trade"
+		var save_error := SESSION.save_session(entry_state, restored_intent)
+		if save_error != OK:
+			push_error("AURELIAN_SESSION_SAVE_FAILED=%s" % save_error)
+		else:
+			print("AURELIAN_SESSION_SAVE=%s:%s" % [entry_state, restored_intent])
 	print("PLAYABLE_AURELIAN_ENTRY_STATE=%s" % entry_state)
 
 func _update_runtime_hud() -> void:
