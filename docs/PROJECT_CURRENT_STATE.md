@@ -2,15 +2,15 @@
 
 Status: ACTIVE
 Updated: 2026-08-21
-Current state revision: Aurelian Decision Loop v1 accepted, Godot Playable Aurelian Entry v1 contract pending acceptance
+Current state revision: Godot Playable Aurelian Entry v1 accepted, next milestone requires bounded strategy review
 Authority source: this file on the current `main`
-Authority baseline SHA: `5148077d1afb15572092a8ab3ac5fee24bd11b51`
-Product baseline SHA: `aa9f703ef32db841673732102813a5fde1fac509`
-Current milestone: accept the bounded Godot Playable Aurelian Entry v1 contract
+Authority baseline SHA: `caad7cf0cbc65fe3e066ca13108a0171098cd4dd`
+Product baseline SHA: `caad7cf0cbc65fe3e066ca13108a0171098cd4dd`
+Current milestone: accept the Godot Playable Aurelian Entry v1 result and return to strategy review
 Active execution issue: #415
-Active implementation PR: authority and contract update only until merged
-Last completed milestone: PR #460 `AURELIAN_DECISION_LOOP_PASS`, accepted head `61231a57b723dc67b27bd629f15de4455008aecf`, merged as `aa9f703ef32db841673732102813a5fde1fac509`
-Next allowed action: after this contract merges and post-merge checks are healthy, execute exactly one bounded Godot Playable Aurelian Entry v1 candidate, review exact-head evidence directly and classify it.
+Active implementation PR: acceptance record only until merged
+Last completed milestone: PR #463 `GODOT_PLAYABLE_AURELIAN_ENTRY_PASS`, accepted head `40444e7d06197048ef6d505c5d1a1dc752edd4f3`, merged as `caad7cf0cbc65fe3e066ca13108a0171098cd4dd`
+Next allowed action: after this acceptance record merges and post-merge checks are healthy, run exactly one bounded strategy review and accept the next milestone contract before any new product implementation.
 
 ## Product truth
 
@@ -54,7 +54,8 @@ Accepted implementation inputs:
 - PR #451: `PRODUCTION_VILLAGE_PASS`;
 - PR #454: `PRODUCTION_MAP_PASS`;
 - PR #457: `PRODUCTION_WORLD_PASS`;
-- PR #460: `AURELIAN_DECISION_LOOP_PASS`.
+- PR #460: `AURELIAN_DECISION_LOOP_PASS`;
+- PR #463: `GODOT_PLAYABLE_AURELIAN_ENTRY_PASS`.
 
 The accepted shared-world pipeline proves:
 
@@ -152,15 +153,30 @@ Direct review of six 1440 x 900 stills and the raw 24-second sequence confirmed 
 
 This proves deterministic intent continuity, not a trade economy, persistence system or new gameplay architecture.
 
+## Accepted Godot Playable Aurelian Entry v1
+
+PR #463 replaced the migration-foundation diagnostic as the normal Godot project entry with one bounded session-local path:
+
+`World neutral -> Trade selected -> Map East Route -> Village route context -> Map -> World`
+
+Evidence identity:
+
+- accepted head: `40444e7d06197048ef6d505c5d1a1dc752edd4f3`;
+- focused run: `32442024239`;
+- artifact: `9432802453`;
+- artifact digest: `sha256:5492481e4b8bdba248a304a7c8b18b25ec5d8a5e66ba2dc87db99aad19516ad2`;
+- merge: `caad7cf0cbc65fe3e066ca13108a0171098cd4dd`;
+- final classification: `GODOT_PLAYABLE_AURELIAN_ENTRY_PASS`.
+
+Direct review of six 1440 x 900 stills and the raw 27-second sequence confirmed that normal launch reaches Aurelian World, the HUD identifies `WHY / WHERE / HOW`, player input drives the complete forward and backward path, and eastern Trade intent survives the return to World. Accepted Village, Map, World and shared geography remain intact. Godot Foundation CI, Pixel Nations CI, RC1, Play Visual QA, P4-P8, P10-P11 and Vercel were successful on the accepted exact head.
+
+This proves a playable Godot entry and session-local handoff only. It does not authorize persistence, trade economy, web integration, P12 or a later product slice.
+
 ## Next bounded milestone
 
-The single authorized next product slice is Godot Playable Aurelian Entry v1 under `docs/GODOT_PLAYABLE_AURELIAN_ENTRY_V1_CONTRACT.md` after that contract is accepted on `main`.
+No later product implementation is authorized yet.
 
-It must replace the migration-foundation diagnostic as the normal Godot player entry with one bounded, input-driven path:
-
-`launch Aurelian World -> select Trade -> Map East Route -> Village route context -> Map -> World`
-
-The flow is session-local and may use a minimal runtime shell. It does not authorize a trade economy, persistence, save migration, public web integration, new reducer actions or broad visual polish.
+The next action is exactly one bounded strategy review using the accepted Village, Map, World, Decision Loop and Playable Entry results. That review may produce one documentation-only contract PR for the next smallest milestone. Product code must not begin before that contract is accepted on `main`.
 
 ## Product interaction hierarchy
 
@@ -277,6 +293,6 @@ If `pn:status` returns `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`,
 
 ## Current stop condition
 
-This contract update stops when it is merged and post-merge state is healthy.
+This acceptance record stops when it is merged and post-merge state is healthy.
 
-Then execute exactly one bounded Godot Playable Aurelian Entry v1 candidate. Stop after direct exact-head artifact review and classify `GODOT_PLAYABLE_AURELIAN_ENTRY_PASS`, one bounded `CORRECTION_REQUIRED`, or `GODOT_PLAYABLE_AURELIAN_ENTRY_REJECT`. No later product milestone is authorized. P12, broad Village / Map / World polish, trade economy, persistence work, public web integration and any fake full-world renderer remain blocked.
+Then run exactly one bounded strategy review. No later product milestone is authorized until a new contract is accepted on `main`. P12, broad Village / Map / World polish, trade economy, persistence work, public web integration and any fake full-world renderer remain blocked.
