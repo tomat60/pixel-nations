@@ -2,15 +2,15 @@
 
 Status: ACTIVE
 Updated: 2026-08-21
-Current state revision: Godot Playable Aurelian Entry v1 accepted, next milestone requires bounded strategy review
+Current state revision: Godot Playable Aurelian Entry v1 accepted, render asset packaging contract pending acceptance
 Authority source: this file on the current `main`
-Authority baseline SHA: `caad7cf0cbc65fe3e066ca13108a0171098cd4dd`
+Authority baseline SHA: `181371872dbdd7371de72337e490f14053f3a67d`
 Product baseline SHA: `caad7cf0cbc65fe3e066ca13108a0171098cd4dd`
-Current milestone: accept the Godot Playable Aurelian Entry v1 result and return to strategy review
+Current milestone: accept the bounded Godot Aurelian Render Asset Packaging v1 contract
 Active execution issue: #415
-Active implementation PR: acceptance record only until merged
+Active implementation PR: authority and packaging contract update only until merged
 Last completed milestone: PR #463 `GODOT_PLAYABLE_AURELIAN_ENTRY_PASS`, accepted head `40444e7d06197048ef6d505c5d1a1dc752edd4f3`, merged as `caad7cf0cbc65fe3e066ca13108a0171098cd4dd`
-Next allowed action: after this acceptance record merges and post-merge checks are healthy, run exactly one bounded strategy review and accept the next milestone contract before any new product implementation.
+Next allowed action: after this contract merges and post-merge checks are healthy, execute exactly one bounded render asset packaging candidate, review exact-head graphical evidence directly and classify it.
 
 ## Product truth
 
@@ -50,6 +50,7 @@ Accepted implementation inputs:
 - Village / Map / World role contract: `docs/AURELIAN_VIEW_ROLES_V1.md`;
 - Aurelian Decision Loop v1 contract: `docs/AURELIAN_DECISION_LOOP_V1_CONTRACT.md`;
 - Godot Playable Aurelian Entry v1 contract: `docs/GODOT_PLAYABLE_AURELIAN_ENTRY_V1_CONTRACT.md`;
+- Godot Aurelian Render Asset Packaging v1 contract: `docs/GODOT_AURELIAN_RENDER_ASSET_PACKAGING_V1_CONTRACT.md`;
 - PR #449 authored Blender terrain + KayKit + GLB + Godot integration reference: `IMPLEMENTATION_REFERENCE_PASS / PRODUCTION_VISUAL_NOT_YET_ACCEPTED`;
 - PR #451: `PRODUCTION_VILLAGE_PASS`;
 - PR #454: `PRODUCTION_MAP_PASS`;
@@ -174,9 +175,9 @@ This proves a playable Godot entry and session-local handoff only. It does not a
 
 ## Next bounded milestone
 
-No later product implementation is authorized yet.
+The single authorized next product slice is Godot Aurelian Render Asset Packaging v1 under `docs/GODOT_AURELIAN_RENDER_ASSET_PACKAGING_V1_CONTRACT.md` after that contract is accepted on `main`.
 
-The next action is exactly one bounded strategy review using the accepted Village, Map, World, Decision Loop and Playable Entry results. That review may produce one documentation-only contract PR for the next smallest milestone. Product code must not begin before that contract is accepted on `main`.
+It must make the already accepted authored Aurelian GLB available to a clean checkout and canonical Linux / Web export, then prove a normal graphical launch without evidence environment variables. It may not change accepted geometry, presentation, interactions or web surfaces.
 
 ## Product interaction hierarchy
 
@@ -293,6 +294,6 @@ If `pn:status` returns `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`,
 
 ## Current stop condition
 
-This acceptance record stops when it is merged and post-merge state is healthy.
+This contract update stops when it is merged and post-merge state is healthy.
 
-Then run exactly one bounded strategy review. No later product milestone is authorized until a new contract is accepted on `main`. P12, broad Village / Map / World polish, trade economy, persistence work, public web integration and any fake full-world renderer remain blocked.
+Then execute exactly one bounded Godot Aurelian Render Asset Packaging v1 candidate. Stop after direct exact-head graphical artifact review and classify `GODOT_AURELIAN_RENDER_ASSET_PACKAGING_PASS` or `GODOT_AURELIAN_RENDER_ASSET_PACKAGING_REJECT`. No later product milestone is authorized. P12, broad Village / Map / World polish, trade economy, persistence work, public web integration and any fake full-world renderer remain blocked.
