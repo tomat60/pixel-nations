@@ -1,0 +1,336 @@
+name: Godot Aurelian Session Persistence V2
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/godot-aurelian-session-persistence-v2.yml"
+      - "game/scenes/aurelian/aurelian_session_persistence_v2.gd"
+      - "game/scenes/aurelian/playable_aurelian_entry_v1.gd"
+      - "game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
+      - "game/tests/aurelian_session_persistence_v2_test.gd"
+      - "game/tests/playable_aurelian_entry_v1_test.gd"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-aurelian-session-persistence-v2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7.1"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EVIDENCE_DIR: "evidence/godot-aurelian-session-persistence-v2"
+  GLB_SHA256: "04116e3d662d461f0d29ca797444193b0873f5aba6012790af7d366c63e01048"
+
+jobs:
+  prove-session-persistence-v2:
+    name: Prove native and synchronous Web persistence v2
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}/stills"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+          cp game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json "${EVIDENCE_DIR}/persistence-schema-manifest.json"
+
+      - name: Install existing QA tools
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          npm ci
+          npx playwright install chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends unzip libgl1 imagemagick ffmpeg xvfb xdotool >/dev/null
+
+      - name: Download pinned Godot and export templates
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/godot /tmp/godot-templates
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip"             -o /tmp/godot/godot.zip
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz"             -o /tmp/godot/templates.tpz
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          unzip -q /tmp/godot/templates.tpz -d /tmp/godot-templates
+          mkdir -p "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          cp -R /tmp/godot-templates/templates/. "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Import, test adapters, and export
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          test "$(sha256sum game/assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb | cut -d' ' -f1)" = "${GLB_SHA256}"
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          for test in playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test; do
+            "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1
+          done
+          grep -F "GODOT_PLAYABLE_AURELIAN_ENTRY_V1_TEST: PASS" "${EVIDENCE_DIR}/playable_aurelian_entry_v1_test.log"
+          grep -F "GODOT_AURELIAN_SESSION_PERSISTENCE_V2_TEST: PASS" "${EVIDENCE_DIR}/aurelian_session_persistence_v2_test.log"
+          mkdir -p game/build/linux game/build/web
+          "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/export-linux.log" 2>&1
+          "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html > "${EVIDENCE_DIR}/export-web.log" 2>&1
+          test -x game/build/linux/pixel-nations-foundation.x86_64
+          test -s game/build/web/index.pck
+          grep -aF "aurelian_session_persistence_v2.gd" game/build/linux/pixel-nations-foundation.pck
+          grep -aF "aurelian_session_persistence_v2.gd" game/build/web/index.pck
+
+      - name: Prove native restart with real input
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          export HOME="${RUNNER_TEMP}/aurelian-native-v2-profile"
+          mkdir -p "$HOME"
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1440x900x24 > "${EVIDENCE_DIR}/xvfb.log" 2>&1 &
+          XVFB_PID=$!
+          trap 'kill $XVFB_PID || true' EXIT
+          for attempt in $(seq 1 40); do
+            xdotool getdisplaygeometry >/dev/null 2>&1 && break
+            sleep 0.25
+          done
+          xdotool getdisplaygeometry >/dev/null
+          cd game/build/linux
+          stdbuf -oL -eL ./pixel-nations-foundation.x86_64 --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 > "../../../${EVIDENCE_DIR}/native-first.log" 2>&1 &
+          GAME_PID=$!
+          for attempt in $(seq 1 120); do
+            WINDOW_ID="$(xdotool search --onlyvisible --name "Pixel Nations" 2>/dev/null | head -1 || true)"
+            [ -n "$WINDOW_ID" ] && break
+            sleep 0.25
+          done
+          test -n "${WINDOW_ID:-}"
+          xdotool key --window "$WINDOW_ID" Return
+          sleep 1
+          xdotool key --window "$WINDOW_ID" Right
+          sleep 2
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-map-before-restart-1440x900.png"
+          kill "$GAME_PID"
+          wait "$GAME_PID" || true
+          stdbuf -oL -eL ./pixel-nations-foundation.x86_64 --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 > "../../../${EVIDENCE_DIR}/native-restored.log" 2>&1 &
+          GAME_PID=$!
+          for attempt in $(seq 1 80); do
+            WINDOW_ID="$(xdotool search --onlyvisible --name "Pixel Nations" 2>/dev/null | head -1 || true)"
+            [ -n "$WINDOW_ID" ] && break
+            sleep 0.25
+          done
+          test -n "${WINDOW_ID:-}"
+          sleep 2
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-map-restored-1440x900.png"
+          xdotool key --window "$WINDOW_ID" Right
+          sleep 2
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-village-after-restore-1440x900.png"
+          kill "$GAME_PID"
+          wait "$GAME_PID" || true
+          cd ../../..
+          grep -F "AURELIAN_SESSION_V2_LOAD=missing:native_file_access:world_neutral:none" "${EVIDENCE_DIR}/native-first.log"
+          grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:map_east_route:east_trade" "${EVIDENCE_DIR}/native-restored.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_route_context" "${EVIDENCE_DIR}/native-restored.log"
+
+      - name: Serve Web export
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8060 --bind 127.0.0.1 --directory game/build/web > "${EVIDENCE_DIR}/http-server.log" 2>&1 &
+          echo "WEB_SERVER_PID=$!" >> "$GITHUB_ENV"
+          for attempt in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:8060/index.html >/dev/null && exit 0
+            sleep 1
+          done
+          exit 1
+
+      - name: Prove acknowledged Web reload and profile reopen
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+          const root = path.resolve(process.env.EVIDENCE_DIR);
+          const stills = path.join(root, 'stills');
+          const profile = path.join(process.env.RUNNER_TEMP, 'aurelian-web-v2-profile');
+          const consoleLines = [];
+          const requestFailures = [];
+          const responseFailures = [];
+          const states = [];
+          const loads = [];
+          const saveAcks = [];
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+          function attach(page) {
+            page.on('console', msg => {
+              const line = '[' + msg.type() + '] ' + msg.text();
+              consoleLines.push(line);
+              let match = msg.text().match(/PLAYABLE_AURELIAN_ENTRY_STATE=([a-z_]+)/);
+              if (match) states.push(match[1]);
+              match = msg.text().match(/AURELIAN_SESSION_V2_LOAD=([a-z_]+):([a-z_]+):([a-z_]+):([a-z_]+)/);
+              if (match) loads.push({status:match[1],adapter:match[2],state:match[3],intent:match[4]});
+              match = msg.text().match(/AURELIAN_SESSION_V2_SAVE_ACK=([a-z_]+):([a-z_]+):([a-z_]+):([a-z_]+)/);
+              if (match) saveAcks.push({status:match[1],adapter:match[2],state:match[3],intent:match[4]});
+            });
+            page.on('pageerror', e => consoleLines.push('[pageerror] ' + (e.stack || e.message)));
+            page.on('requestfailed', r => requestFailures.push({url:r.url(),error:r.failure()?.errorText||'unknown'}));
+            page.on('response', r => { if (r.status() >= 400) responseFailures.push({url:r.url(),status:r.status()}); });
+          }
+          async function waitFor(predicate, label, timeout = 90000) {
+            const start = Date.now();
+            while (Date.now() - start < timeout) {
+              if (predicate()) return;
+              await sleep(100);
+            }
+            throw new Error('Timed out for ' + label + ': states=' + states.join(',') + ' loads=' + JSON.stringify(loads) + ' acks=' + JSON.stringify(saveAcks));
+          }
+          async function openPage(context) {
+            const page = context.pages()[0] || await context.newPage();
+            attach(page);
+            await page.goto('http://127.0.0.1:8060/index.html',{waitUntil:'domcontentloaded',timeout:90000});
+            await page.locator('canvas').waitFor({state:'visible',timeout:90000});
+            await page.locator('canvas').click();
+            return page;
+          }
+          function writeArtifacts() {
+            fs.writeFileSync(path.join(root,'browser-console.log'),consoleLines.join('\n')+'\n');
+            fs.writeFileSync(path.join(root,'browser-requests.json'),JSON.stringify({request_failures:requestFailures,response_failures:responseFailures},null,2)+'\n');
+          }
+
+          (async () => {
+            let context = await chromium.launchPersistentContext(profile,{
+              headless:true,
+              viewport:{width:1440,height:900},
+              recordVideo:{dir:path.join(root,'video-tmp'),size:{width:1440,height:900}},
+              args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']
+            });
+            let page = await openPage(context);
+            await waitFor(() => states.filter(x => x === 'world_neutral').length >= 1,'initial world');
+            await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.adapter === 'web_local_storage' && x.state === 'world_neutral'),'initial save ack');
+            await sleep(4000);
+            await page.screenshot({path:path.join(stills,'web-world-neutral-1440x900.png')});
+            await page.keyboard.press('Enter');
+            await waitFor(() => states.includes('world_trade_selected'),'trade state');
+            await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'world_trade_selected'),'trade save ack');
+            await sleep(3000);
+            await page.keyboard.press('ArrowRight');
+            await waitFor(() => states.includes('map_east_route'),'map state');
+            await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'map_east_route'),'map save ack');
+            await sleep(3000);
+            await page.screenshot({path:path.join(stills,'web-map-before-reload-1440x900.png')});
+            await page.reload({waitUntil:'domcontentloaded',timeout:90000});
+            await page.locator('canvas').waitFor({state:'visible',timeout:90000});
+            await waitFor(() => loads.some(x => x.status === 'restored' && x.adapter === 'web_local_storage' && x.state === 'map_east_route' && x.intent === 'east_trade'),'reload restore');
+            await waitFor(() => states.filter(x => x === 'map_east_route').length >= 2,'reloaded map');
+            await sleep(5000);
+            await page.screenshot({path:path.join(stills,'web-map-restored-1440x900.png')});
+            const video = page.video();
+            await context.close();
+            await video.saveAs(path.join(root,'session-persistence-v2-sequence.webm'));
+
+            await sleep(1000);
+            context = await chromium.launchPersistentContext(profile,{
+              headless:true,
+              viewport:{width:1440,height:900},
+              args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']
+            });
+            page = await openPage(context);
+            await waitFor(() => loads.filter(x => x.status === 'restored' && x.state === 'map_east_route').length >= 2,'profile reopen restore');
+            await waitFor(() => states.filter(x => x === 'map_east_route').length >= 3,'profile reopened map');
+            await sleep(3000);
+            await page.screenshot({path:path.join(stills,'web-map-profile-reopened-1440x900.png')});
+            await page.keyboard.press('ArrowRight');
+            await waitFor(() => states.includes('village_route_context'),'village after reopen');
+            await sleep(3000);
+            await page.screenshot({path:path.join(stills,'web-village-after-profile-reopen-1440x900.png')});
+            await page.keyboard.press('ArrowLeft');
+            await waitFor(() => states.filter(x => x === 'map_east_route').length >= 4,'back to map');
+            await context.close();
+
+            const browser = await chromium.launch({headless:true,args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
+            const denied = await browser.newContext({viewport:{width:1440,height:900}});
+            await denied.addInitScript(() => {
+              Object.defineProperty(window,'localStorage',{configurable:true,get(){throw new DOMException('denied','SecurityError');}});
+            });
+            const deniedPage = await denied.newPage();
+            attach(deniedPage);
+            await deniedPage.goto('http://127.0.0.1:8060/index.html',{waitUntil:'domcontentloaded',timeout:90000});
+            await deniedPage.locator('canvas').waitFor({state:'visible',timeout:90000});
+            await waitFor(() => loads.some(x => x.status === 'unavailable' && x.adapter === 'web_local_storage' && x.state === 'world_neutral'),'denied fallback');
+            await denied.close();
+            await browser.close();
+
+            fs.writeFileSync(path.join(root,'result-manifest.json'),JSON.stringify({
+              contract:'GODOT_AURELIAN_SESSION_PERSISTENCE_V2',
+              exact_head:fs.readFileSync(path.join(root,'exact-head.txt'),'utf8').trim(),
+              schema:'pixel_nations.aurelian_session',
+              schema_version:2,
+              native_adapter:'native_file_access',
+              web_adapter:'web_local_storage',
+              web_key:'pixel_nations.aurelian_session.v2',
+              capability_result:'available',
+              save_acknowledgement:'stored',
+              before_reload_state:'map_east_route',
+              reloaded_state:'map_east_route',
+              profile_reopen_state:'map_east_route',
+              selected_intent:'east_trade',
+              continued_state:'village_route_context',
+              denied_storage_fallback:'world_neutral',
+              input_actions:['Enter','ArrowRight','reload','browser_reopen','ArrowRight','ArrowLeft'],
+              evidence_storage_seeding:false,
+              glb_sha256:process.env.GLB_SHA256
+            },null,2)+'\n');
+            writeArtifacts();
+            if (requestFailures.length || responseFailures.length) throw new Error('Browser request failure');
+            if (consoleLines.some(x => /SCRIPT ERROR|Parse Error|pageerror|WebGL not supported/i.test(x))) throw new Error('Blocking browser runtime error');
+          })().catch(error => {
+            writeArtifacts();
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Validate exact evidence
+        run: |
+          set -euo pipefail
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "8"
+          for image in "${EVIDENCE_DIR}"/stills/*.png; do
+            test "$(identify -format '%wx%h' "$image")" = "1440x900"
+            test "$(stat -c %s "$image")" -gt 70000
+          done
+          duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/session-persistence-v2-sequence.webm")"
+          awk -v duration="$duration" 'BEGIN { exit !(duration >= 20 && duration <= 35) }'
+          grep -F "AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:map_east_route:east_trade" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_SESSION_V2_SAVE_ACK=stored:web_local_storage:map_east_route:east_trade" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_SESSION_V2_LOAD=unavailable:web_local_storage:world_neutral:none" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_route_context" "${EVIDENCE_DIR}/browser-console.log"
+          sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/session-persistence-v2-sequence.webm" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
+          echo "GODOT_AURELIAN_SESSION_PERSISTENCE_V2_DETERMINISTIC_QA=PASS"
+
+      - name: Stop local server
+        if: always()
+        run: |
+          if [ -n "${WEB_SERVER_PID:-}" ]; then kill "${WEB_SERVER_PID}" || true; fi
+
+      - name: Upload exact-head persistence v2 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-aurelian-session-persistence-v2-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/godot-aurelian-session-persistence-v2
+          if-no-files-found: error
+          retention-days: 7
