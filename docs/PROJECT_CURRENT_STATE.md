@@ -2,15 +2,15 @@
 
 Status: ACTIVE
 Updated: 2026-08-21
-Current state revision: Production World v1 accepted, Aurelian Decision Loop v1 contract pending acceptance
+Current state revision: Aurelian Decision Loop v1 accepted, next milestone pending bounded strategy review
 Authority source: this file on the current `main`
-Authority baseline SHA: `fb18803f17a3b94688fdf6c3588894ae5dc82e9e`
-Product baseline SHA: `5082c387fb7be436c5fc6073efc5ec88a2572850`
-Current milestone: accept the bounded Aurelian Decision Loop v1 contract
+Authority baseline SHA: `aa9f703ef32db841673732102813a5fde1fac509`
+Product baseline SHA: `aa9f703ef32db841673732102813a5fde1fac509`
+Current milestone: record Aurelian Decision Loop v1 acceptance and conduct one bounded strategy review
 Active execution issue: #415
-Active implementation PR: authority and contract update only until merged
-Last completed milestone: PR #457 `PRODUCTION_WORLD_PASS`, accepted head `88c8ffc706d06b2fa4ff73f6d0fe961aee9a803f`, merged as `5082c387fb7be436c5fc6073efc5ec88a2572850`
-Next allowed action: after this contract merges and post-merge checks are healthy, execute exactly one bounded Aurelian Decision Loop v1 candidate, review exact-head evidence directly and classify it.
+Active implementation PR: acceptance-state update only until merged
+Last completed milestone: PR #460 `AURELIAN_DECISION_LOOP_PASS`, accepted head `61231a57b723dc67b27bd629f15de4455008aecf`, merged as `aa9f703ef32db841673732102813a5fde1fac509`
+Next allowed action: after this acceptance update merges and post-merge checks are healthy, conduct exactly one bounded strategy review. No later product slice is authorized until a fresh contract is accepted.
 
 ## Product truth
 
@@ -52,7 +52,8 @@ Accepted implementation inputs:
 - PR #449 authored Blender terrain + KayKit + GLB + Godot integration reference: `IMPLEMENTATION_REFERENCE_PASS / PRODUCTION_VISUAL_NOT_YET_ACCEPTED`;
 - PR #451: `PRODUCTION_VILLAGE_PASS`;
 - PR #454: `PRODUCTION_MAP_PASS`;
-- PR #457: `PRODUCTION_WORLD_PASS`.
+- PR #457: `PRODUCTION_WORLD_PASS`;
+- PR #460: `AURELIAN_DECISION_LOOP_PASS`.
 
 The accepted shared-world pipeline proves:
 
@@ -131,15 +132,30 @@ The first meaningful candidate was technically complete but visually read as a d
 
 World v1 proves the role, not a finished global renderer. Diplomacy, combat, economy expansion, P12, independent World geography and a fake 10,000-land presentation remain blocked.
 
+## Accepted Aurelian Decision Loop v1
+
+PR #460 accepted one retained eastern-trade intent across the three accepted decision layers:
+
+`Direction_EastTrade -> Land_EastRouteSelected -> GreenvaleTradeRouteContext`
+
+Evidence identity:
+
+- accepted head: `61231a57b723dc67b27bd629f15de4455008aecf`;
+- focused run: `32438354507`;
+- artifact: `9431564011`;
+- artifact digest: `sha256:e24d2b7373205ca8552d6541e83bbdbc40aa7d5c44302d7f977a404c8502912d`;
+- merge: `aa9f703ef32db841673732102813a5fde1fac509`;
+- final classification: `AURELIAN_DECISION_LOOP_PASS`.
+
+Direct review of six 1440 x 900 stills and the raw 24-second sequence confirmed the complete handoff: World communicates the strategic Trade reason, Map carries it into the East Route land choice, and Village shows the resulting Greenvale-to-Gilded-Crossing route-capacity context. River, bridge, roads, Greenvale, landmarks and topology remain consistent. Map and Village regression evidence is clean.
+
+This proves deterministic intent continuity, not a trade economy, persistence system or new gameplay architecture.
+
 ## Next bounded milestone
 
-The single authorized next product slice is Aurelian Decision Loop v1 under `docs/AURELIAN_DECISION_LOOP_V1_CONTRACT.md` after that contract is accepted on `main`.
+No later product implementation slice is currently authorized.
 
-It must prove one retained eastern-trade intent across the accepted layers:
-
-`World Direction_EastTrade -> Map Land_EastRouteSelected -> Village developed Greenvale / Gilded Crossing route context`
-
-This is a deterministic interaction and evidence slice only. It does not authorize a trade economy, new persistence, reducer actions, a new settlement system, independent geography or broad visual polish.
+After this acceptance update merges and post-merge state is healthy, conduct exactly one bounded strategy review using the accepted Village, Map, World and Decision Loop evidence. Any next product milestone requires a fresh written contract and normal exact-head PR acceptance before implementation begins.
 
 ## Product interaction hierarchy
 
@@ -256,6 +272,6 @@ If `pn:status` returns `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`,
 
 ## Current stop condition
 
-This contract update stops when it is merged and post-merge state is healthy.
+This acceptance update stops when it is merged and post-merge state is healthy.
 
-Then execute exactly one bounded Aurelian Decision Loop v1 candidate. Stop after direct exact-head artifact review and classify `AURELIAN_DECISION_LOOP_PASS`, one bounded `CORRECTION_REQUIRED`, or `AURELIAN_DECISION_LOOP_REJECT`. No later product milestone is authorized. P12, broad Village / Map / World polish and any fake full-world renderer remain blocked.
+Then conduct exactly one bounded strategy review. Stop before any new product implementation until its fresh contract is accepted. P12, broad Village / Map / World polish, trade economy, persistence work and any fake full-world renderer remain blocked.
