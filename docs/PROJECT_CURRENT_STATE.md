@@ -2,15 +2,15 @@
 
 Status: ACTIVE
 Updated: 2026-08-21
-Current state revision: Godot Aurelian Session Persistence v1 rejected, strategy review required
+Current state revision: bounded Web persistence strategy complete, Session Persistence v2 contract proposed
 Authority source: this file on the current `main`
-Authority baseline SHA: `d8e2c2a002419f8062d8423089c5f9c37fa08b65`
+Authority baseline SHA: `61edb7e5b0611f8604cba10a42af8ab199e16173`
 Product baseline SHA: `822496de91a42babc596a8e4cc101503fbc52e14`
-Current milestone: record the rejected persistence candidate and return #415 to bounded strategy review
+Current milestone: authorize one distinct Web storage adapter candidate through an authority-only contract
 Active execution issue: #415
-Active implementation PR: authority-only rejection record until merged
+Active implementation PR: authority-only Session Persistence v2 contract
 Last completed milestone: PR #469 `GODOT_WEB_EXPORT_PLAYABILITY_PASS`, accepted head `fe1460a9b9abc04d50e85d4257ed7e43acf0449a`, merged as `822496de91a42babc596a8e4cc101503fbc52e14`
-Next allowed action: after this authority update merges and post-merge checks are healthy, perform one bounded strategy review of the Web persistence mechanism before authorizing any new candidate.
+Next allowed action: after this contract merges and post-merge checks are healthy, implement exactly one bounded Session Persistence v2 candidate using the authorized platform adapter.
 
 ## Product truth
 
@@ -53,6 +53,7 @@ Accepted implementation inputs:
 - Godot Aurelian Render Asset Packaging v1 contract: `docs/GODOT_AURELIAN_RENDER_ASSET_PACKAGING_V1_CONTRACT.md`;
 - Godot Web Export Playability v1 contract: `docs/GODOT_WEB_EXPORT_PLAYABILITY_V1_CONTRACT.md`;
 - Godot Aurelian Session Persistence v1 contract: `docs/GODOT_AURELIAN_SESSION_PERSISTENCE_V1_CONTRACT.md`;
+- Godot Aurelian Session Persistence v2 contract: `docs/GODOT_AURELIAN_SESSION_PERSISTENCE_V2_CONTRACT.md`;
 - PR #449 authored Blender terrain + KayKit + GLB + Godot integration reference: `IMPLEMENTATION_REFERENCE_PASS / PRODUCTION_VISUAL_NOT_YET_ACCEPTED`;
 - PR #451: `PRODUCTION_VILLAGE_PASS`;
 - PR #454: `PRODUCTION_MAP_PASS`;
@@ -228,11 +229,21 @@ The native path is accepted only as rough technical reference: schema and fallba
 
 The binding same-origin Chromium requirement failed. The exact browser sequence reached `world_neutral -> world_trade_selected -> map_east_route`, then reload returned to `world_neutral` instead of restoring `map_east_route:east_trade`. Pre-product Xvfb failures were repaired only in the evidence workflow. The one bounded product correction was already used for deterministic GDScript correctness, so no further product correction or merge is authorized on this technique.
 
+## Completed bounded Web persistence strategy review
+
+The review classified the rejected Web `user://` technique as an asynchronous durability boundary, not a candidate for another timing retry. Godot Web uses IndexedDB-backed IDBFS, schedules synchronization after persistent `FileAccess` writes and exposes no game-code completion result for the asynchronous flush. The rejected browser evidence already waited three seconds after the final state save, so a longer blind delay would not be a deterministic recovery.
+
+A distinct v2 technique is viable without touching `app/play/**`, public routes or accepted visuals. The accepted contract is `docs/GODOT_AURELIAN_SESSION_PERSISTENCE_V2_CONTRACT.md`: native keeps the versioned `FileAccess` JSON path, while Web uses synchronous, origin-scoped `window.localStorage` through a guarded `JavaScriptBridge` adapter. Both adapters share one minimal schema and safe fallback behavior.
+
+The v1 branch and IndexedDB-backed `user://` Web technique remain rejected and may not be reused.
+
 ## Next bounded milestone
 
-No new product implementation is authorized. The next step is one bounded strategy review of the rejected Web persistence path, including the browser storage synchronization boundary and whether a revised cross-runtime contract is viable without changing `app/play/**`, public routes or the accepted Aurelian visuals.
+After this contract is accepted on `main` and post-merge checks are healthy, exactly one Session Persistence v2 implementation PR is authorized.
 
-Any later persistence candidate requires a fresh contract accepted on `main`. P12, economy, account or cloud save, public web integration, broad visual polish and later product milestones remain blocked.
+The candidate must prove native restart, same-origin Chromium reload and same-profile browser reopen from real player input. It must use a positive Web adapter save acknowledgement before reload, safely handle unavailable storage and preserve the accepted Aurelian interaction and geography.
+
+P12, economy, account or cloud save, legacy save migration, public web integration, broad visual polish and later product milestones remain blocked.
 
 ## Product interaction hierarchy
 
@@ -349,6 +360,6 @@ If `pn:status` returns `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`,
 
 ## Current stop condition
 
-This authority update stops when the PR #472 rejection is recorded on `main` and post-merge state is healthy.
+This authority update stops when the Session Persistence v2 contract is accepted on `main` and post-merge state is healthy.
 
-After that, only one bounded strategy review is authorized. No new persistence implementation, public integration or later product milestone may begin before a fresh contract is accepted on `main`. P12, broad Village / Map / World polish, trade economy, full-save migration, public web integration and any fake full-world renderer remain blocked.
+After that, exactly one bounded v2 implementation candidate is authorized. Stop after direct exact-head classification as `GODOT_AURELIAN_SESSION_PERSISTENCE_V2_PASS` or `GODOT_AURELIAN_SESSION_PERSISTENCE_V2_REJECT`. Public integration and later milestones remain blocked.
