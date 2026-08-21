@@ -80,6 +80,7 @@ jobs:
           grep -F "AURELIAN_AUTHORED_TERRAIN=PASS" "${EVIDENCE_DIR}/blender-author.log"
           test -s "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb"
           cp "${EXPORT_DIR}/transform-manifest.json" "${EVIDENCE_DIR}/transform-manifest.json"
+          mv "${EXPORT_DIR}/aurelian_authored_terrain_v1.blend" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1.blend"
           cp game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json "${EVIDENCE_DIR}/interaction-manifest.json"
 
       - name: Download pinned Godot
