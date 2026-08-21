@@ -109,22 +109,22 @@ jobs:
           done
           xdotool getdisplaygeometry >/dev/null
           cd game/build/linux
-          ./pixel-nations-foundation.x86_64 --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 > "../../../${EVIDENCE_DIR}/native-first.log" 2>&1 &
+          stdbuf -oL -eL ./pixel-nations-foundation.x86_64 --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 > "../../../${EVIDENCE_DIR}/native-first.log" 2>&1 &
           GAME_PID=$!
-          for attempt in $(seq 1 40); do
-            WINDOW_ID="$(xdotool search --name "Pixel Nations" 2>/dev/null | head -1 || true)"
+          for attempt in $(seq 1 120); do
+            WINDOW_ID="$(xdotool search --onlyvisible --name "Pixel Nations" 2>/dev/null | head -1 || true)"
             [ -n "$WINDOW_ID" ] && break
             sleep 0.25
           done
           test -n "${WINDOW_ID:-}"
-          xdotool windowactivate "$WINDOW_ID" key Return
+          xdotool key --window "$WINDOW_ID" Return
           sleep 1
-          xdotool key Right
+          xdotool key --window "$WINDOW_ID" Right
           sleep 2
           import -window root "../../../${EVIDENCE_DIR}/stills/native-map-before-restart-1440x900.png"
           kill "$GAME_PID"
           wait "$GAME_PID" || true
-          ./pixel-nations-foundation.x86_64 --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 > "../../../${EVIDENCE_DIR}/native-restored.log" 2>&1 &
+          stdbuf -oL -eL ./pixel-nations-foundation.x86_64 --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 > "../../../${EVIDENCE_DIR}/native-restored.log" 2>&1 &
           GAME_PID=$!
           for attempt in $(seq 1 40); do
             WINDOW_ID="$(xdotool search --name "Pixel Nations" 2>/dev/null | head -1 || true)"
@@ -133,7 +133,7 @@ jobs:
           done
           sleep 2
           import -window root "../../../${EVIDENCE_DIR}/stills/native-map-restored-1440x900.png"
-          xdotool windowactivate "$WINDOW_ID" key Right
+          xdotool key --window "$WINDOW_ID" Right
           sleep 2
           import -window root "../../../${EVIDENCE_DIR}/stills/native-village-after-restore-1440x900.png"
           kill "$GAME_PID"
