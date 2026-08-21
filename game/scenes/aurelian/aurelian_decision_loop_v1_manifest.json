@@ -1,0 +1,94 @@
+{
+  "contract": "AURELIAN_DECISION_LOOP_V1",
+  "source_scene": "res://scenes/aurelian/aurelian_decision_loop_v1.tscn",
+  "shared_geography": "aurelian_authored_terrain_v1.glb",
+  "player_question": "Can eastern Trade become an East Route land choice and then a Greenvale route context?",
+  "handoff": {
+    "world_marker": "Direction_EastTrade",
+    "map_marker": "Land_EastRouteSelected",
+    "village_state": "developed",
+    "village_context": "GreenvaleTradeRouteContext",
+    "crossing": "GildedCrossing"
+  },
+  "states": {
+    "world_neutral": {
+      "view": "world",
+      "world_state": "neutral",
+      "map_state": "no_selection",
+      "village_state": "developed",
+      "context_visible": false
+    },
+    "world_trade_selected": {
+      "view": "world",
+      "world_state": "selected_trade",
+      "map_state": "no_selection",
+      "village_state": "developed",
+      "context_visible": false
+    },
+    "map_east_route": {
+      "view": "map",
+      "world_state": "selected_trade",
+      "map_state": "selected",
+      "village_state": "developed",
+      "context_visible": false
+    },
+    "village_route_context": {
+      "view": "village",
+      "world_state": "selected_trade",
+      "map_state": "selected",
+      "village_state": "developed",
+      "context_visible": true
+    },
+    "map_regression": {
+      "view": "map",
+      "world_state": "neutral",
+      "map_state": "status_distinctions",
+      "village_state": "developed",
+      "context_visible": false
+    },
+    "village_regression": {
+      "view": "village",
+      "world_state": "neutral",
+      "map_state": "no_selection",
+      "village_state": "developed",
+      "context_visible": false
+    }
+  },
+  "route_context": {
+    "id": "GreenvaleTradeRouteContext",
+    "label": "TRADE ROUTE CAPACITY",
+    "from_topology": [354, 285],
+    "to_topology": [515, 340],
+    "color": "#62b7c8dd",
+    "width": 0.12,
+    "world_height": 0.34
+  },
+  "transform_invariants": {
+    "GreenvaleOrigin": [354, 285],
+    "GildedCrossing": [515, 340],
+    "NorthRidge": [700, 205],
+    "ForestWorkEdge": [245, 205],
+    "FieldsPlains": [405, 505],
+    "SouthMarsh": [365, 690],
+    "CoastOutflow": [610, 875],
+    "Northgate": [445, 65]
+  },
+  "evidence": [
+    "world-neutral",
+    "world-trade-selected",
+    "map-east-route",
+    "village-route-context",
+    "map-regression",
+    "village-regression",
+    "decision-loop-sequence"
+  ],
+  "forbidden_changes": [
+    "new reducer action",
+    "persistence schema change",
+    "trade economy",
+    "production simulation",
+    "independent geography",
+    "broad view polish",
+    "P12"
+  ]
+}
