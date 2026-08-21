@@ -1,0 +1,10 @@
+{
+  "status": "MATERIALIZED_PENDING_COMMIT_AND_EXACT_HEAD_EVIDENCE",
+  "candidate_head": "955371cff011d32dc8d75f17f93ff05025272b2b",
+  "blender_version": "4.3.2",
+  "kaykit_commit": "84fa4e91af6a88989be7c99e0891cede11f2ca38",
+  "kaykit_archive_sha256": "cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028",
+  "source_sha256": "4672732b04579f7717e3a3417d17f3518d82878380420b871f470f50cf9d0cae",
+  "glb_sha256": "04116e3d662d461f0d29ca797444193b0873f5aba6012790af7d366c63e01048",
+  "transform_manifest_sha256": "9ec772c772048a3e0e28874108b82fd94267f8c39b33bb2e5c4198720758c58d"
+}
