@@ -2,15 +2,15 @@
 
 Status: ACTIVE
 Updated: 2026-08-21
-Current state revision: Godot Aurelian Session Persistence v2 accepted
+Current state revision: bounded first-claim strategy complete, Godot Aurelian First Land Claim v1 contract proposed
 Authority source: this file on the current `main`
-Authority baseline SHA: `00a93b12a26a10ddd87a9a5ef1a7b58d6657bfc6`
+Authority baseline SHA: `db606951f10a2b0c8b1ddff0212a8b8bdd951093`
 Product baseline SHA: `00a93b12a26a10ddd87a9a5ef1a7b58d6657bfc6`
-Current milestone: record `GODOT_AURELIAN_SESSION_PERSISTENCE_V2_PASS` and return control to bounded strategy review
+Current milestone: authorize exactly one Godot Aurelian First Land Claim v1 candidate
 Active execution issue: #415
-Active implementation PR: authority-only Session Persistence v2 acceptance record
+Active implementation PR: authority-only Godot Aurelian First Land Claim v1 contract
 Last completed milestone: PR #475 `GODOT_AURELIAN_SESSION_PERSISTENCE_V2_PASS`, accepted head `50f0bedf708cd0e081518b711be5fbda63b4ad9f`, merged as `00a93b12a26a10ddd87a9a5ef1a7b58d6657bfc6`
-Next allowed action: after this acceptance record merges and post-merge checks are healthy, conduct exactly one bounded strategy review and accept the next milestone contract before any product implementation.
+Next allowed action: after this contract merges and post-merge checks are healthy, implement exactly one bounded First Land Claim v1 candidate.
 
 ## Product truth
 
@@ -54,6 +54,7 @@ Accepted implementation inputs:
 - Godot Web Export Playability v1 contract: `docs/GODOT_WEB_EXPORT_PLAYABILITY_V1_CONTRACT.md`;
 - Godot Aurelian Session Persistence v1 contract: `docs/GODOT_AURELIAN_SESSION_PERSISTENCE_V1_CONTRACT.md`;
 - Godot Aurelian Session Persistence v2 contract: `docs/GODOT_AURELIAN_SESSION_PERSISTENCE_V2_CONTRACT.md`;
+- Godot Aurelian First Land Claim v1 contract: `docs/GODOT_AURELIAN_FIRST_LAND_CLAIM_V1_CONTRACT.md`;
 - PR #449 authored Blender terrain + KayKit + GLB + Godot integration reference: `IMPLEMENTATION_REFERENCE_PASS / PRODUCTION_VISUAL_NOT_YET_ACCEPTED`;
 - PR #451: `PRODUCTION_VILLAGE_PASS`;
 - PR #454: `PRODUCTION_MAP_PASS`;
@@ -261,11 +262,19 @@ A distinct v2 technique is viable without touching `app/play/**`, public routes 
 
 The v1 branch and IndexedDB-backed `user://` Web technique remain rejected and may not be reused.
 
+## Completed bounded first-claim strategy review
+
+The normal Godot path now proves playable layer navigation and durable eastern Trade intent, but `map_east_route -> village_route_context` still treats opening Village as navigation. It does not ask the player to claim land, distinguish selected from claimed state or show the accepted claimed Village consequence.
+
+The next smallest milestone is therefore `docs/GODOT_AURELIAN_FIRST_LAND_CLAIM_V1_CONTRACT.md`. It reuses the accepted Map selected/claimed visuals, Village claimed state, shared geography and Session Persistence v2 adapters. It adds exactly one explicit claim decision and no economy, new asset, geography rebuild or public Web integration.
+
 ## Next bounded milestone
 
-After this acceptance record is accepted on `main` and post-merge checks are healthy, conduct exactly one bounded strategy review to select and contract the next smallest milestone.
+After this contract is accepted on `main` and post-merge checks are healthy, exactly one Godot Aurelian First Land Claim v1 implementation PR is authorized.
 
-No product implementation is authorized until that new contract is merged. Allowed work is strategy, documentation and repository QA. P12, economy expansion, account or cloud save, public route replacement, broad visual polish, backend, multiplayer, combat, MAX and paid tools remain blocked.
+The candidate must prove `World Trade -> Map East Route selected -> explicit claim -> Map East Route claimed -> Village claimed`, then return to claimed Map. The claimed state must survive native restart, same-origin Web reload and same-profile browser reopen through the accepted persistence adapters.
+
+P12, economy, multiple-land expansion, settlement founding/development, account or cloud save, public route replacement, broad visual polish, backend, multiplayer, combat, MAX and paid tools remain blocked.
 
 ## Product interaction hierarchy
 
