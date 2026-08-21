@@ -129,9 +129,9 @@ jobs:
           )
           for spec in "${specs[@]}"; do
             IFS=: read -r output state source <<< "$spec"
-            timeout 90s xvfb-run -a -s "-screen 0 1600x1000x24" env               AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}"               AURELIAN_PLAYABLE_EVIDENCE_STATE="$state"               "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility               > "${EVIDENCE_DIR}/${output}.log" 2>&1
+            timeout 90s xvfb-run -a -s "-screen 0 1600x1000x24" env               AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}"               AURELIAN_PLAYABLE_EVIDENCE_STATE="$state"               "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900               > "${EVIDENCE_DIR}/${output}.log" 2>&1
             grep -F "PLAYABLE_AURELIAN_ENTRY_READY=$state" "${EVIDENCE_DIR}/${output}.log"
-            mv "${EVIDENCE_DIR}/${source}-1440x900.png" "${EVIDENCE_DIR}/${output}-1440x900.png"
+            mv "${EVIDENCE_DIR}/playable-1440x900.png" "${EVIDENCE_DIR}/${output}-1440x900.png"
           done
 
       - name: Capture input-driven sequence
