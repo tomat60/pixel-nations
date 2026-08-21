@@ -252,7 +252,7 @@ jobs:
           awk -v duration="$duration" 'BEGIN { exit !(duration >= 20 && duration <= 35) }'
           grep -F "AURELIAN_SESSION_LOAD=restored:map_east_route:east_trade" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_route_context" "${EVIDENCE_DIR}/browser-console.log"
-          sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/session-persistence-sequence.webm | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
+          sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/session-persistence-sequence.webm" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
           echo "GODOT_AURELIAN_SESSION_PERSISTENCE_DETERMINISTIC_QA=PASS"
 
       - name: Stop local server
