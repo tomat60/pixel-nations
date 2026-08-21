@@ -49,7 +49,7 @@ func _write_raw(text: String) -> void:
 
 func _cleanup() -> void:
 	for suffix in ["", ".tmp", ".bak"]:
-		var path := TEST_PATH + suffix
+		var path: String = TEST_PATH + String(suffix)
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)
 
