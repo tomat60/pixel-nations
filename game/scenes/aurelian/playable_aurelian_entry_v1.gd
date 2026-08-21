@@ -37,6 +37,26 @@ func _ready() -> void:
 	if automated_input_mode:
 		set_process(true)
 	print("PLAYABLE_AURELIAN_ENTRY_READY=%s" % entry_state)
+	if DisplayServer.get_name() == "headless" and evidence_dir.is_empty() and not automated_input_mode:
+		call_deferred("_complete_headless_smoke")
+
+func _configure_state_environment(state_name: String) -> void:
+	var states: Dictionary = decision_contract.get("states", {})
+	if not states.has(state_name):
+		return
+	var state: Dictionary = states[state_name]
+	OS.set_environment("AURELIAN_WORLD_STATE", String(state.get("world_state", "neutral")))
+	OS.set_environment("AURELIAN_MAP_STATE", String(state.get("map_state", "no_selection")))
+	OS.set_environment("AURELIAN_VILLAGE_STATE", String(state.get("village_state", "developed")))
+	if not decision_sequence_mode and not OS.get_environment("AURELIAN_EVIDENCE_DIR").is_empty():
+		OS.set_environment("AURELIAN_CAPTURE_PRESET", String(state.get("view", "world")))
+	else:
+		OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
+
+func _complete_headless_smoke() -> void:
+	await get_tree().process_frame
+	print("PLAYABLE_AURELIAN_HEADLESS_SMOKE=PASS")
+	get_tree().quit(0)
 
 func _load_playable_contract() -> Dictionary:
 	var file := FileAccess.open(PLAYABLE_MANIFEST_PATH, FileAccess.READ)
