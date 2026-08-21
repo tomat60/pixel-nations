@@ -2,15 +2,15 @@
 
 Status: ACTIVE
 Updated: 2026-08-21
-Current state revision: Godot Aurelian Render Asset Packaging v1 accepted, Web export playability contract pending acceptance
+Current state revision: Godot Web Export Playability v1 accepted, next product milestone contract pending strategy review
 Authority source: this file on the current `main`
-Authority baseline SHA: `27c1acedda79a3451dc7f55c16a5162c1a6dd870`
-Product baseline SHA: `27c1acedda79a3451dc7f55c16a5162c1a6dd870`
-Current milestone: accept the bounded Godot Web Export Playability v1 contract
+Authority baseline SHA: `822496de91a42babc596a8e4cc101503fbc52e14`
+Product baseline SHA: `822496de91a42babc596a8e4cc101503fbc52e14`
+Current milestone: record Godot Web Export Playability v1 acceptance and return to contract-gated strategy review
 Active execution issue: #415
-Active implementation PR: authority and Web export playability contract update only until merged
-Last completed milestone: PR #466 `GODOT_AURELIAN_RENDER_ASSET_PACKAGING_PASS`, accepted head `a0ba7c516b7b409beb9f3b9970eb77971bab879b`, merged as `27c1acedda79a3451dc7f55c16a5162c1a6dd870`
-Next allowed action: after this contract merges and post-merge checks are healthy, execute exactly one bounded Godot Web Export Playability v1 candidate, review exact-head browser evidence directly and classify it.
+Active implementation PR: acceptance-state documentation update only until merged
+Last completed milestone: PR #469 `GODOT_WEB_EXPORT_PLAYABILITY_PASS`, accepted head `fe1460a9b9abc04d50e85d4257ed7e43acf0449a`, merged as `822496de91a42babc596a8e4cc101503fbc52e14`
+Next allowed action: after this acceptance update merges and post-merge checks are healthy, perform exactly one bounded strategy review and accept a new implementation contract before any further product work.
 
 ## Product truth
 
@@ -57,7 +57,9 @@ Accepted implementation inputs:
 - PR #454: `PRODUCTION_MAP_PASS`;
 - PR #457: `PRODUCTION_WORLD_PASS`;
 - PR #460: `AURELIAN_DECISION_LOOP_PASS`;
-- PR #463: `GODOT_PLAYABLE_AURELIAN_ENTRY_PASS`.
+- PR #463: `GODOT_PLAYABLE_AURELIAN_ENTRY_PASS`;
+- PR #466: `GODOT_AURELIAN_RENDER_ASSET_PACKAGING_PASS`;
+- PR #469: `GODOT_WEB_EXPORT_PLAYABILITY_PASS`.
 
 The accepted shared-world pipeline proves:
 
@@ -190,11 +192,30 @@ Evidence identity:
 
 The exact-head workflow proved clean-checkout identity, byte-identical GLB regeneration, semantic transform-manifest reproduction, Godot import, all accepted Aurelian contracts, Linux and Web export inclusion, native headless launch and normal graphical launch without evidence environment variables. Direct review accepted the 1440 x 900 normal-launch still and preserved shared Aurelian geography. No accepted geometry, presentation, interaction or web surface changed.
 
+## Accepted Godot Web Export Playability v1
+
+PR #469 proved that the canonical packaged Aurelian Web export is playable in a real Chromium canvas from a fresh locally served build.
+
+Evidence identity:
+
+- accepted head: `fe1460a9b9abc04d50e85d4257ed7e43acf0449a`;
+- focused run: `32447659838`;
+- artifact: `9434636457`;
+- artifact digest: `sha256:82e0812ca9a056c1932df671271d723f91cad865ff86dd78b589eabcf6425f65`;
+- merge: `822496de91a42babc596a8e4cc101503fbc52e14`;
+- final classification: `GODOT_WEB_EXPORT_PLAYABILITY_PASS`.
+
+Direct review of six 1440 x 900 stills and the raw 25.44-second browser sequence confirmed normal Chromium WebGL 2 launch, real keyboard control, the full forward and backward path, retained eastern Trade intent, unchanged World / Map / Village presentation and shared geography. Browser request failures, response failures and blocking runtime errors were all zero. Native contracts, Linux launch and Linux / Web exports also passed.
+
+The first artifact exceeded the binding evidence duration and remained rough reference only. The evidence-only recovery shortened post-state stabilization waits and added a duration gate. A missing runner `ffprobe` tool caused one infrastructure failure and was repaired without changing product or visuals.
+
+This proves local Web export playability only. It does not authorize `app/play/**` integration, public route replacement, deployment claims, persistence, economy, P12 or a later product slice.
+
 ## Next bounded milestone
 
-The single authorized next product slice is Godot Web Export Playability v1 under `docs/GODOT_WEB_EXPORT_PLAYABILITY_V1_CONTRACT.md` after that contract is accepted on `main`.
+No further product implementation is authorized yet.
 
-It must prove that a fresh Godot Web export loads in Chromium and completes the accepted input-driven `World -> Map -> Village -> Map -> World` path from a local CI-served origin. It may not modify `app/play/**`, public routes, accepted visuals, gameplay, persistence or hosting integration.
+After this acceptance update merges and post-merge checks are healthy, perform exactly one bounded strategy review. Any later product work requires a new explicit contract accepted on `main`. Public web-shell integration is not implied by the Web export PASS.
 
 ## Product interaction hierarchy
 
@@ -311,6 +332,6 @@ If `pn:status` returns `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`,
 
 ## Current stop condition
 
-This contract update stops when it is merged and post-merge state is healthy.
+This acceptance update stops when it is merged and post-merge state is healthy.
 
-Then execute exactly one bounded Godot Web Export Playability v1 candidate. Stop after direct exact-head browser artifact review and classify `GODOT_WEB_EXPORT_PLAYABILITY_PASS` or `GODOT_WEB_EXPORT_PLAYABILITY_REJECT`. No public integration or later product milestone is authorized. P12, broad Village / Map / World polish, trade economy, persistence work, public web integration and any fake full-world renderer remain blocked.
+Then perform exactly one bounded strategy review and accept a new implementation contract before any further product work. No public integration or later product milestone is authorized by the Godot Web Export Playability v1 PASS. P12, broad Village / Map / World polish, trade economy, persistence work, public web integration and any fake full-world renderer remain blocked.
