@@ -194,7 +194,7 @@ jobs:
           xvfb-run -a -s "-screen 0 1440x900x24" bash -c '
             set -euo pipefail
             cd game/build/linux
-            env -u AURELIAN_EVIDENCE_DIR -u AURELIAN_PLAYABLE_EVIDENCE_STATE               -u AURELIAN_CAPTURE_PLAYABLE_ENTRY GODOT_SILENCE_ROOT_WARNING=1               ./pixel-nations-foundation.x86_64               --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900               > "../../../${EVIDENCE_DIR}/native-graphical.log" 2>&1 &
+            env -u AURELIAN_EVIDENCE_DIR -u AURELIAN_PLAYABLE_EVIDENCE_STATE               -u AURELIAN_CAPTURE_PLAYABLE_ENTRY GODOT_SILENCE_ROOT_WARNING=1               stdbuf -oL -eL ./pixel-nations-foundation.x86_64               --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900               > "../../../${EVIDENCE_DIR}/native-graphical.log" 2>&1 &
             pid=$!
             sleep 12
             import -window root "../../../${EVIDENCE_DIR}/normal-native-launch-1440x900.png"
