@@ -27,9 +27,22 @@
   "runtime_rules": {
     "environment_variables_required": false,
     "frame_driven_transitions": false,
-    "session_local_only": true,
-    "persistence_claimed": false,
-    "economy_claimed": false
+    "session_local_only": false,
+    "persistence_claimed": true,
+    "economy_claimed": false,
+    "persistence_scope": "eastern_trade_and_entry_state_only"
   },
-  "shared_geography": "aurelian_authored_terrain_v1.glb"
+  "shared_geography": "aurelian_authored_terrain_v1.glb",
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "native_adapter": "user:// JSON through FileAccess",
+    "web_adapter": "origin-scoped window.localStorage through JavaScriptBridge",
+    "web_key": "pixel_nations.aurelian_session.v2",
+    "selected_intents": [
+      "none",
+      "east_trade"
+    ],
+    "fallback_state": "world_neutral"
+  }
 }
