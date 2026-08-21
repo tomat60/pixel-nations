@@ -1,7 +1,7 @@
 extends "res://scenes/aurelian/production_village_v1.gd"
 
 const MAP_MANIFEST_PATH := "res://scenes/aurelian/production_map_v1_manifest.json"
-const MAP_STATES := ["no_selection", "selected", "status_distinctions"]
+const MAP_STATES := ["no_selection", "selected", "east_route_claimed", "status_distinctions"]
 
 var map_contract: Dictionary = {}
 var map_state := "no_selection"
