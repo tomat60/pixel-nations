@@ -2,15 +2,15 @@
 
 Status: ACTIVE
 Updated: 2026-08-21
-Current state revision: Aurelian Decision Loop v1 accepted, next milestone pending bounded strategy review
+Current state revision: Aurelian Decision Loop v1 accepted, Godot Playable Aurelian Entry v1 contract pending acceptance
 Authority source: this file on the current `main`
-Authority baseline SHA: `aa9f703ef32db841673732102813a5fde1fac509`
+Authority baseline SHA: `5148077d1afb15572092a8ab3ac5fee24bd11b51`
 Product baseline SHA: `aa9f703ef32db841673732102813a5fde1fac509`
-Current milestone: record Aurelian Decision Loop v1 acceptance and conduct one bounded strategy review
+Current milestone: accept the bounded Godot Playable Aurelian Entry v1 contract
 Active execution issue: #415
-Active implementation PR: acceptance-state update only until merged
+Active implementation PR: authority and contract update only until merged
 Last completed milestone: PR #460 `AURELIAN_DECISION_LOOP_PASS`, accepted head `61231a57b723dc67b27bd629f15de4455008aecf`, merged as `aa9f703ef32db841673732102813a5fde1fac509`
-Next allowed action: after this acceptance update merges and post-merge checks are healthy, conduct exactly one bounded strategy review. No later product slice is authorized until a fresh contract is accepted.
+Next allowed action: after this contract merges and post-merge checks are healthy, execute exactly one bounded Godot Playable Aurelian Entry v1 candidate, review exact-head evidence directly and classify it.
 
 ## Product truth
 
@@ -49,6 +49,7 @@ Accepted implementation inputs:
 - Production Map v1 contract: `docs/AURELIAN_PRODUCTION_MAP_V1_CONTRACT.md`;
 - Village / Map / World role contract: `docs/AURELIAN_VIEW_ROLES_V1.md`;
 - Aurelian Decision Loop v1 contract: `docs/AURELIAN_DECISION_LOOP_V1_CONTRACT.md`;
+- Godot Playable Aurelian Entry v1 contract: `docs/GODOT_PLAYABLE_AURELIAN_ENTRY_V1_CONTRACT.md`;
 - PR #449 authored Blender terrain + KayKit + GLB + Godot integration reference: `IMPLEMENTATION_REFERENCE_PASS / PRODUCTION_VISUAL_NOT_YET_ACCEPTED`;
 - PR #451: `PRODUCTION_VILLAGE_PASS`;
 - PR #454: `PRODUCTION_MAP_PASS`;
@@ -153,9 +154,13 @@ This proves deterministic intent continuity, not a trade economy, persistence sy
 
 ## Next bounded milestone
 
-No later product implementation slice is currently authorized.
+The single authorized next product slice is Godot Playable Aurelian Entry v1 under `docs/GODOT_PLAYABLE_AURELIAN_ENTRY_V1_CONTRACT.md` after that contract is accepted on `main`.
 
-After this acceptance update merges and post-merge state is healthy, conduct exactly one bounded strategy review using the accepted Village, Map, World and Decision Loop evidence. Any next product milestone requires a fresh written contract and normal exact-head PR acceptance before implementation begins.
+It must replace the migration-foundation diagnostic as the normal Godot player entry with one bounded, input-driven path:
+
+`launch Aurelian World -> select Trade -> Map East Route -> Village route context -> Map -> World`
+
+The flow is session-local and may use a minimal runtime shell. It does not authorize a trade economy, persistence, save migration, public web integration, new reducer actions or broad visual polish.
 
 ## Product interaction hierarchy
 
@@ -272,6 +277,6 @@ If `pn:status` returns `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`,
 
 ## Current stop condition
 
-This acceptance update stops when it is merged and post-merge state is healthy.
+This contract update stops when it is merged and post-merge state is healthy.
 
-Then conduct exactly one bounded strategy review. Stop before any new product implementation until its fresh contract is accepted. P12, broad Village / Map / World polish, trade economy, persistence work and any fake full-world renderer remain blocked.
+Then execute exactly one bounded Godot Playable Aurelian Entry v1 candidate. Stop after direct exact-head artifact review and classify `GODOT_PLAYABLE_AURELIAN_ENTRY_PASS`, one bounded `CORRECTION_REQUIRED`, or `GODOT_PLAYABLE_AURELIAN_ENTRY_REJECT`. No later product milestone is authorized. P12, broad Village / Map / World polish, trade economy, persistence work, public web integration and any fake full-world renderer remain blocked.
