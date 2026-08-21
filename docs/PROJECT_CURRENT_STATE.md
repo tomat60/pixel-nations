@@ -2,15 +2,15 @@
 
 Status: ACTIVE
 Updated: 2026-08-21
-Current state revision: Godot Web Export Playability v1 accepted, next product milestone contract pending strategy review
+Current state revision: Godot Web Export Playability v1 accepted, Aurelian Session Persistence v1 contract pending acceptance
 Authority source: this file on the current `main`
-Authority baseline SHA: `822496de91a42babc596a8e4cc101503fbc52e14`
+Authority baseline SHA: `e6b3a05727d8bfe407b2d88f4c0795c3d6f13cff`
 Product baseline SHA: `822496de91a42babc596a8e4cc101503fbc52e14`
-Current milestone: record Godot Web Export Playability v1 acceptance and return to contract-gated strategy review
+Current milestone: accept the bounded Godot Aurelian Session Persistence v1 contract
 Active execution issue: #415
-Active implementation PR: acceptance-state documentation update only until merged
+Active implementation PR: authority and session-persistence contract update only until merged
 Last completed milestone: PR #469 `GODOT_WEB_EXPORT_PLAYABILITY_PASS`, accepted head `fe1460a9b9abc04d50e85d4257ed7e43acf0449a`, merged as `822496de91a42babc596a8e4cc101503fbc52e14`
-Next allowed action: after this acceptance update merges and post-merge checks are healthy, perform exactly one bounded strategy review and accept a new implementation contract before any further product work.
+Next allowed action: after this contract merges and post-merge checks are healthy, execute exactly one bounded Godot Aurelian Session Persistence v1 candidate, review exact-head native and browser restore evidence directly and classify it.
 
 ## Product truth
 
@@ -52,6 +52,7 @@ Accepted implementation inputs:
 - Godot Playable Aurelian Entry v1 contract: `docs/GODOT_PLAYABLE_AURELIAN_ENTRY_V1_CONTRACT.md`;
 - Godot Aurelian Render Asset Packaging v1 contract: `docs/GODOT_AURELIAN_RENDER_ASSET_PACKAGING_V1_CONTRACT.md`;
 - Godot Web Export Playability v1 contract: `docs/GODOT_WEB_EXPORT_PLAYABILITY_V1_CONTRACT.md`;
+- Godot Aurelian Session Persistence v1 contract: `docs/GODOT_AURELIAN_SESSION_PERSISTENCE_V1_CONTRACT.md`;
 - PR #449 authored Blender terrain + KayKit + GLB + Godot integration reference: `IMPLEMENTATION_REFERENCE_PASS / PRODUCTION_VISUAL_NOT_YET_ACCEPTED`;
 - PR #451: `PRODUCTION_VILLAGE_PASS`;
 - PR #454: `PRODUCTION_MAP_PASS`;
@@ -213,9 +214,9 @@ This proves local Web export playability only. It does not authorize `app/play/*
 
 ## Next bounded milestone
 
-No further product implementation is authorized yet.
+The single authorized next product slice is Godot Aurelian Session Persistence v1 under `docs/GODOT_AURELIAN_SESSION_PERSISTENCE_V1_CONTRACT.md` after that contract is accepted on `main`.
 
-After this acceptance update merges and post-merge checks are healthy, perform exactly one bounded strategy review. Any later product work requires a new explicit contract accepted on `main`. Public web-shell integration is not implied by the Web export PASS.
+It must persist only the accepted eastern Trade intent and current World / Map / Village entry state through native restart and same-origin Chromium reload. It may not modify `app/play/**`, public routes, accepted visuals, gameplay progression, economy or hosting integration.
 
 ## Product interaction hierarchy
 
@@ -332,6 +333,6 @@ If `pn:status` returns `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`,
 
 ## Current stop condition
 
-This acceptance update stops when it is merged and post-merge state is healthy.
+This contract update stops when it is merged and post-merge state is healthy.
 
-Then perform exactly one bounded strategy review and accept a new implementation contract before any further product work. No public integration or later product milestone is authorized by the Godot Web Export Playability v1 PASS. P12, broad Village / Map / World polish, trade economy, persistence work, public web integration and any fake full-world renderer remain blocked.
+Then execute exactly one bounded Godot Aurelian Session Persistence v1 candidate. Stop after direct exact-head native and browser artifact review and classify `GODOT_AURELIAN_SESSION_PERSISTENCE_PASS` or `GODOT_AURELIAN_SESSION_PERSISTENCE_REJECT`. No public integration or later product milestone is authorized. P12, broad Village / Map / World polish, trade economy, full-save migration, public web integration and any fake full-world renderer remain blocked.
