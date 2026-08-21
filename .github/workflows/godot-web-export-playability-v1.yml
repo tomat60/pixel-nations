@@ -1,0 +1,279 @@
+name: Godot Web Export Playability V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/godot-web-export-playability-v1.yml"
+      - "game/project.godot"
+      - "game/export_presets.cfg"
+      - "game/scenes/aurelian/**"
+      - "game/tests/**"
+      - "game/assets/aurelian-basin/export/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-web-export-playability-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7.1"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EVIDENCE_DIR: "evidence/godot-web-export-playability-v1"
+  GLB_SHA256: "04116e3d662d461f0d29ca797444193b0873f5aba6012790af7d366c63e01048"
+
+jobs:
+  prove-web-playability:
+    name: Prove Godot Web export playability
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}/stills"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+
+      - name: Install existing browser and runtime tools
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          npm ci
+          npx playwright install chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends unzip libgl1 imagemagick ffmpeg >/dev/null
+
+      - name: Download pinned Godot and export templates
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/godot /tmp/godot-templates
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip"             -o /tmp/godot/godot.zip
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz"             -o /tmp/godot/templates.tpz
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          unzip -q /tmp/godot/templates.tpz -d /tmp/godot-templates
+          mkdir -p "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          cp -R /tmp/godot-templates/templates/. "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Prove packaged identity and native contracts
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          test "$(sha256sum game/assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb | cut -d' ' -f1)" = "${GLB_SHA256}"
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test; do
+            "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd"               > "${EVIDENCE_DIR}/${test}.log" 2>&1
+          done
+          grep -F "GODOT_PLAYABLE_AURELIAN_ENTRY_V1_TEST: PASS" "${EVIDENCE_DIR}/playable_aurelian_entry_v1_test.log"
+
+      - name: Export canonical Linux and Web builds
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          mkdir -p game/build/linux game/build/web
+          "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64             > "${EVIDENCE_DIR}/godot-export-linux.log" 2>&1
+          "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html             > "${EVIDENCE_DIR}/godot-export-web.log" 2>&1
+          test -x game/build/linux/pixel-nations-foundation.x86_64
+          test -s game/build/linux/pixel-nations-foundation.pck
+          test -s game/build/web/index.html
+          test -s game/build/web/index.pck
+          test -s game/build/web/index.wasm
+          grep -aF "aurelian_authored_terrain_v1.glb" game/build/linux/pixel-nations-foundation.pck
+          grep -aF "aurelian_authored_terrain_v1.glb" game/build/web/index.pck
+          (
+            cd game/build/linux
+            timeout 30s env -u AURELIAN_EVIDENCE_DIR -u AURELIAN_PLAYABLE_EVIDENCE_STATE               -u AURELIAN_CAPTURE_PLAYABLE_ENTRY GODOT_SILENCE_ROOT_WARNING=1               ./pixel-nations-foundation.x86_64 --headless
+          ) > "${EVIDENCE_DIR}/native-headless.log" 2>&1
+          grep -F "PLAYABLE_AURELIAN_HEADLESS_SMOKE=PASS" "${EVIDENCE_DIR}/native-headless.log"
+          sha256sum game/build/web/* | tee "${EVIDENCE_DIR}/web-export-sha256sums.txt"
+
+      - name: Serve fresh Web export
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8060 --bind 127.0.0.1 --directory game/build/web             > "${EVIDENCE_DIR}/http-server.log" 2>&1 &
+          echo "WEB_SERVER_PID=$!" >> "$GITHUB_ENV"
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8060/index.html >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1
+
+      - name: Drive normal browser input and capture evidence
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+
+          const root = path.resolve(process.env.EVIDENCE_DIR);
+          const stills = path.join(root, 'stills');
+          fs.mkdirSync(stills, { recursive: true });
+          const consoleLines = [];
+          const requestFailures = [];
+          const responseFailures = [];
+          const observedStates = [];
+
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+          async function waitForCount(value, count, timeout = 30000) {
+            const started = Date.now();
+            while (Date.now() - started < timeout) {
+              if (observedStates.filter(state => state === value).length >= count) return;
+              await sleep(100);
+            }
+            throw new Error(`Timed out waiting for ${value} count ${count}; observed=${observedStates.join(',')}`);
+          }
+
+          (async () => {
+            const browser = await chromium.launch({
+              headless: true,
+              args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist']
+            });
+            const context = await browser.newContext({
+              viewport: { width: 1440, height: 900 },
+              recordVideo: { dir: path.join(root, 'video-tmp'), size: { width: 1440, height: 900 } }
+            });
+            const page = await context.newPage();
+            page.on('console', msg => {
+              const line = `[${msg.type()}] ${msg.text()}`;
+              consoleLines.push(line);
+              const match = msg.text().match(/PLAYABLE_AURELIAN_ENTRY_STATE=([a-z_]+)/);
+              if (match) observedStates.push(match[1]);
+            });
+            page.on('pageerror', error => consoleLines.push(`[pageerror] ${error.stack || error.message}`));
+            page.on('requestfailed', request => requestFailures.push({
+              url: request.url(),
+              error: request.failure()?.errorText || 'unknown'
+            }));
+            page.on('response', response => {
+              if (response.status() >= 400) responseFailures.push({ url: response.url(), status: response.status() });
+            });
+
+            await page.goto('http://127.0.0.1:8060/index.html', { waitUntil: 'domcontentloaded', timeout: 90000 });
+            await page.locator('canvas').waitFor({ state: 'visible', timeout: 90000 });
+            const readyStarted = Date.now();
+            while (!consoleLines.some(line => line.includes('PLAYABLE_AURELIAN_ENTRY_READY=world_neutral'))) {
+              if (Date.now() - readyStarted > 90000) throw new Error('Timed out waiting for normal Web entry readiness');
+              await sleep(100);
+            }
+            await page.locator('canvas').click();
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '01-world-neutral-1440x900.png') });
+
+            await page.keyboard.press('Enter');
+            await waitForCount('world_trade_selected', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '02-world-trade-selected-1440x900.png') });
+
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('map_east_route', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '03-map-east-route-1440x900.png') });
+
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('village_route_context', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '04-village-route-context-1440x900.png') });
+
+            await page.keyboard.press('ArrowLeft');
+            await waitForCount('map_east_route', 2);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '05-returned-map-1440x900.png') });
+
+            await page.keyboard.press('ArrowLeft');
+            await waitForCount('world_trade_selected', 2);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '06-returned-world-1440x900.png') });
+
+            const video = page.video();
+            await context.close();
+            await video.saveAs(path.join(root, 'godot-web-input-sequence.webm'));
+            await browser.close();
+
+            fs.writeFileSync(path.join(root, 'browser-console.log'), consoleLines.join('\n') + '\n');
+            fs.writeFileSync(path.join(root, 'browser-requests.json'), JSON.stringify({
+              request_failures: requestFailures,
+              response_failures: responseFailures
+            }, null, 2) + '\n');
+
+            if (requestFailures.length || responseFailures.length) {
+              throw new Error(`Browser request failures: ${JSON.stringify({requestFailures,responseFailures})}`);
+            }
+            if (consoleLines.some(line => /SCRIPT ERROR|Parse Error|Failed to load script|pageerror|WebGL not supported/i.test(line))) {
+              throw new Error('Browser console contains a blocking runtime error');
+            }
+
+            fs.writeFileSync(path.join(root, 'interaction-manifest.json'), JSON.stringify({
+              contract: 'GODOT_WEB_EXPORT_PLAYABILITY_V1',
+              exact_head: fs.readFileSync(path.join(root, 'exact-head.txt'), 'utf8').trim(),
+              origin: 'http://127.0.0.1:8060',
+              viewport: [1440, 900],
+              browser: 'chromium',
+              normal_entry: 'world_neutral',
+              input_actions: ['Enter', 'ArrowRight', 'ArrowRight', 'ArrowLeft', 'ArrowLeft'],
+              observed_states: observedStates,
+              accepted_handoff: 'Direction_EastTrade -> Land_EastRouteSelected -> GreenvaleTradeRouteContext',
+              glb_sha256: process.env.GLB_SHA256,
+              evidence_environment_state_driving: false
+            }, null, 2) + '\n');
+          })().catch(error => {
+            fs.writeFileSync(path.join(root, 'browser-console.log'), consoleLines.join('\n') + '\n');
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Validate exact browser evidence
+        run: |
+          set -euo pipefail
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "6"
+          for image in "${EVIDENCE_DIR}"/stills/*.png; do
+            test "$(identify -format '%wx%h' "$image")" = "1440x900"
+            test "$(stat -c %s "$image")" -gt 70000
+          done
+          test -s "${EVIDENCE_DIR}/godot-web-input-sequence.webm"
+          test "$(stat -c %s "${EVIDENCE_DIR}/godot-web-input-sequence.webm")" -gt 100000
+          video_duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/godot-web-input-sequence.webm")"
+          awk -v duration="$video_duration" 'BEGIN { exit !(duration >= 20 && duration <= 35) }'
+          grep -F "PLAYABLE_AURELIAN_ENTRY_READY=world_neutral" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_route_context" "${EVIDENCE_DIR}/browser-console.log"
+          sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/godot-web-input-sequence.webm"             | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
+          echo "GODOT_WEB_EXPORT_PLAYABILITY_DETERMINISTIC_QA=PASS"
+
+      - name: Stop local server
+        if: always()
+        run: |
+          if [ -n "${WEB_SERVER_PID:-}" ]; then
+            kill "${WEB_SERVER_PID}" || true
+          fi
+
+      - name: Upload exact-head browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-web-export-playability-v1-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/godot-web-export-playability-v1
+          if-no-files-found: error
+          retention-days: 7
