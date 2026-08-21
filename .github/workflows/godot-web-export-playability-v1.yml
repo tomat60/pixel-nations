@@ -54,7 +54,7 @@ jobs:
           npm ci
           npx playwright install chromium
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends unzip libgl1 imagemagick >/dev/null
+          sudo apt-get install -y -qq --no-install-recommends unzip libgl1 imagemagick ffmpeg >/dev/null
 
       - name: Download pinned Godot and export templates
         timeout-minutes: 7
