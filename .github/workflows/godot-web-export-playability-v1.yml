@@ -179,32 +179,32 @@ jobs:
               await sleep(100);
             }
             await page.locator('canvas').click();
-            await sleep(4000);
+            await sleep(1000);
             await page.screenshot({ path: path.join(stills, '01-world-neutral-1440x900.png') });
 
             await page.keyboard.press('Enter');
             await waitForCount('world_trade_selected', 1);
-            await sleep(4000);
+            await sleep(1000);
             await page.screenshot({ path: path.join(stills, '02-world-trade-selected-1440x900.png') });
 
             await page.keyboard.press('ArrowRight');
             await waitForCount('map_east_route', 1);
-            await sleep(4000);
+            await sleep(1000);
             await page.screenshot({ path: path.join(stills, '03-map-east-route-1440x900.png') });
 
             await page.keyboard.press('ArrowRight');
             await waitForCount('village_route_context', 1);
-            await sleep(4000);
+            await sleep(1000);
             await page.screenshot({ path: path.join(stills, '04-village-route-context-1440x900.png') });
 
             await page.keyboard.press('ArrowLeft');
             await waitForCount('map_east_route', 2);
-            await sleep(4000);
+            await sleep(1000);
             await page.screenshot({ path: path.join(stills, '05-returned-map-1440x900.png') });
 
             await page.keyboard.press('ArrowLeft');
             await waitForCount('world_trade_selected', 2);
-            await sleep(4000);
+            await sleep(1000);
             await page.screenshot({ path: path.join(stills, '06-returned-world-1440x900.png') });
 
             const video = page.video();
@@ -255,6 +255,8 @@ jobs:
           done
           test -s "${EVIDENCE_DIR}/godot-web-input-sequence.webm"
           test "$(stat -c %s "${EVIDENCE_DIR}/godot-web-input-sequence.webm")" -gt 100000
+          video_duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/godot-web-input-sequence.webm")"
+          awk -v duration="$video_duration" 'BEGIN { exit !(duration >= 20 && duration <= 35) }'
           grep -F "PLAYABLE_AURELIAN_ENTRY_READY=world_neutral" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_route_context" "${EVIDENCE_DIR}/browser-console.log"
           sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/godot-web-input-sequence.webm"             | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
