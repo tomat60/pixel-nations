@@ -5,32 +5,41 @@
   "initial_state": "world_neutral",
   "handoff": {
     "world_marker": "Direction_EastTrade",
-    "map_marker": "Land_EastRouteSelected",
-    "village_context": "GreenvaleTradeRouteContext"
+    "map_selected_marker": "Land_EastRouteSelected",
+    "map_claimed_marker": "Land_EastRouteClaimed",
+    "village_state": "claimed"
   },
   "controls": {
     "select_trade": "ui_accept",
-    "continue_layer": "ui_right",
+    "open_map": "ui_right",
+    "claim_land": "ui_accept",
+    "open_village": "ui_right",
     "previous_layer": "ui_left"
   },
   "forward_path": [
     "world_neutral",
     "world_trade_selected",
-    "map_east_route",
-    "village_route_context"
+    "map_east_route_selected",
+    "map_east_route_claimed",
+    "village_claimed"
   ],
   "backward_path": [
-    "village_route_context",
-    "map_east_route",
+    "village_claimed",
+    "map_east_route_claimed",
     "world_trade_selected"
+  ],
+  "legacy_states_retained": [
+    "map_east_route",
+    "village_route_context"
   ],
   "runtime_rules": {
     "environment_variables_required": false,
     "frame_driven_transitions": false,
     "session_local_only": false,
     "persistence_claimed": true,
+    "claim_is_explicit_player_action": true,
     "economy_claimed": false,
-    "persistence_scope": "eastern_trade_and_entry_state_only"
+    "persistence_scope": "eastern_trade_claim_and_entry_state_only"
   },
   "shared_geography": "aurelian_authored_terrain_v1.glb",
   "persistence": {
