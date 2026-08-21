@@ -1,0 +1,35 @@
+{
+  "contract": "GODOT_PLAYABLE_AURELIAN_ENTRY_V1",
+  "startup_scene": "res://scenes/aurelian/playable_aurelian_entry_v1.tscn",
+  "source_scene": "res://scenes/aurelian/aurelian_decision_loop_v1.tscn",
+  "initial_state": "world_neutral",
+  "handoff": {
+    "world_marker": "Direction_EastTrade",
+    "map_marker": "Land_EastRouteSelected",
+    "village_context": "GreenvaleTradeRouteContext"
+  },
+  "controls": {
+    "select_trade": "ui_accept",
+    "continue_layer": "ui_right",
+    "previous_layer": "ui_left"
+  },
+  "forward_path": [
+    "world_neutral",
+    "world_trade_selected",
+    "map_east_route",
+    "village_route_context"
+  ],
+  "backward_path": [
+    "village_route_context",
+    "map_east_route",
+    "world_trade_selected"
+  ],
+  "runtime_rules": {
+    "environment_variables_required": false,
+    "frame_driven_transitions": false,
+    "session_local_only": true,
+    "persistence_claimed": false,
+    "economy_claimed": false
+  },
+  "shared_geography": "aurelian_authored_terrain_v1.glb"
+}

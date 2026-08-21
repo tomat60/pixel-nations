@@ -6,7 +6,7 @@ config_version=5
 [application]
 
 config/name="Pixel Nations"
-run/main_scene="res://scenes/bootstrap/bootstrap.tscn"
+run/main_scene="res://scenes/aurelian/playable_aurelian_entry_v1.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [display]
