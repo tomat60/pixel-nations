@@ -1,0 +1,277 @@
+{
+  "contract": "AURELIAN_AUTHORED_TERRAIN_V1",
+  "topology_plane": [
+    1000,
+    900
+  ],
+  "extended_outflow_y": 1015,
+  "basin_outline": [
+    [
+      70,
+      135
+    ],
+    [
+      195,
+      55
+    ],
+    [
+      430,
+      20
+    ],
+    [
+      700,
+      55
+    ],
+    [
+      900,
+      190
+    ],
+    [
+      965,
+      420
+    ],
+    [
+      915,
+      670
+    ],
+    [
+      790,
+      825
+    ],
+    [
+      670,
+      915
+    ],
+    [
+      625,
+      1015
+    ],
+    [
+      575,
+      925
+    ],
+    [
+      350,
+      875
+    ],
+    [
+      155,
+      735
+    ],
+    [
+      55,
+      500
+    ],
+    [
+      40,
+      285
+    ]
+  ],
+  "river_centerline": [
+    [
+      505,
+      0
+    ],
+    [
+      500,
+      105
+    ],
+    [
+      520,
+      215
+    ],
+    [
+      505,
+      315
+    ],
+    [
+      525,
+      430
+    ],
+    [
+      505,
+      555
+    ],
+    [
+      535,
+      680
+    ],
+    [
+      580,
+      800
+    ],
+    [
+      610,
+      900
+    ]
+  ],
+  "outflow_extension": [
+    [
+      610,
+      900
+    ],
+    [
+      625,
+      1015
+    ]
+  ],
+  "bridge": {
+    "center": [
+      515,
+      340
+    ],
+    "endpoints": [
+      [
+        455,
+        340
+      ],
+      [
+        575,
+        340
+      ]
+    ],
+    "asset": "addons/kaykit_medieval_hexagon_pack/Assets/gltf/buildings/neutral/building_bridge_A.gltf"
+  },
+  "routes": {
+    "GreenvaleCrossing": [
+      [
+        354,
+        285
+      ],
+      [
+        395,
+        300
+      ],
+      [
+        425,
+        320
+      ],
+      [
+        455,
+        340
+      ]
+    ],
+    "OldRoad": [
+      [
+        210,
+        520
+      ],
+      [
+        310,
+        470
+      ],
+      [
+        425,
+        405
+      ],
+      [
+        455,
+        340
+      ]
+    ],
+    "EastTradeRoute": [
+      [
+        575,
+        340
+      ],
+      [
+        650,
+        375
+      ],
+      [
+        760,
+        410
+      ],
+      [
+        910,
+        455
+      ]
+    ],
+    "NorthRidgeRoute": [
+      [
+        575,
+        340
+      ],
+      [
+        625,
+        300
+      ],
+      [
+        665,
+        250
+      ],
+      [
+        700,
+        205
+      ]
+    ],
+    "NorthgateRoute": [
+      [
+        354,
+        285
+      ],
+      [
+        390,
+        210
+      ],
+      [
+        420,
+        130
+      ],
+      [
+        445,
+        65
+      ]
+    ]
+  },
+  "landmarks": {
+    "GreenvaleOrigin": [
+      354,
+      285
+    ],
+    "Bridge_GildedCrossing": [
+      515,
+      340
+    ],
+    "NorthRidge": [
+      700,
+      205
+    ],
+    "ForestWorkEdge": [
+      245,
+      205
+    ],
+    "FieldsPlains": [
+      405,
+      505
+    ],
+    "OldRoadJunction": [
+      425,
+      405
+    ],
+    "EastRoute": [
+      760,
+      410
+    ],
+    "SouthMarsh": [
+      365,
+      690
+    ],
+    "CoastOutflow": [
+      610,
+      875
+    ],
+    "Northgate": [
+      445,
+      65
+    ]
+  },
+  "kaykit_source_commit": "84fa4e91af6a88989be7c99e0891cede11f2ca38",
+  "visual_technique": "authored irregular Blender terrain mesh + imported KayKit props",
+  "rectangular_outer_water_plane": false,
+  "runtime_generated_terrain": false,
+  "terrain_face_cells": 6434,
+  "blend_sha256": "b72550e50cd0777ec40445b7b0a6dc548413cd09361b698a9128925ed47c7929",
+  "glb_sha256": "04116e3d662d461f0d29ca797444193b0873f5aba6012790af7d366c63e01048",
+  "glb_bytes": 855644
+}

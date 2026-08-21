@@ -1,0 +1,255 @@
+name: Godot Aurelian Render Asset Packaging V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/assets/aurelian-basin/export/**"
+      - "game/assets/aurelian-basin/source/aurelian_authored_terrain_v1.py"
+      - ".github/workflows/godot-aurelian-render-asset-packaging-v1.yml"
+      - ".gitattributes"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-aurelian-render-asset-packaging-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  KAYKIT_SHA: "84fa4e91af6a88989be7c99e0891cede11f2ca38"
+  KAYKIT_ARCHIVE_SHA: "cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028"
+  BLENDER_VERSION: "4.3.2"
+  BLENDER_BIN: "/tmp/blender/blender-4.3.2-linux-x64/blender"
+  GODOT_VERSION: "4.7.1"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EXPORT_DIR: "game/assets/aurelian-basin/export"
+  EVIDENCE_DIR: "evidence/godot-aurelian-render-asset-packaging-v1"
+
+jobs:
+  package-and-prove:
+    name: Prove packaged Aurelian render asset
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+
+      - name: Prove clean-checkout packaged identity
+        run: |
+          set -euo pipefail
+          test -s "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb"
+          test -s "${EXPORT_DIR}/transform-manifest.json"
+          test -s "${EXPORT_DIR}/packaging-provenance.json"
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path("game/assets/aurelian-basin/export")
+          provenance=json.loads((root/"packaging-provenance.json").read_text())
+          identities={
+              "glb_sha256": hashlib.sha256((root/"aurelian_authored_terrain_v1.glb").read_bytes()).hexdigest(),
+              "transform_manifest_sha256": hashlib.sha256((root/"transform-manifest.json").read_bytes()).hexdigest(),
+          }
+          for key,value in identities.items():
+              if provenance.get(key) != value:
+                  raise SystemExit(f"{key} drift: {value}")
+          if provenance.get("blender_version") != "4.3.2":
+              raise SystemExit("Blender provenance drift")
+          if provenance.get("kaykit_commit") != "84fa4e91af6a88989be7c99e0891cede11f2ca38":
+              raise SystemExit("KayKit provenance drift")
+          print("CLEAN_CHECKOUT_PACKAGED_ASSET=PASS")
+          PY
+          sha256sum "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb"             "${EXPORT_DIR}/transform-manifest.json"             "${EXPORT_DIR}/packaging-provenance.json"             | tee "${EVIDENCE_DIR}/committed-sha256sums.txt"
+
+      - name: Fetch pinned Blender and KayKit
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/blender /tmp/kaykit /tmp/aurelian-regenerated
+          mkdir -p /tmp/blender /tmp/kaykit/src /tmp/aurelian-regenerated
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://download.blender.org/release/Blender4.3/blender-${BLENDER_VERSION}-linux-x64.tar.xz"             -o /tmp/blender/blender.tar.xz
+          tar -xJf /tmp/blender/blender.tar.xz -C /tmp/blender
+          test -x "${BLENDER_BIN}"
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip"             -o /tmp/kaykit/source.zip
+          test "$(sha256sum /tmp/kaykit/source.zip | cut -d' ' -f1)" = "${KAYKIT_ARCHIVE_SHA}"
+          unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/src
+          ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
+          test -n "$ROOT"
+          echo "KAYKIT_ROOT=$ROOT" >> "$GITHUB_ENV"
+
+      - name: Reproduce committed bytes
+        timeout-minutes: 14
+        run: |
+          set -euo pipefail
+          export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 12m env LIBGL_ALWAYS_SOFTWARE=1             "${BLENDER_BIN}" -b             --python game/assets/aurelian-basin/source/aurelian_authored_terrain_v1.py --             "$KAYKIT_ROOT" /tmp/aurelian-regenerated             2>&1 | tee "${EVIDENCE_DIR}/blender-reproduction.log"
+          grep -F "AURELIAN_AUTHORED_TERRAIN=PASS" "${EVIDENCE_DIR}/blender-reproduction.log"
+          cmp "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb" /tmp/aurelian-regenerated/aurelian_authored_terrain_v1.glb
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          committed=json.loads(Path("game/assets/aurelian-basin/export/transform-manifest.json").read_text())
+          regenerated=json.loads(Path("/tmp/aurelian-regenerated/transform-manifest.json").read_text())
+          committed_blend=committed.pop("blend_sha256", None)
+          regenerated_blend=regenerated.pop("blend_sha256", None)
+          if not committed_blend or not regenerated_blend:
+              raise SystemExit("blend provenance missing")
+          if committed != regenerated:
+              raise SystemExit("semantic transform manifest drift")
+          print("TRANSFORM_MANIFEST_SEMANTIC_REPRODUCTION=PASS")
+          PY
+          echo "PACKAGED_ASSET_REPRODUCTION=PASS"
+
+      - name: Install graphical runtime dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends             unzip libgl1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 xvfb imagemagick python3-pil >/dev/null
+
+      - name: Download pinned Godot and export templates
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/godot /tmp/godot-templates
+          mkdir -p /tmp/godot /tmp/godot-templates
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip"             -o /tmp/godot/godot.zip
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz"             -o /tmp/godot/templates.tpz
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          unzip -q /tmp/godot/templates.tpz -d /tmp/godot-templates
+          mkdir -p "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          cp -R /tmp/godot-templates/templates/. "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Import and run existing Aurelian contracts
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1 || {
+            cat "${EVIDENCE_DIR}/godot-import.log"; exit 1;
+          }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test; do
+            "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd"               > "${EVIDENCE_DIR}/${test}.log" 2>&1
+          done
+          grep -F "AURELIAN_AUTHORED_TERRAIN_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1_test.log"
+          grep -F "PRODUCTION_VILLAGE_V1_TEST: PASS" "${EVIDENCE_DIR}/production_village_v1_test.log"
+          grep -F "PRODUCTION_MAP_V1_TEST: PASS" "${EVIDENCE_DIR}/production_map_v1_test.log"
+          grep -F "PRODUCTION_WORLD_V1_TEST: PASS" "${EVIDENCE_DIR}/production_world_v1_test.log"
+          grep -F "AURELIAN_DECISION_LOOP_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_decision_loop_v1_test.log"
+          grep -F "GODOT_PLAYABLE_AURELIAN_ENTRY_V1_TEST: PASS" "${EVIDENCE_DIR}/playable_aurelian_entry_v1_test.log"
+
+      - name: Export Linux and Web with packaged asset
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          mkdir -p game/build/linux game/build/web
+          "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64             > "${EVIDENCE_DIR}/godot-export-linux.log" 2>&1 || {
+              cat "${EVIDENCE_DIR}/godot-export-linux.log"; exit 1;
+            }
+          "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html             > "${EVIDENCE_DIR}/godot-export-web.log" 2>&1 || {
+              cat "${EVIDENCE_DIR}/godot-export-web.log"; exit 1;
+            }
+          test -x game/build/linux/pixel-nations-foundation.x86_64
+          test -s game/build/linux/pixel-nations-foundation.pck
+          test -s game/build/web/index.pck
+          test -s game/build/web/index.wasm
+          grep -aF "aurelian_authored_terrain_v1.glb" game/build/linux/pixel-nations-foundation.pck
+          grep -aF "aurelian_authored_terrain_v1.glb" game/build/web/index.pck
+          echo "PACKAGED_ASSET_LINUX_EXPORT=PASS"
+          echo "PACKAGED_ASSET_WEB_EXPORT=PASS"
+
+      - name: Native exported headless launch
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          (
+            cd game/build/linux
+            timeout 30s env -u AURELIAN_EVIDENCE_DIR -u AURELIAN_PLAYABLE_EVIDENCE_STATE               -u AURELIAN_CAPTURE_PLAYABLE_ENTRY GODOT_SILENCE_ROOT_WARNING=1               ./pixel-nations-foundation.x86_64 --headless
+          ) > "${EVIDENCE_DIR}/native-headless.log" 2>&1
+          grep -F "PLAYABLE_AURELIAN_HEADLESS_SMOKE=PASS" "${EVIDENCE_DIR}/native-headless.log"
+
+      - name: Normal graphical launch still
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          xvfb-run -a -s "-screen 0 1440x900x24" bash -c '
+            set -euo pipefail
+            cd game/build/linux
+            env -u AURELIAN_EVIDENCE_DIR -u AURELIAN_PLAYABLE_EVIDENCE_STATE               -u AURELIAN_CAPTURE_PLAYABLE_ENTRY GODOT_SILENCE_ROOT_WARNING=1               stdbuf -oL -eL ./pixel-nations-foundation.x86_64               --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900               > "../../../${EVIDENCE_DIR}/native-graphical.log" 2>&1 &
+            pid=$!
+            sleep 12
+            import -window root "../../../${EVIDENCE_DIR}/normal-native-launch-1440x900.png"
+            kill "$pid" || true
+            wait "$pid" || true
+          '
+          identify "${EVIDENCE_DIR}/normal-native-launch-1440x900.png" | tee "${EVIDENCE_DIR}/normal-native-launch-identify.txt"
+          test "$(identify -format '%wx%h' "${EVIDENCE_DIR}/normal-native-launch-1440x900.png")" = "1440x900"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_READY=world_neutral" "${EVIDENCE_DIR}/native-graphical.log"
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "${EVIDENCE_DIR}/native-graphical.log"; then
+            cat "${EVIDENCE_DIR}/native-graphical.log"
+            exit 1
+          fi
+
+      - name: Validate graphical evidence
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          from PIL import Image, ImageStat
+          root=Path("evidence/godot-aurelian-render-asset-packaging-v1")
+          image_path=root/"normal-native-launch-1440x900.png"
+          image=Image.open(image_path).convert("RGB")
+          variance=sum(ImageStat.Stat(image).var)/3
+          colors=len(set(image.resize((240,150)).getdata()))
+          if image.size != (1440,900) or image_path.stat().st_size < 70000 or variance < 60 or colors < 250:
+              raise SystemExit(f"weak graphical evidence: {image.size}, {image_path.stat().st_size}, {variance}, {colors}")
+          report={
+              "status":"PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_REVIEW",
+              "exact_head":(root/"exact-head.txt").read_text().strip(),
+              "glb_sha256":hashlib.sha256(Path("game/assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb").read_bytes()).hexdigest(),
+              "normal_launch":{
+                  "size":[1440,900],
+                  "bytes":image_path.stat().st_size,
+                  "variance":round(variance,3),
+                  "colors":colors,
+                  "sha256":hashlib.sha256(image_path.read_bytes()).hexdigest()
+              },
+              "linux_export":True,
+              "web_export":True,
+              "native_export_launch":True
+          }
+          (root/"evidence-qa.json").write_text(json.dumps(report,indent=2)+"\n")
+          print("GODOT_AURELIAN_RENDER_ASSET_PACKAGING_EVIDENCE_QA=PASS")
+          PY
+
+      - name: Upload exact-head packaging evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-aurelian-render-asset-packaging-v1-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/godot-aurelian-render-asset-packaging-v1
+            game/assets/aurelian-basin/export/packaging-provenance.json
+            game/assets/aurelian-basin/export/transform-manifest.json
+          if-no-files-found: error
+          retention-days: 7
