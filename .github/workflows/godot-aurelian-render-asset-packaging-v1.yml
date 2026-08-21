@@ -107,7 +107,7 @@ jobs:
       - name: Install graphical runtime dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends             unzip libgl1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 xvfb imagemagick >/dev/null
+          sudo apt-get install -y -qq --no-install-recommends             unzip libgl1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 xvfb imagemagick python3-pil >/dev/null
 
       - name: Download pinned Godot and export templates
         timeout-minutes: 7
