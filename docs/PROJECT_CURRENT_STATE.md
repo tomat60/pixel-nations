@@ -2,15 +2,15 @@
 
 Status: ACTIVE
 Updated: 2026-08-21
-Current state revision: Godot Aurelian Render Asset Packaging v1 accepted, strategy review required
+Current state revision: Godot Aurelian Render Asset Packaging v1 accepted, Web export playability contract pending acceptance
 Authority source: this file on the current `main`
 Authority baseline SHA: `27c1acedda79a3451dc7f55c16a5162c1a6dd870`
 Product baseline SHA: `27c1acedda79a3451dc7f55c16a5162c1a6dd870`
-Current milestone: record packaging acceptance and return to contract-gated strategy review
+Current milestone: accept the bounded Godot Web Export Playability v1 contract
 Active execution issue: #415
-Active implementation PR: authority acceptance update only until merged
+Active implementation PR: authority and Web export playability contract update only until merged
 Last completed milestone: PR #466 `GODOT_AURELIAN_RENDER_ASSET_PACKAGING_PASS`, accepted head `a0ba7c516b7b409beb9f3b9970eb77971bab879b`, merged as `27c1acedda79a3451dc7f55c16a5162c1a6dd870`
-Next allowed action: after this acceptance update merges and post-merge checks are healthy, conduct exactly one bounded strategy review and accept the next milestone contract before any product implementation.
+Next allowed action: after this contract merges and post-merge checks are healthy, execute exactly one bounded Godot Web Export Playability v1 candidate, review exact-head browser evidence directly and classify it.
 
 ## Product truth
 
@@ -51,6 +51,7 @@ Accepted implementation inputs:
 - Aurelian Decision Loop v1 contract: `docs/AURELIAN_DECISION_LOOP_V1_CONTRACT.md`;
 - Godot Playable Aurelian Entry v1 contract: `docs/GODOT_PLAYABLE_AURELIAN_ENTRY_V1_CONTRACT.md`;
 - Godot Aurelian Render Asset Packaging v1 contract: `docs/GODOT_AURELIAN_RENDER_ASSET_PACKAGING_V1_CONTRACT.md`;
+- Godot Web Export Playability v1 contract: `docs/GODOT_WEB_EXPORT_PLAYABILITY_V1_CONTRACT.md`;
 - PR #449 authored Blender terrain + KayKit + GLB + Godot integration reference: `IMPLEMENTATION_REFERENCE_PASS / PRODUCTION_VISUAL_NOT_YET_ACCEPTED`;
 - PR #451: `PRODUCTION_VILLAGE_PASS`;
 - PR #454: `PRODUCTION_MAP_PASS`;
@@ -191,9 +192,9 @@ The exact-head workflow proved clean-checkout identity, byte-identical GLB regen
 
 ## Next bounded milestone
 
-No later product slice is authorized.
+The single authorized next product slice is Godot Web Export Playability v1 under `docs/GODOT_WEB_EXPORT_PLAYABILITY_V1_CONTRACT.md` after that contract is accepted on `main`.
 
-The next action is exactly one bounded strategy review that selects and documents the next milestone contract. Product implementation may begin only after that contract is accepted on `main`. P12, broad Village / Map / World polish, trade economy, persistence work, public web integration and any fake full-world renderer remain blocked.
+It must prove that a fresh Godot Web export loads in Chromium and completes the accepted input-driven `World -> Map -> Village -> Map -> World` path from a local CI-served origin. It may not modify `app/play/**`, public routes, accepted visuals, gameplay, persistence or hosting integration.
 
 ## Product interaction hierarchy
 
@@ -310,6 +311,6 @@ If `pn:status` returns `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`,
 
 ## Current stop condition
 
-This acceptance update stops when it is merged and post-merge state is healthy.
+This contract update stops when it is merged and post-merge state is healthy.
 
-Then conduct exactly one bounded strategy review and stop at an accepted next-milestone contract. No product implementation is authorized before that contract is accepted on `main`. P12, broad Village / Map / World polish, trade economy, persistence work, public web integration and any fake full-world renderer remain blocked.
+Then execute exactly one bounded Godot Web Export Playability v1 candidate. Stop after direct exact-head browser artifact review and classify `GODOT_WEB_EXPORT_PLAYABILITY_PASS` or `GODOT_WEB_EXPORT_PLAYABILITY_REJECT`. No public integration or later product milestone is authorized. P12, broad Village / Map / World polish, trade economy, persistence work, public web integration and any fake full-world renderer remain blocked.
