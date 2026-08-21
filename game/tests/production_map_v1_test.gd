@@ -25,25 +25,34 @@ func _initialize() -> void:
 		_check(semantics.has(semantic), "semantic_%s" % semantic)
 
 	var overlays: Array = manifest.get("overlays", [])
-	_check(overlays.size() == 4, "overlay_count")
+	_check(overlays.size() == 5, "overlay_count")
 	var ids: Array[String] = []
+	var by_id: Dictionary = {}
 	for overlay_variant in overlays:
 		var overlay: Dictionary = overlay_variant
 		var overlay_id := String(overlay.get("id", ""))
 		ids.append(overlay_id)
+		by_id[overlay_id] = overlay
 		_check(semantics.has(String(overlay.get("semantic", ""))), "overlay_semantic_%s" % overlay_id)
 		var topology: Array = overlay.get("topology", [])
 		_check(topology.size() == 2, "overlay_topology_%s" % overlay_id)
 		_check(float(overlay.get("radius", 1.0)) <= 0.28, "restrained_radius_%s" % overlay_id)
 
 	var states: Dictionary = manifest.get("states", {})
-	for state_name in ["no_selection", "selected", "status_distinctions"]:
+	for state_name in ["no_selection", "selected", "east_route_claimed", "status_distinctions"]:
 		_check(states.has(state_name), "state_%s" % state_name)
 		if states.has(state_name):
 			for visible_id in (states[state_name] as Dictionary).get("visible", []):
 				_check(ids.has(String(visible_id)), "state_%s_node_%s" % [state_name, visible_id])
 	_check(not ((states.get("no_selection", {}) as Dictionary).get("visible", []) as Array).has("Land_EastRouteSelected"), "no_selection_has_no_selected_marker")
 	_check(((states.get("selected", {}) as Dictionary).get("visible", []) as Array).has("Land_EastRouteSelected"), "selected_marker_present")
+	_check(((states.get("east_route_claimed", {}) as Dictionary).get("visible", []) as Array).has("Land_EastRouteClaimed"), "claimed_marker_present")
+	_check(not ((states.get("east_route_claimed", {}) as Dictionary).get("visible", []) as Array).has("Land_EastRouteSelected"), "claimed_state_hides_selected_marker")
+	var selected: Dictionary = by_id.get("Land_EastRouteSelected", {})
+	var claimed: Dictionary = by_id.get("Land_EastRouteClaimed", {})
+	_check(selected.get("topology", []) == claimed.get("topology", []), "east_route_selected_claimed_topology_parity")
+	_check(String(selected.get("shape", "")) == "selected_ring", "east_route_selected_shape")
+	_check(String(claimed.get("shape", "")) == "claimed_hex", "east_route_claimed_shape")
 
 	var invariants: Dictionary = manifest.get("transform_invariants", {})
 	var expected := {
