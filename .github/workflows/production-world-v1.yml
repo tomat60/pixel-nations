@@ -95,6 +95,7 @@ jobs:
           test -s "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb"
           cp "${EXPORT_DIR}/transform-manifest.json" "${EVIDENCE_DIR}/transform-manifest.json"
           cp "${EXPORT_DIR}/source-manifest.json" "${EVIDENCE_DIR}/source-manifest.json"
+          mv "${EXPORT_DIR}/aurelian_authored_terrain_v1.blend" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1.blend"
           cp game/scenes/aurelian/production_map_v1_manifest.json "${EVIDENCE_DIR}/map-state-manifest.json"
           cp game/scenes/aurelian/production_world_v1_manifest.json "${EVIDENCE_DIR}/world-state-manifest.json"
 
