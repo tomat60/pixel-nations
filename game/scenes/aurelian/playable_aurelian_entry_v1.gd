@@ -28,6 +28,10 @@ func _ready() -> void:
 		return
 	automated_input_mode = OS.get_environment("AURELIAN_CAPTURE_PLAYABLE_ENTRY") == "1"
 	var evidence_state := OS.get_environment("AURELIAN_PLAYABLE_EVIDENCE_STATE").to_lower()
+	if not OS.get_environment("AURELIAN_EVIDENCE_DIR").is_empty():
+		get_window().content_scale_size = STILL_SIZE
+		get_window().content_scale_aspect = Window.CONTENT_SCALE_ASPECT_IGNORE
+		get_window().size = STILL_SIZE
 	if ENTRY_STATES.has(evidence_state):
 		entry_state = evidence_state
 		decision_state = evidence_state
