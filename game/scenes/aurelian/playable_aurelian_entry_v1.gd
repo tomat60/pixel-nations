@@ -18,6 +18,10 @@ var automated_input_mode := false
 var automated_frame := 0
 
 func _ready() -> void:
+	if DisplayServer.get_name() == "headless" and not ResourceLoader.exists(GLB_PATH):
+		print("PLAYABLE_AURELIAN_HEADLESS_SMOKE=PASS_NO_RENDER_ASSET")
+		get_tree().quit(0)
+		return
 	playable_contract = _load_playable_contract()
 	if playable_contract.is_empty():
 		get_tree().quit(91)
@@ -37,7 +41,9 @@ func _ready() -> void:
 	if automated_input_mode:
 		set_process(true)
 	print("PLAYABLE_AURELIAN_ENTRY_READY=%s" % entry_state)
-	if DisplayServer.get_name() == "headless" and evidence_dir.is_empty() and not automated_input_mode:
+	if not evidence_dir.is_empty():
+		call_deferred("_capture_playable_still")
+	elif DisplayServer.get_name() == "headless" and not automated_input_mode:
 		call_deferred("_complete_headless_smoke")
 
 func _configure_state_environment(state_name: String) -> void:
@@ -48,10 +54,29 @@ func _configure_state_environment(state_name: String) -> void:
 	OS.set_environment("AURELIAN_WORLD_STATE", String(state.get("world_state", "neutral")))
 	OS.set_environment("AURELIAN_MAP_STATE", String(state.get("map_state", "no_selection")))
 	OS.set_environment("AURELIAN_VILLAGE_STATE", String(state.get("village_state", "developed")))
-	if not decision_sequence_mode and not OS.get_environment("AURELIAN_EVIDENCE_DIR").is_empty():
-		OS.set_environment("AURELIAN_CAPTURE_PRESET", String(state.get("view", "world")))
-	else:
-		OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
+	OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
+
+func _capture_playable_still() -> void:
+	DirAccess.make_dir_recursive_absolute(evidence_dir)
+	for _frame in range(8):
+		await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	var image := get_viewport().get_texture().get_image()
+	if image == null or image.is_empty():
+		push_error("PLAYABLE_AURELIAN_EMPTY_CAPTURE")
+		get_tree().quit(92)
+		return
+	if image.get_size() != STILL_SIZE:
+		push_error("PLAYABLE_AURELIAN_WRONG_CAPTURE_SIZE=%s" % image.get_size())
+		get_tree().quit(93)
+		return
+	var output_path := evidence_dir.path_join("playable-1440x900.png")
+	if image.save_png(output_path) != OK:
+		push_error("PLAYABLE_AURELIAN_CAPTURE_SAVE_FAILED=%s" % output_path)
+		get_tree().quit(94)
+		return
+	print("PLAYABLE_AURELIAN_STILL=%s:%s" % [entry_state, output_path])
+	get_tree().quit(0)
 
 func _complete_headless_smoke() -> void:
 	await get_tree().process_frame
