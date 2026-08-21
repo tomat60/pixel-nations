@@ -1,0 +1,87 @@
+{
+  "contract": "PRODUCTION_WORLD_V1",
+  "source_scene": "res://scenes/aurelian/production_map_v1.tscn",
+  "shared_geography": "aurelian_authored_terrain_v1.glb",
+  "home_region": "Aurelian Basin",
+  "semantics": {
+    "home_region": "current strategic possession and origin",
+    "trade": "eastern route opportunity",
+    "expansion": "northern growth direction",
+    "frontier_pressure": "western unknown pressure"
+  },
+  "states": {
+    "neutral": {
+      "visible": ["Region_AurelianHome"],
+      "selected": ""
+    },
+    "selected_trade": {
+      "visible": ["Region_AurelianHome", "Direction_EastTrade"],
+      "selected": "Direction_EastTrade"
+    },
+    "all_directions": {
+      "visible": ["Region_AurelianHome", "Direction_EastTrade", "Direction_NorthExpansion", "Direction_WestFrontier"],
+      "selected": ""
+    }
+  },
+  "markers": [
+    {
+      "id": "Region_AurelianHome",
+      "semantic": "home_region",
+      "shape": "home_hex",
+      "topology": [500, 455],
+      "color": "#d6b96f88",
+      "radius": 0.38,
+      "height": 0.055,
+      "world_height": 0.20
+    },
+    {
+      "id": "Direction_EastTrade",
+      "semantic": "trade",
+      "shape": "trade_ring",
+      "topology": [850, 430],
+      "color": "#62b7c8cc",
+      "radius": 0.30,
+      "height": 0.055,
+      "world_height": 0.26,
+      "emission": 0.16
+    },
+    {
+      "id": "Direction_NorthExpansion",
+      "semantic": "expansion",
+      "shape": "expansion_beacon",
+      "topology": [620, 80],
+      "color": "#7abf73cc",
+      "radius": 0.27,
+      "height": 0.075,
+      "world_height": 0.46
+    },
+    {
+      "id": "Direction_WestFrontier",
+      "semantic": "frontier_pressure",
+      "shape": "frontier_diamond",
+      "topology": [120, 500],
+      "color": "#c9785dcc",
+      "radius": 0.28,
+      "height": 0.065,
+      "world_height": 0.22
+    }
+  ],
+  "transform_invariants": {
+    "GreenvaleOrigin": [354, 285],
+    "GildedCrossing": [515, 340],
+    "NorthRidge": [700, 205],
+    "ForestWorkEdge": [245, 205],
+    "FieldsPlains": [405, 505],
+    "SouthMarsh": [365, 690],
+    "CoastOutflow": [610, 875],
+    "Northgate": [445, 65]
+  },
+  "forbidden_changes": [
+    "independent world geography",
+    "full 10000-land renderer",
+    "diplomacy engine",
+    "combat simulation",
+    "economy rewrite",
+    "P12"
+  ]
+}
