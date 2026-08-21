@@ -1,0 +1,112 @@
+name: Godot Aurelian Render Asset Packaging V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/assets/aurelian-basin/export/**"
+      - "game/assets/aurelian-basin/source/aurelian_authored_terrain_v1.py"
+      - "game/tests/aurelian_render_asset_packaging_v1_test.gd"
+      - ".github/workflows/godot-aurelian-render-asset-packaging-v1.yml"
+      - ".gitattributes"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-aurelian-render-asset-packaging-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  KAYKIT_SHA: "84fa4e91af6a88989be7c99e0891cede11f2ca38"
+  KAYKIT_ARCHIVE_SHA: "cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028"
+  BLENDER_VERSION: "4.3.2"
+  BLENDER_BIN: "/tmp/blender/blender-4.3.2-linux-x64/blender"
+  EXPORT_DIR: "game/assets/aurelian-basin/export"
+  EVIDENCE_DIR: "evidence/godot-aurelian-render-asset-packaging-v1"
+
+jobs:
+  materialize:
+    name: Materialize accepted Aurelian render asset
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}" "${EXPORT_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+
+      - name: Fetch pinned Blender and KayKit
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/blender /tmp/kaykit
+          mkdir -p /tmp/blender /tmp/kaykit/src
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://download.blender.org/release/Blender4.3/blender-${BLENDER_VERSION}-linux-x64.tar.xz"             -o /tmp/blender/blender.tar.xz
+          tar -xJf /tmp/blender/blender.tar.xz -C /tmp/blender
+          test -x "${BLENDER_BIN}"
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip"             -o /tmp/kaykit/source.zip
+          test "$(sha256sum /tmp/kaykit/source.zip | cut -d' ' -f1)" = "${KAYKIT_ARCHIVE_SHA}"
+          unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/src
+          ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
+          test -n "$ROOT"
+          echo "KAYKIT_ROOT=$ROOT" >> "$GITHUB_ENV"
+
+      - name: Materialize accepted GLB
+        timeout-minutes: 14
+        run: |
+          set -euo pipefail
+          rm -rf "${EXPORT_DIR}"
+          mkdir -p "${EXPORT_DIR}"
+          export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 12m env LIBGL_ALWAYS_SOFTWARE=1             "${BLENDER_BIN}" -b             --python game/assets/aurelian-basin/source/aurelian_authored_terrain_v1.py --             "$KAYKIT_ROOT" "$PWD/${EXPORT_DIR}"             2>&1 | tee "${EVIDENCE_DIR}/blender-author.log"
+          grep -F "AURELIAN_AUTHORED_TERRAIN=PASS" "${EVIDENCE_DIR}/blender-author.log"
+          test -s "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb"
+          test -s "${EXPORT_DIR}/transform-manifest.json"
+          rm -f "${EXPORT_DIR}/aurelian_authored_terrain_v1.blend"
+
+      - name: Record deterministic provenance
+        run: |
+          set -euo pipefail
+          GLB_SHA="$(sha256sum "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb" | cut -d' ' -f1)"
+          MANIFEST_SHA="$(sha256sum "${EXPORT_DIR}/transform-manifest.json" | cut -d' ' -f1)"
+          SOURCE_SHA="$(sha256sum game/assets/aurelian-basin/source/aurelian_authored_terrain_v1.py | cut -d' ' -f1)"
+          cat > "${EVIDENCE_DIR}/packaging-provenance.json" <<EOF
+          {
+            "status": "MATERIALIZED_PENDING_COMMIT_AND_EXACT_HEAD_EVIDENCE",
+            "candidate_head": "$(git rev-parse HEAD)",
+            "blender_version": "${BLENDER_VERSION}",
+            "kaykit_commit": "${KAYKIT_SHA}",
+            "kaykit_archive_sha256": "${KAYKIT_ARCHIVE_SHA}",
+            "source_sha256": "$SOURCE_SHA",
+            "glb_sha256": "$GLB_SHA",
+            "transform_manifest_sha256": "$MANIFEST_SHA"
+          }
+          EOF
+          cp "${EVIDENCE_DIR}/packaging-provenance.json" "${EXPORT_DIR}/packaging-provenance.json"
+          sha256sum "${EXPORT_DIR}/aurelian_authored_terrain_v1.glb"             "${EXPORT_DIR}/transform-manifest.json"             "${EXPORT_DIR}/packaging-provenance.json"             | tee "${EVIDENCE_DIR}/sha256sums.txt"
+
+      - name: Upload materialized candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: aurelian-render-asset-materialized-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            game/assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb
+            game/assets/aurelian-basin/export/transform-manifest.json
+            game/assets/aurelian-basin/export/packaging-provenance.json
+            evidence/godot-aurelian-render-asset-packaging-v1
+          if-no-files-found: error
+          retention-days: 7
