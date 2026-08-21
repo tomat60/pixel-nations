@@ -103,6 +103,11 @@ jobs:
           Xvfb :99 -screen 0 1440x900x24 > "${EVIDENCE_DIR}/xvfb.log" 2>&1 &
           XVFB_PID=$!
           trap 'kill $XVFB_PID || true' EXIT
+          for attempt in $(seq 1 40); do
+            xdotool getdisplaygeometry >/dev/null 2>&1 && break
+            sleep 0.25
+          done
+          xdotool getdisplaygeometry >/dev/null
           cd game/build/linux
           ./pixel-nations-foundation.x86_64 --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 > "../../../${EVIDENCE_DIR}/native-first.log" 2>&1 &
           GAME_PID=$!
