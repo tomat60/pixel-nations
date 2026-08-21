@@ -26,8 +26,9 @@ func _initialize() -> void:
 	var claimed := _overlay_by_id(overlays, "Land_EastRouteClaimed")
 	_check(not selected.is_empty(), "selected_overlay")
 	_check(not claimed.is_empty(), "claimed_overlay")
-	_check(selected.get("topology", []) == [760, 410], "selected_topology")
-	_check(claimed.get("topology", []) == [760, 410], "claimed_topology")
+	_check(_topology_is(selected.get("topology", []), 760.0, 410.0), "selected_topology")
+	_check(_topology_is(claimed.get("topology", []), 760.0, 410.0), "claimed_topology")
+	_check(_topology_equal(selected.get("topology", []), claimed.get("topology", [])), "selected_claimed_topology_parity")
 	_check(String(selected.get("shape", "")) == "selected_ring", "selected_shape")
 	_check(String(claimed.get("shape", "")) == "claimed_hex", "claimed_shape")
 	_check(String(selected.get("color", "")) != String(claimed.get("color", "")), "selected_claimed_color_distinction")
@@ -52,6 +53,16 @@ func _overlay_by_id(overlays: Array, overlay_id: String) -> Dictionary:
 		if variant is Dictionary and String((variant as Dictionary).get("id", "")) == overlay_id:
 			return variant as Dictionary
 	return {}
+
+func _topology_is(value, x: float, y: float, epsilon := 0.001) -> bool:
+	if not value is Array or value.size() != 2:
+		return false
+	return abs(float(value[0]) - x) <= epsilon and abs(float(value[1]) - y) <= epsilon
+
+func _topology_equal(left, right, epsilon := 0.001) -> bool:
+	if not left is Array or not right is Array or left.size() != 2 or right.size() != 2:
+		return false
+	return abs(float(left[0]) - float(right[0])) <= epsilon and abs(float(left[1]) - float(right[1])) <= epsilon
 
 func _read_json(path: String) -> Dictionary:
 	var text := _read_text(path)
