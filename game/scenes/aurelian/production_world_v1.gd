@@ -70,10 +70,44 @@ func _world_marker_mesh(shape: String, radius: float, height: float) -> Primitiv
 	frontier.size = Vector3(radius * 1.4, height, radius * 1.4)
 	return frontier
 
+func _world_label(text: String, color: Color, height: float) -> Label3D:
+	var label := Label3D.new()
+	label.name = "StrategicLabel"
+	label.text = text
+	label.font_size = 64
+	label.pixel_size = 0.006
+	label.modulate = color
+	label.outline_modulate = Color("#28312ddd")
+	label.outline_size = 10
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.no_depth_test = true
+	label.position.y = height
+	return label
+
+func _direction_path(from_position: Vector3, to_position: Vector3, color: String) -> MeshInstance3D:
+	var path := MeshInstance3D.new()
+	path.name = "StrategicDirectionPath"
+	var midpoint := (from_position + to_position) * 0.5
+	var delta := to_position - from_position
+	var beam := BoxMesh.new()
+	beam.size = Vector3(0.09, 0.035, delta.length())
+	path.mesh = beam
+	path.position = Vector3(midpoint.x, max(from_position.y, to_position.y) + 0.06, midpoint.z)
+	path.rotation.y = atan2(delta.x, delta.z)
+	path.material_override = _material(color, 0.10)
+	return path
+
 func _build_world_overlays() -> Node3D:
 	var root := Node3D.new()
 	root.name = "ProductionWorldOverlays"
 	var markers: Array = world_contract.get("markers", [])
+	var home_position := Vector3.ZERO
+	for marker_variant in markers:
+		var home_spec: Dictionary = marker_variant
+		if String(home_spec.get("semantic", "")) == "home_region":
+			var home_coords: Array = home_spec.get("topology", [])
+			if home_coords.size() == 2:
+				home_position = topology_to_godot(Vector2(float(home_coords[0]), float(home_coords[1])), float(home_spec.get("world_height", 0.25)))
 	for marker_variant in markers:
 		var spec: Dictionary = marker_variant
 		var coords: Array = spec.get("topology", [])
@@ -85,10 +119,13 @@ func _build_world_overlays() -> Node3D:
 		var radius := float(spec.get("radius", 0.28))
 		var height := float(spec.get("height", 0.06))
 		var shape := String(spec.get("shape", "frontier_diamond"))
+		var semantic := String(spec.get("semantic", ""))
+		var color_text := String(spec.get("color", "#ffffffbb"))
+		var marker_color := Color(color_text)
 		var glyph := MeshInstance3D.new()
 		glyph.name = "StrategicGlyph"
 		glyph.mesh = _world_marker_mesh(shape, radius, height)
-		glyph.material_override = _material(String(spec.get("color", "#ffffffbb")), float(spec.get("emission", 0.0)))
+		glyph.material_override = _material(color_text, float(spec.get("emission", 0.0)))
 		if shape == "frontier_diamond":
 			glyph.rotation.y = PI / 4.0
 		marker.add_child(glyph)
@@ -106,6 +143,9 @@ func _build_world_overlays() -> Node3D:
 			halo.visible = false
 			marker.add_child(halo)
 		marker.position = topology_to_godot(Vector2(float(coords[0]), float(coords[1])), float(spec.get("world_height", 0.25)))
+		marker.add_child(_world_label(String(spec.get("label", semantic)).to_upper(), marker_color, float(spec.get("label_height", 0.72))))
+		if semantic != "home_region":
+			marker.add_child(_direction_path(home_position - marker.position, Vector3.ZERO, color_text))
 		root.add_child(marker)
 	return root
 
