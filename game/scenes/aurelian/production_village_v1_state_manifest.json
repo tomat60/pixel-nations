@@ -8,20 +8,59 @@
     "Greenvale_church",
     "Greenvale_cottage_west",
     "Greenvale_cottage_south",
-    "Greenvale_workshop_north"
+    "Greenvale_workshop_north",
+    "Greenvale_cottage_east",
+    "Greenvale_cottage_lane",
+    "Greenvale_storehouse_fields",
+    "Greenvale_workshop_crossing",
+    "Greenvale_shrine_green",
+    "Greenvale_gatehouse_road"
   ],
   "derived_nodes": {
     "Greenvale_cottage_west": {
       "source": "Greenvale_blacksmith",
-      "scale": 0.68
+      "scale": 0.68,
+      "rotation_y_degrees": -18
     },
     "Greenvale_cottage_south": {
       "source": "Greenvale_barracks",
-      "scale": 0.62
+      "scale": 0.62,
+      "rotation_y_degrees": 14
     },
     "Greenvale_workshop_north": {
       "source": "Greenvale_blacksmith",
-      "scale": 0.60
+      "scale": 0.60,
+      "rotation_y_degrees": 22
+    },
+    "Greenvale_cottage_east": {
+      "source": "Greenvale_barracks",
+      "scale": 0.58,
+      "rotation_y_degrees": -24
+    },
+    "Greenvale_cottage_lane": {
+      "source": "Greenvale_blacksmith",
+      "scale": 0.54,
+      "rotation_y_degrees": 34
+    },
+    "Greenvale_storehouse_fields": {
+      "source": "Greenvale_barracks",
+      "scale": 0.66,
+      "rotation_y_degrees": 8
+    },
+    "Greenvale_workshop_crossing": {
+      "source": "Greenvale_blacksmith",
+      "scale": 0.62,
+      "rotation_y_degrees": -32
+    },
+    "Greenvale_shrine_green": {
+      "source": "Greenvale_church",
+      "scale": 0.52,
+      "rotation_y_degrees": 18
+    },
+    "Greenvale_gatehouse_road": {
+      "source": "Greenvale_barracks",
+      "scale": 0.56,
+      "rotation_y_degrees": -8
     }
   },
   "states": {
@@ -30,8 +69,19 @@
       "meaning": "claimed land with a single territorial marker"
     },
     "founded": {
-      "visible": ["Greenvale_flag", "Greenvale_blacksmith", "Greenvale_barracks", "Greenvale_cottage_west"],
-      "meaning": "first functioning settlement around the road to Gilded Crossing"
+      "visible": [
+        "Greenvale_flag",
+        "Greenvale_blacksmith",
+        "Greenvale_barracks",
+        "Greenvale_cottage_west",
+        "Greenvale_cottage_east",
+        "Greenvale_cottage_lane",
+        "Greenvale_storehouse_fields",
+        "Greenvale_workshop_crossing",
+        "Greenvale_shrine_green",
+        "Greenvale_gatehouse_road"
+      ],
+      "meaning": "a legible founded Greenvale organized around the crossing road, village green and fields edge"
     },
     "developed": {
       "visible": [
@@ -41,9 +91,15 @@
         "Greenvale_church",
         "Greenvale_cottage_west",
         "Greenvale_cottage_south",
-        "Greenvale_workshop_north"
+        "Greenvale_workshop_north",
+        "Greenvale_cottage_east",
+        "Greenvale_cottage_lane",
+        "Greenvale_storehouse_fields",
+        "Greenvale_workshop_crossing",
+        "Greenvale_shrine_green",
+        "Greenvale_gatehouse_road"
       ],
-      "meaning": "established village with a clear civic hierarchy and secondary buildings"
+      "meaning": "established village with a clear civic hierarchy, road edge and secondary work buildings"
     }
   },
   "layout_topology": {
@@ -53,7 +109,20 @@
     "Greenvale_flag": [354, 276],
     "Greenvale_cottage_west": [292, 265],
     "Greenvale_cottage_south": [370, 350],
-    "Greenvale_workshop_north": [405, 250]
+    "Greenvale_workshop_north": [405, 250],
+    "Greenvale_cottage_east": [421, 332],
+    "Greenvale_cottage_lane": [326, 352],
+    "Greenvale_storehouse_fields": [408, 390],
+    "Greenvale_workshop_crossing": [448, 315],
+    "Greenvale_shrine_green": [349, 321],
+    "Greenvale_gatehouse_road": [466, 348]
+  },
+  "composition_anchors": {
+    "village_green": [354, 310],
+    "crossing_road_edge": [466, 348],
+    "fields_work_edge": [408, 390],
+    "forest_edge": [245, 205],
+    "gilded_crossing": [515, 340]
   },
   "presentation_adjustments": {
     "NorthRidge_hill_a": 0.38,
