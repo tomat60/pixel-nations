@@ -12,13 +12,18 @@ func _initialize() -> void:
 	_check(String(missing.get("status", "")) == "missing", "missing_status")
 	_check(String(missing.get("entry_state", "")) == "world_neutral", "missing_fallback")
 
-	var save_result := SESSION.save_session("map_east_route", "east_trade", TEST_PATH)
-	_check(bool(save_result.get("ok", false)), "save_valid")
+	var save_result := SESSION.save_session("map_east_route_claimed", "east_trade", TEST_PATH)
+	_check(bool(save_result.get("ok", false)), "save_claimed_valid")
 	_check(String(save_result.get("adapter", "")) == "native_file_access", "native_adapter")
 	var restored := SESSION.load_session(TEST_PATH)
 	_check(String(restored.get("status", "")) == "restored", "restore_status")
-	_check(String(restored.get("entry_state", "")) == "map_east_route", "restore_state")
+	_check(String(restored.get("entry_state", "")) == "map_east_route_claimed", "restore_claimed_state")
 	_check(String(restored.get("selected_intent", "")) == "east_trade", "restore_intent")
+
+	save_result = SESSION.save_session("village_claimed", "east_trade", TEST_PATH)
+	_check(bool(save_result.get("ok", false)), "save_village_claimed_valid")
+	restored = SESSION.load_session(TEST_PATH)
+	_check(String(restored.get("entry_state", "")) == "village_claimed", "restore_village_claimed")
 
 	_write_raw("{broken")
 	var malformed := SESSION.load_session(TEST_PATH)
@@ -29,7 +34,7 @@ func _initialize() -> void:
 		"schema": SESSION.SCHEMA,
 		"version": 99,
 		"selected_intent": "east_trade",
-		"entry_state": "map_east_route",
+		"entry_state": "map_east_route_claimed",
 		"saved_at_utc": "evidence",
 	}))
 	var unsupported := SESSION.load_session(TEST_PATH)
@@ -46,6 +51,10 @@ func _initialize() -> void:
 	_check(String(JSON.parse_string(literal)) == transport, "transport_literal")
 
 	var source := _read_text(SOURCE_PATH)
+	_check(source.contains('const VERSION := 2'), "schema_version_stays_v2")
+	_check(source.contains('"map_east_route_selected"'), "selected_state_allowed")
+	_check(source.contains('"map_east_route_claimed"'), "claimed_state_allowed")
+	_check(source.contains('"village_claimed"'), "village_claimed_state_allowed")
 	_check(source.contains("window.localStorage"), "web_local_storage")
 	_check(source.contains(".setItem("), "web_set")
 	_check(source.contains(".getItem("), "web_get")

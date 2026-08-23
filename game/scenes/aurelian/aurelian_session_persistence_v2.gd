@@ -10,6 +10,9 @@ const VALID_STATES := [
 	"world_trade_selected",
 	"map_east_route",
 	"village_route_context",
+	"map_east_route_selected",
+	"map_east_route_claimed",
+	"village_claimed",
 ]
 const VALID_INTENTS := ["none", "east_trade"]
 

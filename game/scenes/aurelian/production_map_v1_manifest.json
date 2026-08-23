@@ -15,6 +15,9 @@
     "selected": {
       "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_EastRouteSelected", "Land_SouthMarshScouted"]
     },
+    "east_route_claimed": {
+      "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_EastRouteClaimed", "Land_SouthMarshScouted"]
+    },
     "status_distinctions": {
       "visible": ["Land_GreenvaleClaimed", "Land_NorthgateClaimable", "Land_SouthMarshScouted"]
     }
@@ -50,6 +53,17 @@
       "height": 0.075,
       "world_height": 0.38,
       "emission": 0.45
+    },
+    {
+      "id": "Land_EastRouteClaimed",
+      "semantic": "claimed",
+      "shape": "claimed_hex",
+      "topology": [760, 410],
+      "color": "#4d9a5fff",
+      "radius": 0.25,
+      "height": 0.075,
+      "world_height": 0.38,
+      "emission": 0.16
     },
     {
       "id": "Land_SouthMarshScouted",

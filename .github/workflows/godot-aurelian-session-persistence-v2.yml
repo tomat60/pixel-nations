@@ -10,6 +10,7 @@ on:
       - "game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
       - "game/tests/aurelian_session_persistence_v2_test.gd"
       - "game/tests/playable_aurelian_entry_v1_test.gd"
+      - "game/tests/aurelian_first_land_claim_v1_test.gd"
   workflow_dispatch:
 
 permissions:
@@ -62,8 +63,12 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/godot /tmp/godot-templates
-          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip"             -o /tmp/godot/godot.zip
-          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz"             -o /tmp/godot/templates.tpz
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz" \
+            -o /tmp/godot/templates.tpz
           unzip -q /tmp/godot/godot.zip -d /tmp/godot
           chmod +x "${GODOT_BIN}"
           unzip -q /tmp/godot/templates.tpz -d /tmp/godot-templates
@@ -81,11 +86,12 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test; do
+          for test in playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test; do
             "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1
           done
           grep -F "GODOT_PLAYABLE_AURELIAN_ENTRY_V1_TEST: PASS" "${EVIDENCE_DIR}/playable_aurelian_entry_v1_test.log"
           grep -F "GODOT_AURELIAN_SESSION_PERSISTENCE_V2_TEST: PASS" "${EVIDENCE_DIR}/aurelian_session_persistence_v2_test.log"
+          grep -F "GODOT_AURELIAN_FIRST_LAND_CLAIM_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_land_claim_v1_test.log"
           mkdir -p game/build/linux game/build/web
           "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/export-linux.log" 2>&1
           "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html > "${EVIDENCE_DIR}/export-web.log" 2>&1
@@ -94,7 +100,7 @@ jobs:
           grep -aF "aurelian_session_persistence_v2.gd" game/build/linux/pixel-nations-foundation.pck
           grep -aF "aurelian_session_persistence_v2.gd" game/build/web/index.pck
 
-      - name: Prove native restart with real input
+      - name: Prove native claimed-land restart with real input
         timeout-minutes: 5
         run: |
           set -euo pipefail
@@ -119,9 +125,11 @@ jobs:
           done
           test -n "${WINDOW_ID:-}"
           xdotool key --window "$WINDOW_ID" Return
-          sleep 1
+          sleep 0.7
           xdotool key --window "$WINDOW_ID" Right
-          sleep 2
+          sleep 0.7
+          xdotool key --window "$WINDOW_ID" Return
+          sleep 1.2
           import -window root "../../../${EVIDENCE_DIR}/stills/native-map-before-restart-1440x900.png"
           kill "$GAME_PID"
           wait "$GAME_PID" || true
@@ -133,17 +141,18 @@ jobs:
             sleep 0.25
           done
           test -n "${WINDOW_ID:-}"
-          sleep 2
+          sleep 1.2
           import -window root "../../../${EVIDENCE_DIR}/stills/native-map-restored-1440x900.png"
           xdotool key --window "$WINDOW_ID" Right
-          sleep 2
+          sleep 1.2
           import -window root "../../../${EVIDENCE_DIR}/stills/native-village-after-restore-1440x900.png"
           kill "$GAME_PID"
           wait "$GAME_PID" || true
           cd ../../..
           grep -F "AURELIAN_SESSION_V2_LOAD=missing:native_file_access:world_neutral:none" "${EVIDENCE_DIR}/native-first.log"
-          grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:map_east_route:east_trade" "${EVIDENCE_DIR}/native-restored.log"
-          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_route_context" "${EVIDENCE_DIR}/native-restored.log"
+          grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/native-first.log"
+          grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:map_east_route_claimed:east_trade" "${EVIDENCE_DIR}/native-restored.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_claimed" "${EVIDENCE_DIR}/native-restored.log"
 
       - name: Serve Web export
         run: |
@@ -156,7 +165,7 @@ jobs:
           done
           exit 1
 
-      - name: Prove acknowledged Web reload and profile reopen
+      - name: Prove acknowledged claimed-land Web reload and profile reopen
         timeout-minutes: 7
         run: |
           set -euo pipefail
@@ -221,22 +230,26 @@ jobs:
             let page = await openPage(context);
             await waitFor(() => states.filter(x => x === 'world_neutral').length >= 1,'initial world');
             await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.adapter === 'web_local_storage' && x.state === 'world_neutral'),'initial save ack');
-            await sleep(4000);
+            await sleep(1500);
             await page.screenshot({path:path.join(stills,'web-world-neutral-1440x900.png')});
             await page.keyboard.press('Enter');
             await waitFor(() => states.includes('world_trade_selected'),'trade state');
             await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'world_trade_selected'),'trade save ack');
-            await sleep(3000);
+            await sleep(1000);
             await page.keyboard.press('ArrowRight');
-            await waitFor(() => states.includes('map_east_route'),'map state');
-            await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'map_east_route'),'map save ack');
-            await sleep(3000);
+            await waitFor(() => states.includes('map_east_route_selected'),'selected map state');
+            await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'map_east_route_selected'),'selected map save ack');
+            await sleep(1000);
+            await page.keyboard.press('Enter');
+            await waitFor(() => states.includes('map_east_route_claimed'),'claimed map state');
+            await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'map_east_route_claimed'),'claimed map save ack');
+            await sleep(1500);
             await page.screenshot({path:path.join(stills,'web-map-before-reload-1440x900.png')});
             await page.reload({waitUntil:'domcontentloaded',timeout:90000});
             await page.locator('canvas').waitFor({state:'visible',timeout:90000});
-            await waitFor(() => loads.some(x => x.status === 'restored' && x.adapter === 'web_local_storage' && x.state === 'map_east_route' && x.intent === 'east_trade'),'reload restore');
-            await waitFor(() => states.filter(x => x === 'map_east_route').length >= 2,'reloaded map');
-            await sleep(5000);
+            await waitFor(() => loads.some(x => x.status === 'restored' && x.adapter === 'web_local_storage' && x.state === 'map_east_route_claimed' && x.intent === 'east_trade'),'reload restore');
+            await waitFor(() => states.filter(x => x === 'map_east_route_claimed').length >= 2,'reloaded claimed map');
+            await sleep(2500);
             await page.screenshot({path:path.join(stills,'web-map-restored-1440x900.png')});
             const video = page.video();
             await page.close();
@@ -244,23 +257,23 @@ jobs:
             fs.copyFileSync(recordedPath,path.join(root,'session-persistence-v2-sequence.webm'));
             await context.close();
 
-            await sleep(1000);
+            await sleep(500);
             context = await chromium.launchPersistentContext(profile,{
               headless:true,
               viewport:{width:1440,height:900},
               args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']
             });
             page = await openPage(context);
-            await waitFor(() => loads.filter(x => x.status === 'restored' && x.state === 'map_east_route').length >= 2,'profile reopen restore');
-            await waitFor(() => states.filter(x => x === 'map_east_route').length >= 3,'profile reopened map');
-            await sleep(3000);
+            await waitFor(() => loads.filter(x => x.status === 'restored' && x.state === 'map_east_route_claimed').length >= 2,'profile reopen restore');
+            await waitFor(() => states.filter(x => x === 'map_east_route_claimed').length >= 3,'profile reopened claimed map');
+            await sleep(1500);
             await page.screenshot({path:path.join(stills,'web-map-profile-reopened-1440x900.png')});
             await page.keyboard.press('ArrowRight');
-            await waitFor(() => states.includes('village_route_context'),'village after reopen');
-            await sleep(3000);
+            await waitFor(() => states.includes('village_claimed'),'claimed village after reopen');
+            await sleep(1500);
             await page.screenshot({path:path.join(stills,'web-village-after-profile-reopen-1440x900.png')});
             await page.keyboard.press('ArrowLeft');
-            await waitFor(() => states.filter(x => x === 'map_east_route').length >= 4,'back to map');
+            await waitFor(() => states.filter(x => x === 'map_east_route_claimed').length >= 4,'back to claimed map');
             await context.close();
 
             const browser = await chromium.launch({headless:true,args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
@@ -286,13 +299,13 @@ jobs:
               web_key:'pixel_nations.aurelian_session.v2',
               capability_result:'available',
               save_acknowledgement:'stored',
-              before_reload_state:'map_east_route',
-              reloaded_state:'map_east_route',
-              profile_reopen_state:'map_east_route',
+              before_reload_state:'map_east_route_claimed',
+              reloaded_state:'map_east_route_claimed',
+              profile_reopen_state:'map_east_route_claimed',
               selected_intent:'east_trade',
-              continued_state:'village_route_context',
+              continued_state:'village_claimed',
               denied_storage_fallback:'world_neutral',
-              input_actions:['Enter','ArrowRight','reload','browser_reopen','ArrowRight','ArrowLeft'],
+              input_actions:['Enter','ArrowRight','Enter','reload','browser_reopen','ArrowRight','ArrowLeft'],
               evidence_storage_seeding:false,
               glb_sha256:process.env.GLB_SHA256
             },null,2)+'\n');
@@ -315,11 +328,11 @@ jobs:
             test "$(stat -c %s "$image")" -gt 70000
           done
           duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/session-persistence-v2-sequence.webm")"
-          awk -v duration="$duration" 'BEGIN { exit !(duration >= 20 && duration <= 35) }'
-          grep -F "AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:map_east_route:east_trade" "${EVIDENCE_DIR}/browser-console.log"
-          grep -F "AURELIAN_SESSION_V2_SAVE_ACK=stored:web_local_storage:map_east_route:east_trade" "${EVIDENCE_DIR}/browser-console.log"
+          awk -v duration="$duration" 'BEGIN { exit !(duration >= 15 && duration <= 35) }'
+          grep -F "AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:map_east_route_claimed:east_trade" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_SESSION_V2_SAVE_ACK=stored:web_local_storage:map_east_route_claimed:east_trade" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_SESSION_V2_LOAD=unavailable:web_local_storage:world_neutral:none" "${EVIDENCE_DIR}/browser-console.log"
-          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_route_context" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_claimed" "${EVIDENCE_DIR}/browser-console.log"
           sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/session-persistence-v2-sequence.webm" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
           echo "GODOT_AURELIAN_SESSION_PERSISTENCE_V2_DETERMINISTIC_QA=PASS"
 

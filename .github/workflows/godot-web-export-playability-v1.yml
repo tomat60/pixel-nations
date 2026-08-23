@@ -61,8 +61,12 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/godot /tmp/godot-templates
-          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip"             -o /tmp/godot/godot.zip
-          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz"             -o /tmp/godot/templates.tpz
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz" \
+            -o /tmp/godot/templates.tpz
           unzip -q /tmp/godot/godot.zip -d /tmp/godot
           chmod +x "${GODOT_BIN}"
           unzip -q /tmp/godot/templates.tpz -d /tmp/godot-templates
@@ -80,18 +84,19 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test; do
-            "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd"               > "${EVIDENCE_DIR}/${test}.log" 2>&1
+          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test; do
+            "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1
           done
           grep -F "GODOT_PLAYABLE_AURELIAN_ENTRY_V1_TEST: PASS" "${EVIDENCE_DIR}/playable_aurelian_entry_v1_test.log"
+          grep -F "GODOT_AURELIAN_FIRST_LAND_CLAIM_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_land_claim_v1_test.log"
 
       - name: Export canonical Linux and Web builds
         timeout-minutes: 8
         run: |
           set -euo pipefail
           mkdir -p game/build/linux game/build/web
-          "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64             > "${EVIDENCE_DIR}/godot-export-linux.log" 2>&1
-          "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html             > "${EVIDENCE_DIR}/godot-export-web.log" 2>&1
+          "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/godot-export-linux.log" 2>&1
+          "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html > "${EVIDENCE_DIR}/godot-export-web.log" 2>&1
           test -x game/build/linux/pixel-nations-foundation.x86_64
           test -s game/build/linux/pixel-nations-foundation.pck
           test -s game/build/web/index.html
@@ -101,7 +106,9 @@ jobs:
           grep -aF "aurelian_authored_terrain_v1.glb" game/build/web/index.pck
           (
             cd game/build/linux
-            timeout 30s env -u AURELIAN_EVIDENCE_DIR -u AURELIAN_PLAYABLE_EVIDENCE_STATE               -u AURELIAN_CAPTURE_PLAYABLE_ENTRY GODOT_SILENCE_ROOT_WARNING=1               ./pixel-nations-foundation.x86_64 --headless
+            timeout 30s env -u AURELIAN_EVIDENCE_DIR -u AURELIAN_PLAYABLE_EVIDENCE_STATE \
+              -u AURELIAN_CAPTURE_PLAYABLE_ENTRY GODOT_SILENCE_ROOT_WARNING=1 \
+              ./pixel-nations-foundation.x86_64 --headless
           ) > "${EVIDENCE_DIR}/native-headless.log" 2>&1
           grep -F "PLAYABLE_AURELIAN_HEADLESS_SMOKE=PASS" "${EVIDENCE_DIR}/native-headless.log"
           sha256sum game/build/web/* | tee "${EVIDENCE_DIR}/web-export-sha256sums.txt"
@@ -109,7 +116,7 @@ jobs:
       - name: Serve fresh Web export
         run: |
           set -euo pipefail
-          python3 -m http.server 8060 --bind 127.0.0.1 --directory game/build/web             > "${EVIDENCE_DIR}/http-server.log" 2>&1 &
+          python3 -m http.server 8060 --bind 127.0.0.1 --directory game/build/web > "${EVIDENCE_DIR}/http-server.log" 2>&1 &
           echo "WEB_SERVER_PID=$!" >> "$GITHUB_ENV"
           for attempt in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:8060/index.html >/dev/null; then
@@ -188,25 +195,27 @@ jobs:
             await page.screenshot({ path: path.join(stills, '02-world-trade-selected-1440x900.png') });
 
             await page.keyboard.press('ArrowRight');
-            await waitForCount('map_east_route', 1);
+            await waitForCount('map_east_route_selected', 1);
             await sleep(1000);
-            await page.screenshot({ path: path.join(stills, '03-map-east-route-1440x900.png') });
+            await page.screenshot({ path: path.join(stills, '03-map-east-route-selected-1440x900.png') });
+
+            await page.keyboard.press('Enter');
+            await waitForCount('map_east_route_claimed', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '04-map-east-route-claimed-1440x900.png') });
 
             await page.keyboard.press('ArrowRight');
-            await waitForCount('village_route_context', 1);
+            await waitForCount('village_claimed', 1);
             await sleep(1000);
-            await page.screenshot({ path: path.join(stills, '04-village-route-context-1440x900.png') });
+            await page.screenshot({ path: path.join(stills, '05-village-claimed-1440x900.png') });
 
             await page.keyboard.press('ArrowLeft');
-            await waitForCount('map_east_route', 2);
+            await waitForCount('map_east_route_claimed', 2);
             await sleep(1000);
-            await page.screenshot({ path: path.join(stills, '05-returned-map-1440x900.png') });
+            await page.screenshot({ path: path.join(stills, '06-returned-claimed-map-1440x900.png') });
 
             await page.keyboard.press('ArrowLeft');
             await waitForCount('world_trade_selected', 2);
-            await sleep(1000);
-            await page.screenshot({ path: path.join(stills, '06-returned-world-1440x900.png') });
-
             const video = page.video();
             await context.close();
             await video.saveAs(path.join(root, 'godot-web-input-sequence.webm'));
@@ -232,9 +241,9 @@ jobs:
               viewport: [1440, 900],
               browser: 'chromium',
               normal_entry: 'world_neutral',
-              input_actions: ['Enter', 'ArrowRight', 'ArrowRight', 'ArrowLeft', 'ArrowLeft'],
+              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'ArrowLeft', 'ArrowLeft'],
               observed_states: observedStates,
-              accepted_handoff: 'Direction_EastTrade -> Land_EastRouteSelected -> GreenvaleTradeRouteContext',
+              accepted_handoff: 'Direction_EastTrade -> Land_EastRouteSelected -> Land_EastRouteClaimed -> Village claimed',
               glb_sha256: process.env.GLB_SHA256,
               evidence_environment_state_driving: false
             }, null, 2) + '\n');
@@ -258,8 +267,10 @@ jobs:
           video_duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/godot-web-input-sequence.webm")"
           awk -v duration="$video_duration" 'BEGIN { exit !(duration >= 20 && duration <= 40) }'
           grep -F "PLAYABLE_AURELIAN_ENTRY_READY=world_neutral" "${EVIDENCE_DIR}/browser-console.log"
-          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_route_context" "${EVIDENCE_DIR}/browser-console.log"
-          sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/godot-web-input-sequence.webm"             | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
+          grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_claimed" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_claimed" "${EVIDENCE_DIR}/browser-console.log"
+          sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/godot-web-input-sequence.webm" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
           echo "GODOT_WEB_EXPORT_PLAYABILITY_DETERMINISTIC_QA=PASS"
 
       - name: Stop local server
