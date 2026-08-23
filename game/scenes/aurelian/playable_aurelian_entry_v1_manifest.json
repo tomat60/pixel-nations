@@ -7,13 +7,15 @@
     "world_marker": "Direction_EastTrade",
     "map_selected_marker": "Land_EastRouteSelected",
     "map_claimed_marker": "Land_EastRouteClaimed",
-    "village_state": "claimed"
+    "village_claimed_state": "claimed",
+    "village_founded_state": "founded"
   },
   "controls": {
     "select_trade": "ui_accept",
     "open_map": "ui_right",
     "claim_land": "ui_accept",
     "open_village": "ui_right",
+    "found_settlement": "ui_accept",
     "previous_layer": "ui_left"
   },
   "forward_path": [
@@ -21,10 +23,13 @@
     "world_trade_selected",
     "map_east_route_selected",
     "map_east_route_claimed",
-    "village_claimed"
+    "village_claimed",
+    "village_founded",
+    "map_east_route_claimed",
+    "village_founded"
   ],
   "backward_path": [
-    "village_claimed",
+    "village_founded",
     "map_east_route_claimed",
     "world_trade_selected"
   ],
@@ -38,8 +43,10 @@
     "session_local_only": false,
     "persistence_claimed": true,
     "claim_is_explicit_player_action": true,
+    "founding_is_explicit_player_action": true,
+    "opening_village_does_not_found": true,
     "economy_claimed": false,
-    "persistence_scope": "eastern_trade_claim_and_entry_state_only"
+    "persistence_scope": "eastern_trade_claim_entry_state_and_greenvale_founded_flag"
   },
   "shared_geography": "aurelian_authored_terrain_v1.glb",
   "persistence": {
@@ -52,6 +59,7 @@
       "none",
       "east_trade"
     ],
+    "settlement_founded_flag": true,
     "fallback_state": "world_neutral"
   }
 }
