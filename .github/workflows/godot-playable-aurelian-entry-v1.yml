@@ -129,7 +129,7 @@ jobs:
           grep -F "GODOT_AURELIAN_SESSION_PERSISTENCE_V2_TEST: PASS" "${EVIDENCE_DIR}/aurelian_session_persistence_v2_test.log"
           grep -F "GODOT_AURELIAN_FIRST_LAND_CLAIM_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_land_claim_v1_test.log"
 
-      - name: Capture normal launch and claim states
+      - name: Capture normal launch, claim and founding states
         timeout-minutes: 9
         run: |
           set -euo pipefail
@@ -139,6 +139,7 @@ jobs:
             "map-east-route-selected:map_east_route_selected"
             "map-east-route-claimed:map_east_route_claimed"
             "village-claimed:village_claimed"
+            "village-founded:village_founded"
             "returned-claimed-map:map_east_route_claimed"
           )
           for spec in "${specs[@]}"; do
@@ -152,7 +153,7 @@ jobs:
             mv "${EVIDENCE_DIR}/playable-1440x900.png" "${EVIDENCE_DIR}/${output}-1440x900.png"
           done
 
-      - name: Capture input-driven claim sequence
+      - name: Capture input-driven founding sequence
         timeout-minutes: 5
         run: |
           set -euo pipefail
@@ -162,11 +163,12 @@ jobs:
             --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 30 \
             --write-movie "$PWD/${EVIDENCE_DIR}/playable-entry-sequence.avi" \
             > "${EVIDENCE_DIR}/playable-entry-sequence.log" 2>&1
-          for state in world_trade_selected map_east_route_selected map_east_route_claimed village_claimed; do
+          for state in world_trade_selected map_east_route_selected map_east_route_claimed village_claimed village_founded; do
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=$state" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           done
           grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
-          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=930" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "AURELIAN_FIRST_SETTLEMENT_FOUNDING=GREENVALE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=1290" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test -s "${EVIDENCE_DIR}/playable-entry-sequence.avi"
           mediainfo --Output=JSON "${EVIDENCE_DIR}/playable-entry-sequence.avi" > "${EVIDENCE_DIR}/video-metadata.json"
 
@@ -174,11 +176,11 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import hashlib, json, os, re
+          import hashlib, json, math, os, re
           from pathlib import Path
           from PIL import Image, ImageStat
           root=Path(os.environ["EVIDENCE_DIR"])
-          names=["normal-launch","world-trade-selected","map-east-route-selected","map-east-route-claimed","village-claimed","returned-claimed-map"]
+          names=["normal-launch","world-trade-selected","map-east-route-selected","map-east-route-claimed","village-claimed","village-founded","returned-claimed-map"]
           report={}
           for name in names:
               path=root/f"{name}-1440x900.png"
@@ -191,7 +193,8 @@ jobs:
               report[name]={"bytes":path.stat().st_size,"variance":round(variance,3),"colors":colors,"sha256":hashlib.sha256(path.read_bytes()).hexdigest()}
           manifest=json.loads((root/"interaction-manifest.json").read_text())
           if manifest["startup_scene"]!="res://scenes/aurelian/playable_aurelian_entry_v1.tscn": raise SystemExit("startup drift")
-          if manifest["forward_path"]!=["world_neutral","world_trade_selected","map_east_route_selected","map_east_route_claimed","village_claimed"]: raise SystemExit("claim path drift")
+          expected_path=["world_neutral","world_trade_selected","map_east_route_selected","map_east_route_claimed","village_claimed","village_founded","map_east_route_claimed","village_founded"]
+          if manifest["forward_path"]!=expected_path: raise SystemExit("founding path drift")
           video=json.loads((root/"video-metadata.json").read_text())
           tracks=video.get("media",{}).get("track",[])
           general=next((x for x in tracks if x.get("@type")=="General"),{})
@@ -200,10 +203,11 @@ jobs:
           if not match: raise SystemExit("duration missing")
           duration=float(match.group(0))
           if duration>1000: duration/=1000
-          if not 30.5<=duration<=31.5: raise SystemExit(f"duration {duration}")
-          qa={"status":"PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_REVIEW","exact_head":(root/"exact-head.txt").read_text().strip(),"stills":report,"video_seconds":duration,"claim":"east_route"}
+          if not 42.5<=duration<=43.5: raise SystemExit(f"duration {duration}")
+          qa={"status":"PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_REVIEW","exact_head":(root/"exact-head.txt").read_text().strip(),"stills":report,"video_seconds":duration,"claim":"east_route","settlement":"greenvale","founded":True}
           (root/"evidence-qa.json").write_text(json.dumps(qa,indent=2)+"\n")
-          canvas=Image.new("RGB",(1080,450),(32,32,32))
+          rows=math.ceil(len(names)/3)
+          canvas=Image.new("RGB",(1080,rows*225),(32,32,32))
           for i,name in enumerate(names):
               thumb=Image.open(root/f"{name}-1440x900.png").convert("RGB").resize((360,225))
               canvas.paste(thumb,((i%3)*360,(i//3)*225))
