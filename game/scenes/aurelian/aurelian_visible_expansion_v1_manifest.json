@@ -1,0 +1,43 @@
+{
+  "contract": "AURELIAN_VISIBLE_EXPANSION_V1",
+  "authority_issue": 482,
+  "accepted_product_baseline": "33394c20457ffa66a6cd72479001ef0c89d8dbd2",
+  "shared_geography": "aurelian_authored_terrain_v1.glb",
+  "asset_policy": "reuse repository-pinned KayKit instances only",
+  "visible_outcome": {
+    "claimed_nodes": 1,
+    "founded_nodes": 10,
+    "developed_nodes": 13,
+    "settlement_anchors": [
+      "village_green",
+      "crossing_road_edge",
+      "fields_work_edge",
+      "forest_edge",
+      "gilded_crossing"
+    ],
+    "views": ["village", "map", "world"]
+  },
+  "regressions": {
+    "first_land_claim": true,
+    "first_settlement_founding": true,
+    "session_persistence_v2": true,
+    "shared_topology": true
+  },
+  "evidence": [
+    "village-claimed-1440x900.png",
+    "village-founded-1440x900.png",
+    "map-east-route-claimed-1440x900.png",
+    "world-trade-selected-1440x900.png",
+    "playable-entry-sequence.avi"
+  ],
+  "forbidden": [
+    "new geography",
+    "new GLB",
+    "new asset family",
+    "economy",
+    "workers",
+    "timers",
+    "city nation empire mechanics",
+    "P12"
+  ]
+}
