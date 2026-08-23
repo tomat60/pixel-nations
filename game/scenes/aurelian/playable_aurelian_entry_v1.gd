@@ -210,6 +210,19 @@ func _previous_entry() -> void:
 		"world_trade_selected":
 			_apply_entry_state("world_neutral")
 
+func _hide_preclaim_greenvale() -> bool:
+	var all_nodes: Array = state_contract.get("all_nodes", [])
+	if all_nodes.is_empty():
+		push_error("AURELIAN_FIRST_LAND_CLAIM_PRECLAIM_NODES_MISSING")
+		return false
+	for node_name_variant in all_nodes:
+		var node_name := String(node_name_variant)
+		var node := _named_node(main_basin, node_name)
+		if node == null:
+			return false
+		node.visible = false
+	return true
+
 func _apply_entry_state(state_name: String) -> void:
 	if not ENTRY_STATES.has(state_name):
 		push_error("PLAYABLE_AURELIAN_UNKNOWN_STATE=%s" % state_name)
@@ -220,12 +233,21 @@ func _apply_entry_state(state_name: String) -> void:
 	main_decision_overlay_root.visible = state_name == "village_route_context"
 	match state_name:
 		"world_neutral":
+			if not _hide_preclaim_greenvale():
+				push_error("AURELIAN_FIRST_LAND_CLAIM_PRECLAIM_VISIBILITY_FAILED")
 			_apply_world_state(main_world_overlay_root, "neutral")
 			_activate_camera("world")
 		"world_trade_selected":
+			if not _hide_preclaim_greenvale():
+				push_error("AURELIAN_FIRST_LAND_CLAIM_PRECLAIM_VISIBILITY_FAILED")
 			_apply_world_state(main_world_overlay_root, "selected_trade")
 			_activate_camera("world")
-		"map_east_route_selected", "map_east_route":
+		"map_east_route_selected":
+			if not _hide_preclaim_greenvale():
+				push_error("AURELIAN_FIRST_LAND_CLAIM_PRECLAIM_VISIBILITY_FAILED")
+			_apply_map_state(main_overlay_root, "selected")
+			_activate_camera("map")
+		"map_east_route":
 			_apply_map_state(main_overlay_root, "selected")
 			_activate_camera("map")
 		"map_east_route_claimed":
