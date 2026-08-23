@@ -13,6 +13,7 @@ const VALID_STATES := [
 	"map_east_route_selected",
 	"map_east_route_claimed",
 	"village_claimed",
+	"village_founded",
 ]
 const VALID_INTENTS := ["none", "east_trade"]
 
@@ -25,6 +26,7 @@ static func fallback(status: String, adapter: String) -> Dictionary:
 		"version": VERSION,
 		"selected_intent": "none",
 		"entry_state": "world_neutral",
+		"settlement_founded": false,
 	}
 
 static func load_session(path: String = NATIVE_PATH) -> Dictionary:
@@ -32,14 +34,17 @@ static func load_session(path: String = NATIVE_PATH) -> Dictionary:
 		return _load_web()
 	return _load_native(path)
 
-static func save_session(state: String, intent: String, path: String = NATIVE_PATH) -> Dictionary:
+static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false) -> Dictionary:
 	if not _is_valid_pair(state, intent):
+		return fallback("invalid_data", _adapter_name())
+	if state == "village_founded" and not settlement_founded:
 		return fallback("invalid_data", _adapter_name())
 	var payload := {
 		"schema": SCHEMA,
 		"version": VERSION,
 		"selected_intent": intent,
 		"entry_state": state,
+		"settlement_founded": settlement_founded,
 		"saved_at_utc": Time.get_datetime_string_from_system(true),
 	}
 	var payload_text := JSON.stringify(payload)
@@ -70,6 +75,9 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 	var intent := String(session.get("selected_intent", ""))
 	if not _is_valid_pair(state, intent):
 		return fallback("invalid_value", adapter)
+	var settlement_founded := bool(session.get("settlement_founded", false))
+	if state == "village_founded" and not settlement_founded:
+		return fallback("invalid_value", adapter)
 	return {
 		"ok": true,
 		"status": "restored",
@@ -78,6 +86,7 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		"version": VERSION,
 		"selected_intent": intent,
 		"entry_state": state,
+		"settlement_founded": settlement_founded,
 		"saved_at_utc": String(session.get("saved_at_utc", "")),
 	}
 
