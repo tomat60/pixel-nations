@@ -8,7 +8,7 @@ const TOPOLOGY_Z_SIGN := -1.0
 const STILL_SIZE := Vector2i(1440, 900)
 const VILLAGE_STATES := ["claimed", "founded", "developed"]
 const CAMERA_CONTRACT := {
-	"village": {"center": Vector2(382, 326), "size": 9.0},
+	"village": {"center": Vector2(372, 326), "size": 9.4},
 	"map": {"center": Vector2(500, 430), "size": 17.4},
 	"world": {"center": Vector2(500, 480), "size": 23.4},
 	"bridge": {"center": Vector2(515, 340), "size": 4.8},
