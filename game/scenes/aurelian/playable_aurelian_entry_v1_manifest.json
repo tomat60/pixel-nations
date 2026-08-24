@@ -49,7 +49,9 @@
   "backward_path": [
     "village_trade_dispatched",
     "map_east_route_in_use",
-    "world_first_trade_underway"
+    "world_first_trade_underway",
+    "map_east_route_connected",
+    "world_trade_route_active"
   ],
   "legacy_states_retained": [
     "map_east_route",
