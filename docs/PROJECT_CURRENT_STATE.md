@@ -7,6 +7,7 @@ Authority source: this file on the current `main`
 Authority baseline SHA: `3cb0a3df33da606bfff45c5855a332b3ae204a22`
 Product baseline SHA: `3cb0a3df33da606bfff45c5855a332b3ae204a22`
 Current milestone: `GODOT_AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT_PASS`
+Active execution issue: #486
 Completed execution issue: #486
 Next allowed action: one bounded strategy review and, if justified, a separate documentation-only contract PR. No new product implementation is authorized.
 
