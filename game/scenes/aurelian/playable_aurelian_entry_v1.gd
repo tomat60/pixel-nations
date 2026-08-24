@@ -92,6 +92,8 @@ func _decision_state_for_entry(state_name: String) -> String:
 	match state_name:
 		"map_east_route_selected", "map_east_route_claimed", "map_east_route_connected":
 			return "map_east_route"
+		"world_trade_route_active":
+			return "world_trade_selected"
 		"village_claimed", "village_founded", "village_developed":
 			return "village_route_context"
 		_:
