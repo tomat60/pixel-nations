@@ -288,10 +288,9 @@ jobs:
             await sleep(2500);
             await page.screenshot({path:path.join(stills,'web-developed-map-restored-1440x900.png')});
             const video = page.video();
-            await page.close();
+            await context.close();
             const recordedPath = await video.path();
             fs.copyFileSync(recordedPath,path.join(root,'session-persistence-v2-sequence.webm'));
-            await context.close();
 
             await sleep(500);
             context = await chromium.launchPersistentContext(profile,{
