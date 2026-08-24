@@ -343,7 +343,7 @@ jobs:
               args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']
             });
             page = await openPage(context);
-            await waitFor(() => loads.filter(x => x.status === 'restored' && x.state === 'map_east_route_in_use').length >= 2,'profile reopen restore');
+            await waitFor(() => loads.filter(x => x.status === 'restored' && x.state === 'map_greenvale_city').length >= 2,'profile reopen restore');
             await waitFor(() => states.filter(x => x === 'map_greenvale_city').length >= 3,'profile reopened connected map');
             await sleep(1500);
             await page.screenshot({path:path.join(stills,'web-city-map-profile-reopened-1440x900.png')});
