@@ -99,11 +99,6 @@ func _decision_state_for_entry(state_name: String) -> String:
 
 func _configure_state_environment(state_name: String) -> void:
 	match state_name:
-		"world_trade_route_active":
-			if not _apply_village_state(main_basin, "developed"):
-				push_error("AURELIAN_FIRST_TRADE_ROUTE_CONNECTION_VILLAGE_STATE_FAILED")
-			_apply_world_state(main_world_overlay_root, "selected_trade")
-			_activate_camera("world")
 		"map_east_route_selected":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "selected")
@@ -122,11 +117,6 @@ func _configure_state_environment(state_name: String) -> void:
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
 			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
 			return
-		"map_east_route_connected":
-			_apply_map_state(main_overlay_root, "east_route_claimed")
-			if not _apply_village_state(main_basin, "developed"):
-				push_error("AURELIAN_FIRST_TRADE_ROUTE_CONNECTION_VILLAGE_STATE_FAILED")
-			_activate_camera("map")
 		"village_claimed":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
@@ -318,6 +308,11 @@ func _apply_entry_state(state_name: String) -> void:
 					push_error("AURELIAN_FIRST_LAND_CLAIM_PRECLAIM_VISIBILITY_FAILED")
 			_apply_world_state(main_world_overlay_root, "selected_trade")
 			_activate_camera("world")
+		"world_trade_route_active":
+			if not _apply_village_state(main_basin, "developed"):
+				push_error("AURELIAN_FIRST_TRADE_ROUTE_CONNECTION_VILLAGE_STATE_FAILED")
+			_apply_world_state(main_world_overlay_root, "selected_trade")
+			_activate_camera("world")
 		"map_east_route_selected":
 			if not _hide_preclaim_greenvale():
 				push_error("AURELIAN_FIRST_LAND_CLAIM_PRECLAIM_VISIBILITY_FAILED")
@@ -332,6 +327,11 @@ func _apply_entry_state(state_name: String) -> void:
 				push_error("AURELIAN_FIRST_SETTLEMENT_FOUNDING_VILLAGE_STATE_FAILED" if settlement_founded else "AURELIAN_FIRST_LAND_CLAIM_VILLAGE_STATE_FAILED")
 			_activate_camera("map")
 			print("AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE")
+		"map_east_route_connected":
+			_apply_map_state(main_overlay_root, "east_route_claimed")
+			if not _apply_village_state(main_basin, "developed"):
+				push_error("AURELIAN_FIRST_TRADE_ROUTE_CONNECTION_VILLAGE_STATE_FAILED")
+			_activate_camera("map")
 		"village_claimed":
 			_apply_map_state(main_overlay_root, "east_route_claimed")
 			if not _apply_village_state(main_basin, "claimed"):
