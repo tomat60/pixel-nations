@@ -1,0 +1,78 @@
+{
+  "contract": "GODOT_AURELIAN_FIRST_NATION_FOUNDING_V1",
+  "authority_issue": 502,
+  "authority_baseline": "bf12595ebdfe4931b5d92e2b3c60da37b473a25e",
+  "product_baseline": "b747ce5579a29c0b0cb07887c57046549ea3db79",
+  "shared_geography": "aurelian_authored_terrain_v1.glb",
+  "asset_policy": "reuse repository-pinned KayKit instances and existing procedural presentation only",
+  "player_action": {
+    "label": "Found Aurelian Nation",
+    "input": "ui_accept",
+    "event": "AURELIAN_FIRST_NATION_FOUNDING=AURELIAN",
+    "explicit_only": true
+  },
+  "states": {
+    "pre_world": "world_first_city_recognized",
+    "pre_map": "map_greenvale_city",
+    "pre_village": "village_city_chartered",
+    "post_world": "world_first_nation_founded",
+    "post_map": "map_aurelian_homeland",
+    "post_village": "village_greenvale_capital"
+  },
+  "visible_outcome": {
+    "city_nodes_preserved": 19,
+    "civic_standards_added_max": 3,
+    "greenvale_origin": [354, 285],
+    "map_homeland_boundaries": 1,
+    "map_capital_markers": 1,
+    "world_nation_emblems": 1,
+    "readable_without_hud": true
+  },
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "nation_founded_flag": true,
+    "native_restart": true,
+    "web_reload": true,
+    "persistent_profile_reopen": true,
+    "denied_storage_fallback": "world_neutral:none"
+  },
+  "topology": {
+    "single_land_unchanged": true,
+    "east_route_unchanged": true,
+    "caravan_unchanged": true,
+    "gilded_crossing_unchanged": true,
+    "greenvale_origin_unchanged": true,
+    "shared_cameras_unchanged": true
+  },
+  "evidence": {
+    "normal_input_sequence": true,
+    "playable_entry": true,
+    "web_playability": true,
+    "session_persistence_v2": true,
+    "shared_geography_regression": true,
+    "direct_review_required": true,
+    "bounded_visual_corrections_max": 1
+  },
+  "forbidden": [
+    "economy",
+    "population simulation",
+    "workers",
+    "timers",
+    "queues",
+    "governance system",
+    "laws",
+    "diplomacy",
+    "combat",
+    "empire progression",
+    "another land",
+    "new geography",
+    "new GLB",
+    "new asset family",
+    "broad polish",
+    "app/play",
+    "P12",
+    "MAX",
+    "paid tools"
+  ]
+}

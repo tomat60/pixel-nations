@@ -17,7 +17,10 @@
     "village_trade_dispatched_state": "village_trade_dispatched",
     "village_city_chartered_state": "village_city_chartered",
     "map_greenvale_city_state": "map_greenvale_city",
-    "world_first_city_recognized_state": "world_first_city_recognized"
+    "world_first_city_recognized_state": "world_first_city_recognized",
+    "world_first_nation_founded_state": "world_first_nation_founded",
+    "map_aurelian_homeland_state": "map_aurelian_homeland",
+    "village_greenvale_capital_state": "village_greenvale_capital"
   },
   "controls": {
     "select_trade": "ui_accept",
@@ -29,7 +32,8 @@
     "develop_settlement": "ui_accept",
     "connect_trade_route": "ui_accept",
     "dispatch_first_caravan": "ui_accept",
-    "charter_greenvale": "ui_accept"
+    "charter_greenvale": "ui_accept",
+    "found_aurelian_nation": "ui_accept"
   },
   "forward_path": [
     "world_neutral",
@@ -53,9 +57,17 @@
     "map_greenvale_city",
     "world_first_city_recognized",
     "map_greenvale_city",
-    "village_city_chartered"
+    "village_city_chartered",
+    "map_greenvale_city",
+    "world_first_city_recognized",
+    "world_first_nation_founded",
+    "map_aurelian_homeland",
+    "village_greenvale_capital"
   ],
   "backward_path": [
+    "village_greenvale_capital",
+    "map_aurelian_homeland",
+    "world_first_nation_founded",
     "village_city_chartered",
     "map_greenvale_city",
     "world_first_city_recognized",
@@ -78,7 +90,7 @@
     "founding_is_explicit_player_action": true,
     "opening_village_does_not_found": true,
     "economy_claimed": false,
-    "persistence_scope": "eastern_trade_claim_greenvale_city_charter",
+    "persistence_scope": "eastern_trade_claim_greenvale_city_charter_aurelian_nation",
     "development_is_explicit_player_action": true,
     "opening_village_does_not_develop": true,
     "route_connection_is_explicit_player_action": true,
@@ -89,7 +101,12 @@
     "caravan_simulation_claimed": false,
     "city_charter_is_explicit_player_action": true,
     "opening_village_does_not_charter": true,
-    "city_simulation_claimed": false
+    "city_simulation_claimed": false,
+    "nation_founding_is_explicit_player_action": true,
+    "opening_world_does_not_found_nation": true,
+    "nation_simulation_claimed": false,
+    "nation_visual_evidence_required": true,
+    "playable_capture_timeout_seconds": 360
   },
   "shared_geography": "aurelian_authored_terrain_v1.glb",
   "persistence": {
@@ -107,6 +124,7 @@
     "settlement_developed_flag": true,
     "route_connected_flag": true,
     "caravan_dispatched_flag": true,
-    "city_chartered_flag": true
+    "city_chartered_flag": true,
+    "nation_founded_flag": true
   }
 }
