@@ -2,13 +2,13 @@
 
 Status: ACTIVE
 Updated: 2026-08-24
-Current state revision: First Trade Caravan Dispatch v1 contract proposed
+Current state revision: First Trade Caravan Dispatch v1 accepted
 Authority source: this file on the current `main`
-Authority baseline SHA: `6bffe07dc6afab9bb4caf115992ebf1bb17e1e7e`
-Product baseline SHA: `ea3fd0d3daebcfc1cc4b935bd1b46940e0b57d40`
-Current milestone: authorize `GODOT_AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH_V1`
-Active execution issue: #494
-Next allowed action: merge the documentation-only contract after exact-head guards pass, then execute exactly one bounded First Trade Caravan Dispatch v1 candidate.
+Authority baseline SHA: `c6b6133d5271aee73ae2252af7492886a005b19b`
+Product baseline SHA: `c6b6133d5271aee73ae2252af7492886a005b19b`
+Current milestone: no product implementation authorized
+Active execution issue: none
+Next allowed action: one bounded strategy review and a separate documentation-only contract PR for the next milestone.
 
 ## Product truth
 
@@ -43,67 +43,52 @@ Do not rebuild these accepted capabilities:
 - explicit First Settlement Founding;
 - Aurelian Visible Expansion v1;
 - explicit First Settlement Development;
-- explicit First Trade Route Connection with cross-view payoff.
+- explicit First Trade Route Connection with cross-view payoff;
+- explicit First Trade Caravan Dispatch with cross-view payoff.
 
 Accepted GLB identity and shared physical geography remain unchanged.
 
 ## Most recent accepted product milestone
 
-PR #492 `Implement Godot Aurelian First Trade Route Connection v1` is accepted and merged.
+PR #496 `Implement Godot Aurelian First Trade Caravan Dispatch v1` is accepted and merged.
 
-- terminal result: `GODOT_AURELIAN_FIRST_TRADE_ROUTE_CONNECTION_PASS`;
-- accepted head: `f46d8fd3c2d073d1b984b452b884cf3a74a24bd2`;
-- merged product baseline: `ea3fd0d3daebcfc1cc4b935bd1b46940e0b57d40`;
-- player path: `Village developed -> Map East Route claimed -> explicit Connect East Route -> Map East Route connected -> World trade route active`;
-- event: `AURELIAN_FIRST_TRADE_ROUTE_CONNECTION=EAST_ROUTE`, emitted only for explicit connection;
-- native restart, Web reload and persistent-profile reopen restore `map_east_route_connected:east_trade`;
-- direct review confirmed readable claimed-to-connected change, World trade payoff and no shared-geography regression.
+- terminal result: `GODOT_AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH_PASS`;
+- accepted head: `d20e7368fcacfc79287b182abecd5f3a49600dd7`;
+- merged product baseline: `c6b6133d5271aee73ae2252af7492886a005b19b`;
+- player path: `World trade route active -> Map route connected -> Village developed -> explicit Dispatch First Caravan -> Map route in use -> World first trade underway`;
+- event: `AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH=EAST_ROUTE`, emitted only for explicit dispatch;
+- one fixed gold and red procedural token marks the route at `[435,313]`;
+- native restart, Web reload and persistent-profile reopen restore `map_east_route_in_use:east_trade`;
+- denied localStorage safely falls back to `world_neutral:none`;
+- direct review confirmed readable route-in-use and first-trade-underway payoff with no shared-geography regression;
+- the one allowed visual correction removed a colliding label and strengthened the static token.
 
 Accepted evidence:
 
-- Playable Entry run `32693737031`, artifact `9508178940`, digest `sha256:dee4063247bd7e1970238feb2890bf22ce3ca3b14a27abcd54e44e6acd19cb26`;
-- Web Playability run `32693737059`, artifact `9508166361`, digest `sha256:65ca6568299bdb8d020fba746a72ddb27ccc4312cf337bb41bd516a8279d18c5`;
-- Session Persistence v2 run `32693737054`, artifact `9508170582`, digest `sha256:435c60b79094ca9a64a97cc222544e2e2b4c27355ae63e42edddf854e283778d`.
+- Playable Entry run `32705747920`, artifact `9512302338`, digest `sha256:c909726472bec15daa154dbf3e3fd582c47ae4bf76ebfc5a5432236898d37013`;
+- Web Playability run `32705747882`, artifact `9512263732`, digest `sha256:be60ac3b974b6f0aa140b3194c718f57ae1ddb46757e7994c0d32096771b7cba`;
+- Session Persistence v2 run `32705747829`, artifact `9512280852`, digest `sha256:ea26856174040aa582f707183217f62ff3d91a92f507301501b70f6d6315ddef`.
 
-Issue #490 is closed as completed.
-
-## Current contract
-
-Issue #494 and `docs/GODOT_AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH_V1_CONTRACT.md` propose exactly one bounded outcome:
-
-`World trade route active -> Map route connected -> Village developed -> explicit Dispatch First Caravan -> Map route in use -> World first trade underway`
-
-Required constraints:
-
-- explicit action label: `Dispatch First Caravan`;
-- explicit-only event: `AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH=EAST_ROUTE`;
-- exactly one restrained procedural caravan token at a fixed point on the existing Greenvale to Gilded Crossing route;
-- the token is a state marker, not an animated or simulated unit;
-- Session Persistence v2 retains its namespace and schema version 2 unless a deterministic compatibility failure proves otherwise;
-- one bounded visual correction maximum;
-- direct exact-head artifact review is mandatory.
+Issue #494 is completed.
 
 ## Current gate
 
-Before the contract PR merges, no product implementation is authorized.
-
-After the documentation-only contract is accepted on `main`, exactly one bounded implementation candidate is allowed for issue #494.
+No new product implementation is authorized.
 
 Allowed:
 
-- `game/scenes/aurelian/**`;
-- `game/tests/**`;
-- existing Playable Entry, Web Playability and Session Persistence v2 workflows where necessary;
-- one small focused evidence adjustment only if existing workflows cannot prove the outcome;
-- documentation and evidence manifests.
+- one bounded strategy review;
+- one separate documentation-only contract PR for the next milestone;
+- repository QA and release verification.
 
-Forbidden:
+Forbidden until a new contract is accepted on `main`:
 
+- new product implementation;
 - prices, resources, costs, rewards, inventory or economy;
 - production simulation, workers, timers, queues or repeated caravans;
 - city, nation or empire progression;
 - another land or multiple-land expansion;
-- new terrain, GLB, asset family, geography or Village nodes;
+- new terrain, GLB, asset family or geography;
 - broad Village, Map or World polish;
 - `app/play/**` or public shell changes;
 - backend, accounts, cloud save, multiplayer, combat or diplomacy;
@@ -112,12 +97,10 @@ Forbidden:
 
 ## Release state
 
-- PR #492 exact-head product evidence: PASS;
-- PR #492 merge: `ea3fd0d3daebcfc1cc4b935bd1b46940e0b57d40`;
-- PASS record merge: `6bffe07dc6afab9bb4caf115992ebf1bb17e1e7e`;
-- Vercel for both merge SHAs: SUCCESS;
-- issue #490: completed;
-- issue #494: open contract authority;
+- PR #496 exact-head product evidence: PASS;
+- PR #496 merge: `c6b6133d5271aee73ae2252af7492886a005b19b`;
+- merge-SHA Vercel: SUCCESS;
+- issue #494: completed;
 - public-origin route verification remains an environment capability boundary, not evidence of an outage.
 
 ## Process rules
@@ -153,14 +136,13 @@ Issue #415 remains shared-geography history and continuity guidance, not current
 
 ## Session start gate
 
-Before meaningful implementation:
+Before meaningful work:
 
 1. run `npm run pn:status` when a checkout is available;
 2. read this file, ADR-001 and root `AGENTS.md`;
-3. read issue #494;
-4. re-fetch live GitHub state;
-5. state model and tool, MAX, cost, allowed scope, forbidden actions, validation and stop condition.
+3. re-fetch live GitHub state;
+4. state model and tool, MAX, cost, allowed scope, forbidden actions, validation and stop condition.
 
 ## Current stop condition
 
-Do not start product implementation before the documentation-only contract merges. After merge, stop the implementation candidate at direct exact-head `GODOT_AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH_PASS` or `GODOT_AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH_REJECT`.
+Do not start product implementation before a separate next-milestone contract is accepted on `main`.
