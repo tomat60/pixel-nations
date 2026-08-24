@@ -9,7 +9,9 @@
     "map_claimed_marker": "Land_EastRouteClaimed",
     "village_claimed_state": "claimed",
     "village_founded_state": "founded",
-    "village_developed_state": "developed"
+    "village_developed_state": "developed",
+    "map_connected_state": "map_east_route_connected",
+    "world_trade_active_state": "world_trade_route_active"
   },
   "controls": {
     "select_trade": "ui_accept",
@@ -18,7 +20,8 @@
     "open_village": "ui_right",
     "found_settlement": "ui_accept",
     "previous_layer": "ui_left",
-    "develop_settlement": "ui_accept"
+    "develop_settlement": "ui_accept",
+    "connect_trade_route": "ui_accept"
   },
   "forward_path": [
     "world_neutral",
@@ -29,12 +32,15 @@
     "village_founded",
     "village_developed",
     "map_east_route_claimed",
+    "map_east_route_connected",
+    "world_trade_route_active",
+    "map_east_route_connected",
     "village_developed"
   ],
   "backward_path": [
     "village_developed",
-    "map_east_route_claimed",
-    "world_trade_selected"
+    "map_east_route_connected",
+    "world_trade_route_active"
   ],
   "legacy_states_retained": [
     "map_east_route",
@@ -49,9 +55,11 @@
     "founding_is_explicit_player_action": true,
     "opening_village_does_not_found": true,
     "economy_claimed": false,
-    "persistence_scope": "eastern_trade_claim_entry_state_greenvale_founded_and_developed_flags",
+    "persistence_scope": "eastern_trade_claim_greenvale_development_and_connected_route",
     "development_is_explicit_player_action": true,
-    "opening_village_does_not_develop": true
+    "opening_village_does_not_develop": true,
+    "route_connection_is_explicit_player_action": true,
+    "opening_map_does_not_connect": true
   },
   "shared_geography": "aurelian_authored_terrain_v1.glb",
   "persistence": {
@@ -66,6 +74,7 @@
     ],
     "settlement_founded_flag": true,
     "fallback_state": "world_neutral",
-    "settlement_developed_flag": true
+    "settlement_developed_flag": true,
+    "route_connected_flag": true
   }
 }

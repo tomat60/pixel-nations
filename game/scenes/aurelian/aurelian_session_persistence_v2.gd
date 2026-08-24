@@ -12,6 +12,8 @@ const VALID_STATES := [
 	"village_route_context",
 	"map_east_route_selected",
 	"map_east_route_claimed",
+	"map_east_route_connected",
+	"world_trade_route_active",
 	"village_claimed",
 	"village_founded",
 	"village_developed",
@@ -29,6 +31,7 @@ static func fallback(status: String, adapter: String) -> Dictionary:
 		"entry_state": "world_neutral",
 		"settlement_founded": false,
 		"settlement_developed": false,
+		"route_connected": false,
 	}
 
 static func load_session(path: String = NATIVE_PATH) -> Dictionary:
@@ -36,7 +39,7 @@ static func load_session(path: String = NATIVE_PATH) -> Dictionary:
 		return _load_web()
 	return _load_native(path)
 
-static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false) -> Dictionary:
+static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false, route_connected: bool = false) -> Dictionary:
 	if not _is_valid_pair(state, intent):
 		return fallback("invalid_data", _adapter_name())
 	if state in ["village_founded", "village_developed"] and not settlement_founded:
@@ -45,6 +48,10 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		return fallback("invalid_data", _adapter_name())
 	if settlement_developed and not settlement_founded:
 		return fallback("invalid_data", _adapter_name())
+	if state in ["map_east_route_connected", "world_trade_route_active"] and not route_connected:
+		return fallback("invalid_data", _adapter_name())
+	if route_connected and not settlement_developed:
+		return fallback("invalid_data", _adapter_name())
 	var payload := {
 		"schema": SCHEMA,
 		"version": VERSION,
@@ -52,6 +59,7 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		"entry_state": state,
 		"settlement_founded": settlement_founded,
 		"settlement_developed": settlement_developed,
+		"route_connected": route_connected,
 		"saved_at_utc": Time.get_datetime_string_from_system(true),
 	}
 	var payload_text := JSON.stringify(payload)
@@ -84,11 +92,16 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		return fallback("invalid_value", adapter)
 	var settlement_founded := bool(session.get("settlement_founded", false))
 	var settlement_developed := bool(session.get("settlement_developed", false))
+	var route_connected := bool(session.get("route_connected", false))
 	if state in ["village_founded", "village_developed"] and not settlement_founded:
 		return fallback("invalid_value", adapter)
 	if state == "village_developed" and not settlement_developed:
 		return fallback("invalid_value", adapter)
 	if settlement_developed and not settlement_founded:
+		return fallback("invalid_value", adapter)
+	if state in ["map_east_route_connected", "world_trade_route_active"] and not route_connected:
+		return fallback("invalid_value", adapter)
+	if route_connected and not settlement_developed:
 		return fallback("invalid_value", adapter)
 	return {
 		"ok": true,
@@ -100,6 +113,7 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		"entry_state": state,
 		"settlement_founded": settlement_founded,
 		"settlement_developed": settlement_developed,
+		"route_connected": route_connected,
 		"saved_at_utc": String(session.get("saved_at_utc", "")),
 	}
 
