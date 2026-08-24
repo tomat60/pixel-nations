@@ -2,13 +2,13 @@
 
 Status: ACTIVE
 Updated: 2026-08-24
-Current state revision: First Nation Founding v1 contract proposed
+Current state revision: First Nation Founding v1 accepted
 Authority source: this file on the current `main`
-Authority baseline SHA: `0d86b2027c5fe121eea475e9e7a326f459b000c0`
-Product baseline SHA: `b747ce5579a29c0b0cb07887c57046549ea3db79`
-Current milestone: `GODOT_AURELIAN_FIRST_NATION_FOUNDING_V1`
+Authority baseline SHA: `20293fa6d83b55c886536875566d15fb89c0164b`
+Product baseline SHA: `20293fa6d83b55c886536875566d15fb89c0164b`
+Current milestone: none authorized
 Active execution issue: #502
-Next allowed action: merge the documentation-only First Nation Founding v1 contract after exact-head guards, then run exactly one bounded implementation candidate.
+Next allowed action: one bounded strategy review and a separate documentation-only contract for any next product milestone.
 
 ## Product truth
 
@@ -45,69 +45,50 @@ Do not rebuild these accepted capabilities:
 - explicit First Settlement Development;
 - explicit First Trade Route Connection with cross-view payoff;
 - explicit First Trade Caravan Dispatch with cross-view payoff;
-- explicit First City Charter with cross-view payoff.
+- explicit First City Charter with cross-view payoff;
+- explicit First Nation Founding with cross-view payoff.
 
 Accepted GLB identity and shared physical geography remain unchanged.
 
 ## Most recent accepted product milestone
 
-PR #500 `Implement Godot Aurelian First City Charter v1` is accepted and merged.
+PR #504 `Implement Godot Aurelian First Nation Founding v1` is accepted and merged.
 
-- terminal result: `GODOT_AURELIAN_FIRST_CITY_CHARTER_PASS`;
-- accepted head: `41345833d2520b340b3934b676f55d16553e80ca`;
-- merged product baseline: `b747ce5579a29c0b0cb07887c57046549ea3db79`;
-- player path: `World first trade underway -> Map East Route in use -> Village developed -> explicit Charter Greenvale -> Village first city -> Map city marker -> World first city recognized`;
-- event: `AURELIAN_FIRST_CITY_CHARTER=GREENVALE`, emitted only for explicit charter;
-- the accepted 13-node developed settlement expands to a 19-node civic-core superset using the repository-pinned asset family;
-- one subordinate city marker remains at the accepted Greenvale topology origin `[354,285]`;
-- native restart, Web reload and persistent-profile reopen restore `map_greenvale_city:east_trade`;
-- reopening Village restores `village_city_chartered`;
-- direct review confirmed the visible city transformation, Map WHERE role, World WHY role and unchanged shared geography;
+- terminal result: `GODOT_AURELIAN_FIRST_NATION_FOUNDING_PASS`;
+- accepted head: `4bda75d73f5b15aa10358672b4e7c3c15ccdd9b7`;
+- merged product baseline: `20293fa6d83b55c886536875566d15fb89c0164b`;
+- player path: `World first city recognized -> explicit Found Aurelian Nation -> World first nation founded -> Map Aurelian homeland -> Village Greenvale capital`;
+- event: `AURELIAN_FIRST_NATION_FOUNDING=AURELIAN`, emitted only for explicit founding;
+- World preserves strategic directions and adds one bounded Aurelian emblem;
+- Map preserves the accepted single-land topology, East Route and caravan while adding one homeland cue and Greenvale capital marker;
+- Village preserves the accepted 19-node city and adds exactly three bounded civic standards;
+- native restart, Web reload and persistent-profile reopen restore `map_aurelian_homeland:east_trade`;
+- reopening Village restores `village_greenvale_capital`;
+- denied-storage fallback remains `world_neutral:none`;
+- direct review confirmed visible city-to-nation progression, correct view roles and unchanged shared geography;
 - no visual correction was required.
 
 Accepted evidence:
 
-- Playable Entry run `32715919643`, artifact `9516051229`, digest `sha256:42d3b90f1963d1a28161b9537dabf49e7d610f92fddf4e7634feed85272d754f`;
-- Web Playability run `32715919938`, artifact `9516003998`, digest `sha256:32f44a0e37d447bc5ccf36a366e7910f10632218e1c6723b928784921d417581`;
-- Session Persistence v2 run `32715919731`, artifact `9515997814`, digest `sha256:07b80890df27fb8304c5d148ebaf78c5b90be8c6355cf395ac796041cc93b59d`.
+- Playable Entry run `32726753368`, artifact `9519982639`, digest `sha256:fc00c0e3e9ee0adada6e22934aa7170e059fcf48d61fdb483a41588bc5e6779d`;
+- Web Playability run `32726753303`, artifact `9519881895`, digest `sha256:286c484c3438bcec26de8670c14b4f04c307cd9f519a2f31292a8e6fbf6890a0`;
+- Session Persistence v2 run `32726753309`, accepted rerun artifact `9520087645`, digest `sha256:0b455fdf9a301c4db2aeb9ea8600c0120d7366300916f08a675354db1b7fe0b2`.
 
-Issue #498 is completed by this accepted implementation.
-
-## Proposed milestone contract
-
-Issue #502 and `docs/GODOT_AURELIAN_FIRST_NATION_FOUNDING_V1_CONTRACT.md` define one bounded transition:
-
-`World first city recognized -> explicit Found Aurelian Nation -> World first nation founded -> Map Aurelian homeland -> Village Greenvale capital`
-
-The action is deliberate and emits `AURELIAN_FIRST_NATION_FOUNDING=AURELIAN` only on explicit founding.
-
-The candidate must:
-
-- preserve the accepted single land and one physical Aurelian geography;
-- preserve the 19-node Greenvale city and identify it as the capital;
-- add at most three bounded civic standards or repository-pinned derived instances;
-- add one subordinate homeland cue and one capital marker on Map;
-- add one bounded nation emblem or standard on World while preserving strategic directions;
-- persist one new `nation_founded` fact across native restart, Web reload and persistent-profile reopen;
-- restore `world_first_nation_founded`, `map_aurelian_homeland` and `village_greenvale_capital`.
+Issue #502 is completed by this accepted implementation.
 
 ## Current gate
 
-Before the documentation-only contract merges, no product implementation is authorized.
+No additional product implementation is authorized.
 
-After it merges, exactly one bounded implementation candidate for issue #502 is authorized.
+Allowed:
 
-Allowed after contract acceptance:
+- repository QA and release verification;
+- one bounded strategy review;
+- one separate documentation-only contract for a selected next milestone.
 
-- bounded Aurelian Godot controller, HUD and existing scene logic;
-- one `nation_founded` persistence fact;
-- focused deterministic contract tests;
-- synchronized existing Playable Entry, Web Playability and Session Persistence v2 evidence workflows;
-- one bounded visual correction maximum;
-- direct exact-head evidence review.
+Forbidden until a new contract is accepted on `main`:
 
-Forbidden:
-
+- product implementation;
 - economy, prices, resources, costs, rewards, inventory or taxes;
 - population simulation, workers, timers, queues or repeated actions;
 - governance systems, laws, factions, diplomacy or combat;
@@ -122,12 +103,10 @@ Forbidden:
 
 ## Release state
 
-- PR #500 exact-head product evidence: PASS;
-- PR #500 merge: `b747ce5579a29c0b0cb07887c57046549ea3db79`;
-- PR #501 authority merge and current main: `0d86b2027c5fe121eea475e9e7a326f459b000c0`;
+- PR #504 exact-head product evidence: PASS;
+- PR #504 merge and current main: `20293fa6d83b55c886536875566d15fb89c0164b`;
 - post-merge Vercel: SUCCESS;
-- issue #498: completed;
-- issue #502: active contract authority;
+- issue #502: completed;
 - public-origin route verification remains an environment capability boundary, not evidence of an outage.
 
 ## Process rules
@@ -172,4 +151,4 @@ Before meaningful work:
 
 ## Current stop condition
 
-Do not start product implementation before this documentation-only contract is accepted on `main`. After acceptance, stop the single candidate at exact-head direct review with `GODOT_AURELIAN_FIRST_NATION_FOUNDING_PASS` or `GODOT_AURELIAN_FIRST_NATION_FOUNDING_REJECT`.
+Do not start another product implementation before a bounded strategy review and a separate contract are accepted on `main`.
