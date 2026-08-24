@@ -7,7 +7,7 @@ Authority source: this file on the current `main`
 Authority baseline SHA: `67ad47798189ab6ce65781599a87105fc31391a5`
 Product baseline SHA: `67ad47798189ab6ce65781599a87105fc31391a5`
 Current milestone: choose and authorize exactly one next bounded product milestone
-Active execution issue: none
+Active execution issue: #482
 Next allowed action: one bounded strategy review, release verification and a documentation-only authority PR. No new product implementation is authorized yet.
 
 ## Product truth
@@ -137,7 +137,7 @@ The review must choose one coherent next player-facing outcome, not a bundle of 
 5. accepted exact-head evidence and current operating/QA protocols;
 6. historical issues, PRs, briefs and generated reports.
 
-Issue #482 and PR #484 remain accepted provenance for Aurelian Visible Expansion v1, but they do not authorize another implementation.
+Issue #482 remains active for strategy-review closeout only. PR #484 is accepted provenance for Aurelian Visible Expansion v1. Neither authorizes another implementation.
 
 ## Session start gate
 
