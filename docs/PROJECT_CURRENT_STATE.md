@@ -7,7 +7,7 @@ Authority source: this file on the current `main`
 Authority baseline SHA: `ea3fd0d3daebcfc1cc4b935bd1b46940e0b57d40`
 Product baseline SHA: `ea3fd0d3daebcfc1cc4b935bd1b46940e0b57d40`
 Current milestone: record `GODOT_AURELIAN_FIRST_TRADE_ROUTE_CONNECTION_PASS`
-Active execution issue: none
+Active execution issue: #490
 Next allowed action: one bounded strategy review and, only if accepted, a separate documentation-only contract PR. No product implementation is currently authorized.
 
 ## Product truth
