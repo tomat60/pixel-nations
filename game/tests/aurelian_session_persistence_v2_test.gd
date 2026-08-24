@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_check(String(missing.get("status", "")) == "missing", "missing_status")
 	_check(String(missing.get("entry_state", "")) == "world_neutral", "missing_fallback")
 	_check(bool(missing.get("settlement_founded", true)) == false, "missing_founded_fallback")
+	_check(bool(missing.get("settlement_developed", true)) == false, "missing_developed_fallback")
 
 	var save_result := SESSION.save_session("map_east_route_claimed", "east_trade", TEST_PATH)
 	_check(bool(save_result.get("ok", false)), "save_claimed_valid")
@@ -33,11 +34,19 @@ func _initialize() -> void:
 	_check(String(restored.get("entry_state", "")) == "village_founded", "restore_village_founded")
 	_check(bool(restored.get("settlement_founded", false)), "restore_founded_flag")
 
-	save_result = SESSION.save_session("map_east_route_claimed", "east_trade", TEST_PATH, true)
+	save_result = SESSION.save_session("village_developed", "east_trade", TEST_PATH, true, true)
+	_check(bool(save_result.get("ok", false)), "save_village_developed_valid")
+	restored = SESSION.load_session(TEST_PATH)
+	_check(String(restored.get("entry_state", "")) == "village_developed", "restore_village_developed")
+	_check(bool(restored.get("settlement_founded", false)), "restore_developed_founded_flag")
+	_check(bool(restored.get("settlement_developed", false)), "restore_developed_flag")
+
+	save_result = SESSION.save_session("map_east_route_claimed", "east_trade", TEST_PATH, true, true)
 	_check(bool(save_result.get("ok", false)), "save_map_with_founded_valid")
 	restored = SESSION.load_session(TEST_PATH)
 	_check(String(restored.get("entry_state", "")) == "map_east_route_claimed", "restore_map_after_founding")
 	_check(bool(restored.get("settlement_founded", false)), "restore_founded_on_map")
+	_check(bool(restored.get("settlement_developed", false)), "restore_developed_on_map")
 
 	_write_raw("{broken")
 	var malformed := SESSION.load_session(TEST_PATH)
@@ -61,6 +70,10 @@ func _initialize() -> void:
 	_check(String(invalid.get("status", "")) == "invalid_data", "invalid_state")
 	invalid = SESSION.save_session("village_founded", "east_trade", TEST_PATH, false)
 	_check(String(invalid.get("status", "")) == "invalid_data", "founded_requires_flag")
+	invalid = SESSION.save_session("village_developed", "east_trade", TEST_PATH, true, false)
+	_check(String(invalid.get("status", "")) == "invalid_data", "developed_requires_flag")
+	invalid = SESSION.save_session("map_east_route_claimed", "east_trade", TEST_PATH, false, true)
+	_check(String(invalid.get("status", "")) == "invalid_data", "developed_requires_founded")
 
 	var transport := "quote\" slash\\ newline\n unicode Ł"
 	var literal := SESSION.javascript_string_literal(transport)
@@ -73,6 +86,8 @@ func _initialize() -> void:
 	_check(source.contains('"village_claimed"'), "village_claimed_state_allowed")
 	_check(source.contains('"village_founded"'), "village_founded_state_allowed")
 	_check(source.contains('"settlement_founded"'), "founded_flag_persisted")
+	_check(source.contains('"village_developed"'), "village_developed_state_allowed")
+	_check(source.contains('"settlement_developed"'), "developed_flag_persisted")
 	_check(source.contains("window.localStorage"), "web_local_storage")
 	_check(source.contains(".setItem("), "web_set")
 	_check(source.contains(".getItem("), "web_get")

@@ -8,9 +8,11 @@ on:
       - "game/scenes/aurelian/aurelian_session_persistence_v2.gd"
       - "game/scenes/aurelian/playable_aurelian_entry_v1.gd"
       - "game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
+      - "game/scenes/aurelian/aurelian_first_settlement_development_v1_manifest.json"
       - "game/tests/aurelian_session_persistence_v2_test.gd"
       - "game/tests/playable_aurelian_entry_v1_test.gd"
       - "game/tests/aurelian_first_land_claim_v1_test.gd"
+      - "game/tests/aurelian_first_settlement_development_v1_test.gd"
   workflow_dispatch:
 
 permissions:
@@ -86,12 +88,13 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test; do
+          for test in playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test; do
             "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1
           done
           grep -F "GODOT_PLAYABLE_AURELIAN_ENTRY_V1_TEST: PASS" "${EVIDENCE_DIR}/playable_aurelian_entry_v1_test.log"
           grep -F "GODOT_AURELIAN_SESSION_PERSISTENCE_V2_TEST: PASS" "${EVIDENCE_DIR}/aurelian_session_persistence_v2_test.log"
           grep -F "GODOT_AURELIAN_FIRST_LAND_CLAIM_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_land_claim_v1_test.log"
+          grep -F "GODOT_AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_settlement_development_v1_test.log"
           mkdir -p game/build/linux game/build/web
           "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/export-linux.log" 2>&1
           "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html > "${EVIDENCE_DIR}/export-web.log" 2>&1
@@ -100,7 +103,7 @@ jobs:
           grep -aF "aurelian_session_persistence_v2.gd" game/build/linux/pixel-nations-foundation.pck
           grep -aF "aurelian_session_persistence_v2.gd" game/build/web/index.pck
 
-      - name: Prove native claimed-land restart with real input
+      - name: Prove native developed-settlement restart with real input
         timeout-minutes: 5
         run: |
           set -euo pipefail
@@ -129,8 +132,16 @@ jobs:
           xdotool key --window "$WINDOW_ID" Right
           sleep 0.7
           xdotool key --window "$WINDOW_ID" Return
+          sleep 0.7
+          xdotool key --window "$WINDOW_ID" Right
+          sleep 0.7
+          xdotool key --window "$WINDOW_ID" Return
+          sleep 0.7
+          xdotool key --window "$WINDOW_ID" Return
+          sleep 0.7
+          xdotool key --window "$WINDOW_ID" Left
           sleep 1.2
-          import -window root "../../../${EVIDENCE_DIR}/stills/native-map-before-restart-1440x900.png"
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-developed-map-before-restart-1440x900.png"
           kill "$GAME_PID"
           wait "$GAME_PID" || true
           stdbuf -oL -eL ./pixel-nations-foundation.x86_64 --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 > "../../../${EVIDENCE_DIR}/native-restored.log" 2>&1 &
@@ -142,17 +153,18 @@ jobs:
           done
           test -n "${WINDOW_ID:-}"
           sleep 1.2
-          import -window root "../../../${EVIDENCE_DIR}/stills/native-map-restored-1440x900.png"
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-developed-map-restored-1440x900.png"
           xdotool key --window "$WINDOW_ID" Right
           sleep 1.2
-          import -window root "../../../${EVIDENCE_DIR}/stills/native-village-after-restore-1440x900.png"
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-developed-village-after-restore-1440x900.png"
           kill "$GAME_PID"
           wait "$GAME_PID" || true
           cd ../../..
           grep -F "AURELIAN_SESSION_V2_LOAD=missing:native_file_access:world_neutral:none" "${EVIDENCE_DIR}/native-first.log"
           grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/native-first.log"
           grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:map_east_route_claimed:east_trade" "${EVIDENCE_DIR}/native-restored.log"
-          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_claimed" "${EVIDENCE_DIR}/native-restored.log"
+          grep -F "AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT=GREENVALE" "${EVIDENCE_DIR}/native-first.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_developed" "${EVIDENCE_DIR}/native-restored.log"
 
       - name: Serve Web export
         run: |
@@ -165,7 +177,7 @@ jobs:
           done
           exit 1
 
-      - name: Prove acknowledged claimed-land Web reload and profile reopen
+      - name: Prove acknowledged developed-settlement Web reload and profile reopen
         timeout-minutes: 7
         run: |
           set -euo pipefail
@@ -243,14 +255,25 @@ jobs:
             await page.keyboard.press('Enter');
             await waitFor(() => states.includes('map_east_route_claimed'),'claimed map state');
             await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'map_east_route_claimed'),'claimed map save ack');
+            await page.keyboard.press('ArrowRight');
+            await waitFor(() => states.includes('village_claimed'),'claimed village');
+            await page.keyboard.press('Enter');
+            await waitFor(() => states.includes('village_founded'),'founded village');
+            await page.keyboard.press('Enter');
+            await waitFor(() => states.includes('village_developed'),'developed village');
+            await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'village_developed'),'developed save ack');
             await sleep(1500);
-            await page.screenshot({path:path.join(stills,'web-map-before-reload-1440x900.png')});
+            await page.screenshot({path:path.join(stills,'web-village-developed-before-reload-1440x900.png')});
+            await page.keyboard.press('ArrowLeft');
+            await waitFor(() => states.filter(x => x === 'map_east_route_claimed').length >= 2,'developed return map');
+            await sleep(1000);
+            await page.screenshot({path:path.join(stills,'web-developed-map-before-reload-1440x900.png')});
             await page.reload({waitUntil:'domcontentloaded',timeout:90000});
             await page.locator('canvas').waitFor({state:'visible',timeout:90000});
             await waitFor(() => loads.some(x => x.status === 'restored' && x.adapter === 'web_local_storage' && x.state === 'map_east_route_claimed' && x.intent === 'east_trade'),'reload restore');
-            await waitFor(() => states.filter(x => x === 'map_east_route_claimed').length >= 2,'reloaded claimed map');
+            await waitFor(() => states.filter(x => x === 'map_east_route_claimed').length >= 3,'reloaded developed claimed map');
             await sleep(2500);
-            await page.screenshot({path:path.join(stills,'web-map-restored-1440x900.png')});
+            await page.screenshot({path:path.join(stills,'web-developed-map-restored-1440x900.png')});
             const video = page.video();
             await page.close();
             const recordedPath = await video.path();
@@ -265,15 +288,15 @@ jobs:
             });
             page = await openPage(context);
             await waitFor(() => loads.filter(x => x.status === 'restored' && x.state === 'map_east_route_claimed').length >= 2,'profile reopen restore');
-            await waitFor(() => states.filter(x => x === 'map_east_route_claimed').length >= 3,'profile reopened claimed map');
+            await waitFor(() => states.filter(x => x === 'map_east_route_claimed').length >= 4,'profile reopened developed map');
             await sleep(1500);
-            await page.screenshot({path:path.join(stills,'web-map-profile-reopened-1440x900.png')});
+            await page.screenshot({path:path.join(stills,'web-developed-map-profile-reopened-1440x900.png')});
             await page.keyboard.press('ArrowRight');
-            await waitFor(() => states.includes('village_claimed'),'claimed village after reopen');
+            await waitFor(() => states.filter(x => x === 'village_developed').length >= 2,'developed village after reopen');
             await sleep(1500);
-            await page.screenshot({path:path.join(stills,'web-village-after-profile-reopen-1440x900.png')});
+            await page.screenshot({path:path.join(stills,'web-developed-village-after-profile-reopen-1440x900.png')});
             await page.keyboard.press('ArrowLeft');
-            await waitFor(() => states.filter(x => x === 'map_east_route_claimed').length >= 4,'back to claimed map');
+            await waitFor(() => states.filter(x => x === 'map_east_route_claimed').length >= 5,'back to developed claimed map');
             await context.close();
 
             const browser = await chromium.launch({headless:true,args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
@@ -302,10 +325,12 @@ jobs:
               before_reload_state:'map_east_route_claimed',
               reloaded_state:'map_east_route_claimed',
               profile_reopen_state:'map_east_route_claimed',
+              settlement_founded:true,
+              settlement_developed:true,
               selected_intent:'east_trade',
-              continued_state:'village_claimed',
+              continued_state:'village_developed',
               denied_storage_fallback:'world_neutral',
-              input_actions:['Enter','ArrowRight','Enter','reload','browser_reopen','ArrowRight','ArrowLeft'],
+              input_actions:['Enter','ArrowRight','Enter','ArrowRight','Enter','Enter','ArrowLeft','reload','browser_reopen','ArrowRight','ArrowLeft'],
               evidence_storage_seeding:false,
               glb_sha256:process.env.GLB_SHA256
             },null,2)+'\n');
@@ -322,7 +347,7 @@ jobs:
       - name: Validate exact evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "8"
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "9"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
             test "$(stat -c %s "$image")" -gt 70000
@@ -332,7 +357,8 @@ jobs:
           grep -F "AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:map_east_route_claimed:east_trade" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_SESSION_V2_SAVE_ACK=stored:web_local_storage:map_east_route_claimed:east_trade" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_SESSION_V2_LOAD=unavailable:web_local_storage:world_neutral:none" "${EVIDENCE_DIR}/browser-console.log"
-          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_claimed" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT=GREENVALE" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_developed" "${EVIDENCE_DIR}/browser-console.log"
           sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/session-persistence-v2-sequence.webm" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
           echo "GODOT_AURELIAN_SESSION_PERSISTENCE_V2_DETERMINISTIC_QA=PASS"
 
