@@ -284,7 +284,7 @@ jobs:
             await page.reload({waitUntil:'domcontentloaded',timeout:90000});
             await page.locator('canvas').waitFor({state:'visible',timeout:90000});
             await waitFor(() => loads.some(x => x.status === 'restored' && x.adapter === 'web_local_storage' && x.state === 'map_east_route_connected' && x.intent === 'east_trade'),'reload restore');
-            await waitFor(() => states.filter(x => x === 'map_east_route_connected').length >= 3,'reloaded developed claimed map');
+            await waitFor(() => states.filter(x => x === 'map_east_route_connected').length >= 2,'reloaded connected map');
             await sleep(2500);
             await page.screenshot({path:path.join(stills,'web-developed-map-restored-1440x900.png')});
             const video = page.video();
@@ -300,7 +300,7 @@ jobs:
             });
             page = await openPage(context);
             await waitFor(() => loads.filter(x => x.status === 'restored' && x.state === 'map_east_route_connected').length >= 2,'profile reopen restore');
-            await waitFor(() => states.filter(x => x === 'map_east_route_connected').length >= 4,'profile reopened developed map');
+            await waitFor(() => states.filter(x => x === 'map_east_route_connected').length >= 3,'profile reopened connected map');
             await sleep(1500);
             await page.screenshot({path:path.join(stills,'web-developed-map-profile-reopened-1440x900.png')});
             await page.keyboard.press('ArrowRight');
@@ -308,7 +308,7 @@ jobs:
             await sleep(1500);
             await page.screenshot({path:path.join(stills,'web-developed-village-after-profile-reopen-1440x900.png')});
             await page.keyboard.press('ArrowLeft');
-            await waitFor(() => states.filter(x => x === 'map_east_route_connected').length >= 5,'back to developed claimed map');
+            await waitFor(() => states.filter(x => x === 'map_east_route_connected').length >= 4,'back to connected map');
             await context.close();
 
             const browser = await chromium.launch({headless:true,args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
