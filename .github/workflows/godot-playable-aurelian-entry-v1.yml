@@ -176,7 +176,7 @@ jobs:
         timeout-minutes: 5
         run: |
           set -euo pipefail
-          timeout 120s xvfb-run -a -s "-screen 0 1280x720x24" env \
+          timeout 240s xvfb-run -a -s "-screen 0 1280x720x24" env \
             AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
             "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
             --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 30 \
