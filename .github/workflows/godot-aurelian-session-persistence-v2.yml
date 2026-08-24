@@ -10,6 +10,7 @@ on:
       - "game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
       - "game/scenes/aurelian/aurelian_first_settlement_development_v1_manifest.json"
       - "game/scenes/aurelian/aurelian_first_trade_route_connection_v1_manifest.json"
+      - "game/scenes/aurelian/aurelian_first_trade_caravan_dispatch_v1_manifest.json"
       - "game/tests/aurelian_session_persistence_v2_test.gd"
       - "game/tests/playable_aurelian_entry_v1_test.gd"
       - "game/tests/aurelian_first_land_claim_v1_test.gd"
