@@ -222,7 +222,7 @@ jobs:
           from pathlib import Path
           from PIL import Image, ImageStat
           root=Path(os.environ["EVIDENCE_DIR"])
-          names=["normal-launch","world-trade-selected","map-east-route-selected","map-east-route-claimed","village-claimed","village-founded","village-developed","returned-claimed-map","map-east-route-connected","world-trade-route-active","reopened-connected-map","reopened-village-developed","village-first-caravan-dispatched","map-east-route-in-use","world-first-trade-underway","village-first-city-chartered","map-greenvale-city","world-first-city-recognized"]
+          names=["normal-launch","world-trade-selected","map-east-route-selected","map-east-route-claimed","village-claimed","village-founded","village-developed","returned-claimed-map","map-east-route-connected","world-trade-route-active","reopened-connected-map","reopened-village-developed","village-first-caravan-dispatched","map-east-route-in-use","world-first-trade-underway","village-first-city-chartered","map-greenvale-city","world-first-city-recognized","world-first-nation-founded","map-aurelian-homeland","village-greenvale-capital"]
           report={}
           for name in names:
               path=root/f"{name}-1440x900.png"
@@ -235,7 +235,7 @@ jobs:
               report[name]={"bytes":path.stat().st_size,"variance":round(variance,3),"colors":colors,"sha256":hashlib.sha256(path.read_bytes()).hexdigest()}
           manifest=json.loads((root/"interaction-manifest.json").read_text())
           if manifest["startup_scene"]!="res://scenes/aurelian/playable_aurelian_entry_v1.tscn": raise SystemExit("startup drift")
-          expected_path=["world_neutral","world_trade_selected","map_east_route_selected","map_east_route_claimed","village_claimed","village_founded","village_developed","map_east_route_claimed","map_east_route_connected","world_trade_route_active","map_east_route_connected","village_developed","village_trade_dispatched","map_east_route_in_use","world_first_trade_underway","map_east_route_in_use","village_trade_dispatched","village_city_chartered","map_greenvale_city","world_first_city_recognized","map_greenvale_city","village_city_chartered"]
+          expected_path=["world_neutral","world_trade_selected","map_east_route_selected","map_east_route_claimed","village_claimed","village_founded","village_developed","map_east_route_claimed","map_east_route_connected","world_trade_route_active","map_east_route_connected","village_developed","village_trade_dispatched","map_east_route_in_use","world_first_trade_underway","map_east_route_in_use","village_trade_dispatched","village_city_chartered","map_greenvale_city","world_first_city_recognized","map_greenvale_city","village_city_chartered","map_greenvale_city","world_first_city_recognized","world_first_nation_founded","map_aurelian_homeland","village_greenvale_capital"]
           if manifest["forward_path"]!=expected_path: raise SystemExit("development path drift")
           video=json.loads((root/"video-metadata.json").read_text())
           tracks=video.get("media",{}).get("track",[])
@@ -245,7 +245,7 @@ jobs:
           if not match: raise SystemExit("duration missing")
           duration=float(match.group(0))
           if duration>1000: duration/=1000
-          if not 106.5<=duration<=107.5: raise SystemExit(f"duration {duration}")
+          if not 134.5<=duration<=136.5: raise SystemExit(f"duration {duration}")
           qa={"status":"PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_REVIEW","exact_head":(root/"exact-head.txt").read_text().strip(),"stills":report,"video_seconds":duration,"claim":"east_route","settlement":"greenvale","founded":True,"developed":True,"route_connected":True,"world_trade_active":True,"caravan_dispatched":True,"world_first_trade_underway":True,"city_chartered":True,"city_marker_topology":[354,285]}
           (root/"evidence-qa.json").write_text(json.dumps(qa,indent=2)+"\n")
           rows=math.ceil(len(names)/3)
