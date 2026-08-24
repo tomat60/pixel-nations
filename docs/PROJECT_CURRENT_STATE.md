@@ -2,13 +2,13 @@
 
 Status: ACTIVE
 Updated: 2026-08-24
-Current state revision: First Trade Caravan Dispatch v1 accepted
+Current state revision: First City Charter v1 contract proposed
 Authority source: this file on the current `main`
-Authority baseline SHA: `c6b6133d5271aee73ae2252af7492886a005b19b`
+Authority baseline SHA: `026183e364f7b411a294e11ec2f35bde78898fa0`
 Product baseline SHA: `c6b6133d5271aee73ae2252af7492886a005b19b`
-Current milestone: no product implementation authorized
-Active execution issue: #494
-Next allowed action: one bounded strategy review and a separate documentation-only contract PR for the next milestone.
+Current milestone: authorize `GODOT_AURELIAN_FIRST_CITY_CHARTER_V1`
+Active execution issue: #498
+Next allowed action: merge the documentation-only contract after exact-head guards pass, then execute exactly one bounded First City Charter v1 candidate.
 
 ## Product truth
 
@@ -71,22 +71,42 @@ Accepted evidence:
 
 Issue #494 is completed.
 
+## Current contract
+
+Issue #498 and `docs/GODOT_AURELIAN_FIRST_CITY_CHARTER_V1_CONTRACT.md` propose exactly one bounded outcome:
+
+`World first trade underway -> Map East Route in use -> Village developed -> explicit Charter Greenvale -> Village first city -> Map city marker -> World first city recognized`
+
+Required constraints:
+
+- explicit action label: `Charter Greenvale`;
+- explicit-only event: `AURELIAN_FIRST_CITY_CHARTER=GREENVALE`;
+- chartered Village is a compact civic-core superset of the accepted 13-node developed baseline;
+- repository-pinned KayKit asset family only;
+- exactly one subordinate Greenvale city marker on Map;
+- Session Persistence v2 retains its namespace and schema version 2 unless deterministic compatibility failure proves otherwise;
+- one bounded visual correction maximum;
+- direct exact-head artifact review is mandatory.
+
 ## Current gate
 
-No new product implementation is authorized.
+Before the contract PR merges, no product implementation is authorized.
+
+After the documentation-only contract is accepted on `main`, exactly one bounded implementation candidate is allowed for issue #498.
 
 Allowed:
 
-- one bounded strategy review;
-- one separate documentation-only contract PR for the next milestone;
-- repository QA and release verification.
+- `game/scenes/aurelian/**`;
+- `game/tests/**`;
+- existing Playable Entry, Web Playability and Session Persistence v2 workflows where necessary;
+- one small focused evidence adjustment only if existing workflows cannot prove the outcome;
+- documentation and evidence manifests.
 
-Forbidden until a new contract is accepted on `main`:
+Forbidden:
 
-- new product implementation;
-- prices, resources, costs, rewards, inventory or economy;
-- production simulation, workers, timers, queues or repeated caravans;
-- city, nation or empire progression;
+- prices, resources, costs, rewards, inventory, taxes or economy;
+- population simulation, workers, timers, queues or repeated actions;
+- nation or empire progression;
 - another land or multiple-land expansion;
 - new terrain, GLB, asset family or geography;
 - broad Village, Map or World polish;
@@ -101,6 +121,7 @@ Forbidden until a new contract is accepted on `main`:
 - PR #496 merge: `c6b6133d5271aee73ae2252af7492886a005b19b`;
 - merge-SHA Vercel: SUCCESS;
 - issue #494: completed;
+- issue #498: open contract authority;
 - public-origin route verification remains an environment capability boundary, not evidence of an outage.
 
 ## Process rules
@@ -140,9 +161,10 @@ Before meaningful work:
 
 1. run `npm run pn:status` when a checkout is available;
 2. read this file, ADR-001 and root `AGENTS.md`;
-3. re-fetch live GitHub state;
-4. state model and tool, MAX, cost, allowed scope, forbidden actions, validation and stop condition.
+3. read issue #498;
+4. re-fetch live GitHub state;
+5. state model and tool, MAX, cost, allowed scope, forbidden actions, validation and stop condition.
 
 ## Current stop condition
 
-Do not start product implementation before a separate next-milestone contract is accepted on `main`.
+Do not start product implementation before the documentation-only First City Charter v1 contract merges. After merge, stop the implementation candidate at direct exact-head `GODOT_AURELIAN_FIRST_CITY_CHARTER_PASS` or `GODOT_AURELIAN_FIRST_CITY_CHARTER_REJECT`.
