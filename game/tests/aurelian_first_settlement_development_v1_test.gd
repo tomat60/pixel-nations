@@ -4,7 +4,7 @@ const MANIFEST_PATH := "res://scenes/aurelian/aurelian_first_settlement_developm
 const PLAYABLE_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
 const CONTROLLER_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1.gd"
 const PERSISTENCE_PATH := "res://scenes/aurelian/aurelian_session_persistence_v2.gd"
-const VILLAGE_MANIFEST_PATH := "res://scenes/aurelian/production_village_v1_manifest.json"
+const VILLAGE_MANIFEST_PATH := "res://scenes/aurelian/production_village_v1_state_manifest.json"
 
 var failures: Array[String] = []
 
@@ -51,7 +51,7 @@ func _initialize() -> void:
 
 	var states: Dictionary = village.get("states", {})
 	var developed: Dictionary = states.get("developed", {})
-	var visible_nodes: Array = developed.get("visible_nodes", [])
+	var visible_nodes: Array = developed.get("visible", [])
 	_check(visible_nodes.size() == 13, "accepted_13_node_state")
 	_finish()
 
