@@ -7,7 +7,7 @@ Authority source: this file on the current `main`
 Authority baseline SHA: `20293fa6d83b55c886536875566d15fb89c0164b`
 Product baseline SHA: `20293fa6d83b55c886536875566d15fb89c0164b`
 Current milestone: none authorized
-Active execution issue: none
+Active execution issue: #502
 Next allowed action: one bounded strategy review and a separate documentation-only contract for any next product milestone.
 
 ## Product truth
