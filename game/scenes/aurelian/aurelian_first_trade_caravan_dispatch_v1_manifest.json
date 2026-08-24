@@ -1,0 +1,73 @@
+{
+  "schema": "pixel-nations.aurelian.first-trade-caravan-dispatch.v1",
+  "authority": {
+    "issue": 494,
+    "contract": "docs/GODOT_AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH_V1_CONTRACT.md",
+    "baseline_sha": "2d4ffee57c89001a04f0068559c9c4f4cc8e01a6"
+  },
+  "outcome": "World trade route active -> Map route connected -> Village developed -> explicit Dispatch First Caravan -> Map route in use -> World first trade underway",
+  "states": {
+    "entry": "world_trade_route_active",
+    "map_before": "map_east_route_connected",
+    "village_before": "village_developed",
+    "village_after": "village_trade_dispatched",
+    "map_after": "map_east_route_in_use",
+    "world_after": "world_first_trade_underway"
+  },
+  "action": {
+    "label": "Dispatch First Caravan",
+    "event": "AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH=EAST_ROUTE",
+    "explicit_only": true
+  },
+  "shared_topology": {
+    "route_id": "GreenvaleTradeRouteContext",
+    "from": {
+      "name": "Greenvale",
+      "point": [354, 285]
+    },
+    "to": {
+      "name": "Gilded Crossing",
+      "point": [515, 340]
+    },
+    "caravan_token": {
+      "point": [435, 313],
+      "count": 1,
+      "procedural": true,
+      "animated": false,
+      "simulation": false
+    },
+    "new_geography": false
+  },
+  "persistence": {
+    "schema_version": 2,
+    "reuse_existing_namespace": true,
+    "native_restart": "required",
+    "web_reload": "required",
+    "persistent_profile_reopen": "required",
+    "denied_storage_fallback": "world_neutral:none"
+  },
+  "evidence": {
+    "normal_input_sequence": true,
+    "direct_visual_review": true,
+    "shared_geography_regression": true,
+    "maximum_visual_corrections": 1
+  },
+  "forbidden": [
+    "economy",
+    "resource_costs",
+    "rewards",
+    "inventory",
+    "workers",
+    "timers",
+    "queues",
+    "repeated_caravans",
+    "city_progression",
+    "new_assets",
+    "new_geography",
+    "another_land",
+    "app/play",
+    "P12",
+    "MAX",
+    "paid_tools"
+  ]
+}
