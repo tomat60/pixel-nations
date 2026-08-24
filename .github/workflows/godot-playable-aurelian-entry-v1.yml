@@ -191,16 +191,16 @@ jobs:
           done
 
       - name: Capture input-driven development sequence
-        timeout-minutes: 5
+        timeout-minutes: 7
         run: |
           set -euo pipefail
-          timeout 240s xvfb-run -a -s "-screen 0 1280x720x24" env \
+          timeout 360s xvfb-run -a -s "-screen 0 1280x720x24" env \
             AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
             "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
             --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 30 \
             --write-movie "$PWD/${EVIDENCE_DIR}/playable-entry-sequence.avi" \
             > "${EVIDENCE_DIR}/playable-entry-sequence.log" 2>&1
-          for state in world_trade_selected map_east_route_selected map_east_route_claimed village_claimed village_founded village_developed map_east_route_connected world_trade_route_active village_trade_dispatched map_east_route_in_use world_first_trade_underway village_city_chartered map_greenvale_city world_first_city_recognized; do
+          for state in world_trade_selected map_east_route_selected map_east_route_claimed village_claimed village_founded village_developed map_east_route_connected world_trade_route_active village_trade_dispatched map_east_route_in_use world_first_trade_underway village_city_chartered map_greenvale_city world_first_city_recognized world_first_nation_founded map_aurelian_homeland village_greenvale_capital; do
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=$state" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           done
           grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
