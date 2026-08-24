@@ -12,7 +12,7 @@
     "denied_storage_fallback": "world_neutral"
   },
   "shared_geography": "aurelian_authored_terrain_v1.glb",
-  "source_village_manifest": "res://scenes/aurelian/production_village_v1_manifest.json",
+  "source_village_manifest": "res://scenes/aurelian/production_village_v1_state_manifest.json",
   "before_state": "village_founded",
   "action": {
     "label": "Develop Greenvale",
