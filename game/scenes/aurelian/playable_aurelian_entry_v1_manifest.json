@@ -14,7 +14,10 @@
     "world_trade_active_state": "world_trade_route_active",
     "map_route_in_use_state": "map_east_route_in_use",
     "world_first_trade_underway_state": "world_first_trade_underway",
-    "village_trade_dispatched_state": "village_trade_dispatched"
+    "village_trade_dispatched_state": "village_trade_dispatched",
+    "village_city_chartered_state": "village_city_chartered",
+    "map_greenvale_city_state": "map_greenvale_city",
+    "world_first_city_recognized_state": "world_first_city_recognized"
   },
   "controls": {
     "select_trade": "ui_accept",
@@ -25,7 +28,8 @@
     "previous_layer": "ui_left",
     "develop_settlement": "ui_accept",
     "connect_trade_route": "ui_accept",
-    "dispatch_first_caravan": "ui_accept"
+    "dispatch_first_caravan": "ui_accept",
+    "charter_greenvale": "ui_accept"
   },
   "forward_path": [
     "world_neutral",
@@ -44,9 +48,17 @@
     "map_east_route_in_use",
     "world_first_trade_underway",
     "map_east_route_in_use",
-    "village_trade_dispatched"
+    "village_trade_dispatched",
+    "village_city_chartered",
+    "map_greenvale_city",
+    "world_first_city_recognized",
+    "map_greenvale_city",
+    "village_city_chartered"
   ],
   "backward_path": [
+    "village_city_chartered",
+    "map_greenvale_city",
+    "world_first_city_recognized",
     "village_trade_dispatched",
     "map_east_route_in_use",
     "world_first_trade_underway",
@@ -66,7 +78,7 @@
     "founding_is_explicit_player_action": true,
     "opening_village_does_not_found": true,
     "economy_claimed": false,
-    "persistence_scope": "eastern_trade_claim_greenvale_development_connected_route_and_first_caravan_dispatch",
+    "persistence_scope": "eastern_trade_claim_greenvale_city_charter",
     "development_is_explicit_player_action": true,
     "opening_village_does_not_develop": true,
     "route_connection_is_explicit_player_action": true,
@@ -74,7 +86,10 @@
     "caravan_dispatch_is_explicit_player_action": true,
     "opening_village_does_not_dispatch": true,
     "caravan_is_static_state_marker": true,
-    "caravan_simulation_claimed": false
+    "caravan_simulation_claimed": false,
+    "city_charter_is_explicit_player_action": true,
+    "opening_village_does_not_charter": true,
+    "city_simulation_claimed": false
   },
   "shared_geography": "aurelian_authored_terrain_v1.glb",
   "persistence": {
@@ -91,6 +106,7 @@
     "fallback_state": "world_neutral",
     "settlement_developed_flag": true,
     "route_connected_flag": true,
-    "caravan_dispatched_flag": true
+    "caravan_dispatched_flag": true,
+    "city_chartered_flag": true
   }
 }

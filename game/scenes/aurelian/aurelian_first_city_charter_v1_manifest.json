@@ -1,0 +1,70 @@
+{
+  "contract": "GODOT_AURELIAN_FIRST_CITY_CHARTER_V1",
+  "authority_issue": 498,
+  "authority_baseline": "797b9fed1b0860b3649cc683ea91498b34181f69",
+  "shared_geography": "aurelian_authored_terrain_v1.glb",
+  "asset_policy": "reuse repository-pinned KayKit instances and existing procedural presentation only",
+  "player_action": {
+    "label": "Charter Greenvale",
+    "input": "ui_accept",
+    "event": "AURELIAN_FIRST_CITY_CHARTER=GREENVALE",
+    "explicit_only": true
+  },
+  "states": {
+    "pre_world": "world_first_trade_underway",
+    "pre_map": "map_east_route_in_use",
+    "pre_village": "village_trade_dispatched",
+    "post_village": "village_city_chartered",
+    "post_map": "map_greenvale_city",
+    "post_world": "world_first_city_recognized"
+  },
+  "visible_outcome": {
+    "developed_nodes": 13,
+    "chartered_city_nodes": 19,
+    "civic_core_added_nodes": 6,
+    "greenvale_origin": [354, 285],
+    "map_city_markers": 1,
+    "readable_without_hud": true
+  },
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "city_chartered_flag": true,
+    "native_restart": true,
+    "web_reload": true,
+    "persistent_profile_reopen": true,
+    "denied_storage_fallback": "world_neutral:none"
+  },
+  "topology": {
+    "east_route_unchanged": true,
+    "gilded_crossing_unchanged": true,
+    "greenvale_origin_unchanged": true,
+    "shared_cameras_unchanged": true
+  },
+  "evidence": {
+    "normal_input_sequence": true,
+    "playable_entry": true,
+    "web_playability": true,
+    "session_persistence_v2": true,
+    "direct_review_required": true,
+    "bounded_visual_corrections_max": 1
+  },
+  "forbidden": [
+    "economy",
+    "population simulation",
+    "workers",
+    "timers",
+    "queues",
+    "nation progression",
+    "empire progression",
+    "another land",
+    "new geography",
+    "new GLB",
+    "new asset family",
+    "broad polish",
+    "app/play",
+    "P12",
+    "MAX",
+    "paid tools"
+  ]
+}

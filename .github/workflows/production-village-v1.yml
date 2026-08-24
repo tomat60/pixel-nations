@@ -229,8 +229,10 @@ jobs:
           if state.get('contract') != 'PRODUCTION_VILLAGE_V1':
               raise SystemExit('wrong village state contract')
           states = state.get('states', {})
-          if list(states.keys()) != ['claimed','founded','developed']:
+          if list(states.keys()) != ['claimed','founded','developed','city_chartered']:
               raise SystemExit(f'wrong state order: {list(states.keys())}')
+          if len(states['city_chartered'].get('visible', [])) != 19:
+              raise SystemExit('city charter node count drift')
           counts = [len(states[name].get('visible', [])) for name in ('claimed','founded','developed')]
           if not counts[0] < counts[1] < counts[2]:
               raise SystemExit(f'village structure progression invalid: {counts}')
