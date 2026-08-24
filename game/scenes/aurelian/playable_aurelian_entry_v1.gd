@@ -318,35 +318,32 @@ func _build_dispatch_token() -> Node3D:
 	var body := MeshInstance3D.new()
 	body.name = "CaravanBody"
 	var body_mesh := BoxMesh.new()
-	body_mesh.size = Vector3(0.34, 0.20, 0.46)
+	body_mesh.size = Vector3(0.50, 0.24, 0.62)
 	body.mesh = body_mesh
-	body.material_override = _material("#e0a95be8", 0.30)
+	body.position.y = 0.06
+	body.material_override = _material("#f2b84bff", 0.24)
 	root.add_child(body)
+	var cargo := MeshInstance3D.new()
+	cargo.name = "CaravanCargo"
+	var cargo_mesh := BoxMesh.new()
+	cargo_mesh.size = Vector3(0.34, 0.30, 0.34)
+	cargo.mesh = cargo_mesh
+	cargo.position = Vector3(0.0, 0.31, -0.08)
+	cargo.material_override = _material("#b94f3fff", 0.22)
+	root.add_child(cargo)
 	for side in [-1.0, 1.0]:
 		var wheel := MeshInstance3D.new()
 		wheel.name = "CaravanWheel"
 		var wheel_mesh := CylinderMesh.new()
-		wheel_mesh.top_radius = 0.10
-		wheel_mesh.bottom_radius = 0.10
-		wheel_mesh.height = 0.055
+		wheel_mesh.top_radius = 0.14
+		wheel_mesh.bottom_radius = 0.14
+		wheel_mesh.height = 0.065
 		wheel_mesh.radial_segments = 16
 		wheel.mesh = wheel_mesh
 		wheel.rotation.z = PI / 2.0
-		wheel.position = Vector3(side * 0.20, -0.11, 0.0)
+		wheel.position = Vector3(side * 0.29, -0.09, 0.02)
 		wheel.material_override = _material("#4a3528ee")
 		root.add_child(wheel)
-	var label := Label3D.new()
-	label.name = "CaravanDispatchLabel"
-	label.text = "FIRST CARAVAN"
-	label.font_size = 46
-	label.pixel_size = 0.0045
-	label.modulate = Color("#f4d38aff")
-	label.outline_modulate = Color("#28312ddd")
-	label.outline_size = 8
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.no_depth_test = true
-	label.position.y = 0.48
-	root.add_child(label)
 	root.position = topology_to_godot(Vector2(435.0, 313.0), 0.44)
 	root.visible = false
 	return root
