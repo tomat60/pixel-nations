@@ -16,6 +16,7 @@ on:
       - "game/scenes/aurelian/aurelian_visible_expansion_v1_manifest.json"
       - "game/scenes/aurelian/aurelian_first_settlement_development_v1_manifest.json"
       - "game/scenes/aurelian/aurelian_first_trade_route_connection_v1_manifest.json"
+      - "game/scenes/aurelian/aurelian_first_trade_caravan_dispatch_v1_manifest.json"
       - "game/tests/production_village_v1_test.gd"
       - "game/tests/aurelian_visible_expansion_v1_test.gd"
       - "game/tests/playable_aurelian_entry_v1_test.gd"
