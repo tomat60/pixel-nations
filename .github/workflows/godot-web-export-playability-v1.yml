@@ -226,15 +226,30 @@ jobs:
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '08-returned-claimed-map-1440x900.png') });
 
+            await page.keyboard.press('Enter');
+            await waitForCount('map_east_route_connected', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '09-map-east-route-connected-1440x900.png') });
+
+            await page.keyboard.press('ArrowLeft');
+            await waitForCount('world_trade_route_active', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '10-world-trade-route-active-1440x900.png') });
+
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('map_east_route_connected', 2);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '11-reopened-connected-map-1440x900.png') });
+
             await page.keyboard.press('ArrowRight');
             await waitForCount('village_developed', 2);
             await sleep(1000);
-            await page.screenshot({ path: path.join(stills, '09-reopened-village-developed-1440x900.png') });
+            await page.screenshot({ path: path.join(stills, '12-reopened-village-developed-1440x900.png') });
 
             await page.keyboard.press('ArrowLeft');
-            await waitForCount('map_east_route_claimed', 3);
+            await waitForCount('map_east_route_connected', 3);
             await page.keyboard.press('ArrowLeft');
-            await waitForCount('world_trade_selected', 2);
+            await waitForCount('world_trade_route_active', 2);
             const video = page.video();
             await context.close();
             await video.saveAs(path.join(root, 'godot-web-input-sequence.webm'));
@@ -260,9 +275,9 @@ jobs:
               viewport: [1440, 900],
               browser: 'chromium',
               normal_entry: 'world_neutral',
-              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowLeft'],
+              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'ArrowLeft', 'ArrowLeft'],
               observed_states: observedStates,
-              accepted_handoff: 'Direction EastTrade -> East Route claimed -> Village founded -> explicit Develop Greenvale -> Village developed -> claimed Map -> reopened developed Village',
+              accepted_handoff: 'Direction EastTrade -> East Route claimed -> Village developed -> explicit Connect East Route -> connected Map -> World Trade active -> reopened developed Village',
               glb_sha256: process.env.GLB_SHA256,
               evidence_environment_state_driving: false
             }, null, 2) + '\n');
@@ -276,7 +291,7 @@ jobs:
       - name: Validate exact browser evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "9"
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "12"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
             test "$(stat -c %s "$image")" -gt 70000
@@ -291,6 +306,9 @@ jobs:
           grep -F "AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT=GREENVALE" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_developed" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_claimed" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_FIRST_TRADE_ROUTE_CONNECTION=EAST_ROUTE" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_connected" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_trade_route_active" "${EVIDENCE_DIR}/browser-console.log"
           sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/godot-web-input-sequence.webm" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
           echo "GODOT_WEB_EXPORT_PLAYABILITY_DETERMINISTIC_QA=PASS"
 
