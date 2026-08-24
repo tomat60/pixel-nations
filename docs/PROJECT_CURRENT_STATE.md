@@ -2,13 +2,13 @@
 
 Status: ACTIVE
 Updated: 2026-08-24
-Current state revision: First City Charter v1 accepted
+Current state revision: First Nation Founding v1 contract proposed
 Authority source: this file on the current `main`
-Authority baseline SHA: `b747ce5579a29c0b0cb07887c57046549ea3db79`
+Authority baseline SHA: `0d86b2027c5fe121eea475e9e7a326f459b000c0`
 Product baseline SHA: `b747ce5579a29c0b0cb07887c57046549ea3db79`
-Current milestone: none authorized
-Active execution issue: #498
-Next allowed action: one bounded strategy review and a separate documentation-only contract for any next product milestone.
+Current milestone: `GODOT_AURELIAN_FIRST_NATION_FOUNDING_V1`
+Active execution issue: #502
+Next allowed action: merge the documentation-only First Nation Founding v1 contract after exact-head guards, then run exactly one bounded implementation candidate.
 
 ## Product truth
 
@@ -73,27 +73,50 @@ Accepted evidence:
 
 Issue #498 is completed by this accepted implementation.
 
+## Proposed milestone contract
+
+Issue #502 and `docs/GODOT_AURELIAN_FIRST_NATION_FOUNDING_V1_CONTRACT.md` define one bounded transition:
+
+`World first city recognized -> explicit Found Aurelian Nation -> World first nation founded -> Map Aurelian homeland -> Village Greenvale capital`
+
+The action is deliberate and emits `AURELIAN_FIRST_NATION_FOUNDING=AURELIAN` only on explicit founding.
+
+The candidate must:
+
+- preserve the accepted single land and one physical Aurelian geography;
+- preserve the 19-node Greenvale city and identify it as the capital;
+- add at most three bounded civic standards or repository-pinned derived instances;
+- add one subordinate homeland cue and one capital marker on Map;
+- add one bounded nation emblem or standard on World while preserving strategic directions;
+- persist one new `nation_founded` fact across native restart, Web reload and persistent-profile reopen;
+- restore `world_first_nation_founded`, `map_aurelian_homeland` and `village_greenvale_capital`.
+
 ## Current gate
 
-No additional product implementation is authorized.
+Before the documentation-only contract merges, no product implementation is authorized.
 
-Allowed:
+After it merges, exactly one bounded implementation candidate for issue #502 is authorized.
 
-- repository QA and release verification;
-- one bounded strategy review;
-- one separate documentation-only contract for a selected next milestone.
+Allowed after contract acceptance:
 
-Forbidden until a new contract is accepted on `main`:
+- bounded Aurelian Godot controller, HUD and existing scene logic;
+- one `nation_founded` persistence fact;
+- focused deterministic contract tests;
+- synchronized existing Playable Entry, Web Playability and Session Persistence v2 evidence workflows;
+- one bounded visual correction maximum;
+- direct exact-head evidence review.
 
-- product implementation;
-- prices, resources, costs, rewards, inventory, taxes or economy;
+Forbidden:
+
+- economy, prices, resources, costs, rewards, inventory or taxes;
 - population simulation, workers, timers, queues or repeated actions;
-- nation or empire progression;
+- governance systems, laws, factions, diplomacy or combat;
+- empire progression;
 - another land or multiple-land expansion;
-- new terrain, GLB, asset family or geography;
+- new terrain, geography, GLB or asset family;
 - broad Village, Map or World polish;
 - `app/play/**` or public shell changes;
-- backend, accounts, cloud save, multiplayer, combat or diplomacy;
+- backend, accounts, cloud save or multiplayer;
 - crypto, NFT, wallet, token, mint or pay-to-win direction;
 - P12, MAX, paid tools or image generation authority.
 
@@ -101,9 +124,10 @@ Forbidden until a new contract is accepted on `main`:
 
 - PR #500 exact-head product evidence: PASS;
 - PR #500 merge: `b747ce5579a29c0b0cb07887c57046549ea3db79`;
-- exact-head Vercel preview: SUCCESS;
-- merge-SHA deployment status: pending availability;
+- PR #501 authority merge and current main: `0d86b2027c5fe121eea475e9e7a326f459b000c0`;
+- post-merge Vercel: SUCCESS;
 - issue #498: completed;
+- issue #502: active contract authority;
 - public-origin route verification remains an environment capability boundary, not evidence of an outage.
 
 ## Process rules
@@ -148,4 +172,4 @@ Before meaningful work:
 
 ## Current stop condition
 
-Do not start another product implementation before a bounded strategy review and a separate contract are accepted on `main`.
+Do not start product implementation before this documentation-only contract is accepted on `main`. After acceptance, stop the single candidate at exact-head direct review with `GODOT_AURELIAN_FIRST_NATION_FOUNDING_PASS` or `GODOT_AURELIAN_FIRST_NATION_FOUNDING_REJECT`.
