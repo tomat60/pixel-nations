@@ -12,12 +12,15 @@ on:
       - "game/scenes/aurelian/aurelian_first_trade_route_connection_v1_manifest.json"
       - "game/scenes/aurelian/aurelian_first_trade_caravan_dispatch_v1_manifest.json"
       - "game/scenes/aurelian/aurelian_first_city_charter_v1_manifest.json"
+      - "game/scenes/aurelian/aurelian_first_nation_founding_v1_manifest.json"
       - "game/tests/aurelian_session_persistence_v2_test.gd"
       - "game/tests/playable_aurelian_entry_v1_test.gd"
       - "game/tests/aurelian_first_land_claim_v1_test.gd"
       - "game/tests/aurelian_first_settlement_development_v1_test.gd"
       - "game/tests/aurelian_first_trade_route_connection_v1_test.gd"
       - "game/tests/aurelian_first_trade_caravan_dispatch_v1_test.gd"
+      - "game/tests/aurelian_first_city_charter_v1_test.gd"
+      - "game/tests/aurelian_first_nation_founding_v1_test.gd"
   workflow_dispatch:
 
 permissions:
@@ -93,7 +96,7 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test; do
+          for test in playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test; do
             "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1
           done
           grep -F "GODOT_PLAYABLE_AURELIAN_ENTRY_V1_TEST: PASS" "${EVIDENCE_DIR}/playable_aurelian_entry_v1_test.log"
@@ -103,6 +106,7 @@ jobs:
           grep -F "GODOT_AURELIAN_FIRST_TRADE_ROUTE_CONNECTION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_trade_route_connection_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_trade_caravan_dispatch_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_CITY_CHARTER_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_city_charter_v1_test.log"
+          grep -F "GODOT_AURELIAN_FIRST_NATION_FOUNDING_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_nation_founding_v1_test.log"
           mkdir -p game/build/linux game/build/web
           "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/export-linux.log" 2>&1
           "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html > "${EVIDENCE_DIR}/export-web.log" 2>&1
@@ -168,6 +172,14 @@ jobs:
           xdotool key --window "$WINDOW_ID" Left
           sleep 1.2
           import -window root "../../../${EVIDENCE_DIR}/stills/native-city-map-before-restart-1440x900.png"
+          xdotool key --window "$WINDOW_ID" Left
+          sleep 0.7
+          xdotool key --window "$WINDOW_ID" Return
+          sleep 1.2
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-nation-world-before-restart-1440x900.png"
+          xdotool key --window "$WINDOW_ID" Right
+          sleep 1.2
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-homeland-map-before-restart-1440x900.png"
           kill "$GAME_PID"
           wait "$GAME_PID" || true
           stdbuf -oL -eL ./pixel-nations-foundation.x86_64 --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 > "../../../${EVIDENCE_DIR}/native-restored.log" 2>&1 &
@@ -179,22 +191,23 @@ jobs:
           done
           test -n "${WINDOW_ID:-}"
           sleep 1.2
-          import -window root "../../../${EVIDENCE_DIR}/stills/native-city-map-restored-1440x900.png"
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-homeland-map-restored-1440x900.png"
           xdotool key --window "$WINDOW_ID" Right
           sleep 1.2
-          import -window root "../../../${EVIDENCE_DIR}/stills/native-city-village-after-restore-1440x900.png"
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-capital-village-after-restore-1440x900.png"
           kill "$GAME_PID"
           wait "$GAME_PID" || true
           cd ../../..
           grep -F "AURELIAN_SESSION_V2_LOAD=missing:native_file_access:world_neutral:none" "${EVIDENCE_DIR}/native-first.log"
           grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/native-first.log"
-          grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:map_greenvale_city:east_trade" "${EVIDENCE_DIR}/native-restored.log"
+          grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:map_aurelian_homeland:east_trade" "${EVIDENCE_DIR}/native-restored.log"
           grep -F "AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT=GREENVALE" "${EVIDENCE_DIR}/native-first.log"
           grep -F "AURELIAN_FIRST_TRADE_ROUTE_CONNECTION=EAST_ROUTE" "${EVIDENCE_DIR}/native-first.log"
           grep -F "AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH=EAST_ROUTE" "${EVIDENCE_DIR}/native-first.log"
           grep -F "AURELIAN_FIRST_CITY_CHARTER=GREENVALE" "${EVIDENCE_DIR}/native-first.log"
-          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_greenvale_city" "${EVIDENCE_DIR}/native-restored.log"
-          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_city_chartered" "${EVIDENCE_DIR}/native-restored.log"
+          grep -F "AURELIAN_FIRST_NATION_FOUNDING=AURELIAN" "${EVIDENCE_DIR}/native-first.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_homeland" "${EVIDENCE_DIR}/native-restored.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_greenvale_capital" "${EVIDENCE_DIR}/native-restored.log"
 
       - name: Serve Web export
         run: |
@@ -324,13 +337,23 @@ jobs:
             await waitFor(() => states.includes('map_greenvale_city'),'city map before reload');
             await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'map_greenvale_city'),'city map save ack');
             await sleep(1200);
-            await page.screenshot({path:path.join(stills,'web-city-map-before-reload-1440x900.png')});
+            await page.screenshot({path:path.join(stills,'web-city-map-before-nation-1440x900.png')});
+            await page.keyboard.press('ArrowLeft');
+            await waitFor(() => states.includes('world_first_city_recognized'),'world before nation');
+            await page.keyboard.press('Enter');
+            await waitFor(() => states.includes('world_first_nation_founded'),'nation founded world');
+            await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'world_first_nation_founded'),'nation save ack');
+            await page.keyboard.press('ArrowRight');
+            await waitFor(() => states.includes('map_aurelian_homeland'),'homeland map before reload');
+            await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'map_aurelian_homeland'),'homeland save ack');
+            await sleep(1200);
+            await page.screenshot({path:path.join(stills,'web-homeland-map-before-reload-1440x900.png')});
             await page.reload({waitUntil:'domcontentloaded',timeout:90000});
             await page.locator('canvas').waitFor({state:'visible',timeout:90000});
-            await waitFor(() => loads.some(x => x.status === 'restored' && x.adapter === 'web_local_storage' && x.state === 'map_greenvale_city' && x.intent === 'east_trade'),'reload restore');
-            await waitFor(() => states.filter(x => x === 'map_greenvale_city').length >= 2,'reloaded connected map');
+            await waitFor(() => loads.some(x => x.status === 'restored' && x.adapter === 'web_local_storage' && x.state === 'map_aurelian_homeland' && x.intent === 'east_trade'),'reload restore');
+            await waitFor(() => states.filter(x => x === 'map_aurelian_homeland').length >= 2,'reloaded homeland map');
             await sleep(2500);
-            await page.screenshot({path:path.join(stills,'web-city-map-restored-1440x900.png')});
+            await page.screenshot({path:path.join(stills,'web-homeland-map-restored-1440x900.png')});
             const video = page.video();
             await context.close();
             const recordedPath = await video.path();
@@ -343,16 +366,16 @@ jobs:
               args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']
             });
             page = await openPage(context);
-            await waitFor(() => loads.filter(x => x.status === 'restored' && x.state === 'map_greenvale_city').length >= 2,'profile reopen restore');
-            await waitFor(() => states.filter(x => x === 'map_greenvale_city').length >= 3,'profile reopened connected map');
+            await waitFor(() => loads.filter(x => x.status === 'restored' && x.state === 'map_aurelian_homeland').length >= 2,'profile reopen restore');
+            await waitFor(() => states.filter(x => x === 'map_aurelian_homeland').length >= 3,'profile reopened homeland map');
             await sleep(1500);
-            await page.screenshot({path:path.join(stills,'web-city-map-profile-reopened-1440x900.png')});
+            await page.screenshot({path:path.join(stills,'web-homeland-map-profile-reopened-1440x900.png')});
             await page.keyboard.press('ArrowRight');
-            await waitFor(() => states.filter(x => x === 'village_city_chartered').length >= 2,'city village after reopen');
+            await waitFor(() => states.filter(x => x === 'village_greenvale_capital').length >= 1,'capital village after reopen');
             await sleep(1500);
-            await page.screenshot({path:path.join(stills,'web-city-village-after-profile-reopen-1440x900.png')});
+            await page.screenshot({path:path.join(stills,'web-capital-village-after-profile-reopen-1440x900.png')});
             await page.keyboard.press('ArrowLeft');
-            await waitFor(() => states.filter(x => x === 'map_greenvale_city').length >= 4,'back to city map');
+            await waitFor(() => states.filter(x => x === 'map_aurelian_homeland').length >= 4,'back to homeland map');
             await context.close();
 
             const browser = await chromium.launch({headless:true,args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
@@ -378,18 +401,19 @@ jobs:
               web_key:'pixel_nations.aurelian_session.v2',
               capability_result:'available',
               save_acknowledgement:'stored',
-              before_reload_state:'map_greenvale_city',
-              reloaded_state:'map_greenvale_city',
-              profile_reopen_state:'map_greenvale_city',
+              before_reload_state:'map_aurelian_homeland',
+              reloaded_state:'map_aurelian_homeland',
+              profile_reopen_state:'map_aurelian_homeland',
               settlement_founded:true,
               settlement_developed:true,
               route_connected:true,
               caravan_dispatched:true,
               city_chartered:true,
+              nation_founded:true,
               selected_intent:'east_trade',
-              continued_state:'village_city_chartered',
+              continued_state:'village_greenvale_capital',
               denied_storage_fallback:'world_neutral',
-              input_actions:['Enter','ArrowRight','Enter','ArrowRight','Enter','Enter','ArrowLeft','Enter','ArrowRight','Enter','ArrowLeft','ArrowRight','Enter','ArrowLeft','reload','browser_reopen','ArrowRight','ArrowLeft'],
+              input_actions:['Enter','ArrowRight','Enter','ArrowRight','Enter','Enter','ArrowLeft','Enter','ArrowRight','Enter','ArrowLeft','ArrowRight','Enter','ArrowLeft','ArrowLeft','Enter','ArrowRight','reload','browser_reopen','ArrowRight','ArrowLeft'],
               evidence_storage_seeding:false,
               glb_sha256:process.env.GLB_SHA256
             },null,2)+'\n');
@@ -406,15 +430,15 @@ jobs:
       - name: Validate exact evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "17"
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "20"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
             test "$(stat -c %s "$image")" -gt 70000
           done
           duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/session-persistence-v2-sequence.webm")"
           awk -v duration="$duration" 'BEGIN { exit !(duration >= 15 && duration <= 50) }'
-          grep -F "AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:map_greenvale_city:east_trade" "${EVIDENCE_DIR}/browser-console.log"
-          grep -F "AURELIAN_SESSION_V2_SAVE_ACK=stored:web_local_storage:map_greenvale_city:east_trade" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:map_aurelian_homeland:east_trade" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_SESSION_V2_SAVE_ACK=stored:web_local_storage:map_aurelian_homeland:east_trade" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_SESSION_V2_LOAD=unavailable:web_local_storage:world_neutral:none" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT=GREENVALE" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_TRADE_ROUTE_CONNECTION=EAST_ROUTE" "${EVIDENCE_DIR}/browser-console.log"
@@ -422,8 +446,11 @@ jobs:
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_in_use" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_trade_dispatched" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_CITY_CHARTER=GREENVALE" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_FIRST_NATION_FOUNDING=AURELIAN" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_city_chartered" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_greenvale_city" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_homeland" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_greenvale_capital" "${EVIDENCE_DIR}/browser-console.log"
           sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/session-persistence-v2-sequence.webm" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
           echo "GODOT_AURELIAN_SESSION_PERSISTENCE_V2_DETERMINISTIC_QA=PASS"
 
