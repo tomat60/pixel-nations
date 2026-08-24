@@ -105,7 +105,8 @@
     "nation_founding_is_explicit_player_action": true,
     "opening_world_does_not_found_nation": true,
     "nation_simulation_claimed": false,
-    "nation_visual_evidence_required": true
+    "nation_visual_evidence_required": true,
+    "playable_capture_timeout_seconds": 360
   },
   "shared_geography": "aurelian_authored_terrain_v1.glb",
   "persistence": {
