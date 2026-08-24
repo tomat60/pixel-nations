@@ -34,12 +34,12 @@ func _initialize() -> void:
 	_check(String(topology.get("route_id", "")) == "GreenvaleTradeRouteContext", "route_id")
 	var from_spec: Dictionary = topology.get("from", {})
 	var to_spec: Dictionary = topology.get("to", {})
-	_check(from_spec.get("point", []) == [354, 285], "greenvale_topology")
-	_check(to_spec.get("point", []) == [515, 340], "gilded_crossing_topology")
+	_check(_topology_is(from_spec.get("point", []), 354.0, 285.0), "greenvale_topology")
+	_check(_topology_is(to_spec.get("point", []), 515.0, 340.0), "gilded_crossing_topology")
 	_check(topology.get("new_geography", true) == false, "no_new_geography")
 	var route_context: Dictionary = decision.get("route_context", {})
-	_check(route_context.get("from_topology", []) == [354, 285], "shared_from_parity")
-	_check(route_context.get("to_topology", []) == [515, 340], "shared_to_parity")
+	_check(_topology_is(route_context.get("from_topology", []), 354.0, 285.0), "shared_from_parity")
+	_check(_topology_is(route_context.get("to_topology", []), 515.0, 340.0), "shared_to_parity")
 
 	var forward_path: Array = playable.get("forward_path", [])
 	_check(forward_path.has("map_east_route_connected"), "playable_connected")
@@ -54,6 +54,11 @@ func _initialize() -> void:
 	_check(persistence.contains('"route_connected"'), "connected_flag_persisted")
 	_check(persistence.contains("const VERSION := 2"), "schema_version_2")
 	_finish()
+
+func _topology_is(value, x: float, y: float, epsilon := 0.001) -> bool:
+	if not value is Array or value.size() != 2:
+		return false
+	return abs(float(value[0]) - x) <= epsilon and abs(float(value[1]) - y) <= epsilon
 
 func _read_json(path: String) -> Dictionary:
 	var payload = JSON.parse_string(_read_text(path))
