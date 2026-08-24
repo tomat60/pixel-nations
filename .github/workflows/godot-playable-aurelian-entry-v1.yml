@@ -18,6 +18,7 @@ on:
       - "game/scenes/aurelian/aurelian_first_trade_route_connection_v1_manifest.json"
       - "game/scenes/aurelian/aurelian_first_trade_caravan_dispatch_v1_manifest.json"
       - "game/scenes/aurelian/aurelian_first_city_charter_v1_manifest.json"
+      - "game/scenes/aurelian/aurelian_first_nation_founding_v1_manifest.json"
       - "game/tests/production_village_v1_test.gd"
       - "game/tests/aurelian_visible_expansion_v1_test.gd"
       - "game/tests/playable_aurelian_entry_v1_test.gd"
@@ -25,6 +26,8 @@ on:
       - "game/tests/aurelian_first_settlement_development_v1_test.gd"
       - "game/tests/aurelian_first_trade_route_connection_v1_test.gd"
       - "game/tests/aurelian_first_trade_caravan_dispatch_v1_test.gd"
+      - "game/tests/aurelian_first_city_charter_v1_test.gd"
+      - "game/tests/aurelian_first_nation_founding_v1_test.gd"
       - ".github/workflows/godot-playable-aurelian-entry-v1.yml"
   workflow_dispatch:
 
@@ -131,7 +134,7 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in aurelian_authored_terrain_v1_test production_village_v1_test aurelian_visible_expansion_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test; do
+          for test in aurelian_authored_terrain_v1_test production_village_v1_test aurelian_visible_expansion_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test; do
             "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1
           done
           grep -F "AURELIAN_AUTHORED_TERRAIN_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1_test.log"
@@ -147,6 +150,7 @@ jobs:
           grep -F "GODOT_AURELIAN_FIRST_TRADE_ROUTE_CONNECTION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_trade_route_connection_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_trade_caravan_dispatch_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_CITY_CHARTER_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_city_charter_v1_test.log"
+          grep -F "GODOT_AURELIAN_FIRST_NATION_FOUNDING_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_nation_founding_v1_test.log"
 
       - name: Capture normal launch, founding and development states
         timeout-minutes: 9
@@ -171,6 +175,9 @@ jobs:
             "village-first-city-chartered:village_city_chartered"
             "map-greenvale-city:map_greenvale_city"
             "world-first-city-recognized:world_first_city_recognized"
+            "world-first-nation-founded:world_first_nation_founded"
+            "map-aurelian-homeland:map_aurelian_homeland"
+            "village-greenvale-capital:village_greenvale_capital"
           )
           for spec in "${specs[@]}"; do
             IFS=: read -r output state <<< "$spec"
@@ -202,7 +209,8 @@ jobs:
           grep -F "AURELIAN_FIRST_TRADE_ROUTE_CONNECTION=EAST_ROUTE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH=EAST_ROUTE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_CITY_CHARTER=GREENVALE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
-          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=3210" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "AURELIAN_FIRST_NATION_FOUNDING=AURELIAN" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=4050" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test -s "${EVIDENCE_DIR}/playable-entry-sequence.avi"
           mediainfo --Output=JSON "${EVIDENCE_DIR}/playable-entry-sequence.avi" > "${EVIDENCE_DIR}/video-metadata.json"
 
