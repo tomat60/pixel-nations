@@ -11,7 +11,10 @@
     "village_founded_state": "founded",
     "village_developed_state": "developed",
     "map_connected_state": "map_east_route_connected",
-    "world_trade_active_state": "world_trade_route_active"
+    "world_trade_active_state": "world_trade_route_active",
+    "map_route_in_use_state": "map_east_route_in_use",
+    "world_first_trade_underway_state": "world_first_trade_underway",
+    "village_trade_dispatched_state": "village_trade_dispatched"
   },
   "controls": {
     "select_trade": "ui_accept",
@@ -21,7 +24,8 @@
     "found_settlement": "ui_accept",
     "previous_layer": "ui_left",
     "develop_settlement": "ui_accept",
-    "connect_trade_route": "ui_accept"
+    "connect_trade_route": "ui_accept",
+    "dispatch_first_caravan": "ui_accept"
   },
   "forward_path": [
     "world_neutral",
@@ -35,10 +39,17 @@
     "map_east_route_connected",
     "world_trade_route_active",
     "map_east_route_connected",
-    "village_developed"
+    "village_developed",
+    "village_trade_dispatched",
+    "map_east_route_in_use",
+    "world_first_trade_underway",
+    "map_east_route_in_use",
+    "village_trade_dispatched"
   ],
   "backward_path": [
-    "village_developed",
+    "village_trade_dispatched",
+    "map_east_route_in_use",
+    "world_first_trade_underway",
     "map_east_route_connected",
     "world_trade_route_active"
   ],
@@ -55,11 +66,15 @@
     "founding_is_explicit_player_action": true,
     "opening_village_does_not_found": true,
     "economy_claimed": false,
-    "persistence_scope": "eastern_trade_claim_greenvale_development_and_connected_route",
+    "persistence_scope": "eastern_trade_claim_greenvale_development_connected_route_and_first_caravan_dispatch",
     "development_is_explicit_player_action": true,
     "opening_village_does_not_develop": true,
     "route_connection_is_explicit_player_action": true,
-    "opening_map_does_not_connect": true
+    "opening_map_does_not_connect": true,
+    "caravan_dispatch_is_explicit_player_action": true,
+    "opening_village_does_not_dispatch": true,
+    "caravan_is_static_state_marker": true,
+    "caravan_simulation_claimed": false
   },
   "shared_geography": "aurelian_authored_terrain_v1.glb",
   "persistence": {
@@ -75,6 +90,7 @@
     "settlement_founded_flag": true,
     "fallback_state": "world_neutral",
     "settlement_developed_flag": true,
-    "route_connected_flag": true
+    "route_connected_flag": true,
+    "caravan_dispatched_flag": true
   }
 }

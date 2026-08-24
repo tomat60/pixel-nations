@@ -10,6 +10,9 @@ const ENTRY_STATES := [
 	"map_east_route_claimed",
 	"map_east_route_connected",
 	"world_trade_route_active",
+	"village_trade_dispatched",
+	"map_east_route_in_use",
+	"world_first_trade_underway",
 	"village_claimed",
 	"village_founded",
 	"village_developed",
@@ -30,6 +33,8 @@ var restored_intent := "none"
 var settlement_founded := false
 var settlement_developed := false
 var route_connected := false
+var caravan_dispatched := false
+var dispatch_token: Node3D
 
 func _ready() -> void:
 	if DisplayServer.get_name() == "headless" and not ResourceLoader.exists(GLB_PATH):
@@ -49,9 +54,10 @@ func _ready() -> void:
 		get_window().size = STILL_SIZE
 	if ENTRY_STATES.has(evidence_state):
 		entry_state = evidence_state
-		settlement_founded = evidence_state in ["village_founded", "village_developed"]
-		settlement_developed = evidence_state in ["village_developed", "map_east_route_connected", "world_trade_route_active"]
-		route_connected = evidence_state in ["map_east_route_connected", "world_trade_route_active"]
+		settlement_founded = evidence_state in ["village_founded", "village_developed", "village_trade_dispatched", "map_east_route_in_use", "world_first_trade_underway"]
+		settlement_developed = evidence_state in ["village_developed", "village_trade_dispatched", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway"]
+		route_connected = evidence_state in ["map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway", "village_trade_dispatched"]
+		caravan_dispatched = evidence_state in ["village_trade_dispatched", "map_east_route_in_use", "world_first_trade_underway"]
 	else:
 		var restored := SESSION.load_session()
 		entry_state = String(restored.get("entry_state", "world_neutral"))
@@ -59,24 +65,30 @@ func _ready() -> void:
 		settlement_founded = bool(restored.get("settlement_founded", false))
 		settlement_developed = bool(restored.get("settlement_developed", false))
 		route_connected = bool(restored.get("route_connected", false))
-		print("AURELIAN_SESSION_V2_LOAD=%s:%s:%s:%s:%s:%s:%s" % [String(restored.get("status", "unknown")), String(restored.get("adapter", "unknown")), entry_state, restored_intent, settlement_founded, settlement_developed, route_connected])
+		caravan_dispatched = bool(restored.get("caravan_dispatched", false))
+		print("AURELIAN_SESSION_V2_LOAD=%s:%s:%s:%s:%s:%s:%s:%s" % [String(restored.get("status", "unknown")), String(restored.get("adapter", "unknown")), entry_state, restored_intent, settlement_founded, settlement_developed, route_connected, caravan_dispatched])
 	if not ENTRY_STATES.has(entry_state):
 		entry_state = "world_neutral"
 		restored_intent = "none"
 		settlement_founded = false
 		settlement_developed = false
 		route_connected = false
-	if entry_state in ["village_founded", "village_developed", "map_east_route_connected", "world_trade_route_active"]:
+		caravan_dispatched = false
+	if entry_state in ["village_founded", "village_developed", "village_trade_dispatched", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway"]:
 		settlement_founded = true
-	if entry_state in ["village_developed", "map_east_route_connected", "world_trade_route_active"]:
+	if entry_state in ["village_developed", "village_trade_dispatched", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway"]:
 		settlement_developed = true
-	if entry_state in ["map_east_route_connected", "world_trade_route_active"]:
+	if entry_state in ["map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway", "village_trade_dispatched"]:
 		route_connected = true
+	if entry_state in ["village_trade_dispatched", "map_east_route_in_use", "world_first_trade_underway"]:
+		caravan_dispatched = true
 	decision_state = _decision_state_for_entry(entry_state)
 	_configure_state_environment(entry_state)
 	super()
 	if cameras.is_empty():
 		return
+	dispatch_token = _build_dispatch_token()
+	main_decision_overlay_root.add_child(dispatch_token)
 	_build_runtime_hud()
 	_apply_entry_state(entry_state)
 	set_process_unhandled_input(true)
@@ -90,11 +102,11 @@ func _ready() -> void:
 
 func _decision_state_for_entry(state_name: String) -> String:
 	match state_name:
-		"map_east_route_selected", "map_east_route_claimed", "map_east_route_connected":
+		"map_east_route_selected", "map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use":
 			return "map_east_route"
-		"world_trade_route_active":
+		"world_trade_route_active", "world_first_trade_underway":
 			return "world_trade_selected"
-		"village_claimed", "village_founded", "village_developed":
+		"village_claimed", "village_founded", "village_developed", "village_trade_dispatched":
 			return "village_route_context"
 		_:
 			return state_name
@@ -107,13 +119,13 @@ func _configure_state_environment(state_name: String) -> void:
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
 			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
 			return
-		"map_east_route_claimed", "map_east_route_connected":
+		"map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed" if settlement_developed else ("founded" if settlement_founded else "claimed"))
 			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
 			return
-		"world_trade_route_active":
+		"world_trade_route_active", "world_first_trade_underway":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
@@ -131,7 +143,7 @@ func _configure_state_environment(state_name: String) -> void:
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "founded")
 			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
 			return
-		"village_developed":
+		"village_developed", "village_trade_dispatched":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
@@ -245,6 +257,11 @@ func _accept_entry() -> void:
 				route_connected = true
 				_apply_entry_state("map_east_route_connected")
 				print("AURELIAN_FIRST_TRADE_ROUTE_CONNECTION=EAST_ROUTE")
+		"village_developed":
+			if route_connected and not caravan_dispatched:
+				caravan_dispatched = true
+				_apply_entry_state("village_trade_dispatched")
+				print("AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH=EAST_ROUTE")
 
 func _right_entry() -> void:
 	match entry_state:
@@ -252,10 +269,14 @@ func _right_entry() -> void:
 			_apply_entry_state("map_east_route_claimed" if settlement_founded else "map_east_route_selected")
 		"world_trade_route_active":
 			_apply_entry_state("map_east_route_connected")
+		"world_first_trade_underway":
+			_apply_entry_state("map_east_route_in_use")
 		"map_east_route_claimed":
 			_apply_entry_state("village_developed" if settlement_developed else ("village_founded" if settlement_founded else "village_claimed"))
 		"map_east_route_connected":
-			_apply_entry_state("village_developed")
+			_apply_entry_state("village_trade_dispatched" if caravan_dispatched else "village_developed")
+		"map_east_route_in_use":
+			_apply_entry_state("village_trade_dispatched")
 		"map_east_route":
 			_apply_entry_state("village_route_context")
 
@@ -265,10 +286,14 @@ func _previous_entry() -> void:
 			_apply_entry_state("map_east_route_claimed")
 		"village_developed":
 			_apply_entry_state("map_east_route_connected" if route_connected else "map_east_route_claimed")
+		"village_trade_dispatched":
+			_apply_entry_state("map_east_route_in_use")
 		"map_east_route_claimed", "map_east_route_selected", "map_east_route":
 			_apply_entry_state("world_trade_selected")
 		"map_east_route_connected":
 			_apply_entry_state("world_trade_route_active")
+		"map_east_route_in_use":
+			_apply_entry_state("world_first_trade_underway")
 		"village_route_context":
 			_apply_entry_state("map_east_route")
 		"world_trade_selected":
@@ -287,6 +312,49 @@ func _hide_preclaim_greenvale() -> bool:
 		node.visible = false
 	return true
 
+func _build_dispatch_token() -> Node3D:
+	var root := Node3D.new()
+	root.name = "FirstTradeCaravanDispatch"
+	var body := MeshInstance3D.new()
+	body.name = "CaravanBody"
+	var body_mesh := BoxMesh.new()
+	body_mesh.size = Vector3(0.50, 0.24, 0.62)
+	body.mesh = body_mesh
+	body.position.y = 0.06
+	body.material_override = _material("#f2b84bff", 0.24)
+	root.add_child(body)
+	var cargo := MeshInstance3D.new()
+	cargo.name = "CaravanCargo"
+	var cargo_mesh := BoxMesh.new()
+	cargo_mesh.size = Vector3(0.34, 0.30, 0.34)
+	cargo.mesh = cargo_mesh
+	cargo.position = Vector3(0.0, 0.31, -0.08)
+	cargo.material_override = _material("#b94f3fff", 0.22)
+	root.add_child(cargo)
+	for side in [-1.0, 1.0]:
+		var wheel := MeshInstance3D.new()
+		wheel.name = "CaravanWheel"
+		var wheel_mesh := CylinderMesh.new()
+		wheel_mesh.top_radius = 0.14
+		wheel_mesh.bottom_radius = 0.14
+		wheel_mesh.height = 0.065
+		wheel_mesh.radial_segments = 16
+		wheel.mesh = wheel_mesh
+		wheel.rotation.z = PI / 2.0
+		wheel.position = Vector3(side * 0.29, -0.09, 0.02)
+		wheel.material_override = _material("#4a3528ee")
+		root.add_child(wheel)
+	root.position = topology_to_godot(Vector2(435.0, 313.0), 0.44)
+	root.visible = false
+	return root
+
+func _set_trade_world_underway(underway: bool) -> void:
+	if main_world_overlay_root == null:
+		return
+	var label := main_world_overlay_root.get_node_or_null("Direction_EastTrade/StrategicLabel") as Label3D
+	if label != null:
+		label.text = "TRADE UNDERWAY" if underway else "TRADE"
+
 func _apply_entry_state(state_name: String) -> void:
 	if not ENTRY_STATES.has(state_name):
 		push_error("PLAYABLE_AURELIAN_UNKNOWN_STATE=%s" % state_name)
@@ -294,7 +362,10 @@ func _apply_entry_state(state_name: String) -> void:
 	entry_state = state_name
 	main_world_overlay_root.visible = state_name.begins_with("world_")
 	main_overlay_root.visible = state_name.begins_with("map_")
-	main_decision_overlay_root.visible = state_name in ["village_route_context", "map_east_route_connected", "world_trade_route_active"]
+	main_decision_overlay_root.visible = state_name in ["village_route_context", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway"]
+	if dispatch_token != null:
+		dispatch_token.visible = state_name in ["map_east_route_in_use", "world_first_trade_underway"]
+	_set_trade_world_underway(false)
 	match state_name:
 		"world_neutral":
 			if not _hide_preclaim_greenvale():
@@ -315,6 +386,12 @@ func _apply_entry_state(state_name: String) -> void:
 				push_error("AURELIAN_FIRST_TRADE_ROUTE_CONNECTION_VILLAGE_STATE_FAILED")
 			_apply_world_state(main_world_overlay_root, "selected_trade")
 			_activate_camera("world")
+		"world_first_trade_underway":
+			if not _apply_village_state(main_basin, "developed"):
+				push_error("AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH_VILLAGE_STATE_FAILED")
+			_apply_world_state(main_world_overlay_root, "selected_trade")
+			_set_trade_world_underway(true)
+			_activate_camera("world")
 		"map_east_route_selected":
 			if not _hide_preclaim_greenvale():
 				push_error("AURELIAN_FIRST_LAND_CLAIM_PRECLAIM_VISIBILITY_FAILED")
@@ -329,7 +406,7 @@ func _apply_entry_state(state_name: String) -> void:
 				push_error("AURELIAN_FIRST_SETTLEMENT_FOUNDING_VILLAGE_STATE_FAILED" if settlement_founded else "AURELIAN_FIRST_LAND_CLAIM_VILLAGE_STATE_FAILED")
 			_activate_camera("map")
 			print("AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE")
-		"map_east_route_connected":
+		"map_east_route_connected", "map_east_route_in_use":
 			_apply_map_state(main_overlay_root, "east_route_claimed")
 			if not _apply_village_state(main_basin, "developed"):
 				push_error("AURELIAN_FIRST_TRADE_ROUTE_CONNECTION_VILLAGE_STATE_FAILED")
@@ -345,7 +422,7 @@ func _apply_entry_state(state_name: String) -> void:
 			if not _apply_village_state(main_basin, "founded"):
 				push_error("AURELIAN_FIRST_SETTLEMENT_FOUNDING_VILLAGE_STATE_FAILED")
 			_activate_camera("village")
-		"village_developed":
+		"village_developed", "village_trade_dispatched":
 			settlement_founded = true
 			settlement_developed = true
 			_apply_map_state(main_overlay_root, "east_route_claimed")
@@ -357,8 +434,8 @@ func _apply_entry_state(state_name: String) -> void:
 	_update_runtime_hud()
 	if persistence_enabled:
 		restored_intent = "none" if entry_state == "world_neutral" else "east_trade"
-		var save_result := SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH, settlement_founded, settlement_developed, route_connected)
-		print("AURELIAN_SESSION_V2_SAVE_ACK=%s:%s:%s:%s:%s:%s:%s" % [String(save_result.get("status", "unknown")), String(save_result.get("adapter", "unknown")), entry_state, restored_intent, settlement_founded, settlement_developed, route_connected])
+		var save_result := SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH, settlement_founded, settlement_developed, route_connected, caravan_dispatched)
+		print("AURELIAN_SESSION_V2_SAVE_ACK=%s:%s:%s:%s:%s:%s:%s:%s" % [String(save_result.get("status", "unknown")), String(save_result.get("adapter", "unknown")), entry_state, restored_intent, settlement_founded, settlement_developed, route_connected, caravan_dispatched])
 		if not bool(save_result.get("ok", false)) and String(save_result.get("status", "")) != "unavailable":
 			push_error("AURELIAN_SESSION_V2_SAVE_FAILED=%s" % String(save_result.get("status", "unknown")))
 	print("PLAYABLE_AURELIAN_ENTRY_STATE=%s" % entry_state)
@@ -379,6 +456,10 @@ func _update_runtime_hud() -> void:
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "Eastern Trade active through connected East Route"
 			controls_label.text = "[RIGHT] Inspect connected Map"
+		"world_first_trade_underway":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "First eastern trade caravan is underway"
+			controls_label.text = "[RIGHT] Inspect route in use"
 		"map_east_route_selected":
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "East Route selected near Gilded Crossing"
@@ -391,6 +472,10 @@ func _update_runtime_hud() -> void:
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "East Route connected: Greenvale to Gilded Crossing"
 			controls_label.text = "[RIGHT] Reopen developed Greenvale    [LEFT] World"
+		"map_east_route_in_use":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "First caravan dispatched along the connected East Route"
+			controls_label.text = "[RIGHT] Reopen Greenvale    [LEFT] World"
 		"village_claimed":
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "East Route is claimed: no settlement exists yet"
@@ -402,7 +487,11 @@ func _update_runtime_hud() -> void:
 		"village_developed":
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "Greenvale developed into a visible working settlement"
-			controls_label.text = "[LEFT / ESC] Return to claimed Map"
+			controls_label.text = "[ENTER] Dispatch First Caravan    [LEFT / ESC] Return to connected Map" if route_connected else "[LEFT / ESC] Return to claimed Map"
+		"village_trade_dispatched":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "First caravan dispatched from developed Greenvale"
+			controls_label.text = "[LEFT / ESC] Inspect route in use"
 		"map_east_route":
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "Legacy East Route selection restored"
@@ -450,9 +539,19 @@ func _process(_delta: float) -> void:
 	elif automated_frame == 1410:
 		_emit_action("ui_right")
 	elif automated_frame == 1530:
-		_emit_action("ui_left")
+		_emit_action("ui_accept")
 	elif automated_frame == 1650:
 		_emit_action("ui_left")
-	elif automated_frame >= 1770:
-		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=1770")
+	elif automated_frame == 1770:
+		_emit_action("ui_left")
+	elif automated_frame == 1890:
+		_emit_action("ui_right")
+	elif automated_frame == 2010:
+		_emit_action("ui_right")
+	elif automated_frame == 2130:
+		_emit_action("ui_left")
+	elif automated_frame == 2250:
+		_emit_action("ui_left")
+	elif automated_frame >= 2370:
+		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=2370")
 		get_tree().quit(0)

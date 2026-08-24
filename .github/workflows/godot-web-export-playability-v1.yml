@@ -84,13 +84,14 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test; do
+          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test; do
             "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1
           done
           grep -F "GODOT_PLAYABLE_AURELIAN_ENTRY_V1_TEST: PASS" "${EVIDENCE_DIR}/playable_aurelian_entry_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_LAND_CLAIM_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_land_claim_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_settlement_development_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_TRADE_ROUTE_CONNECTION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_trade_route_connection_v1_test.log"
+          grep -F "GODOT_AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_trade_caravan_dispatch_v1_test.log"
 
       - name: Export canonical Linux and Web builds
         timeout-minutes: 8
@@ -246,10 +247,20 @@ jobs:
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '12-reopened-village-developed-1440x900.png') });
 
+            await page.keyboard.press('Enter');
+            await waitForCount('village_trade_dispatched', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '13-village-first-caravan-dispatched-1440x900.png') });
+
             await page.keyboard.press('ArrowLeft');
-            await waitForCount('map_east_route_connected', 3);
+            await waitForCount('map_east_route_in_use', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '14-map-east-route-in-use-1440x900.png') });
+
             await page.keyboard.press('ArrowLeft');
-            await waitForCount('world_trade_route_active', 2);
+            await waitForCount('world_first_trade_underway', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '15-world-first-trade-underway-1440x900.png') });
             const video = page.video();
             await context.close();
             await video.saveAs(path.join(root, 'godot-web-input-sequence.webm'));
@@ -275,9 +286,9 @@ jobs:
               viewport: [1440, 900],
               browser: 'chromium',
               normal_entry: 'world_neutral',
-              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'ArrowLeft', 'ArrowLeft'],
+              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft'],
               observed_states: observedStates,
-              accepted_handoff: 'Direction EastTrade -> East Route claimed -> Village developed -> explicit Connect East Route -> connected Map -> World Trade active -> reopened developed Village',
+              accepted_handoff: 'Direction EastTrade -> East Route claimed -> Village developed -> connected East Route -> explicit Dispatch First Caravan -> Map route in use -> World first trade underway',
               glb_sha256: process.env.GLB_SHA256,
               evidence_environment_state_driving: false
             }, null, 2) + '\n');
@@ -291,7 +302,7 @@ jobs:
       - name: Validate exact browser evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "12"
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "15"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
             test "$(stat -c %s "$image")" -gt 70000
@@ -309,6 +320,10 @@ jobs:
           grep -F "AURELIAN_FIRST_TRADE_ROUTE_CONNECTION=EAST_ROUTE" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_connected" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_trade_route_active" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH=EAST_ROUTE" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_trade_dispatched" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_in_use" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_trade_underway" "${EVIDENCE_DIR}/browser-console.log"
           sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/godot-web-input-sequence.webm" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
           echo "GODOT_WEB_EXPORT_PLAYABILITY_DETERMINISTIC_QA=PASS"
 
