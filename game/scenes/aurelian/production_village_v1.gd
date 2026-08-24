@@ -8,9 +8,9 @@ const TOPOLOGY_Z_SIGN := -1.0
 const STILL_SIZE := Vector2i(1440, 900)
 const VILLAGE_STATES := ["claimed", "founded", "developed"]
 const CAMERA_CONTRACT := {
-	"village": {"center": Vector2(390, 320), "size": 7.2},
-	"map": {"center": Vector2(500, 435), "size": 16.2},
-	"world": {"center": Vector2(500, 500), "size": 22.0},
+	"village": {"center": Vector2(372, 326), "size": 9.4},
+	"map": {"center": Vector2(500, 430), "size": 17.4},
+	"world": {"center": Vector2(500, 480), "size": 23.4},
 	"bridge": {"center": Vector2(515, 340), "size": 4.8},
 }
 
@@ -133,6 +133,7 @@ func _ensure_derived_nodes(basin: Node3D) -> bool:
 		clone.name = derived_name
 		var multiplier := float(spec.get("scale", 1.0))
 		clone.scale = source.scale * Vector3(multiplier, multiplier, multiplier)
+		clone.rotation_degrees.y += float(spec.get("rotation_y_degrees", 0.0))
 		source.get_parent().add_child(clone)
 	return true
 

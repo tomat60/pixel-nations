@@ -11,6 +11,11 @@ on:
       - "game/scenes/aurelian/aurelian_session_persistence_v2.gd"
       - "game/scenes/aurelian/production_map_v1.gd"
       - "game/scenes/aurelian/production_map_v1_manifest.json"
+      - "game/scenes/aurelian/production_village_v1.gd"
+      - "game/scenes/aurelian/production_village_v1_state_manifest.json"
+      - "game/scenes/aurelian/aurelian_visible_expansion_v1_manifest.json"
+      - "game/tests/production_village_v1_test.gd"
+      - "game/tests/aurelian_visible_expansion_v1_test.gd"
       - "game/tests/playable_aurelian_entry_v1_test.gd"
       - "game/tests/aurelian_first_land_claim_v1_test.gd"
       - ".github/workflows/godot-playable-aurelian-entry-v1.yml"
@@ -92,6 +97,7 @@ jobs:
           cp "${EXPORT_DIR}/transform-manifest.json" "${EVIDENCE_DIR}/transform-manifest.json"
           mv "${EXPORT_DIR}/aurelian_authored_terrain_v1.blend" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1.blend"
           cp game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json "${EVIDENCE_DIR}/interaction-manifest.json"
+          cp game/scenes/aurelian/aurelian_visible_expansion_v1_manifest.json "${EVIDENCE_DIR}/visible-expansion-manifest.json"
 
       - name: Download pinned Godot
         timeout-minutes: 5
@@ -117,11 +123,12 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test; do
+          for test in aurelian_authored_terrain_v1_test production_village_v1_test aurelian_visible_expansion_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test; do
             "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1
           done
           grep -F "AURELIAN_AUTHORED_TERRAIN_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1_test.log"
           grep -F "PRODUCTION_VILLAGE_V1_TEST: PASS" "${EVIDENCE_DIR}/production_village_v1_test.log"
+          grep -F "AURELIAN_VISIBLE_EXPANSION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_visible_expansion_v1_test.log"
           grep -F "PRODUCTION_MAP_V1_TEST: PASS" "${EVIDENCE_DIR}/production_map_v1_test.log"
           grep -F "PRODUCTION_WORLD_V1_TEST: PASS" "${EVIDENCE_DIR}/production_world_v1_test.log"
           grep -F "AURELIAN_DECISION_LOOP_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_decision_loop_v1_test.log"
