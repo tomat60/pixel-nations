@@ -60,6 +60,8 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		return fallback("invalid_data", _adapter_name())
 	if caravan_dispatched and not route_connected:
 		return fallback("invalid_data", _adapter_name())
+	if caravan_dispatched and state not in ["village_trade_dispatched", "map_east_route_in_use", "world_first_trade_underway"]:
+		return fallback("invalid_data", _adapter_name())
 	var payload := {
 		"schema": SCHEMA,
 		"version": VERSION,
@@ -116,6 +118,8 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 	if state in ["village_trade_dispatched", "map_east_route_in_use", "world_first_trade_underway"] and not caravan_dispatched:
 		return fallback("invalid_value", adapter)
 	if caravan_dispatched and not route_connected:
+		return fallback("invalid_value", adapter)
+	if caravan_dispatched and state not in ["village_trade_dispatched", "map_east_route_in_use", "world_first_trade_underway"]:
 		return fallback("invalid_value", adapter)
 	return {
 		"ok": true,
