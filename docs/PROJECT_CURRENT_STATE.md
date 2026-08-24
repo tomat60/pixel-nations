@@ -1,14 +1,14 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-08-23
-Current state revision: First Settlement Founding accepted, Aurelian Visible Expansion v1 selected
+Updated: 2026-08-24
+Current state revision: Aurelian Visible Expansion v1 accepted, bounded strategy review required
 Authority source: this file on the current `main`
-Authority baseline SHA: `21c3a28dc904d63d109fcdc5393e55c4be4d4b4d`
-Product baseline SHA: `33394c20457ffa66a6cd72479001ef0c89d8dbd2`
-Current milestone: implement exactly one Aurelian Visible Expansion v1 candidate
-Active execution issue: #482
-Next allowed action: after this authority alignment merges with healthy checks, implement one visibly larger and richer Aurelian Basin / Greenvale candidate on the existing shared Godot geography.
+Authority baseline SHA: `67ad47798189ab6ce65781599a87105fc31391a5`
+Product baseline SHA: `67ad47798189ab6ce65781599a87105fc31391a5`
+Current milestone: choose and authorize exactly one next bounded product milestone
+Active execution issue: none
+Next allowed action: one bounded strategy review, release verification and a documentation-only authority PR. No new product implementation is authorized yet.
 
 ## Product truth
 
@@ -20,7 +20,11 @@ The full logical world contains 10,000 lands in a 100 x 100 structure. The curre
 
 Godot remains the target runtime under ADR-001. Next.js `/play` remains a bridge, mechanics reference and rollback surface, not the production-final visual engine.
 
-The demo must prove the fantasy through one understandable player arc before broad systems expansion.
+Village, Map and World remain three roles over one physical geography:
+
+- Village = HOW
+- Map = WHERE
+- World = WHY / WHICH DIRECTION
 
 ## Accepted foundation that must be reused
 
@@ -36,155 +40,115 @@ Do not rebuild these accepted capabilities:
 - Chromium Web export playability;
 - Session Persistence v2 for native and Web;
 - explicit First Land Claim flow;
-- explicit First Settlement Founding flow with persisted Greenvale founded state.
-
-Most recent accepted product milestone:
-
-- PR #480 `Implement Godot First Settlement Founding v1`;
-- accepted head `a75fb8eb1b859eedf2b68b4922a70471cd741487`;
-- merged product baseline `33394c20457ffa66a6cd72479001ef0c89d8dbd2`;
-- final result: `GODOT_AURELIAN_FIRST_SETTLEMENT_FOUNDING_PASS`.
-
-Latest accepted process cleanup:
-
-- PR #481 `Skip legacy web evidence on Godot-only PRs`;
-- merged authority baseline `21c3a28dc904d63d109fcdc5393e55c4be4d4b4d`.
+- explicit First Settlement Founding flow with persisted Greenvale founded state;
+- Aurelian Visible Expansion v1 composition and view framing.
 
 Accepted GLB identity remains unchanged unless a later explicit asset milestone changes it.
 
-## Current milestone: Aurelian Visible Expansion v1
+## Most recent accepted product milestone
 
-Binding execution issue: #482.
+PR #484 `Implement Aurelian Visible Expansion v1` is accepted.
 
-The bottleneck is now visible product progress. The next candidate must make the current game materially richer without adding another broad gameplay system.
+- terminal result: `AURELIAN_VISIBLE_EXPANSION_V1_PASS`;
+- accepted head: `7527a9884aedcad00b0adcc1312444cfb326b5c8`;
+- merged product baseline: `67ad47798189ab6ce65781599a87105fc31391a5`;
+- shared geography and accepted GLB unchanged;
+- founded Greenvale expanded from 4 visible settlement nodes to 10;
+- claimed remains a single territorial marker;
+- developed remains a 13-node superset;
+- composition now follows the village green, crossing road and fields work edge;
+- Village, Map and World framing remains one coherent Basin;
+- claim, founding, Web playability and persistence contracts remain green.
 
-Target outcome:
+Exact-head evidence:
 
-1. Greenvale reads as a believable founded settlement, not a few props on empty ground.
-2. The immediate settlement area gains clearer structure using the existing asset envelope: paths/roads, fields or work edge, natural anchors and stronger composition.
-3. Village framing improves so founding has a stronger visual payoff.
-4. Map framing shows Greenvale embedded in a wider local geography.
-5. World framing suggests an Aurelian Basin that continues beyond one small patch.
-6. Village, Map and World remain views of the same persistent physical geography.
-7. The accepted land-claim and settlement-founding loop remains intact.
-8. No new economy, worker, timer, city, nation or empire system is required for this milestone.
+- Playable Entry run `32675472551`, artifact `9502553750`, digest `sha256:35ad41f56fa02f595cd0ef0d8739f65501d2b9495212043053acf499cd617d0a`;
+- Production Village run `32675472547`, artifact `9502545609`, digest `sha256:0600acec8ca404d3109230f0c14df9e70785f26a8a94db80d56b2fc43d9400c3`;
+- Web Playability run `32675472568`, artifact `9502544910`, digest `sha256:82f6a89fc95ba68e9664f092b24867e494b83b83e0d3467d22dc6fb3b2e6c0e7`.
 
-## Execution model
+The first visual artifact was `CORRECTION_REQUIRED` because founded structures were too tightly piled near the bridge. The single allowed bounded correction spread the same accepted asset set along the road, village green and fields edge. Direct review then passed the claimed -> founded transition, the expanded settlement, Map/World coherence and the input-driven sequence.
 
-Use a proof-driven iteration loop:
+## Release state
 
-`spec -> implement -> run Godot -> capture screenshot/video -> inspect -> one bounded repair -> final gate`
+- PR exact-head guards: PASS;
+- merge SHA Vercel status: SUCCESS;
+- no open PR remains after #484 merge;
+- public-origin HTTP is not required to classify this Godot-only product evidence and is not inferred from Vercel status.
 
-During implementation:
+## Current authority gate
 
-- prefer fast headless/import/state tests;
-- reuse the existing deterministic capture harness;
-- do not rebuild a second QA or scene framework;
-- do not wait for every legacy Web evidence suite on Godot-only changes;
-- do not split one visible outcome into multiple tiny milestone PRs unless a real technical dependency requires it;
-- one executor may implement while a separate reviewer/control-plane inspects the resulting exact head.
+No next product implementation is authorized.
 
-Full visual/persistence/regression evidence is required at the final candidate gate, not after every small edit.
+The next milestone must be selected by one bounded strategy review and merged as an explicit contract before another product branch starts.
 
-## Allowed scope
+The review must choose one coherent next player-facing outcome, not a bundle of systems. It must define:
 
-Allowed for the implementation candidate:
+- player outcome;
+- exact allowed scope;
+- forbidden scope;
+- evidence and direct-review gate;
+- one correction maximum when visual;
+- cost mode and stop condition.
 
-- `game/scenes/aurelian/**`;
-- `game/tests/**`;
-- existing Aurelian manifests, layout and camera definitions;
-- existing licensed/pinned assets already in the repository;
-- minimal focused Godot QA workflow adjustment only if needed to prove the candidate.
+## Allowed now
 
-## Forbidden scope
+- bounded strategy review;
+- documentation-only contract work;
+- GitHub QA and release verification;
+- read-only inspection of accepted artifacts and product gaps.
 
-Do not broaden into:
+## Forbidden now
 
-- new paid assets or paid generation;
-- a new asset family without proving the existing envelope is insufficient;
-- React/SVG/CSS rebuilding of final game surfaces;
-- economy, resource costs, workers, timers or production queues;
+- new product implementation without a merged contract;
+- economy, resources, workers, timers or production queues;
 - city, nation or empire mechanics;
 - multiple-land systemic expansion;
 - backend, accounts, cloud save, multiplayer, combat or diplomacy;
+- new paid assets or paid generation;
 - crypto, NFT, wallet, token, mint or pay-to-win direction;
-- broad CI/platform refactoring inside the visual implementation PR.
-
-## Visual acceptance gate
-
-The exact candidate head must provide evidence that is visibly different from the current founding baseline:
-
-- claimed/pre-founding Greenvale;
-- founded Greenvale;
-- expanded settlement and immediate environment composition;
-- Map view showing Greenvale in wider local geography;
-- World view showing coherent Aurelian context;
-- one short input-driven or deterministic capture sequence;
-- focused tests proving accepted claim/founding/persistence behavior did not regress.
-
-Green CI is necessary but not sufficient. Direct image/video review decides visual acceptance.
-
-Terminal classification:
-
-- `AURELIAN_VISIBLE_EXPANSION_V1_PASS`
-- `AURELIAN_VISIBLE_EXPANSION_V1_CORRECTION_REQUIRED`
-- `AURELIAN_VISIBLE_EXPANSION_V1_REJECT`
-
-One bounded correction maximum after the first meaningful visual artifact. If it remains weak, change art/level-design strategy instead of micro-polishing.
+- P12;
+- MAX or paid tools without a named blocker and explicit authority.
 
 ## Process acceleration rules
 
-1. Optimize for visible playable progress, not number of gates passed.
-2. One meaningful product PR at a time, but research/review/QA may run in parallel when they do not edit the same files.
-3. Keep implementation tasks roughly reviewable in one sitting; batch related visual changes that produce one coherent outcome.
-4. Use focused Godot tests during iteration and expensive/full evidence at final gate.
-5. Directly inspect the running-game result; compile success is not product proof.
-6. User-reported confusion or visual rejection overrides screenshot-only automation.
-7. An open PR with no progress for roughly one steward interval is P0 and must be diagnosed.
-8. Small continuous cleanup is preferred over multi-day infrastructure detours.
+1. Optimize for visible playable progress, not gate count.
+2. One active product or recovery PR at a time.
+3. Use focused Godot tests during iteration and full evidence at the final gate.
+4. Directly inspect running-game images and motion. Green CI alone is not acceptance.
+5. One bounded visual correction maximum.
+6. An open PR with no meaningful progress for roughly one steward interval is P0.
+7. Preserve accepted shared geography and avoid rebuilding the GLB for view-specific work.
 
 ## Tool and cost policy
 
 - Strategy/control/direct review: GPT-5.6 Sol.
-- Executor when useful: Cursor GPT-5.5 without MAX.
-- MAX: OFF unless a named blocker justifies it.
 - Deterministic GitHub/Godot tooling first.
-- Blender only when the shared authored asset itself must change.
+- Cursor only when materially useful as executor, GPT-5.5 without MAX.
+- MAX: OFF.
 - Extra spend target: 0 USD.
-
-## Mandatory PR/release ownership
-
-For every candidate PR/head change:
-
-- verify exact head/base, diff, changed files and mergeability;
-- inspect failed jobs rather than blind-rerunning;
-- directly inspect required screenshot/video artifacts;
-- classify `PENDING / BLOCKED / REJECTED / READY`.
-
-After merge, verify accepted head -> merge SHA -> new `main` and the relevant post-merge state. If production/public evidence cannot be reached, report exactly what remains unverified.
+- Image generation is not implementation authority.
 
 ## Source-of-truth precedence
 
 1. this `PROJECT_CURRENT_STATE.md`;
 2. accepted ADRs, especially ADR-001;
 3. root `AGENTS.md`;
-4. active issue #482;
+4. the next active issue after it is explicitly selected here;
 5. accepted exact-head evidence and current operating/QA protocols;
 6. historical issues, PRs, briefs and generated reports.
 
-Historical issue #415 remains useful provenance for the shared-geography reset, but it is no longer the active execution authority.
+Issue #482 and PR #484 remain accepted provenance for Aurelian Visible Expansion v1, but they do not authorize another implementation.
 
 ## Session start gate
 
 Before meaningful implementation:
 
 1. run `npm run pn:status` when a checkout is available;
-2. read this file, ADR-001, root `AGENTS.md` and issue #482;
-3. re-fetch live GitHub state;
-4. state model/tool, MAX, cost, allowed scope, forbidden actions, validation and stop condition.
+2. read this file, ADR-001 and root `AGENTS.md`;
+3. read the active issue named here, when one exists;
+4. re-fetch live GitHub state;
+5. state model/tool, MAX, cost, allowed scope, forbidden actions, validation and stop condition.
 
 ## Current stop condition
 
-This authority alignment stops when the current-state update is merged and healthy.
-
-Then implement exactly one Aurelian Visible Expansion v1 candidate and stop for direct visual/product review before adding economy, city, nation, empire or another broad system.
+Stop product execution until one bounded strategy review selects a next milestone and its explicit contract is accepted on `main`.
