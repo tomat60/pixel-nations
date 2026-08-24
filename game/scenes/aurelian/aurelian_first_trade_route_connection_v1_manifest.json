@@ -1,0 +1,61 @@
+{
+  "schema": "pixel-nations.aurelian.first-trade-route-connection.v1",
+  "authority": {
+    "issue": 490,
+    "contract": "docs/GODOT_AURELIAN_FIRST_TRADE_ROUTE_CONNECTION_V1_CONTRACT.md",
+    "baseline_sha": "21454177233719adabafb9b487639cefd452e9cf"
+  },
+  "outcome": "Village developed -> Map East Route claimed -> explicit Connect East Route -> Map East Route connected -> World trade route active",
+  "states": {
+    "entry": "village_developed",
+    "map_before": "map_east_route_claimed",
+    "map_after": "map_east_route_connected",
+    "world_after": "world_trade_route_active",
+    "village_reopen": "village_developed"
+  },
+  "action": {
+    "label": "Connect East Route",
+    "event": "AURELIAN_FIRST_TRADE_ROUTE_CONNECTION=EAST_ROUTE",
+    "explicit_only": true
+  },
+  "shared_topology": {
+    "route_id": "GreenvaleTradeRouteContext",
+    "from": {
+      "name": "Greenvale",
+      "point": [354, 285]
+    },
+    "to": {
+      "name": "Gilded Crossing",
+      "point": [515, 340]
+    },
+    "new_geography": false
+  },
+  "persistence": {
+    "schema_version": 2,
+    "reuse_existing_namespace": true,
+    "native_restart": "required",
+    "web_reload": "required",
+    "persistent_profile_reopen": "required",
+    "denied_storage_fallback": "world_neutral:none"
+  },
+  "evidence": {
+    "normal_input_sequence": true,
+    "direct_visual_review": true,
+    "shared_geography_regression": true,
+    "maximum_visual_corrections": 1
+  },
+  "forbidden": [
+    "economy",
+    "resource_costs",
+    "workers",
+    "timers",
+    "city_progression",
+    "new_assets",
+    "new_geography",
+    "another_land",
+    "app/play",
+    "P12",
+    "MAX",
+    "paid_tools"
+  ]
+}
