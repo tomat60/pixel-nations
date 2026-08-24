@@ -17,6 +17,9 @@ const VALID_STATES := [
 	"village_trade_dispatched",
 	"map_east_route_in_use",
 	"world_first_trade_underway",
+	"village_city_chartered",
+	"map_greenvale_city",
+	"world_first_city_recognized",
 	"village_claimed",
 	"village_founded",
 	"village_developed",
@@ -36,6 +39,7 @@ static func fallback(status: String, adapter: String) -> Dictionary:
 		"settlement_developed": false,
 		"route_connected": false,
 		"caravan_dispatched": false,
+		"city_chartered": false,
 	}
 
 static func load_session(path: String = NATIVE_PATH) -> Dictionary:
@@ -43,7 +47,7 @@ static func load_session(path: String = NATIVE_PATH) -> Dictionary:
 		return _load_web()
 	return _load_native(path)
 
-static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false, route_connected: bool = false, caravan_dispatched: bool = false) -> Dictionary:
+static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false, route_connected: bool = false, caravan_dispatched: bool = false, city_chartered: bool = false) -> Dictionary:
 	if not _is_valid_pair(state, intent):
 		return fallback("invalid_data", _adapter_name())
 	if state in ["village_founded", "village_developed"] and not settlement_founded:
@@ -60,7 +64,13 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		return fallback("invalid_data", _adapter_name())
 	if caravan_dispatched and not route_connected:
 		return fallback("invalid_data", _adapter_name())
-	if caravan_dispatched and state not in ["village_trade_dispatched", "map_east_route_in_use", "world_first_trade_underway"]:
+	if city_chartered and not caravan_dispatched:
+		return fallback("invalid_data", _adapter_name())
+	if state in ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized"] and not city_chartered:
+		return fallback("invalid_data", _adapter_name())
+	if city_chartered and state not in ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized"]:
+		return fallback("invalid_data", _adapter_name())
+	if caravan_dispatched and not city_chartered and state not in ["village_trade_dispatched", "map_east_route_in_use", "world_first_trade_underway"]:
 		return fallback("invalid_data", _adapter_name())
 	var payload := {
 		"schema": SCHEMA,
@@ -71,6 +81,7 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		"settlement_developed": settlement_developed,
 		"route_connected": route_connected,
 		"caravan_dispatched": caravan_dispatched,
+		"city_chartered": city_chartered,
 		"saved_at_utc": Time.get_datetime_string_from_system(true),
 	}
 	var payload_text := JSON.stringify(payload)
@@ -105,6 +116,7 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 	var settlement_developed := bool(session.get("settlement_developed", false))
 	var route_connected := bool(session.get("route_connected", false))
 	var caravan_dispatched := bool(session.get("caravan_dispatched", false))
+	var city_chartered := bool(session.get("city_chartered", false))
 	if state in ["village_founded", "village_developed"] and not settlement_founded:
 		return fallback("invalid_value", adapter)
 	if state == "village_developed" and not settlement_developed:
@@ -119,7 +131,13 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		return fallback("invalid_value", adapter)
 	if caravan_dispatched and not route_connected:
 		return fallback("invalid_value", adapter)
-	if caravan_dispatched and state not in ["village_trade_dispatched", "map_east_route_in_use", "world_first_trade_underway"]:
+	if city_chartered and not caravan_dispatched:
+		return fallback("invalid_value", adapter)
+	if state in ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized"] and not city_chartered:
+		return fallback("invalid_value", adapter)
+	if city_chartered and state not in ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized"]:
+		return fallback("invalid_value", adapter)
+	if caravan_dispatched and not city_chartered and state not in ["village_trade_dispatched", "map_east_route_in_use", "world_first_trade_underway"]:
 		return fallback("invalid_value", adapter)
 	return {
 		"ok": true,
@@ -133,6 +151,7 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		"settlement_developed": settlement_developed,
 		"route_connected": route_connected,
 		"caravan_dispatched": caravan_dispatched,
+		"city_chartered": city_chartered,
 		"saved_at_utc": String(session.get("saved_at_utc", "")),
 	}
 

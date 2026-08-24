@@ -6,7 +6,7 @@ const TOPOLOGY_SCALE := 0.018
 const TOPOLOGY_CENTER := Vector2(500.0, 450.0)
 const TOPOLOGY_Z_SIGN := -1.0
 const STILL_SIZE := Vector2i(1440, 900)
-const VILLAGE_STATES := ["claimed", "founded", "developed"]
+const VILLAGE_STATES := ["claimed", "founded", "developed", "city_chartered"]
 const CAMERA_CONTRACT := {
 	"village": {"center": Vector2(372, 326), "size": 9.4},
 	"map": {"center": Vector2(500, 430), "size": 17.4},

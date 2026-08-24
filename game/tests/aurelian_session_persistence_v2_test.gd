@@ -14,6 +14,7 @@ func _initialize() -> void:
 	_check(bool(missing.get("settlement_founded", true)) == false, "missing_founded_fallback")
 	_check(bool(missing.get("settlement_developed", true)) == false, "missing_developed_fallback")
 	_check(bool(missing.get("caravan_dispatched", true)) == false, "missing_dispatch_fallback")
+	_check(bool(missing.get("city_chartered", true)) == false, "missing_city_fallback")
 
 	var save_result := SESSION.save_session("map_east_route_claimed", "east_trade", TEST_PATH)
 	_check(bool(save_result.get("ok", false)), "save_claimed_valid")
@@ -55,6 +56,12 @@ func _initialize() -> void:
 	_check(String(restored.get("entry_state", "")) == "world_first_trade_underway", "restore_trade_underway")
 	_check(bool(restored.get("caravan_dispatched", false)), "restore_dispatch_flag")
 
+	save_result = SESSION.save_session("map_greenvale_city", "east_trade", TEST_PATH, true, true, true, true, true)
+	_check(bool(save_result.get("ok", false)), "save_city_map_valid")
+	restored = SESSION.load_session(TEST_PATH)
+	_check(String(restored.get("entry_state", "")) == "map_greenvale_city", "restore_city_map")
+	_check(bool(restored.get("city_chartered", false)), "restore_city_flag")
+
 	_write_raw("{broken")
 	var malformed := SESSION.load_session(TEST_PATH)
 	_check(String(malformed.get("status", "")) == "malformed", "malformed_status")
@@ -85,6 +92,10 @@ func _initialize() -> void:
 	_check(String(invalid.get("status", "")) == "invalid_data", "underway_requires_dispatch")
 	invalid = SESSION.save_session("world_trade_route_active", "east_trade", TEST_PATH, true, true, true, true)
 	_check(String(invalid.get("status", "")) == "invalid_data", "dispatch_flag_requires_dispatch_state")
+	invalid = SESSION.save_session("map_greenvale_city", "east_trade", TEST_PATH, true, true, true, true, false)
+	_check(String(invalid.get("status", "")) == "invalid_data", "city_state_requires_flag")
+	invalid = SESSION.save_session("map_east_route_in_use", "east_trade", TEST_PATH, true, true, true, true, true)
+	_check(String(invalid.get("status", "")) == "invalid_data", "city_flag_requires_city_state")
 
 	var transport := "quote\" slash\\ newline\n unicode Ł"
 	var literal := SESSION.javascript_string_literal(transport)
@@ -103,6 +114,10 @@ func _initialize() -> void:
 	_check(source.contains('"map_east_route_in_use"'), "route_in_use_state_allowed")
 	_check(source.contains('"world_first_trade_underway"'), "trade_underway_state_allowed")
 	_check(source.contains('"caravan_dispatched"'), "dispatch_flag_persisted")
+	_check(source.contains('"village_city_chartered"'), "city_village_state_allowed")
+	_check(source.contains('"map_greenvale_city"'), "city_map_state_allowed")
+	_check(source.contains('"world_first_city_recognized"'), "city_world_state_allowed")
+	_check(source.contains('"city_chartered"'), "city_flag_persisted")
 	_check(source.contains("window.localStorage"), "web_local_storage")
 	_check(source.contains(".setItem("), "web_set")
 	_check(source.contains(".getItem("), "web_get")

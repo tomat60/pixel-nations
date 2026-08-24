@@ -21,24 +21,26 @@ func _init() -> void:
 
 	_check(String(manifest.get("contract", "")) == "PRODUCTION_VILLAGE_V1", "contract")
 	_check(String(manifest.get("default_state", "")) == "developed", "default_state")
-	_check(PRODUCTION_SCRIPT.VILLAGE_STATES == ["claimed", "founded", "developed"], "script_state_order")
+	_check(PRODUCTION_SCRIPT.VILLAGE_STATES == ["claimed", "founded", "developed", "city_chartered"], "script_state_order")
 	_check(PRODUCTION_SCRIPT.STATE_MANIFEST_PATH == STATE_MANIFEST_PATH, "script_manifest_path")
 	_check(PRODUCTION_SCRIPT.CAMERA_CONTRACT["village"]["size"] >= 8.5, "expanded_village_framing")
 	_check(PRODUCTION_SCRIPT.CAMERA_CONTRACT["map"]["size"] >= 17.0, "expanded_map_framing")
 	_check(PRODUCTION_SCRIPT.CAMERA_CONTRACT["world"]["size"] >= 23.0, "expanded_world_framing")
 
 	var all_nodes: Array = manifest.get("all_nodes", [])
-	_check(all_nodes.size() == 13, "all_nodes_count")
+	_check(all_nodes.size() == 19, "all_nodes_count")
 	for node_name in [
 		"Greenvale_flag", "Greenvale_blacksmith", "Greenvale_barracks", "Greenvale_church",
 		"Greenvale_cottage_west", "Greenvale_cottage_south", "Greenvale_workshop_north",
 		"Greenvale_cottage_east", "Greenvale_cottage_lane", "Greenvale_storehouse_fields",
-		"Greenvale_workshop_crossing", "Greenvale_shrine_green", "Greenvale_gatehouse_road"
+		"Greenvale_workshop_crossing", "Greenvale_shrine_green", "Greenvale_gatehouse_road",
+		"Greenvale_city_hall", "Greenvale_market_hall", "Greenvale_civic_house_west",
+		"Greenvale_civic_house_east", "Greenvale_watchtower", "Greenvale_archive"
 	]:
 		_check(all_nodes.has(node_name), "node_%s" % node_name)
 
 	var derived: Dictionary = manifest.get("derived_nodes", {})
-	_check(derived.size() == 9, "derived_nodes_count")
+	_check(derived.size() == 15, "derived_nodes_count")
 	for node_name in derived.keys():
 		var spec: Dictionary = derived[node_name]
 		_check(String(spec.get("source", "")).begins_with("Greenvale_"), "derived_source_%s" % node_name)
@@ -46,7 +48,7 @@ func _init() -> void:
 		_check(abs(float(spec.get("rotation_y_degrees", 0.0))) <= 45.0, "derived_rotation_%s" % node_name)
 
 	var states: Dictionary = manifest.get("states", {})
-	for state_name in ["claimed", "founded", "developed"]:
+	for state_name in ["claimed", "founded", "developed", "city_chartered"]:
 		_check(states.has(state_name), "state_%s_present" % state_name)
 
 	if states.has("claimed") and states.has("founded") and states.has("developed"):
@@ -56,13 +58,17 @@ func _init() -> void:
 		_check(claimed == ["Greenvale_flag"], "claimed_single_marker")
 		_check(founded.size() == 10, "founded_structure_count")
 		_check(developed.size() == 13, "developed_structure_count")
+		var city: Array = (states["city_chartered"] as Dictionary).get("visible", [])
+		_check(city.size() == 19, "city_structure_count")
+		for node_name in developed:
+			_check(city.has(node_name), "developed_subset_city_%s" % node_name)
 		for node_name in claimed:
 			_check(founded.has(node_name), "claimed_subset_founded_%s" % node_name)
 		for node_name in founded:
 			_check(developed.has(node_name), "founded_subset_developed_%s" % node_name)
 
 	var layout: Dictionary = manifest.get("layout_topology", {})
-	_check(layout.size() == 13, "layout_count")
+	_check(layout.size() == 19, "layout_count")
 	for node_name in all_nodes:
 		_check(layout.has(node_name), "layout_%s" % node_name)
 		if layout.has(node_name):
