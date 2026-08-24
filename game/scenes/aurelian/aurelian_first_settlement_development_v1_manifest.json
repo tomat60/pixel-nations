@@ -1,0 +1,34 @@
+{
+  "contract": "GODOT_AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT_V1",
+  "issue": 486,
+  "authority_contract": "docs/GODOT_AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT_V1_CONTRACT.md",
+  "controller": "res://scenes/aurelian/playable_aurelian_entry_v1.gd",
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "native_restart": true,
+    "web_reload": true,
+    "profile_reopen": true,
+    "denied_storage_fallback": "world_neutral"
+  },
+  "shared_geography": "aurelian_authored_terrain_v1.glb",
+  "source_village_manifest": "res://scenes/aurelian/production_village_v1_manifest.json",
+  "before_state": "village_founded",
+  "action": {
+    "label": "Develop Greenvale",
+    "input": "ui_accept",
+    "event": "AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT=GREENVALE"
+  },
+  "after_state": "village_developed",
+  "village_visual_state": "developed",
+  "developed_node_count": 13,
+  "return_state": "map_east_route_claimed",
+  "reopen_state": "village_developed",
+  "regression": {
+    "map_state": "east_route_claimed",
+    "world_intent": "east_trade",
+    "new_geography": false,
+    "new_assets": false,
+    "economy": false
+  }
+}
