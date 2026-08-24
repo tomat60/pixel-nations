@@ -19,47 +19,47 @@
   "derived_nodes": {
     "Greenvale_cottage_west": {
       "source": "Greenvale_blacksmith",
-      "scale": 0.68,
+      "scale": 0.50,
       "rotation_y_degrees": -18
     },
     "Greenvale_cottage_south": {
       "source": "Greenvale_barracks",
-      "scale": 0.62,
+      "scale": 0.50,
       "rotation_y_degrees": 14
     },
     "Greenvale_workshop_north": {
       "source": "Greenvale_blacksmith",
-      "scale": 0.60,
+      "scale": 0.50,
       "rotation_y_degrees": 22
     },
     "Greenvale_cottage_east": {
       "source": "Greenvale_barracks",
-      "scale": 0.58,
+      "scale": 0.46,
       "rotation_y_degrees": -24
     },
     "Greenvale_cottage_lane": {
       "source": "Greenvale_blacksmith",
-      "scale": 0.54,
+      "scale": 0.43,
       "rotation_y_degrees": 34
     },
     "Greenvale_storehouse_fields": {
       "source": "Greenvale_barracks",
-      "scale": 0.66,
+      "scale": 0.50,
       "rotation_y_degrees": 8
     },
     "Greenvale_workshop_crossing": {
       "source": "Greenvale_blacksmith",
-      "scale": 0.62,
+      "scale": 0.46,
       "rotation_y_degrees": -32
     },
     "Greenvale_shrine_green": {
       "source": "Greenvale_church",
-      "scale": 0.52,
+      "scale": 0.42,
       "rotation_y_degrees": 18
     },
     "Greenvale_gatehouse_road": {
       "source": "Greenvale_barracks",
-      "scale": 0.56,
+      "scale": 0.44,
       "rotation_y_degrees": -8
     }
   },
@@ -103,30 +103,32 @@
     }
   },
   "layout_topology": {
-    "Greenvale_blacksmith": [310, 307],
-    "Greenvale_barracks": [392, 304],
+    "Greenvale_blacksmith": [300, 300],
+    "Greenvale_barracks": [395, 290],
     "Greenvale_church": [344, 236],
-    "Greenvale_flag": [354, 276],
-    "Greenvale_cottage_west": [292, 265],
-    "Greenvale_cottage_south": [370, 350],
-    "Greenvale_workshop_north": [405, 250],
-    "Greenvale_cottage_east": [421, 332],
-    "Greenvale_cottage_lane": [326, 352],
-    "Greenvale_storehouse_fields": [408, 390],
-    "Greenvale_workshop_crossing": [448, 315],
-    "Greenvale_shrine_green": [349, 321],
-    "Greenvale_gatehouse_road": [466, 348]
+    "Greenvale_flag": [350, 315],
+    "Greenvale_cottage_west": [260, 260],
+    "Greenvale_cottage_south": [370, 365],
+    "Greenvale_workshop_north": [390, 235],
+    "Greenvale_cottage_east": [435, 250],
+    "Greenvale_cottage_lane": [285, 360],
+    "Greenvale_storehouse_fields": [390, 410],
+    "Greenvale_workshop_crossing": [455, 340],
+    "Greenvale_shrine_green": [340, 370],
+    "Greenvale_gatehouse_road": [475, 300]
   },
   "composition_anchors": {
-    "village_green": [354, 310],
-    "crossing_road_edge": [466, 348],
-    "fields_work_edge": [408, 390],
+    "village_green": [350, 330],
+    "crossing_road_edge": [475, 320],
+    "fields_work_edge": [390, 410],
     "forest_edge": [245, 205],
     "gilded_crossing": [515, 340]
   },
   "presentation_adjustments": {
-    "NorthRidge_hill_a": 0.38,
+    NorthRidge_hill_a": 0.38,
     "NorthRidge_hill_b": 0.38,
+    "Greenvale_blacksmith": 0.86,
+    "Greenvale_barracks": 0.86,
     "Bridge_GildedCrossing": 1.10
   }
 }
