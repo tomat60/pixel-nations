@@ -553,7 +553,7 @@ func _build_living_capital_presentation() -> Node3D:
 	plaza_mesh.radial_segments = 32
 	plaza.mesh = plaza_mesh
 	plaza.position.y = 0.03
-	plaza.material_override = _material("#c6b47a88", 0.14)
+	plaza.material_override = _material("#b69a5638", 0.18)
 	civic_ring.add_child(plaza)
 	var quarter_offsets := [
 		Vector3(-1.35, 0.0, -0.72),
@@ -567,12 +567,24 @@ func _build_living_capital_presentation() -> Node3D:
 		var quarter := MeshInstance3D.new()
 		quarter.name = "CivicQuarter%02d" % (index + 1)
 		var quarter_mesh := BoxMesh.new()
-		quarter_mesh.size = Vector3(0.58, 0.42 + float(index % 2) * 0.14, 0.48)
+		quarter_mesh.size = Vector3(0.52, 0.40 + float(index % 2) * 0.12, 0.44)
 		quarter.mesh = quarter_mesh
 		quarter.position = quarter_offsets[index] + Vector3(0.0, quarter_mesh.size.y * 0.5, 0.0)
 		quarter.rotation.y = float(index) * 0.52
-		quarter.material_override = _material("#d8bd72ff" if index % 2 == 0 else "#6f9d86ff", 0.20)
+		quarter.material_override = _material("#a9654fff" if index % 2 == 0 else "#55758cff", 0.24)
 		civic_ring.add_child(quarter)
+		var roof := MeshInstance3D.new()
+		roof.name = "CapitalRoof%02d" % (index + 1)
+		var roof_mesh := CylinderMesh.new()
+		roof_mesh.top_radius = 0.06
+		roof_mesh.bottom_radius = 0.40
+		roof_mesh.height = 0.24
+		roof_mesh.radial_segments = 4
+		roof.mesh = roof_mesh
+		roof.position = quarter.position + Vector3(0.0, quarter_mesh.size.y * 0.5 + 0.12, 0.0)
+		roof.rotation.y = quarter.rotation.y + PI * 0.25
+		roof.material_override = _material("#d2aa52ff" if index % 2 == 0 else "#8f493fff", 0.20)
+		civic_ring.add_child(roof)
 	var lantern_offsets := [
 		Vector3(-0.92, 0.0, -0.92),
 		Vector3(0.92, 0.0, -0.92),
@@ -603,9 +615,11 @@ func _animate_living_capital_presentation(delta: float) -> void:
 		dispatch_token.position = topology_to_godot(route_point, 0.44 + sin(seconds * 2.4) * 0.035)
 		dispatch_token.rotation.y += delta * 0.75
 	if living_capital_presentation != null and living_capital_presentation.visible:
-		var activity_ring := living_capital_presentation.get_node_or_null("CivicActivityRing") as Node3D
-		if activity_ring != null:
-			activity_ring.rotation.y += delta * 0.055
+		for index in range(4):
+			var lantern := living_capital_presentation.get_node_or_null("CapitalLantern%02d" % (index + 1)) as Node3D
+			if lantern != null:
+				var lantern_pulse := 1.0 + sin(seconds * 2.2 + float(index) * 0.9) * 0.10
+				lantern.scale = Vector3(1.0, lantern_pulse, 1.0)
 	if homeland_marker != null and homeland_marker.visible:
 		var map_pulse := 1.0 + sin(seconds * 2.0) * 0.025
 		homeland_marker.scale = Vector3.ONE * map_pulse
