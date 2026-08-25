@@ -1,0 +1,84 @@
+{
+  "contract": "AURELIAN_LIVING_CAPITAL_VERTICAL_SLICE_V1",
+  "authority_issue": 506,
+  "authority_baseline": "9550fd723ef4e82ab419e0a87b01eed290445534",
+  "product_baseline": "20293fa6d83b55c886536875566d15fb89c0164b",
+  "runtime": "Godot 4.7.1",
+  "shared_geography": "aurelian_authored_terrain_v1.glb",
+  "asset_policy": "reuse repository-pinned assets and existing procedural presentation only",
+  "candidate": {
+    "single_vertical_slice": true,
+    "primary_view": "village_greenvale_capital",
+    "supporting_views": [
+      "map_aurelian_homeland",
+      "world_first_nation_founded"
+    ],
+    "preserve_complete_progression": true
+  },
+  "visual_targets": {
+    "settlement_city_capital_distinct_at_glance": true,
+    "capital_civic_center_composition": true,
+    "capital_density_improved": true,
+    "national_identity_clear_without_dashboard": true,
+    "input_consequence_readable": true
+  },
+  "motion_targets": {
+    "accepted_transition_reveal": true,
+    "trade_activity_visible": true,
+    "camera_or_tween_presentation": true,
+    "deterministic_short_capture": true,
+    "no_background_simulation": true
+  },
+  "accepted_states_preserved": {
+    "settlement": "village_founded",
+    "city": "village_city_chartered",
+    "capital": "village_greenvale_capital",
+    "map": "map_aurelian_homeland",
+    "world": "world_first_nation_founded",
+    "persistence": "map_aurelian_homeland:east_trade",
+    "denied_storage_fallback": "world_neutral:none"
+  },
+  "topology": {
+    "single_land_unchanged": true,
+    "greenvale_origin_unchanged": true,
+    "east_route_unchanged": true,
+    "gilded_crossing_unchanged": true,
+    "shared_view_geography_unchanged": true
+  },
+  "evidence": {
+    "settlement_reference": true,
+    "city_reference": true,
+    "capital_reference": true,
+    "map_reference": true,
+    "world_reference": true,
+    "motion_capture": true,
+    "focused_godot_regression": true,
+    "playable_entry": true,
+    "web_playability": true,
+    "session_persistence_v2": true,
+    "exact_head_identity": true,
+    "direct_review_required": true,
+    "bounded_visual_corrections_max": 1
+  },
+  "forbidden": [
+    "economy",
+    "resources",
+    "population simulation",
+    "workers",
+    "timers",
+    "queues",
+    "another land",
+    "governance",
+    "diplomacy",
+    "combat",
+    "empire progression",
+    "backend",
+    "multiplayer",
+    "new geography",
+    "new asset family without blocker",
+    "app/play",
+    "P12",
+    "MAX",
+    "paid tools"
+  ]
+}
