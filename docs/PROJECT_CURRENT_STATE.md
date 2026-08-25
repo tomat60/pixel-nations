@@ -2,13 +2,13 @@
 
 Status: ACTIVE
 Updated: 2026-08-25
-Current state revision: Living Capital Vertical Slice v1 accepted
+Current state revision: Living Capital Vertical Slice v1 accepted, First National Direction Commitment v1 selected
 Authority source: this file on the current `main`
-Authority baseline SHA: `b803f13931b0608f2580a5cc30db50e30fc93d01`
+Authority baseline SHA: `10a13f434982483bb3f47fd0d11bcaa64d84fc87`
 Product baseline SHA: `b803f13931b0608f2580a5cc30db50e30fc93d01`
-Current milestone: Living Capital Vertical Slice v1 accepted, no next product implementation authorized
-Active execution issue: #506
-Next allowed action: perform one bounded strategy review and, only if justified, propose a separate documentation contract for the next milestone.
+Current milestone: authorize exactly one Godot Aurelian First National Direction Commitment v1 candidate
+Active execution issue: #510
+Next allowed action: after this authority update and `docs/GODOT_AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT_V1_CONTRACT.md` merge with healthy checks, implement exactly one bounded candidate.
 
 ## Product truth
 
@@ -68,8 +68,8 @@ PR #508 `Implement Aurelian Living Capital Vertical Slice v1` is accepted and me
 - native restart, Web reload and persistent-profile reopen restore `map_aurelian_homeland:east_trade`;
 - reopening Village restores `village_greenvale_capital`;
 - denied-storage fallback remains `world_neutral:none`;
-- one bounded visual correction was used to replace the rough rotating civic block treatment with static roofed quarters and restrained ambient motion;
-- direct still and motion review confirmed the candidate is materially better in presentation and feel than the First Nation baseline.
+- one bounded visual correction was used;
+- direct still and motion review confirmed the accepted candidate.
 
 Accepted exact-head evidence:
 
@@ -79,39 +79,79 @@ Accepted exact-head evidence:
 
 Issue #506 is completed by this accepted implementation.
 
-## Current gate
+## Current milestone: First National Direction Commitment v1
 
-No additional product implementation is authorized.
+Binding execution issue: #510.
+Binding contract: `docs/GODOT_AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT_V1_CONTRACT.md`.
 
-The next allowed work is exactly one bounded strategy review of the accepted playable path and current experiential bottleneck. A new product slice requires a separate documentation contract accepted on `main`.
+The bounded strategy review found that the accepted playable experience is visually stronger but still one linear chain. The next slice introduces the first persistent post-nation choice by reusing the accepted World directions instead of adding another automatic milestone or cosmetic microstate.
 
-Do not infer authorization for empire progression merely because the product truth names empire as a long-term destination.
+Required outcome:
 
-## Forbidden until a new accepted contract
+`World first nation founded -> inspect Trade / Expand / Frontier -> explicit Commit Aurelian Direction -> World direction committed -> Map homeland reflects the commitment -> Village capital reflects the commitment`
 
-- economy, resources, costs, rewards, inventory or taxes;
-- population simulation, workers, timers, queues or production systems;
-- another land or multi-land expansion;
+Binding rules:
+
+1. World alone owns direction inspection, selection and commitment.
+2. Exactly one of Trade, Expand or Frontier is committed.
+3. Map remains WHERE and preserves the accepted homeland and geography.
+4. Village remains HOW and preserves Greenvale capital.
+5. Cross-view cues are restrained identity and context only.
+6. Commitment does not simulate economy, territory, governance, diplomacy or combat.
+7. Native restart, Web reload and persistent-profile reopen preserve the committed direction.
+8. The complete accepted pre-nation path remains intact.
+
+## Allowed scope
+
+- `game/scenes/aurelian/**`;
+- `game/tests/**`;
+- existing Aurelian manifests, layout and camera definitions;
+- existing Session Persistence v2 schema;
+- existing procedural presentation helpers and repository assets;
+- focused changes to the three existing evidence workflows only when required.
+
+## Forbidden scope
+
+- economy, resources, costs, rewards, inventory, taxes or production;
+- population, workers, timers or queues;
+- another land, territorial expansion or multi-land simulation;
 - governance, laws, factions, diplomacy or combat;
 - empire progression;
 - backend, accounts, cloud save or multiplayer;
 - React, SVG or CSS rebuilding of final game surfaces;
-- new paid assets or paid tools;
-- a new asset family without a proven limitation of the current envelope;
+- new GLB, terrain, geography, paid assets or paid tools;
 - broad CI or platform refactoring;
 - crypto, NFT, wallet, token, mint or pay-to-win direction;
 - P12 or MAX.
+
+## Execution and evidence
+
+Use one serialized product PR:
+
+`implement -> focused Godot test -> deterministic capture -> direct still and motion review -> one bounded correction -> final exact-head gate`
+
+Exact-head evidence must show all three inspectable World directions, explicit commitment, one committed World state, unchanged Map geography, unchanged Greenvale capital, cross-view cues, normal-input reopening and native, Web and profile persistence.
+
+Green CI is necessary but not sufficient. Direct review decides acceptance.
+
+Terminal classification:
+
+- `GODOT_AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT_PASS`
+- `GODOT_AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT_CORRECTION_REQUIRED`
+- `GODOT_AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT_REJECT`
+
+One bounded visual correction maximum.
 
 ## Process rules
 
 1. Optimize for visible playable progress, not gate count.
 2. One active product or recovery PR at a time.
-3. Green CI is necessary but not sufficient for visual or product acceptance.
+3. Use focused Godot tests during iteration and full evidence at the final gate.
 4. Directly inspect running-game images and motion.
 5. One bounded visual correction maximum per milestone.
 6. An open PR with no meaningful progress for roughly one steward interval is P0.
 7. Preserve accepted shared geography and avoid rebuilding the GLB.
-8. Do not begin another product implementation without a new accepted contract.
+8. Do not begin economy, second-land, governance, combat or empire work.
 
 ## Tool and cost policy
 
@@ -120,16 +160,18 @@ Do not infer authorization for empire progression merely because the product tru
 - Cursor when materially useful as executor, default GPT-5.5 without MAX.
 - MAX: OFF.
 - Extra spend target: 0 USD.
-- Image generation is reference or moodboard only unless a later explicit decision changes that role.
+- Image generation is not acceptance authority.
 
 ## Source-of-truth precedence
 
 1. this `PROJECT_CURRENT_STATE.md`;
 2. accepted ADRs, especially ADR-001;
 3. root `AGENTS.md`;
-4. accepted exact-head evidence and merged PRs;
-5. operating and QA protocols;
-6. historical issues, PRs, briefs and reports.
+4. active execution issue #510;
+5. `docs/GODOT_AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT_V1_CONTRACT.md`;
+6. accepted exact-head evidence and merged PRs;
+7. operating and QA protocols;
+8. historical issues, PRs, briefs and reports.
 
 Issue #415 remains shared-geography history and continuity guidance, not current implementation authority.
 
@@ -138,12 +180,12 @@ Issue #415 remains shared-geography history and continuity guidance, not current
 Before meaningful work:
 
 1. run `npm run pn:status` when a checkout is available;
-2. read this file, ADR-001 and root `AGENTS.md`;
+2. read this file, ADR-001, root `AGENTS.md`, issue #510 and the current contract;
 3. re-fetch live GitHub state;
 4. state model/tool, MAX, cost, allowed scope, forbidden actions, validation and stop condition.
 
 ## Current stop condition
 
-Stop after recording the Living Capital Vertical Slice v1 PASS on `main` with healthy checks and deployment state.
+This authority update stops when this current-state revision and the First National Direction Commitment v1 contract are accepted on `main` with healthy post-merge state.
 
-Do not start another product implementation. The next decision is one bounded strategy review followed by a separate documentation contract only if the review identifies a justified next slice.
+Then implement exactly one bounded candidate and stop after direct exact-head PASS, CORRECTION_REQUIRED or REJECT before any economy, second-land, governance, combat or empire work.
