@@ -14,6 +14,7 @@ on:
       - "game/scenes/aurelian/aurelian_first_city_charter_v1_manifest.json"
       - "game/scenes/aurelian/aurelian_first_nation_founding_v1_manifest.json"
       - "game/scenes/aurelian/aurelian_living_capital_vertical_slice_v1_manifest.json"
+      - "game/scenes/aurelian/first_national_direction_commitment_v1_manifest.json"
       - "game/tests/aurelian_session_persistence_v2_test.gd"
       - "game/tests/playable_aurelian_entry_v1_test.gd"
       - "game/tests/aurelian_first_land_claim_v1_test.gd"
@@ -23,6 +24,7 @@ on:
       - "game/tests/aurelian_first_city_charter_v1_test.gd"
       - "game/tests/aurelian_first_nation_founding_v1_test.gd"
       - "game/tests/aurelian_living_capital_vertical_slice_v1_test.gd"
+      - "game/tests/aurelian_first_national_direction_commitment_v1_test.gd"
   workflow_dispatch:
 
 permissions:
@@ -61,6 +63,7 @@ jobs:
           fi
           cp game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json "${EVIDENCE_DIR}/persistence-schema-manifest.json"
           cp game/scenes/aurelian/aurelian_living_capital_vertical_slice_v1_manifest.json "${EVIDENCE_DIR}/living-capital-manifest.json"
+          cp game/scenes/aurelian/first_national_direction_commitment_v1_manifest.json "${EVIDENCE_DIR}/national-direction-manifest.json"
 
       - name: Install existing QA tools
         timeout-minutes: 8
@@ -99,7 +102,7 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test; do
+          for test in playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test aurelian_first_national_direction_commitment_v1_test; do
             "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1
           done
           grep -F "GODOT_PLAYABLE_AURELIAN_ENTRY_V1_TEST: PASS" "${EVIDENCE_DIR}/playable_aurelian_entry_v1_test.log"
@@ -111,6 +114,7 @@ jobs:
           grep -F "GODOT_AURELIAN_FIRST_CITY_CHARTER_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_city_charter_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_NATION_FOUNDING_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_nation_founding_v1_test.log"
           grep -F "AURELIAN_LIVING_CAPITAL_VERTICAL_SLICE_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_living_capital_vertical_slice_v1_test.log"
+          grep -F "GODOT_AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_national_direction_commitment_v1_test.log"
           mkdir -p game/build/linux game/build/web
           "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/export-linux.log" 2>&1
           "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html > "${EVIDENCE_DIR}/export-web.log" 2>&1
@@ -181,6 +185,15 @@ jobs:
           xdotool key --window "$WINDOW_ID" Return
           sleep 1.2
           import -window root "../../../${EVIDENCE_DIR}/stills/native-nation-world-before-restart-1440x900.png"
+          xdotool key --window "$WINDOW_ID" Down
+          sleep 0.5
+          xdotool key --window "$WINDOW_ID" Down
+          sleep 0.5
+          xdotool key --window "$WINDOW_ID" Up
+          sleep 0.5
+          xdotool key --window "$WINDOW_ID" Return
+          sleep 1.2
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-direction-expand-committed-1440x900.png"
           xdotool key --window "$WINDOW_ID" Right
           sleep 1.2
           import -window root "../../../${EVIDENCE_DIR}/stills/native-homeland-map-before-restart-1440x900.png"
@@ -210,6 +223,8 @@ jobs:
           grep -F "AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH=EAST_ROUTE" "${EVIDENCE_DIR}/native-first.log"
           grep -F "AURELIAN_FIRST_CITY_CHARTER=GREENVALE" "${EVIDENCE_DIR}/native-first.log"
           grep -F "AURELIAN_FIRST_NATION_FOUNDING=AURELIAN" "${EVIDENCE_DIR}/native-first.log"
+          grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=EXPAND" "${EVIDENCE_DIR}/native-first.log"
+          grep -F "AURELIAN_NATIONAL_DIRECTION_RESTORED=expand" "${EVIDENCE_DIR}/native-restored.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_homeland" "${EVIDENCE_DIR}/native-restored.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_greenvale_capital" "${EVIDENCE_DIR}/native-restored.log"
 
@@ -347,6 +362,12 @@ jobs:
             await page.keyboard.press('Enter');
             await waitFor(() => states.includes('world_first_nation_founded'),'nation founded world');
             await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'world_first_nation_founded'),'nation save ack');
+            await page.keyboard.press('ArrowDown');
+            await page.keyboard.press('ArrowDown');
+            await page.keyboard.press('ArrowUp');
+            await page.keyboard.press('Enter');
+            await waitFor(() => states.filter(x => x === 'world_first_nation_founded').length >= 2,'direction committed world');
+            await waitFor(() => consoleLines.some(x => x.includes('AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=EXPAND')),'direction commit event');
             await page.keyboard.press('ArrowRight');
             await waitFor(() => states.includes('map_aurelian_homeland'),'homeland map before reload');
             await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'map_aurelian_homeland'),'homeland save ack');
@@ -414,10 +435,11 @@ jobs:
               caravan_dispatched:true,
               city_chartered:true,
               nation_founded:true,
+              national_direction:'expand',
               selected_intent:'east_trade',
               continued_state:'village_greenvale_capital',
               denied_storage_fallback:'world_neutral',
-              input_actions:['Enter','ArrowRight','Enter','ArrowRight','Enter','Enter','ArrowLeft','Enter','ArrowRight','Enter','ArrowLeft','ArrowRight','Enter','ArrowLeft','ArrowLeft','Enter','ArrowRight','reload','browser_reopen','ArrowRight','ArrowLeft'],
+              input_actions:['Enter','ArrowRight','Enter','ArrowRight','Enter','Enter','ArrowLeft','Enter','ArrowRight','Enter','ArrowLeft','ArrowRight','Enter','ArrowLeft','ArrowLeft','Enter','ArrowDown','ArrowDown','ArrowUp','Enter','ArrowRight','reload','browser_reopen','ArrowRight','ArrowLeft'],
               evidence_storage_seeding:false,
               glb_sha256:process.env.GLB_SHA256
             },null,2)+'\n');
@@ -434,7 +456,7 @@ jobs:
       - name: Validate exact evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "20"
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "21"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
             test "$(stat -c %s "$image")" -gt 70000
@@ -451,6 +473,8 @@ jobs:
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_trade_dispatched" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_CITY_CHARTER=GREENVALE" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_NATION_FOUNDING=AURELIAN" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=EXPAND" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_NATIONAL_DIRECTION_RESTORED=expand" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_city_chartered" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_greenvale_city" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_homeland" "${EVIDENCE_DIR}/browser-console.log"

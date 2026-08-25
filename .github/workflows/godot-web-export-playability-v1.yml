@@ -291,17 +291,28 @@ jobs:
             await page.keyboard.press('Enter');
             await waitForCount('world_first_nation_founded', 1);
             await sleep(1000);
-            await page.screenshot({ path: path.join(stills, '20-world-first-nation-founded-1440x900.png') });
+            await page.screenshot({ path: path.join(stills, '20-world-direction-trade-inspected-1440x900.png') });
+            await page.keyboard.press('ArrowDown');
+            await sleep(700);
+            await page.screenshot({ path: path.join(stills, '21-world-direction-expand-inspected-1440x900.png') });
+            await page.keyboard.press('ArrowDown');
+            await sleep(700);
+            await page.screenshot({ path: path.join(stills, '22-world-direction-frontier-inspected-1440x900.png') });
+            await page.keyboard.press('ArrowUp');
+            await page.keyboard.press('Enter');
+            await waitForCount('world_first_nation_founded', 2);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '23-world-direction-expand-committed-1440x900.png') });
 
             await page.keyboard.press('ArrowRight');
             await waitForCount('map_aurelian_homeland', 1);
             await sleep(1000);
-            await page.screenshot({ path: path.join(stills, '21-map-aurelian-homeland-1440x900.png') });
+            await page.screenshot({ path: path.join(stills, '24-map-aurelian-homeland-expand-1440x900.png') });
 
             await page.keyboard.press('ArrowRight');
             await waitForCount('village_greenvale_capital', 1);
             await sleep(1000);
-            await page.screenshot({ path: path.join(stills, '22-village-greenvale-capital-1440x900.png') });
+            await page.screenshot({ path: path.join(stills, '25-village-greenvale-capital-expand-1440x900.png') });
             const video = page.video();
             await context.close();
             await video.saveAs(path.join(root, 'godot-web-input-sequence.webm'));
@@ -327,9 +338,10 @@ jobs:
               viewport: [1440, 900],
               browser: 'chromium',
               normal_entry: 'world_neutral',
-              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight'],
+              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowDown', 'ArrowDown', 'ArrowUp', 'Enter', 'ArrowRight', 'ArrowRight'],
               observed_states: observedStates,
-              accepted_handoff: 'World first city recognized -> explicit Found Aurelian Nation -> World first nation founded -> Map Aurelian homeland -> Village Greenvale capital',
+              accepted_handoff: 'World first nation founded -> inspect three directions -> commit Expand -> Map homeland context -> Village capital identity',
+              national_direction: 'expand',
               glb_sha256: process.env.GLB_SHA256,
               evidence_environment_state_driving: false
             }, null, 2) + '\n');
@@ -343,7 +355,7 @@ jobs:
       - name: Validate exact browser evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "22"
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "25"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
             test "$(stat -c %s "$image")" -gt 70000
@@ -371,6 +383,9 @@ jobs:
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_city_recognized" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_NATION_FOUNDING=AURELIAN" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_nation_founded" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_NATIONAL_DIRECTION_INSPECT=EXPAND" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_NATIONAL_DIRECTION_INSPECT=FRONTIER" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=EXPAND" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_homeland" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_greenvale_capital" "${EVIDENCE_DIR}/browser-console.log"
           sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/godot-web-input-sequence.webm" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"

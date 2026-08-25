@@ -3,6 +3,7 @@ extends "res://scenes/aurelian/aurelian_decision_loop_v1.gd"
 const SESSION := preload("res://scenes/aurelian/aurelian_session_persistence_v2.gd")
 
 const PLAYABLE_MANIFEST_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
+const NATIONAL_DIRECTIONS := ["trade", "expand", "frontier"]
 const ENTRY_STATES := [
 	"world_neutral",
 	"world_trade_selected",
@@ -42,6 +43,8 @@ var route_connected := false
 var caravan_dispatched := false
 var city_chartered := false
 var nation_founded := false
+var national_direction_cursor := 0
+var committed_direction := "none"
 var dispatch_token: Node3D
 var city_marker: Node3D
 var homeland_marker: Node3D
@@ -60,6 +63,10 @@ func _ready() -> void:
 		return
 	automated_input_mode = OS.get_environment("AURELIAN_CAPTURE_PLAYABLE_ENTRY") == "1"
 	var evidence_state := OS.get_environment("AURELIAN_PLAYABLE_EVIDENCE_STATE").to_lower()
+	var evidence_direction := OS.get_environment("AURELIAN_COMMITTED_DIRECTION").to_lower()
+	if NATIONAL_DIRECTIONS.has(evidence_direction):
+		committed_direction = evidence_direction
+		national_direction_cursor = NATIONAL_DIRECTIONS.find(evidence_direction)
 	persistence_enabled = evidence_state.is_empty() and not automated_input_mode
 	if not OS.get_environment("AURELIAN_EVIDENCE_DIR").is_empty():
 		get_window().content_scale_size = STILL_SIZE
@@ -83,6 +90,12 @@ func _ready() -> void:
 		caravan_dispatched = bool(restored.get("caravan_dispatched", false))
 		city_chartered = bool(restored.get("city_chartered", false))
 		nation_founded = bool(restored.get("nation_founded", false))
+		committed_direction = String(restored.get("national_direction", "none"))
+		if NATIONAL_DIRECTIONS.has(committed_direction):
+			national_direction_cursor = NATIONAL_DIRECTIONS.find(committed_direction)
+		else:
+			committed_direction = "none"
+		print("AURELIAN_NATIONAL_DIRECTION_RESTORED=%s" % committed_direction)
 		print("AURELIAN_SESSION_V2_LOAD=%s:%s:%s:%s:%s:%s:%s:%s:%s:%s" % [String(restored.get("status", "unknown")), String(restored.get("adapter", "unknown")), entry_state, restored_intent, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded])
 	if not ENTRY_STATES.has(entry_state):
 		entry_state = "world_neutral"
@@ -93,6 +106,8 @@ func _ready() -> void:
 		caravan_dispatched = false
 		city_chartered = false
 		nation_founded = false
+		committed_direction = "none"
+		national_direction_cursor = 0
 	if entry_state in ["village_founded", "village_developed", "village_trade_dispatched", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway"]:
 		settlement_founded = true
 	if entry_state in ["village_developed", "village_trade_dispatched", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway"]:
@@ -269,6 +284,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
 		_accept_entry()
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_up"):
+		_cycle_national_direction(-1)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_down"):
+		_cycle_national_direction(1)
+		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_right"):
 		_right_entry()
 		get_viewport().set_input_as_handled()
@@ -311,6 +332,11 @@ func _accept_entry() -> void:
 				nation_founded = true
 				_apply_entry_state("world_first_nation_founded")
 				print("AURELIAN_FIRST_NATION_FOUNDING=AURELIAN")
+		"world_first_nation_founded":
+			if nation_founded and committed_direction == "none":
+				committed_direction = NATIONAL_DIRECTIONS[national_direction_cursor]
+				_apply_entry_state("world_first_nation_founded")
+				print("AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=%s" % committed_direction.to_upper())
 
 func _right_entry() -> void:
 	match entry_state:
@@ -323,7 +349,8 @@ func _right_entry() -> void:
 		"world_first_city_recognized":
 			_apply_entry_state("map_greenvale_city")
 		"world_first_nation_founded":
-			_apply_entry_state("map_aurelian_homeland")
+			if committed_direction != "none":
+				_apply_entry_state("map_aurelian_homeland")
 		"map_east_route_claimed":
 			_apply_entry_state("village_developed" if settlement_developed else ("village_founded" if settlement_founded else "village_claimed"))
 		"map_east_route_connected":
@@ -363,6 +390,44 @@ func _previous_entry() -> void:
 			_apply_entry_state("map_east_route")
 		"world_trade_selected":
 			_apply_entry_state("world_neutral")
+
+func _cycle_national_direction(step: int) -> void:
+	if entry_state != "world_first_nation_founded" or committed_direction != "none":
+		return
+	national_direction_cursor = posmod(national_direction_cursor + step, NATIONAL_DIRECTIONS.size())
+	_refresh_national_direction_identity()
+	_update_runtime_hud()
+	print("AURELIAN_NATIONAL_DIRECTION_INSPECT=%s" % NATIONAL_DIRECTIONS[national_direction_cursor].to_upper())
+
+func _direction_color(direction: String) -> String:
+	match direction:
+		"expand":
+			return "#68a978ff"
+		"frontier":
+			return "#c56b4fff"
+		_:
+			return "#d7ad42ff"
+
+func _refresh_national_direction_identity() -> void:
+	var direction: String = committed_direction if committed_direction != "none" else String(NATIONAL_DIRECTIONS[national_direction_cursor])
+	var color := _direction_color(direction)
+	if nation_emblem != null:
+		var world_hex := nation_emblem.get_node_or_null("NationHex") as MeshInstance3D
+		if world_hex != null:
+			world_hex.material_override = _material(color, 0.34)
+		var nation_label := nation_emblem.get_node_or_null("NationLabel") as Label3D
+		if nation_label != null:
+			nation_label.text = "AURELIAN / %s" % direction.to_upper() if committed_direction != "none" else "AURELIAN / %s?" % direction.to_upper()
+	if homeland_marker != null:
+		var homeland_hex := homeland_marker.get_node_or_null("HomelandHex") as MeshInstance3D
+		if homeland_hex != null:
+			homeland_hex.material_override = _material(color, 0.16)
+	if capital_standards != null:
+		for standard in capital_standards.get_children():
+			if standard.get_child_count() > 1:
+				var flag := standard.get_child(1) as MeshInstance3D
+				if flag != null:
+					flag.material_override = _material(color, 0.24)
 
 func _hide_preclaim_greenvale() -> bool:
 	var all_nodes: Array = state_contract.get("all_nodes", [])
@@ -667,6 +732,7 @@ func _apply_entry_state(state_name: String) -> void:
 		if living_capital_presentation.visible and previous_state != state_name:
 			_reveal_living_capital()
 	_set_trade_world_underway(false)
+	_refresh_national_direction_identity()
 	match state_name:
 		"world_neutral":
 			if not _hide_preclaim_greenvale():
@@ -778,7 +844,8 @@ func _apply_entry_state(state_name: String) -> void:
 	_update_runtime_hud()
 	if persistence_enabled:
 		restored_intent = "none" if entry_state == "world_neutral" else "east_trade"
-		var save_result := SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded)
+		var save_result := SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded, committed_direction)
+		print("AURELIAN_NATIONAL_DIRECTION_SAVE=%s" % committed_direction)
 		print("AURELIAN_SESSION_V2_SAVE_ACK=%s:%s:%s:%s:%s:%s:%s:%s:%s:%s" % [String(save_result.get("status", "unknown")), String(save_result.get("adapter", "unknown")), entry_state, restored_intent, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded])
 		if not bool(save_result.get("ok", false)) and String(save_result.get("status", "")) != "unavailable":
 			push_error("AURELIAN_SESSION_V2_SAVE_FAILED=%s" % String(save_result.get("status", "unknown")))
@@ -810,8 +877,13 @@ func _update_runtime_hud() -> void:
 			controls_label.text = "[ENTER] Found Aurelian Nation    [RIGHT] Inspect city on Map"
 		"world_first_nation_founded":
 			layer_label.text = "WORLD  |  WHY"
-			intent_label.text = "Aurelian founded with Greenvale as its first capital"
-			controls_label.text = "[RIGHT] Inspect Aurelian homeland"
+			if committed_direction == "none":
+				var inspected: String = String(NATIONAL_DIRECTIONS[national_direction_cursor]).capitalize()
+				intent_label.text = "Inspect national direction: %s" % inspected
+				controls_label.text = "[UP / DOWN] Trade / Expand / Frontier    [ENTER] Commit Aurelian Direction"
+			else:
+				intent_label.text = "Aurelian direction committed: %s" % committed_direction.capitalize()
+				controls_label.text = "[RIGHT] Inspect homeland context"
 		"map_east_route_selected":
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "East Route selected near Gilded Crossing"
@@ -834,7 +906,7 @@ func _update_runtime_hud() -> void:
 			controls_label.text = "[RIGHT] Open first city    [LEFT] World"
 		"map_aurelian_homeland":
 			layer_label.text = "MAP  |  WHERE"
-			intent_label.text = "Aurelian homeland with Greenvale marked as capital"
+			intent_label.text = "Aurelian homeland context: %s direction" % committed_direction.capitalize()
 			controls_label.text = "[RIGHT] Open Greenvale capital    [LEFT] World"
 		"village_claimed":
 			layer_label.text = "VILLAGE  |  HOW"
@@ -858,7 +930,7 @@ func _update_runtime_hud() -> void:
 			controls_label.text = "[LEFT / ESC] Inspect city on Map"
 		"village_greenvale_capital":
 			layer_label.text = "VILLAGE  |  HOW"
-			intent_label.text = "Greenvale serves as the capital of founded Aurelian"
+			intent_label.text = "Greenvale capital identity: %s direction" % committed_direction.capitalize()
 			controls_label.text = "[LEFT / ESC] Inspect Aurelian homeland"
 		"map_east_route":
 			layer_label.text = "MAP  |  WHERE"
@@ -942,13 +1014,21 @@ func _process(_delta: float) -> void:
 	elif automated_frame == 3450:
 		_emit_action("ui_accept")
 	elif automated_frame == 3570:
-		_emit_action("ui_right")
+		_emit_action("ui_down")
 	elif automated_frame == 3690:
-		_emit_action("ui_right")
+		_emit_action("ui_down")
 	elif automated_frame == 3810:
-		_emit_action("ui_left")
+		_emit_action("ui_up")
 	elif automated_frame == 3930:
+		_emit_action("ui_accept")
+	elif automated_frame == 4050:
+		_emit_action("ui_right")
+	elif automated_frame == 4170:
+		_emit_action("ui_right")
+	elif automated_frame == 4290:
 		_emit_action("ui_left")
-	elif automated_frame >= 4050:
-		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=4050")
+	elif automated_frame == 4410:
+		_emit_action("ui_left")
+	elif automated_frame >= 4530:
+		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=4530")
 		get_tree().quit(0)
