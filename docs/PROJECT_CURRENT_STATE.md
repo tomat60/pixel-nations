@@ -2,13 +2,13 @@
 
 Status: ACTIVE
 Updated: 2026-08-25
-Current state revision: First Nation Founding accepted, Living Capital Vertical Slice v1 selected
+Current state revision: Living Capital Vertical Slice v1 accepted
 Authority source: this file on the current `main`
-Authority baseline SHA: `20293fa6d83b55c886536875566d15fb89c0164b`
-Product baseline SHA: `20293fa6d83b55c886536875566d15fb89c0164b`
-Current milestone: authorize exactly one Godot Aurelian Living Capital Vertical Slice v1 candidate
+Authority baseline SHA: `b803f13931b0608f2580a5cc30db50e30fc93d01`
+Product baseline SHA: `b803f13931b0608f2580a5cc30db50e30fc93d01`
+Current milestone: Living Capital Vertical Slice v1 accepted, no next product implementation authorized
 Active execution issue: #506
-Next allowed action: after this authority update and `docs/GODOT_AURELIAN_LIVING_CAPITAL_VERTICAL_SLICE_V1_CONTRACT.md` merge with healthy checks, implement exactly one bounded Living Capital Vertical Slice v1 candidate.
+Next allowed action: perform one bounded strategy review and, only if justified, propose a separate documentation contract for the next milestone.
 
 ## Product truth
 
@@ -31,9 +31,9 @@ Village, Map and World remain three roles over one physical geography:
 Do not rebuild these accepted capabilities:
 
 - shared deterministic Aurelian Basin geography and Blender to GLB to Godot pipeline;
-- Production Village `claimed / founded / developed / city_chartered`;
-- Production Map land-state presentation;
-- Production World strategic-direction role;
+- Production Village progression through claimed, founded, developed, city and capital;
+- Production Map land, route, city and homeland presentation;
+- Production World strategic-direction and nation role;
 - World to Map to Village decision handoff;
 - normal Godot playable entry and keyboard navigation;
 - packaged Aurelian render asset;
@@ -43,69 +43,51 @@ Do not rebuild these accepted capabilities:
 - explicit First Settlement Founding;
 - Aurelian Visible Expansion v1;
 - explicit First Settlement Development;
-- explicit First Trade Route Connection with cross-view payoff;
-- explicit First Trade Caravan Dispatch with cross-view payoff;
-- explicit First City Charter with cross-view payoff;
-- explicit First Nation Founding with cross-view payoff.
+- explicit First Trade Route Connection;
+- explicit First Trade Caravan Dispatch;
+- explicit First City Charter;
+- explicit First Nation Founding;
+- Living Capital Vertical Slice v1.
 
 Accepted GLB identity and shared physical geography remain unchanged.
 
 ## Most recent accepted product milestone
 
-PR #504 `Implement Godot Aurelian First Nation Founding v1` is accepted and merged.
+PR #508 `Implement Aurelian Living Capital Vertical Slice v1` is accepted and merged.
 
-- terminal result: `GODOT_AURELIAN_FIRST_NATION_FOUNDING_PASS`;
-- accepted head: `4bda75d73f5b15aa10358672b4e7c3c15ccdd9b7`;
-- merged product baseline: `20293fa6d83b55c886536875566d15fb89c0164b`;
-- player path: `World first city recognized -> explicit Found Aurelian Nation -> World first nation founded -> Map Aurelian homeland -> Village Greenvale capital`;
-- event: `AURELIAN_FIRST_NATION_FOUNDING=AURELIAN`, emitted only for explicit founding;
-- World preserves strategic directions and adds one bounded Aurelian emblem;
-- Map preserves the accepted single-land topology, East Route and caravan while adding one homeland cue and Greenvale capital marker;
-- Village preserves the accepted 19-node city and adds exactly three bounded civic standards;
+- terminal result: `AURELIAN_LIVING_CAPITAL_VERTICAL_SLICE_V1_PASS`;
+- accepted head: `916efe13369a1e878d88422d50667462f799eb4b`;
+- merged product baseline: `b803f13931b0608f2580a5cc30db50e30fc93d01`;
+- Greenvale capital adds a deliberate civic composition with plaza, roofed civic quarters and restrained lantern activity;
+- settlement, city and capital remain visibly distinct;
+- the capital transition includes a bounded reveal tween;
+- the caravan visibly moves only along the accepted Greenvale to Gilded Crossing East Route;
+- homeland and nation cues use restrained presentation motion;
+- Village remains HOW, Map remains WHERE and World remains WHY / WHICH DIRECTION;
+- shared Aurelian geography, Greenvale origin, East Route and Gilded Crossing remain unchanged;
 - native restart, Web reload and persistent-profile reopen restore `map_aurelian_homeland:east_trade`;
 - reopening Village restores `village_greenvale_capital`;
 - denied-storage fallback remains `world_neutral:none`;
-- direct review confirmed visible city-to-nation progression, correct view roles and unchanged shared geography.
+- one bounded visual correction was used to replace the rough rotating civic block treatment with static roofed quarters and restrained ambient motion;
+- direct still and motion review confirmed the candidate is materially better in presentation and feel than the First Nation baseline.
 
-Accepted evidence:
+Accepted exact-head evidence:
 
-- Playable Entry run `32726753368`, artifact `9519982639`;
-- Web Playability run `32726753303`, artifact `9519881895`;
-- Session Persistence v2 run `32726753309`, accepted rerun artifact `9520087645`.
+- Playable Entry run `32869824111`, artifact `9571959543`, digest `sha256:fbe02c41bfd9dd5ec606a03b83bd8932d3d4d62097bd6fd3776595f8df9b7cfb`;
+- Web Playability run `32869823845`, artifact `9571685428`, digest `sha256:14195e61d97ed8c174763584511cffe54941dc54b1b13215b0cccedc01a6a6f9`;
+- Session Persistence v2 run `32869826180`, artifact `9571717523`, digest `sha256:88d7af2e3497b29864d063d75f18b1eb0987a36e2aac4a4f63f57a77521aed59`.
 
-Issue #502 is completed by this accepted implementation.
+Issue #506 is completed by this accepted implementation.
 
-## Current milestone: Living Capital Vertical Slice v1
+## Current gate
 
-Binding execution issue: #506.
-Binding contract: `docs/GODOT_AURELIAN_LIVING_CAPITAL_VERTICAL_SLICE_V1_CONTRACT.md`.
+No additional product implementation is authorized.
 
-The bottleneck is no longer missing progression states. It is experiential quality: the accepted progression is mechanically coherent, but presentation, motion, density and gamefeel are not yet at the desired product level.
+The next allowed work is exactly one bounded strategy review of the accepted playable path and current experiential bottleneck. A new product slice requires a separate documentation contract accepted on `main`.
 
-The next candidate must improve both presentation and feel without adding a broad new system.
+Do not infer authorization for empire progression merely because the product truth names empire as a long-term destination.
 
-Required product outcome:
-
-1. Greenvale capital reads as a deliberate civic center rather than a sparse prototype cluster.
-2. Settlement, city and capital are visually distinguishable at a glance.
-3. At least one accepted progression transition gains visible motion or reveal payoff.
-4. Existing trade activity reads as activity rather than only a static marker.
-5. Village, Map and World framing improves while preserving one shared physical geography.
-6. Aurelian national identity becomes clearer without turning Map or World into a dashboard.
-7. Input/state feedback makes the consequence of the player's action easier to understand.
-8. The complete accepted path through land, settlement, city and nation remains intact and persistent.
-
-## Allowed scope
-
-- `game/scenes/aurelian/**`;
-- `game/tests/**`;
-- existing Aurelian manifests, layout and camera definitions;
-- existing pinned/licensed assets already in the repository;
-- procedural presentation helpers in the existing Godot scene system;
-- tween/animation/camera presentation tied to already accepted states;
-- one minimal focused workflow adjustment only if required to prove the candidate.
-
-## Forbidden scope
+## Forbidden until a new accepted contract
 
 - economy, resources, costs, rewards, inventory or taxes;
 - population simulation, workers, timers, queues or production systems;
@@ -113,55 +95,23 @@ Required product outcome:
 - governance, laws, factions, diplomacy or combat;
 - empire progression;
 - backend, accounts, cloud save or multiplayer;
-- React/SVG/CSS rebuilding of final game surfaces;
+- React, SVG or CSS rebuilding of final game surfaces;
 - new paid assets or paid tools;
 - a new asset family without a proven limitation of the current envelope;
-- broad CI/platform refactoring inside the product PR;
+- broad CI or platform refactoring;
 - crypto, NFT, wallet, token, mint or pay-to-win direction;
 - P12 or MAX.
-
-## Execution model
-
-Use the proof-driven loop:
-
-`implement -> fast Godot test -> run/capture -> direct visual review -> one bounded correction -> final exact-head gate`
-
-During iteration, prefer focused Godot import/state tests and deterministic captures. Full persistence, Web and broad regression evidence is required at the final candidate gate, not after every small edit.
-
-Do not split this visible outcome into multiple tiny product PRs unless a hard dependency requires it.
-
-## Evidence and acceptance
-
-The exact candidate head must provide:
-
-- settlement-state visual reference;
-- city-state visual reference;
-- capital-state visual reference;
-- Map view with preserved geography and clearer capital/nation context;
-- World view with preserved strategic role and clearer national presence;
-- one short motion capture demonstrating improved transition/gamefeel;
-- focused tests proving accepted claim/founding/city/nation/persistence semantics did not regress.
-
-Green CI is necessary but not sufficient. Direct screenshot/video review decides acceptance.
-
-Terminal classification:
-
-- `AURELIAN_LIVING_CAPITAL_VERTICAL_SLICE_V1_PASS`
-- `AURELIAN_LIVING_CAPITAL_VERTICAL_SLICE_V1_CORRECTION_REQUIRED`
-- `AURELIAN_LIVING_CAPITAL_VERTICAL_SLICE_V1_REJECT`
-
-One bounded correction maximum after the first meaningful visual candidate.
 
 ## Process rules
 
 1. Optimize for visible playable progress, not gate count.
 2. One active product or recovery PR at a time.
-3. Use focused Godot tests during iteration and full evidence at the final gate.
+3. Green CI is necessary but not sufficient for visual or product acceptance.
 4. Directly inspect running-game images and motion.
 5. One bounded visual correction maximum per milestone.
 6. An open PR with no meaningful progress for roughly one steward interval is P0.
 7. Preserve accepted shared geography and avoid rebuilding the GLB.
-8. Continue learning from effective AI game-development workflows, but adopt only practices that improve Pixel Nations quality, speed or cost without adding unnecessary orchestration.
+8. Do not begin another product implementation without a new accepted contract.
 
 ## Tool and cost policy
 
@@ -170,18 +120,16 @@ One bounded correction maximum after the first meaningful visual candidate.
 - Cursor when materially useful as executor, default GPT-5.5 without MAX.
 - MAX: OFF.
 - Extra spend target: 0 USD.
-- Image generation is reference/moodboard only unless a later explicit decision changes that role.
+- Image generation is reference or moodboard only unless a later explicit decision changes that role.
 
 ## Source-of-truth precedence
 
 1. this `PROJECT_CURRENT_STATE.md`;
 2. accepted ADRs, especially ADR-001;
 3. root `AGENTS.md`;
-4. active execution issue #506;
-5. `docs/GODOT_AURELIAN_LIVING_CAPITAL_VERTICAL_SLICE_V1_CONTRACT.md`;
-6. accepted exact-head evidence and merged PRs;
-7. operating and QA protocols;
-8. historical issues, PRs, briefs and reports.
+4. accepted exact-head evidence and merged PRs;
+5. operating and QA protocols;
+6. historical issues, PRs, briefs and reports.
 
 Issue #415 remains shared-geography history and continuity guidance, not current implementation authority.
 
@@ -190,12 +138,12 @@ Issue #415 remains shared-geography history and continuity guidance, not current
 Before meaningful work:
 
 1. run `npm run pn:status` when a checkout is available;
-2. read this file, ADR-001, root `AGENTS.md`, issue #506 and the current contract;
+2. read this file, ADR-001 and root `AGENTS.md`;
 3. re-fetch live GitHub state;
 4. state model/tool, MAX, cost, allowed scope, forbidden actions, validation and stop condition.
 
 ## Current stop condition
 
-This authority update stops when this current-state revision and the Living Capital Vertical Slice v1 contract are accepted on `main` with healthy post-merge state.
+Stop after recording the Living Capital Vertical Slice v1 PASS on `main` with healthy checks and deployment state.
 
-Then implement exactly one bounded Living Capital Vertical Slice v1 candidate and stop after direct exact-head PASS, CORRECTION_REQUIRED or REJECT before any empire, second-land, economy or governance work.
+Do not start another product implementation. The next decision is one bounded strategy review followed by a separate documentation contract only if the review identifies a justified next slice.
