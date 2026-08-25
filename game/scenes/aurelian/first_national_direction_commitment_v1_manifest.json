@@ -15,8 +15,8 @@
     "frontier"
   ],
   "controls": {
-    "inspect_previous_direction": "ui_left",
-    "inspect_next_direction": "ui_right",
+    "inspect_previous_direction": "ui_up",
+    "inspect_next_direction": "ui_down",
     "commit_direction": "ui_accept"
   },
   "required_outcome": [
@@ -29,7 +29,7 @@
   "commitment": {
     "explicit_player_action_required": true,
     "exactly_one_direction": true,
-    "persistence_field": "national_direction_committed",
+    "persistence_field": "national_direction",
     "allowed_values": [
       "trade",
       "expand",
