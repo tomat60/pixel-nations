@@ -1,0 +1,83 @@
+{
+  "contract": "GODOT_AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT_V1",
+  "issue": 510,
+  "authority_baseline_sha": "cdf0ae57b36faa388e628080233ddb9dc0959503",
+  "product_baseline_sha": "b803f13931b0608f2580a5cc30db50e30fc93d01",
+  "entry_requirement": {
+    "world_state": "world_first_nation_founded",
+    "map_state": "map_aurelian_homeland",
+    "village_state": "village_greenvale_capital",
+    "nation_founded": true
+  },
+  "world_direction_choices": [
+    "trade",
+    "expand",
+    "frontier"
+  ],
+  "controls": {
+    "inspect_previous_direction": "ui_left",
+    "inspect_next_direction": "ui_right",
+    "commit_direction": "ui_accept"
+  },
+  "required_outcome": [
+    "world_first_nation_founded",
+    "world_direction_inspection",
+    "world_national_direction_committed",
+    "map_aurelian_homeland_direction_context",
+    "village_greenvale_capital_direction_identity"
+  ],
+  "commitment": {
+    "explicit_player_action_required": true,
+    "exactly_one_direction": true,
+    "persistence_field": "national_direction_committed",
+    "allowed_values": [
+      "trade",
+      "expand",
+      "frontier"
+    ],
+    "event": "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT"
+  },
+  "view_roles": {
+    "world": "WHY_WHICH_DIRECTION_AND_ONLY_COMMITMENT_SURFACE",
+    "map": "WHERE_EXISTING_HOMELAND_CONTEXT_ONLY",
+    "village": "HOW_EXISTING_CAPITAL_IDENTITY_ONLY"
+  },
+  "shared_geography": {
+    "asset": "aurelian_authored_terrain_v1.glb",
+    "greenvale_origin_unchanged": true,
+    "east_route_unchanged": true,
+    "gilded_crossing_unchanged": true,
+    "second_land_allowed": false
+  },
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "native_restart_required": true,
+    "web_reload_required": true,
+    "persistent_profile_reopen_required": true,
+    "denied_storage_fallback": "world_neutral:none"
+  },
+  "non_claims": {
+    "economy": false,
+    "territorial_expansion": false,
+    "governance": false,
+    "diplomacy": false,
+    "combat": false,
+    "empire_progression": false,
+    "new_assets": false,
+    "new_geography": false
+  },
+  "evidence": {
+    "normal_input_sequence_required": true,
+    "all_three_precommit_choices_required": true,
+    "world_committed_state_required": true,
+    "map_context_required": true,
+    "village_identity_required": true,
+    "shared_geography_regression_required": true,
+    "native_persistence_required": true,
+    "web_persistence_required": true,
+    "profile_reopen_required": true,
+    "direct_still_and_motion_review_required": true,
+    "one_bounded_visual_correction_maximum": true
+  }
+}
