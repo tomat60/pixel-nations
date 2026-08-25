@@ -7,7 +7,7 @@ Authority source: this file on the current `main`
 Authority baseline SHA: `b803f13931b0608f2580a5cc30db50e30fc93d01`
 Product baseline SHA: `b803f13931b0608f2580a5cc30db50e30fc93d01`
 Current milestone: Living Capital Vertical Slice v1 accepted, no next product implementation authorized
-Active execution issue: none
+Active execution issue: #506
 Next allowed action: perform one bounded strategy review and, only if justified, propose a separate documentation contract for the next milestone.
 
 ## Product truth
