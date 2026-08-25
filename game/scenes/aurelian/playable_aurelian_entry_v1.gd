@@ -47,6 +47,7 @@ var city_marker: Node3D
 var homeland_marker: Node3D
 var nation_emblem: Node3D
 var capital_standards: Node3D
+var living_capital_presentation: Node3D
 
 func _ready() -> void:
 	if DisplayServer.get_name() == "headless" and not ResourceLoader.exists(GLB_PATH):
@@ -119,6 +120,8 @@ func _ready() -> void:
 	main_basin.add_child(nation_emblem)
 	capital_standards = _build_capital_standards()
 	main_basin.add_child(capital_standards)
+	living_capital_presentation = _build_living_capital_presentation()
+	main_basin.add_child(living_capital_presentation)
 	_build_runtime_hud()
 	_apply_entry_state(entry_state)
 	set_process_unhandled_input(true)
@@ -535,6 +538,90 @@ func _build_capital_standards() -> Node3D:
 	root.visible = false
 	return root
 
+func _build_living_capital_presentation() -> Node3D:
+	var root := Node3D.new()
+	root.name = "GreenvaleLivingCapitalPresentation"
+	var civic_ring := Node3D.new()
+	civic_ring.name = "CivicActivityRing"
+	root.add_child(civic_ring)
+	var plaza := MeshInstance3D.new()
+	plaza.name = "CapitalPlaza"
+	var plaza_mesh := CylinderMesh.new()
+	plaza_mesh.top_radius = 1.58
+	plaza_mesh.bottom_radius = 1.58
+	plaza_mesh.height = 0.055
+	plaza_mesh.radial_segments = 32
+	plaza.mesh = plaza_mesh
+	plaza.position.y = 0.03
+	plaza.material_override = _material("#c6b47a88", 0.14)
+	civic_ring.add_child(plaza)
+	var quarter_offsets := [
+		Vector3(-1.35, 0.0, -0.72),
+		Vector3(-0.48, 0.0, -1.42),
+		Vector3(0.52, 0.0, -1.38),
+		Vector3(1.38, 0.0, -0.62),
+		Vector3(1.32, 0.0, 0.72),
+		Vector3(-1.28, 0.0, 0.78),
+	]
+	for index in range(quarter_offsets.size()):
+		var quarter := MeshInstance3D.new()
+		quarter.name = "CivicQuarter%02d" % (index + 1)
+		var quarter_mesh := BoxMesh.new()
+		quarter_mesh.size = Vector3(0.58, 0.42 + float(index % 2) * 0.14, 0.48)
+		quarter.mesh = quarter_mesh
+		quarter.position = quarter_offsets[index] + Vector3(0.0, quarter_mesh.size.y * 0.5, 0.0)
+		quarter.rotation.y = float(index) * 0.52
+		quarter.material_override = _material("#d8bd72ff" if index % 2 == 0 else "#6f9d86ff", 0.20)
+		civic_ring.add_child(quarter)
+	var lantern_offsets := [
+		Vector3(-0.92, 0.0, -0.92),
+		Vector3(0.92, 0.0, -0.92),
+		Vector3(0.92, 0.0, 0.92),
+		Vector3(-0.92, 0.0, 0.92),
+	]
+	for index in range(lantern_offsets.size()):
+		var lantern := MeshInstance3D.new()
+		lantern.name = "CapitalLantern%02d" % (index + 1)
+		var lantern_mesh := CylinderMesh.new()
+		lantern_mesh.top_radius = 0.06
+		lantern_mesh.bottom_radius = 0.09
+		lantern_mesh.height = 0.72
+		lantern_mesh.radial_segments = 10
+		lantern.mesh = lantern_mesh
+		lantern.position = lantern_offsets[index] + Vector3(0.0, 0.36, 0.0)
+		lantern.material_override = _material("#f3c85bff", 0.30)
+		root.add_child(lantern)
+	root.position = topology_to_godot(Vector2(354.0, 285.0), 0.15)
+	root.visible = false
+	return root
+
+func _animate_living_capital_presentation(delta: float) -> void:
+	var seconds := float(Time.get_ticks_msec()) / 1000.0
+	if dispatch_token != null and dispatch_token.visible:
+		var route_mix := (sin(seconds * 0.82) + 1.0) * 0.5
+		var route_point := Vector2(354.0, 285.0).lerp(Vector2(515.0, 340.0), route_mix)
+		dispatch_token.position = topology_to_godot(route_point, 0.44 + sin(seconds * 2.4) * 0.035)
+		dispatch_token.rotation.y += delta * 0.75
+	if living_capital_presentation != null and living_capital_presentation.visible:
+		var activity_ring := living_capital_presentation.get_node_or_null("CivicActivityRing") as Node3D
+		if activity_ring != null:
+			activity_ring.rotation.y += delta * 0.055
+	if homeland_marker != null and homeland_marker.visible:
+		var map_pulse := 1.0 + sin(seconds * 2.0) * 0.025
+		homeland_marker.scale = Vector3.ONE * map_pulse
+	if nation_emblem != null and nation_emblem.visible:
+		var world_pulse := 1.0 + sin(seconds * 1.6) * 0.02
+		nation_emblem.scale = Vector3.ONE * world_pulse
+
+func _reveal_living_capital() -> void:
+	if living_capital_presentation == null:
+		return
+	living_capital_presentation.scale = Vector3.ONE * 0.72
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(living_capital_presentation, "scale", Vector3.ONE, 0.72)
+
 func _set_trade_world_underway(underway: bool) -> void:
 	if main_world_overlay_root == null:
 		return
@@ -546,6 +633,7 @@ func _apply_entry_state(state_name: String) -> void:
 	if not ENTRY_STATES.has(state_name):
 		push_error("PLAYABLE_AURELIAN_UNKNOWN_STATE=%s" % state_name)
 		return
+	var previous_state := entry_state
 	entry_state = state_name
 	main_world_overlay_root.visible = state_name.begins_with("world_")
 	main_overlay_root.visible = state_name.begins_with("map_")
@@ -560,6 +648,10 @@ func _apply_entry_state(state_name: String) -> void:
 		nation_emblem.visible = state_name == "world_first_nation_founded"
 	if capital_standards != null:
 		capital_standards.visible = state_name == "village_greenvale_capital"
+	if living_capital_presentation != null:
+		living_capital_presentation.visible = state_name == "village_greenvale_capital"
+		if living_capital_presentation.visible and previous_state != state_name:
+			_reveal_living_capital()
 	_set_trade_world_underway(false)
 	match state_name:
 		"world_neutral":
@@ -774,6 +866,7 @@ func _emit_action(action_name: String) -> void:
 	Input.parse_input_event(event)
 
 func _process(_delta: float) -> void:
+	_animate_living_capital_presentation(_delta)
 	if not automated_input_mode:
 		super(_delta)
 		return
