@@ -409,7 +409,7 @@ func _direction_color(direction: String) -> String:
 			return "#d7ad42ff"
 
 func _refresh_national_direction_identity() -> void:
-	var direction := committed_direction if committed_direction != "none" else NATIONAL_DIRECTIONS[national_direction_cursor]
+	var direction: String = committed_direction if committed_direction != "none" else String(NATIONAL_DIRECTIONS[national_direction_cursor])
 	var color := _direction_color(direction)
 	if nation_emblem != null:
 		var world_hex := nation_emblem.get_node_or_null("NationHex") as MeshInstance3D
@@ -878,7 +878,7 @@ func _update_runtime_hud() -> void:
 		"world_first_nation_founded":
 			layer_label.text = "WORLD  |  WHY"
 			if committed_direction == "none":
-				var inspected := NATIONAL_DIRECTIONS[national_direction_cursor].capitalize()
+				var inspected: String = String(NATIONAL_DIRECTIONS[national_direction_cursor]).capitalize()
 				intent_label.text = "Inspect national direction: %s" % inspected
 				controls_label.text = "[UP / DOWN] Trade / Expand / Frontier    [ENTER] Commit Aurelian Direction"
 			else:
