@@ -28,6 +28,7 @@ const VALID_STATES := [
 	"village_developed",
 ]
 const VALID_INTENTS := ["none", "east_trade"]
+const VALID_NATIONAL_DIRECTIONS := ["none", "trade", "expand", "frontier"]
 
 static func fallback(status: String, adapter: String) -> Dictionary:
 	return {
@@ -44,6 +45,7 @@ static func fallback(status: String, adapter: String) -> Dictionary:
 		"caravan_dispatched": false,
 		"city_chartered": false,
 		"nation_founded": false,
+		"national_direction": "none",
 	}
 
 static func load_session(path: String = NATIVE_PATH) -> Dictionary:
@@ -51,8 +53,12 @@ static func load_session(path: String = NATIVE_PATH) -> Dictionary:
 		return _load_web()
 	return _load_native(path)
 
-static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false, route_connected: bool = false, caravan_dispatched: bool = false, city_chartered: bool = false, nation_founded: bool = false) -> Dictionary:
+static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false, route_connected: bool = false, caravan_dispatched: bool = false, city_chartered: bool = false, nation_founded: bool = false, national_direction: String = "none") -> Dictionary:
 	if not _is_valid_pair(state, intent):
+		return fallback("invalid_data", _adapter_name())
+	if not VALID_NATIONAL_DIRECTIONS.has(national_direction):
+		return fallback("invalid_data", _adapter_name())
+	if national_direction != "none" and not nation_founded:
 		return fallback("invalid_data", _adapter_name())
 	if state in ["village_founded", "village_developed"] and not settlement_founded:
 		return fallback("invalid_data", _adapter_name())
@@ -95,6 +101,7 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		"caravan_dispatched": caravan_dispatched,
 		"city_chartered": city_chartered,
 		"nation_founded": nation_founded,
+		"national_direction": national_direction,
 		"saved_at_utc": Time.get_datetime_string_from_system(true),
 	}
 	var payload_text := JSON.stringify(payload)
@@ -131,6 +138,11 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 	var caravan_dispatched := bool(session.get("caravan_dispatched", false))
 	var city_chartered := bool(session.get("city_chartered", false))
 	var nation_founded := bool(session.get("nation_founded", false))
+	var national_direction := String(session.get("national_direction", "none"))
+	if not VALID_NATIONAL_DIRECTIONS.has(national_direction):
+		return fallback("invalid_value", adapter)
+	if national_direction != "none" and not nation_founded:
+		return fallback("invalid_value", adapter)
 	if state in ["village_founded", "village_developed"] and not settlement_founded:
 		return fallback("invalid_value", adapter)
 	if state == "village_developed" and not settlement_developed:
@@ -175,6 +187,7 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		"caravan_dispatched": caravan_dispatched,
 		"city_chartered": city_chartered,
 		"nation_founded": nation_founded,
+		"national_direction": national_direction,
 		"saved_at_utc": String(session.get("saved_at_utc", "")),
 	}
 
