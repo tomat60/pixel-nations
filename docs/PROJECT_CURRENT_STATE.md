@@ -7,7 +7,7 @@ Authority source: this file on the current `main`
 Authority baseline SHA: `ebdc103a3f2a9ff4c8a495e9547a084ae9a6a715`
 Product baseline SHA: `ebdc103a3f2a9ff4c8a495e9547a084ae9a6a715`
 Current milestone: First Empire Proclamation v1 accepted; no further product implementation authorized
-Active execution issue: #518 completed
+Active execution issue: #518
 Next allowed action: conduct one bounded strategy review and, only if it selects a safe next slice, propose a separate documentation contract before any product implementation.
 
 ## Product truth
