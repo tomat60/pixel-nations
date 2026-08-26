@@ -1,0 +1,111 @@
+{
+  "contract": "GODOT_AURELIAN_FIRST_NATIONAL_MANDATE_V1",
+  "issue": 514,
+  "authority_baseline_sha": "111557ca16671af26c2fefb69e8e2f1fcf9a5b0d",
+  "product_baseline_sha": "627d06f780266adb08e15c0d174dd4791773eef0",
+  "entry_requirement": {
+    "world_state": "world_national_direction_committed",
+    "map_state": "map_aurelian_homeland_direction_context",
+    "village_state": "village_greenvale_capital_direction_identity",
+    "national_direction_committed": true,
+    "national_mandate_started": false
+  },
+  "direction_bindings": {
+    "trade": {
+      "action": "Dispatch Trade Delegation",
+      "map_locus": "east_route",
+      "world_outcome": "world_trade_mandate_underway"
+    },
+    "expand": {
+      "action": "Commission Basin Survey",
+      "map_locus": "north_ridge",
+      "world_outcome": "world_expand_mandate_underway"
+    },
+    "frontier": {
+      "action": "Establish Frontier Watch",
+      "map_locus": "gilded_crossing",
+      "world_outcome": "world_frontier_mandate_underway"
+    }
+  },
+  "controls": {
+    "open_village": "ui_right",
+    "launch_mandate": "ui_accept",
+    "return_to_map": "ui_left",
+    "return_to_world": "ui_left"
+  },
+  "required_outcome": [
+    "world_national_direction_committed",
+    "map_aurelian_homeland_direction_context",
+    "village_greenvale_capital_direction_identity",
+    "village_national_mandate_started",
+    "map_national_mandate_active",
+    "world_national_mandate_underway"
+  ],
+  "mandate": {
+    "explicit_player_action_required": true,
+    "direction_specific_action_required": true,
+    "exactly_one_mandate": true,
+    "idempotent_after_start": true,
+    "persistence_field": "national_mandate_started",
+    "event": "AURELIAN_FIRST_NATIONAL_MANDATE",
+    "event_values": [
+      "TRADE",
+      "EXPAND",
+      "FRONTIER"
+    ]
+  },
+  "view_roles": {
+    "world": "WHY_WHICH_DIRECTION_AND_MANDATE_UNDERWAY",
+    "map": "WHERE_EXISTING_MANDATE_LOCUS",
+    "village": "HOW_EXPLICIT_MANDATE_ACTION_AND_STARTED_STATE"
+  },
+  "shared_geography": {
+    "asset": "aurelian_authored_terrain_v1.glb",
+    "greenvale_origin_unchanged": true,
+    "east_route_unchanged": true,
+    "north_ridge_unchanged": true,
+    "gilded_crossing_unchanged": true,
+    "territorial_ownership_change_allowed": false,
+    "second_land_allowed": false
+  },
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "fields": [
+      "national_direction",
+      "national_mandate_started"
+    ],
+    "native_restart_required": true,
+    "web_reload_required": true,
+    "persistent_profile_reopen_required": true,
+    "denied_storage_false_start_allowed": false
+  },
+  "non_claims": {
+    "economy": false,
+    "resources": false,
+    "population": false,
+    "territorial_expansion": false,
+    "governance": false,
+    "diplomacy": false,
+    "combat": false,
+    "empire_progression": false,
+    "new_assets": false,
+    "new_geography": false
+  },
+  "evidence": {
+    "all_three_direction_actions_required": true,
+    "no_preinput_mandate_required": true,
+    "single_event_required": true,
+    "idempotence_required": true,
+    "normal_input_sequence_required": true,
+    "village_how_required": true,
+    "map_where_required": true,
+    "world_why_required": true,
+    "shared_geography_regression_required": true,
+    "native_persistence_required": true,
+    "web_persistence_required": true,
+    "profile_reopen_required": true,
+    "direct_still_and_motion_review_required": true,
+    "one_bounded_visual_correction_maximum": true
+  }
+}
