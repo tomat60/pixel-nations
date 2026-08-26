@@ -42,6 +42,7 @@ var intent_label: Label
 var controls_label: Label
 var automated_input_mode := false
 var automated_frame := 0
+var automated_direction := "expand"
 var persistence_enabled := true
 var restored_intent := "none"
 var settlement_founded := false
@@ -73,6 +74,9 @@ func _ready() -> void:
 		get_tree().quit(91)
 		return
 	automated_input_mode = OS.get_environment("AURELIAN_CAPTURE_PLAYABLE_ENTRY") == "1"
+	var requested_automated_direction := OS.get_environment("AURELIAN_AUTOMATED_DIRECTION").to_lower()
+	if requested_automated_direction in NATIONAL_DIRECTIONS:
+		automated_direction = requested_automated_direction
 	var evidence_state := OS.get_environment("AURELIAN_PLAYABLE_EVIDENCE_STATE").to_lower()
 	var evidence_direction := OS.get_environment("AURELIAN_COMMITTED_DIRECTION").to_lower()
 	if NATIONAL_DIRECTIONS.has(evidence_direction):
@@ -1214,7 +1218,7 @@ func _update_runtime_hud() -> void:
 			controls_label.text = "[RIGHT] Open mandate in Greenvale    [LEFT] World"
 		"map_aurelian_imperial_heartland":
 			layer_label.text = "MAP  |  WHERE"
-			intent_label.text = "Aurelian imperial heartland anchored at Greenvale and the existing mandate locus"
+			intent_label.text = "%s imperial heartland anchored at Greenvale and %s" % [committed_direction.capitalize(), _mandate_locus_label()]
 			controls_label.text = "[RIGHT] Open imperial capital    [LEFT] World"
 		"village_claimed":
 			layer_label.text = "VILLAGE  |  HOW"
@@ -1246,7 +1250,7 @@ func _update_runtime_hud() -> void:
 			controls_label.text = "[ENTER] Proclaim Aurelian Empire    [LEFT / ESC] Inspect active mandate locus"
 		"village_aurelian_imperial_capital":
 			layer_label.text = "VILLAGE  |  HOW"
-			intent_label.text = "Greenvale is the Aurelian imperial capital"
+			intent_label.text = "Greenvale is the %s Aurelian imperial capital" % committed_direction.capitalize()
 			controls_label.text = "[LEFT / ESC] Inspect imperial heartland"
 		"map_east_route":
 			layer_label.text = "MAP  |  WHERE"
@@ -1348,12 +1352,10 @@ func _process(_delta: float) -> void:
 		_emit_action("ui_left")
 	elif automated_frame == 3450:
 		_emit_action("ui_accept")
-	elif automated_frame == 3570:
+	elif automated_frame == 3570 and automated_direction in ["expand", "frontier"]:
 		_emit_action("ui_down")
-	elif automated_frame == 3690:
+	elif automated_frame == 3690 and automated_direction == "frontier":
 		_emit_action("ui_down")
-	elif automated_frame == 3810:
-		_emit_action("ui_up")
 	elif automated_frame == 3930:
 		_emit_action("ui_accept")
 	elif automated_frame == 4050:
