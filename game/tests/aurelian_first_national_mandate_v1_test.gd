@@ -29,7 +29,8 @@ func _initialize() -> void:
 	_check(controller.contains("Vector2(515.0, 340.0)"), "gilded_crossing_locus")
 	_check(persistence.contains("\"national_mandate_started\""), "mandate_persistence")
 	_check(persistence.contains("const VERSION := 2"), "schema_v2_compatible")
-	for direction in ["trade", "expand", "frontier"]:
+	for direction_variant in ["trade", "expand", "frontier"]:
+		var direction := String(direction_variant)
 		_cleanup()
 		var saved := SESSION.save_session("map_national_mandate_active", "east_trade", TEST_PATH, true, true, true, true, true, true, direction, true)
 		_check(bool(saved.get("ok", false)), "save_%s_mandate" % direction)
