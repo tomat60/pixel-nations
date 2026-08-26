@@ -43,6 +43,7 @@ jobs:
           set -euo pipefail
           mkdir -p "${EVIDENCE_DIR}/stills"
           cp game/scenes/aurelian/aurelian_living_capital_vertical_slice_v1_manifest.json "${EVIDENCE_DIR}/living-capital-manifest.json"
+          cp game/scenes/aurelian/first_national_mandate_v1_manifest.json "${EVIDENCE_DIR}/national-mandate-manifest.json"
           git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
@@ -85,7 +86,7 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test; do
+          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test aurelian_first_national_direction_commitment_v1_test aurelian_first_national_mandate_v1_test; do
             "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1
           done
           grep -F "GODOT_PLAYABLE_AURELIAN_ENTRY_V1_TEST: PASS" "${EVIDENCE_DIR}/playable_aurelian_entry_v1_test.log"
@@ -96,6 +97,8 @@ jobs:
           grep -F "GODOT_AURELIAN_FIRST_CITY_CHARTER_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_city_charter_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_NATION_FOUNDING_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_nation_founding_v1_test.log"
           grep -F "AURELIAN_LIVING_CAPITAL_VERTICAL_SLICE_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_living_capital_vertical_slice_v1_test.log"
+          grep -F "GODOT_AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_national_direction_commitment_v1_test.log"
+          grep -F "GODOT_AURELIAN_FIRST_NATIONAL_MANDATE_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_national_mandate_v1_test.log"
 
       - name: Export canonical Linux and Web builds
         timeout-minutes: 8
@@ -313,6 +316,21 @@ jobs:
             await waitForCount('village_greenvale_capital', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '25-village-greenvale-capital-expand-1440x900.png') });
+
+            await page.keyboard.press('Enter');
+            await waitForCount('village_national_mandate_started', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '26-village-national-mandate-started-expand-1440x900.png') });
+
+            await page.keyboard.press('ArrowLeft');
+            await waitForCount('map_national_mandate_active', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '27-map-national-mandate-active-expand-1440x900.png') });
+
+            await page.keyboard.press('ArrowLeft');
+            await waitForCount('world_national_mandate_underway', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '28-world-national-mandate-underway-expand-1440x900.png') });
             const video = page.video();
             await context.close();
             await video.saveAs(path.join(root, 'godot-web-input-sequence.webm'));
@@ -338,9 +356,10 @@ jobs:
               viewport: [1440, 900],
               browser: 'chromium',
               normal_entry: 'world_neutral',
-              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowDown', 'ArrowDown', 'ArrowUp', 'Enter', 'ArrowRight', 'ArrowRight'],
+              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowDown', 'ArrowDown', 'ArrowUp', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft'],
               observed_states: observedStates,
-              accepted_handoff: 'World first nation founded -> inspect three directions -> commit Expand -> Map homeland context -> Village capital identity',
+              accepted_handoff: 'World direction committed -> Village explicit mandate -> Map existing locus active -> World mandate underway',
+              national_mandate_started: true,
               national_direction: 'expand',
               glb_sha256: process.env.GLB_SHA256,
               evidence_environment_state_driving: false
@@ -355,7 +374,7 @@ jobs:
       - name: Validate exact browser evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "25"
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "28"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
             test "$(stat -c %s "$image")" -gt 70000
@@ -388,6 +407,11 @@ jobs:
           grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=EXPAND" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_homeland" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_greenvale_capital" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_FIRST_NATIONAL_MANDATE=EXPAND" "${EVIDENCE_DIR}/browser-console.log"
+          test "$(grep -Fc "AURELIAN_FIRST_NATIONAL_MANDATE=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_national_mandate_started" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_national_mandate_active" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_national_mandate_underway" "${EVIDENCE_DIR}/browser-console.log"
           sha256sum "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}/godot-web-input-sequence.webm" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
           echo "GODOT_WEB_EXPORT_PLAYABILITY_DETERMINISTIC_QA=PASS"
 
