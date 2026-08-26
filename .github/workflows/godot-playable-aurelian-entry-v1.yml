@@ -264,11 +264,10 @@ jobs:
           test -s "${EVIDENCE_DIR}/playable-entry-sequence.avi"
           mediainfo --Output=JSON "${EVIDENCE_DIR}/playable-entry-sequence.avi" > "${EVIDENCE_DIR}/video-metadata.json"
           for direction in trade frontier; do
-            timeout 180s xvfb-run -a -s "-screen 0 1280x720x24" env \
+            timeout 90s env \
               AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
               AURELIAN_AUTOMATED_DIRECTION="${direction}" \
-              "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
-              --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 120 \
+              "${GODOT_BIN}" --headless --path game --audio-driver Dummy --fixed-fps 480 \
               > "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log" 2>&1
             grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=${direction^^}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
             grep -F "AURELIAN_FIRST_NATIONAL_MANDATE=${direction^^}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
