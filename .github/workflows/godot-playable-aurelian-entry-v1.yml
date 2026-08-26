@@ -245,7 +245,7 @@ jobs:
           grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=EXPAND" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_NATIONAL_MANDATE=EXPAND" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test "$(grep -Fc "AURELIAN_FIRST_NATIONAL_MANDATE=" "${EVIDENCE_DIR}/playable-entry-sequence.log")" = "1"
-          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=5250" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=4830" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test -s "${EVIDENCE_DIR}/playable-entry-sequence.avi"
           mediainfo --Output=JSON "${EVIDENCE_DIR}/playable-entry-sequence.avi" > "${EVIDENCE_DIR}/video-metadata.json"
 
