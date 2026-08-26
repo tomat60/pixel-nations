@@ -1354,8 +1354,10 @@ func _process(_delta: float) -> void:
 		_emit_action("ui_accept")
 	elif automated_frame == 3570 and automated_direction in ["expand", "frontier"]:
 		_emit_action("ui_down")
-	elif automated_frame == 3690 and automated_direction == "frontier":
+	elif automated_frame == 3690 and automated_direction in ["expand", "frontier"]:
 		_emit_action("ui_down")
+	elif automated_frame == 3810 and automated_direction == "expand":
+		_emit_action("ui_up")
 	elif automated_frame == 3930:
 		_emit_action("ui_accept")
 	elif automated_frame == 4050:
