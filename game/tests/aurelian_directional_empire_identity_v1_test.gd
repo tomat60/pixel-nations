@@ -14,7 +14,7 @@ func _initialize() -> void:
 	_check(int(manifest.get("issue", 0)) == 522, "issue")
 	_check(String(manifest.get("authority_baseline_sha", "")) == "d7984bb1fe16247263bb54316f28b6f22181b964", "authority_baseline")
 	_check(String(manifest.get("product_baseline_sha", "")) == "ebdc103a3f2a9ff4c8a495e9547a084ae9a6a715", "product_baseline")
-	var proclamation := manifest.get("proclamation", {})
+	var proclamation: Dictionary = manifest.get("proclamation", {}) as Dictionary
 	_check(String(proclamation.get("action", "")) == "Proclaim Aurelian Empire", "action")
 	_check(String(proclamation.get("event", "")) == "AURELIAN_FIRST_EMPIRE_PROCLAMATION=AURELIAN", "event")
 	_check(controller.count("AURELIAN_FIRST_EMPIRE_PROCLAMATION=AURELIAN") == 1, "single_event_site")
@@ -27,10 +27,10 @@ func _initialize() -> void:
 		_check(controller.contains(node_name), node_name)
 	for label_format in ["%s IMPERIAL CAPITAL", "%s IMPERIAL HEARTLAND", "AURELIAN %s EMPIRE"]:
 		_check(controller.contains(label_format), label_format)
-	var bindings := manifest.get("direction_bindings", {})
+	var bindings: Dictionary = manifest.get("direction_bindings", {}) as Dictionary
 	for direction in ["trade", "expand", "frontier"]:
 		_check(bindings.has(direction), "binding_%s" % direction)
-		var binding := bindings.get(direction, {})
+		var binding: Dictionary = bindings.get(direction, {}) as Dictionary
 		_check(not String(binding.get("village_cue", "")).is_empty(), "village_cue_%s" % direction)
 		_check(not String(binding.get("map_locus", "")).is_empty(), "map_locus_%s" % direction)
 		_check(not String(binding.get("world_cue", "")).is_empty(), "world_cue_%s" % direction)
@@ -43,7 +43,7 @@ func _initialize() -> void:
 	_finish()
 
 func _read_json(path: String) -> Dictionary:
-	var parsed := JSON.parse_string(_read_text(path))
+	var parsed: Variant = JSON.parse_string(_read_text(path))
 	return parsed if parsed is Dictionary else {}
 
 func _read_text(path: String) -> String:
