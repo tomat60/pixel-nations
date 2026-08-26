@@ -2,13 +2,13 @@
 
 Status: ACTIVE
 Updated: 2026-08-26
-Current state revision: Directional Empire Identity v1 authorized
+Current state revision: Directional Empire Identity v1 accepted
 Authority source: this file on the current `main`
-Authority baseline SHA: `8fe1436ee6824606304d2c4bb55c06b85636c2ee`
-Product baseline SHA: `ebdc103a3f2a9ff4c8a495e9547a084ae9a6a715`
-Current milestone: Directional Empire Identity v1 authorized for exactly one bounded implementation candidate
+Authority baseline SHA: `bcd97f7970856551d91fa325609761eb542c32c1`
+Product baseline SHA: `bcd97f7970856551d91fa325609761eb542c32c1`
+Current milestone: Directional Empire Identity v1 accepted; no further product implementation authorized
 Active execution issue: #522
-Next allowed action: implement exactly one Godot Aurelian Directional Empire Identity v1 candidate under the accepted contract, then run exact-head evidence and direct review.
+Next allowed action: conduct one bounded strategy review and, only if it selects a safe next slice, propose a separate documentation contract before any product implementation.
 
 ## Product truth
 
@@ -56,67 +56,53 @@ Accepted GLB identity and shared physical geography remain unchanged.
 
 ## Most recent accepted product milestone
 
-PR #520 `Implement Godot Aurelian First Empire Proclamation v1` is accepted and merged.
+PR #524 `Implement Godot Directional Empire Identity v1` is accepted and merged.
 
-- terminal result: `GODOT_AURELIAN_FIRST_EMPIRE_PROCLAMATION_PASS`;
-- accepted head: `864d888f5f159f59447bda099177d7b36066a213`;
-- merged product baseline: `ebdc103a3f2a9ff4c8a495e9547a084ae9a6a715`;
-- Village owns the deliberate `Proclaim Aurelian Empire` action and imperial-capital presentation;
-- Map shows the existing homeland as the imperial heartland without changing ownership or geography;
-- World recognizes the first Aurelian Empire while preserving Trade, Expand or Frontier;
+- terminal result: `GODOT_AURELIAN_DIRECTIONAL_EMPIRE_IDENTITY_PASS`;
+- accepted head: `478bc1a56e2dcd95ebf453c17f5d24004540b2c9`;
+- merged product baseline: `bcd97f7970856551d91fa325609761eb542c32c1`;
+- Trade, Expand and Frontier now have separate procedural physical glyphs in Village, Map and World;
+- Village identifies the direction-specific imperial capital;
+- Map preserves the unchanged Aurelian geography while binding Trade to East Route, Expand to North Ridge and Frontier to Gilded Crossing;
+- World recognizes a direction-specific first Aurelian Empire;
 - Session Persistence v2 preserves `empire_proclaimed=true` and the committed direction;
-- direct still and motion review accepted the candidate after one bounded visual correction;
-- no new asset, GLB or geography was added.
+- direct review accepted all nine final Village, Map and World stills;
+- normal-input evidence completed the full commitment, mandate and proclamation sequence for all three directions;
+- no visual correction, new asset, GLB or geography was required.
 
 Accepted exact-head evidence:
 
-- Playable Entry run `32976610513`, artifact `9610013150`, digest `sha256:770d8e135a8e6e961fe2a1564b9c91cf44dbeceeba387015288d7bad5dc19d0c`;
-- Web Playability run `32976610533`, artifact `9609824128`, digest `sha256:93416bce16e0ad36140c2e9934af019ff79d099e09a47f883e95277f213b0002`;
-- Session Persistence v2 run `32976610485`, artifact `9609855562`, digest `sha256:f1122de8633798e290659e0d228a45dc1248ae270d65f4451fbabbba877c3aba`.
+- Playable Entry run `33009988927`, artifact `9622374839`, digest `sha256:796712858ff2a8591088b8c2f8c4914cb77b35b94f369efd26489f0b27389726`;
+- Web Playability run `33009988868`, artifact `9622268120`, digest `sha256:8ad49a5b8b457b3c6edfa72cf8cca7ca9ac6752ddbe36b3e3c5efe6326232471`;
+- Session Persistence v2 run `33009988889`, artifact `9622265401`, digest `sha256:85220753998df80245deeed81f370b2b0b59b6bbfc408046fd6fef5d6c43f85d`.
 
-Issue #518 is completed by this accepted implementation.
+Issue #522 is completed by this accepted implementation.
 
 ## Strategy decision
 
-The linear first-run fantasy is complete. Another state after proclamation would add little playable value.
+The first-run fantasy and its direction-specific empire payoff are complete.
 
-The next bounded slice makes the already accepted Trade, Expand or Frontier commitment visibly consequential at the empire endpoint:
-
-`committed direction -> mandate underway -> explicit empire proclamation -> direction-specific imperial capital -> direction-specific imperial heartland -> direction-specific first empire identity`
-
-This is a payoff for an existing strategic choice, not post-proclamation progression.
+No later product slice is selected. The next permitted activity is one bounded strategy review. It may propose a separate documentation-only contract, but it may not authorize implementation by itself.
 
 ## Current authority
 
-Issue #522 and `docs/GODOT_AURELIAN_DIRECTIONAL_EMPIRE_IDENTITY_V1_CONTRACT.md` authorize exactly one implementation candidate.
+Directional Empire Identity v1 is terminally accepted.
 
-The candidate must:
+There is no active product implementation authority. Any later executable slice requires a new issue and a separate documentation-only contract merged with healthy exact-head checks.
 
-- preserve the accepted proclamation action and event;
-- make Trade, Expand and Frontier materially distinguishable without relying only on HUD prose;
-- keep Village as HOW, Map as WHERE and World as WHY / WHICH DIRECTION;
-- preserve the committed direction and `empire_proclaimed=true` across native restart, Web reload and persistent-profile reopen;
-- preserve all shared geography and accepted imperial hierarchy;
-- produce exact-head Playable Entry, Web Playability and Session Persistence evidence;
-- receive direct still and motion review for all three variants.
-
-Green CI alone is not acceptance. One bounded visual correction maximum is allowed. The terminal classification must be exactly:
-
-- `GODOT_AURELIAN_DIRECTIONAL_EMPIRE_IDENTITY_PASS`; or
-- `GODOT_AURELIAN_DIRECTIONAL_EMPIRE_IDENTITY_REJECT`.
+Green CI alone remains insufficient for future visual or product acceptance.
 
 ## Allowed scope
 
-- one exact manifest for Trade, Expand and Frontier outcomes;
-- focused controller and HUD changes under the accepted Godot Aurelian surface;
-- restrained procedural direction cues using accepted geometry, colors and loci;
-- focused tests and Session Persistence v2 fixtures;
-- narrowly scoped updates to the existing evidence workflows;
-- contract-linked documentation.
+- one bounded strategy review;
+- repository and evidence inspection;
+- a separate documentation-only contract proposal if the review selects a safe slice;
+- authority maintenance required to keep this file current.
 
 ## Forbidden scope
 
-- progression after first empire proclamation;
+- any product implementation before a new contract is merged;
+- progression after first empire proclamation without a new explicit strategy decision;
 - another land, territorial ownership change or multi-land simulation;
 - economy, resources, costs, rewards, taxes, production or inventory;
 - population, workers, timers or queues;
@@ -152,16 +138,14 @@ Green CI alone is not acceptance. One bounded visual correction maximum is allow
 ## Source-of-truth precedence
 
 1. this `PROJECT_CURRENT_STATE.md`;
-2. `docs/GODOT_AURELIAN_DIRECTIONAL_EMPIRE_IDENTITY_V1_CONTRACT.md`;
-3. active execution issue #522;
-4. accepted ADRs, especially ADR-001;
-5. root `AGENTS.md`;
-6. accepted exact-head evidence and merged PRs;
-7. operating and QA protocols;
-8. historical issues, PRs, briefs and reports.
+2. accepted ADRs, especially ADR-001;
+3. root `AGENTS.md`;
+4. accepted exact-head evidence and merged PR #524;
+5. operating and QA protocols;
+6. historical issues, contracts, PRs, briefs and reports.
 
-Issue #415 remains shared-geography history and continuity guidance, not current implementation authority.
+Issue #415 remains shared-geography history and continuity guidance. Issue #522 and its contract are completed historical authority.
 
 ## Current stop condition
 
-Stop after one accepted or rejected Directional Empire Identity v1 candidate. A PASS must be recorded in this file before any later strategy review. A REJECT must restore the accepted First Empire Proclamation baseline and record the exact reason.
+Do not start product implementation from this state. Stop after recording the accepted Directional Empire Identity v1 result. The next allowed activity is one bounded strategy review and, only if justified, a separate documentation contract.
