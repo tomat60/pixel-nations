@@ -1,4 +1,4 @@
-# Exact-head evidence includes empire proclamation across native, Web, and profile reopen.
+# Exact-head evidence includes empire proclamation and persistence across native, Web, and profile reopen.
 extends "res://scenes/aurelian/aurelian_decision_loop_v1.gd"
 
 const SESSION := preload("res://scenes/aurelian/aurelian_session_persistence_v2.gd")
