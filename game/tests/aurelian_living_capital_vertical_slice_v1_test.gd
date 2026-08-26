@@ -39,7 +39,7 @@ func _initialize() -> void:
 	_check(controller.contains("Vector2(354.0, 285.0).lerp(Vector2(515.0, 340.0)"), "accepted_trade_topology")
 	_check(controller.contains("func _reveal_living_capital()"), "reveal_function")
 	_check(controller.contains("Tween.TRANS_BACK"), "reveal_tween")
-	_check(controller.contains('living_capital_presentation.visible = state_name == "village_greenvale_capital"'), "capital_only_visibility")
+	_check(controller.contains('living_capital_presentation.visible = state_name in ["village_greenvale_capital", "village_national_mandate_started"]'), "capital_only_visibility")
 	_check(controller.contains("_animate_living_capital_presentation(_delta)"), "runtime_motion")
 	_finish()
 
