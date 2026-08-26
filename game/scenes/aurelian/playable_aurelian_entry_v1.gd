@@ -20,6 +20,9 @@ const ENTRY_STATES := [
 	"world_first_nation_founded",
 	"map_aurelian_homeland",
 	"village_greenvale_capital",
+	"village_national_mandate_started",
+	"map_national_mandate_active",
+	"world_national_mandate_underway",
 	"village_claimed",
 	"village_founded",
 	"village_developed",
@@ -45,6 +48,8 @@ var city_chartered := false
 var nation_founded := false
 var national_direction_cursor := 0
 var committed_direction := "none"
+var national_mandate_started := false
+var mandate_marker: Node3D
 var dispatch_token: Node3D
 var city_marker: Node3D
 var homeland_marker: Node3D
@@ -79,7 +84,8 @@ func _ready() -> void:
 		route_connected = evidence_state in ["map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway", "village_trade_dispatched"]
 		caravan_dispatched = evidence_state in ["village_trade_dispatched", "map_east_route_in_use", "world_first_trade_underway", "village_city_chartered", "map_greenvale_city", "world_first_city_recognized", "world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital"]
 		city_chartered = evidence_state in ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized", "world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital"]
-		nation_founded = evidence_state in ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital"]
+		nation_founded = evidence_state in ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway"]
+		national_mandate_started = evidence_state in ["village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway"]
 	else:
 		var restored := SESSION.load_session()
 		entry_state = String(restored.get("entry_state", "world_neutral"))
@@ -91,6 +97,7 @@ func _ready() -> void:
 		city_chartered = bool(restored.get("city_chartered", false))
 		nation_founded = bool(restored.get("nation_founded", false))
 		committed_direction = String(restored.get("national_direction", "none"))
+		national_mandate_started = bool(restored.get("national_mandate_started", false))
 		if NATIONAL_DIRECTIONS.has(committed_direction):
 			national_direction_cursor = NATIONAL_DIRECTIONS.find(committed_direction)
 		else:
@@ -107,6 +114,7 @@ func _ready() -> void:
 		city_chartered = false
 		nation_founded = false
 		committed_direction = "none"
+		national_mandate_started = false
 		national_direction_cursor = 0
 	if entry_state in ["village_founded", "village_developed", "village_trade_dispatched", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway"]:
 		settlement_founded = true
@@ -118,8 +126,10 @@ func _ready() -> void:
 		caravan_dispatched = true
 	if entry_state in ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized", "world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital"]:
 		city_chartered = true
-	if entry_state in ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital"]:
+	if entry_state in ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway"]:
 		nation_founded = true
+	if entry_state in ["village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway"]:
+		national_mandate_started = true
 	decision_state = _decision_state_for_entry(entry_state)
 	_configure_state_environment(entry_state)
 	super()
@@ -137,6 +147,8 @@ func _ready() -> void:
 	main_basin.add_child(capital_standards)
 	living_capital_presentation = _build_living_capital_presentation()
 	main_basin.add_child(living_capital_presentation)
+	mandate_marker = _build_national_mandate_marker()
+	main_basin.add_child(mandate_marker)
 	_build_runtime_hud()
 	_apply_entry_state(entry_state)
 	set_process_unhandled_input(true)
@@ -150,11 +162,11 @@ func _ready() -> void:
 
 func _decision_state_for_entry(state_name: String) -> String:
 	match state_name:
-		"map_east_route_selected", "map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland":
+		"map_east_route_selected", "map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland", "map_national_mandate_active":
 			return "map_east_route"
-		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded":
+		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded", "world_national_mandate_underway":
 			return "world_trade_selected"
-		"village_claimed", "village_founded", "village_developed", "village_trade_dispatched", "village_city_chartered", "village_greenvale_capital":
+		"village_claimed", "village_founded", "village_developed", "village_trade_dispatched", "village_city_chartered", "village_greenvale_capital", "village_national_mandate_started":
 			return "village_route_context"
 		_:
 			return state_name
@@ -167,13 +179,13 @@ func _configure_state_environment(state_name: String) -> void:
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
 			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
 			return
-		"map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland":
+		"map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland", "map_national_mandate_active":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed" if settlement_developed else ("founded" if settlement_founded else "claimed"))
 			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
 			return
-		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded":
+		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded", "world_national_mandate_underway":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
@@ -197,7 +209,7 @@ func _configure_state_environment(state_name: String) -> void:
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
 			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
 			return
-		"village_city_chartered", "village_greenvale_capital":
+		"village_city_chartered", "village_greenvale_capital", "village_national_mandate_started":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "city_chartered")
@@ -337,6 +349,11 @@ func _accept_entry() -> void:
 				committed_direction = NATIONAL_DIRECTIONS[national_direction_cursor]
 				_apply_entry_state("world_first_nation_founded")
 				print("AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=%s" % committed_direction.to_upper())
+		"village_greenvale_capital":
+			if committed_direction != "none" and not national_mandate_started:
+				national_mandate_started = true
+				_apply_entry_state("village_national_mandate_started")
+				print("AURELIAN_FIRST_NATIONAL_MANDATE=%s" % committed_direction.to_upper())
 
 func _right_entry() -> void:
 	match entry_state:
@@ -351,6 +368,8 @@ func _right_entry() -> void:
 		"world_first_nation_founded":
 			if committed_direction != "none":
 				_apply_entry_state("map_aurelian_homeland")
+		"world_national_mandate_underway":
+			_apply_entry_state("map_national_mandate_active")
 		"map_east_route_claimed":
 			_apply_entry_state("village_developed" if settlement_developed else ("village_founded" if settlement_founded else "village_claimed"))
 		"map_east_route_connected":
@@ -360,7 +379,9 @@ func _right_entry() -> void:
 		"map_greenvale_city":
 			_apply_entry_state("village_city_chartered")
 		"map_aurelian_homeland":
-			_apply_entry_state("village_greenvale_capital")
+			_apply_entry_state("village_national_mandate_started" if national_mandate_started else "village_greenvale_capital")
+		"map_national_mandate_active":
+			_apply_entry_state("village_national_mandate_started")
 		"map_east_route":
 			_apply_entry_state("village_route_context")
 
@@ -376,6 +397,8 @@ func _previous_entry() -> void:
 			_apply_entry_state("map_greenvale_city")
 		"village_greenvale_capital":
 			_apply_entry_state("map_aurelian_homeland")
+		"village_national_mandate_started":
+			_apply_entry_state("map_national_mandate_active")
 		"map_east_route_claimed", "map_east_route_selected", "map_east_route":
 			_apply_entry_state("world_trade_selected")
 		"map_east_route_connected":
@@ -386,6 +409,8 @@ func _previous_entry() -> void:
 			_apply_entry_state("world_first_city_recognized")
 		"map_aurelian_homeland":
 			_apply_entry_state("world_first_nation_founded")
+		"map_national_mandate_active":
+			_apply_entry_state("world_national_mandate_underway")
 		"village_route_context":
 			_apply_entry_state("map_east_route")
 		"world_trade_selected":
@@ -441,6 +466,63 @@ func _hide_preclaim_greenvale() -> bool:
 			return false
 		node.visible = false
 	return true
+
+
+func _build_national_mandate_marker() -> Node3D:
+	var root := Node3D.new()
+	root.name = "AurelianNationalMandateLocus"
+	var ring := MeshInstance3D.new()
+	ring.name = "MandateRing"
+	var ring_mesh := TorusMesh.new()
+	ring_mesh.inner_radius = 0.34
+	ring_mesh.outer_radius = 0.52
+	ring_mesh.rings = 24
+	ring_mesh.ring_segments = 12
+	ring.mesh = ring_mesh
+	ring.material_override = _material(_direction_color(committed_direction), 0.42)
+	root.add_child(ring)
+	var beacon := MeshInstance3D.new()
+	beacon.name = "MandateBeacon"
+	var beacon_mesh := CylinderMesh.new()
+	beacon_mesh.top_radius = 0.07
+	beacon_mesh.bottom_radius = 0.16
+	beacon_mesh.height = 0.82
+	beacon_mesh.radial_segments = 12
+	beacon.mesh = beacon_mesh
+	beacon.position.y = 0.43
+	beacon.material_override = _material(_direction_color(committed_direction), 0.34)
+	root.add_child(beacon)
+	var label := Label3D.new()
+	label.name = "MandateLabel"
+	label.font_size = 34
+	label.outline_size = 7
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.position = Vector3(0.0, 1.12, 0.0)
+	root.add_child(label)
+	root.visible = false
+	return root
+
+func _refresh_national_mandate_marker() -> void:
+	if mandate_marker == null or committed_direction == "none":
+		return
+	var topology := Vector2(435.0, 313.0)
+	var locus := "EAST ROUTE"
+	match committed_direction:
+		"expand":
+			topology = Vector2(700.0, 205.0)
+			locus = "NORTH RIDGE"
+		"frontier":
+			topology = Vector2(515.0, 340.0)
+			locus = "GILDED CROSSING"
+	mandate_marker.position = topology_to_godot(topology, 0.56)
+	var label := mandate_marker.get_node_or_null("MandateLabel") as Label3D
+	if label != null:
+		label.text = "%s MANDATE ACTIVE" % locus
+		label.modulate = Color(_direction_color(committed_direction))
+	for node_name in ["MandateRing", "MandateBeacon"]:
+		var node := mandate_marker.get_node_or_null(node_name) as MeshInstance3D
+		if node != null:
+			node.material_override = _material(_direction_color(committed_direction), 0.38)
 
 func _build_dispatch_token() -> Node3D:
 	var root := Node3D.new()
@@ -716,7 +798,7 @@ func _apply_entry_state(state_name: String) -> void:
 	entry_state = state_name
 	main_world_overlay_root.visible = state_name.begins_with("world_")
 	main_overlay_root.visible = state_name.begins_with("map_")
-	main_decision_overlay_root.visible = state_name in ["village_route_context", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway", "map_greenvale_city", "world_first_city_recognized", "world_first_nation_founded", "map_aurelian_homeland"]
+	main_decision_overlay_root.visible = state_name in ["village_route_context", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway", "map_greenvale_city", "world_first_city_recognized", "world_first_nation_founded", "map_aurelian_homeland", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway"]
 	if dispatch_token != null:
 		dispatch_token.visible = state_name in ["map_east_route_in_use", "world_first_trade_underway", "map_greenvale_city", "world_first_city_recognized", "world_first_nation_founded", "map_aurelian_homeland"]
 	if city_marker != null:
@@ -727,8 +809,11 @@ func _apply_entry_state(state_name: String) -> void:
 		nation_emblem.visible = state_name == "world_first_nation_founded"
 	if capital_standards != null:
 		capital_standards.visible = state_name == "village_greenvale_capital"
+	if mandate_marker != null:
+		mandate_marker.visible = state_name == "map_national_mandate_active"
+		_refresh_national_mandate_marker()
 	if living_capital_presentation != null:
-		living_capital_presentation.visible = state_name == "village_greenvale_capital"
+		living_capital_presentation.visible = state_name in ["village_greenvale_capital", "village_national_mandate_started"]
 		if living_capital_presentation.visible and previous_state != state_name:
 			_reveal_living_capital()
 	_set_trade_world_underway(false)
@@ -765,7 +850,7 @@ func _apply_entry_state(state_name: String) -> void:
 			_apply_world_state(main_world_overlay_root, "selected_trade")
 			_set_trade_world_underway(true)
 			_activate_camera("world")
-		"world_first_nation_founded":
+		"world_first_nation_founded", "world_national_mandate_underway":
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_NATION_FOUNDING_CAPITAL_STATE_FAILED")
 			_apply_world_state(main_world_overlay_root, "selected_trade")
@@ -795,7 +880,7 @@ func _apply_entry_state(state_name: String) -> void:
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_CITY_CHARTER_VILLAGE_STATE_FAILED")
 			_activate_camera("map")
-		"map_aurelian_homeland":
+		"map_aurelian_homeland", "map_national_mandate_active":
 			_apply_map_state(main_overlay_root, "east_route_claimed")
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_NATION_FOUNDING_CAPITAL_STATE_FAILED")
@@ -828,7 +913,7 @@ func _apply_entry_state(state_name: String) -> void:
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_CITY_CHARTER_VILLAGE_STATE_FAILED")
 			_activate_camera("village")
-		"village_greenvale_capital":
+		"village_greenvale_capital", "village_national_mandate_started":
 			settlement_founded = true
 			settlement_developed = true
 			route_connected = true
@@ -844,7 +929,7 @@ func _apply_entry_state(state_name: String) -> void:
 	_update_runtime_hud()
 	if persistence_enabled:
 		restored_intent = "none" if entry_state == "world_neutral" else "east_trade"
-		var save_result := SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded, committed_direction)
+		var save_result := SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded, committed_direction, national_mandate_started)
 		print("AURELIAN_NATIONAL_DIRECTION_SAVE=%s" % committed_direction)
 		print("AURELIAN_SESSION_V2_SAVE_ACK=%s:%s:%s:%s:%s:%s:%s:%s:%s:%s" % [String(save_result.get("status", "unknown")), String(save_result.get("adapter", "unknown")), entry_state, restored_intent, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded])
 		if not bool(save_result.get("ok", false)) and String(save_result.get("status", "")) != "unavailable":
@@ -875,6 +960,10 @@ func _update_runtime_hud() -> void:
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "Greenvale recognized as Aurelian's first city"
 			controls_label.text = "[ENTER] Found Aurelian Nation    [RIGHT] Inspect city on Map"
+		"world_national_mandate_underway":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "%s mandate underway for Aurelian" % committed_direction.capitalize()
+			controls_label.text = "[RIGHT] Inspect active mandate locus"
 		"world_first_nation_founded":
 			layer_label.text = "WORLD  |  WHY"
 			if committed_direction == "none":
@@ -908,6 +997,10 @@ func _update_runtime_hud() -> void:
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "Aurelian homeland context: %s direction" % committed_direction.capitalize()
 			controls_label.text = "[RIGHT] Open Greenvale capital    [LEFT] World"
+		"map_national_mandate_active":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "%s mandate active at %s" % [committed_direction.capitalize(), _mandate_locus_label()]
+			controls_label.text = "[RIGHT] Open mandate in Greenvale    [LEFT] World"
 		"village_claimed":
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "East Route is claimed: no settlement exists yet"
@@ -931,7 +1024,11 @@ func _update_runtime_hud() -> void:
 		"village_greenvale_capital":
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "Greenvale capital identity: %s direction" % committed_direction.capitalize()
-			controls_label.text = "[LEFT / ESC] Inspect Aurelian homeland"
+			controls_label.text = "[ENTER] %s    [LEFT / ESC] Inspect Aurelian homeland" % _mandate_action_label()
+		"village_national_mandate_started":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "%s mandate started from Greenvale" % committed_direction.capitalize()
+			controls_label.text = "[LEFT / ESC] Inspect active mandate locus"
 		"map_east_route":
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "Legacy East Route selection restored"
@@ -940,6 +1037,25 @@ func _update_runtime_hud() -> void:
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "Legacy Greenvale route context"
 			controls_label.text = "[LEFT / ESC] Return to Map"
+
+
+func _mandate_action_label() -> String:
+	match committed_direction:
+		"expand":
+			return "Commission Basin Survey"
+		"frontier":
+			return "Establish Frontier Watch"
+		_:
+			return "Dispatch Trade Delegation"
+
+func _mandate_locus_label() -> String:
+	match committed_direction:
+		"expand":
+			return "North Ridge"
+		"frontier":
+			return "Gilded Crossing"
+		_:
+			return "East Route"
 
 func _emit_action(action_name: String) -> void:
 	var event := InputEventAction.new()
@@ -1026,9 +1142,11 @@ func _process(_delta: float) -> void:
 	elif automated_frame == 4170:
 		_emit_action("ui_right")
 	elif automated_frame == 4290:
-		_emit_action("ui_left")
+		_emit_action("ui_accept")
 	elif automated_frame == 4410:
 		_emit_action("ui_left")
-	elif automated_frame >= 4530:
-		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=4530")
+	elif automated_frame == 4530:
+		_emit_action("ui_left")
+	elif automated_frame >= 4650:
+		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=4650")
 		get_tree().quit(0)
