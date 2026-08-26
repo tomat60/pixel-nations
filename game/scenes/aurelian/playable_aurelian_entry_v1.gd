@@ -61,6 +61,7 @@ var homeland_marker: Node3D
 var nation_emblem: Node3D
 var capital_standards: Node3D
 var living_capital_presentation: Node3D
+var imperial_presentation: Node3D
 
 func _ready() -> void:
 	if DisplayServer.get_name() == "headless" and not ResourceLoader.exists(GLB_PATH):
@@ -157,6 +158,8 @@ func _ready() -> void:
 	main_basin.add_child(capital_standards)
 	living_capital_presentation = _build_living_capital_presentation()
 	main_basin.add_child(living_capital_presentation)
+	imperial_presentation = _build_imperial_presentation()
+	main_basin.add_child(imperial_presentation)
 	mandate_marker = _build_national_mandate_marker()
 	main_basin.add_child(mandate_marker)
 	_build_runtime_hud()
@@ -777,6 +780,126 @@ func _build_living_capital_presentation() -> Node3D:
 	root.visible = false
 	return root
 
+func _build_imperial_presentation() -> Node3D:
+	var root := Node3D.new()
+	root.name = "AurelianImperialPresentation"
+
+	var capital := Node3D.new()
+	capital.name = "VillageImperialCapital"
+	capital.position = topology_to_godot(Vector2(354.0, 285.0), 0.22)
+	var plinth := MeshInstance3D.new()
+	plinth.name = "ImperialPlinth"
+	var plinth_mesh := CylinderMesh.new()
+	plinth_mesh.top_radius = 0.82
+	plinth_mesh.bottom_radius = 1.02
+	plinth_mesh.height = 0.34
+	plinth_mesh.radial_segments = 12
+	plinth.mesh = plinth_mesh
+	plinth.position.y = 0.17
+	plinth.material_override = _material("#5b2f68ff", 0.28)
+	capital.add_child(plinth)
+	var spire := MeshInstance3D.new()
+	spire.name = "ImperialSpire"
+	var spire_mesh := CylinderMesh.new()
+	spire_mesh.top_radius = 0.12
+	spire_mesh.bottom_radius = 0.30
+	spire_mesh.height = 2.55
+	spire_mesh.radial_segments = 12
+	spire.mesh = spire_mesh
+	spire.position.y = 1.48
+	spire.material_override = _material("#e1b94fff", 0.46)
+	capital.add_child(spire)
+	for index in range(3):
+		var crown_point := MeshInstance3D.new()
+		crown_point.name = "ImperialCrownPoint%02d" % (index + 1)
+		var crown_mesh := CylinderMesh.new()
+		crown_mesh.top_radius = 0.02
+		crown_mesh.bottom_radius = 0.18
+		crown_mesh.height = 0.68
+		crown_mesh.radial_segments = 6
+		crown_point.mesh = crown_mesh
+		crown_point.position = Vector3((float(index) - 1.0) * 0.34, 2.86, 0.0)
+		crown_point.material_override = _material("#f1d36aff", 0.50)
+		capital.add_child(crown_point)
+	var capital_label := Label3D.new()
+	capital_label.name = "ImperialCapitalLabel"
+	capital_label.text = "IMPERIAL CAPITAL"
+	capital_label.font_size = 46
+	capital_label.outline_size = 10
+	capital_label.modulate = Color("#ffe28aff")
+	capital_label.position = Vector3(0.0, 3.65, 0.0)
+	capital_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	capital.add_child(capital_label)
+	root.add_child(capital)
+
+	var heartland := Node3D.new()
+	heartland.name = "MapImperialHeartland"
+	heartland.position = topology_to_godot(Vector2(354.0, 285.0), 0.52)
+	for radius in [1.05, 1.42]:
+		var ring := MeshInstance3D.new()
+		ring.name = "ImperialHeartlandRing"
+		var ring_mesh := TorusMesh.new()
+		ring_mesh.inner_radius = radius - 0.07
+		ring_mesh.outer_radius = radius + 0.07
+		ring_mesh.rings = 32
+		ring_mesh.ring_segments = 12
+		ring.mesh = ring_mesh
+		ring.material_override = _material("#f0c552ff", 0.48)
+		heartland.add_child(ring)
+	var heartland_label := Label3D.new()
+	heartland_label.name = "ImperialHeartlandLabel"
+	heartland_label.text = "IMPERIAL HEARTLAND"
+	heartland_label.font_size = 38
+	heartland_label.outline_size = 9
+	heartland_label.modulate = Color("#ffe28aff")
+	heartland_label.position = Vector3(0.0, 1.35, 0.0)
+	heartland_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	heartland.add_child(heartland_label)
+	root.add_child(heartland)
+
+	var world_emblem := Node3D.new()
+	world_emblem.name = "WorldFirstEmpire"
+	world_emblem.position = topology_to_godot(Vector2(500.0, 455.0), 0.38)
+	var world_hex := MeshInstance3D.new()
+	world_hex.name = "ImperialWorldHex"
+	var world_hex_mesh := CylinderMesh.new()
+	world_hex_mesh.top_radius = 0.78
+	world_hex_mesh.bottom_radius = 0.78
+	world_hex_mesh.height = 0.18
+	world_hex_mesh.radial_segments = 6
+	world_hex.mesh = world_hex_mesh
+	world_hex.rotation.x = PI / 2.0
+	world_hex.position.y = 1.25
+	world_hex.material_override = _material("#6f347dff", 0.44)
+	world_emblem.add_child(world_hex)
+	var world_label := Label3D.new()
+	world_label.name = "FirstEmpireLabel"
+	world_label.text = "AURELIAN EMPIRE"
+	world_label.font_size = 52
+	world_label.outline_size = 11
+	world_label.modulate = Color("#ffe28aff")
+	world_label.position = Vector3(0.0, 2.18, 0.0)
+	world_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	world_emblem.add_child(world_label)
+	root.add_child(world_emblem)
+
+	root.visible = false
+	return root
+
+func _refresh_imperial_presentation(state_name: String) -> void:
+	if imperial_presentation == null:
+		return
+	imperial_presentation.visible = state_name in ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"]
+	var village_marker := imperial_presentation.get_node_or_null("VillageImperialCapital") as Node3D
+	var map_marker := imperial_presentation.get_node_or_null("MapImperialHeartland") as Node3D
+	var world_marker := imperial_presentation.get_node_or_null("WorldFirstEmpire") as Node3D
+	if village_marker != null:
+		village_marker.visible = state_name == "village_aurelian_imperial_capital"
+	if map_marker != null:
+		map_marker.visible = state_name == "map_aurelian_imperial_heartland"
+	if world_marker != null:
+		world_marker.visible = state_name == "world_first_empire_proclaimed"
+
 func _animate_living_capital_presentation(delta: float) -> void:
 	var seconds := float(Time.get_ticks_msec()) / 1000.0
 	if dispatch_token != null and dispatch_token.visible:
@@ -839,6 +962,7 @@ func _apply_entry_state(state_name: String) -> void:
 		living_capital_presentation.visible = state_name in ["village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital"]
 		if living_capital_presentation.visible and previous_state != state_name:
 			_reveal_living_capital()
+	_refresh_imperial_presentation(state_name)
 	_set_trade_world_underway(false)
 	_refresh_national_direction_identity()
 	match state_name:
