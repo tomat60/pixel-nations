@@ -2,19 +2,19 @@
 
 Status: ACTIVE
 Updated: 2026-08-26
-Current state revision: Directional Empire Identity v1 accepted
+Current state revision: Aurelian River Surge Crisis v1 authorized
 Authority source: this file on the current `main`
-Authority baseline SHA: `bcd97f7970856551d91fa325609761eb542c32c1`
+Authority baseline SHA: `60e1a53f5a7f063d8304f68ea4e8518a100e08dc`
 Product baseline SHA: `bcd97f7970856551d91fa325609761eb542c32c1`
-Current milestone: Directional Empire Identity v1 accepted; no further product implementation authorized
-Active execution issue: #522
-Next allowed action: conduct one bounded strategy review and, only if it selects a safe next slice, propose a separate documentation contract before any product implementation.
+Current milestone: Aurelian River Surge Crisis v1 authorized for exactly one bounded implementation candidate
+Active execution issue: #526
+Next allowed action: implement exactly one Godot Aurelian River Surge Crisis v1 candidate under the accepted contract, then run exact-head evidence and direct review.
 
 ## Product truth
 
 Pixel Nations is a strategy game built around:
 
-`one land -> settlement -> city -> nation -> empire`
+`one land -> settlement -> city -> nation -> empire -> crisis -> rival -> frontier payoff`
 
 The full logical world contains 10,000 lands in a 100 x 100 structure. The current playable demonstration remains Sector A-01 / Aurelian Basin.
 
@@ -31,26 +31,22 @@ Village, Map and World remain three roles over one physical geography:
 Do not rebuild these accepted capabilities:
 
 - shared deterministic Aurelian Basin geography and Blender to GLB to Godot pipeline;
-- Production Village progression through claimed, founded, developed, city, capital and imperial capital;
-- Production Map land, route, city, homeland and imperial heartland presentation;
-- Production World strategic-direction, nation and first-empire role;
+- Production Village progression through imperial capital;
+- Production Map progression through imperial heartland;
+- Production World progression through direction-specific first empire;
 - World to Map to Village decision handoff;
 - normal Godot playable entry and keyboard navigation;
 - packaged Aurelian render asset;
 - Chromium Web export playability;
 - Session Persistence v2 for native and Web;
-- explicit First Land Claim;
-- explicit First Settlement Founding;
-- Aurelian Visible Expansion v1;
-- explicit First Settlement Development;
-- explicit First Trade Route Connection;
-- explicit First Trade Caravan Dispatch;
-- explicit First City Charter;
-- explicit First Nation Founding;
+- explicit land claim, settlement founding and development;
+- visible expansion, trade route connection and caravan dispatch;
+- explicit city charter and nation founding;
 - Living Capital Vertical Slice v1;
 - First National Direction Commitment v1;
 - First National Mandate v1;
-- First Empire Proclamation v1.
+- First Empire Proclamation v1;
+- Directional Empire Identity v1.
 
 Accepted GLB identity and shared physical geography remain unchanged.
 
@@ -61,13 +57,12 @@ PR #524 `Implement Godot Directional Empire Identity v1` is accepted and merged.
 - terminal result: `GODOT_AURELIAN_DIRECTIONAL_EMPIRE_IDENTITY_PASS`;
 - accepted head: `478bc1a56e2dcd95ebf453c17f5d24004540b2c9`;
 - merged product baseline: `bcd97f7970856551d91fa325609761eb542c32c1`;
-- Trade, Expand and Frontier now have separate procedural physical glyphs in Village, Map and World;
+- Trade, Expand and Frontier have distinct procedural identities in Village, Map and World;
 - Village identifies the direction-specific imperial capital;
-- Map preserves the unchanged Aurelian geography while binding Trade to East Route, Expand to North Ridge and Frontier to Gilded Crossing;
+- Map binds Trade to East Route, Expand to North Ridge and Frontier to Gilded Crossing;
 - World recognizes a direction-specific first Aurelian Empire;
 - Session Persistence v2 preserves `empire_proclaimed=true` and the committed direction;
-- direct review accepted all nine final Village, Map and World stills;
-- normal-input evidence completed the full commitment, mandate and proclamation sequence for all three directions;
+- direct review accepted all nine final stills and normal-input sequences;
 - no visual correction, new asset, GLB or geography was required.
 
 Accepted exact-head evidence:
@@ -80,32 +75,53 @@ Issue #522 is completed by this accepted implementation.
 
 ## Strategy decision
 
-The first-run fantasy and its direction-specific empire payoff are complete.
+The direction-specific empire completes the founding arc. The next bounded slice begins the crisis step explicitly named by ADR-001 and adds the first two-way decision after empire formation.
 
-No later product slice is selected. The next permitted activity is one bounded strategy review. It may propose a separate documentation-only contract, but it may not authorize implementation by itself.
+The selected crisis is a deterministic River Surge on the existing Aurelian river. The player must choose exactly one response:
+
+- `Shield Greenvale`; or
+- `Keep East Bridge Open`.
+
+This is a persistent strategic response, not crisis simulation. There is no resolution, reward, cost, timer, damage or failure state.
 
 ## Current authority
 
-Directional Empire Identity v1 is terminally accepted.
+Issue #526 and `docs/GODOT_AURELIAN_RIVER_SURGE_CRISIS_V1_CONTRACT.md` authorize exactly one implementation candidate:
 
-There is no active product implementation authority. Any later executable slice requires a new issue and a separate documentation-only contract merged with healthy exact-head checks.
+`direction-specific first empire -> World reveals River Surge crisis -> Map shows Greenvale and East Bridge response loci -> Village explicitly chooses a response -> Map shows the selected existing locus -> World records the first imperial crisis response`
 
-Green CI alone remains insufficient for future visual or product acceptance.
+The candidate must:
+
+- preserve Trade, Expand or Frontier identity and `empire_proclaimed=true`;
+- use deliberate normal input for the mutually exclusive response;
+- keep Village as HOW, Map as WHERE and World as WHY / WHICH DIRECTION;
+- preserve all accepted river, bridge, landmark and camera geography;
+- persist the response across native restart, Web reload and profile reopen;
+- produce exact-head Playable Entry, Web Playability and Session Persistence evidence;
+- receive direct still and motion review.
+
+Green CI alone is not acceptance. One bounded visual correction maximum is allowed. The terminal classification must be exactly:
+
+- `GODOT_AURELIAN_RIVER_SURGE_CRISIS_PASS`; or
+- `GODOT_AURELIAN_RIVER_SURGE_CRISIS_REJECT`.
 
 ## Allowed scope
 
-- one bounded strategy review;
-- repository and evidence inspection;
-- a separate documentation-only contract proposal if the review selects a safe slice;
-- authority maintenance required to keep this file current.
+- one exact River Surge crisis manifest;
+- exactly two responses: Shield Greenvale and Keep East Bridge Open;
+- focused Godot controller and HUD changes;
+- restrained procedural cues on existing river, Greenvale and East Bridge geometry;
+- focused tests and Session Persistence v2 fixtures;
+- narrowly scoped changes to existing evidence workflows;
+- contract-linked documentation.
 
 ## Forbidden scope
 
-- any product implementation before a new contract is merged;
-- progression after first empire proclamation without a new explicit strategy decision;
-- another land, territorial ownership change or multi-land simulation;
-- economy, resources, costs, rewards, taxes, production or inventory;
-- population, workers, timers or queues;
+- crisis resolution, reward, penalty, resource cost, timer or failure simulation;
+- a third response or direction-specific response matrix;
+- rival, frontier payoff or further post-crisis progression;
+- another land, ownership change or multi-land simulation;
+- economy, resources, taxes, production, inventory, population, workers or queues;
 - governance systems, laws, factions or diplomacy;
 - combat, units, damage or military simulation;
 - backend, accounts, cloud save or multiplayer;
@@ -119,9 +135,9 @@ Green CI alone remains insufficient for future visual or product acceptance.
 
 1. Optimize for visible playable progress, not gate count.
 2. One active product or recovery PR at a time.
-3. Green CI is necessary but not sufficient for visual or product acceptance.
+3. Green CI is necessary but not sufficient for acceptance.
 4. Directly inspect running-game images, motion and persistence artifacts.
-5. Preserve the accepted shared geography and avoid rebuilding the GLB.
+5. Preserve the accepted shared geography and GLB.
 6. Any head movement invalidates older evidence.
 7. Fix deterministic failures at root cause on the same PR.
 8. Rerun only the smallest failing job for isolated infrastructure failures.
@@ -138,14 +154,16 @@ Green CI alone remains insufficient for future visual or product acceptance.
 ## Source-of-truth precedence
 
 1. this `PROJECT_CURRENT_STATE.md`;
-2. accepted ADRs, especially ADR-001;
-3. root `AGENTS.md`;
-4. accepted exact-head evidence and merged PR #524;
-5. operating and QA protocols;
-6. historical issues, contracts, PRs, briefs and reports.
+2. `docs/GODOT_AURELIAN_RIVER_SURGE_CRISIS_V1_CONTRACT.md`;
+3. active execution issue #526;
+4. accepted ADRs, especially ADR-001;
+5. root `AGENTS.md`;
+6. accepted exact-head evidence and merged PR #524;
+7. operating and QA protocols;
+8. historical issues, contracts, PRs, briefs and reports.
 
 Issue #415 remains shared-geography history and continuity guidance. Issue #522 and its contract are completed historical authority.
 
 ## Current stop condition
 
-Do not start product implementation from this state. Stop after recording the accepted Directional Empire Identity v1 result. The next allowed activity is one bounded strategy review and, only if justified, a separate documentation contract.
+Stop after one accepted or rejected Aurelian River Surge Crisis v1 candidate. A PASS must be recorded here before any rival or frontier strategy review. A REJECT must restore the accepted Directional Empire Identity baseline and record the exact reason.
