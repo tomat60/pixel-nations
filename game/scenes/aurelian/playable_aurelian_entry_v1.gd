@@ -1179,18 +1179,18 @@ func _process(_delta: float) -> void:
 		_emit_action("ui_accept")
 	elif automated_frame == 4410:
 		_emit_action("ui_left")
+	elif automated_frame == 4470:
+		_emit_action("ui_left")
 	elif automated_frame == 4530:
-		_emit_action("ui_left")
+		_emit_action("ui_right")
+	elif automated_frame == 4590:
+		_emit_action("ui_right")
 	elif automated_frame == 4650:
-		_emit_action("ui_right")
-	elif automated_frame == 4770:
-		_emit_action("ui_right")
-	elif automated_frame == 4890:
 		_emit_action("ui_accept")
-	elif automated_frame == 5010:
+	elif automated_frame == 4710:
 		_emit_action("ui_left")
-	elif automated_frame == 5130:
+	elif automated_frame == 4770:
 		_emit_action("ui_left")
-	elif automated_frame >= 5250:
-		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=5250")
+	elif automated_frame >= 4830:
+		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=4830")
 		get_tree().quit(0)
