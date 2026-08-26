@@ -1,0 +1,67 @@
+{
+  "contract": "GODOT_AURELIAN_FIRST_EMPIRE_PROCLAMATION_V1",
+  "issue": 518,
+  "authority_baseline": "1d2bece54d467119072bbd708a80fc4b0f8e31de",
+  "product_baseline": "accf1e0687ec2f6f3ba27a6cc01a804c86da2fac",
+  "action": "Proclaim Aurelian Empire",
+  "event": "AURELIAN_FIRST_EMPIRE_PROCLAMATION=AURELIAN",
+  "prerequisites": {
+    "nation_founded": true,
+    "national_direction": ["trade", "expand", "frontier"],
+    "national_mandate_started": true
+  },
+  "states": {
+    "world_before": "world_national_mandate_underway",
+    "map_before": "map_national_mandate_active",
+    "village_before": "village_national_mandate_started",
+    "village_after": "village_aurelian_imperial_capital",
+    "map_after": "map_aurelian_imperial_heartland",
+    "world_after": "world_first_empire_proclaimed"
+  },
+  "view_roles": {
+    "village": "HOW",
+    "map": "WHERE",
+    "world": "WHY_WHICH_DIRECTION"
+  },
+  "direction_invariant": {
+    "preserve_committed_direction": true,
+    "variants": ["trade", "expand", "frontier"]
+  },
+  "persistence": {
+    "schema": "AURELIAN_SESSION_PERSISTENCE_V2",
+    "field": "empire_proclaimed",
+    "native_restart": true,
+    "web_reload": true,
+    "profile_reopen": true,
+    "denied_storage_fallback": "world_neutral"
+  },
+  "geography": {
+    "new_land": false,
+    "ownership_change": false,
+    "new_glb": false,
+    "new_terrain": false,
+    "preserve_greenvale": true,
+    "preserve_east_route": true,
+    "preserve_north_ridge": true,
+    "preserve_gilded_crossing": true
+  },
+  "acceptance": {
+    "explicit_input_only": true,
+    "single_event": true,
+    "idempotent": true,
+    "direct_review_required": true,
+    "visual_correction_limit": 1
+  },
+  "forbidden": [
+    "economy",
+    "population",
+    "governance_simulation",
+    "diplomacy",
+    "combat",
+    "second_land",
+    "post_proclamation_empire_progression",
+    "new_assets",
+    "P12",
+    "MAX"
+  ]
+}
