@@ -830,6 +830,10 @@ func _build_imperial_presentation() -> Node3D:
 	capital_label.position = Vector3(0.0, 3.65, 0.0)
 	capital_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	capital.add_child(capital_label)
+	var capital_glyph := MeshInstance3D.new()
+	capital_glyph.name = "ImperialCapitalDirectionGlyph"
+	capital_glyph.position = Vector3(0.0, 3.02, 0.18)
+	capital.add_child(capital_glyph)
 	root.add_child(capital)
 
 	var heartland := Node3D.new()
@@ -855,6 +859,10 @@ func _build_imperial_presentation() -> Node3D:
 	heartland_label.position = Vector3(0.0, 1.35, 0.0)
 	heartland_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	heartland.add_child(heartland_label)
+	var heartland_glyph := MeshInstance3D.new()
+	heartland_glyph.name = "ImperialHeartlandDirectionGlyph"
+	heartland_glyph.position = Vector3(0.0, 0.24, 0.0)
+	heartland.add_child(heartland_glyph)
 	root.add_child(heartland)
 
 	var world_emblem := Node3D.new()
@@ -881,24 +889,76 @@ func _build_imperial_presentation() -> Node3D:
 	world_label.position = Vector3(0.0, 2.18, 0.0)
 	world_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	world_emblem.add_child(world_label)
+	var world_glyph := MeshInstance3D.new()
+	world_glyph.name = "ImperialWorldDirectionGlyph"
+	world_glyph.position = Vector3(0.0, 1.25, 0.22)
+	world_emblem.add_child(world_glyph)
 	root.add_child(world_emblem)
 
 	root.visible = false
 	return root
 
+func _configure_directional_empire_glyph(glyph: MeshInstance3D, direction: String, scale: float) -> void:
+	glyph.rotation = Vector3.ZERO
+	match direction:
+		"expand":
+			var expansion_arrow := CylinderMesh.new()
+			expansion_arrow.top_radius = scale
+			expansion_arrow.bottom_radius = scale
+			expansion_arrow.height = scale * 0.24
+			expansion_arrow.radial_segments = 3
+			glyph.mesh = expansion_arrow
+			glyph.rotation.x = PI / 2.0
+		"frontier":
+			var frontier_shield := BoxMesh.new()
+			frontier_shield.size = Vector3(scale * 1.25, scale * 1.25, scale * 0.22)
+			glyph.mesh = frontier_shield
+			glyph.rotation.z = PI / 4.0
+		_:
+			var trade_ring := TorusMesh.new()
+			trade_ring.inner_radius = scale * 0.52
+			trade_ring.outer_radius = scale
+			trade_ring.rings = 24
+			trade_ring.ring_segments = 10
+			glyph.mesh = trade_ring
+	glyph.material_override = _material(_direction_color(direction), 0.58)
+
 func _refresh_imperial_presentation(state_name: String) -> void:
 	if imperial_presentation == null:
 		return
 	imperial_presentation.visible = state_name in ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"]
+	var direction := committed_direction if committed_direction in NATIONAL_DIRECTIONS else "trade"
+	var direction_title := direction.to_upper()
 	var village_marker := imperial_presentation.get_node_or_null("VillageImperialCapital") as Node3D
 	var map_marker := imperial_presentation.get_node_or_null("MapImperialHeartland") as Node3D
 	var world_marker := imperial_presentation.get_node_or_null("WorldFirstEmpire") as Node3D
 	if village_marker != null:
 		village_marker.visible = state_name == "village_aurelian_imperial_capital"
+		var village_label := village_marker.get_node_or_null("ImperialCapitalLabel") as Label3D
+		var village_glyph := village_marker.get_node_or_null("ImperialCapitalDirectionGlyph") as MeshInstance3D
+		if village_label != null:
+			village_label.text = "%s IMPERIAL CAPITAL" % direction_title
+			village_label.modulate = Color(_direction_color(direction))
+		if village_glyph != null:
+			_configure_directional_empire_glyph(village_glyph, direction, 0.34)
 	if map_marker != null:
 		map_marker.visible = state_name == "map_aurelian_imperial_heartland"
+		var map_label := map_marker.get_node_or_null("ImperialHeartlandLabel") as Label3D
+		var map_glyph := map_marker.get_node_or_null("ImperialHeartlandDirectionGlyph") as MeshInstance3D
+		if map_label != null:
+			map_label.text = "%s IMPERIAL HEARTLAND" % direction_title
+			map_label.modulate = Color(_direction_color(direction))
+		if map_glyph != null:
+			_configure_directional_empire_glyph(map_glyph, direction, 0.42)
 	if world_marker != null:
 		world_marker.visible = state_name == "world_first_empire_proclaimed"
+		var world_label := world_marker.get_node_or_null("FirstEmpireLabel") as Label3D
+		var world_glyph := world_marker.get_node_or_null("ImperialWorldDirectionGlyph") as MeshInstance3D
+		if world_label != null:
+			world_label.text = "AURELIAN %s EMPIRE" % direction_title
+			world_label.modulate = Color(_direction_color(direction))
+		if world_glyph != null:
+			_configure_directional_empire_glyph(world_glyph, direction, 0.46)
 
 func _animate_living_capital_presentation(delta: float) -> void:
 	var seconds := float(Time.get_ticks_msec()) / 1000.0
