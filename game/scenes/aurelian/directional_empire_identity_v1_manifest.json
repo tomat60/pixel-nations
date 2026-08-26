@@ -1,0 +1,122 @@
+{
+  "contract": "GODOT_AURELIAN_DIRECTIONAL_EMPIRE_IDENTITY_V1",
+  "issue": 522,
+  "authority_baseline_sha": "d7984bb1fe16247263bb54316f28b6f22181b964",
+  "product_baseline_sha": "ebdc103a3f2a9ff4c8a495e9547a084ae9a6a715",
+  "entry_requirement": {
+    "nation_founded": true,
+    "national_direction": ["trade", "expand", "frontier"],
+    "national_mandate_started": true,
+    "empire_proclaimed": false
+  },
+  "proclamation": {
+    "action": "Proclaim Aurelian Empire",
+    "event": "AURELIAN_FIRST_EMPIRE_PROCLAMATION=AURELIAN",
+    "explicit_player_action_required": true,
+    "single_event": true,
+    "idempotent": true,
+    "preserve_committed_direction": true
+  },
+  "direction_bindings": {
+    "trade": {
+      "village_state": "village_aurelian_imperial_capital_trade_identity",
+      "village_cue": "imperial_trade_standard",
+      "map_state": "map_aurelian_imperial_heartland_trade_identity",
+      "map_locus": "east_route",
+      "world_state": "world_first_trade_empire_proclaimed",
+      "world_cue": "aurelian_trade_empire_emblem",
+      "color_source": "existing_trade_direction_color"
+    },
+    "expand": {
+      "village_state": "village_aurelian_imperial_capital_expand_identity",
+      "village_cue": "imperial_survey_standard",
+      "map_state": "map_aurelian_imperial_heartland_expand_identity",
+      "map_locus": "north_ridge",
+      "world_state": "world_first_expand_empire_proclaimed",
+      "world_cue": "aurelian_expand_empire_emblem",
+      "color_source": "existing_expand_direction_color"
+    },
+    "frontier": {
+      "village_state": "village_aurelian_imperial_capital_frontier_identity",
+      "village_cue": "imperial_watch_standard",
+      "map_state": "map_aurelian_imperial_heartland_frontier_identity",
+      "map_locus": "gilded_crossing",
+      "world_state": "world_first_frontier_empire_proclaimed",
+      "world_cue": "aurelian_frontier_empire_emblem",
+      "color_source": "existing_frontier_direction_color"
+    }
+  },
+  "presentation": {
+    "procedural_only": true,
+    "new_asset": false,
+    "new_glb": false,
+    "whole_scene_recolor": false,
+    "label_only_differentiation": false,
+    "one_clear_cue_per_view": true,
+    "preserve_imperial_hierarchy": true,
+    "subordinate_to_shared_terrain": true
+  },
+  "view_roles": {
+    "village": "HOW_DIRECTION_SPECIFIC_IMPERIAL_CAPITAL",
+    "map": "WHERE_EXISTING_DIRECTION_LOCUS_IN_IMPERIAL_HEARTLAND",
+    "world": "WHY_WHICH_DIRECTION_FIRST_EMPIRE_IDENTITY"
+  },
+  "shared_geography": {
+    "asset": "aurelian_authored_terrain_v1.glb",
+    "greenvale_origin_unchanged": true,
+    "river_unchanged": true,
+    "bridge_unchanged": true,
+    "east_route_unchanged": true,
+    "north_ridge_unchanged": true,
+    "gilded_crossing_unchanged": true,
+    "ownership_change_allowed": false,
+    "second_land_allowed": false
+  },
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "fields": ["national_direction", "national_mandate_started", "empire_proclaimed"],
+    "matching_direction_identity_required": true,
+    "native_restart_required": true,
+    "web_reload_required": true,
+    "persistent_profile_reopen_required": true,
+    "restore_event_emission_allowed": false,
+    "duplicate_cue_allowed": false
+  },
+  "evidence": {
+    "all_three_normal_input_sequences_required": true,
+    "all_three_preaction_states_required": true,
+    "all_three_postaction_view_sets_required": true,
+    "village_reopen_required": true,
+    "native_persistence_required": true,
+    "web_persistence_required": true,
+    "profile_reopen_required": true,
+    "shared_geography_regression_required": true,
+    "exact_manifest_validation_required": true,
+    "direct_still_and_motion_review_required": true,
+    "one_bounded_visual_correction_maximum": true
+  },
+  "terminal_results": [
+    "GODOT_AURELIAN_DIRECTIONAL_EMPIRE_IDENTITY_PASS",
+    "GODOT_AURELIAN_DIRECTIONAL_EMPIRE_IDENTITY_REJECT"
+  ],
+  "forbidden": [
+    "post_proclamation_progression",
+    "economy",
+    "resources",
+    "population",
+    "workers",
+    "timers",
+    "queues",
+    "governance",
+    "diplomacy",
+    "combat",
+    "units",
+    "second_land",
+    "ownership_change",
+    "new_assets",
+    "new_geography",
+    "P12",
+    "MAX"
+  ]
+}
