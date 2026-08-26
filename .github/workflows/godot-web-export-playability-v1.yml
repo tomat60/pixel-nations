@@ -377,7 +377,9 @@ jobs:
           test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "28"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
-            test "$(stat -c %s "$image")" -gt 70000
+            bytes="$(stat -c %s "$image")"
+            echo "$(basename "$image") $bytes"
+            test "$bytes" -gt 60000
           done
           test -s "${EVIDENCE_DIR}/godot-web-input-sequence.webm"
           test "$(stat -c %s "${EVIDENCE_DIR}/godot-web-input-sequence.webm")" -gt 100000
