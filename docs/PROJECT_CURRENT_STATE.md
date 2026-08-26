@@ -1,14 +1,14 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-08-25
-Current state revision: First National Direction Commitment v1 accepted
+Updated: 2026-08-26
+Current state revision: First National Direction Commitment v1 accepted, First National Mandate v1 selected
 Authority source: this file on the current `main`
-Authority baseline SHA: `627d06f780266adb08e15c0d174dd4791773eef0`
+Authority baseline SHA: `db264ff394f2a550d37dfc68707c9786c3801b95`
 Product baseline SHA: `627d06f780266adb08e15c0d174dd4791773eef0`
-Current milestone: no further product implementation is authorized
-Active execution issue: #510
-Next allowed action: one bounded strategy review and, only if justified, a separate documentation contract PR.
+Current milestone: authorize exactly one Godot Aurelian First National Mandate v1 candidate
+Active execution issue: #514
+Next allowed action: after this authority and contract merge with healthy exact-head checks, implement exactly one bounded First National Mandate v1 candidate.
 
 ## Product truth
 
@@ -78,31 +78,50 @@ Accepted exact-head evidence:
 
 Issue #510 is completed by this accepted implementation.
 
+## Current milestone contract
+
+The bounded strategy review found one precise gap: the accepted Trade, Expand or Frontier commitment is persistent and readable, but it does not yet produce a deliberate player action.
+
+Issue #514 and `docs/GODOT_AURELIAN_FIRST_NATIONAL_MANDATE_V1_CONTRACT.md` authorize exactly one candidate with this outcome:
+
+`World direction committed -> Map homeland context -> Village capital identity -> explicit Launch National Mandate -> Village mandate started -> Map mandate active at an existing geographic locus -> World mandate underway`
+
+Direction bindings:
+
+- Trade: `Dispatch Trade Delegation` on the accepted East Route;
+- Expand: `Commission Basin Survey` at the existing North Ridge inside the accepted homeland;
+- Frontier: `Establish Frontier Watch` at the accepted Gilded Crossing frontier edge.
+
+One shared state machine must serve all three directions. Village owns the explicit action, Map owns the existing locus, and World owns the strategic consequence. The mandate must persist through native restart, Web reload and persistent-profile reopen.
+
 ## Current gate
 
-No additional product implementation is authorized.
+This documentation contract must merge with healthy exact-head checks before product implementation starts.
 
-The next allowed action is exactly one bounded strategy review of the accepted playable path. If that review identifies a justified next milestone, authorization requires a separate documentation contract PR accepted on `main` before any implementation branch or product PR.
+After acceptance, exactly one active First National Mandate v1 product or recovery PR is authorized. Green CI alone is not product acceptance. The candidate requires direct exact-head review and one bounded visual correction maximum.
 
 ## Allowed scope
 
-- strategy review;
+- `game/scenes/aurelian/**`;
+- `game/tests/**`;
+- existing Aurelian manifests and Session Persistence v2;
+- existing procedural presentation helpers and repository assets;
+- focused updates to the existing Playable Entry, Web Playability and Session Persistence v2 evidence workflows when required;
 - repository and evidence QA;
-- documentation contract work;
 - correctness recovery for the accepted baseline.
 
 ## Forbidden scope
 
-- uncontracted product implementation;
 - economy, resources, costs, rewards, taxes, production or inventory;
 - population, workers, timers or queues;
-- another land, territorial expansion or multi-land simulation;
-- governance, laws, factions, diplomacy or combat;
+- another land, territorial ownership change or multi-land simulation;
+- governance, laws, factions or diplomacy;
+- combat, units, damage or military simulation;
 - empire progression;
 - backend, accounts, cloud save or multiplayer;
 - React, SVG or CSS rebuilding of final game surfaces;
 - new GLB, terrain, geography, paid assets or paid tools;
-- broad CI or platform refactoring;
+- broad visual polish, broad CI changes or platform refactoring;
 - crypto, NFT, wallet, token, mint or pay-to-win direction;
 - P12 or MAX.
 
@@ -113,7 +132,8 @@ The next allowed action is exactly one bounded strategy review of the accepted p
 3. Green CI is necessary but not sufficient for visual or product acceptance.
 4. Directly inspect running-game images, motion and persistence artifacts.
 5. Preserve the accepted shared geography and avoid rebuilding the GLB.
-6. Do not begin another product implementation without a new accepted contract.
+6. Do not begin product implementation until this contract is accepted on `main`.
+7. Stop the candidate at `GODOT_AURELIAN_FIRST_NATIONAL_MANDATE_PASS`, `GODOT_AURELIAN_FIRST_NATIONAL_MANDATE_CORRECTION_REQUIRED` or `GODOT_AURELIAN_FIRST_NATIONAL_MANDATE_REJECT`.
 
 ## Tool and cost policy
 
@@ -127,14 +147,16 @@ The next allowed action is exactly one bounded strategy review of the accepted p
 ## Source-of-truth precedence
 
 1. this `PROJECT_CURRENT_STATE.md`;
-2. accepted ADRs, especially ADR-001;
-3. root `AGENTS.md`;
-4. accepted exact-head evidence and merged PRs;
-5. operating and QA protocols;
-6. historical issues, PRs, briefs and reports.
+2. `docs/GODOT_AURELIAN_FIRST_NATIONAL_MANDATE_V1_CONTRACT.md`;
+3. issue #514;
+4. accepted ADRs, especially ADR-001;
+5. root `AGENTS.md`;
+6. accepted exact-head evidence and merged PRs;
+7. operating and QA protocols;
+8. historical issues, PRs, briefs and reports.
 
 Issue #415 remains shared-geography history and continuity guidance, not current implementation authority.
 
 ## Current stop condition
 
-Stop product implementation. Perform only the next bounded strategy review and any separately authorized documentation contract work.
+Merge this documentation authority only after exact-head checks pass. Then authorize exactly one bounded First National Mandate v1 implementation candidate and stop it at direct terminal review.
