@@ -23,6 +23,9 @@ const VALID_STATES := [
 	"world_first_nation_founded",
 	"map_aurelian_homeland",
 	"village_greenvale_capital",
+	"village_national_mandate_started",
+	"map_national_mandate_active",
+	"world_national_mandate_underway",
 	"village_claimed",
 	"village_founded",
 	"village_developed",
@@ -46,6 +49,7 @@ static func fallback(status: String, adapter: String) -> Dictionary:
 		"city_chartered": false,
 		"nation_founded": false,
 		"national_direction": "none",
+		"national_mandate_started": false,
 	}
 
 static func load_session(path: String = NATIVE_PATH) -> Dictionary:
@@ -53,12 +57,14 @@ static func load_session(path: String = NATIVE_PATH) -> Dictionary:
 		return _load_web()
 	return _load_native(path)
 
-static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false, route_connected: bool = false, caravan_dispatched: bool = false, city_chartered: bool = false, nation_founded: bool = false, national_direction: String = "none") -> Dictionary:
+static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false, route_connected: bool = false, caravan_dispatched: bool = false, city_chartered: bool = false, nation_founded: bool = false, national_direction: String = "none", national_mandate_started: bool = false) -> Dictionary:
 	if not _is_valid_pair(state, intent):
 		return fallback("invalid_data", _adapter_name())
 	if not VALID_NATIONAL_DIRECTIONS.has(national_direction):
 		return fallback("invalid_data", _adapter_name())
 	if national_direction != "none" and not nation_founded:
+		return fallback("invalid_data", _adapter_name())
+	if national_mandate_started and national_direction == "none":
 		return fallback("invalid_data", _adapter_name())
 	if state in ["village_founded", "village_developed"] and not settlement_founded:
 		return fallback("invalid_data", _adapter_name())
@@ -79,10 +85,13 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 	if nation_founded and not city_chartered:
 		return fallback("invalid_data", _adapter_name())
 	var city_states := ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized"]
-	var nation_states := ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital"]
+	var nation_states := ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway"]
 	if state in city_states and not city_chartered:
 		return fallback("invalid_data", _adapter_name())
 	if state in nation_states and not nation_founded:
+		return fallback("invalid_data", _adapter_name())
+	var mandate_states := ["village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway"]
+	if (state in mandate_states) != national_mandate_started:
 		return fallback("invalid_data", _adapter_name())
 	if nation_founded and state not in nation_states:
 		return fallback("invalid_data", _adapter_name())
@@ -102,6 +111,7 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		"city_chartered": city_chartered,
 		"nation_founded": nation_founded,
 		"national_direction": national_direction,
+		"national_mandate_started": national_mandate_started,
 		"saved_at_utc": Time.get_datetime_string_from_system(true),
 	}
 	var payload_text := JSON.stringify(payload)
@@ -139,9 +149,12 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 	var city_chartered := bool(session.get("city_chartered", false))
 	var nation_founded := bool(session.get("nation_founded", false))
 	var national_direction := String(session.get("national_direction", "none"))
+	var national_mandate_started := bool(session.get("national_mandate_started", false))
 	if not VALID_NATIONAL_DIRECTIONS.has(national_direction):
 		return fallback("invalid_value", adapter)
 	if national_direction != "none" and not nation_founded:
+		return fallback("invalid_value", adapter)
+	if national_mandate_started and national_direction == "none":
 		return fallback("invalid_value", adapter)
 	if state in ["village_founded", "village_developed"] and not settlement_founded:
 		return fallback("invalid_value", adapter)
@@ -162,10 +175,13 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 	if nation_founded and not city_chartered:
 		return fallback("invalid_value", adapter)
 	var city_states := ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized"]
-	var nation_states := ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital"]
+	var nation_states := ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway"]
 	if state in city_states and not city_chartered:
 		return fallback("invalid_value", adapter)
 	if state in nation_states and not nation_founded:
+		return fallback("invalid_value", adapter)
+	var mandate_states := ["village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway"]
+	if (state in mandate_states) != national_mandate_started:
 		return fallback("invalid_value", adapter)
 	if nation_founded and state not in nation_states:
 		return fallback("invalid_value", adapter)
@@ -188,6 +204,7 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		"city_chartered": city_chartered,
 		"nation_founded": nation_founded,
 		"national_direction": national_direction,
+		"national_mandate_started": national_mandate_started,
 		"saved_at_utc": String(session.get("saved_at_utc", "")),
 	}
 
