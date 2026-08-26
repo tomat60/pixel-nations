@@ -2,13 +2,13 @@
 
 Status: ACTIVE
 Updated: 2026-08-26
-Current state revision: First National Mandate v1 accepted, First Empire Proclamation v1 selected
+Current state revision: First Empire Proclamation v1 accepted
 Authority source: this file on the current `main`
-Authority baseline SHA: `3f49b017d6e891734e949da51c475254c5303a2a`
-Product baseline SHA: `accf1e0687ec2f6f3ba27a6cc01a804c86da2fac`
-Current milestone: authorize exactly one Godot Aurelian First Empire Proclamation v1 candidate
+Authority baseline SHA: `ebdc103a3f2a9ff4c8a495e9547a084ae9a6a715`
+Product baseline SHA: `ebdc103a3f2a9ff4c8a495e9547a084ae9a6a715`
+Current milestone: First Empire Proclamation v1 accepted; no further product implementation authorized
 Active execution issue: #518
-Next allowed action: after this authority and contract merge with healthy exact-head checks, implement exactly one bounded First Empire Proclamation v1 candidate.
+Next allowed action: conduct one bounded strategy review and, only if it selects a safe next slice, propose a separate documentation contract before any product implementation.
 
 ## Product truth
 
@@ -31,9 +31,9 @@ Village, Map and World remain three roles over one physical geography:
 Do not rebuild these accepted capabilities:
 
 - shared deterministic Aurelian Basin geography and Blender to GLB to Godot pipeline;
-- Production Village progression through claimed, founded, developed, city and capital;
-- Production Map land, route, city and homeland presentation;
-- Production World strategic-direction and nation role;
+- Production Village progression through claimed, founded, developed, city, capital and imperial capital;
+- Production Map land, route, city, homeland and imperial heartland presentation;
+- Production World strategic-direction, nation and first-empire role;
 - World to Map to Village decision handoff;
 - normal Godot playable entry and keyboard navigation;
 - packaged Aurelian render asset;
@@ -49,61 +49,57 @@ Do not rebuild these accepted capabilities:
 - explicit First Nation Founding;
 - Living Capital Vertical Slice v1;
 - First National Direction Commitment v1;
-- First National Mandate v1.
+- First National Mandate v1;
+- First Empire Proclamation v1.
 
 Accepted GLB identity and shared physical geography remain unchanged.
 
 ## Most recent accepted product milestone
 
-PR #516 `Implement Godot Aurelian First National Mandate v1` is accepted and merged.
+PR #520 `Implement Godot Aurelian First Empire Proclamation v1` is accepted and merged.
 
-- terminal result: `GODOT_AURELIAN_FIRST_NATIONAL_MANDATE_PASS`;
-- accepted head: `579a3d2030f40bbdc5c20de32146d1cbc2b007d9`;
-- merged product baseline: `accf1e0687ec2f6f3ba27a6cc01a804c86da2fac`;
-- Village owns one explicit direction-bound action;
-- Map shows activity at the accepted East Route, North Ridge or Gilded Crossing locus;
-- World shows the selected mandate underway;
-- one shared state machine serves Trade, Expand and Frontier;
-- native restart, Web reload and persistent-profile reopen preserve `national_direction=expand` and `national_mandate_started=true`;
-- direct still and motion review accepted all three variants;
-- no visual correction was required.
+- terminal result: `GODOT_AURELIAN_FIRST_EMPIRE_PROCLAMATION_PASS`;
+- accepted head: `864d888f5f159f59447bda099177d7b36066a213`;
+- merged product baseline: `ebdc103a3f2a9ff4c8a495e9547a084ae9a6a715`;
+- Village owns the explicit `Proclaim Aurelian Empire` action after a national mandate starts;
+- Village becomes the Aurelian imperial capital;
+- Map shows the existing homeland as the imperial heartland without changing ownership or geography;
+- World recognizes the first Aurelian Empire while preserving Trade, Expand or Frontier;
+- normal input emits `AURELIAN_FIRST_EMPIRE_PROCLAMATION=AURELIAN` exactly once;
+- Session Persistence v2 preserves `empire_proclaimed=true` and the committed direction;
+- native restart, Web reload and persistent-profile reopen restore the imperial Map and Village states;
+- focused contracts, shared-geography regressions and all exact-head guards passed;
+- direct still and motion review accepted the candidate after the one allowed bounded visual correction;
+- the correction added procedural imperial presentation only, with no new asset, GLB or geography.
 
 Accepted exact-head evidence:
 
-- Playable Entry run `32929608710`, artifact `9592886223`, digest `sha256:1af5b1824ccd217f5d7dd67eeb013ed0ae524f458635e6e45d7ba8ebc4f417ba`;
-- Web Playability run `32929608603`, artifact `9592815442`, digest `sha256:6deb7e6bb23659f31984c78857aef12008d4e26ae292717883e96234a2b4be4a`;
-- Session Persistence v2 run `32929608577`, artifact `9592813105`, digest `sha256:50be7d1e356f25430c3c9a3402fa209452c55ac202374d6fac98963c5b913af6`.
+- Playable Entry run `32976610513`, artifact `9610013150`, digest `sha256:770d8e135a8e6e961fe2a1564b9c91cf44dbeceeba387015288d7bad5dc19d0c`;
+- Web Playability run `32976610533`, artifact `9609824128`, digest `sha256:93416bce16e0ad36140c2e9934af019ff79d099e09a47f883e95277f213b0002`;
+- Session Persistence v2 run `32976610485`, artifact `9609855562`, digest `sha256:f1122de8633798e290659e0d228a45dc1248ae270d65f4451fbabbba877c3aba`.
 
-Issue #514 is completed.
-
-## Current milestone contract
-
-The bounded strategy review rejected another mandate microstate and selected the first major completion of the core fantasy.
-
-Issue #518 and `docs/GODOT_AURELIAN_FIRST_EMPIRE_PROCLAMATION_V1_CONTRACT.md` authorize exactly one candidate with this outcome:
-
-`World national mandate underway -> Map Aurelian homeland and active mandate -> Village Greenvale capital -> explicit Proclaim Aurelian Empire -> Village imperial capital -> Map Aurelian imperial heartland -> World first empire proclaimed`
-
-The proclamation preserves the committed Trade, Expand or Frontier identity. It changes national status and presentation only. It does not add a second land, territorial ownership, economy, governance simulation, diplomacy or combat.
+Issue #518 is completed by this accepted implementation.
 
 ## Current gate
 
-This documentation contract must merge with healthy exact-head checks before product implementation starts.
+No additional product implementation is authorized.
 
-After acceptance, exactly one active First Empire Proclamation v1 product or recovery PR is authorized. Green CI alone is not product acceptance. The candidate requires direct exact-head review and one bounded visual correction maximum.
+The next permissible activity is one bounded strategy review. Any resulting product slice requires its own issue and documentation contract, merged with healthy exact-head checks before an implementation branch starts.
+
+Green CI alone remains insufficient for visual or product acceptance.
 
 ## Allowed scope
 
-- `game/scenes/aurelian/**`;
-- `game/tests/**`;
-- existing Aurelian manifests and Session Persistence v2;
-- existing procedural presentation helpers and repository assets;
-- focused updates to the existing Playable Entry, Web Playability and Session Persistence v2 evidence workflows when required;
-- repository and evidence QA;
-- correctness recovery for the accepted baseline.
+- repository and exact-head evidence QA;
+- correctness recovery for the accepted baseline;
+- one bounded strategy review;
+- a separate documentation-only authority proposal if the review selects a safe next slice.
 
 ## Forbidden scope
 
+Until a new contract is accepted:
+
+- product implementation;
 - another land, territorial ownership change or multi-land simulation;
 - economy, resources, costs, rewards, taxes, production or inventory;
 - population, workers, timers or queues;
@@ -124,8 +120,7 @@ After acceptance, exactly one active First Empire Proclamation v1 product or rec
 3. Green CI is necessary but not sufficient for visual or product acceptance.
 4. Directly inspect running-game images, motion and persistence artifacts.
 5. Preserve the accepted shared geography and avoid rebuilding the GLB.
-6. Do not begin product implementation until this contract is accepted on `main`.
-7. Stop the candidate at PASS, CORRECTION_REQUIRED or REJECT.
+6. Do not begin another product implementation until a new contract is accepted on `main`.
 
 ## Tool and cost policy
 
@@ -139,8 +134,8 @@ After acceptance, exactly one active First Empire Proclamation v1 product or rec
 ## Source-of-truth precedence
 
 1. this `PROJECT_CURRENT_STATE.md`;
-2. `docs/GODOT_AURELIAN_FIRST_EMPIRE_PROCLAMATION_V1_CONTRACT.md`;
-3. issue #518;
+2. the latest accepted milestone contract;
+3. the active execution issue named above;
 4. accepted ADRs, especially ADR-001;
 5. root `AGENTS.md`;
 6. accepted exact-head evidence and merged PRs;
@@ -151,4 +146,4 @@ Issue #415 remains shared-geography history and continuity guidance, not current
 
 ## Current stop condition
 
-Merge this documentation authority only after exact-head checks pass. Then authorize exactly one bounded First Empire Proclamation v1 implementation candidate and stop it at direct terminal review.
+Stop at accepted First Empire Proclamation v1. Do not start another product slice without a fresh bounded strategy review and a separately merged documentation contract.
