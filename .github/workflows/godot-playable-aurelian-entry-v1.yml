@@ -22,6 +22,7 @@ on:
       - "game/scenes/aurelian/aurelian_living_capital_vertical_slice_v1_manifest.json"
       - "game/scenes/aurelian/first_national_direction_commitment_v1_manifest.json"
       - "game/scenes/aurelian/first_national_mandate_v1_manifest.json"
+      - "game/scenes/aurelian/first_empire_proclamation_v1_manifest.json"
       - "game/tests/production_village_v1_test.gd"
       - "game/tests/aurelian_visible_expansion_v1_test.gd"
       - "game/tests/playable_aurelian_entry_v1_test.gd"
@@ -34,6 +35,7 @@ on:
       - "game/tests/aurelian_living_capital_vertical_slice_v1_test.gd"
       - "game/tests/aurelian_first_national_direction_commitment_v1_test.gd"
       - "game/tests/aurelian_first_national_mandate_v1_test.gd"
+      - "game/tests/aurelian_first_empire_proclamation_v1_test.gd"
       - ".github/workflows/godot-playable-aurelian-entry-v1.yml"
   workflow_dispatch:
 
@@ -118,6 +120,7 @@ jobs:
           cp game/scenes/aurelian/aurelian_living_capital_vertical_slice_v1_manifest.json "${EVIDENCE_DIR}/living-capital-manifest.json"
           cp game/scenes/aurelian/first_national_direction_commitment_v1_manifest.json "${EVIDENCE_DIR}/national-direction-manifest.json"
           cp game/scenes/aurelian/first_national_mandate_v1_manifest.json "${EVIDENCE_DIR}/national-mandate-manifest.json"
+          cp game/scenes/aurelian/first_empire_proclamation_v1_manifest.json "${EVIDENCE_DIR}/empire-proclamation-manifest.json"
 
       - name: Download pinned Godot
         timeout-minutes: 5
@@ -143,7 +146,7 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in aurelian_authored_terrain_v1_test production_village_v1_test aurelian_visible_expansion_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test aurelian_first_national_direction_commitment_v1_test aurelian_first_national_mandate_v1_test; do
+          for test in aurelian_authored_terrain_v1_test production_village_v1_test aurelian_visible_expansion_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test aurelian_first_national_direction_commitment_v1_test aurelian_first_national_mandate_v1_test aurelian_first_empire_proclamation_v1_test; do
             "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1 || { cat "${EVIDENCE_DIR}/${test}.log"; exit 1; }
           done
           grep -F "AURELIAN_AUTHORED_TERRAIN_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1_test.log"
@@ -163,6 +166,7 @@ jobs:
           grep -F "AURELIAN_LIVING_CAPITAL_VERTICAL_SLICE_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_living_capital_vertical_slice_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_national_direction_commitment_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_NATIONAL_MANDATE_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_national_mandate_v1_test.log"
+          grep -F "GODOT_AURELIAN_FIRST_EMPIRE_PROCLAMATION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_empire_proclamation_v1_test.log"
 
       - name: Capture normal launch, founding and development states
         timeout-minutes: 9
@@ -241,7 +245,7 @@ jobs:
           grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=EXPAND" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_NATIONAL_MANDATE=EXPAND" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test "$(grep -Fc "AURELIAN_FIRST_NATIONAL_MANDATE=" "${EVIDENCE_DIR}/playable-entry-sequence.log")" = "1"
-          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=4650" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=5250" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test -s "${EVIDENCE_DIR}/playable-entry-sequence.avi"
           mediainfo --Output=JSON "${EVIDENCE_DIR}/playable-entry-sequence.avi" > "${EVIDENCE_DIR}/video-metadata.json"
 
