@@ -333,6 +333,28 @@ jobs:
             await waitForCount('world_national_mandate_underway', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '28-world-national-mandate-underway-expand-1440x900.png') });
+
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('map_national_mandate_active', 2);
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('village_national_mandate_started', 2);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '29-village-before-empire-proclamation-expand-1440x900.png') });
+
+            await page.keyboard.press('Enter');
+            await waitForCount('village_aurelian_imperial_capital', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '30-village-aurelian-imperial-capital-expand-1440x900.png') });
+
+            await page.keyboard.press('ArrowLeft');
+            await waitForCount('map_aurelian_imperial_heartland', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '31-map-aurelian-imperial-heartland-expand-1440x900.png') });
+
+            await page.keyboard.press('ArrowLeft');
+            await waitForCount('world_first_empire_proclaimed', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '32-world-first-empire-proclaimed-expand-1440x900.png') });
             const video = page.video();
             await context.close();
             await video.saveAs(path.join(root, 'godot-web-input-sequence.webm'));
@@ -360,8 +382,9 @@ jobs:
               normal_entry: 'world_neutral',
               input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowDown', 'ArrowDown', 'ArrowUp', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft'],
               observed_states: observedStates,
-              accepted_handoff: 'World direction committed -> Village explicit mandate -> Map existing locus active -> World mandate underway',
+              accepted_handoff: 'World mandate underway -> Village explicit proclamation -> Map imperial heartland -> World first empire proclaimed',
               national_mandate_started: true,
+              empire_proclaimed: true,
               national_direction: 'expand',
               glb_sha256: process.env.GLB_SHA256,
               evidence_environment_state_driving: false
@@ -376,7 +399,7 @@ jobs:
       - name: Validate exact browser evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "28"
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "32"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
             bytes="$(stat -c %s "$image")"
@@ -412,6 +435,11 @@ jobs:
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_homeland" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_greenvale_capital" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_NATIONAL_MANDATE=EXPAND" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_FIRST_EMPIRE_PROCLAMATION=AURELIAN" "${EVIDENCE_DIR}/browser-console.log"
+          test "$(grep -Fc "AURELIAN_FIRST_EMPIRE_PROCLAMATION=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_aurelian_imperial_capital" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_imperial_heartland" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_empire_proclaimed" "${EVIDENCE_DIR}/browser-console.log"
           test "$(grep -Fc "AURELIAN_FIRST_NATIONAL_MANDATE=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_national_mandate_started" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_national_mandate_active" "${EVIDENCE_DIR}/browser-console.log"
