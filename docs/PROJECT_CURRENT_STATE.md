@@ -1,14 +1,14 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-08-26
-Current state revision: Aurelian River Surge Crisis v1 authorized
+Updated: 2026-08-27
+Current state revision: Aurelian River Surge Crisis v1 accepted
 Authority source: this file on the current `main`
-Authority baseline SHA: `60e1a53f5a7f063d8304f68ea4e8518a100e08dc`
-Product baseline SHA: `bcd97f7970856551d91fa325609761eb542c32c1`
-Current milestone: Aurelian River Surge Crisis v1 authorized for exactly one bounded implementation candidate
+Authority baseline SHA: `a4be5db1bf55baac055f9a9985d5de698dfdf75d`
+Product baseline SHA: `a4be5db1bf55baac055f9a9985d5de698dfdf75d`
+Current milestone: Aurelian River Surge Crisis v1 completed
 Active execution issue: #526
-Next allowed action: implement exactly one Godot Aurelian River Surge Crisis v1 candidate under the accepted contract, then run exact-head evidence and direct review.
+Next allowed action: one bounded strategy review and, only if justified, one separate documentation-only authority contract. No product implementation is currently authorized.
 
 ## Product truth
 
@@ -16,11 +16,7 @@ Pixel Nations is a strategy game built around:
 
 `one land -> settlement -> city -> nation -> empire -> crisis -> rival -> frontier payoff`
 
-The full logical world contains 10,000 lands in a 100 x 100 structure. The current playable demonstration remains Sector A-01 / Aurelian Basin.
-
-Godot remains the target runtime under ADR-001. Next.js `/play` remains a bridge, mechanics reference and rollback surface.
-
-Village, Map and World remain three roles over one physical geography:
+The playable demonstration remains Sector A-01 / Aurelian Basin. Godot is the target runtime under ADR-001. Village, Map and World are three roles over one physical geography:
 
 - Village = HOW
 - Map = WHERE
@@ -28,107 +24,55 @@ Village, Map and World remain three roles over one physical geography:
 
 ## Accepted foundation
 
-Do not rebuild these accepted capabilities:
-
-- shared deterministic Aurelian Basin geography and Blender to GLB to Godot pipeline;
-- Production Village progression through imperial capital;
-- Production Map progression through imperial heartland;
-- Production World progression through direction-specific first empire;
-- World to Map to Village decision handoff;
-- normal Godot playable entry and keyboard navigation;
-- packaged Aurelian render asset;
-- Chromium Web export playability;
-- Session Persistence v2 for native and Web;
-- explicit land claim, settlement founding and development;
-- visible expansion, trade route connection and caravan dispatch;
-- explicit city charter and nation founding;
-- Living Capital Vertical Slice v1;
-- First National Direction Commitment v1;
-- First National Mandate v1;
-- First Empire Proclamation v1;
-- Directional Empire Identity v1.
-
-Accepted GLB identity and shared physical geography remain unchanged.
+Do not rebuild the accepted deterministic Aurelian Basin geography, Blender to GLB to Godot pipeline, Production Village, Map and World, normal-input decision handoff, packaged runtime, Chromium Web export, Session Persistence v2, or the accepted progression from land claim through direction-specific first empire.
 
 ## Most recent accepted product milestone
 
-PR #524 `Implement Godot Directional Empire Identity v1` is accepted and merged.
+PR #528 `Implement Godot Aurelian River Surge Crisis v1` is accepted and merged.
 
-- terminal result: `GODOT_AURELIAN_DIRECTIONAL_EMPIRE_IDENTITY_PASS`;
-- accepted head: `478bc1a56e2dcd95ebf453c17f5d24004540b2c9`;
-- merged product baseline: `bcd97f7970856551d91fa325609761eb542c32c1`;
-- Trade, Expand and Frontier have distinct procedural identities in Village, Map and World;
-- Village identifies the direction-specific imperial capital;
-- Map binds Trade to East Route, Expand to North Ridge and Frontier to Gilded Crossing;
-- World recognizes a direction-specific first Aurelian Empire;
-- Session Persistence v2 preserves `empire_proclaimed=true` and the committed direction;
-- direct review accepted all nine final stills and normal-input sequences;
-- no visual correction, new asset, GLB or geography was required.
+- terminal result: `GODOT_AURELIAN_RIVER_SURGE_CRISIS_PASS`;
+- accepted head: `9488154dc368016f45abd143eb31254e77989998`;
+- merged product baseline: `a4be5db1bf55baac055f9a9985d5de698dfdf75d`;
+- World reveals River Surge and records the chosen imperial response;
+- Map shows both existing response loci before commitment and the selected locus afterward;
+- Village provides the explicit mutually exclusive choice `Shield Greenvale` or `Keep East Bridge Open`;
+- Trade, Expand and Frontier identities remain intact;
+- Session Persistence v2 preserves the chosen response across native restart, Web reload and profile reopen;
+- the accepted river, Greenvale, East Bridge, landmarks, cameras and shared geography remain unchanged;
+- no new asset, GLB, land, economy, governance, combat, P12 or MAX was introduced;
+- direct review accepted stills, motion and persistence after the one allowed bounded visual correction.
 
 Accepted exact-head evidence:
 
-- Playable Entry run `33009988927`, artifact `9622374839`, digest `sha256:796712858ff2a8591088b8c2f8c4914cb77b35b94f369efd26489f0b27389726`;
-- Web Playability run `33009988868`, artifact `9622268120`, digest `sha256:8ad49a5b8b457b3c6edfa72cf8cca7ca9ac6752ddbe36b3e3c5efe6326232471`;
-- Session Persistence v2 run `33009988889`, artifact `9622265401`, digest `sha256:85220753998df80245deeed81f370b2b0b59b6bbfc408046fd6fef5d6c43f85d`.
+- Playable Entry run `33098586324`, artifact `9657750109`, digest `sha256:55f2647a5fc18e72b91d0f3cfea29319a1a38b5d49982ba523aaa285ab07809f`;
+- Web Playability run `33098586310`, artifact `9657583208`, digest `sha256:939932e37d7f740b5dd18c835170319ccb7d2a6e6ea533a6bbb467e03c313b49`;
+- Session Persistence v2 run `33098586292`, artifact `9657639928`, digest `sha256:0b2d75bbf3793305fd9e9ee64f710b59139ae75b662e246a0f73bbdd6254bef8`.
 
-Issue #522 is completed by this accepted implementation.
-
-## Strategy decision
-
-The direction-specific empire completes the founding arc. The next bounded slice begins the crisis step explicitly named by ADR-001 and adds the first two-way decision after empire formation.
-
-The selected crisis is a deterministic River Surge on the existing Aurelian river. The player must choose exactly one response:
-
-- `Shield Greenvale`; or
-- `Keep East Bridge Open`.
-
-This is a persistent strategic response, not crisis simulation. There is no resolution, reward, cost, timer, damage or failure state.
+Issue #526 is completed by this accepted implementation.
 
 ## Current authority
 
-Issue #526 and `docs/GODOT_AURELIAN_RIVER_SURGE_CRISIS_V1_CONTRACT.md` authorize exactly one implementation candidate:
+No further product implementation is authorized.
 
-`direction-specific first empire -> World reveals River Surge crisis -> Map shows Greenvale and East Bridge response loci -> Village explicitly chooses a response -> Map shows the selected existing locus -> World records the first imperial crisis response`
+The next allowed step is one bounded strategy review. Any executable successor requires a new issue and a separate documentation-only authority contract merged to `main` before implementation begins.
 
-The candidate must:
+River Surge Crisis v1 is terminally accepted and must not be reopened. A successor must preserve:
 
-- preserve Trade, Expand or Frontier identity and `empire_proclaimed=true`;
-- use deliberate normal input for the mutually exclusive response;
-- keep Village as HOW, Map as WHERE and World as WHY / WHICH DIRECTION;
-- preserve all accepted river, bridge, landmark and camera geography;
-- persist the response across native restart, Web reload and profile reopen;
-- produce exact-head Playable Entry, Web Playability and Session Persistence evidence;
-- receive direct still and motion review.
+- Village = HOW, Map = WHERE, World = WHY / WHICH DIRECTION;
+- one physical Aurelian geography;
+- both persistent River Surge response outcomes;
+- the accepted direction-specific empire identity;
+- exact-head evidence, direct review and one active product or recovery PR.
 
-Green CI alone is not acceptance. One bounded visual correction maximum is allowed. The terminal classification must be exactly:
+## Forbidden without new authority
 
-- `GODOT_AURELIAN_RIVER_SURGE_CRISIS_PASS`; or
-- `GODOT_AURELIAN_RIVER_SURGE_CRISIS_REJECT`.
-
-## Allowed scope
-
-- one exact River Surge crisis manifest;
-- exactly two responses: Shield Greenvale and Keep East Bridge Open;
-- focused Godot controller and HUD changes;
-- restrained procedural cues on existing river, Greenvale and East Bridge geometry;
-- focused tests and Session Persistence v2 fixtures;
-- narrowly scoped changes to existing evidence workflows;
-- contract-linked documentation.
-
-## Forbidden scope
-
-- crisis resolution, reward, penalty, resource cost, timer or failure simulation;
-- a third response or direction-specific response matrix;
+- crisis resolution, rewards, penalties, costs, timers, damage or failure simulation;
 - rival, frontier payoff or further post-crisis progression;
-- another land, ownership change or multi-land simulation;
-- economy, resources, taxes, production, inventory, population, workers or queues;
-- governance systems, laws, factions or diplomacy;
-- combat, units, damage or military simulation;
+- another land or ownership change;
+- economy, resources, population, workers or queues;
+- governance, diplomacy, combat or units;
 - backend, accounts, cloud save or multiplayer;
-- React, SVG or CSS rebuilding of final game surfaces;
 - new GLB, terrain, geography, asset family, dependency, paid asset or paid tool;
-- broad visual polish, broad CI changes or platform refactoring;
-- crypto, NFT, wallet, token, mint or pay-to-win direction;
 - P12 or MAX.
 
 ## Process rules
@@ -154,16 +98,12 @@ Green CI alone is not acceptance. One bounded visual correction maximum is allow
 ## Source-of-truth precedence
 
 1. this `PROJECT_CURRENT_STATE.md`;
-2. `docs/GODOT_AURELIAN_RIVER_SURGE_CRISIS_V1_CONTRACT.md`;
-3. active execution issue #526;
-4. accepted ADRs, especially ADR-001;
-5. root `AGENTS.md`;
-6. accepted exact-head evidence and merged PR #524;
-7. operating and QA protocols;
-8. historical issues, contracts, PRs, briefs and reports.
-
-Issue #415 remains shared-geography history and continuity guidance. Issue #522 and its contract are completed historical authority.
+2. root `AGENTS.md`;
+3. accepted ADRs, especially ADR-001;
+4. accepted exact-head evidence and merged PR #528;
+5. issue #415 as shared-geography history and continuity guidance;
+6. historical issues, contracts, PRs, briefs and reports.
 
 ## Current stop condition
 
-Stop after one accepted or rejected Aurelian River Surge Crisis v1 candidate. A PASS must be recorded here before any rival or frontier strategy review. A REJECT must restore the accepted Directional Empire Identity baseline and record the exact reason.
+Stop. River Surge Crisis v1 is accepted. Do not begin another implementation until a bounded strategy review and a new authority contract explicitly authorize it.
