@@ -54,13 +54,13 @@ func _initialize() -> void:
 		"world_aurelian_river_surge_greenvale_response",
 		"world_aurelian_river_surge_bridge_response",
 	]:
-		_check(persistence.contains("\\\"%s\\\"" % state_name), "persistence_state_%s" % state_name)
+		_check(persistence.contains("\"%s\"" % state_name), "persistence_state_%s" % state_name)
 	for field in ["imperial_crisis", "imperial_crisis_response"]:
-		_check(persistence.contains("\\\"%s\\\"" % field), "persistence_field_%s" % field)
+		_check(persistence.contains("\"%s\"" % field), "persistence_field_%s" % field)
 	_check(persistence.contains("VALID_IMPERIAL_CRISES"), "valid_crises")
 	_check(persistence.contains("VALID_IMPERIAL_CRISIS_RESPONSES"), "valid_responses")
-	_check(persistence.contains("imperial_crisis_response == \\\"shield_greenvale\\\""), "greenvale_validation")
-	_check(persistence.contains("imperial_crisis_response == \\\"keep_east_bridge_open\\\""), "bridge_validation")
+	_check(persistence.contains("imperial_crisis_response == \"shield_greenvale\""), "greenvale_validation")
+	_check(persistence.contains("imperial_crisis_response == \"keep_east_bridge_open\""), "bridge_validation")
 	_check(not controller.is_empty(), "controller_available")
 	for required_controller_token in [
 		"CRISIS_RESPONSES",
