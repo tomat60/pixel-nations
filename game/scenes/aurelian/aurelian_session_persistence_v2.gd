@@ -38,16 +38,16 @@ const VALID_STATES := [
 	"map_aurelian_imperial_heartland_bridge_response",
 	"world_aurelian_river_surge_greenvale_response",
 	"world_aurelian_river_surge_bridge_response",
-		"world_first_rival_countermove
-map_first_rival_countermove_east_bridge
-map_first_rival_countermove_greenvale
-village_first_rival_response_pending
-village_first_rival_response_stand_firm
-map_first_rival_response_stand_firm
-world_first_rival_response_stand_firm
-village_first_rival_response_negotiate_passage
-map_first_rival_response_negotiate_passage
-world_first_rival_response_negotiate_passage",
+	"world_first_rival_countermove",
+	"map_first_rival_countermove_east_bridge",
+	"map_first_rival_countermove_greenvale",
+	"village_first_rival_response_pending",
+	"village_first_rival_response_stand_firm",
+	"map_first_rival_response_stand_firm",
+	"world_first_rival_response_stand_firm",
+	"village_first_rival_response_negotiate_passage",
+	"map_first_rival_response_negotiate_passage",
+	"world_first_rival_response_negotiate_passage",
 	"village_claimed",
 	"village_founded",
 	"village_developed",
