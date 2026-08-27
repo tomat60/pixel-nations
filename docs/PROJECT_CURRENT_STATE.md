@@ -7,7 +7,7 @@ Authority source: this file on the current `main`
 Authority baseline SHA: `a4be5db1bf55baac055f9a9985d5de698dfdf75d`
 Product baseline SHA: `a4be5db1bf55baac055f9a9985d5de698dfdf75d`
 Current milestone: Aurelian River Surge Crisis v1 completed
-Active execution issue: none
+Active execution issue: #526
 Next allowed action: one bounded strategy review and, only if justified, one separate documentation-only authority contract. No product implementation is currently authorized.
 
 ## Product truth
