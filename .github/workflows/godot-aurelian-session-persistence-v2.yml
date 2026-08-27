@@ -19,6 +19,7 @@ on:
       - "game/scenes/aurelian/first_empire_proclamation_v1_manifest.json"
       - "game/scenes/aurelian/directional_empire_identity_v1_manifest.json"
       - "game/scenes/aurelian/river_surge_crisis_v1_manifest.json"
+      - "game/scenes/aurelian/first_rival_countermove_v1_manifest.json"
       - "game/tests/aurelian_session_persistence_v2_test.gd"
       - "game/tests/playable_aurelian_entry_v1_test.gd"
       - "game/tests/aurelian_first_land_claim_v1_test.gd"
@@ -33,6 +34,7 @@ on:
       - "game/tests/aurelian_first_empire_proclamation_v1_test.gd"
       - "game/tests/aurelian_directional_empire_identity_v1_test.gd"
       - "game/tests/aurelian_river_surge_crisis_v1_test.gd"
+      - "game/tests/aurelian_first_rival_countermove_v1_test.gd"
   workflow_dispatch:
 
 permissions:
@@ -76,6 +78,7 @@ jobs:
           cp game/scenes/aurelian/first_empire_proclamation_v1_manifest.json "${EVIDENCE_DIR}/empire-proclamation-manifest.json"
           cp game/scenes/aurelian/directional_empire_identity_v1_manifest.json "${EVIDENCE_DIR}/directional-empire-identity-manifest.json"
           cp game/scenes/aurelian/river_surge_crisis_v1_manifest.json "${EVIDENCE_DIR}/river-surge-crisis-manifest.json"
+          cp game/scenes/aurelian/first_rival_countermove_v1_manifest.json "${EVIDENCE_DIR}/first-rival-countermove-manifest.json"
 
       - name: Install existing QA tools
         timeout-minutes: 8
@@ -114,7 +117,7 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test aurelian_first_national_direction_commitment_v1_test aurelian_first_national_mandate_v1_test aurelian_first_empire_proclamation_v1_test aurelian_directional_empire_identity_v1_test aurelian_river_surge_crisis_v1_test; do
+          for test in playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test aurelian_first_national_direction_commitment_v1_test aurelian_first_national_mandate_v1_test aurelian_first_empire_proclamation_v1_test aurelian_directional_empire_identity_v1_test aurelian_river_surge_crisis_v1_test aurelian_first_rival_countermove_v1_test; do
             "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1 || { cat "${EVIDENCE_DIR}/${test}.log"; exit 1; }
           done
           grep -F "GODOT_PLAYABLE_AURELIAN_ENTRY_V1_TEST: PASS" "${EVIDENCE_DIR}/playable_aurelian_entry_v1_test.log"
@@ -131,6 +134,7 @@ jobs:
           grep -F "GODOT_AURELIAN_FIRST_EMPIRE_PROCLAMATION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_empire_proclamation_v1_test.log"
           grep -F "GODOT_AURELIAN_DIRECTIONAL_EMPIRE_IDENTITY_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_directional_empire_identity_v1_test.log"
           grep -F "GODOT_AURELIAN_RIVER_SURGE_CRISIS_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_river_surge_crisis_v1_test.log"
+          grep -F "GODOT_AURELIAN_FIRST_RIVAL_COUNTERMOVE_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_rival_countermove_v1_test.log"
           mkdir -p game/build/linux game/build/web
           "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/export-linux.log" 2>&1
           "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html > "${EVIDENCE_DIR}/export-web.log" 2>&1
@@ -247,7 +251,25 @@ jobs:
           import -window root "../../../${EVIDENCE_DIR}/stills/native-village-east-bridge-response-1440x900.png"
           xdotool key --window "$WINDOW_ID" Left
           sleep 1.0
-          import -window root "../../../${EVIDENCE_DIR}/stills/native-map-east-bridge-response-before-restart-1440x900.png"
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-map-east-bridge-response-before-rival-1440x900.png"
+          xdotool key --window "$WINDOW_ID" Left
+          sleep 0.7
+          xdotool key --window "$WINDOW_ID" Return
+          sleep 1.0
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-world-first-rival-countermove-1440x900.png"
+          xdotool key --window "$WINDOW_ID" Right
+          sleep 1.0
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-map-first-rival-greenvale-pressure-1440x900.png"
+          xdotool key --window "$WINDOW_ID" Right
+          sleep 0.7
+          xdotool key --window "$WINDOW_ID" Down
+          sleep 0.5
+          xdotool key --window "$WINDOW_ID" Return
+          sleep 1.0
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-village-first-rival-negotiate-passage-1440x900.png"
+          xdotool key --window "$WINDOW_ID" Left
+          sleep 1.0
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-map-first-rival-negotiate-passage-before-restart-1440x900.png"
           kill "$GAME_PID"
           wait "$GAME_PID" || true
           stdbuf -oL -eL ./pixel-nations-foundation.x86_64 --audio-driver Dummy --rendering-method gl_compatibility --resolution 1440x900 --position 0,0 > "../../../${EVIDENCE_DIR}/native-restored.log" 2>&1 &
@@ -259,16 +281,16 @@ jobs:
           done
           test -n "${WINDOW_ID:-}"
           sleep 1.2
-          import -window root "../../../${EVIDENCE_DIR}/stills/native-map-east-bridge-response-restored-1440x900.png"
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-map-first-rival-negotiate-passage-restored-1440x900.png"
           xdotool key --window "$WINDOW_ID" Right
           sleep 1.2
-          import -window root "../../../${EVIDENCE_DIR}/stills/native-village-east-bridge-response-after-restore-1440x900.png"
+          import -window root "../../../${EVIDENCE_DIR}/stills/native-village-first-rival-negotiate-passage-after-restore-1440x900.png"
           kill "$GAME_PID"
           wait "$GAME_PID" || true
           cd ../../..
           grep -F "AURELIAN_SESSION_V2_LOAD=missing:native_file_access:world_neutral:none" "${EVIDENCE_DIR}/native-first.log"
           grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/native-first.log"
-          grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:map_aurelian_imperial_heartland_bridge_response:east_trade" "${EVIDENCE_DIR}/native-restored.log"
+          grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:map_first_rival_response_negotiate_passage:east_trade" "${EVIDENCE_DIR}/native-restored.log"
           grep -F "AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT=GREENVALE" "${EVIDENCE_DIR}/native-first.log"
           grep -F "AURELIAN_FIRST_TRADE_ROUTE_CONNECTION=EAST_ROUTE" "${EVIDENCE_DIR}/native-first.log"
           grep -F "AURELIAN_FIRST_TRADE_CARAVAN_DISPATCH=EAST_ROUTE" "${EVIDENCE_DIR}/native-first.log"
@@ -281,9 +303,12 @@ jobs:
           grep -F "AURELIAN_FIRST_IMPERIAL_CRISIS=RIVER_SURGE" "${EVIDENCE_DIR}/native-first.log"
           grep -F "AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=KEEP_EAST_BRIDGE_OPEN" "${EVIDENCE_DIR}/native-first.log"
           test "$(grep -Fc "AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=" "${EVIDENCE_DIR}/native-first.log")" = "1"
+          grep -F "AURELIAN_FIRST_RIVAL_COUNTERMOVE=OBSIDIAN_MARCH" "${EVIDENCE_DIR}/native-first.log"
+          grep -F "AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=NEGOTIATE_PASSAGE" "${EVIDENCE_DIR}/native-first.log"
+          test "$(grep -Fc "AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=" "${EVIDENCE_DIR}/native-first.log")" = "1"
           grep -F "AURELIAN_NATIONAL_DIRECTION_RESTORED=expand" "${EVIDENCE_DIR}/native-restored.log"
-          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_imperial_heartland_bridge_response" "${EVIDENCE_DIR}/native-restored.log"
-          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_aurelian_imperial_capital_bridge_response" "${EVIDENCE_DIR}/native-restored.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_first_rival_response_negotiate_passage" "${EVIDENCE_DIR}/native-restored.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_first_rival_response_negotiate_passage" "${EVIDENCE_DIR}/native-restored.log"
 
       - name: Serve Web export
         run: |
