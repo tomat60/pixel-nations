@@ -540,6 +540,14 @@ func _right_entry() -> void:
 			_apply_entry_state("map_first_rival_countermove_east_bridge" if imperial_crisis_response == "shield_greenvale" else "map_first_rival_countermove_greenvale")
 		"map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale":
 			_apply_entry_state("village_first_rival_response_pending")
+		"world_first_rival_response_stand_firm":
+			_apply_entry_state("map_first_rival_response_stand_firm")
+		"world_first_rival_response_negotiate_passage":
+			_apply_entry_state("map_first_rival_response_negotiate_passage")
+		"map_first_rival_response_stand_firm":
+			_apply_entry_state("village_first_rival_response_stand_firm")
+		"map_first_rival_response_negotiate_passage":
+			_apply_entry_state("village_first_rival_response_negotiate_passage")
 		"map_east_route_claimed":
 			_apply_entry_state("village_developed" if settlement_developed else ("village_founded" if settlement_founded else "village_claimed"))
 		"map_east_route_connected":
