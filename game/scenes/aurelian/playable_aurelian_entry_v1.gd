@@ -1079,20 +1079,20 @@ func _build_river_surge_presentation() -> Node3D:
 		var wave := MeshInstance3D.new()
 		wave.name = "RiverSurgeWave%02d" % (index + 1)
 		var wave_mesh := TorusMesh.new()
-		wave_mesh.inner_radius = 0.38 + float(index) * 0.23
-		wave_mesh.outer_radius = 0.45 + float(index) * 0.23
+		wave_mesh.inner_radius = 0.70 + float(index) * 0.28
+		wave_mesh.outer_radius = 0.82 + float(index) * 0.28
 		wave_mesh.rings = 28
 		wave_mesh.ring_segments = 12
 		wave.mesh = wave_mesh
-		wave.material_override = _material("#48a8d8ff", 0.44 - float(index) * 0.07)
+		wave.material_override = _material("#48a8d8ff", 0.58 - float(index) * 0.08)
 		world_cue.add_child(wave)
 	var world_label := Label3D.new()
 	world_label.name = "RiverSurgeWorldLabel"
 	world_label.text = "RIVER SURGE"
-	world_label.font_size = 48
-	world_label.outline_size = 10
+	world_label.font_size = 24
+	world_label.outline_size = 8
 	world_label.modulate = Color("#9ee5ffff")
-	world_label.position = Vector3(0.0, 1.45, 0.0)
+	world_label.position = Vector3(1.35, 0.95, -0.35)
 	world_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	world_cue.add_child(world_label)
 	root.add_child(world_cue)
@@ -1108,18 +1108,18 @@ func _build_river_surge_presentation() -> Node3D:
 	var village_marker := MeshInstance3D.new()
 	village_marker.name = "VillageResponseMarker"
 	var village_mesh := CylinderMesh.new()
-	village_mesh.top_radius = 0.22
-	village_mesh.bottom_radius = 0.42
-	village_mesh.height = 1.2
+	village_mesh.top_radius = 0.12
+	village_mesh.bottom_radius = 0.24
+	village_mesh.height = 0.75
 	village_mesh.radial_segments = 6
 	village_marker.mesh = village_mesh
-	village_marker.position.y = 0.6
+	village_marker.position.y = 0.375
 	village_cue.add_child(village_marker)
 	var village_label := Label3D.new()
 	village_label.name = "VillageResponseLabel"
-	village_label.font_size = 38
-	village_label.outline_size = 9
-	village_label.position = Vector3(0.0, 1.65, 0.0)
+	village_label.font_size = 26
+	village_label.outline_size = 7
+	village_label.position = Vector3(0.85, 1.05, -0.20)
 	village_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	village_cue.add_child(village_label)
 	root.add_child(village_cue)
@@ -1134,8 +1134,8 @@ func _build_crisis_locus(node_name: String, label_text: String, topology: Vector
 	var ring := MeshInstance3D.new()
 	ring.name = "ResponseRing"
 	var ring_mesh := TorusMesh.new()
-	ring_mesh.inner_radius = 0.48
-	ring_mesh.outer_radius = 0.62
+	ring_mesh.inner_radius = 0.58
+	ring_mesh.outer_radius = 0.75
 	ring_mesh.rings = 28
 	ring_mesh.ring_segments = 12
 	ring.mesh = ring_mesh
@@ -1158,7 +1158,7 @@ func _build_crisis_locus(node_name: String, label_text: String, topology: Vector
 	label.font_size = 32
 	label.outline_size = 8
 	label.modulate = Color(color)
-	label.position = Vector3(0.0, 1.2, 0.0)
+	label.position = Vector3(-0.95 if node_name == "GreenvaleResponseLocus" else 0.95, 0.95, -0.18)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	locus.add_child(label)
 	return locus
