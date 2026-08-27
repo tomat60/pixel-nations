@@ -476,7 +476,7 @@ jobs:
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_aurelian_imperial_capital" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_imperial_heartland" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_empire_proclaimed" "${EVIDENCE_DIR}/browser-console.log"
-          grep -F "AURELIAN_IMPERIAL_CRISIS=RIVER_SURGE" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_FIRST_IMPERIAL_CRISIS=RIVER_SURGE" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=SHIELD_GREENVALE" "${EVIDENCE_DIR}/browser-console.log"
           test "$(grep -Fc "AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_river_surge_crisis" "${EVIDENCE_DIR}/browser-console.log"
