@@ -494,14 +494,33 @@ jobs:
             await page.screenshot({path:path.join(stills,'web-village-greenvale-shielded-before-reload-1440x900.png')});
             await page.keyboard.press('ArrowLeft');
             await waitFor(() => states.includes('map_aurelian_imperial_heartland_greenvale_response'),'Greenvale response map before reload');
-            await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'map_aurelian_imperial_heartland_greenvale_response'),'Greenvale response save ack');
-            await page.screenshot({path:path.join(stills,'web-map-greenvale-response-before-reload-1440x900.png')});
+            await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'map_first_rival_response_stand_firm'),'Greenvale response save ack');
+            await page.screenshot({path:path.join(stills,'web-map-greenvale-response-before-rival-1440x900.png')});
+            await page.keyboard.press('ArrowLeft');
+            await waitFor(() => states.includes('world_aurelian_river_surge_greenvale_response'),'Greenvale response world before rival');
+            await page.keyboard.press('Enter');
+            await waitFor(() => states.includes('world_first_rival_countermove'),'first rival countermove world');
+            await waitFor(() => consoleLines.some(x => x.includes('AURELIAN_FIRST_RIVAL_COUNTERMOVE=OBSIDIAN_MARCH')),'rival countermove event');
+            await page.screenshot({path:path.join(stills,'web-world-first-rival-countermove-1440x900.png')});
+            await page.keyboard.press('ArrowRight');
+            await waitFor(() => states.includes('map_first_rival_countermove_east_bridge'),'East Bridge pressure map');
+            await page.screenshot({path:path.join(stills,'web-map-first-rival-east-bridge-pressure-1440x900.png')});
+            await page.keyboard.press('ArrowRight');
+            await waitFor(() => states.includes('village_first_rival_response_pending'),'rival response pending village');
+            await page.keyboard.press('Enter');
+            await waitFor(() => states.includes('village_first_rival_response_stand_firm'),'Stand Firm village');
+            await waitFor(() => consoleLines.some(x => x.includes('AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=STAND_FIRM')),'rival response event');
+            await page.screenshot({path:path.join(stills,'web-village-first-rival-stand-firm-1440x900.png')});
+            await page.keyboard.press('ArrowLeft');
+            await waitFor(() => states.includes('map_first_rival_response_stand_firm'),'Stand Firm map before reload');
+            await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'map_first_rival_response_stand_firm'),'Stand Firm save ack');
+            await page.screenshot({path:path.join(stills,'web-map-first-rival-stand-firm-before-reload-1440x900.png')});
             await page.reload({waitUntil:'domcontentloaded',timeout:90000});
             await page.locator('canvas').waitFor({state:'visible',timeout:90000});
-            await waitFor(() => loads.some(x => x.status === 'restored' && x.adapter === 'web_local_storage' && x.state === 'map_aurelian_imperial_heartland_greenvale_response' && x.intent === 'east_trade'),'reload restore');
-            await waitFor(() => states.filter(x => x === 'map_aurelian_imperial_heartland_greenvale_response').length >= 2,'reloaded Greenvale response map');
+            await waitFor(() => loads.some(x => x.status === 'restored' && x.adapter === 'web_local_storage' && x.state === 'map_first_rival_response_stand_firm' && x.intent === 'east_trade'),'reload restore');
+            await waitFor(() => states.filter(x => x === 'map_first_rival_response_stand_firm').length >= 2,'reloaded Greenvale response map');
             await sleep(2500);
-            await page.screenshot({path:path.join(stills,'web-map-greenvale-response-restored-1440x900.png')});
+            await page.screenshot({path:path.join(stills,'web-map-first-rival-stand-firm-restored-1440x900.png')});
             const video = page.video();
             await context.close();
             const recordedPath = await video.path();
@@ -514,16 +533,16 @@ jobs:
               args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']
             });
             page = await openPage(context);
-            await waitFor(() => loads.filter(x => x.status === 'restored' && x.state === 'map_aurelian_imperial_heartland_greenvale_response').length >= 2,'profile reopen restore');
-            await waitFor(() => states.filter(x => x === 'map_aurelian_imperial_heartland_greenvale_response').length >= 3,'profile reopened Greenvale response map');
+            await waitFor(() => loads.filter(x => x.status === 'restored' && x.state === 'map_first_rival_response_stand_firm').length >= 2,'profile reopen restore');
+            await waitFor(() => states.filter(x => x === 'map_first_rival_response_stand_firm').length >= 3,'profile reopened Greenvale response map');
             await sleep(1500);
-            await page.screenshot({path:path.join(stills,'web-map-greenvale-response-profile-reopened-1440x900.png')});
+            await page.screenshot({path:path.join(stills,'web-map-first-rival-stand-firm-profile-reopened-1440x900.png')});
             await page.keyboard.press('ArrowRight');
-            await waitFor(() => states.filter(x => x === 'village_aurelian_imperial_capital_greenvale_shielded').length >= 2,'Greenvale shielded after reopen');
+            await waitFor(() => states.filter(x => x === 'village_first_rival_response_stand_firm').length >= 2,'Greenvale shielded after reopen');
             await sleep(1500);
-            await page.screenshot({path:path.join(stills,'web-village-greenvale-shielded-after-profile-reopen-1440x900.png')});
+            await page.screenshot({path:path.join(stills,'web-village-first-rival-stand-firm-after-profile-reopen-1440x900.png')});
             await page.keyboard.press('ArrowLeft');
-            await waitFor(() => states.filter(x => x === 'map_aurelian_imperial_heartland_greenvale_response').length >= 4,'back to Greenvale response map');
+            await waitFor(() => states.filter(x => x === 'map_first_rival_response_stand_firm').length >= 4,'back to Greenvale response map');
             await context.close();
 
             const browser = await chromium.launch({headless:true,args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
@@ -549,9 +568,9 @@ jobs:
               web_key:'pixel_nations.aurelian_session.v2',
               capability_result:'available',
               save_acknowledgement:'stored',
-              before_reload_state:'map_aurelian_imperial_heartland_greenvale_response',
-              reloaded_state:'map_aurelian_imperial_heartland_greenvale_response',
-              profile_reopen_state:'map_aurelian_imperial_heartland_greenvale_response',
+              before_reload_state:'map_first_rival_response_stand_firm',
+              reloaded_state:'map_first_rival_response_stand_firm',
+              profile_reopen_state:'map_first_rival_response_stand_firm',
               settlement_founded:true,
               settlement_developed:true,
               route_connected:true,
@@ -563,8 +582,10 @@ jobs:
               empire_proclaimed:true,
               imperial_crisis:'river_surge',
               imperial_crisis_response:'shield_greenvale',
+              first_rival_countermove:'obsidian_march',
+              first_rival_countermove_response:'stand_firm',
               selected_intent:'east_trade',
-              continued_state:'village_aurelian_imperial_capital_greenvale_shielded',
+              continued_state:'village_first_rival_response_stand_firm',
               denied_storage_fallback:'world_neutral',
               input_actions:['Enter','ArrowRight','Enter','ArrowRight','Enter','Enter','ArrowLeft','Enter','ArrowRight','Enter','ArrowLeft','ArrowRight','Enter','ArrowLeft','ArrowLeft','Enter','ArrowDown','ArrowDown','ArrowUp','Enter','ArrowRight','ArrowRight','Enter','ArrowLeft','ArrowRight','Enter','ArrowLeft','ArrowLeft','Enter','ArrowRight','ArrowRight','Enter','ArrowLeft','reload','browser_reopen','ArrowRight','ArrowLeft'],
               evidence_storage_seeding:false,
@@ -583,15 +604,15 @@ jobs:
       - name: Validate exact evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "41"
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "45"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
             test "$(stat -c %s "$image")" -gt 70000
           done
           duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/session-persistence-v2-sequence.webm")"
           awk -v duration="$duration" 'BEGIN { exit !(duration >= 15 && duration <= 125) }'
-          grep -F "AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:map_aurelian_imperial_heartland_greenvale_response:east_trade" "${EVIDENCE_DIR}/browser-console.log"
-          grep -F "AURELIAN_SESSION_V2_SAVE_ACK=stored:web_local_storage:map_aurelian_imperial_heartland_greenvale_response:east_trade" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:map_first_rival_response_stand_firm:east_trade" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_SESSION_V2_SAVE_ACK=stored:web_local_storage:map_first_rival_response_stand_firm:east_trade" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_SESSION_V2_LOAD=unavailable:web_local_storage:world_neutral:none" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT=GREENVALE" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_TRADE_ROUTE_CONNECTION=EAST_ROUTE" "${EVIDENCE_DIR}/browser-console.log"
@@ -611,6 +632,11 @@ jobs:
           grep -F "AURELIAN_FIRST_IMPERIAL_CRISIS=RIVER_SURGE" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=SHIELD_GREENVALE" "${EVIDENCE_DIR}/browser-console.log"
           test "$(grep -Fc "AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
+          grep -F "AURELIAN_FIRST_RIVAL_COUNTERMOVE=OBSIDIAN_MARCH" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=STAND_FIRM" "${EVIDENCE_DIR}/browser-console.log"
+          test "$(grep -Fc "AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_first_rival_response_stand_firm" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_first_rival_response_stand_firm" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_river_surge_crisis" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_river_surge_response_loci" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_river_surge_response_pending" "${EVIDENCE_DIR}/browser-console.log"
