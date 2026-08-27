@@ -1256,7 +1256,9 @@ func _refresh_river_surge_presentation(state_name: String) -> void:
 	var bridge_locus := river_surge_presentation.get_node_or_null("EastBridgeResponseLocus") as Node3D
 	var village_cue := river_surge_presentation.get_node_or_null("VillageRiverSurgeResponseCue") as Node3D
 	var is_world := state_name in ["world_river_surge_crisis", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "world_first_rival_response_stand_firm", "world_first_rival_response_negotiate_passage"]
-	var is_map_pending := state_name in ["map_river_surge_response_loci", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale"]
+	var is_map_pending := state_name == "map_river_surge_response_loci"
+	var is_rival_greenvale := state_name == "map_first_rival_countermove_greenvale"
+	var is_rival_bridge := state_name == "map_first_rival_countermove_east_bridge"
 	var is_greenvale_map := state_name == "map_aurelian_imperial_heartland_greenvale_response"
 	var is_bridge_map := state_name == "map_aurelian_imperial_heartland_bridge_response"
 	if world_cue != null:
@@ -1276,11 +1278,17 @@ func _refresh_river_surge_presentation(state_name: String) -> void:
 			else:
 				world_label.text = "RIVER SURGE"
 	if greenvale_locus != null:
-		greenvale_locus.visible = is_map_pending or is_greenvale_map or state_name in ["map_first_rival_response_stand_firm", "map_first_rival_response_negotiate_passage"] and imperial_crisis_response == "keep_east_bridge_open"
-		greenvale_locus.scale = Vector3.ONE * (1.14 if is_map_pending and crisis_response_cursor == 0 else 1.0)
+		greenvale_locus.visible = is_map_pending or is_greenvale_map or is_rival_greenvale or state_name in ["map_first_rival_response_stand_firm", "map_first_rival_response_negotiate_passage"] and imperial_crisis_response == "keep_east_bridge_open"
+		greenvale_locus.scale = Vector3.ONE * (1.14 if is_rival_greenvale or is_map_pending and crisis_response_cursor == 0 else 1.0)
+		var greenvale_label := greenvale_locus.get_node_or_null("ResponseLabel") as Label3D
+		if greenvale_label != null:
+			greenvale_label.text = "OBSIDIAN LEGITIMACY PRESSURE" if is_rival_greenvale else ("STAND FIRM" if state_name == "map_first_rival_response_stand_firm" else ("NEGOTIATED PASSAGE" if state_name == "map_first_rival_response_negotiate_passage" else "SHIELD GREENVALE"))
 	if bridge_locus != null:
-		bridge_locus.visible = is_map_pending or is_bridge_map or state_name in ["map_first_rival_response_stand_firm", "map_first_rival_response_negotiate_passage"] and imperial_crisis_response == "shield_greenvale"
-		bridge_locus.scale = Vector3.ONE * (1.14 if is_map_pending and crisis_response_cursor == 1 else 1.0)
+		bridge_locus.visible = is_map_pending or is_bridge_map or is_rival_bridge or state_name in ["map_first_rival_response_stand_firm", "map_first_rival_response_negotiate_passage"] and imperial_crisis_response == "shield_greenvale"
+		bridge_locus.scale = Vector3.ONE * (1.14 if is_rival_bridge or is_map_pending and crisis_response_cursor == 1 else 1.0)
+		var bridge_label := bridge_locus.get_node_or_null("ResponseLabel") as Label3D
+		if bridge_label != null:
+			bridge_label.text = "OBSIDIAN BRIDGE PRESSURE" if is_rival_bridge else ("STAND FIRM" if state_name == "map_first_rival_response_stand_firm" else ("NEGOTIATED PASSAGE" if state_name == "map_first_rival_response_negotiate_passage" else "KEEP EAST BRIDGE OPEN"))
 	if village_cue != null:
 		village_cue.visible = state_name in ["village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage"]
 		var village_marker := village_cue.get_node_or_null("VillageResponseMarker") as MeshInstance3D
@@ -1521,11 +1529,23 @@ func _update_runtime_hud() -> void:
 		"world_aurelian_river_surge_greenvale_response":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "%s Empire records: Greenvale shielded" % committed_direction.capitalize()
-			controls_label.text = "[RIGHT] Inspect Greenvale response"
+			controls_label.text = "[ENTER] Reveal Obsidian March countermove    [RIGHT] Inspect Greenvale response"
 		"world_aurelian_river_surge_bridge_response":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "%s Empire records: East Bridge kept open" % committed_direction.capitalize()
-			controls_label.text = "[RIGHT] Inspect East Bridge response"
+			controls_label.text = "[ENTER] Reveal Obsidian March countermove    [RIGHT] Inspect East Bridge response"
+		"world_first_rival_countermove":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "Obsidian March reacts at %s because of the River Surge response" % ("East Bridge" if imperial_crisis_response == "shield_greenvale" else "Greenvale")
+			controls_label.text = "[RIGHT] Inspect pressured locus on Map"
+		"world_first_rival_response_stand_firm":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "%s Aurelian Empire records: Stand Firm" % committed_direction.capitalize()
+			controls_label.text = "[RIGHT] Inspect recorded response on Map"
+		"world_first_rival_response_negotiate_passage":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "%s Aurelian Empire records: Negotiate Passage" % committed_direction.capitalize()
+			controls_label.text = "[RIGHT] Inspect recorded response on Map"
 		"world_first_nation_founded":
 			layer_label.text = "WORLD  |  WHY"
 			if committed_direction == "none":
@@ -1579,6 +1599,22 @@ func _update_runtime_hud() -> void:
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "Selected response anchored at East Bridge"
 			controls_label.text = "[RIGHT] Reopen imperial capital    [LEFT] World"
+		"map_first_rival_countermove_east_bridge":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Obsidian March pressures the existing East Bridge"
+			controls_label.text = "[RIGHT] Choose Aurelian response in Village    [LEFT] World"
+		"map_first_rival_countermove_greenvale":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Obsidian March pressures legitimacy at existing Greenvale"
+			controls_label.text = "[RIGHT] Choose Aurelian response in Village    [LEFT] World"
+		"map_first_rival_response_stand_firm":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Stand Firm recorded at the pressured existing locus"
+			controls_label.text = "[LEFT] Record response in World"
+		"map_first_rival_response_negotiate_passage":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Negotiated Passage recorded at the pressured existing locus"
+			controls_label.text = "[LEFT] Record response in World"
 		"village_claimed":
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "East Route is claimed: no settlement exists yet"
@@ -1624,6 +1660,19 @@ func _update_runtime_hud() -> void:
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "East Bridge access response committed"
 			controls_label.text = "[LEFT / ESC] Inspect East Bridge response on Map"
+		"village_first_rival_response_pending":
+			layer_label.text = "VILLAGE  |  HOW"
+			var inspected_rival_response := "Stand Firm" if rival_response_cursor == 0 else "Negotiate Passage"
+			intent_label.text = "Choose Aurelian response to Obsidian March: %s" % inspected_rival_response
+			controls_label.text = "[UP / DOWN] Inspect responses    [ENTER] Commit response    [LEFT] Map"
+		"village_first_rival_response_stand_firm":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "Aurelian Empire stands firm at the pressured locus"
+			controls_label.text = "[LEFT / ESC] Inspect result on Map"
+		"village_first_rival_response_negotiate_passage":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "Aurelian Empire negotiates passage at the pressured locus"
+			controls_label.text = "[LEFT / ESC] Inspect result on Map"
 		"map_east_route":
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "Legacy East Route selection restored"
@@ -1767,9 +1816,19 @@ func _process(_delta: float) -> void:
 	elif automated_frame == 5190:
 		_emit_action("ui_left")
 	elif automated_frame == 5250:
-		_emit_action("ui_right")
+		_emit_action("ui_accept")
 	elif automated_frame == 5310:
 		_emit_action("ui_right")
-	elif automated_frame >= 5370:
-		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=5370")
+	elif automated_frame == 5370:
+		_emit_action("ui_right")
+	elif automated_frame == 5430 and automated_rival_response == "negotiate_passage":
+		_emit_action("ui_down")
+	elif automated_frame == 5490:
+		_emit_action("ui_accept")
+	elif automated_frame == 5550:
+		_emit_action("ui_left")
+	elif automated_frame == 5610:
+		_emit_action("ui_left")
+	elif automated_frame >= 5670:
+		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=5670")
 		get_tree().quit(0)
