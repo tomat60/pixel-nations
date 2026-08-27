@@ -1191,7 +1191,7 @@ func _refresh_river_surge_presentation(state_name: String) -> void:
 		village_cue.visible = state_name in ["village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response"]
 		var village_marker := village_cue.get_node_or_null("VillageResponseMarker") as MeshInstance3D
 		var village_label := village_cue.get_node_or_null("VillageResponseLabel") as Label3D
-		var response := imperial_crisis_response if imperial_crisis_response != "none" else CRISIS_RESPONSES[crisis_response_cursor]
+		var response: String = imperial_crisis_response if imperial_crisis_response != "none" else String(CRISIS_RESPONSES[crisis_response_cursor])
 		var response_color := "#5ecb8aff" if response == "shield_greenvale" else "#e6b85cff"
 		if village_marker != null:
 			village_marker.material_override = _material(response_color, 0.42)
