@@ -64,6 +64,7 @@ var controls_label: Label
 var automated_input_mode := false
 var automated_frame := 0
 var automated_direction := "expand"
+var automated_crisis_response := "shield_greenvale"
 var persistence_enabled := true
 var restored_intent := "none"
 var settlement_founded := false
@@ -102,6 +103,9 @@ func _ready() -> void:
 	var requested_automated_direction := OS.get_environment("AURELIAN_AUTOMATED_DIRECTION").to_lower()
 	if requested_automated_direction in NATIONAL_DIRECTIONS:
 		automated_direction = requested_automated_direction
+	var requested_automated_response := OS.get_environment("AURELIAN_AUTOMATED_CRISIS_RESPONSE").to_lower()
+	if requested_automated_response in CRISIS_RESPONSES:
+		automated_crisis_response = requested_automated_response
 	var evidence_state := OS.get_environment("AURELIAN_PLAYABLE_EVIDENCE_STATE").to_lower()
 	var evidence_direction := OS.get_environment("AURELIAN_COMMITTED_DIRECTION").to_lower()
 	if NATIONAL_DIRECTIONS.has(evidence_direction):
@@ -1653,6 +1657,24 @@ func _process(_delta: float) -> void:
 		_emit_action("ui_left")
 	elif automated_frame == 4770:
 		_emit_action("ui_left")
-	elif automated_frame >= 4830:
-		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=4830")
+	elif automated_frame == 4830:
+		_emit_action("ui_accept")
+	elif automated_frame == 4890:
+		_emit_action("ui_right")
+	elif automated_frame == 4950:
+		_emit_action("ui_right")
+	elif automated_frame == 5010 and automated_crisis_response == "keep_east_bridge_open":
+		_emit_action("ui_down")
+	elif automated_frame == 5070:
+		_emit_action("ui_accept")
+	elif automated_frame == 5130:
+		_emit_action("ui_left")
+	elif automated_frame == 5190:
+		_emit_action("ui_left")
+	elif automated_frame == 5250:
+		_emit_action("ui_right")
+	elif automated_frame == 5310:
+		_emit_action("ui_right")
+	elif automated_frame >= 5370:
+		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=5370")
 		get_tree().quit(0)
