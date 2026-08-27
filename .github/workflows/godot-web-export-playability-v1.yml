@@ -46,6 +46,7 @@ jobs:
           cp game/scenes/aurelian/first_national_mandate_v1_manifest.json "${EVIDENCE_DIR}/national-mandate-manifest.json"
           cp game/scenes/aurelian/first_empire_proclamation_v1_manifest.json "${EVIDENCE_DIR}/empire-proclamation-manifest.json"
           cp game/scenes/aurelian/directional_empire_identity_v1_manifest.json "${EVIDENCE_DIR}/directional-empire-identity-manifest.json"
+          cp game/scenes/aurelian/river_surge_crisis_v1_manifest.json "${EVIDENCE_DIR}/river-surge-crisis-manifest.json"
           git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
@@ -88,7 +89,7 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test aurelian_first_national_direction_commitment_v1_test aurelian_first_national_mandate_v1_test aurelian_first_empire_proclamation_v1_test aurelian_directional_empire_identity_v1_test; do
+          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test aurelian_first_national_direction_commitment_v1_test aurelian_first_national_mandate_v1_test aurelian_first_empire_proclamation_v1_test aurelian_directional_empire_identity_v1_test aurelian_river_surge_crisis_v1_test; do
             "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1 || { cat "${EVIDENCE_DIR}/${test}.log"; exit 1; }
           done
           grep -F "GODOT_PLAYABLE_AURELIAN_ENTRY_V1_TEST: PASS" "${EVIDENCE_DIR}/playable_aurelian_entry_v1_test.log"
@@ -103,6 +104,7 @@ jobs:
           grep -F "GODOT_AURELIAN_FIRST_NATIONAL_MANDATE_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_national_mandate_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_EMPIRE_PROCLAMATION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_empire_proclamation_v1_test.log"
           grep -F "GODOT_AURELIAN_DIRECTIONAL_EMPIRE_IDENTITY_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_directional_empire_identity_v1_test.log"
+          grep -F "GODOT_AURELIAN_RIVER_SURGE_CRISIS_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_river_surge_crisis_v1_test.log"
 
       - name: Export canonical Linux and Web builds
         timeout-minutes: 8
@@ -357,6 +359,36 @@ jobs:
             await waitForCount('world_first_empire_proclaimed', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '32-world-first-empire-proclaimed-expand-1440x900.png') });
+
+            await page.keyboard.press('Enter');
+            await waitForCount('world_river_surge_crisis', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '33-world-river-surge-crisis-expand-1440x900.png') });
+
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('map_river_surge_response_loci', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '34-map-river-surge-response-loci-expand-1440x900.png') });
+
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('village_river_surge_response_pending', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '35-village-river-surge-response-pending-expand-1440x900.png') });
+
+            await page.keyboard.press('Enter');
+            await waitForCount('village_aurelian_imperial_capital_greenvale_shielded', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '36-village-greenvale-shielded-expand-1440x900.png') });
+
+            await page.keyboard.press('ArrowLeft');
+            await waitForCount('map_aurelian_imperial_heartland_greenvale_response', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '37-map-greenvale-response-expand-1440x900.png') });
+
+            await page.keyboard.press('ArrowLeft');
+            await waitForCount('world_aurelian_river_surge_greenvale_response', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '38-world-greenvale-response-expand-1440x900.png') });
             const video = page.video();
             await context.close();
             await video.saveAs(path.join(root, 'godot-web-input-sequence.webm'));
@@ -382,11 +414,13 @@ jobs:
               viewport: [1440, 900],
               browser: 'chromium',
               normal_entry: 'world_neutral',
-              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowDown', 'ArrowDown', 'ArrowUp', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft'],
+              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowDown', 'ArrowDown', 'ArrowUp', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft'],
               observed_states: observedStates,
-              accepted_handoff: 'World mandate underway -> Village explicit proclamation -> Map imperial heartland -> World first empire proclaimed',
+              accepted_handoff: 'World empire -> River Surge -> Map response loci -> Village explicit response -> Map and World recorded response',
               national_mandate_started: true,
               empire_proclaimed: true,
+              imperial_crisis: 'river_surge',
+              imperial_crisis_response: 'shield_greenvale',
               national_direction: 'expand',
               glb_sha256: process.env.GLB_SHA256,
               evidence_environment_state_driving: false
@@ -401,7 +435,7 @@ jobs:
       - name: Validate exact browser evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "32"
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "38"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
             bytes="$(stat -c %s "$image")"
@@ -442,6 +476,15 @@ jobs:
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_aurelian_imperial_capital" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_imperial_heartland" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_empire_proclaimed" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_IMPERIAL_CRISIS=RIVER_SURGE" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=SHIELD_GREENVALE" "${EVIDENCE_DIR}/browser-console.log"
+          test "$(grep -Fc "AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_river_surge_crisis" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_river_surge_response_loci" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_river_surge_response_pending" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_aurelian_imperial_capital_greenvale_shielded" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_imperial_heartland_greenvale_response" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_aurelian_river_surge_greenvale_response" "${EVIDENCE_DIR}/browser-console.log"
           test "$(grep -Fc "AURELIAN_FIRST_NATIONAL_MANDATE=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_national_mandate_started" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_national_mandate_active" "${EVIDENCE_DIR}/browser-console.log"
