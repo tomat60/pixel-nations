@@ -5,6 +5,18 @@ const SESSION := preload("res://scenes/aurelian/aurelian_session_persistence_v2.
 
 const PLAYABLE_MANIFEST_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
 const NATIONAL_DIRECTIONS := ["trade", "expand", "frontier"]
+const CRISIS_RESPONSES := ["shield_greenvale", "keep_east_bridge_open"]
+const CRISIS_STATES := [
+	"world_river_surge_crisis",
+	"map_river_surge_response_loci",
+	"village_river_surge_response_pending",
+	"village_aurelian_imperial_capital_greenvale_shielded",
+	"village_aurelian_imperial_capital_bridge_response",
+	"map_aurelian_imperial_heartland_greenvale_response",
+	"map_aurelian_imperial_heartland_bridge_response",
+	"world_aurelian_river_surge_greenvale_response",
+	"world_aurelian_river_surge_bridge_response",
+]
 const ENTRY_STATES := [
 	"world_neutral",
 	"world_trade_selected",
@@ -27,6 +39,15 @@ const ENTRY_STATES := [
 	"village_aurelian_imperial_capital",
 	"map_aurelian_imperial_heartland",
 	"world_first_empire_proclaimed",
+	"world_river_surge_crisis",
+	"map_river_surge_response_loci",
+	"village_river_surge_response_pending",
+	"village_aurelian_imperial_capital_greenvale_shielded",
+	"village_aurelian_imperial_capital_bridge_response",
+	"map_aurelian_imperial_heartland_greenvale_response",
+	"map_aurelian_imperial_heartland_bridge_response",
+	"world_aurelian_river_surge_greenvale_response",
+	"world_aurelian_river_surge_bridge_response",
 	"village_claimed",
 	"village_founded",
 	"village_developed",
@@ -43,6 +64,7 @@ var controls_label: Label
 var automated_input_mode := false
 var automated_frame := 0
 var automated_direction := "expand"
+var automated_crisis_response := "shield_greenvale"
 var persistence_enabled := true
 var restored_intent := "none"
 var settlement_founded := false
@@ -55,6 +77,10 @@ var national_direction_cursor := 0
 var committed_direction := "none"
 var national_mandate_started := false
 var empire_proclaimed := false
+var imperial_crisis := "none"
+var imperial_crisis_response := "none"
+var crisis_response_cursor := 0
+var river_surge_presentation: Node3D
 var mandate_marker: Node3D
 var dispatch_token: Node3D
 var city_marker: Node3D
@@ -77,6 +103,9 @@ func _ready() -> void:
 	var requested_automated_direction := OS.get_environment("AURELIAN_AUTOMATED_DIRECTION").to_lower()
 	if requested_automated_direction in NATIONAL_DIRECTIONS:
 		automated_direction = requested_automated_direction
+	var requested_automated_response := OS.get_environment("AURELIAN_AUTOMATED_CRISIS_RESPONSE").to_lower()
+	if requested_automated_response in CRISIS_RESPONSES:
+		automated_crisis_response = requested_automated_response
 	var evidence_state := OS.get_environment("AURELIAN_PLAYABLE_EVIDENCE_STATE").to_lower()
 	var evidence_direction := OS.get_environment("AURELIAN_COMMITTED_DIRECTION").to_lower()
 	if NATIONAL_DIRECTIONS.has(evidence_direction):
@@ -96,7 +125,14 @@ func _ready() -> void:
 		city_chartered = evidence_state in ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized", "world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital"]
 		nation_founded = evidence_state in ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway"]
 		national_mandate_started = evidence_state in ["village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway", "village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"]
-		empire_proclaimed = evidence_state in ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"]
+		empire_proclaimed = evidence_state in ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"] or evidence_state in CRISIS_STATES
+		if evidence_state in CRISIS_STATES:
+			imperial_crisis = "river_surge"
+			if evidence_state in ["village_aurelian_imperial_capital_greenvale_shielded", "map_aurelian_imperial_heartland_greenvale_response", "world_aurelian_river_surge_greenvale_response"]:
+				imperial_crisis_response = "shield_greenvale"
+			elif evidence_state in ["village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_bridge_response"]:
+				imperial_crisis_response = "keep_east_bridge_open"
+				crisis_response_cursor = 1
 	else:
 		var restored := SESSION.load_session()
 		entry_state = String(restored.get("entry_state", "world_neutral"))
@@ -110,6 +146,10 @@ func _ready() -> void:
 		committed_direction = String(restored.get("national_direction", "none"))
 		national_mandate_started = bool(restored.get("national_mandate_started", false))
 		empire_proclaimed = bool(restored.get("empire_proclaimed", false))
+		imperial_crisis = String(restored.get("imperial_crisis", "none"))
+		imperial_crisis_response = String(restored.get("imperial_crisis_response", "none"))
+		if imperial_crisis_response == "keep_east_bridge_open":
+			crisis_response_cursor = 1
 		if NATIONAL_DIRECTIONS.has(committed_direction):
 			national_direction_cursor = NATIONAL_DIRECTIONS.find(committed_direction)
 		else:
@@ -128,6 +168,9 @@ func _ready() -> void:
 		committed_direction = "none"
 		national_mandate_started = false
 		empire_proclaimed = false
+		imperial_crisis = "none"
+		imperial_crisis_response = "none"
+		crisis_response_cursor = 0
 		national_direction_cursor = 0
 	if entry_state in ["village_founded", "village_developed", "village_trade_dispatched", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway"]:
 		settlement_founded = true
@@ -145,6 +188,21 @@ func _ready() -> void:
 		national_mandate_started = true
 	if entry_state in ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"]:
 		empire_proclaimed = true
+	if entry_state in CRISIS_STATES:
+		settlement_founded = true
+		settlement_developed = true
+		route_connected = true
+		caravan_dispatched = true
+		city_chartered = true
+		nation_founded = true
+		national_mandate_started = true
+		empire_proclaimed = true
+		imperial_crisis = "river_surge"
+		if entry_state in ["village_aurelian_imperial_capital_greenvale_shielded", "map_aurelian_imperial_heartland_greenvale_response", "world_aurelian_river_surge_greenvale_response"]:
+			imperial_crisis_response = "shield_greenvale"
+		elif entry_state in ["village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_bridge_response"]:
+			imperial_crisis_response = "keep_east_bridge_open"
+			crisis_response_cursor = 1
 	decision_state = _decision_state_for_entry(entry_state)
 	_configure_state_environment(entry_state)
 	super()
@@ -164,6 +222,8 @@ func _ready() -> void:
 	main_basin.add_child(living_capital_presentation)
 	imperial_presentation = _build_imperial_presentation()
 	main_basin.add_child(imperial_presentation)
+	river_surge_presentation = _build_river_surge_presentation()
+	main_basin.add_child(river_surge_presentation)
 	mandate_marker = _build_national_mandate_marker()
 	main_basin.add_child(mandate_marker)
 	_build_runtime_hud()
@@ -179,11 +239,11 @@ func _ready() -> void:
 
 func _decision_state_for_entry(state_name: String) -> String:
 	match state_name:
-		"map_east_route_selected", "map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland":
+		"map_east_route_selected", "map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_river_surge_response_loci", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response":
 			return "map_east_route"
-		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed":
+		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_river_surge_crisis", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response":
 			return "world_trade_selected"
-		"village_claimed", "village_founded", "village_developed", "village_trade_dispatched", "village_city_chartered", "village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital":
+		"village_claimed", "village_founded", "village_developed", "village_trade_dispatched", "village_city_chartered", "village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response":
 			return "village_route_context"
 		_:
 			return state_name
@@ -376,6 +436,20 @@ func _accept_entry() -> void:
 				empire_proclaimed = true
 				_apply_entry_state("village_aurelian_imperial_capital")
 				print("AURELIAN_FIRST_EMPIRE_PROCLAMATION=AURELIAN")
+		"world_first_empire_proclaimed":
+			if empire_proclaimed and imperial_crisis == "none":
+				imperial_crisis = "river_surge"
+				_apply_entry_state("world_river_surge_crisis")
+				print("AURELIAN_FIRST_IMPERIAL_CRISIS=RIVER_SURGE")
+		"village_river_surge_response_pending":
+			if imperial_crisis == "river_surge" and imperial_crisis_response == "none":
+				imperial_crisis_response = CRISIS_RESPONSES[crisis_response_cursor]
+				if imperial_crisis_response == "shield_greenvale":
+					_apply_entry_state("village_aurelian_imperial_capital_greenvale_shielded")
+					print("AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=SHIELD_GREENVALE")
+				else:
+					_apply_entry_state("village_aurelian_imperial_capital_bridge_response")
+					print("AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=KEEP_EAST_BRIDGE_OPEN")
 
 func _right_entry() -> void:
 	match entry_state:
@@ -394,6 +468,12 @@ func _right_entry() -> void:
 			_apply_entry_state("map_national_mandate_active")
 		"world_first_empire_proclaimed":
 			_apply_entry_state("map_aurelian_imperial_heartland")
+		"world_river_surge_crisis":
+			_apply_entry_state("map_river_surge_response_loci")
+		"world_aurelian_river_surge_greenvale_response":
+			_apply_entry_state("map_aurelian_imperial_heartland_greenvale_response")
+		"world_aurelian_river_surge_bridge_response":
+			_apply_entry_state("map_aurelian_imperial_heartland_bridge_response")
 		"map_east_route_claimed":
 			_apply_entry_state("village_developed" if settlement_developed else ("village_founded" if settlement_founded else "village_claimed"))
 		"map_east_route_connected":
@@ -408,6 +488,12 @@ func _right_entry() -> void:
 			_apply_entry_state("village_national_mandate_started")
 		"map_aurelian_imperial_heartland":
 			_apply_entry_state("village_aurelian_imperial_capital")
+		"map_river_surge_response_loci":
+			_apply_entry_state("village_river_surge_response_pending")
+		"map_aurelian_imperial_heartland_greenvale_response":
+			_apply_entry_state("village_aurelian_imperial_capital_greenvale_shielded")
+		"map_aurelian_imperial_heartland_bridge_response":
+			_apply_entry_state("village_aurelian_imperial_capital_bridge_response")
 		"map_east_route":
 			_apply_entry_state("village_route_context")
 
@@ -427,6 +513,12 @@ func _previous_entry() -> void:
 			_apply_entry_state("map_national_mandate_active")
 		"village_aurelian_imperial_capital":
 			_apply_entry_state("map_aurelian_imperial_heartland")
+		"village_river_surge_response_pending":
+			_apply_entry_state("map_river_surge_response_loci")
+		"village_aurelian_imperial_capital_greenvale_shielded":
+			_apply_entry_state("map_aurelian_imperial_heartland_greenvale_response")
+		"village_aurelian_imperial_capital_bridge_response":
+			_apply_entry_state("map_aurelian_imperial_heartland_bridge_response")
 		"map_east_route_claimed", "map_east_route_selected", "map_east_route":
 			_apply_entry_state("world_trade_selected")
 		"map_east_route_connected":
@@ -441,12 +533,24 @@ func _previous_entry() -> void:
 			_apply_entry_state("world_national_mandate_underway")
 		"map_aurelian_imperial_heartland":
 			_apply_entry_state("world_first_empire_proclaimed")
+		"map_river_surge_response_loci":
+			_apply_entry_state("world_river_surge_crisis")
+		"map_aurelian_imperial_heartland_greenvale_response":
+			_apply_entry_state("world_aurelian_river_surge_greenvale_response")
+		"map_aurelian_imperial_heartland_bridge_response":
+			_apply_entry_state("world_aurelian_river_surge_bridge_response")
 		"village_route_context":
 			_apply_entry_state("map_east_route")
 		"world_trade_selected":
 			_apply_entry_state("world_neutral")
 
 func _cycle_national_direction(step: int) -> void:
+	if entry_state == "village_river_surge_response_pending" and imperial_crisis_response == "none":
+		crisis_response_cursor = posmod(crisis_response_cursor + step, CRISIS_RESPONSES.size())
+		_refresh_river_surge_presentation(entry_state)
+		_update_runtime_hud()
+		print("AURELIAN_IMPERIAL_CRISIS_RESPONSE_INSPECT=%s" % CRISIS_RESPONSES[crisis_response_cursor].to_upper())
+		return
 	if entry_state != "world_first_nation_founded" or committed_direction != "none":
 		return
 	national_direction_cursor = posmod(national_direction_cursor + step, NATIONAL_DIRECTIONS.size())
@@ -930,14 +1034,14 @@ func _configure_directional_empire_glyph(glyph: MeshInstance3D, direction: Strin
 func _refresh_imperial_presentation(state_name: String) -> void:
 	if imperial_presentation == null:
 		return
-	imperial_presentation.visible = state_name in ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"]
+	imperial_presentation.visible = state_name in ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"] or state_name in CRISIS_STATES
 	var direction := committed_direction if committed_direction in NATIONAL_DIRECTIONS else "trade"
 	var direction_title := direction.to_upper()
 	var village_marker := imperial_presentation.get_node_or_null("VillageImperialCapital") as Node3D
 	var map_marker := imperial_presentation.get_node_or_null("MapImperialHeartland") as Node3D
 	var world_marker := imperial_presentation.get_node_or_null("WorldFirstEmpire") as Node3D
 	if village_marker != null:
-		village_marker.visible = state_name == "village_aurelian_imperial_capital"
+		village_marker.visible = state_name in ["village_aurelian_imperial_capital", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response"]
 		var village_label := village_marker.get_node_or_null("ImperialCapitalLabel") as Label3D
 		var village_glyph := village_marker.get_node_or_null("ImperialCapitalDirectionGlyph") as MeshInstance3D
 		if village_label != null:
@@ -946,7 +1050,7 @@ func _refresh_imperial_presentation(state_name: String) -> void:
 		if village_glyph != null:
 			_configure_directional_empire_glyph(village_glyph, direction, 0.34)
 	if map_marker != null:
-		map_marker.visible = state_name == "map_aurelian_imperial_heartland"
+		map_marker.visible = state_name in ["map_aurelian_imperial_heartland", "map_river_surge_response_loci", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response"]
 		var map_label := map_marker.get_node_or_null("ImperialHeartlandLabel") as Label3D
 		var map_glyph := map_marker.get_node_or_null("ImperialHeartlandDirectionGlyph") as MeshInstance3D
 		if map_label != null:
@@ -955,7 +1059,7 @@ func _refresh_imperial_presentation(state_name: String) -> void:
 		if map_glyph != null:
 			_configure_directional_empire_glyph(map_glyph, direction, 0.42)
 	if world_marker != null:
-		world_marker.visible = state_name == "world_first_empire_proclaimed"
+		world_marker.visible = state_name in ["world_first_empire_proclaimed", "world_river_surge_crisis", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response"]
 		var world_label := world_marker.get_node_or_null("FirstEmpireLabel") as Label3D
 		var world_glyph := world_marker.get_node_or_null("ImperialWorldDirectionGlyph") as MeshInstance3D
 		if world_label != null:
@@ -963,6 +1067,141 @@ func _refresh_imperial_presentation(state_name: String) -> void:
 			world_label.modulate = Color(_direction_color(direction))
 		if world_glyph != null:
 			_configure_directional_empire_glyph(world_glyph, direction, 0.46)
+
+func _build_river_surge_presentation() -> Node3D:
+	var root := Node3D.new()
+	root.name = "AurelianRiverSurgePresentation"
+
+	var world_cue := Node3D.new()
+	world_cue.name = "RiverSurgeWorldCue"
+	world_cue.position = topology_to_godot(Vector2(435.0, 313.0), 0.58)
+	for index in range(3):
+		var wave := MeshInstance3D.new()
+		wave.name = "RiverSurgeWave%02d" % (index + 1)
+		var wave_mesh := TorusMesh.new()
+		wave_mesh.inner_radius = 0.70 + float(index) * 0.28
+		wave_mesh.outer_radius = 0.82 + float(index) * 0.28
+		wave_mesh.rings = 28
+		wave_mesh.ring_segments = 12
+		wave.mesh = wave_mesh
+		wave.material_override = _material("#48a8d8ff", 0.58 - float(index) * 0.08)
+		world_cue.add_child(wave)
+	var world_label := Label3D.new()
+	world_label.name = "RiverSurgeWorldLabel"
+	world_label.text = "RIVER SURGE"
+	world_label.font_size = 24
+	world_label.outline_size = 8
+	world_label.modulate = Color("#9ee5ffff")
+	world_label.position = Vector3(1.35, 0.95, -0.35)
+	world_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	world_cue.add_child(world_label)
+	root.add_child(world_cue)
+
+	var greenvale_locus := _build_crisis_locus("GreenvaleResponseLocus", "SHIELD GREENVALE", Vector2(354.0, 285.0), "#5ecb8aff")
+	root.add_child(greenvale_locus)
+	var bridge_locus := _build_crisis_locus("EastBridgeResponseLocus", "KEEP EAST BRIDGE OPEN", Vector2(515.0, 340.0), "#e6b85cff")
+	root.add_child(bridge_locus)
+
+	var village_cue := Node3D.new()
+	village_cue.name = "VillageRiverSurgeResponseCue"
+	village_cue.position = topology_to_godot(Vector2(354.0, 285.0), 0.62)
+	var village_marker := MeshInstance3D.new()
+	village_marker.name = "VillageResponseMarker"
+	var village_mesh := CylinderMesh.new()
+	village_mesh.top_radius = 0.12
+	village_mesh.bottom_radius = 0.24
+	village_mesh.height = 0.75
+	village_mesh.radial_segments = 6
+	village_marker.mesh = village_mesh
+	village_marker.position.y = 0.375
+	village_cue.add_child(village_marker)
+	var village_label := Label3D.new()
+	village_label.name = "VillageResponseLabel"
+	village_label.font_size = 26
+	village_label.outline_size = 7
+	village_label.position = Vector3(0.85, 1.05, -0.20)
+	village_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	village_cue.add_child(village_label)
+	root.add_child(village_cue)
+
+	root.visible = false
+	return root
+
+func _build_crisis_locus(node_name: String, label_text: String, topology: Vector2, color: String) -> Node3D:
+	var locus := Node3D.new()
+	locus.name = node_name
+	locus.position = topology_to_godot(topology, 0.48)
+	var ring := MeshInstance3D.new()
+	ring.name = "ResponseRing"
+	var ring_mesh := TorusMesh.new()
+	ring_mesh.inner_radius = 0.58
+	ring_mesh.outer_radius = 0.75
+	ring_mesh.rings = 28
+	ring_mesh.ring_segments = 12
+	ring.mesh = ring_mesh
+	ring.material_override = _material(color, 0.48)
+	locus.add_child(ring)
+	var beacon := MeshInstance3D.new()
+	beacon.name = "ResponseBeacon"
+	var beacon_mesh := CylinderMesh.new()
+	beacon_mesh.top_radius = 0.06
+	beacon_mesh.bottom_radius = 0.18
+	beacon_mesh.height = 0.9
+	beacon_mesh.radial_segments = 10
+	beacon.mesh = beacon_mesh
+	beacon.position.y = 0.45
+	beacon.material_override = _material(color, 0.34)
+	locus.add_child(beacon)
+	var label := Label3D.new()
+	label.name = "ResponseLabel"
+	label.text = label_text
+	label.font_size = 32
+	label.outline_size = 8
+	label.modulate = Color(color)
+	label.position = Vector3(-0.95 if node_name == "GreenvaleResponseLocus" else 0.95, 0.95, -0.18)
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	locus.add_child(label)
+	return locus
+
+func _refresh_river_surge_presentation(state_name: String) -> void:
+	if river_surge_presentation == null:
+		return
+	river_surge_presentation.visible = state_name in CRISIS_STATES
+	var world_cue := river_surge_presentation.get_node_or_null("RiverSurgeWorldCue") as Node3D
+	var greenvale_locus := river_surge_presentation.get_node_or_null("GreenvaleResponseLocus") as Node3D
+	var bridge_locus := river_surge_presentation.get_node_or_null("EastBridgeResponseLocus") as Node3D
+	var village_cue := river_surge_presentation.get_node_or_null("VillageRiverSurgeResponseCue") as Node3D
+	var is_world := state_name in ["world_river_surge_crisis", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response"]
+	var is_map_pending := state_name == "map_river_surge_response_loci"
+	var is_greenvale_map := state_name == "map_aurelian_imperial_heartland_greenvale_response"
+	var is_bridge_map := state_name == "map_aurelian_imperial_heartland_bridge_response"
+	if world_cue != null:
+		world_cue.visible = is_world
+		var world_label := world_cue.get_node_or_null("RiverSurgeWorldLabel") as Label3D
+		if world_label != null:
+			if state_name == "world_aurelian_river_surge_greenvale_response":
+				world_label.text = "RIVER SURGE / GREENVALE SHIELDED"
+			elif state_name == "world_aurelian_river_surge_bridge_response":
+				world_label.text = "RIVER SURGE / EAST BRIDGE OPEN"
+			else:
+				world_label.text = "RIVER SURGE"
+	if greenvale_locus != null:
+		greenvale_locus.visible = is_map_pending or is_greenvale_map
+		greenvale_locus.scale = Vector3.ONE * (1.14 if is_map_pending and crisis_response_cursor == 0 else 1.0)
+	if bridge_locus != null:
+		bridge_locus.visible = is_map_pending or is_bridge_map
+		bridge_locus.scale = Vector3.ONE * (1.14 if is_map_pending and crisis_response_cursor == 1 else 1.0)
+	if village_cue != null:
+		village_cue.visible = state_name in ["village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response"]
+		var village_marker := village_cue.get_node_or_null("VillageResponseMarker") as MeshInstance3D
+		var village_label := village_cue.get_node_or_null("VillageResponseLabel") as Label3D
+		var response: String = imperial_crisis_response if imperial_crisis_response != "none" else String(CRISIS_RESPONSES[crisis_response_cursor])
+		var response_color := "#5ecb8aff" if response == "shield_greenvale" else "#e6b85cff"
+		if village_marker != null:
+			village_marker.material_override = _material(response_color, 0.42)
+		if village_label != null:
+			village_label.modulate = Color(response_color)
+			village_label.text = "SHIELD GREENVALE" if response == "shield_greenvale" else "KEEP EAST BRIDGE OPEN"
 
 func _animate_living_capital_presentation(delta: float) -> void:
 	var seconds := float(Time.get_ticks_msec()) / 1000.0
@@ -1027,6 +1266,7 @@ func _apply_entry_state(state_name: String) -> void:
 		if living_capital_presentation.visible and previous_state != state_name:
 			_reveal_living_capital()
 	_refresh_imperial_presentation(state_name)
+	_refresh_river_surge_presentation(state_name)
 	_set_trade_world_underway(false)
 	_refresh_national_direction_identity()
 	match state_name:
@@ -1061,7 +1301,7 @@ func _apply_entry_state(state_name: String) -> void:
 			_apply_world_state(main_world_overlay_root, "selected_trade")
 			_set_trade_world_underway(true)
 			_activate_camera("world")
-		"world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed":
+		"world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_river_surge_crisis", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response":
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_NATION_FOUNDING_CAPITAL_STATE_FAILED")
 			_apply_world_state(main_world_overlay_root, "selected_trade")
@@ -1091,7 +1331,7 @@ func _apply_entry_state(state_name: String) -> void:
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_CITY_CHARTER_VILLAGE_STATE_FAILED")
 			_activate_camera("map")
-		"map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland":
+		"map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_river_surge_response_loci", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response":
 			_apply_map_state(main_overlay_root, "east_route_claimed")
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_NATION_FOUNDING_CAPITAL_STATE_FAILED")
@@ -1124,7 +1364,7 @@ func _apply_entry_state(state_name: String) -> void:
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_CITY_CHARTER_VILLAGE_STATE_FAILED")
 			_activate_camera("village")
-		"village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital":
+		"village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response":
 			settlement_founded = true
 			settlement_developed = true
 			route_connected = true
@@ -1140,7 +1380,7 @@ func _apply_entry_state(state_name: String) -> void:
 	_update_runtime_hud()
 	if persistence_enabled:
 		restored_intent = "none" if entry_state == "world_neutral" else "east_trade"
-		var save_result := SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded, committed_direction, national_mandate_started, empire_proclaimed)
+		var save_result := SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded, committed_direction, national_mandate_started, empire_proclaimed, imperial_crisis, imperial_crisis_response)
 		print("AURELIAN_NATIONAL_DIRECTION_SAVE=%s" % committed_direction)
 		print("AURELIAN_SESSION_V2_SAVE_ACK=%s:%s:%s:%s:%s:%s:%s:%s:%s:%s" % [String(save_result.get("status", "unknown")), String(save_result.get("adapter", "unknown")), entry_state, restored_intent, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded])
 		if not bool(save_result.get("ok", false)) and String(save_result.get("status", "")) != "unavailable":
@@ -1178,7 +1418,19 @@ func _update_runtime_hud() -> void:
 		"world_first_empire_proclaimed":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "First Aurelian Empire proclaimed, preserving %s direction" % committed_direction.capitalize()
-			controls_label.text = "[RIGHT] Inspect imperial heartland"
+			controls_label.text = "[ENTER] Face River Surge    [RIGHT] Inspect imperial heartland"
+		"world_river_surge_crisis":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "River Surge threatens Greenvale and the East Bridge"
+			controls_label.text = "[RIGHT] Inspect both response loci"
+		"world_aurelian_river_surge_greenvale_response":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "%s Empire records: Greenvale shielded" % committed_direction.capitalize()
+			controls_label.text = "[RIGHT] Inspect Greenvale response"
+		"world_aurelian_river_surge_bridge_response":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "%s Empire records: East Bridge kept open" % committed_direction.capitalize()
+			controls_label.text = "[RIGHT] Inspect East Bridge response"
 		"world_first_nation_founded":
 			layer_label.text = "WORLD  |  WHY"
 			if committed_direction == "none":
@@ -1220,6 +1472,18 @@ func _update_runtime_hud() -> void:
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "%s imperial heartland anchored at Greenvale and %s" % [committed_direction.capitalize(), _mandate_locus_label()]
 			controls_label.text = "[RIGHT] Open imperial capital    [LEFT] World"
+		"map_river_surge_response_loci":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "River Surge response loci: Greenvale and East Bridge"
+			controls_label.text = "[RIGHT] Choose response in Village    [LEFT] World"
+		"map_aurelian_imperial_heartland_greenvale_response":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Selected response anchored at Greenvale"
+			controls_label.text = "[RIGHT] Reopen imperial capital    [LEFT] World"
+		"map_aurelian_imperial_heartland_bridge_response":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Selected response anchored at East Bridge"
+			controls_label.text = "[RIGHT] Reopen imperial capital    [LEFT] World"
 		"village_claimed":
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "East Route is claimed: no settlement exists yet"
@@ -1252,6 +1516,19 @@ func _update_runtime_hud() -> void:
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "Greenvale is the %s Aurelian imperial capital" % committed_direction.capitalize()
 			controls_label.text = "[LEFT / ESC] Inspect imperial heartland"
+		"village_river_surge_response_pending":
+			layer_label.text = "VILLAGE  |  HOW"
+			var inspected_response := "Shield Greenvale" if crisis_response_cursor == 0 else "Keep East Bridge Open"
+			intent_label.text = "Choose the first imperial crisis response: %s" % inspected_response
+			controls_label.text = "[UP / DOWN] Inspect responses    [ENTER] Commit response    [LEFT] Map"
+		"village_aurelian_imperial_capital_greenvale_shielded":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "Greenvale shield response committed"
+			controls_label.text = "[LEFT / ESC] Inspect Greenvale response on Map"
+		"village_aurelian_imperial_capital_bridge_response":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "East Bridge access response committed"
+			controls_label.text = "[LEFT / ESC] Inspect East Bridge response on Map"
 		"map_east_route":
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "Legacy East Route selection restored"
@@ -1380,6 +1657,24 @@ func _process(_delta: float) -> void:
 		_emit_action("ui_left")
 	elif automated_frame == 4770:
 		_emit_action("ui_left")
-	elif automated_frame >= 4830:
-		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=4830")
+	elif automated_frame == 4830:
+		_emit_action("ui_accept")
+	elif automated_frame == 4890:
+		_emit_action("ui_right")
+	elif automated_frame == 4950:
+		_emit_action("ui_right")
+	elif automated_frame == 5010 and automated_crisis_response == "keep_east_bridge_open":
+		_emit_action("ui_down")
+	elif automated_frame == 5070:
+		_emit_action("ui_accept")
+	elif automated_frame == 5130:
+		_emit_action("ui_left")
+	elif automated_frame == 5190:
+		_emit_action("ui_left")
+	elif automated_frame == 5250:
+		_emit_action("ui_right")
+	elif automated_frame == 5310:
+		_emit_action("ui_right")
+	elif automated_frame >= 5370:
+		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=5370")
 		get_tree().quit(0)
