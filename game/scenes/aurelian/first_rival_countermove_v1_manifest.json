@@ -1,0 +1,163 @@
+{
+  "contract": "GODOT_AURELIAN_FIRST_RIVAL_COUNTERMOVE_V1",
+  "issue": 530,
+  "authority_baseline_sha": "1a518d867093d8d5729c1d82c5d694726c36d8fa",
+  "product_baseline_sha": "a4be5db1bf55baac055f9a9985d5de698dfdf75d",
+  "entry_requirement": {
+    "empire_proclaimed": true,
+    "imperial_crisis": "river_surge",
+    "imperial_crisis_response": [
+      "shield_greenvale",
+      "keep_east_bridge_open"
+    ],
+    "national_direction": [
+      "trade",
+      "expand",
+      "frontier"
+    ],
+    "first_rival_countermove_response": null
+  },
+  "rival": {
+    "id": "obsidian_march",
+    "label": "Obsidian March",
+    "simulation_allowed": false,
+    "combat_allowed": false,
+    "ai_allowed": false
+  },
+  "origin_mapping": {
+    "shield_greenvale": {
+      "countermove": "east_bridge_pressure",
+      "map_locus": "east_bridge",
+      "world_reason": "greenvale_shield_exposes_bridge_pressure"
+    },
+    "keep_east_bridge_open": {
+      "countermove": "greenvale_legitimacy_pressure",
+      "map_locus": "greenvale",
+      "world_reason": "open_bridge_redirects_legitimacy_pressure"
+    }
+  },
+  "responses": {
+    "stand_firm": {
+      "action": "Stand Firm",
+      "village_state": "village_first_rival_response_stand_firm",
+      "map_state": "map_first_rival_response_stand_firm",
+      "world_state": "world_first_rival_response_stand_firm",
+      "cue": "rival_response_stand_firm"
+    },
+    "negotiate_passage": {
+      "action": "Negotiate Passage",
+      "village_state": "village_first_rival_response_negotiate_passage",
+      "map_state": "map_first_rival_response_negotiate_passage",
+      "world_state": "world_first_rival_response_negotiate_passage",
+      "cue": "rival_response_negotiate_passage"
+    }
+  },
+  "precommit_states": {
+    "world": "world_first_rival_countermove",
+    "map_east_bridge": "map_first_rival_countermove_east_bridge",
+    "map_greenvale": "map_first_rival_countermove_greenvale",
+    "village": "village_first_rival_response_pending"
+  },
+  "event": {
+    "format": "AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=STAND_FIRM|NEGOTIATE_PASSAGE",
+    "single_event": true,
+    "idempotent": true,
+    "restore_event_emission_allowed": false,
+    "mutually_exclusive_response": true
+  },
+  "view_roles": {
+    "village": "HOW_COMMIT_FIRST_RIVAL_RESPONSE",
+    "map": "WHERE_EXISTING_PRESSURED_LOCUS_AND_RESPONSE",
+    "world": "WHY_RIVAL_REACTED_AND_WHICH_RESPONSE_WAS_RECORDED"
+  },
+  "presentation": {
+    "procedural_only": true,
+    "pressured_existing_locus_required": true,
+    "response_specific_cue_required": true,
+    "label_only_differentiation": false,
+    "whole_scene_recolor": false,
+    "new_asset": false,
+    "new_glb": false,
+    "damage_or_destruction": false
+  },
+  "shared_geography": {
+    "asset": "aurelian_authored_terrain_v1.glb",
+    "greenvale_origin_unchanged": true,
+    "river_spline_unchanged": true,
+    "river_banks_unchanged": true,
+    "east_bridge_transform_unchanged": true,
+    "bridge_landings_unchanged": true,
+    "east_route_unchanged": true,
+    "north_ridge_unchanged": true,
+    "gilded_crossing_unchanged": true,
+    "camera_topology_unchanged": true,
+    "ownership_change_allowed": false,
+    "second_land_allowed": false
+  },
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "new_fields": [
+      "first_rival_countermove_response"
+    ],
+    "origin_derived_from": "imperial_crisis_response",
+    "response_values": [
+      "stand_firm",
+      "negotiate_passage"
+    ],
+    "preserve_river_surge_response": true,
+    "preserve_directional_empire_identity": true,
+    "native_restart_required": true,
+    "web_reload_required": true,
+    "persistent_profile_reopen_required": true,
+    "duplicate_event_allowed": false
+  },
+  "evidence": {
+    "both_crisis_origins_required": true,
+    "both_pressured_loci_required": true,
+    "both_normal_input_responses_required": true,
+    "both_postresponse_view_sets_required": true,
+    "all_three_directions_preserved_required": true,
+    "native_persistence_required": true,
+    "web_persistence_required": true,
+    "profile_reopen_required": true,
+    "shared_geography_regression_required": true,
+    "exact_manifest_validation_required": true,
+    "direct_still_and_motion_review_required": true,
+    "one_bounded_visual_correction_maximum": true
+  },
+  "terminal_results": [
+    "GODOT_AURELIAN_FIRST_RIVAL_COUNTERMOVE_PASS",
+    "GODOT_AURELIAN_FIRST_RIVAL_COUNTERMOVE_REJECT"
+  ],
+  "forbidden": [
+    "combat",
+    "units",
+    "attacks",
+    "damage",
+    "victory_simulation",
+    "defeat_simulation",
+    "rival_ai",
+    "rival_turns",
+    "random_behavior",
+    "rewards",
+    "penalties",
+    "resource_costs",
+    "timers",
+    "economy",
+    "pressure_meter",
+    "diplomacy_simulation",
+    "governance_simulation",
+    "third_origin",
+    "third_response",
+    "direction_response_matrix",
+    "frontier_payoff",
+    "second_land",
+    "ownership_change",
+    "new_settlement",
+    "new_assets",
+    "new_geography",
+    "P12",
+    "MAX"
+  ]
+}
