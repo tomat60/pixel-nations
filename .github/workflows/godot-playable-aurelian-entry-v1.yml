@@ -208,6 +208,15 @@ jobs:
             "village-aurelian-imperial-capital:village_aurelian_imperial_capital"
             "map-aurelian-imperial-heartland:map_aurelian_imperial_heartland"
             "world-first-empire-proclaimed:world_first_empire_proclaimed"
+            "world-river-surge-crisis:world_river_surge_crisis"
+            "map-river-surge-response-loci:map_river_surge_response_loci"
+            "village-river-surge-response-pending:village_river_surge_response_pending"
+            "village-greenvale-shielded:village_aurelian_imperial_capital_greenvale_shielded"
+            "map-greenvale-response:map_aurelian_imperial_heartland_greenvale_response"
+            "world-greenvale-response:world_aurelian_river_surge_greenvale_response"
+            "village-east-bridge-response:village_aurelian_imperial_capital_bridge_response"
+            "map-east-bridge-response:map_aurelian_imperial_heartland_bridge_response"
+            "world-east-bridge-response:world_aurelian_river_surge_bridge_response"
             "trade-village-mandate-started:village_national_mandate_started:trade"
             "trade-map-mandate-active:map_national_mandate_active:trade"
             "trade-world-mandate-underway:world_national_mandate_underway:trade"
@@ -225,7 +234,7 @@ jobs:
             IFS=: read -r output state explicit_direction <<< "$spec"
             direction="${explicit_direction:-}"
             case "$state" in
-              world_first_nation_founded|map_aurelian_homeland|village_greenvale_capital|village_national_mandate_started|map_national_mandate_active|world_national_mandate_underway|village_aurelian_imperial_capital|map_aurelian_imperial_heartland|world_first_empire_proclaimed) direction="${direction:-expand}" ;;
+              world_first_nation_founded|map_aurelian_homeland|village_greenvale_capital|village_national_mandate_started|map_national_mandate_active|world_national_mandate_underway|village_aurelian_imperial_capital|map_aurelian_imperial_heartland|world_first_empire_proclaimed|world_river_surge_crisis|map_river_surge_response_loci|village_river_surge_response_pending|village_aurelian_imperial_capital_greenvale_shielded|map_aurelian_imperial_heartland_greenvale_response|world_aurelian_river_surge_greenvale_response|village_aurelian_imperial_capital_bridge_response|map_aurelian_imperial_heartland_bridge_response|world_aurelian_river_surge_bridge_response) direction="${direction:-expand}" ;;
             esac
             timeout 90s xvfb-run -a -s "-screen 0 1600x1000x24" env \
               AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}" \
@@ -247,7 +256,7 @@ jobs:
             --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 30 \
             --write-movie "$PWD/${EVIDENCE_DIR}/playable-entry-sequence.avi" \
             > "${EVIDENCE_DIR}/playable-entry-sequence.log" 2>&1
-          for state in world_trade_selected map_east_route_selected map_east_route_claimed village_claimed village_founded village_developed map_east_route_connected world_trade_route_active village_trade_dispatched map_east_route_in_use world_first_trade_underway village_city_chartered map_greenvale_city world_first_city_recognized world_first_nation_founded map_aurelian_homeland village_greenvale_capital village_national_mandate_started map_national_mandate_active world_national_mandate_underway village_aurelian_imperial_capital map_aurelian_imperial_heartland world_first_empire_proclaimed; do
+          for state in world_trade_selected map_east_route_selected map_east_route_claimed village_claimed village_founded village_developed map_east_route_connected world_trade_route_active village_trade_dispatched map_east_route_in_use world_first_trade_underway village_city_chartered map_greenvale_city world_first_city_recognized world_first_nation_founded map_aurelian_homeland village_greenvale_capital village_national_mandate_started map_national_mandate_active world_national_mandate_underway village_aurelian_imperial_capital map_aurelian_imperial_heartland world_first_empire_proclaimed world_river_surge_crisis map_river_surge_response_loci village_river_surge_response_pending village_aurelian_imperial_capital_greenvale_shielded map_aurelian_imperial_heartland_greenvale_response world_aurelian_river_surge_greenvale_response; do
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=$state" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           done
           grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
@@ -264,13 +273,19 @@ jobs:
           test "$(grep -Fc "AURELIAN_FIRST_NATIONAL_MANDATE=" "${EVIDENCE_DIR}/playable-entry-sequence.log")" = "1"
           grep -F "AURELIAN_FIRST_EMPIRE_PROCLAMATION=AURELIAN" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test "$(grep -Fc "AURELIAN_FIRST_EMPIRE_PROCLAMATION=" "${EVIDENCE_DIR}/playable-entry-sequence.log")" = "1"
-          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=4830" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "AURELIAN_IMPERIAL_CRISIS=RIVER_SURGE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "AURELIAN_IMPERIAL_CRISIS_RESPONSE=SHIELD_GREENVALE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          test "$(grep -Fc "AURELIAN_IMPERIAL_CRISIS_RESPONSE=" "${EVIDENCE_DIR}/playable-entry-sequence.log")" = "1"
+          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=5370" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test -s "${EVIDENCE_DIR}/playable-entry-sequence.avi"
           mediainfo --Output=JSON "${EVIDENCE_DIR}/playable-entry-sequence.avi" > "${EVIDENCE_DIR}/video-metadata.json"
           for direction in trade frontier; do
+            response="shield_greenvale"
+            if [ "$direction" = "frontier" ]; then response="keep_east_bridge_open"; fi
             timeout 90s env \
               AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
               AURELIAN_AUTOMATED_DIRECTION="${direction}" \
+              AURELIAN_AUTOMATED_CRISIS_RESPONSE="${response}" \
               "${GODOT_BIN}" --headless --path game --audio-driver Dummy --fixed-fps 480 \
               > "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log" 2>&1
             grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=${direction^^}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
@@ -280,7 +295,19 @@ jobs:
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_aurelian_imperial_capital" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_imperial_heartland" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_empire_proclaimed" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=4830" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_river_surge_crisis" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_river_surge_response_loci" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_river_surge_response_pending" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            grep -F "AURELIAN_IMPERIAL_CRISIS=RIVER_SURGE" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            expected_response="${response^^}"
+            grep -F "AURELIAN_IMPERIAL_CRISIS_RESPONSE=${expected_response}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            test "$(grep -Fc "AURELIAN_IMPERIAL_CRISIS_RESPONSE=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
+            if [ "$response" = "shield_greenvale" ]; then
+              grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_aurelian_river_surge_greenvale_response" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            else
+              grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_aurelian_river_surge_bridge_response" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            fi
+            grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=5370" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
           done
 
       - name: Validate evidence
@@ -291,7 +318,7 @@ jobs:
           from pathlib import Path
           from PIL import Image, ImageStat
           root=Path(os.environ["EVIDENCE_DIR"])
-          names=["normal-launch","world-trade-selected","map-east-route-selected","map-east-route-claimed","village-claimed","village-founded","village-developed","returned-claimed-map","map-east-route-connected","world-trade-route-active","reopened-connected-map","reopened-village-developed","village-first-caravan-dispatched","map-east-route-in-use","world-first-trade-underway","village-first-city-chartered","map-greenvale-city","world-first-city-recognized","world-first-nation-founded","map-aurelian-homeland","village-greenvale-capital","village-national-mandate-started","map-national-mandate-active","world-national-mandate-underway","village-aurelian-imperial-capital","map-aurelian-imperial-heartland","world-first-empire-proclaimed","trade-village-mandate-started","trade-map-mandate-active","trade-world-mandate-underway","frontier-village-mandate-started","frontier-map-mandate-active","frontier-world-mandate-underway","trade-village-imperial-capital","trade-map-imperial-heartland","trade-world-first-empire","frontier-village-imperial-capital","frontier-map-imperial-heartland","frontier-world-first-empire"]
+          names=["normal-launch","world-trade-selected","map-east-route-selected","map-east-route-claimed","village-claimed","village-founded","village-developed","returned-claimed-map","map-east-route-connected","world-trade-route-active","reopened-connected-map","reopened-village-developed","village-first-caravan-dispatched","map-east-route-in-use","world-first-trade-underway","village-first-city-chartered","map-greenvale-city","world-first-city-recognized","world-first-nation-founded","map-aurelian-homeland","village-greenvale-capital","village-national-mandate-started","map-national-mandate-active","world-national-mandate-underway","village-aurelian-imperial-capital","map-aurelian-imperial-heartland","world-first-empire-proclaimed","trade-village-mandate-started","trade-map-mandate-active","trade-world-mandate-underway","frontier-village-mandate-started","frontier-map-mandate-active","frontier-world-mandate-underway","trade-village-imperial-capital","trade-map-imperial-heartland","trade-world-first-empire","frontier-village-imperial-capital","frontier-map-imperial-heartland","frontier-world-first-empire","world-river-surge-crisis","map-river-surge-response-loci","village-river-surge-response-pending","village-greenvale-shielded","map-greenvale-response","world-greenvale-response","village-east-bridge-response","map-east-bridge-response","world-east-bridge-response"]
           report={}
           for name in names:
               path=root/f"{name}-1440x900.png"
@@ -314,8 +341,8 @@ jobs:
           if not match: raise SystemExit("duration missing")
           duration=float(match.group(0))
           if duration>1000: duration/=1000
-          if not 160.0<=duration<=162.0: raise SystemExit(f"duration {duration}")
-          qa={"status":"PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_REVIEW","exact_head":(root/"exact-head.txt").read_text().strip(),"stills":report,"video_seconds":duration,"claim":"east_route","settlement":"greenvale","founded":True,"developed":True,"route_connected":True,"world_trade_active":True,"caravan_dispatched":True,"world_first_trade_underway":True,"city_chartered":True,"city_marker_topology":[354,285],"national_direction":"expand","direction_commitment":True,"national_mandate_started":True,"empire_proclaimed":True,"imperial_capital":"greenvale","imperial_heartland":"aurelian","mandate_direction_actions":["trade","expand","frontier"],"mandate_loci":{"trade":[435,313],"expand":[700,205],"frontier":[515,340]}}
+          if not 178.0<=duration<=181.0: raise SystemExit(f"duration {duration}")
+          qa={"status":"PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_REVIEW","exact_head":(root/"exact-head.txt").read_text().strip(),"stills":report,"video_seconds":duration,"claim":"east_route","settlement":"greenvale","founded":True,"developed":True,"route_connected":True,"world_trade_active":True,"caravan_dispatched":True,"world_first_trade_underway":True,"city_chartered":True,"city_marker_topology":[354,285],"national_direction":"expand","direction_commitment":True,"national_mandate_started":True,"empire_proclaimed":True,"imperial_crisis":"river_surge","imperial_crisis_responses":["shield_greenvale","keep_east_bridge_open"],"imperial_capital":"greenvale","imperial_heartland":"aurelian","mandate_direction_actions":["trade","expand","frontier"],"mandate_loci":{"trade":[435,313],"expand":[700,205],"frontier":[515,340]}}
           (root/"evidence-qa.json").write_text(json.dumps(qa,indent=2)+"\n")
           rows=math.ceil(len(names)/3)
           canvas=Image.new("RGB",(1080,rows*225),(32,32,32))
