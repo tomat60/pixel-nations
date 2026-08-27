@@ -254,7 +254,7 @@ jobs:
               village_first_rival_response_negotiate_passage|map_first_rival_response_negotiate_passage|world_first_rival_response_negotiate_passage) rival_response="negotiate_passage" ;;
             esac
             case "$state" in
-              world_first_nation_founded|map_aurelian_homeland|village_greenvale_capital|village_national_mandate_started|map_national_mandate_active|world_national_mandate_underway|village_aurelian_imperial_capital|map_aurelian_imperial_heartland|world_first_empire_proclaimed|world_river_surge_crisis|map_river_surge_response_loci|village_river_surge_response_pending|village_aurelian_imperial_capital_greenvale_shielded|map_aurelian_imperial_heartland_greenvale_response|world_aurelian_river_surge_greenvale_response|village_aurelian_imperial_capital_bridge_response|map_aurelian_imperial_heartland_bridge_response|world_aurelian_river_surge_bridge_response) direction="${direction:-expand}" ;;
+              world_first_nation_founded|map_aurelian_homeland|village_greenvale_capital|village_national_mandate_started|map_national_mandate_active|world_national_mandate_underway|village_aurelian_imperial_capital|map_aurelian_imperial_heartland|world_first_empire_proclaimed|world_river_surge_crisis|map_river_surge_response_loci|village_river_surge_response_pending|village_aurelian_imperial_capital_greenvale_shielded|map_aurelian_imperial_heartland_greenvale_response|world_aurelian_river_surge_greenvale_response|village_aurelian_imperial_capital_bridge_response|map_aurelian_imperial_heartland_bridge_response|world_aurelian_river_surge_bridge_response|world_first_rival_*|map_first_rival_*|village_first_rival_*) direction="${direction:-expand}" ;;
             esac
             timeout 90s xvfb-run -a -s "-screen 0 1600x1000x24" env \
               AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}" \
@@ -373,7 +373,7 @@ jobs:
           if not match: raise SystemExit("duration missing")
           duration=float(match.group(0))
           if duration>1000: duration/=1000
-          if not 178.0<=duration<=181.0: raise SystemExit(f"duration {duration}")
+          if not 188.0<=duration<=191.0: raise SystemExit(f"duration {duration}")
           qa={"status":"PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_REVIEW","exact_head":(root/"exact-head.txt").read_text().strip(),"stills":report,"video_seconds":duration,"claim":"east_route","settlement":"greenvale","founded":True,"developed":True,"route_connected":True,"world_trade_active":True,"caravan_dispatched":True,"world_first_trade_underway":True,"city_chartered":True,"city_marker_topology":[354,285],"national_direction":"expand","direction_commitment":True,"national_mandate_started":True,"empire_proclaimed":True,"imperial_crisis":"river_surge","imperial_crisis_responses":["shield_greenvale","keep_east_bridge_open"],"first_rival_countermove":"obsidian_march","first_rival_responses":["stand_firm","negotiate_passage"],"imperial_capital":"greenvale","imperial_heartland":"aurelian","mandate_direction_actions":["trade","expand","frontier"],"mandate_loci":{"trade":[435,313],"expand":[700,205],"frontier":[515,340]}}
           (root/"evidence-qa.json").write_text(json.dumps(qa,indent=2)+"\n")
           rows=math.ceil(len(names)/3)
