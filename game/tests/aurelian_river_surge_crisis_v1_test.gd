@@ -9,6 +9,7 @@ var failures: Array[String] = []
 func _initialize() -> void:
 	var manifest := _read_json(MANIFEST_PATH)
 	var persistence := _read_text(PERSISTENCE_PATH)
+	var controller := _read_text(CONTROLLER_PATH)
 	_check(String(manifest.get("contract", "")) == "GODOT_AURELIAN_RIVER_SURGE_CRISIS_V1", "contract")
 	_check(int(manifest.get("issue", 0)) == 526, "issue")
 	_check(String(manifest.get("authority_baseline_sha", "")) == "1f5399a849f6736c5a178d3198184ad338a7eb39", "authority_baseline")
@@ -53,14 +54,32 @@ func _initialize() -> void:
 		"world_aurelian_river_surge_greenvale_response",
 		"world_aurelian_river_surge_bridge_response",
 	]:
-		_check(persistence.contains(""%s"" % state_name), "persistence_state_%s" % state_name)
+		_check(persistence.contains("\\\"%s\\\"" % state_name), "persistence_state_%s" % state_name)
 	for field in ["imperial_crisis", "imperial_crisis_response"]:
-		_check(persistence.contains(""%s"" % field), "persistence_field_%s" % field)
+		_check(persistence.contains("\\\"%s\\\"" % field), "persistence_field_%s" % field)
 	_check(persistence.contains("VALID_IMPERIAL_CRISES"), "valid_crises")
 	_check(persistence.contains("VALID_IMPERIAL_CRISIS_RESPONSES"), "valid_responses")
-	_check(persistence.contains("imperial_crisis_response == "shield_greenvale""), "greenvale_validation")
-	_check(persistence.contains("imperial_crisis_response == "keep_east_bridge_open""), "bridge_validation")
-	_check(not _read_text(CONTROLLER_PATH).is_empty(), "controller_available")
+	_check(persistence.contains("imperial_crisis_response == \\\"shield_greenvale\\\""), "greenvale_validation")
+	_check(persistence.contains("imperial_crisis_response == \\\"keep_east_bridge_open\\\""), "bridge_validation")
+	_check(not controller.is_empty(), "controller_available")
+	for required_controller_token in [
+		"CRISIS_RESPONSES",
+		"world_river_surge_crisis",
+		"map_river_surge_response_loci",
+		"village_river_surge_response_pending",
+		"_build_river_surge_presentation",
+		"GreenvaleResponseLocus",
+		"EastBridgeResponseLocus",
+		"AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=SHIELD_GREENVALE",
+		"AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=KEEP_EAST_BRIDGE_OPEN",
+		"SESSION.save_session(entry_state",
+		"imperial_crisis, imperial_crisis_response",
+	]:
+		_check(controller.contains(required_controller_token), "controller_%s" % required_controller_token)
+	_check(controller.contains("[UP / DOWN] Inspect responses"), "normal_input_response_inspection")
+	_check(controller.contains("[ENTER] Commit response"), "explicit_response_commit")
+	_check(controller.contains("Vector2(354.0, 285.0)"), "accepted_greenvale_topology")
+	_check(controller.contains("Vector2(515.0, 340.0)"), "accepted_east_bridge_topology")
 	_finish()
 
 func _read_json(path: String) -> Dictionary:
