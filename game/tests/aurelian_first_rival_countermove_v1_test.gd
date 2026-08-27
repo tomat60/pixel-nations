@@ -4,6 +4,7 @@ const SESSION = preload("res://scenes/aurelian/aurelian_session_persistence_v2.g
 const TEST_PATH := "user://aurelian-first-rival-countermove-v1-test.json"
 const MANIFEST_PATH := "res://scenes/aurelian/first_rival_countermove_v1_manifest.json"
 const PERSISTENCE_PATH := "res://scenes/aurelian/aurelian_session_persistence_v2.gd"
+const CONTROLLER_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1.gd"
 
 var failures: Array[String] = []
 
@@ -54,6 +55,25 @@ func _initialize() -> void:
 	var persistence := _read_text(PERSISTENCE_PATH)
 	_check(persistence.contains("VALID_FIRST_RIVAL_COUNTERMOVE_RESPONSES"), "valid_response_contract")
 	_check(persistence.contains('"first_rival_countermove_response"'), "response_persisted")
+	var controller := _read_text(CONTROLLER_PATH)
+	for token in [
+		"RIVAL_RESPONSES",
+		"world_first_rival_countermove",
+		"map_first_rival_countermove_east_bridge",
+		"map_first_rival_countermove_greenvale",
+		"village_first_rival_response_pending",
+		"AURELIAN_FIRST_RIVAL_COUNTERMOVE=OBSIDIAN_MARCH",
+		"AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=STAND_FIRM",
+		"AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=NEGOTIATE_PASSAGE",
+		"[UP / DOWN] Inspect responses",
+		"[ENTER] Commit response",
+		"SESSION.save_session(entry_state",
+		"first_rival_countermove_response",
+	]:
+		_check(controller.contains(token), "controller_%s" % token)
+	_check(controller.contains("Vector2(354.0, 285.0)"), "accepted_greenvale_topology")
+	_check(controller.contains("Vector2(515.0, 340.0)"), "accepted_east_bridge_topology")
+	_check(controller.contains("AURELIAN_AUTOMATED_RIVAL_RESPONSE"), "automated_normal_input_variants")
 	_cleanup()
 	_finish()
 
