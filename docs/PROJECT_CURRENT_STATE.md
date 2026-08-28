@@ -7,7 +7,7 @@ Authority source: this file on the current `main`
 Authority baseline SHA: `f18a335b0f0b65a1c3611a3af76f189f86ae2f02`
 Product baseline SHA: `f18a335b0f0b65a1c3611a3af76f189f86ae2f02`
 Current milestone: Aurelian First Frontier Payoff v1 terminally accepted
-Active execution issue: none
+Active execution issue: #534 (completed)
 Next allowed action: perform at most one bounded strategy review. No further product implementation is authorized until a separate documentation-only contract is accepted and merged.
 
 ## Product truth
