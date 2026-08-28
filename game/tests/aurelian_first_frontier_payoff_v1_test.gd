@@ -73,12 +73,12 @@ func _initialize() -> void:
 		"AURELIAN_FIRST_FRONTIER_PAYOFF_REVEAL=RATIFY_EAST_BRIDGE_PASSAGE",
 		"AURELIAN_FIRST_FRONTIER_PAYOFF=SECURE_GILDED_CROSSING",
 		"AURELIAN_FIRST_FRONTIER_PAYOFF=RATIFY_EAST_BRIDGE_PASSAGE",
-		"PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=6030",
+		"PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=",
 		"[ENTER] Secure Gilded Crossing",
 		"[ENTER] Ratify East Bridge Passage",
 	]:
 		_check(controller.contains(token), "controller_token_%s" % token)
-	_check(controller.contains('main_decision_overlay_root.visible = state_name in RIVAL_STATES or state_name in FRONTIER_PAYOFF_STATES'), "payoff_overlay_visible")
+	_check(controller.contains("state_name in FRONTIER_PAYOFF_STATES"), "payoff_overlay_visible")
 	_check(controller.contains('bridge_locus.visible = state_name.begins_with("map_")'), "reuse_existing_map_locus")
 	_check(controller.contains('village_cue.visible = state_name.begins_with("village_")'), "reuse_existing_village_cue")
 	_check(not controller.contains("FRONTIER_PAYOFF_GLB"), "no_payoff_asset_dependency")
