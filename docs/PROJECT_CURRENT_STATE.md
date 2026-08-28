@@ -2,19 +2,19 @@
 
 Status: ACTIVE
 Updated: 2026-08-28
-Current state revision: Aurelian First Frontier Payoff v1 accepted
+Current state revision: Aurelian First Imperial Expansion v1 proposed
 Authority source: this file on the current `main`
-Authority baseline SHA: `f18a335b0f0b65a1c3611a3af76f189f86ae2f02`
+Authority baseline SHA: `f43921e39cb671af7e3fef73f95e6b5090c36d5b`
 Product baseline SHA: `f18a335b0f0b65a1c3611a3af76f189f86ae2f02`
-Current milestone: Aurelian First Frontier Payoff v1 terminally accepted
-Active execution issue: #534
-Next allowed action: perform at most one bounded strategy review. No further product implementation is authorized until a separate documentation-only contract is accepted and merged.
+Current milestone: Aurelian First Imperial Expansion v1 authorized for exactly one bounded implementation candidate
+Active execution issue: #538
+Next allowed action: implement exactly one Godot Aurelian First Imperial Expansion v1 candidate under the accepted contract, then run exact-head evidence and direct review.
 
 ## Product truth
 
 Pixel Nations is a strategy game built around:
 
-`one land -> settlement -> city -> nation -> empire -> crisis -> rival -> frontier payoff`
+`one land -> settlement -> city -> nation -> empire -> crisis -> rival -> frontier payoff -> first imperial expansion`
 
 The playable demonstration remains Sector A-01 / Aurelian Basin. Godot is the target runtime under ADR-001. Village, Map and World remain three roles over one physical geography:
 
@@ -50,45 +50,61 @@ Accepted exact-head evidence:
 
 Issue #534 is completed. First Frontier Payoff v1 must not be reopened.
 
-## Acceptance review
+## Strategy decision
 
-Direct review confirmed both normal-input paths:
+The accepted first-run arc now closes coherently, but the playable product still owns only one land inside a finite 10,000-land world. Another aftermath microstate would not materially advance the game fantasy.
 
-1. `stand_firm -> World reveal -> Gilded Crossing pending on Map -> explicit Secure Gilded Crossing in Village -> secured Map locus -> completed World legacy`.
-2. `negotiate_passage -> World reveal -> East Bridge pending on Map -> explicit Ratify East Bridge Passage in Village -> secured Map locus -> completed World legacy`.
+The next bounded milestone therefore makes the world premise playable by claiming exactly one adjacent second land at the existing North Ridge locus.
 
-The reviewed persistence artifact additionally proves:
-
-- East Bridge secured survives native restart and Village reopen;
-- Gilded Crossing secured survives Web reload, browser profile reopen and Village reopen;
-- invalid response/payoff combinations remain rejected;
-- one response produces exactly one secured payoff and one payoff event.
+This is not a repeatable expansion system. It does not add new terrain, a third land, a second settlement, an economy or combat.
 
 ## Current authority
 
-No new product implementation is authorized.
+Issue #538 and `docs/GODOT_AURELIAN_FIRST_IMPERIAL_EXPANSION_V1_CONTRACT.md` authorize exactly one bounded implementation candidate:
 
-The only allowed next planning action is one bounded strategy review that may:
+`completed frontier legacy -> World identifies North Ridge as the adjacent expansion direction -> Map inspects the existing North Ridge land -> explicit Claim North Ridge -> Map shows Greenvale homeland plus North Ridge claimed -> Village keeps Greenvale as imperial capital administering two lands -> World records the first two-land imperial footprint`
 
-- inspect the completed first-run arc and remaining product gaps;
-- choose one smallest valuable next milestone or decide to hold;
-- propose one separate documentation-only contract;
-- preserve the accepted shared geography and view-role binding.
+The candidate must:
 
-A strategy review does not authorize code. A new executable slice requires a separate accepted authority update on `main`.
+- keep East Route claimed and Greenvale as the imperial capital;
+- reveal only the existing North Ridge locus after a completed frontier payoff;
+- require deliberate normal input to inspect and claim North Ridge;
+- add exactly one second-land claim and no third-land path;
+- preserve Trade, Expand or Frontier identity, empire proclamation, River Surge response, rival response and First Frontier Payoff;
+- keep Village as HOW, Map as WHERE and World as WHY / WHICH DIRECTION;
+- preserve river, bridge, Greenvale, North Ridge, Gilded Crossing, route, landmark and camera transforms;
+- use restrained ownership cues on existing procedural geometry;
+- make the second claim idempotent with one event;
+- persist both claims across native restart, Web reload and profile reopen;
+- produce exact-head Playable Entry, Web Playability and Session Persistence evidence;
+- receive direct still and normal-input motion review.
 
-## Forbidden until new authority
+Green CI alone is not acceptance. One bounded visual correction maximum is allowed. Terminal classification must be exactly:
 
-- another land, ownership expansion or a new settlement;
+- `GODOT_AURELIAN_FIRST_IMPERIAL_EXPANSION_PASS`; or
+- `GODOT_AURELIAN_FIRST_IMPERIAL_EXPANSION_REJECT`.
+
+## Allowed scope
+
+- one exact First Imperial Expansion manifest;
+- exactly one fixed adjacent second land at the existing North Ridge locus;
+- one explicit `Claim North Ridge` action on Map;
+- focused Godot controller, HUD and Session Persistence v2 changes;
+- restrained procedural ownership cues;
+- focused tests and narrowly scoped evidence workflow changes;
+- contract-linked documentation.
+
+## Forbidden scope
+
+- third land, land picker, procedural land generation or repeatable expansion;
+- settlement, city, workers, construction or economy on North Ridge;
+- resources, costs, rewards, timers, population or pressure meters;
 - combat, units, attacks, damage, victory or defeat simulation;
-- rival AI, randomness, turns or a broad faction system;
-- resources, rewards, penalties, costs, timers, economy or pressure meters;
-- diplomacy, governance or treaty simulation;
+- rival AI, diplomacy, governance simulation or border conflict;
 - backend, accounts, cloud save or multiplayer;
 - React, SVG or CSS rebuilding of final game surfaces;
-- new GLB, terrain, geography, asset family, dependency, paid asset or paid tool;
-- broad visual polish, broad CI changes, public-shell work, P12 or MAX;
-- any product implementation based only on an issue, branch or stale prompt.
+- new GLB, terrain, geography, camera, asset family, dependency, paid asset or paid tool;
+- broad visual polish, broad CI changes, public-shell work, P12 or MAX.
 
 ## Process rules
 
@@ -114,14 +130,15 @@ A strategy review does not authorize code. A new executable slice requires a sep
 ## Source-of-truth precedence
 
 1. this `PROJECT_CURRENT_STATE.md`;
-2. the most recently accepted documentation-only contract, if any;
-3. accepted ADRs, especially ADR-001;
-4. root `AGENTS.md`;
-5. accepted exact-head evidence and merged PR #536;
-6. issue #415 as shared-geography history and continuity guidance;
-7. completed issue #534 and older contracts as history only;
-8. older issues, PRs, briefs and reports.
+2. `docs/GODOT_AURELIAN_FIRST_IMPERIAL_EXPANSION_V1_CONTRACT.md`;
+3. active execution issue #538;
+4. accepted ADRs, especially ADR-001;
+5. root `AGENTS.md`;
+6. accepted exact-head evidence and merged PR #536;
+7. issue #415 as shared-geography history and continuity guidance;
+8. completed issue #534 and older contracts as history only;
+9. older issues, PRs, briefs and reports.
 
 ## Current stop condition
 
-Stop product execution. A single bounded strategy review may propose the next documentation-only authority. Do not create an implementation branch, run product evidence or open a product PR until that authority is accepted on fresh `main`.
+Stop after one accepted or rejected First Imperial Expansion v1 candidate. A PASS must be recorded here before any later strategy review. A REJECT must restore the accepted First Frontier Payoff baseline and record the exact reason.
