@@ -7,7 +7,7 @@ Authority source: this file on the current `main`
 Authority baseline SHA: `74a4362789a407853a41a0769ac3741d2e684119`
 Product baseline SHA: `74a4362789a407853a41a0769ac3741d2e684119`
 Current milestone: Aurelian First Rival Countermove v1 terminally accepted
-Active execution issue: none
+Active execution issue: #530
 Next allowed action: one bounded strategy review and, only if justified, a separate documentation-only contract proposal. No further product implementation is authorized.
 
 ## Product truth
