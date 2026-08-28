@@ -4,6 +4,7 @@ const SESSION = preload("res://scenes/aurelian/aurelian_session_persistence_v2.g
 const TEST_PATH := "user://aurelian-first-frontier-payoff-v1-test.json"
 const MANIFEST_PATH := "res://scenes/aurelian/first_frontier_payoff_v1_manifest.json"
 const PERSISTENCE_PATH := "res://scenes/aurelian/aurelian_session_persistence_v2.gd"
+const CONTROLLER_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1.gd"
 
 var failures: Array[String] = []
 
@@ -66,6 +67,21 @@ func _initialize() -> void:
 	var persistence := _read_text(PERSISTENCE_PATH)
 	_check(persistence.contains("VALID_FIRST_FRONTIER_PAYOFFS"), "valid_payoff_contract")
 	_check(persistence.contains('"first_frontier_payoff"'), "payoff_persisted")
+	var controller := _read_text(CONTROLLER_PATH)
+	for token in [
+		"AURELIAN_FIRST_FRONTIER_PAYOFF_REVEAL=SECURE_GILDED_CROSSING",
+		"AURELIAN_FIRST_FRONTIER_PAYOFF_REVEAL=RATIFY_EAST_BRIDGE_PASSAGE",
+		"AURELIAN_FIRST_FRONTIER_PAYOFF=SECURE_GILDED_CROSSING",
+		"AURELIAN_FIRST_FRONTIER_PAYOFF=RATIFY_EAST_BRIDGE_PASSAGE",
+		"PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=6030",
+		"[ENTER] Secure Gilded Crossing",
+		"[ENTER] Ratify East Bridge Passage",
+	]:
+		_check(controller.contains(token), "controller_token_%s" % token)
+	_check(controller.contains('main_decision_overlay_root.visible = state_name in RIVAL_STATES or state_name in FRONTIER_PAYOFF_STATES'), "payoff_overlay_visible")
+	_check(controller.contains('bridge_locus.visible = state_name.begins_with("map_")'), "reuse_existing_map_locus")
+	_check(controller.contains('village_cue.visible = state_name.begins_with("village_")'), "reuse_existing_village_cue")
+	_check(not controller.contains("FRONTIER_PAYOFF_GLB"), "no_payoff_asset_dependency")
 	for state in [
 		"world_first_frontier_payoff_gilded_crossing_revealed",
 		"map_first_frontier_payoff_gilded_crossing_pending",
