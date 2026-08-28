@@ -4,6 +4,7 @@ const SESSION = preload("res://scenes/aurelian/aurelian_session_persistence_v2.g
 const TEST_PATH := "user://aurelian-first-imperial-expansion-v1-test.json"
 const MANIFEST_PATH := "res://scenes/aurelian/first_imperial_expansion_v1_manifest.json"
 const PERSISTENCE_PATH := "res://scenes/aurelian/aurelian_session_persistence_v2.gd"
+const CONTROLLER_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1.gd"
 
 var failures: Array[String] = []
 
@@ -138,15 +139,32 @@ func _initialize() -> void:
 		"\"first_imperial_expansion\"",
 	]:
 		_check(persistence.contains(token), "persistence_token_%s" % token)
-	for state in [
+	var expansion_states := [
 		"world_first_imperial_expansion_north_ridge_direction",
 		"map_first_imperial_expansion_north_ridge_available",
 		"map_first_imperial_expansion_north_ridge_inspected",
 		"map_first_imperial_expansion_two_lands_claimed",
 		"village_first_imperial_expansion_greenvale_capital_two_lands",
 		"world_first_imperial_expansion_two_land_footprint",
-	]:
+	]
+	for state in expansion_states:
 		_check(persistence.contains(state), "persistence_state_%s" % state)
+
+	var controller := _read_text(CONTROLLER_PATH)
+	for state in expansion_states:
+		_check(controller.contains(state), "controller_state_%s" % state)
+	for token in [
+		"IMPERIAL_EXPANSION_STATES",
+		"imperial_expansion_target",
+		"first_imperial_expansion",
+		"func _build_imperial_expansion_presentation",
+		"func _refresh_imperial_expansion_presentation",
+		"Claim North Ridge",
+		"AURELIAN_FIRST_IMPERIAL_EXPANSION_INSPECT=NORTH_RIDGE",
+		"AURELIAN_FIRST_IMPERIAL_EXPANSION=NORTH_RIDGE",
+		"PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=6450",
+	]:
+		_check(controller.contains(token), "controller_token_%s" % token)
 
 	_cleanup()
 	_finish()
