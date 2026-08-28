@@ -603,13 +603,13 @@ jobs:
       - name: Validate exact evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "45"
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "49"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
             test "$(stat -c %s "$image")" -gt 70000
           done
           duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/session-persistence-v2-sequence.webm")"
-          awk -v duration="$duration" 'BEGIN { exit !(duration >= 15 && duration <= 125) }'
+          awk -v duration="$duration" 'BEGIN { exit !(duration >= 130 && duration <= 155) }'
           grep -F "AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:map_first_rival_response_stand_firm:east_trade" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_SESSION_V2_SAVE_ACK=stored:web_local_storage:map_first_rival_response_stand_firm:east_trade" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_SESSION_V2_LOAD=unavailable:web_local_storage:world_neutral:none" "${EVIDENCE_DIR}/browser-console.log"
