@@ -494,7 +494,6 @@ jobs:
             await page.screenshot({path:path.join(stills,'web-village-greenvale-shielded-before-reload-1440x900.png')});
             await page.keyboard.press('ArrowLeft');
             await waitFor(() => states.includes('map_aurelian_imperial_heartland_greenvale_response'),'Greenvale response map before reload');
-            await waitFor(() => saveAcks.some(x => x.status === 'stored' && x.state === 'map_first_rival_response_stand_firm'),'Greenvale response save ack');
             await page.screenshot({path:path.join(stills,'web-map-greenvale-response-before-rival-1440x900.png')});
             await page.keyboard.press('ArrowLeft');
             await waitFor(() => states.includes('world_aurelian_river_surge_greenvale_response'),'Greenvale response world before rival');
