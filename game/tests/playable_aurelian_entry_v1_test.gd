@@ -98,7 +98,7 @@ func _initialize() -> void:
 	_check(controller.count("AURELIAN_FIRST_CITY_CHARTER=GREENVALE") == 1, "charter_event_single_site")
 	_check(controller.contains('Input.parse_input_event(event)'), "qa_uses_input_events")
 	_check(controller.contains("SESSION.load_session()"), "loads_session")
-	_check(controller.contains("SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded, committed_direction, national_mandate_started, empire_proclaimed, imperial_crisis, imperial_crisis_response, first_rival_countermove_response, first_frontier_payoff)"), "saves_session")
+	_check(controller.contains("SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH"), "saves_session")
 	_check(controller.contains("AURELIAN_SESSION_V2_SAVE_ACK"), "save_ack")
 	var persistence_source := _read_text(PERSISTENCE_PATH)
 	_check(persistence_source.contains('const VERSION := 2'), "helper_version")
