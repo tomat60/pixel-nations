@@ -1,0 +1,174 @@
+{
+  "contract": "GODOT_AURELIAN_FIRST_FRONTIER_PAYOFF_V1",
+  "issue": 534,
+  "authority_baseline_sha": "87ed2c168750a4b7abb826671b2263632e17ee5a",
+  "product_baseline_sha": "74a4362789a407853a41a0769ac3741d2e684119",
+  "entry_requirement": {
+    "empire_proclaimed": true,
+    "imperial_crisis": "river_surge",
+    "imperial_crisis_response": [
+      "shield_greenvale",
+      "keep_east_bridge_open"
+    ],
+    "first_rival_countermove_response": [
+      "stand_firm",
+      "negotiate_passage"
+    ],
+    "national_direction": [
+      "trade",
+      "expand",
+      "frontier"
+    ],
+    "first_frontier_payoff": null
+  },
+  "response_mapping": {
+    "stand_firm": {
+      "payoff": "secure_gilded_crossing",
+      "action": "Secure Gilded Crossing",
+      "map_locus": "gilded_crossing",
+      "world_reason": "stand_firm_opens_gilded_crossing_payoff",
+      "village_pending_state": "village_first_frontier_payoff_gilded_crossing_pending",
+      "village_secured_state": "village_first_frontier_payoff_gilded_crossing_secured",
+      "map_pending_state": "map_first_frontier_payoff_gilded_crossing_pending",
+      "map_secured_state": "map_first_frontier_payoff_gilded_crossing_secured",
+      "world_pending_state": "world_first_frontier_payoff_gilded_crossing_revealed",
+      "world_secured_state": "world_first_frontier_legacy_gilded_crossing_complete",
+      "cue": "frontier_payoff_gilded_crossing"
+    },
+    "negotiate_passage": {
+      "payoff": "ratify_east_bridge_passage",
+      "action": "Ratify East Bridge Passage",
+      "map_locus": "east_bridge",
+      "world_reason": "negotiated_passage_opens_east_bridge_payoff",
+      "village_pending_state": "village_first_frontier_payoff_east_bridge_pending",
+      "village_secured_state": "village_first_frontier_payoff_east_bridge_secured",
+      "map_pending_state": "map_first_frontier_payoff_east_bridge_pending",
+      "map_secured_state": "map_first_frontier_payoff_east_bridge_secured",
+      "world_pending_state": "world_first_frontier_payoff_east_bridge_revealed",
+      "world_secured_state": "world_first_frontier_legacy_east_bridge_complete",
+      "cue": "frontier_payoff_east_bridge"
+    }
+  },
+  "availability": {
+    "derived_action_only": true,
+    "second_action_available": false,
+    "random_selection": false,
+    "direction_specific_matrix": false,
+    "invalid_response_payoff_combination_rejected": true
+  },
+  "event": {
+    "format": "AURELIAN_FIRST_FRONTIER_PAYOFF=SECURE_GILDED_CROSSING|RATIFY_EAST_BRIDGE_PASSAGE",
+    "single_event": true,
+    "idempotent": true,
+    "restore_event_emission_allowed": false,
+    "mutually_exclusive_payoff": true
+  },
+  "view_roles": {
+    "village": "HOW_SECURE_DERIVED_FRONTIER_PAYOFF",
+    "map": "WHERE_EXISTING_PAYOFF_LOCUS_PENDING_AND_SECURED",
+    "world": "WHY_RESPONSE_CREATED_PAYOFF_AND_WHICH_FRONTIER_LEGACY_COMPLETED"
+  },
+  "presentation": {
+    "procedural_only": true,
+    "existing_locus_required": true,
+    "pending_and_secured_cues_required": true,
+    "payoff_specific_cue_required": true,
+    "label_only_differentiation": false,
+    "whole_scene_recolor": false,
+    "new_asset": false,
+    "new_glb": false,
+    "new_terrain": false
+  },
+  "shared_geography": {
+    "asset": "aurelian_authored_terrain_v1.glb",
+    "greenvale_origin_unchanged": true,
+    "river_spline_unchanged": true,
+    "river_banks_unchanged": true,
+    "east_bridge_transform_unchanged": true,
+    "bridge_landings_unchanged": true,
+    "east_route_unchanged": true,
+    "north_ridge_unchanged": true,
+    "gilded_crossing_transform_unchanged": true,
+    "camera_topology_unchanged": true,
+    "ownership_change_allowed": false,
+    "second_land_allowed": false
+  },
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "new_fields": [
+      "first_frontier_payoff"
+    ],
+    "derived_from": "first_rival_countermove_response",
+    "payoff_values": [
+      "secure_gilded_crossing",
+      "ratify_east_bridge_passage"
+    ],
+    "preserve_imperial_crisis_response": true,
+    "preserve_first_rival_countermove_response": true,
+    "preserve_empire_proclaimed": true,
+    "preserve_directional_empire_identity": true,
+    "native_restart_required": true,
+    "web_reload_required": true,
+    "persistent_profile_reopen_required": true,
+    "duplicate_event_allowed": false
+  },
+  "evidence": {
+    "both_rival_responses_required": true,
+    "both_derived_actions_required": true,
+    "both_existing_loci_required": true,
+    "both_pending_and_secured_view_sets_required": true,
+    "both_normal_input_actions_required": true,
+    "all_three_directions_preserved_required": true,
+    "native_persistence_required": true,
+    "web_persistence_required": true,
+    "profile_reopen_required": true,
+    "shared_geography_regression_required": true,
+    "exact_manifest_validation_required": true,
+    "direct_still_and_motion_review_required": true,
+    "one_bounded_visual_correction_maximum": true
+  },
+  "terminal_results": [
+    "GODOT_AURELIAN_FIRST_FRONTIER_PAYOFF_PASS",
+    "GODOT_AURELIAN_FIRST_FRONTIER_PAYOFF_REJECT"
+  ],
+  "forbidden": [
+    "second_choice_matrix",
+    "third_payoff",
+    "direction_payoff_matrix",
+    "second_land",
+    "ownership_change",
+    "border_expansion",
+    "new_settlement",
+    "combat",
+    "units",
+    "attacks",
+    "damage",
+    "victory_simulation",
+    "defeat_simulation",
+    "rival_ai",
+    "random_behavior",
+    "turns",
+    "rewards",
+    "penalties",
+    "resources",
+    "costs",
+    "timers",
+    "economy",
+    "pressure_meter",
+    "diplomacy_simulation",
+    "governance_simulation",
+    "treaty_simulation",
+    "backend",
+    "accounts",
+    "cloud_save",
+    "multiplayer",
+    "new_assets",
+    "new_glb",
+    "new_terrain",
+    "new_geography",
+    "public_shell",
+    "P12",
+    "MAX"
+  ]
+}

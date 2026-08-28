@@ -48,6 +48,18 @@ const VALID_STATES := [
 	"village_first_rival_response_negotiate_passage",
 	"map_first_rival_response_negotiate_passage",
 	"world_first_rival_response_negotiate_passage",
+	"world_first_frontier_payoff_gilded_crossing_revealed",
+	"map_first_frontier_payoff_gilded_crossing_pending",
+	"village_first_frontier_payoff_gilded_crossing_pending",
+	"village_first_frontier_payoff_gilded_crossing_secured",
+	"map_first_frontier_payoff_gilded_crossing_secured",
+	"world_first_frontier_legacy_gilded_crossing_complete",
+	"world_first_frontier_payoff_east_bridge_revealed",
+	"map_first_frontier_payoff_east_bridge_pending",
+	"village_first_frontier_payoff_east_bridge_pending",
+	"village_first_frontier_payoff_east_bridge_secured",
+	"map_first_frontier_payoff_east_bridge_secured",
+	"world_first_frontier_legacy_east_bridge_complete",
 	"village_claimed",
 	"village_founded",
 	"village_developed",
@@ -57,6 +69,7 @@ const VALID_NATIONAL_DIRECTIONS := ["none", "trade", "expand", "frontier"]
 const VALID_IMPERIAL_CRISES := ["none", "river_surge"]
 const VALID_IMPERIAL_CRISIS_RESPONSES := ["none", "shield_greenvale", "keep_east_bridge_open"]
 const VALID_FIRST_RIVAL_COUNTERMOVE_RESPONSES := ["none", "stand_firm", "negotiate_passage"]
+const VALID_FIRST_FRONTIER_PAYOFFS := ["none", "secure_gilded_crossing", "ratify_east_bridge_passage"]
 
 static func fallback(status: String, adapter: String) -> Dictionary:
 	return {
@@ -79,6 +92,7 @@ static func fallback(status: String, adapter: String) -> Dictionary:
 		"imperial_crisis": "none",
 		"imperial_crisis_response": "none",
 		"first_rival_countermove_response": "none",
+		"first_frontier_payoff": "none",
 	}
 
 static func load_session(path: String = NATIVE_PATH) -> Dictionary:
@@ -86,7 +100,7 @@ static func load_session(path: String = NATIVE_PATH) -> Dictionary:
 		return _load_web()
 	return _load_native(path)
 
-static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false, route_connected: bool = false, caravan_dispatched: bool = false, city_chartered: bool = false, nation_founded: bool = false, national_direction: String = "none", national_mandate_started: bool = false, empire_proclaimed: bool = false, imperial_crisis: String = "none", imperial_crisis_response: String = "none", first_rival_countermove_response: String = "none") -> Dictionary:
+static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false, route_connected: bool = false, caravan_dispatched: bool = false, city_chartered: bool = false, nation_founded: bool = false, national_direction: String = "none", national_mandate_started: bool = false, empire_proclaimed: bool = false, imperial_crisis: String = "none", imperial_crisis_response: String = "none", first_rival_countermove_response: String = "none", first_frontier_payoff: String = "none") -> Dictionary:
 	if not _is_valid_pair(state, intent):
 		return fallback("invalid_data", _adapter_name())
 	if not VALID_NATIONAL_DIRECTIONS.has(national_direction):
@@ -109,6 +123,10 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		return fallback("invalid_data", _adapter_name())
 	if first_rival_countermove_response != "none" and imperial_crisis_response == "none":
 		return fallback("invalid_data", _adapter_name())
+	if not VALID_FIRST_FRONTIER_PAYOFFS.has(first_frontier_payoff):
+		return fallback("invalid_data", _adapter_name())
+	if first_frontier_payoff != "none" and first_rival_countermove_response == "none":
+		return fallback("invalid_data", _adapter_name())
 	if state in ["village_founded", "village_developed"] and not settlement_founded:
 		return fallback("invalid_data", _adapter_name())
 	if state == "village_developed" and not settlement_developed:
@@ -128,15 +146,15 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 	if nation_founded and not city_chartered:
 		return fallback("invalid_data", _adapter_name())
 	var city_states := ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized"]
-	var nation_states := ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway", "village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed", "world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"]
+	var nation_states := ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway", "village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed", "world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"] + ["world_first_frontier_payoff_gilded_crossing_revealed", "map_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_gilded_crossing_secured", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "map_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "map_first_frontier_payoff_east_bridge_secured", "world_first_frontier_legacy_east_bridge_complete"]
 	if state in city_states and not city_chartered:
 		return fallback("invalid_data", _adapter_name())
 	if state in nation_states and not nation_founded:
 		return fallback("invalid_data", _adapter_name())
-	var mandate_states := ["village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway", "village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed", "world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"]
+	var mandate_states := ["village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway", "village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed", "world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"] + ["world_first_frontier_payoff_gilded_crossing_revealed", "map_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_gilded_crossing_secured", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "map_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "map_first_frontier_payoff_east_bridge_secured", "world_first_frontier_legacy_east_bridge_complete"]
 	if (state in mandate_states) != national_mandate_started:
 		return fallback("invalid_data", _adapter_name())
-	var empire_states := ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed", "world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"]
+	var empire_states := ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed", "world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"] + ["world_first_frontier_payoff_gilded_crossing_revealed", "map_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_gilded_crossing_secured", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "map_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "map_first_frontier_payoff_east_bridge_secured", "world_first_frontier_legacy_east_bridge_complete"]
 	if (state in empire_states) != empire_proclaimed:
 		return fallback("invalid_data", _adapter_name())
 	var crisis_pending_states := ["world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending"]
@@ -146,15 +164,22 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 	var rival_stand_firm_states := ["village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm"]
 	var rival_negotiate_states := ["village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"]
 	var rival_countermove_states := rival_pending_states + rival_stand_firm_states + rival_negotiate_states
+	var payoff_gilded_pending_states := ["world_first_frontier_payoff_gilded_crossing_revealed", "map_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_pending"]
+	var payoff_gilded_secured_states := ["village_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_gilded_crossing_secured", "world_first_frontier_legacy_gilded_crossing_complete"]
+	var payoff_bridge_pending_states := ["world_first_frontier_payoff_east_bridge_revealed", "map_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_pending"]
+	var payoff_bridge_secured_states := ["village_first_frontier_payoff_east_bridge_secured", "map_first_frontier_payoff_east_bridge_secured", "world_first_frontier_legacy_east_bridge_complete"]
+	var payoff_gilded_states := payoff_gilded_pending_states + payoff_gilded_secured_states
+	var payoff_bridge_states := payoff_bridge_pending_states + payoff_bridge_secured_states
+	var frontier_payoff_states := payoff_gilded_states + payoff_bridge_states
 	if state in crisis_pending_states and (imperial_crisis != "river_surge" or imperial_crisis_response != "none"):
 		return fallback("invalid_data", _adapter_name())
 	if state in greenvale_response_states and imperial_crisis_response != "shield_greenvale":
 		return fallback("invalid_data", _adapter_name())
 	if state in bridge_response_states and imperial_crisis_response != "keep_east_bridge_open":
 		return fallback("invalid_data", _adapter_name())
-	if imperial_crisis_response == "shield_greenvale" and state not in greenvale_response_states and state not in rival_countermove_states:
+	if imperial_crisis_response == "shield_greenvale" and state not in greenvale_response_states and state not in rival_countermove_states and state not in frontier_payoff_states:
 		return fallback("invalid_data", _adapter_name())
-	if imperial_crisis_response == "keep_east_bridge_open" and state not in bridge_response_states and state not in rival_countermove_states:
+	if imperial_crisis_response == "keep_east_bridge_open" and state not in bridge_response_states and state not in rival_countermove_states and state not in frontier_payoff_states:
 		return fallback("invalid_data", _adapter_name())
 	if state in rival_pending_states and first_rival_countermove_response != "none":
 		return fallback("invalid_data", _adapter_name())
@@ -162,9 +187,21 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		return fallback("invalid_data", _adapter_name())
 	if state in rival_negotiate_states and first_rival_countermove_response != "negotiate_passage":
 		return fallback("invalid_data", _adapter_name())
-	if first_rival_countermove_response == "stand_firm" and state not in rival_stand_firm_states:
+	if first_rival_countermove_response == "stand_firm" and state not in rival_stand_firm_states and state not in payoff_gilded_states:
 		return fallback("invalid_data", _adapter_name())
-	if first_rival_countermove_response == "negotiate_passage" and state not in rival_negotiate_states:
+	if first_rival_countermove_response == "negotiate_passage" and state not in rival_negotiate_states and state not in payoff_bridge_states:
+		return fallback("invalid_data", _adapter_name())
+	if state in payoff_gilded_pending_states and first_frontier_payoff != "none":
+		return fallback("invalid_data", _adapter_name())
+	if state in payoff_bridge_pending_states and first_frontier_payoff != "none":
+		return fallback("invalid_data", _adapter_name())
+	if state in payoff_gilded_secured_states and first_frontier_payoff != "secure_gilded_crossing":
+		return fallback("invalid_data", _adapter_name())
+	if state in payoff_bridge_secured_states and first_frontier_payoff != "ratify_east_bridge_passage":
+		return fallback("invalid_data", _adapter_name())
+	if first_frontier_payoff == "secure_gilded_crossing" and state not in payoff_gilded_secured_states:
+		return fallback("invalid_data", _adapter_name())
+	if first_frontier_payoff == "ratify_east_bridge_passage" and state not in payoff_bridge_secured_states:
 		return fallback("invalid_data", _adapter_name())
 	if nation_founded and state not in nation_states:
 		return fallback("invalid_data", _adapter_name())
@@ -189,6 +226,7 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		"imperial_crisis": imperial_crisis,
 		"imperial_crisis_response": imperial_crisis_response,
 		"first_rival_countermove_response": first_rival_countermove_response,
+		"first_frontier_payoff": first_frontier_payoff,
 		"saved_at_utc": Time.get_datetime_string_from_system(true),
 	}
 	var payload_text := JSON.stringify(payload)
@@ -231,6 +269,7 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 	var imperial_crisis := String(session.get("imperial_crisis", "none"))
 	var imperial_crisis_response := String(session.get("imperial_crisis_response", "none"))
 	var first_rival_countermove_response := String(session.get("first_rival_countermove_response", "none"))
+	var first_frontier_payoff := String(session.get("first_frontier_payoff", "none"))
 	if not VALID_NATIONAL_DIRECTIONS.has(national_direction):
 		return fallback("invalid_value", adapter)
 	if national_direction != "none" and not nation_founded:
@@ -251,6 +290,10 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		return fallback("invalid_value", adapter)
 	if first_rival_countermove_response != "none" and imperial_crisis_response == "none":
 		return fallback("invalid_value", adapter)
+	if not VALID_FIRST_FRONTIER_PAYOFFS.has(first_frontier_payoff):
+		return fallback("invalid_value", adapter)
+	if first_frontier_payoff != "none" and first_rival_countermove_response == "none":
+		return fallback("invalid_value", adapter)
 	if state in ["village_founded", "village_developed"] and not settlement_founded:
 		return fallback("invalid_value", adapter)
 	if state == "village_developed" and not settlement_developed:
@@ -270,15 +313,15 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 	if nation_founded and not city_chartered:
 		return fallback("invalid_value", adapter)
 	var city_states := ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized"]
-	var nation_states := ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway", "village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed", "world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"]
+	var nation_states := ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway", "village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed", "world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"] + ["world_first_frontier_payoff_gilded_crossing_revealed", "map_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_gilded_crossing_secured", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "map_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "map_first_frontier_payoff_east_bridge_secured", "world_first_frontier_legacy_east_bridge_complete"]
 	if state in city_states and not city_chartered:
 		return fallback("invalid_value", adapter)
 	if state in nation_states and not nation_founded:
 		return fallback("invalid_value", adapter)
-	var mandate_states := ["village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway", "village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed", "world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"]
+	var mandate_states := ["village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway", "village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed", "world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"] + ["world_first_frontier_payoff_gilded_crossing_revealed", "map_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_gilded_crossing_secured", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "map_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "map_first_frontier_payoff_east_bridge_secured", "world_first_frontier_legacy_east_bridge_complete"]
 	if (state in mandate_states) != national_mandate_started:
 		return fallback("invalid_value", adapter)
-	var empire_states := ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed", "world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"]
+	var empire_states := ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed", "world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"] + ["world_first_frontier_payoff_gilded_crossing_revealed", "map_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_gilded_crossing_secured", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "map_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "map_first_frontier_payoff_east_bridge_secured", "world_first_frontier_legacy_east_bridge_complete"]
 	if (state in empire_states) != empire_proclaimed:
 		return fallback("invalid_value", adapter)
 	var crisis_pending_states := ["world_river_surge_crisis", "map_river_surge_response_loci", "village_river_surge_response_pending"]
@@ -288,15 +331,22 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 	var rival_stand_firm_states := ["village_first_rival_response_stand_firm", "map_first_rival_response_stand_firm", "world_first_rival_response_stand_firm"]
 	var rival_negotiate_states := ["village_first_rival_response_negotiate_passage", "map_first_rival_response_negotiate_passage", "world_first_rival_response_negotiate_passage"]
 	var rival_countermove_states := rival_pending_states + rival_stand_firm_states + rival_negotiate_states
+	var payoff_gilded_pending_states := ["world_first_frontier_payoff_gilded_crossing_revealed", "map_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_pending"]
+	var payoff_gilded_secured_states := ["village_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_gilded_crossing_secured", "world_first_frontier_legacy_gilded_crossing_complete"]
+	var payoff_bridge_pending_states := ["world_first_frontier_payoff_east_bridge_revealed", "map_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_pending"]
+	var payoff_bridge_secured_states := ["village_first_frontier_payoff_east_bridge_secured", "map_first_frontier_payoff_east_bridge_secured", "world_first_frontier_legacy_east_bridge_complete"]
+	var payoff_gilded_states := payoff_gilded_pending_states + payoff_gilded_secured_states
+	var payoff_bridge_states := payoff_bridge_pending_states + payoff_bridge_secured_states
+	var frontier_payoff_states := payoff_gilded_states + payoff_bridge_states
 	if state in crisis_pending_states and (imperial_crisis != "river_surge" or imperial_crisis_response != "none"):
 		return fallback("invalid_value", adapter)
 	if state in greenvale_response_states and imperial_crisis_response != "shield_greenvale":
 		return fallback("invalid_value", adapter)
 	if state in bridge_response_states and imperial_crisis_response != "keep_east_bridge_open":
 		return fallback("invalid_value", adapter)
-	if imperial_crisis_response == "shield_greenvale" and state not in greenvale_response_states and state not in rival_countermove_states:
+	if imperial_crisis_response == "shield_greenvale" and state not in greenvale_response_states and state not in rival_countermove_states and state not in frontier_payoff_states:
 		return fallback("invalid_value", adapter)
-	if imperial_crisis_response == "keep_east_bridge_open" and state not in bridge_response_states and state not in rival_countermove_states:
+	if imperial_crisis_response == "keep_east_bridge_open" and state not in bridge_response_states and state not in rival_countermove_states and state not in frontier_payoff_states:
 		return fallback("invalid_value", adapter)
 	if state in rival_pending_states and first_rival_countermove_response != "none":
 		return fallback("invalid_value", adapter)
@@ -304,9 +354,21 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		return fallback("invalid_value", adapter)
 	if state in rival_negotiate_states and first_rival_countermove_response != "negotiate_passage":
 		return fallback("invalid_value", adapter)
-	if first_rival_countermove_response == "stand_firm" and state not in rival_stand_firm_states:
+	if first_rival_countermove_response == "stand_firm" and state not in rival_stand_firm_states and state not in payoff_gilded_states:
 		return fallback("invalid_value", adapter)
-	if first_rival_countermove_response == "negotiate_passage" and state not in rival_negotiate_states:
+	if first_rival_countermove_response == "negotiate_passage" and state not in rival_negotiate_states and state not in payoff_bridge_states:
+		return fallback("invalid_value", adapter)
+	if state in payoff_gilded_pending_states and first_frontier_payoff != "none":
+		return fallback("invalid_value", adapter)
+	if state in payoff_bridge_pending_states and first_frontier_payoff != "none":
+		return fallback("invalid_value", adapter)
+	if state in payoff_gilded_secured_states and first_frontier_payoff != "secure_gilded_crossing":
+		return fallback("invalid_value", adapter)
+	if state in payoff_bridge_secured_states and first_frontier_payoff != "ratify_east_bridge_passage":
+		return fallback("invalid_value", adapter)
+	if first_frontier_payoff == "secure_gilded_crossing" and state not in payoff_gilded_secured_states:
+		return fallback("invalid_value", adapter)
+	if first_frontier_payoff == "ratify_east_bridge_passage" and state not in payoff_bridge_secured_states:
 		return fallback("invalid_value", adapter)
 	if nation_founded and state not in nation_states:
 		return fallback("invalid_value", adapter)
@@ -334,6 +396,7 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		"imperial_crisis": imperial_crisis,
 		"imperial_crisis_response": imperial_crisis_response,
 		"first_rival_countermove_response": first_rival_countermove_response,
+		"first_frontier_payoff": first_frontier_payoff,
 		"saved_at_utc": String(session.get("saved_at_utc", "")),
 	}
 
