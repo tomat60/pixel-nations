@@ -235,6 +235,18 @@ jobs:
             "village-first-rival-negotiate-passage:village_first_rival_response_negotiate_passage"
             "map-first-rival-negotiate-passage:map_first_rival_response_negotiate_passage"
             "world-first-rival-negotiate-passage:world_first_rival_response_negotiate_passage"
+            "world-frontier-payoff-gilded-revealed:world_first_frontier_payoff_gilded_crossing_revealed"
+            "map-frontier-payoff-gilded-pending:map_first_frontier_payoff_gilded_crossing_pending"
+            "village-frontier-payoff-gilded-pending:village_first_frontier_payoff_gilded_crossing_pending"
+            "village-frontier-payoff-gilded-secured:village_first_frontier_payoff_gilded_crossing_secured"
+            "map-frontier-payoff-gilded-secured:map_first_frontier_payoff_gilded_crossing_secured"
+            "world-frontier-legacy-gilded-complete:world_first_frontier_legacy_gilded_crossing_complete"
+            "world-frontier-payoff-bridge-revealed:world_first_frontier_payoff_east_bridge_revealed"
+            "map-frontier-payoff-bridge-pending:map_first_frontier_payoff_east_bridge_pending"
+            "village-frontier-payoff-bridge-pending:village_first_frontier_payoff_east_bridge_pending"
+            "village-frontier-payoff-bridge-secured:village_first_frontier_payoff_east_bridge_secured"
+            "map-frontier-payoff-bridge-secured:map_first_frontier_payoff_east_bridge_secured"
+            "world-frontier-legacy-bridge-complete:world_first_frontier_legacy_east_bridge_complete"
             "trade-village-mandate-started:village_national_mandate_started:trade"
             "trade-map-mandate-active:map_national_mandate_active:trade"
             "trade-world-mandate-underway:world_national_mandate_underway:trade"
@@ -255,10 +267,10 @@ jobs:
             rival_response="stand_firm"
             case "$state" in
               map_first_rival_countermove_greenvale) crisis_response="keep_east_bridge_open" ;;
-              village_first_rival_response_negotiate_passage|map_first_rival_response_negotiate_passage|world_first_rival_response_negotiate_passage) rival_response="negotiate_passage" ;;
+              village_first_rival_response_negotiate_passage|map_first_rival_response_negotiate_passage|world_first_rival_response_negotiate_passage|*first_frontier*east_bridge*) rival_response="negotiate_passage" ;;
             esac
             case "$state" in
-              world_first_nation_founded|map_aurelian_homeland|village_greenvale_capital|village_national_mandate_started|map_national_mandate_active|world_national_mandate_underway|village_aurelian_imperial_capital|map_aurelian_imperial_heartland|world_first_empire_proclaimed|world_river_surge_crisis|map_river_surge_response_loci|village_river_surge_response_pending|village_aurelian_imperial_capital_greenvale_shielded|map_aurelian_imperial_heartland_greenvale_response|world_aurelian_river_surge_greenvale_response|village_aurelian_imperial_capital_bridge_response|map_aurelian_imperial_heartland_bridge_response|world_aurelian_river_surge_bridge_response|world_first_rival_*|map_first_rival_*|village_first_rival_*) direction="${direction:-expand}" ;;
+              world_first_nation_founded|map_aurelian_homeland|village_greenvale_capital|village_national_mandate_started|map_national_mandate_active|world_national_mandate_underway|village_aurelian_imperial_capital|map_aurelian_imperial_heartland|world_first_empire_proclaimed|world_river_surge_crisis|map_river_surge_response_loci|village_river_surge_response_pending|village_aurelian_imperial_capital_greenvale_shielded|map_aurelian_imperial_heartland_greenvale_response|world_aurelian_river_surge_greenvale_response|village_aurelian_imperial_capital_bridge_response|map_aurelian_imperial_heartland_bridge_response|world_aurelian_river_surge_bridge_response|world_first_rival_*|map_first_rival_*|village_first_rival_*|world_first_frontier_*|map_first_frontier_*|village_first_frontier_*) direction="${direction:-expand}" ;;
             esac
             timeout 90s xvfb-run -a -s "-screen 0 1600x1000x24" env \
               AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}" \
@@ -305,7 +317,11 @@ jobs:
           grep -F "AURELIAN_FIRST_RIVAL_COUNTERMOVE=OBSIDIAN_MARCH" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=STAND_FIRM" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test "$(grep -Fc "AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=" "${EVIDENCE_DIR}/playable-entry-sequence.log")" = "1"
-          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=5670" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "AURELIAN_FIRST_FRONTIER_PAYOFF_REVEAL=SECURE_GILDED_CROSSING" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "AURELIAN_FIRST_FRONTIER_PAYOFF=SECURE_GILDED_CROSSING" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          test "$(grep -Fc "AURELIAN_FIRST_FRONTIER_PAYOFF=" "${EVIDENCE_DIR}/playable-entry-sequence.log")" = "1"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_frontier_legacy_gilded_crossing_complete" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=6030" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test -s "${EVIDENCE_DIR}/playable-entry-sequence.avi"
           mediainfo --Output=JSON "${EVIDENCE_DIR}/playable-entry-sequence.avi" > "${EVIDENCE_DIR}/video-metadata.json"
           for direction in trade expand frontier; do
@@ -343,7 +359,18 @@ jobs:
             expected_rival_response="${rival_response^^}"
             grep -F "AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=${expected_rival_response}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
             test "$(grep -Fc "AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=5670" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            if [ "$rival_response" = "stand_firm" ]; then
+              expected_payoff="SECURE_GILDED_CROSSING"
+              expected_legacy_state="world_first_frontier_legacy_gilded_crossing_complete"
+            else
+              expected_payoff="RATIFY_EAST_BRIDGE_PASSAGE"
+              expected_legacy_state="world_first_frontier_legacy_east_bridge_complete"
+            fi
+            grep -F "AURELIAN_FIRST_FRONTIER_PAYOFF_REVEAL=${expected_payoff}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            grep -F "AURELIAN_FIRST_FRONTIER_PAYOFF=${expected_payoff}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            test "$(grep -Fc "AURELIAN_FIRST_FRONTIER_PAYOFF=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_legacy_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=6030" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
           done
 
       - name: Validate evidence
@@ -354,7 +381,7 @@ jobs:
           from pathlib import Path
           from PIL import Image, ImageStat
           root=Path(os.environ["EVIDENCE_DIR"])
-          names=["normal-launch","world-trade-selected","map-east-route-selected","map-east-route-claimed","village-claimed","village-founded","village-developed","returned-claimed-map","map-east-route-connected","world-trade-route-active","reopened-connected-map","reopened-village-developed","village-first-caravan-dispatched","map-east-route-in-use","world-first-trade-underway","village-first-city-chartered","map-greenvale-city","world-first-city-recognized","world-first-nation-founded","map-aurelian-homeland","village-greenvale-capital","village-national-mandate-started","map-national-mandate-active","world-national-mandate-underway","village-aurelian-imperial-capital","map-aurelian-imperial-heartland","world-first-empire-proclaimed","trade-village-mandate-started","trade-map-mandate-active","trade-world-mandate-underway","frontier-village-mandate-started","frontier-map-mandate-active","frontier-world-mandate-underway","trade-village-imperial-capital","trade-map-imperial-heartland","trade-world-first-empire","frontier-village-imperial-capital","frontier-map-imperial-heartland","frontier-world-first-empire","world-river-surge-crisis","map-river-surge-response-loci","village-river-surge-response-pending","village-greenvale-shielded","map-greenvale-response","world-greenvale-response","village-east-bridge-response","map-east-bridge-response","world-east-bridge-response","world-first-rival-countermove","map-first-rival-east-bridge-pressure","map-first-rival-greenvale-pressure","village-first-rival-response-pending","village-first-rival-stand-firm","map-first-rival-stand-firm","world-first-rival-stand-firm","village-first-rival-negotiate-passage","map-first-rival-negotiate-passage","world-first-rival-negotiate-passage"]
+          names=["normal-launch","world-trade-selected","map-east-route-selected","map-east-route-claimed","village-claimed","village-founded","village-developed","returned-claimed-map","map-east-route-connected","world-trade-route-active","reopened-connected-map","reopened-village-developed","village-first-caravan-dispatched","map-east-route-in-use","world-first-trade-underway","village-first-city-chartered","map-greenvale-city","world-first-city-recognized","world-first-nation-founded","map-aurelian-homeland","village-greenvale-capital","village-national-mandate-started","map-national-mandate-active","world-national-mandate-underway","village-aurelian-imperial-capital","map-aurelian-imperial-heartland","world-first-empire-proclaimed","trade-village-mandate-started","trade-map-mandate-active","trade-world-mandate-underway","frontier-village-mandate-started","frontier-map-mandate-active","frontier-world-mandate-underway","trade-village-imperial-capital","trade-map-imperial-heartland","trade-world-first-empire","frontier-village-imperial-capital","frontier-map-imperial-heartland","frontier-world-first-empire","world-river-surge-crisis","map-river-surge-response-loci","village-river-surge-response-pending","village-greenvale-shielded","map-greenvale-response","world-greenvale-response","village-east-bridge-response","map-east-bridge-response","world-east-bridge-response","world-first-rival-countermove","map-first-rival-east-bridge-pressure","map-first-rival-greenvale-pressure","village-first-rival-response-pending","village-first-rival-stand-firm","map-first-rival-stand-firm","world-first-rival-stand-firm","village-first-rival-negotiate-passage","map-first-rival-negotiate-passage","world-first-rival-negotiate-passage","world-frontier-payoff-gilded-revealed","map-frontier-payoff-gilded-pending","village-frontier-payoff-gilded-pending","village-frontier-payoff-gilded-secured","map-frontier-payoff-gilded-secured","world-frontier-legacy-gilded-complete","world-frontier-payoff-bridge-revealed","map-frontier-payoff-bridge-pending","village-frontier-payoff-bridge-pending","village-frontier-payoff-bridge-secured","map-frontier-payoff-bridge-secured","world-frontier-legacy-bridge-complete"]
           report={}
           for name in names:
               path=root/f"{name}-1440x900.png"
@@ -377,8 +404,8 @@ jobs:
           if not match: raise SystemExit("duration missing")
           duration=float(match.group(0))
           if duration>1000: duration/=1000
-          if not 188.0<=duration<=191.0: raise SystemExit(f"duration {duration}")
-          qa={"status":"PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_REVIEW","exact_head":(root/"exact-head.txt").read_text().strip(),"stills":report,"video_seconds":duration,"claim":"east_route","settlement":"greenvale","founded":True,"developed":True,"route_connected":True,"world_trade_active":True,"caravan_dispatched":True,"world_first_trade_underway":True,"city_chartered":True,"city_marker_topology":[354,285],"national_direction":"expand","direction_commitment":True,"national_mandate_started":True,"empire_proclaimed":True,"imperial_crisis":"river_surge","imperial_crisis_responses":["shield_greenvale","keep_east_bridge_open"],"first_rival_countermove":"obsidian_march","first_rival_responses":["stand_firm","negotiate_passage"],"imperial_capital":"greenvale","imperial_heartland":"aurelian","mandate_direction_actions":["trade","expand","frontier"],"mandate_loci":{"trade":[435,313],"expand":[700,205],"frontier":[515,340]}}
+          if not 200.0<=duration<=202.0: raise SystemExit(f"duration {duration}")
+          qa={"status":"PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_REVIEW","exact_head":(root/"exact-head.txt").read_text().strip(),"stills":report,"video_seconds":duration,"claim":"east_route","settlement":"greenvale","founded":True,"developed":True,"route_connected":True,"world_trade_active":True,"caravan_dispatched":True,"world_first_trade_underway":True,"city_chartered":True,"city_marker_topology":[354,285],"national_direction":"expand","direction_commitment":True,"national_mandate_started":True,"empire_proclaimed":True,"imperial_crisis":"river_surge","imperial_crisis_responses":["shield_greenvale","keep_east_bridge_open"],"first_rival_countermove":"obsidian_march","first_rival_responses":["stand_firm","negotiate_passage"],"first_frontier_payoffs":["secure_gilded_crossing","ratify_east_bridge_passage"],"frontier_payoff_loci":{"secure_gilded_crossing":[515,340],"ratify_east_bridge_passage":[515,340]},"imperial_capital":"greenvale","imperial_heartland":"aurelian","mandate_direction_actions":["trade","expand","frontier"],"mandate_loci":{"trade":[435,313],"expand":[700,205],"frontier":[515,340]}}
           (root/"evidence-qa.json").write_text(json.dumps(qa,indent=2)+"\n")
           rows=math.ceil(len(names)/3)
           canvas=Image.new("RGB",(1080,rows*225),(32,32,32))
