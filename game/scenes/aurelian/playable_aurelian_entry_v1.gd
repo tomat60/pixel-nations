@@ -22,6 +22,14 @@ const FRONTIER_PAYOFF_STATES := [
 	"map_first_frontier_payoff_east_bridge_secured",
 	"world_first_frontier_legacy_east_bridge_complete",
 ]
+const IMPERIAL_EXPANSION_STATES := [
+	"world_first_imperial_expansion_north_ridge_direction",
+	"map_first_imperial_expansion_north_ridge_available",
+	"map_first_imperial_expansion_north_ridge_inspected",
+	"map_first_imperial_expansion_two_lands_claimed",
+	"village_first_imperial_expansion_greenvale_capital_two_lands",
+	"world_first_imperial_expansion_two_land_footprint",
+]
 const CRISIS_STATES := [
 	"world_river_surge_crisis",
 	"map_river_surge_response_loci",
@@ -98,6 +106,12 @@ const ENTRY_STATES := [
 	"village_first_frontier_payoff_east_bridge_secured",
 	"map_first_frontier_payoff_east_bridge_secured",
 	"world_first_frontier_legacy_east_bridge_complete",
+	"world_first_imperial_expansion_north_ridge_direction",
+	"map_first_imperial_expansion_north_ridge_available",
+	"map_first_imperial_expansion_north_ridge_inspected",
+	"map_first_imperial_expansion_two_lands_claimed",
+	"village_first_imperial_expansion_greenvale_capital_two_lands",
+	"world_first_imperial_expansion_two_land_footprint",
 	"village_claimed",
 	"village_founded",
 	"village_developed",
@@ -133,6 +147,8 @@ var imperial_crisis_response := "none"
 var crisis_response_cursor := 0
 var first_rival_countermove_response := "none"
 var first_frontier_payoff := "none"
+var imperial_expansion_target := "none"
+var first_imperial_expansion := "none"
 var rival_response_cursor := 0
 var river_surge_presentation: Node3D
 var mandate_marker: Node3D
@@ -143,6 +159,7 @@ var nation_emblem: Node3D
 var capital_standards: Node3D
 var living_capital_presentation: Node3D
 var imperial_presentation: Node3D
+var imperial_expansion_presentation: Node3D
 
 func _ready() -> void:
 	if DisplayServer.get_name() == "headless" and not ResourceLoader.exists(GLB_PATH):
@@ -182,8 +199,8 @@ func _ready() -> void:
 		city_chartered = evidence_state in ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized", "world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital"]
 		nation_founded = evidence_state in ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway"]
 		national_mandate_started = evidence_state in ["village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway", "village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"]
-		empire_proclaimed = evidence_state in ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"] or evidence_state in CRISIS_STATES or evidence_state in RIVAL_STATES or evidence_state in FRONTIER_PAYOFF_STATES
-		if evidence_state in CRISIS_STATES or evidence_state in RIVAL_STATES or evidence_state in FRONTIER_PAYOFF_STATES:
+		empire_proclaimed = evidence_state in ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"] or evidence_state in CRISIS_STATES or evidence_state in RIVAL_STATES or evidence_state in FRONTIER_PAYOFF_STATES or evidence_state in IMPERIAL_EXPANSION_STATES
+		if evidence_state in CRISIS_STATES or evidence_state in RIVAL_STATES or evidence_state in FRONTIER_PAYOFF_STATES or evidence_state in IMPERIAL_EXPANSION_STATES:
 			imperial_crisis = "river_surge"
 			if evidence_state in ["village_aurelian_imperial_capital_greenvale_shielded", "map_aurelian_imperial_heartland_greenvale_response", "world_aurelian_river_surge_greenvale_response"]:
 				imperial_crisis_response = "shield_greenvale"
@@ -202,6 +219,12 @@ func _ready() -> void:
 				first_rival_countermove_response = "stand_firm"
 			if evidence_state in FRONTIER_PAYOFF_STATES and ("secured" in evidence_state or "complete" in evidence_state):
 				first_frontier_payoff = "secure_gilded_crossing" if "gilded_crossing" in evidence_state else "ratify_east_bridge_passage"
+			elif evidence_state in IMPERIAL_EXPANSION_STATES:
+				first_rival_countermove_response = automated_rival_response
+				rival_response_cursor = RIVAL_RESPONSES.find(first_rival_countermove_response)
+				first_frontier_payoff = "secure_gilded_crossing" if first_rival_countermove_response == "stand_firm" else "ratify_east_bridge_passage"
+				imperial_expansion_target = "north_ridge"
+				first_imperial_expansion = "north_ridge_claimed" if evidence_state in ["map_first_imperial_expansion_two_lands_claimed", "village_first_imperial_expansion_greenvale_capital_two_lands", "world_first_imperial_expansion_two_land_footprint"] else "none"
 	else:
 		var restored := SESSION.load_session()
 		entry_state = String(restored.get("entry_state", "world_neutral"))
@@ -219,6 +242,8 @@ func _ready() -> void:
 		imperial_crisis_response = String(restored.get("imperial_crisis_response", "none"))
 		first_rival_countermove_response = String(restored.get("first_rival_countermove_response", "none"))
 		first_frontier_payoff = String(restored.get("first_frontier_payoff", "none"))
+		imperial_expansion_target = String(restored.get("imperial_expansion_target", "none"))
+		first_imperial_expansion = String(restored.get("first_imperial_expansion", "none"))
 		if imperial_crisis_response == "keep_east_bridge_open":
 			crisis_response_cursor = 1
 		if first_rival_countermove_response == "negotiate_passage":
@@ -246,6 +271,8 @@ func _ready() -> void:
 		crisis_response_cursor = 0
 		first_rival_countermove_response = "none"
 		first_frontier_payoff = "none"
+		imperial_expansion_target = "none"
+		first_imperial_expansion = "none"
 		rival_response_cursor = 0
 		national_direction_cursor = 0
 	if entry_state in ["village_founded", "village_developed", "village_trade_dispatched", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway"]:
@@ -264,7 +291,7 @@ func _ready() -> void:
 		national_mandate_started = true
 	if entry_state in ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"]:
 		empire_proclaimed = true
-	if entry_state in CRISIS_STATES or entry_state in RIVAL_STATES or entry_state in FRONTIER_PAYOFF_STATES:
+	if entry_state in CRISIS_STATES or entry_state in RIVAL_STATES or entry_state in FRONTIER_PAYOFF_STATES or entry_state in IMPERIAL_EXPANSION_STATES:
 		settlement_founded = true
 		settlement_developed = true
 		route_connected = true
@@ -290,6 +317,12 @@ func _ready() -> void:
 			first_rival_countermove_response = "stand_firm"
 		if entry_state in FRONTIER_PAYOFF_STATES and ("secured" in entry_state or "complete" in entry_state):
 			first_frontier_payoff = "secure_gilded_crossing" if "gilded_crossing" in entry_state else "ratify_east_bridge_passage"
+		elif entry_state in IMPERIAL_EXPANSION_STATES:
+			imperial_expansion_target = "north_ridge"
+			if first_frontier_payoff == "none":
+				first_frontier_payoff = "secure_gilded_crossing" if first_rival_countermove_response == "stand_firm" else "ratify_east_bridge_passage"
+			if entry_state in ["map_first_imperial_expansion_two_lands_claimed", "village_first_imperial_expansion_greenvale_capital_two_lands", "world_first_imperial_expansion_two_land_footprint"]:
+				first_imperial_expansion = "north_ridge_claimed"
 	decision_state = _decision_state_for_entry(entry_state)
 	_configure_state_environment(entry_state)
 	super()
@@ -311,6 +344,8 @@ func _ready() -> void:
 	main_basin.add_child(imperial_presentation)
 	river_surge_presentation = _build_river_surge_presentation()
 	main_basin.add_child(river_surge_presentation)
+	imperial_expansion_presentation = _build_imperial_expansion_presentation()
+	main_basin.add_child(imperial_expansion_presentation)
 	mandate_marker = _build_national_mandate_marker()
 	main_basin.add_child(mandate_marker)
 	_build_runtime_hud()
@@ -326,11 +361,11 @@ func _ready() -> void:
 
 func _decision_state_for_entry(state_name: String) -> String:
 	match state_name:
-		"map_east_route_selected", "map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_river_surge_response_loci", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "map_first_rival_response_stand_firm", "map_first_rival_response_negotiate_passage", "map_first_frontier_payoff_gilded_crossing_pending", "map_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_east_bridge_pending", "map_first_frontier_payoff_east_bridge_secured":
+		"map_east_route_selected", "map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_river_surge_response_loci", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "map_first_rival_response_stand_firm", "map_first_rival_response_negotiate_passage", "map_first_frontier_payoff_gilded_crossing_pending", "map_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_east_bridge_pending", "map_first_frontier_payoff_east_bridge_secured", "map_first_imperial_expansion_north_ridge_available", "map_first_imperial_expansion_north_ridge_inspected", "map_first_imperial_expansion_two_lands_claimed":
 			return "map_east_route"
-		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_river_surge_crisis", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "world_first_rival_response_stand_firm", "world_first_rival_response_negotiate_passage", "world_first_frontier_payoff_gilded_crossing_revealed", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "world_first_frontier_legacy_east_bridge_complete":
+		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_river_surge_crisis", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "world_first_rival_response_stand_firm", "world_first_rival_response_negotiate_passage", "world_first_frontier_payoff_gilded_crossing_revealed", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "world_first_frontier_legacy_east_bridge_complete", "world_first_imperial_expansion_north_ridge_direction", "world_first_imperial_expansion_two_land_footprint":
 			return "world_trade_selected"
-		"village_claimed", "village_founded", "village_developed", "village_trade_dispatched", "village_city_chartered", "village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured":
+		"village_claimed", "village_founded", "village_developed", "village_trade_dispatched", "village_city_chartered", "village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "village_first_imperial_expansion_greenvale_capital_two_lands":
 			return "village_route_context"
 		_:
 			return state_name
@@ -343,13 +378,13 @@ func _configure_state_environment(state_name: String) -> void:
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
 			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
 			return
-		"map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_first_frontier_payoff_gilded_crossing_pending", "map_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_east_bridge_pending", "map_first_frontier_payoff_east_bridge_secured":
+		"map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_first_frontier_payoff_gilded_crossing_pending", "map_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_east_bridge_pending", "map_first_frontier_payoff_east_bridge_secured", "map_first_imperial_expansion_north_ridge_available", "map_first_imperial_expansion_north_ridge_inspected", "map_first_imperial_expansion_two_lands_claimed":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed" if settlement_developed else ("founded" if settlement_founded else "claimed"))
 			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
 			return
-		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_first_frontier_payoff_gilded_crossing_revealed", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "world_first_frontier_legacy_east_bridge_complete":
+		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_first_frontier_payoff_gilded_crossing_revealed", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "world_first_frontier_legacy_east_bridge_complete", "world_first_imperial_expansion_north_ridge_direction", "world_first_imperial_expansion_two_land_footprint":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
@@ -373,7 +408,7 @@ func _configure_state_environment(state_name: String) -> void:
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
 			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
 			return
-		"village_city_chartered", "village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured":
+		"village_city_chartered", "village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "village_first_imperial_expansion_greenvale_capital_two_lands":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "city_chartered")
@@ -566,6 +601,20 @@ func _accept_entry() -> void:
 			first_frontier_payoff = "ratify_east_bridge_passage"
 			_apply_entry_state("village_first_frontier_payoff_east_bridge_secured")
 			print("AURELIAN_FIRST_FRONTIER_PAYOFF=RATIFY_EAST_BRIDGE_PASSAGE")
+		"world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_legacy_east_bridge_complete":
+			if first_frontier_payoff != "none" and imperial_expansion_target == "none":
+				imperial_expansion_target = "north_ridge"
+				_apply_entry_state("world_first_imperial_expansion_north_ridge_direction")
+				print("AURELIAN_FIRST_IMPERIAL_EXPANSION_DIRECTION=NORTH_RIDGE")
+		"map_first_imperial_expansion_north_ridge_available":
+			if imperial_expansion_target == "north_ridge" and first_imperial_expansion == "none":
+				_apply_entry_state("map_first_imperial_expansion_north_ridge_inspected")
+				print("AURELIAN_FIRST_IMPERIAL_EXPANSION_INSPECT=NORTH_RIDGE")
+		"map_first_imperial_expansion_north_ridge_inspected":
+			if imperial_expansion_target == "north_ridge" and first_imperial_expansion == "none":
+				first_imperial_expansion = "north_ridge_claimed"
+				_apply_entry_state("map_first_imperial_expansion_two_lands_claimed")
+				print("AURELIAN_FIRST_IMPERIAL_EXPANSION=NORTH_RIDGE")
 
 func _right_entry() -> void:
 	match entry_state:
@@ -618,6 +667,10 @@ func _right_entry() -> void:
 			_apply_entry_state("village_first_frontier_payoff_gilded_crossing_secured")
 		"map_first_frontier_payoff_east_bridge_secured":
 			_apply_entry_state("village_first_frontier_payoff_east_bridge_secured")
+		"world_first_imperial_expansion_north_ridge_direction":
+			_apply_entry_state("map_first_imperial_expansion_north_ridge_available")
+		"map_first_imperial_expansion_two_lands_claimed":
+			_apply_entry_state("village_first_imperial_expansion_greenvale_capital_two_lands")
 		"map_east_route_claimed":
 			_apply_entry_state("village_developed" if settlement_developed else ("village_founded" if settlement_founded else "village_claimed"))
 		"map_east_route_connected":
@@ -677,6 +730,12 @@ func _previous_entry() -> void:
 			_apply_entry_state("map_first_frontier_payoff_gilded_crossing_secured")
 		"village_first_frontier_payoff_east_bridge_secured":
 			_apply_entry_state("map_first_frontier_payoff_east_bridge_secured")
+		"village_first_imperial_expansion_greenvale_capital_two_lands":
+			_apply_entry_state("map_first_imperial_expansion_two_lands_claimed")
+		"map_first_imperial_expansion_north_ridge_available", "map_first_imperial_expansion_north_ridge_inspected":
+			_apply_entry_state("world_first_imperial_expansion_north_ridge_direction")
+		"map_first_imperial_expansion_two_lands_claimed":
+			_apply_entry_state("world_first_imperial_expansion_two_land_footprint")
 		"map_east_route_claimed", "map_east_route_selected", "map_east_route":
 			_apply_entry_state("world_trade_selected")
 		"map_east_route_connected":
@@ -1427,6 +1486,96 @@ func _refresh_river_surge_presentation(state_name: String) -> void:
 			else:
 				village_label.text = "SHIELD GREENVALE" if response == "shield_greenvale" else "KEEP EAST BRIDGE OPEN"
 
+func _build_imperial_expansion_presentation() -> Node3D:
+	var root := Node3D.new()
+	root.name = "AurelianFirstImperialExpansionPresentation"
+	var ridge := Node3D.new()
+	ridge.name = "NorthRidgeOwnershipCue"
+	ridge.position = topology_to_godot(Vector2(700.0, 205.0), 0.62)
+	var ring := MeshInstance3D.new()
+	ring.name = "NorthRidgeClaimRing"
+	var ring_mesh := TorusMesh.new()
+	ring_mesh.inner_radius = 0.72
+	ring_mesh.outer_radius = 0.94
+	ring_mesh.rings = 28
+	ring_mesh.ring_segments = 14
+	ring.mesh = ring_mesh
+	ridge.add_child(ring)
+	var beacon := MeshInstance3D.new()
+	beacon.name = "NorthRidgeClaimBeacon"
+	var beacon_mesh := CylinderMesh.new()
+	beacon_mesh.top_radius = 0.08
+	beacon_mesh.bottom_radius = 0.22
+	beacon_mesh.height = 1.08
+	beacon_mesh.radial_segments = 10
+	beacon.mesh = beacon_mesh
+	beacon.position.y = 0.54
+	ridge.add_child(beacon)
+	var ridge_label := Label3D.new()
+	ridge_label.name = "NorthRidgeClaimLabel"
+	ridge_label.font_size = 30
+	ridge_label.outline_size = 8
+	ridge_label.position = Vector3(0.0, 1.32, 0.0)
+	ridge_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	ridge.add_child(ridge_label)
+	root.add_child(ridge)
+	var capital := Node3D.new()
+	capital.name = "GreenvaleTwoLandAdministrationCue"
+	capital.position = topology_to_godot(Vector2(354.0, 285.0), 0.66)
+	var capital_ring := MeshInstance3D.new()
+	capital_ring.name = "GreenvaleAdministrationRing"
+	var capital_mesh := TorusMesh.new()
+	capital_mesh.inner_radius = 0.78
+	capital_mesh.outer_radius = 1.02
+	capital_mesh.rings = 28
+	capital_mesh.ring_segments = 14
+	capital_ring.mesh = capital_mesh
+	capital_ring.material_override = _material("#d7ad42ff", 0.46)
+	capital.add_child(capital_ring)
+	var capital_label := Label3D.new()
+	capital_label.name = "GreenvaleAdministrationLabel"
+	capital_label.text = "GREENVALE CAPITAL / 2 LANDS"
+	capital_label.font_size = 28
+	capital_label.outline_size = 8
+	capital_label.position = Vector3(0.0, 1.12, 0.0)
+	capital_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	capital.add_child(capital_label)
+	root.add_child(capital)
+	root.visible = false
+	return root
+
+func _refresh_imperial_expansion_presentation(state_name: String) -> void:
+	if imperial_expansion_presentation == null:
+		return
+	var active := state_name in IMPERIAL_EXPANSION_STATES
+	imperial_expansion_presentation.visible = active
+	if not active:
+		return
+	var claimed := first_imperial_expansion == "north_ridge_claimed"
+	var inspected := state_name == "map_first_imperial_expansion_north_ridge_inspected"
+	var ridge := imperial_expansion_presentation.get_node_or_null("NorthRidgeOwnershipCue") as Node3D
+	var capital := imperial_expansion_presentation.get_node_or_null("GreenvaleTwoLandAdministrationCue") as Node3D
+	var color := "#68a978ff" if claimed else ("#f2cf63ff" if inspected else "#9ebbd1ff")
+	if ridge != null:
+		ridge.visible = not state_name.begins_with("village_")
+		var label := ridge.get_node_or_null("NorthRidgeClaimLabel") as Label3D
+		if label != null:
+			label.modulate = Color(color)
+			if state_name == "world_first_imperial_expansion_two_land_footprint":
+				label.text = "AURELIAN / FIRST TWO-LAND FOOTPRINT"
+			elif claimed:
+				label.text = "NORTH RIDGE CLAIMED / LAND 2"
+			elif inspected:
+				label.text = "NORTH RIDGE INSPECTED / CLAIM READY"
+			else:
+				label.text = "NORTH RIDGE / ADJACENT LAND"
+		for node_name in ["NorthRidgeClaimRing", "NorthRidgeClaimBeacon"]:
+			var cue := ridge.get_node_or_null(node_name) as MeshInstance3D
+			if cue != null:
+				cue.material_override = _material(color, 0.46)
+	if capital != null:
+		capital.visible = claimed and state_name in ["map_first_imperial_expansion_two_lands_claimed", "village_first_imperial_expansion_greenvale_capital_two_lands", "world_first_imperial_expansion_two_land_footprint"]
+
 func _animate_living_capital_presentation(delta: float) -> void:
 	var seconds := float(Time.get_ticks_msec()) / 1000.0
 	if dispatch_token != null and dispatch_token.visible:
@@ -1471,13 +1620,13 @@ func _apply_entry_state(state_name: String) -> void:
 	entry_state = state_name
 	main_world_overlay_root.visible = state_name.begins_with("world_")
 	main_overlay_root.visible = state_name.begins_with("map_")
-	main_decision_overlay_root.visible = state_name in RIVAL_STATES or state_name in FRONTIER_PAYOFF_STATES or state_name in ["village_route_context", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway", "map_greenvale_city", "world_first_city_recognized", "world_first_nation_founded", "map_aurelian_homeland", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway", "village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"]
+	main_decision_overlay_root.visible = state_name in RIVAL_STATES or state_name in FRONTIER_PAYOFF_STATES or state_name in IMPERIAL_EXPANSION_STATES or state_name in ["village_route_context", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway", "map_greenvale_city", "world_first_city_recognized", "world_first_nation_founded", "map_aurelian_homeland", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway", "village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"]
 	if dispatch_token != null:
 		dispatch_token.visible = state_name in ["map_east_route_in_use", "world_first_trade_underway", "map_greenvale_city", "world_first_city_recognized", "world_first_nation_founded", "map_aurelian_homeland"]
 	if city_marker != null:
 		city_marker.visible = state_name in ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized", "world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital"]
 	if homeland_marker != null:
-		homeland_marker.visible = state_name in ["map_aurelian_homeland", "map_aurelian_imperial_heartland"]
+		homeland_marker.visible = state_name in ["map_aurelian_homeland", "map_aurelian_imperial_heartland", "map_first_imperial_expansion_two_lands_claimed"]
 	if nation_emblem != null:
 		nation_emblem.visible = state_name in ["world_first_nation_founded", "world_first_empire_proclaimed"]
 	if capital_standards != null:
@@ -1491,6 +1640,7 @@ func _apply_entry_state(state_name: String) -> void:
 			_reveal_living_capital()
 	_refresh_imperial_presentation(state_name)
 	_refresh_river_surge_presentation(state_name)
+	_refresh_imperial_expansion_presentation(state_name)
 	_set_trade_world_underway(false)
 	_refresh_national_direction_identity()
 	match state_name:
@@ -1525,7 +1675,7 @@ func _apply_entry_state(state_name: String) -> void:
 			_apply_world_state(main_world_overlay_root, "selected_trade")
 			_set_trade_world_underway(true)
 			_activate_camera("world")
-		"world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_river_surge_crisis", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "world_first_rival_response_stand_firm", "world_first_rival_response_negotiate_passage", "world_first_frontier_payoff_gilded_crossing_revealed", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "world_first_frontier_legacy_east_bridge_complete":
+		"world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_river_surge_crisis", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "world_first_rival_response_stand_firm", "world_first_rival_response_negotiate_passage", "world_first_frontier_payoff_gilded_crossing_revealed", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "world_first_frontier_legacy_east_bridge_complete", "world_first_imperial_expansion_north_ridge_direction", "world_first_imperial_expansion_two_land_footprint":
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_NATION_FOUNDING_CAPITAL_STATE_FAILED")
 			_apply_world_state(main_world_overlay_root, "selected_trade")
@@ -1555,7 +1705,7 @@ func _apply_entry_state(state_name: String) -> void:
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_CITY_CHARTER_VILLAGE_STATE_FAILED")
 			_activate_camera("map")
-		"map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_river_surge_response_loci", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "map_first_rival_response_stand_firm", "map_first_rival_response_negotiate_passage", "map_first_frontier_payoff_gilded_crossing_pending", "map_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_east_bridge_pending", "map_first_frontier_payoff_east_bridge_secured":
+		"map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_river_surge_response_loci", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "map_first_rival_response_stand_firm", "map_first_rival_response_negotiate_passage", "map_first_frontier_payoff_gilded_crossing_pending", "map_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_east_bridge_pending", "map_first_frontier_payoff_east_bridge_secured", "map_first_imperial_expansion_north_ridge_available", "map_first_imperial_expansion_north_ridge_inspected", "map_first_imperial_expansion_two_lands_claimed":
 			_apply_map_state(main_overlay_root, "east_route_claimed")
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_NATION_FOUNDING_CAPITAL_STATE_FAILED")
@@ -1588,7 +1738,7 @@ func _apply_entry_state(state_name: String) -> void:
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_CITY_CHARTER_VILLAGE_STATE_FAILED")
 			_activate_camera("village")
-		"village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured":
+		"village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "village_first_imperial_expansion_greenvale_capital_two_lands":
 			settlement_founded = true
 			settlement_developed = true
 			route_connected = true
@@ -1604,7 +1754,7 @@ func _apply_entry_state(state_name: String) -> void:
 	_update_runtime_hud()
 	if persistence_enabled:
 		restored_intent = "none" if entry_state == "world_neutral" else "east_trade"
-		var save_result := SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded, committed_direction, national_mandate_started, empire_proclaimed, imperial_crisis, imperial_crisis_response, first_rival_countermove_response, first_frontier_payoff)
+		var save_result := SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded, committed_direction, national_mandate_started, empire_proclaimed, imperial_crisis, imperial_crisis_response, first_rival_countermove_response, first_frontier_payoff, imperial_expansion_target, first_imperial_expansion)
 		print("AURELIAN_NATIONAL_DIRECTION_SAVE=%s" % committed_direction)
 		print("AURELIAN_SESSION_V2_SAVE_ACK=%s:%s:%s:%s:%s:%s:%s:%s:%s:%s" % [String(save_result.get("status", "unknown")), String(save_result.get("adapter", "unknown")), entry_state, restored_intent, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded])
 		if not bool(save_result.get("ok", false)) and String(save_result.get("status", "")) != "unavailable":
@@ -1674,7 +1824,7 @@ func _update_runtime_hud() -> void:
 		"world_first_frontier_legacy_gilded_crossing_complete":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "Aurelian frontier legacy: Gilded Crossing secured"
-			controls_label.text = "[RIGHT] Inspect secured frontier on Map"
+			controls_label.text = "[ENTER] Reveal North Ridge expansion direction    [RIGHT] Inspect secured frontier"
 		"world_first_frontier_payoff_east_bridge_revealed":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "Negotiated Passage creates a frontier payoff at East Bridge"
@@ -1682,7 +1832,15 @@ func _update_runtime_hud() -> void:
 		"world_first_frontier_legacy_east_bridge_complete":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "Aurelian frontier legacy: East Bridge passage ratified"
-			controls_label.text = "[RIGHT] Inspect secured frontier on Map"
+			controls_label.text = "[ENTER] Reveal North Ridge expansion direction    [RIGHT] Inspect secured frontier"
+		"world_first_imperial_expansion_north_ridge_direction":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "Completed frontier legacy opens adjacent North Ridge"
+			controls_label.text = "[RIGHT] Inspect North Ridge on Map"
+		"world_first_imperial_expansion_two_land_footprint":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "Aurelian records its first two-land imperial footprint"
+			controls_label.text = "[RIGHT] Inspect both claimed lands on Map"
 		"map_first_frontier_payoff_gilded_crossing_pending":
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "Gilded Crossing is the pending payoff locus"
@@ -1699,6 +1857,22 @@ func _update_runtime_hud() -> void:
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "East Bridge passage is ratified on the existing route"
 			controls_label.text = "[RIGHT] Reopen capital record    [LEFT] World"
+		"map_first_imperial_expansion_north_ridge_available":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "North Ridge is the only adjacent land available"
+			controls_label.text = "[ENTER] Inspect North Ridge    [LEFT] World"
+		"map_first_imperial_expansion_north_ridge_inspected":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "North Ridge inspected: East Route remains the homeland"
+			controls_label.text = "[ENTER] Claim North Ridge    [LEFT] World"
+		"map_first_imperial_expansion_two_lands_claimed":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Claimed lands: East Route and North Ridge"
+			controls_label.text = "[RIGHT] Open Greenvale capital    [LEFT] World"
+		"village_first_imperial_expansion_greenvale_capital_two_lands":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "Greenvale imperial capital administers two claimed lands"
+			controls_label.text = "[LEFT] Return to two-land Map"
 		"village_first_frontier_payoff_gilded_crossing_pending":
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "Capital action ready: Secure Gilded Crossing"
@@ -2010,6 +2184,20 @@ func _process(_delta: float) -> void:
 		_emit_action("ui_left")
 	elif automated_frame == 5970:
 		_emit_action("ui_left")
-	elif automated_frame >= 6030:
-		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=6030")
+	elif automated_frame == 6030:
+		_emit_action("ui_accept")
+	elif automated_frame == 6090:
+		_emit_action("ui_right")
+	elif automated_frame == 6150:
+		_emit_action("ui_accept")
+	elif automated_frame == 6210:
+		_emit_action("ui_accept")
+	elif automated_frame == 6270:
+		_emit_action("ui_right")
+	elif automated_frame == 6330:
+		_emit_action("ui_left")
+	elif automated_frame == 6390:
+		_emit_action("ui_left")
+	elif automated_frame >= 6450:
+		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=6450")
 		get_tree().quit(0)
