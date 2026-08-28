@@ -2004,7 +2004,15 @@ func _update_runtime_hud() -> void:
 		"world_first_imperial_expansion_two_land_footprint":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "Aurelian records its first two-land imperial footprint"
-			controls_label.text = "[RIGHT] Inspect both claimed lands on Map"
+			controls_label.text = "[ENTER] Assess why North Ridge must be held    [RIGHT] Inspect both lands"
+		"world_north_ridge_outpost_frontier_need":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "North Ridge must hold the exposed second-land frontier"
+			controls_label.text = "[RIGHT] Inspect claimed North Ridge on Map"
+		"world_north_ridge_outpost_held_two_land_frontier":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "North Ridge Outpost holds the two-land frontier"
+			controls_label.text = "[RIGHT] Inspect established outpost on Map"
 		"map_first_frontier_payoff_gilded_crossing_pending":
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "Gilded Crossing is the pending payoff locus"
@@ -2037,6 +2045,22 @@ func _update_runtime_hud() -> void:
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "Greenvale imperial capital administers two claimed lands"
 			controls_label.text = "[LEFT] Return to two-land Map"
+		"map_north_ridge_outpost_claimed_inspection":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Claimed North Ridge has no frontier presence yet"
+			controls_label.text = "[RIGHT] Open Greenvale establishment action    [LEFT] World"
+		"village_north_ridge_outpost_establish_action":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "Greenvale can establish one fixed North Ridge Outpost"
+			controls_label.text = "[ENTER] Establish North Ridge Outpost    [LEFT] Map"
+		"map_north_ridge_outpost_established":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "One established outpost now marks claimed North Ridge"
+			controls_label.text = "[RIGHT] Open Greenvale administration    [LEFT] World"
+		"village_north_ridge_outpost_greenvale_administers":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "Greenvale imperial capital administers North Ridge Outpost"
+			controls_label.text = "[LEFT] Return to established outpost Map"
 		"village_first_frontier_payoff_gilded_crossing_pending":
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "Capital action ready: Secure Gilded Crossing"
@@ -2362,6 +2386,20 @@ func _process(_delta: float) -> void:
 		_emit_action("ui_left")
 	elif automated_frame == 6390:
 		_emit_action("ui_left")
-	elif automated_frame >= 6450:
-		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=6450")
+	elif automated_frame == 6450:
+		_emit_action("ui_accept")
+	elif automated_frame == 6510:
+		_emit_action("ui_right")
+	elif automated_frame == 6570:
+		_emit_action("ui_right")
+	elif automated_frame == 6630:
+		_emit_action("ui_accept")
+	elif automated_frame == 6690:
+		_emit_action("ui_right")
+	elif automated_frame == 6750:
+		_emit_action("ui_left")
+	elif automated_frame == 6810:
+		_emit_action("ui_left")
+	elif automated_frame >= 6870:
+		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=6870")
 		get_tree().quit(0)
