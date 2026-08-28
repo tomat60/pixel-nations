@@ -4,6 +4,7 @@ const SESSION = preload("res://scenes/aurelian/aurelian_session_persistence_v2.g
 const TEST_PATH := "user://aurelian-north-ridge-outpost-v1-test.json"
 const MANIFEST_PATH := "res://scenes/aurelian/north_ridge_outpost_v1_manifest.json"
 const PERSISTENCE_PATH := "res://scenes/aurelian/aurelian_session_persistence_v2.gd"
+const CONTROLLER_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1.gd"
 
 var failures: Array[String] = []
 
@@ -114,6 +115,28 @@ func _initialize() -> void:
 		"world_north_ridge_outpost_held_two_land_frontier",
 	]:
 		_check(persistence.contains(token), "persistence_token_%s" % token)
+
+	var controller := _read_text(CONTROLLER_PATH)
+	for token in [
+		"NORTH_RIDGE_OUTPOST_STATES",
+		"north_ridge_outpost",
+		"func _build_north_ridge_outpost_presentation",
+		"func _refresh_north_ridge_outpost_presentation",
+		"Establish North Ridge Outpost",
+		"AURELIAN_NORTH_RIDGE_OUTPOST_NEED=HOLD_FRONTIER",
+		"AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED",
+		"PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=6870",
+	]:
+		_check(controller.contains(token), "controller_token_%s" % token)
+	for state in [
+		"world_north_ridge_outpost_frontier_need",
+		"map_north_ridge_outpost_claimed_inspection",
+		"village_north_ridge_outpost_establish_action",
+		"map_north_ridge_outpost_established",
+		"village_north_ridge_outpost_greenvale_administers",
+		"world_north_ridge_outpost_held_two_land_frontier",
+	]:
+		_check(controller.contains(state), "controller_state_%s" % state)
 
 	_cleanup()
 	_finish()
