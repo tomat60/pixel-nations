@@ -43,10 +43,16 @@
     "held_frontier_state": "world_north_ridge_specialization_held_frontier",
     "map_inspection_state": "map_north_ridge_specialization_inspection",
     "village_choice_state": "village_north_ridge_specialization_choice",
-    "trade_result_state": "map_north_ridge_trade_post_committed",
-    "watch_result_state": "map_north_ridge_watch_post_committed",
-    "village_administration_state": "village_north_ridge_specialization_greenvale_administers",
-    "world_posture_state": "world_north_ridge_specialization_frontier_posture"
+    "trade_result_states": [
+      "map_north_ridge_trade_post_committed",
+      "village_north_ridge_trade_post_greenvale_administers",
+      "world_north_ridge_trade_post_logistics_posture"
+    ],
+    "watch_result_states": [
+      "map_north_ridge_watch_post_committed",
+      "village_north_ridge_watch_post_greenvale_administers",
+      "world_north_ridge_watch_post_vigilance_posture"
+    ]
   },
   "availability": {
     "established_outpost_required": true,
