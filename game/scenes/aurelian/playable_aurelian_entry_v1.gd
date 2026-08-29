@@ -43,6 +43,18 @@ const NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES := [
 	"village_north_ridge_outpost_greenvale_administers",
 	"world_north_ridge_outpost_held_two_land_frontier",
 ]
+const NORTH_RIDGE_SPECIALIZATIONS := ["trade_post", "watch_post"]
+const NORTH_RIDGE_SPECIALIZATION_STATES := [
+	"world_north_ridge_specialization_held_frontier",
+	"map_north_ridge_specialization_inspection",
+	"village_north_ridge_specialization_choice",
+	"map_north_ridge_trade_post_committed",
+	"village_north_ridge_trade_post_greenvale_administers",
+	"world_north_ridge_trade_post_logistics_posture",
+	"map_north_ridge_watch_post_committed",
+	"village_north_ridge_watch_post_greenvale_administers",
+	"world_north_ridge_watch_post_vigilance_posture",
+]
 const CRISIS_STATES := [
 	"world_river_surge_crisis",
 	"map_river_surge_response_loci",
@@ -131,6 +143,15 @@ const ENTRY_STATES := [
 	"map_north_ridge_outpost_established",
 	"village_north_ridge_outpost_greenvale_administers",
 	"world_north_ridge_outpost_held_two_land_frontier",
+	"world_north_ridge_specialization_held_frontier",
+	"map_north_ridge_specialization_inspection",
+	"village_north_ridge_specialization_choice",
+	"map_north_ridge_trade_post_committed",
+	"village_north_ridge_trade_post_greenvale_administers",
+	"world_north_ridge_trade_post_logistics_posture",
+	"map_north_ridge_watch_post_committed",
+	"village_north_ridge_watch_post_greenvale_administers",
+	"world_north_ridge_watch_post_vigilance_posture",
 	"village_claimed",
 	"village_founded",
 	"village_developed",
@@ -169,6 +190,8 @@ var first_frontier_payoff := "none"
 var imperial_expansion_target := "none"
 var first_imperial_expansion := "none"
 var north_ridge_outpost := "none"
+var north_ridge_specialization := "none"
+var north_ridge_specialization_cursor := 0
 var rival_response_cursor := 0
 var river_surge_presentation: Node3D
 var mandate_marker: Node3D
@@ -181,6 +204,7 @@ var living_capital_presentation: Node3D
 var imperial_presentation: Node3D
 var imperial_expansion_presentation: Node3D
 var north_ridge_outpost_presentation: Node3D
+var north_ridge_specialization_presentation: Node3D
 
 func _ready() -> void:
 	if DisplayServer.get_name() == "headless" and not ResourceLoader.exists(GLB_PATH):
@@ -220,8 +244,8 @@ func _ready() -> void:
 		city_chartered = evidence_state in ["village_city_chartered", "map_greenvale_city", "world_first_city_recognized", "world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital"]
 		nation_founded = evidence_state in ["world_first_nation_founded", "map_aurelian_homeland", "village_greenvale_capital", "village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway"]
 		national_mandate_started = evidence_state in ["village_national_mandate_started", "map_national_mandate_active", "world_national_mandate_underway", "village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"]
-		empire_proclaimed = evidence_state in ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"] or evidence_state in CRISIS_STATES or evidence_state in RIVAL_STATES or evidence_state in FRONTIER_PAYOFF_STATES or evidence_state in IMPERIAL_EXPANSION_STATES or evidence_state in NORTH_RIDGE_OUTPOST_STATES
-		if evidence_state in CRISIS_STATES or evidence_state in RIVAL_STATES or evidence_state in FRONTIER_PAYOFF_STATES or evidence_state in IMPERIAL_EXPANSION_STATES or evidence_state in NORTH_RIDGE_OUTPOST_STATES:
+		empire_proclaimed = evidence_state in ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"] or evidence_state in CRISIS_STATES or evidence_state in RIVAL_STATES or evidence_state in FRONTIER_PAYOFF_STATES or evidence_state in IMPERIAL_EXPANSION_STATES or evidence_state in NORTH_RIDGE_OUTPOST_STATES or evidence_state in NORTH_RIDGE_SPECIALIZATION_STATES
+		if evidence_state in CRISIS_STATES or evidence_state in RIVAL_STATES or evidence_state in FRONTIER_PAYOFF_STATES or evidence_state in IMPERIAL_EXPANSION_STATES or evidence_state in NORTH_RIDGE_OUTPOST_STATES or evidence_state in NORTH_RIDGE_SPECIALIZATION_STATES:
 			imperial_crisis = "river_surge"
 			if evidence_state in ["village_aurelian_imperial_capital_greenvale_shielded", "map_aurelian_imperial_heartland_greenvale_response", "world_aurelian_river_surge_greenvale_response"]:
 				imperial_crisis_response = "shield_greenvale"
@@ -240,13 +264,16 @@ func _ready() -> void:
 				first_rival_countermove_response = "stand_firm"
 			if evidence_state in FRONTIER_PAYOFF_STATES and ("secured" in evidence_state or "complete" in evidence_state):
 				first_frontier_payoff = "secure_gilded_crossing" if "gilded_crossing" in evidence_state else "ratify_east_bridge_passage"
-			elif evidence_state in IMPERIAL_EXPANSION_STATES or evidence_state in NORTH_RIDGE_OUTPOST_STATES:
+			elif evidence_state in IMPERIAL_EXPANSION_STATES or evidence_state in NORTH_RIDGE_OUTPOST_STATES or evidence_state in NORTH_RIDGE_SPECIALIZATION_STATES:
 				first_rival_countermove_response = automated_rival_response
 				rival_response_cursor = RIVAL_RESPONSES.find(first_rival_countermove_response)
 				first_frontier_payoff = "secure_gilded_crossing" if first_rival_countermove_response == "stand_firm" else "ratify_east_bridge_passage"
 				imperial_expansion_target = "north_ridge"
-				first_imperial_expansion = "north_ridge_claimed" if evidence_state in ["map_first_imperial_expansion_two_lands_claimed", "village_first_imperial_expansion_greenvale_capital_two_lands", "world_first_imperial_expansion_two_land_footprint"] or evidence_state in NORTH_RIDGE_OUTPOST_STATES else "none"
-				north_ridge_outpost = "established" if evidence_state in NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES else "none"
+				first_imperial_expansion = "north_ridge_claimed" if evidence_state in ["map_first_imperial_expansion_two_lands_claimed", "village_first_imperial_expansion_greenvale_capital_two_lands", "world_first_imperial_expansion_two_land_footprint"] or evidence_state in NORTH_RIDGE_OUTPOST_STATES or evidence_state in NORTH_RIDGE_SPECIALIZATION_STATES else "none"
+				north_ridge_outpost = "established" if evidence_state in NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES or evidence_state in NORTH_RIDGE_SPECIALIZATION_STATES else "none"
+				if evidence_state in NORTH_RIDGE_SPECIALIZATION_STATES:
+					north_ridge_specialization = "trade_post" if "trade_post" in evidence_state else ("watch_post" if "watch_post" in evidence_state else "none")
+					north_ridge_specialization_cursor = NORTH_RIDGE_SPECIALIZATIONS.find(north_ridge_specialization) if north_ridge_specialization != "none" else 0
 	else:
 		var restored := SESSION.load_session()
 		entry_state = String(restored.get("entry_state", "world_neutral"))
@@ -267,6 +294,9 @@ func _ready() -> void:
 		imperial_expansion_target = String(restored.get("imperial_expansion_target", "none"))
 		first_imperial_expansion = String(restored.get("first_imperial_expansion", "none"))
 		north_ridge_outpost = String(restored.get("north_ridge_outpost", "none"))
+		north_ridge_specialization = String(restored.get("north_ridge_specialization", "none"))
+		if north_ridge_specialization in NORTH_RIDGE_SPECIALIZATIONS:
+			north_ridge_specialization_cursor = NORTH_RIDGE_SPECIALIZATIONS.find(north_ridge_specialization)
 		if imperial_crisis_response == "keep_east_bridge_open":
 			crisis_response_cursor = 1
 		if first_rival_countermove_response == "negotiate_passage":
@@ -297,6 +327,8 @@ func _ready() -> void:
 		imperial_expansion_target = "none"
 		first_imperial_expansion = "none"
 		north_ridge_outpost = "none"
+		north_ridge_specialization = "none"
+		north_ridge_specialization_cursor = 0
 		rival_response_cursor = 0
 		national_direction_cursor = 0
 	if entry_state in ["village_founded", "village_developed", "village_trade_dispatched", "map_east_route_connected", "map_east_route_in_use", "world_trade_route_active", "world_first_trade_underway"]:
@@ -315,7 +347,7 @@ func _ready() -> void:
 		national_mandate_started = true
 	if entry_state in ["village_aurelian_imperial_capital", "map_aurelian_imperial_heartland", "world_first_empire_proclaimed"]:
 		empire_proclaimed = true
-	if entry_state in CRISIS_STATES or entry_state in RIVAL_STATES or entry_state in FRONTIER_PAYOFF_STATES or entry_state in IMPERIAL_EXPANSION_STATES or entry_state in NORTH_RIDGE_OUTPOST_STATES:
+	if entry_state in CRISIS_STATES or entry_state in RIVAL_STATES or entry_state in FRONTIER_PAYOFF_STATES or entry_state in IMPERIAL_EXPANSION_STATES or entry_state in NORTH_RIDGE_OUTPOST_STATES or entry_state in NORTH_RIDGE_SPECIALIZATION_STATES:
 		settlement_founded = true
 		settlement_developed = true
 		route_connected = true
@@ -341,11 +373,11 @@ func _ready() -> void:
 			first_rival_countermove_response = "stand_firm"
 		if entry_state in FRONTIER_PAYOFF_STATES and ("secured" in entry_state or "complete" in entry_state):
 			first_frontier_payoff = "secure_gilded_crossing" if "gilded_crossing" in entry_state else "ratify_east_bridge_passage"
-		elif entry_state in IMPERIAL_EXPANSION_STATES or entry_state in NORTH_RIDGE_OUTPOST_STATES:
+		elif entry_state in IMPERIAL_EXPANSION_STATES or entry_state in NORTH_RIDGE_OUTPOST_STATES or entry_state in NORTH_RIDGE_SPECIALIZATION_STATES:
 			imperial_expansion_target = "north_ridge"
 			if first_frontier_payoff == "none":
 				first_frontier_payoff = "secure_gilded_crossing" if first_rival_countermove_response == "stand_firm" else "ratify_east_bridge_passage"
-			if entry_state in ["map_first_imperial_expansion_two_lands_claimed", "village_first_imperial_expansion_greenvale_capital_two_lands", "world_first_imperial_expansion_two_land_footprint"] or entry_state in NORTH_RIDGE_OUTPOST_STATES:
+			if entry_state in ["map_first_imperial_expansion_two_lands_claimed", "village_first_imperial_expansion_greenvale_capital_two_lands", "world_first_imperial_expansion_two_land_footprint"] or entry_state in NORTH_RIDGE_OUTPOST_STATES or entry_state in NORTH_RIDGE_SPECIALIZATION_STATES:
 				first_imperial_expansion = "north_ridge_claimed"
 			if entry_state in NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES:
 				north_ridge_outpost = "established"
@@ -374,6 +406,8 @@ func _ready() -> void:
 	main_basin.add_child(imperial_expansion_presentation)
 	north_ridge_outpost_presentation = _build_north_ridge_outpost_presentation()
 	main_basin.add_child(north_ridge_outpost_presentation)
+	north_ridge_specialization_presentation = _build_north_ridge_specialization_presentation()
+	main_basin.add_child(north_ridge_specialization_presentation)
 	mandate_marker = _build_national_mandate_marker()
 	main_basin.add_child(mandate_marker)
 	_build_runtime_hud()
@@ -389,11 +423,11 @@ func _ready() -> void:
 
 func _decision_state_for_entry(state_name: String) -> String:
 	match state_name:
-		"map_east_route_selected", "map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_river_surge_response_loci", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "map_first_rival_response_stand_firm", "map_first_rival_response_negotiate_passage", "map_first_frontier_payoff_gilded_crossing_pending", "map_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_east_bridge_pending", "map_first_frontier_payoff_east_bridge_secured", "map_first_imperial_expansion_north_ridge_available", "map_first_imperial_expansion_north_ridge_inspected", "map_first_imperial_expansion_two_lands_claimed", "map_north_ridge_outpost_claimed_inspection", "map_north_ridge_outpost_established":
+		"map_east_route_selected", "map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_river_surge_response_loci", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "map_first_rival_response_stand_firm", "map_first_rival_response_negotiate_passage", "map_first_frontier_payoff_gilded_crossing_pending", "map_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_east_bridge_pending", "map_first_frontier_payoff_east_bridge_secured", "map_first_imperial_expansion_north_ridge_available", "map_first_imperial_expansion_north_ridge_inspected", "map_first_imperial_expansion_two_lands_claimed", "map_north_ridge_outpost_claimed_inspection", "map_north_ridge_outpost_established", "map_north_ridge_specialization_inspection", "map_north_ridge_trade_post_committed", "map_north_ridge_watch_post_committed":
 			return "map_east_route"
-		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_river_surge_crisis", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "world_first_rival_response_stand_firm", "world_first_rival_response_negotiate_passage", "world_first_frontier_payoff_gilded_crossing_revealed", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "world_first_frontier_legacy_east_bridge_complete", "world_first_imperial_expansion_north_ridge_direction", "world_first_imperial_expansion_two_land_footprint", "world_north_ridge_outpost_frontier_need", "world_north_ridge_outpost_held_two_land_frontier":
+		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_river_surge_crisis", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "world_first_rival_response_stand_firm", "world_first_rival_response_negotiate_passage", "world_first_frontier_payoff_gilded_crossing_revealed", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "world_first_frontier_legacy_east_bridge_complete", "world_first_imperial_expansion_north_ridge_direction", "world_first_imperial_expansion_two_land_footprint", "world_north_ridge_outpost_frontier_need", "world_north_ridge_outpost_held_two_land_frontier", "world_north_ridge_specialization_held_frontier", "world_north_ridge_trade_post_logistics_posture", "world_north_ridge_watch_post_vigilance_posture":
 			return "world_trade_selected"
-		"village_claimed", "village_founded", "village_developed", "village_trade_dispatched", "village_city_chartered", "village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "village_first_imperial_expansion_greenvale_capital_two_lands", "village_north_ridge_outpost_establish_action", "village_north_ridge_outpost_greenvale_administers":
+		"village_claimed", "village_founded", "village_developed", "village_trade_dispatched", "village_city_chartered", "village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "village_first_imperial_expansion_greenvale_capital_two_lands", "village_north_ridge_outpost_establish_action", "village_north_ridge_outpost_greenvale_administers", "village_north_ridge_specialization_choice", "village_north_ridge_trade_post_greenvale_administers", "village_north_ridge_watch_post_greenvale_administers":
 			return "village_route_context"
 		_:
 			return state_name
@@ -406,13 +440,13 @@ func _configure_state_environment(state_name: String) -> void:
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
 			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
 			return
-		"map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_first_frontier_payoff_gilded_crossing_pending", "map_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_east_bridge_pending", "map_first_frontier_payoff_east_bridge_secured", "map_first_imperial_expansion_north_ridge_available", "map_first_imperial_expansion_north_ridge_inspected", "map_first_imperial_expansion_two_lands_claimed", "map_north_ridge_outpost_claimed_inspection", "map_north_ridge_outpost_established":
+		"map_east_route_claimed", "map_east_route_connected", "map_east_route_in_use", "map_greenvale_city", "map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_first_frontier_payoff_gilded_crossing_pending", "map_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_east_bridge_pending", "map_first_frontier_payoff_east_bridge_secured", "map_first_imperial_expansion_north_ridge_available", "map_first_imperial_expansion_north_ridge_inspected", "map_first_imperial_expansion_two_lands_claimed", "map_north_ridge_outpost_claimed_inspection", "map_north_ridge_outpost_established", "map_north_ridge_specialization_inspection", "map_north_ridge_trade_post_committed", "map_north_ridge_watch_post_committed":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed" if settlement_developed else ("founded" if settlement_founded else "claimed"))
 			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
 			return
-		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_first_frontier_payoff_gilded_crossing_revealed", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "world_first_frontier_legacy_east_bridge_complete", "world_first_imperial_expansion_north_ridge_direction", "world_first_imperial_expansion_two_land_footprint", "world_north_ridge_outpost_frontier_need", "world_north_ridge_outpost_held_two_land_frontier":
+		"world_trade_route_active", "world_first_trade_underway", "world_first_city_recognized", "world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_first_frontier_payoff_gilded_crossing_revealed", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "world_first_frontier_legacy_east_bridge_complete", "world_first_imperial_expansion_north_ridge_direction", "world_first_imperial_expansion_two_land_footprint", "world_north_ridge_outpost_frontier_need", "world_north_ridge_outpost_held_two_land_frontier", "world_north_ridge_specialization_held_frontier", "world_north_ridge_trade_post_logistics_posture", "world_north_ridge_watch_post_vigilance_posture":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
@@ -652,6 +686,19 @@ func _accept_entry() -> void:
 				north_ridge_outpost = "established"
 				_apply_entry_state("map_north_ridge_outpost_established")
 				print("AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED")
+		"world_north_ridge_outpost_held_two_land_frontier":
+			if north_ridge_outpost == "established" and north_ridge_specialization == "none":
+				_apply_entry_state("world_north_ridge_specialization_held_frontier")
+				print("AURELIAN_NORTH_RIDGE_SPECIALIZATION_READY=TRADE_POST_OR_WATCH_POST")
+		"village_north_ridge_specialization_choice":
+			if north_ridge_outpost == "established" and north_ridge_specialization == "none":
+				north_ridge_specialization = NORTH_RIDGE_SPECIALIZATIONS[north_ridge_specialization_cursor]
+				if north_ridge_specialization == "trade_post":
+					_apply_entry_state("map_north_ridge_trade_post_committed")
+					print("AURELIAN_NORTH_RIDGE_SPECIALIZATION=TRADE_POST")
+				else:
+					_apply_entry_state("map_north_ridge_watch_post_committed")
+					print("AURELIAN_NORTH_RIDGE_SPECIALIZATION=WATCH_POST")
 
 func _right_entry() -> void:
 	match entry_state:
@@ -714,6 +761,18 @@ func _right_entry() -> void:
 			_apply_entry_state("village_north_ridge_outpost_establish_action")
 		"map_north_ridge_outpost_established":
 			_apply_entry_state("village_north_ridge_outpost_greenvale_administers")
+		"world_north_ridge_specialization_held_frontier":
+			_apply_entry_state("map_north_ridge_specialization_inspection")
+		"map_north_ridge_specialization_inspection":
+			_apply_entry_state("village_north_ridge_specialization_choice")
+		"world_north_ridge_trade_post_logistics_posture":
+			_apply_entry_state("map_north_ridge_trade_post_committed")
+		"world_north_ridge_watch_post_vigilance_posture":
+			_apply_entry_state("map_north_ridge_watch_post_committed")
+		"map_north_ridge_trade_post_committed":
+			_apply_entry_state("village_north_ridge_trade_post_greenvale_administers")
+		"map_north_ridge_watch_post_committed":
+			_apply_entry_state("village_north_ridge_watch_post_greenvale_administers")
 		"map_east_route_claimed":
 			_apply_entry_state("village_developed" if settlement_developed else ("village_founded" if settlement_founded else "village_claimed"))
 		"map_east_route_connected":
@@ -779,6 +838,18 @@ func _previous_entry() -> void:
 			_apply_entry_state("map_north_ridge_outpost_claimed_inspection")
 		"village_north_ridge_outpost_greenvale_administers":
 			_apply_entry_state("map_north_ridge_outpost_established")
+		"village_north_ridge_specialization_choice":
+			_apply_entry_state("map_north_ridge_specialization_inspection")
+		"village_north_ridge_trade_post_greenvale_administers":
+			_apply_entry_state("map_north_ridge_trade_post_committed")
+		"village_north_ridge_watch_post_greenvale_administers":
+			_apply_entry_state("map_north_ridge_watch_post_committed")
+		"map_north_ridge_specialization_inspection":
+			_apply_entry_state("world_north_ridge_specialization_held_frontier")
+		"map_north_ridge_trade_post_committed":
+			_apply_entry_state("world_north_ridge_trade_post_logistics_posture")
+		"map_north_ridge_watch_post_committed":
+			_apply_entry_state("world_north_ridge_watch_post_vigilance_posture")
 		"map_north_ridge_outpost_claimed_inspection":
 			_apply_entry_state("world_north_ridge_outpost_frontier_need")
 		"map_north_ridge_outpost_established":
@@ -827,6 +898,12 @@ func _previous_entry() -> void:
 			_apply_entry_state("world_neutral")
 
 func _cycle_national_direction(step: int) -> void:
+	if entry_state == "village_north_ridge_specialization_choice" and north_ridge_specialization == "none":
+		north_ridge_specialization_cursor = posmod(north_ridge_specialization_cursor + step, NORTH_RIDGE_SPECIALIZATIONS.size())
+		_refresh_north_ridge_specialization_presentation(entry_state)
+		_update_runtime_hud()
+		print("AURELIAN_NORTH_RIDGE_SPECIALIZATION_INSPECT=%s" % NORTH_RIDGE_SPECIALIZATIONS[north_ridge_specialization_cursor].to_upper())
+		return
 	if entry_state == "village_first_rival_response_pending" and first_rival_countermove_response == "none":
 		rival_response_cursor = posmod(rival_response_cursor + step, RIVAL_RESPONSES.size())
 		_refresh_river_surge_presentation(entry_state)
@@ -1739,6 +1816,134 @@ func _refresh_north_ridge_outpost_presentation(state_name: String) -> void:
 		if admin_label != null:
 			admin_label.text = "GREENVALE ADMINISTERS NORTH RIDGE OUTPOST" if established else "ESTABLISH NORTH RIDGE OUTPOST"
 
+
+func _build_north_ridge_specialization_presentation() -> Node3D:
+	var root := Node3D.new()
+	root.name = "AurelianNorthRidgeSpecializationPresentation"
+	var ridge := Node3D.new()
+	ridge.name = "NorthRidgeSpecializationCue"
+	ridge.position = topology_to_godot(Vector2(700.0, 205.0), 0.66)
+	var base := MeshInstance3D.new()
+	base.name = "SpecializationBase"
+	var base_mesh := CylinderMesh.new()
+	base_mesh.top_radius = 0.84
+	base_mesh.bottom_radius = 0.94
+	base_mesh.height = 0.22
+	base_mesh.radial_segments = 12
+	base.mesh = base_mesh
+	base.position.y = 0.13
+	base.material_override = _material("#5c4938ff", 0.20)
+	ridge.add_child(base)
+	var trade := Node3D.new()
+	trade.name = "TradePostCue"
+	for index in range(3):
+		var cargo := MeshInstance3D.new()
+		cargo.name = "Cargo%02d" % (index + 1)
+		var cargo_mesh := BoxMesh.new()
+		cargo_mesh.size = Vector3(0.46, 0.42, 0.52)
+		cargo.mesh = cargo_mesh
+		cargo.position = Vector3(-0.55 + float(index) * 0.55, 0.34, 0.18 if index % 2 == 0 else -0.20)
+		cargo.material_override = _material("#d7ad42ff", 0.30)
+		trade.add_child(cargo)
+	var route_bar := MeshInstance3D.new()
+	route_bar.name = "TradeRouteBar"
+	var route_mesh := BoxMesh.new()
+	route_mesh.size = Vector3(2.25, 0.12, 0.16)
+	route_bar.mesh = route_mesh
+	route_bar.position = Vector3(0.0, 0.24, -0.62)
+	route_bar.material_override = _material("#e2c36fff", 0.40)
+	trade.add_child(route_bar)
+	ridge.add_child(trade)
+	var watch := Node3D.new()
+	watch.name = "WatchPostCue"
+	var mast := MeshInstance3D.new()
+	mast.name = "WatchMast"
+	var mast_mesh := CylinderMesh.new()
+	mast_mesh.top_radius = 0.12
+	mast_mesh.bottom_radius = 0.25
+	mast_mesh.height = 2.18
+	mast_mesh.radial_segments = 10
+	mast.mesh = mast_mesh
+	mast.position.y = 1.20
+	mast.material_override = _material("#668fb5ff", 0.30)
+	watch.add_child(mast)
+	var lookout := MeshInstance3D.new()
+	lookout.name = "WatchLookout"
+	var lookout_mesh := CylinderMesh.new()
+	lookout_mesh.top_radius = 0.58
+	lookout_mesh.bottom_radius = 0.48
+	lookout_mesh.height = 0.28
+	lookout_mesh.radial_segments = 10
+	lookout.mesh = lookout_mesh
+	lookout.position.y = 2.16
+	lookout.material_override = _material("#9ecce6ff", 0.44)
+	watch.add_child(lookout)
+	ridge.add_child(watch)
+	var label := Label3D.new()
+	label.name = "NorthRidgeSpecializationLabel"
+	label.font_size = 29
+	label.outline_size = 9
+	label.position = Vector3(0.0, 2.72, 0.0)
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	ridge.add_child(label)
+	root.add_child(ridge)
+	var capital := Node3D.new()
+	capital.name = "GreenvaleSpecializationAdministrationCue"
+	capital.position = topology_to_godot(Vector2(354.0, 285.0), 0.78)
+	var capital_ring := MeshInstance3D.new()
+	capital_ring.name = "SpecializationAdministrationRing"
+	var ring_mesh := TorusMesh.new()
+	ring_mesh.inner_radius = 0.90
+	ring_mesh.outer_radius = 1.14
+	ring_mesh.rings = 28
+	ring_mesh.ring_segments = 16
+	capital_ring.mesh = ring_mesh
+	capital.add_child(capital_ring)
+	var capital_label := Label3D.new()
+	capital_label.name = "SpecializationAdministrationLabel"
+	capital_label.font_size = 27
+	capital_label.outline_size = 8
+	capital_label.position = Vector3(0.0, 1.34, 0.0)
+	capital_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	capital.add_child(capital_label)
+	root.add_child(capital)
+	root.visible = false
+	return root
+
+func _refresh_north_ridge_specialization_presentation(state_name: String) -> void:
+	if north_ridge_specialization_presentation == null:
+		return
+	var active := state_name in NORTH_RIDGE_SPECIALIZATION_STATES
+	north_ridge_specialization_presentation.visible = active
+	if not active:
+		return
+	var preview := NORTH_RIDGE_SPECIALIZATIONS[north_ridge_specialization_cursor] if north_ridge_specialization == "none" else north_ridge_specialization
+	var trade_active := preview == "trade_post"
+	var color := "#d7ad42ff" if trade_active else "#668fb5ff"
+	var ridge := north_ridge_specialization_presentation.get_node_or_null("NorthRidgeSpecializationCue") as Node3D
+	var capital := north_ridge_specialization_presentation.get_node_or_null("GreenvaleSpecializationAdministrationCue") as Node3D
+	if ridge != null:
+		ridge.visible = not state_name.begins_with("village_")
+		var trade := ridge.get_node_or_null("TradePostCue") as Node3D
+		var watch := ridge.get_node_or_null("WatchPostCue") as Node3D
+		if trade != null:
+			trade.visible = trade_active
+		if watch != null:
+			watch.visible = not trade_active
+		var label := ridge.get_node_or_null("NorthRidgeSpecializationLabel") as Label3D
+		if label != null:
+			label.modulate = Color(color)
+			label.text = "NORTH RIDGE / TRADE POST" if trade_active else "NORTH RIDGE / WATCH POST"
+	if capital != null:
+		capital.visible = state_name.begins_with("village_")
+		var ring := capital.get_node_or_null("SpecializationAdministrationRing") as MeshInstance3D
+		if ring != null:
+			ring.material_override = _material(color, 0.42)
+		var label := capital.get_node_or_null("SpecializationAdministrationLabel") as Label3D
+		if label != null:
+			label.modulate = Color(color)
+			label.text = "GREENVALE COMMITS TRADE POST" if trade_active else "GREENVALE COMMITS WATCH POST"
+
 func _animate_living_capital_presentation(delta: float) -> void:
 	var seconds := float(Time.get_ticks_msec()) / 1000.0
 	if dispatch_token != null and dispatch_token.visible:
@@ -1805,6 +2010,7 @@ func _apply_entry_state(state_name: String) -> void:
 	_refresh_river_surge_presentation(state_name)
 	_refresh_imperial_expansion_presentation(state_name)
 	_refresh_north_ridge_outpost_presentation(state_name)
+	_refresh_north_ridge_specialization_presentation(state_name)
 	_set_trade_world_underway(false)
 	_refresh_national_direction_identity()
 	match state_name:
@@ -1839,7 +2045,7 @@ func _apply_entry_state(state_name: String) -> void:
 			_apply_world_state(main_world_overlay_root, "selected_trade")
 			_set_trade_world_underway(true)
 			_activate_camera("world")
-		"world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_river_surge_crisis", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "world_first_rival_response_stand_firm", "world_first_rival_response_negotiate_passage", "world_first_frontier_payoff_gilded_crossing_revealed", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "world_first_frontier_legacy_east_bridge_complete", "world_first_imperial_expansion_north_ridge_direction", "world_first_imperial_expansion_two_land_footprint", "world_north_ridge_outpost_frontier_need", "world_north_ridge_outpost_held_two_land_frontier":
+		"world_first_nation_founded", "world_national_mandate_underway", "world_first_empire_proclaimed", "world_river_surge_crisis", "world_aurelian_river_surge_greenvale_response", "world_aurelian_river_surge_bridge_response", "world_first_rival_countermove", "world_first_rival_response_stand_firm", "world_first_rival_response_negotiate_passage", "world_first_frontier_payoff_gilded_crossing_revealed", "world_first_frontier_legacy_gilded_crossing_complete", "world_first_frontier_payoff_east_bridge_revealed", "world_first_frontier_legacy_east_bridge_complete", "world_first_imperial_expansion_north_ridge_direction", "world_first_imperial_expansion_two_land_footprint", "world_north_ridge_outpost_frontier_need", "world_north_ridge_outpost_held_two_land_frontier", "world_north_ridge_specialization_held_frontier", "world_north_ridge_trade_post_logistics_posture", "world_north_ridge_watch_post_vigilance_posture":
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_NATION_FOUNDING_CAPITAL_STATE_FAILED")
 			_apply_world_state(main_world_overlay_root, "selected_trade")
@@ -1869,7 +2075,7 @@ func _apply_entry_state(state_name: String) -> void:
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_CITY_CHARTER_VILLAGE_STATE_FAILED")
 			_activate_camera("map")
-		"map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_river_surge_response_loci", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "map_first_rival_response_stand_firm", "map_first_rival_response_negotiate_passage", "map_first_frontier_payoff_gilded_crossing_pending", "map_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_east_bridge_pending", "map_first_frontier_payoff_east_bridge_secured", "map_first_imperial_expansion_north_ridge_available", "map_first_imperial_expansion_north_ridge_inspected", "map_first_imperial_expansion_two_lands_claimed", "map_north_ridge_outpost_claimed_inspection", "map_north_ridge_outpost_established":
+		"map_aurelian_homeland", "map_national_mandate_active", "map_aurelian_imperial_heartland", "map_river_surge_response_loci", "map_aurelian_imperial_heartland_greenvale_response", "map_aurelian_imperial_heartland_bridge_response", "map_first_rival_countermove_east_bridge", "map_first_rival_countermove_greenvale", "map_first_rival_response_stand_firm", "map_first_rival_response_negotiate_passage", "map_first_frontier_payoff_gilded_crossing_pending", "map_first_frontier_payoff_gilded_crossing_secured", "map_first_frontier_payoff_east_bridge_pending", "map_first_frontier_payoff_east_bridge_secured", "map_first_imperial_expansion_north_ridge_available", "map_first_imperial_expansion_north_ridge_inspected", "map_first_imperial_expansion_two_lands_claimed", "map_north_ridge_outpost_claimed_inspection", "map_north_ridge_outpost_established", "map_north_ridge_specialization_inspection", "map_north_ridge_trade_post_committed", "map_north_ridge_watch_post_committed":
 			_apply_map_state(main_overlay_root, "east_route_claimed")
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_NATION_FOUNDING_CAPITAL_STATE_FAILED")
@@ -1902,7 +2108,7 @@ func _apply_entry_state(state_name: String) -> void:
 			if not _apply_village_state(main_basin, "city_chartered"):
 				push_error("AURELIAN_FIRST_CITY_CHARTER_VILLAGE_STATE_FAILED")
 			_activate_camera("village")
-		"village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "village_first_imperial_expansion_greenvale_capital_two_lands", "village_north_ridge_outpost_establish_action", "village_north_ridge_outpost_greenvale_administers":
+		"village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_river_surge_response_pending", "village_aurelian_imperial_capital_greenvale_shielded", "village_aurelian_imperial_capital_bridge_response", "village_first_rival_response_pending", "village_first_rival_response_stand_firm", "village_first_rival_response_negotiate_passage", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "village_first_imperial_expansion_greenvale_capital_two_lands", "village_north_ridge_outpost_establish_action", "village_north_ridge_outpost_greenvale_administers", "village_north_ridge_specialization_choice", "village_north_ridge_trade_post_greenvale_administers", "village_north_ridge_watch_post_greenvale_administers":
 			settlement_founded = true
 			settlement_developed = true
 			route_connected = true
@@ -1918,7 +2124,7 @@ func _apply_entry_state(state_name: String) -> void:
 	_update_runtime_hud()
 	if persistence_enabled:
 		restored_intent = "none" if entry_state == "world_neutral" else "east_trade"
-		var save_result := SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded, committed_direction, national_mandate_started, empire_proclaimed, imperial_crisis, imperial_crisis_response, first_rival_countermove_response, first_frontier_payoff, imperial_expansion_target, first_imperial_expansion, north_ridge_outpost)
+		var save_result := SESSION.save_session(entry_state, restored_intent, SESSION.NATIVE_PATH, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded, committed_direction, national_mandate_started, empire_proclaimed, imperial_crisis, imperial_crisis_response, first_rival_countermove_response, first_frontier_payoff, imperial_expansion_target, first_imperial_expansion, north_ridge_outpost, north_ridge_specialization)
 		print("AURELIAN_NATIONAL_DIRECTION_SAVE=%s" % committed_direction)
 		print("AURELIAN_SESSION_V2_SAVE_ACK=%s:%s:%s:%s:%s:%s:%s:%s:%s:%s" % [String(save_result.get("status", "unknown")), String(save_result.get("adapter", "unknown")), entry_state, restored_intent, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded])
 		if not bool(save_result.get("ok", false)) and String(save_result.get("status", "")) != "unavailable":
@@ -2012,7 +2218,19 @@ func _update_runtime_hud() -> void:
 		"world_north_ridge_outpost_held_two_land_frontier":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "North Ridge Outpost holds the two-land frontier"
-			controls_label.text = "[RIGHT] Inspect established outpost on Map"
+			controls_label.text = "[ENTER] Choose its first specialization    [RIGHT] Inspect established outpost on Map"
+		"world_north_ridge_specialization_held_frontier":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "The held frontier now needs a lasting North Ridge role"
+			controls_label.text = "[RIGHT] Inspect specialization locus on Map"
+		"world_north_ridge_trade_post_logistics_posture":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "Trade Post extends Aurelian logistics across the two-land frontier"
+			controls_label.text = "[RIGHT] Inspect committed Trade Post"
+		"world_north_ridge_watch_post_vigilance_posture":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "Watch Post gives Aurelian vigilance across the two-land frontier"
+			controls_label.text = "[RIGHT] Inspect committed Watch Post"
 		"map_first_frontier_payoff_gilded_crossing_pending":
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "Gilded Crossing is the pending payoff locus"
@@ -2061,6 +2279,31 @@ func _update_runtime_hud() -> void:
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "Greenvale imperial capital administers North Ridge Outpost"
 			controls_label.text = "[LEFT] Return to established outpost Map"
+		"map_north_ridge_specialization_inspection":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Existing North Ridge Outpost is the only specialization locus"
+			controls_label.text = "[RIGHT] Choose its role in Village    [LEFT] World"
+		"village_north_ridge_specialization_choice":
+			layer_label.text = "VILLAGE  |  HOW"
+			var inspected_specialization := "Trade Post" if north_ridge_specialization_cursor == 0 else "Watch Post"
+			intent_label.text = "Choose one lasting North Ridge role: %s" % inspected_specialization
+			controls_label.text = "[UP / DOWN] Trade Post / Watch Post    [ENTER] Commit role    [LEFT] Map"
+		"map_north_ridge_trade_post_committed":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Trade Post is committed at the existing North Ridge Outpost"
+			controls_label.text = "[RIGHT] Open Greenvale administration    [LEFT] World"
+		"village_north_ridge_trade_post_greenvale_administers":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "Greenvale administers North Ridge Trade Post logistics"
+			controls_label.text = "[LEFT] Return to committed Map"
+		"map_north_ridge_watch_post_committed":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Watch Post is committed at the existing North Ridge Outpost"
+			controls_label.text = "[RIGHT] Open Greenvale administration    [LEFT] World"
+		"village_north_ridge_watch_post_greenvale_administers":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "Greenvale administers North Ridge Watch Post vigilance"
+			controls_label.text = "[LEFT] Return to committed Map"
 		"village_first_frontier_payoff_gilded_crossing_pending":
 			layer_label.text = "VILLAGE  |  HOW"
 			intent_label.text = "Capital action ready: Secure Gilded Crossing"
