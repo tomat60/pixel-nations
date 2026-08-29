@@ -1921,9 +1921,9 @@ func _refresh_north_ridge_specialization_presentation(state_name: String) -> voi
 	north_ridge_specialization_presentation.visible = active
 	if not active:
 		return
-	var preview := NORTH_RIDGE_SPECIALIZATIONS[north_ridge_specialization_cursor] if north_ridge_specialization == "none" else north_ridge_specialization
-	var trade_active := preview == "trade_post"
-	var color := "#d7ad42ff" if trade_active else "#668fb5ff"
+	var preview: String = String(NORTH_RIDGE_SPECIALIZATIONS[north_ridge_specialization_cursor]) if north_ridge_specialization == "none" else north_ridge_specialization
+	var trade_active: bool = preview == "trade_post"
+	var color: String = "#d7ad42ff" if trade_active else "#668fb5ff"
 	var ridge := north_ridge_specialization_presentation.get_node_or_null("NorthRidgeSpecializationCue") as Node3D
 	var capital := north_ridge_specialization_presentation.get_node_or_null("GreenvaleSpecializationAdministrationCue") as Node3D
 	if ridge != null:
