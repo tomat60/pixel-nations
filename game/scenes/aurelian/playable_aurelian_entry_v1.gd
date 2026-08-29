@@ -170,6 +170,7 @@ var automated_frame := 0
 var automated_direction := "expand"
 var automated_crisis_response := "shield_greenvale"
 var automated_rival_response := "stand_firm"
+var automated_north_ridge_specialization := "trade_post"
 var persistence_enabled := true
 var restored_intent := "none"
 var settlement_founded := false
@@ -225,6 +226,9 @@ func _ready() -> void:
 	var requested_rival_response := OS.get_environment("AURELIAN_AUTOMATED_RIVAL_RESPONSE").to_lower()
 	if requested_rival_response in RIVAL_RESPONSES:
 		automated_rival_response = requested_rival_response
+	var requested_specialization := OS.get_environment("AURELIAN_AUTOMATED_NORTH_RIDGE_SPECIALIZATION").to_lower()
+	if requested_specialization in NORTH_RIDGE_SPECIALIZATIONS:
+		automated_north_ridge_specialization = requested_specialization
 	var evidence_state := OS.get_environment("AURELIAN_PLAYABLE_EVIDENCE_STATE").to_lower()
 	var evidence_direction := OS.get_environment("AURELIAN_COMMITTED_DIRECTION").to_lower()
 	if NATIONAL_DIRECTIONS.has(evidence_direction):
@@ -470,7 +474,7 @@ func _configure_state_environment(state_name: String) -> void:
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "developed")
 			OS.set_environment("AURELIAN_CAPTURE_PRESET", "")
 			return
-		"village_city_chartered", "village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "village_first_imperial_expansion_greenvale_capital_two_lands":
+		"village_city_chartered", "village_greenvale_capital", "village_national_mandate_started", "village_aurelian_imperial_capital", "village_first_frontier_payoff_gilded_crossing_pending", "village_first_frontier_payoff_gilded_crossing_secured", "village_first_frontier_payoff_east_bridge_pending", "village_first_frontier_payoff_east_bridge_secured", "village_first_imperial_expansion_greenvale_capital_two_lands", "village_north_ridge_outpost_establish_action", "village_north_ridge_outpost_greenvale_administers", "village_north_ridge_specialization_choice", "village_north_ridge_trade_post_greenvale_administers", "village_north_ridge_watch_post_greenvale_administers":
 			OS.set_environment("AURELIAN_WORLD_STATE", "selected_trade")
 			OS.set_environment("AURELIAN_MAP_STATE", "east_route_claimed")
 			OS.set_environment("AURELIAN_VILLAGE_STATE", "city_chartered")
@@ -2643,6 +2647,30 @@ func _process(_delta: float) -> void:
 		_emit_action("ui_left")
 	elif automated_frame == 6810:
 		_emit_action("ui_left")
-	elif automated_frame >= 6870:
-		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=6870")
+	elif automated_frame == 6870:
+		_emit_action("ui_accept")
+	elif automated_frame == 6930:
+		_emit_action("ui_right")
+	elif automated_frame == 6990:
+		_emit_action("ui_right")
+	elif automated_frame == 7050 and automated_north_ridge_specialization == "watch_post":
+		_emit_action("ui_down")
+	elif automated_frame == 7110:
+		_emit_action("ui_accept")
+	elif automated_frame == 7170:
+		_emit_action("ui_right")
+	elif automated_frame == 7230:
+		_emit_action("ui_left")
+	elif automated_frame == 7290:
+		_emit_action("ui_left")
+	elif automated_frame == 7350:
+		_emit_action("ui_right")
+	elif automated_frame == 7410:
+		_emit_action("ui_right")
+	elif automated_frame == 7470:
+		_emit_action("ui_left")
+	elif automated_frame == 7530:
+		_emit_action("ui_left")
+	elif automated_frame >= 7590:
+		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=7590")
 		get_tree().quit(0)
