@@ -1,141 +1,151 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-08-28
-Current state revision: Aurelian North Ridge Outpost v1 proposed
+Updated: 2026-08-29
+Current state revision: North Ridge Outpost accepted; North Ridge Specialization v1 selected
 Authority source: this file on the current `main`
-Authority baseline SHA: `ba3238f63cb53c4c11c25697b322d5f24e75d66c`
-Product baseline SHA: `2cdc419634e3caf547b4e2716aa75d3265bbdca5`
-Current milestone: Aurelian North Ridge Outpost v1 authorized for exactly one bounded implementation candidate
-Active execution issue: #542
-Next allowed action: implement exactly one Godot Aurelian North Ridge Outpost v1 candidate under the accepted contract, then run exact-head evidence and direct review.
+Authority baseline SHA: `9f184cf9d48b512ee0e4551cfd0b3d6986814c81`
+Product baseline SHA: `9f184cf9d48b512ee0e4551cfd0b3d6986814c81`
+Current milestone: authorize exactly one Godot Aurelian North Ridge Specialization v1 candidate
+Active execution issue: #547
+Next allowed action: after this transition/contract merges with healthy checks, implement one bounded North Ridge Specialization v1 candidate covering both mutually exclusive outcomes.
 
 ## Product truth
 
 Pixel Nations is a strategy game built around:
 
-`one land -> settlement -> city -> nation -> empire -> crisis -> rival -> frontier payoff -> first imperial expansion -> first second-land use`
+`one land -> settlement -> city -> nation -> empire`
 
-The playable demonstration remains Sector A-01 / Aurelian Basin. Godot is the target runtime under ADR-001. Village, Map and World remain three roles over one physical geography:
+The playable demonstration remains Sector A-01 / Aurelian Basin. The current accepted arc now proves one founded empire with exactly two claimed lands and one established frontier outpost.
+
+Godot remains the target runtime under ADR-001. Village, Map and World remain roles over one physical geography:
 
 - Village = HOW
 - Map = WHERE
 - World = WHY / WHICH DIRECTION
 
+## Accepted foundation
+
+Preserve and reuse:
+
+- one shared deterministic Aurelian geography and packaged GLB;
+- Greenvale progression through settlement, city, capital and living-capital presentation;
+- national direction, mandate and empire progression;
+- River Surge, rival countermove and frontier-payoff history;
+- exactly two claimed lands: `east_route` and `north_ridge`;
+- North Ridge as the first established second-land outpost;
+- normal-input Godot entry and cross-view navigation;
+- Session Persistence v2 across native and Web;
+- existing pinned/licensed assets and procedural presentation language.
+
+Do not rebuild accepted geography, cameras, persistence architecture or earlier progression.
+
 ## Most recent accepted product milestone
 
-PR #540 `Implement Godot Aurelian First Imperial Expansion v1` is terminally accepted and merged.
+PR #546 `Implement Godot Aurelian North Ridge Outpost v1` is accepted and merged.
 
-Terminal result: `GODOT_AURELIAN_FIRST_IMPERIAL_EXPANSION_PASS`.
+Terminal result: `GODOT_AURELIAN_NORTH_RIDGE_OUTPOST_PASS`.
 
-- accepted head: `5dced8cc3cc0deb05a187c505b202c48796d3a53`;
-- merged product baseline: `2cdc419634e3caf547b4e2716aa75d3265bbdca5`;
-- East Route remains the first claimed land and North Ridge becomes the only second claimed land;
-- World identifies North Ridge as the adjacent expansion direction;
-- Map requires deliberate inspection and explicit `Claim North Ridge`;
-- the claim emits exactly one event and exposes no third-land or repeatable path;
-- Village keeps Greenvale as the imperial capital administering two lands;
-- Session Persistence v2 restores exactly `east_route` and `north_ridge` across native restart, Web reload and profile reopen;
-- one shared Aurelian geography and all accepted direction, empire, crisis, rival and frontier-payoff state remain intact;
-- direct still, normal-input motion and persistence review passed without a visual correction.
+- accepted exact head: `f7ebca102fdb7d660761b5b4c5fc9ce5335bbb77`;
+- merged product baseline: `9f184cf9d48b512ee0e4551cfd0b3d6986814c81`;
+- outcome: two-land imperial footprint -> World frontier need -> Map claimed inspection -> explicit `Establish North Ridge Outpost` -> Map established outpost -> Greenvale administration -> World held frontier;
+- exactly one persisted outpost exists at the accepted North Ridge locus;
+- claimed and established Map states are visibly distinct;
+- exactly `east_route` and `north_ridge` remain claimed;
+- native restart, Web reload and same-profile reopen restore the established outpost;
+- shared geography, cameras, Greenvale capital and all accepted earlier progression remain intact;
+- exact-head Playable, Web, Persistence, Foundation, Pixel Nations CI and Visual QA completed successfully;
+- direct still and normal-input review passed without a visual correction.
 
-Accepted exact-head evidence:
-
-- Playable Entry run `33197402661`, artifact `9696609483`, digest `sha256:b29b4415f0d62aa98d9c2ed03c7729f590cd30d3dc86d5283e48531f0ffdd917`;
-- Web Playability run `33197402739`, artifact `9696503715`, digest `sha256:89037a620d16791eb88d4232bdddbd97414827378b9914f060bb9ae3a9ccc770`;
-- Session Persistence v2 run `33197402673`, artifact `9696507358`, digest `sha256:0693cc135a439762c74d2759147c27b917f4fc112f5b16ff8964e8545834e5c0`.
-
-Issue #538 is completed. First Imperial Expansion v1 must not be reopened.
+PR #546 and issue #542 are complete and must not be reopened as implementation work.
 
 ## Strategy decision
 
-The empire now owns North Ridge, but ownership alone is not yet a meaningful second-land result. A third land or repeatable expansion would widen the map before the new land has any use.
+The project should not add a third land yet. North Ridge now exists as a meaningful location but still lacks a player-authored role.
 
-The next bounded milestone therefore establishes exactly one fixed frontier outpost at the already claimed North Ridge locus. This is the first visible use of the second land, not a second settlement progression, economy, construction system or unit layer.
+The next milestone therefore deepens the second land with one mutually exclusive strategic specialization:
+
+- `Trade Post` for logistics/trade identity;
+- `Watch Post` for vigilance/frontier identity.
+
+This creates a real decision and stronger visible differentiation without prematurely introducing economy or combat simulation.
+
+Binding contract: `docs/GODOT_AURELIAN_NORTH_RIDGE_SPECIALIZATION_V1_CONTRACT.md`.
 
 ## Current authority
 
-Issue #542 and `docs/GODOT_AURELIAN_NORTH_RIDGE_OUTPOST_V1_CONTRACT.md` authorize exactly one bounded implementation candidate:
+Issue #547 and the specialization contract authorize one candidate after this transition merges.
 
-`two-land imperial footprint -> World explains why North Ridge must be held -> Map inspects claimed North Ridge -> Village exposes explicit Establish North Ridge Outpost -> Map shows one established outpost at North Ridge -> Village confirms Greenvale administers the outpost -> World records a held two-land frontier`
+Required outcome:
+
+`held frontier -> inspect established North Ridge -> choose specialization -> Commit Trade Post / Commit Watch Post -> visibly specialized North Ridge -> Greenvale administration consequence -> World frontier posture`
 
 The candidate must:
 
-- require the accepted North Ridge claim and exactly two owned lands;
-- require deliberate normal input to inspect and establish the outpost;
-- create exactly one persisted North Ridge outpost and one establishment event;
-- make claimed-without-outpost and established-outpost visibly distinct;
-- keep Greenvale as imperial capital administering both lands;
-- preserve Trade, Expand or Frontier identity, empire, River Surge response, rival response, First Frontier Payoff and First Imperial Expansion;
-- keep Village as HOW, Map as WHERE and World as WHY / WHICH DIRECTION;
-- preserve river, East Bridge, Greenvale, North Ridge, Gilded Crossing, route, landmark and camera transforms;
-- use restrained procedural geometry and existing materials only;
-- expose no second-outpost, second-settlement, third-land or repeatable path;
-- persist across native restart, Web reload and profile reopen;
-- produce exact-head Playable Entry, Web Playability and Session Persistence evidence;
-- receive direct still and normal-input motion review.
-
-Green CI alone is not acceptance. One bounded visual correction maximum is allowed. Terminal classification must be exactly:
-
-- `GODOT_AURELIAN_NORTH_RIDGE_OUTPOST_PASS`; or
-- `GODOT_AURELIAN_NORTH_RIDGE_OUTPOST_REJECT`.
+- preserve exactly two lands and one North Ridge outpost;
+- expose exactly one mutually exclusive persisted specialization choice;
+- make Trade Post and Watch Post visually distinct at a glance;
+- strengthen the North Ridge composition beyond the base outpost;
+- preserve Village HOW, Map WHERE and World WHY roles;
+- preserve all accepted empire/crisis/rival/frontier history;
+- persist across native restart, Web reload and same-profile reopen;
+- use existing geometry/materials/assets only;
+- provide exact-head motion, still and persistence evidence.
 
 ## Allowed scope
 
-- one exact North Ridge Outpost manifest;
-- exactly one fixed outpost at the existing claimed North Ridge locus;
-- one explicit `Establish North Ridge Outpost` action;
-- focused Godot controller, HUD and Session Persistence v2 changes;
-- restrained procedural outpost cues using existing geometry and materials;
-- focused tests and narrowly scoped evidence workflow changes;
-- contract-linked documentation.
+- `game/scenes/aurelian/**`;
+- `game/tests/**`;
+- Session Persistence v2 extension for one specialization fact;
+- existing manifests/layout/presentation helpers;
+- focused Playable/Web/Persistence workflow adjustments required for evidence.
 
 ## Forbidden scope
 
-- third land, land picker, procedural land generation or repeatable expansion;
-- second settlement progression, city, population, workers or build queue;
-- resources, costs, rewards, timers, production or economy;
-- multiple outposts or repeatable construction;
-- combat, units, attacks, damage, victory or defeat simulation;
-- rival AI, diplomacy, governance simulation or border conflict;
-- backend, accounts, cloud save or multiplayer;
-- React, SVG or CSS rebuilding of final game surfaces;
-- new GLB, terrain, geography, camera, asset family, dependency, paid asset or paid tool;
-- broad visual polish, public-shell work, P12 or MAX.
+- third land or repeatable land expansion;
+- second settlement/city progression;
+- resource economy, prices, production, workers, queues or timers;
+- combat simulation, units, damage or victory/defeat;
+- full diplomacy/governance systems;
+- new terrain, geography, GLB, camera, dependency or asset family;
+- backend, accounts, multiplayer;
+- React/SVG/CSS final-game rebuild;
+- broad unrelated infrastructure work;
+- P12, MAX or paid tools.
 
-## Process rules
+## Process acceleration rules
 
 1. Optimize for visible playable progress, not gate count.
-2. One active product or recovery PR at a time.
-3. Green CI is necessary but not sufficient for acceptance.
-4. Directly inspect running-game images, motion and persistence artifacts.
-5. Preserve the accepted shared geography and GLB.
-6. Any head movement invalidates older evidence.
-7. Fix deterministic failures at root cause on the same PR.
-8. Rerun only the smallest failing job for isolated infrastructure failures.
-9. After merge, verify fresh `main`, checks and available deployment status before authorizing another implementation.
+2. One active product/recovery PR at a time.
+3. Use one implementation PR for one coherent player outcome; do not split logically inseparable branches into separate PRs.
+4. Use focused Godot tests during iteration; run full exact-head evidence at the final candidate gate.
+5. Directly inspect running-game screenshots and motion; green CI alone is not acceptance.
+6. Any product-head movement invalidates older product evidence.
+7. Fix deterministic failures at root cause on the same PR; rerun only the smallest isolated infrastructure failure.
+8. After merge, verify the merge SHA and current main before new product implementation.
+9. **When a milestone already has terminal exact-head PASS, no unresolved blocker, and a verified merge, combine its PASS recording with the next bounded strategy/contract authorization in one documentation transition PR. Do not spend a separate CI cycle on a standalone acceptance-record PR unless the next direction is genuinely undecided or risky.**
+10. Prefer larger vertical-slice milestones that improve at least two of: strategic choice, visible world change, gamefeel, progression readability.
 
 ## Tool and cost policy
 
-- Strategy, control and direct review: GPT-5.6 Sol.
-- Deterministic GitHub and Godot tooling first.
-- Cursor only when materially useful as executor, default GPT-5.5 without MAX.
+- Strategy/control/direct review: GPT-5.6 Sol.
+- Deterministic GitHub/Godot tooling first.
+- Cursor as executor when materially useful: GPT-5.5 without MAX.
 - MAX: OFF.
 - Extra spend target: 0 USD.
-- Image generation is not acceptance authority.
+- No paid asset/tool without a named blocker and explicit value case.
 
 ## Source-of-truth precedence
 
 1. this `PROJECT_CURRENT_STATE.md`;
-2. `docs/GODOT_AURELIAN_NORTH_RIDGE_OUTPOST_V1_CONTRACT.md`;
-3. active execution issue #542;
+2. `docs/GODOT_AURELIAN_NORTH_RIDGE_SPECIALIZATION_V1_CONTRACT.md`;
+3. active execution issue #547;
 4. accepted ADRs, especially ADR-001;
 5. root `AGENTS.md`;
-6. accepted exact-head evidence and merged PR #540;
-7. issue #415 as shared-geography history and continuity guidance;
-8. completed issue #538 and older contracts as history only;
-9. older issues, PRs, briefs and reports.
+6. accepted exact-head evidence and merged PR #546;
+7. operating and QA protocols;
+8. older issues, PRs and contracts as history only.
 
 ## Current stop condition
 
-Stop after one accepted or rejected North Ridge Outpost v1 candidate. A PASS must be recorded here before any later strategy review. A REJECT must restore the accepted First Imperial Expansion baseline and record the exact reason.
+This transition stops when the North Ridge Outpost PASS is recorded and North Ridge Specialization v1 is authorized on `main` with healthy checks. Then implement exactly one bounded specialization candidate and stop at direct exact-head PASS or REJECT before any third land, economy or combat expansion.
