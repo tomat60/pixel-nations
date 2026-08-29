@@ -4,6 +4,7 @@ const SESSION = preload("res://scenes/aurelian/aurelian_session_persistence_v2.g
 const TEST_PATH := "user://aurelian-north-ridge-specialization-v1-test.json"
 const MANIFEST_PATH := "res://scenes/aurelian/north_ridge_specialization_v1_manifest.json"
 const PERSISTENCE_PATH := "res://scenes/aurelian/aurelian_session_persistence_v2.gd"
+const CONTROLLER_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1.gd"
 
 var failures: Array[String] = []
 
@@ -135,6 +136,28 @@ func _initialize() -> void:
 		"world_north_ridge_watch_post_vigilance_posture",
 	]:
 		_check(persistence.contains(token), "persistence_token_%s" % token)
+
+	var controller := _read_text(CONTROLLER_PATH)
+	for token in [
+		"NORTH_RIDGE_SPECIALIZATIONS",
+		"NORTH_RIDGE_SPECIALIZATION_STATES",
+		"north_ridge_specialization_cursor",
+		"_build_north_ridge_specialization_presentation",
+		"_refresh_north_ridge_specialization_presentation",
+		"TradePostCue",
+		"WatchPostCue",
+		"AURELIAN_NORTH_RIDGE_SPECIALIZATION=TRADE_POST",
+		"AURELIAN_NORTH_RIDGE_SPECIALIZATION=WATCH_POST",
+		"SESSION.save_session(entry_state",
+		"north_ridge_outpost, north_ridge_specialization",
+	]:
+		_check(controller.contains(token), "controller_token_%s" % token)
+	_check(controller.count("AURELIAN_NORTH_RIDGE_SPECIALIZATION=TRADE_POST") == 1, "single_trade_post_event")
+	_check(controller.count("AURELIAN_NORTH_RIDGE_SPECIALIZATION=WATCH_POST") == 1, "single_watch_post_event")
+	var cursor_choice := controller.find("village_north_ridge_specialization_choice")
+	var trade_commit := controller.find("AURELIAN_NORTH_RIDGE_SPECIALIZATION=TRADE_POST")
+	var watch_commit := controller.find("AURELIAN_NORTH_RIDGE_SPECIALIZATION=WATCH_POST")
+	_check(cursor_choice >= 0 and trade_commit > cursor_choice and watch_commit > trade_commit, "explicit_choice_before_commits")
 
 	_cleanup()
 	_finish()
