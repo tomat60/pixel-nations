@@ -72,6 +72,15 @@ const VALID_STATES := [
 	"map_north_ridge_outpost_established",
 	"village_north_ridge_outpost_greenvale_administers",
 	"world_north_ridge_outpost_held_two_land_frontier",
+	"world_north_ridge_specialization_held_frontier",
+	"map_north_ridge_specialization_inspection",
+	"village_north_ridge_specialization_choice",
+	"map_north_ridge_trade_post_committed",
+	"village_north_ridge_trade_post_greenvale_administers",
+	"world_north_ridge_trade_post_logistics_posture",
+	"map_north_ridge_watch_post_committed",
+	"village_north_ridge_watch_post_greenvale_administers",
+	"world_north_ridge_watch_post_vigilance_posture",
 	"village_claimed",
 	"village_founded",
 	"village_developed",
@@ -91,7 +100,12 @@ const VALID_NORTH_RIDGE_OUTPOSTS := ["none", "established"]
 const NORTH_RIDGE_OUTPOST_PENDING_STATES := ["world_north_ridge_outpost_frontier_need", "map_north_ridge_outpost_claimed_inspection", "village_north_ridge_outpost_establish_action"]
 const NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES := ["map_north_ridge_outpost_established", "village_north_ridge_outpost_greenvale_administers", "world_north_ridge_outpost_held_two_land_frontier"]
 const NORTH_RIDGE_OUTPOST_STATES := NORTH_RIDGE_OUTPOST_PENDING_STATES + NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES
-const POST_FRONTIER_STATES := FIRST_IMPERIAL_EXPANSION_STATES + NORTH_RIDGE_OUTPOST_STATES
+const VALID_NORTH_RIDGE_SPECIALIZATIONS := ["none", "trade_post", "watch_post"]
+const NORTH_RIDGE_SPECIALIZATION_PENDING_STATES := ["world_north_ridge_specialization_held_frontier", "map_north_ridge_specialization_inspection", "village_north_ridge_specialization_choice"]
+const NORTH_RIDGE_TRADE_POST_STATES := ["map_north_ridge_trade_post_committed", "village_north_ridge_trade_post_greenvale_administers", "world_north_ridge_trade_post_logistics_posture"]
+const NORTH_RIDGE_WATCH_POST_STATES := ["map_north_ridge_watch_post_committed", "village_north_ridge_watch_post_greenvale_administers", "world_north_ridge_watch_post_vigilance_posture"]
+const NORTH_RIDGE_SPECIALIZATION_STATES := NORTH_RIDGE_SPECIALIZATION_PENDING_STATES + NORTH_RIDGE_TRADE_POST_STATES + NORTH_RIDGE_WATCH_POST_STATES
+const POST_FRONTIER_STATES := FIRST_IMPERIAL_EXPANSION_STATES + NORTH_RIDGE_OUTPOST_STATES + NORTH_RIDGE_SPECIALIZATION_STATES
 
 static func fallback(status: String, adapter: String) -> Dictionary:
 	return {
@@ -119,6 +133,7 @@ static func fallback(status: String, adapter: String) -> Dictionary:
 		"claimed_lands": ["east_route"],
 		"first_imperial_expansion": "none",
 		"north_ridge_outpost": "none",
+		"north_ridge_specialization": "none",
 	}
 
 static func load_session(path: String = NATIVE_PATH) -> Dictionary:
@@ -126,7 +141,7 @@ static func load_session(path: String = NATIVE_PATH) -> Dictionary:
 		return _load_web()
 	return _load_native(path)
 
-static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false, route_connected: bool = false, caravan_dispatched: bool = false, city_chartered: bool = false, nation_founded: bool = false, national_direction: String = "none", national_mandate_started: bool = false, empire_proclaimed: bool = false, imperial_crisis: String = "none", imperial_crisis_response: String = "none", first_rival_countermove_response: String = "none", first_frontier_payoff: String = "none", imperial_expansion_target: String = "none", first_imperial_expansion: String = "none", north_ridge_outpost: String = "none") -> Dictionary:
+static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false, route_connected: bool = false, caravan_dispatched: bool = false, city_chartered: bool = false, nation_founded: bool = false, national_direction: String = "none", national_mandate_started: bool = false, empire_proclaimed: bool = false, imperial_crisis: String = "none", imperial_crisis_response: String = "none", first_rival_countermove_response: String = "none", first_frontier_payoff: String = "none", imperial_expansion_target: String = "none", first_imperial_expansion: String = "none", north_ridge_outpost: String = "none", north_ridge_specialization: String = "none") -> Dictionary:
 	if not _is_valid_pair(state, intent):
 		return fallback("invalid_data", _adapter_name())
 	if not VALID_NATIONAL_DIRECTIONS.has(national_direction):
@@ -157,6 +172,8 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		return fallback("invalid_data", _adapter_name())
 	if not VALID_NORTH_RIDGE_OUTPOSTS.has(north_ridge_outpost):
 		return fallback("invalid_data", _adapter_name())
+	if not VALID_NORTH_RIDGE_SPECIALIZATIONS.has(north_ridge_specialization):
+		return fallback("invalid_data", _adapter_name())
 	if imperial_expansion_target == "north_ridge" and first_frontier_payoff == "none":
 		return fallback("invalid_data", _adapter_name())
 	if first_imperial_expansion == "north_ridge_claimed" and (imperial_expansion_target != "north_ridge" or first_frontier_payoff == "none"):
@@ -171,7 +188,19 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		return fallback("invalid_data", _adapter_name())
 	if state in NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES and north_ridge_outpost != "established":
 		return fallback("invalid_data", _adapter_name())
-	if north_ridge_outpost == "established" and state not in NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES:
+	if north_ridge_specialization != "none" and north_ridge_outpost != "established":
+		return fallback("invalid_data", _adapter_name())
+	if state in NORTH_RIDGE_SPECIALIZATION_PENDING_STATES and (north_ridge_outpost != "established" or north_ridge_specialization != "none"):
+		return fallback("invalid_data", _adapter_name())
+	if state in NORTH_RIDGE_TRADE_POST_STATES and north_ridge_specialization != "trade_post":
+		return fallback("invalid_data", _adapter_name())
+	if state in NORTH_RIDGE_WATCH_POST_STATES and north_ridge_specialization != "watch_post":
+		return fallback("invalid_data", _adapter_name())
+	if north_ridge_specialization == "trade_post" and state not in NORTH_RIDGE_TRADE_POST_STATES:
+		return fallback("invalid_data", _adapter_name())
+	if north_ridge_specialization == "watch_post" and state not in NORTH_RIDGE_WATCH_POST_STATES:
+		return fallback("invalid_data", _adapter_name())
+	if north_ridge_outpost == "established" and state not in NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES and state not in NORTH_RIDGE_SPECIALIZATION_STATES:
 		return fallback("invalid_data", _adapter_name())
 	if imperial_expansion_target == "north_ridge" and state not in POST_FRONTIER_STATES:
 		return fallback("invalid_data", _adapter_name())
@@ -279,6 +308,7 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		"claimed_lands": ["east_route", "north_ridge"] if first_imperial_expansion == "north_ridge_claimed" else ["east_route"],
 		"first_imperial_expansion": first_imperial_expansion,
 		"north_ridge_outpost": north_ridge_outpost,
+		"north_ridge_specialization": north_ridge_specialization,
 		"saved_at_utc": Time.get_datetime_string_from_system(true),
 	}
 	var payload_text := JSON.stringify(payload)
@@ -326,6 +356,7 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 	var claimed_lands = session.get("claimed_lands", ["east_route"])
 	var first_imperial_expansion := String(session.get("first_imperial_expansion", "none"))
 	var north_ridge_outpost := String(session.get("north_ridge_outpost", "none"))
+	var north_ridge_specialization := String(session.get("north_ridge_specialization", "none"))
 	if not VALID_NATIONAL_DIRECTIONS.has(national_direction):
 		return fallback("invalid_value", adapter)
 	if national_direction != "none" and not nation_founded:
@@ -354,6 +385,8 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		return fallback("invalid_value", adapter)
 	if not VALID_NORTH_RIDGE_OUTPOSTS.has(north_ridge_outpost):
 		return fallback("invalid_value", adapter)
+	if not VALID_NORTH_RIDGE_SPECIALIZATIONS.has(north_ridge_specialization):
+		return fallback("invalid_value", adapter)
 	if not claimed_lands is Array:
 		return fallback("invalid_value", adapter)
 	var expected_claimed_lands := ["east_route", "north_ridge"] if first_imperial_expansion == "north_ridge_claimed" else ["east_route"]
@@ -373,7 +406,19 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		return fallback("invalid_value", adapter)
 	if state in NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES and north_ridge_outpost != "established":
 		return fallback("invalid_value", adapter)
-	if north_ridge_outpost == "established" and state not in NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES:
+	if north_ridge_specialization != "none" and north_ridge_outpost != "established":
+		return fallback("invalid_value", adapter)
+	if state in NORTH_RIDGE_SPECIALIZATION_PENDING_STATES and (north_ridge_outpost != "established" or north_ridge_specialization != "none"):
+		return fallback("invalid_value", adapter)
+	if state in NORTH_RIDGE_TRADE_POST_STATES and north_ridge_specialization != "trade_post":
+		return fallback("invalid_value", adapter)
+	if state in NORTH_RIDGE_WATCH_POST_STATES and north_ridge_specialization != "watch_post":
+		return fallback("invalid_value", adapter)
+	if north_ridge_specialization == "trade_post" and state not in NORTH_RIDGE_TRADE_POST_STATES:
+		return fallback("invalid_value", adapter)
+	if north_ridge_specialization == "watch_post" and state not in NORTH_RIDGE_WATCH_POST_STATES:
+		return fallback("invalid_value", adapter)
+	if north_ridge_outpost == "established" and state not in NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES and state not in NORTH_RIDGE_SPECIALIZATION_STATES:
 		return fallback("invalid_value", adapter)
 	if imperial_expansion_target == "north_ridge" and state not in POST_FRONTIER_STATES:
 		return fallback("invalid_value", adapter)
@@ -484,6 +529,7 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		"claimed_lands": claimed_lands,
 		"first_imperial_expansion": first_imperial_expansion,
 		"north_ridge_outpost": north_ridge_outpost,
+		"north_ridge_specialization": north_ridge_specialization,
 		"saved_at_utc": String(session.get("saved_at_utc", "")),
 	}
 
