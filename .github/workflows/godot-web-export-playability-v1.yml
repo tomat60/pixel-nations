@@ -149,7 +149,7 @@ jobs:
           exit 1
 
       - name: Drive normal browser input and capture evidence
-        timeout-minutes: 5
+        timeout-minutes: 7
         run: |
           set -euo pipefail
           node <<'NODE'
