@@ -1,0 +1,202 @@
+{
+  "contract": "GODOT_AURELIAN_NORTH_RIDGE_OUTPOST_V1",
+  "issue": 542,
+  "authority_baseline_sha": "2153f319230e31edb4d1567ac9ea355eabded7cb",
+  "product_baseline_sha": "2cdc419634e3caf547b4e2716aa75d3265bbdca5",
+  "entry_requirement": {
+    "empire_proclaimed": true,
+    "greenvale_imperial_capital": true,
+    "national_direction": [
+      "trade",
+      "expand",
+      "frontier"
+    ],
+    "imperial_crisis": "river_surge",
+    "imperial_crisis_response": [
+      "shield_greenvale",
+      "keep_east_bridge_open"
+    ],
+    "first_rival_countermove_response": [
+      "stand_firm",
+      "negotiate_passage"
+    ],
+    "first_frontier_payoff": [
+      "secure_gilded_crossing",
+      "ratify_east_bridge_passage"
+    ],
+    "imperial_expansion_target": "north_ridge",
+    "claimed_lands": [
+      "east_route",
+      "north_ridge"
+    ],
+    "first_imperial_expansion": "north_ridge_claimed",
+    "north_ridge_outpost": null
+  },
+  "outpost": {
+    "locus": "north_ridge",
+    "action": "Establish North Ridge Outpost",
+    "before": null,
+    "after": "established",
+    "exactly_one_outpost": true,
+    "normal_input_inspection_required": true,
+    "normal_input_establishment_required": true,
+    "second_settlement_progression": false,
+    "repeatable_construction": false,
+    "third_land_available": false
+  },
+  "sequence": {
+    "world_need_state": "world_north_ridge_outpost_frontier_need",
+    "map_claimed_inspection_state": "map_north_ridge_outpost_claimed_inspection",
+    "village_action_state": "village_north_ridge_outpost_establish_action",
+    "map_established_state": "map_north_ridge_outpost_established",
+    "village_administered_state": "village_north_ridge_outpost_greenvale_administers",
+    "world_held_frontier_state": "world_north_ridge_outpost_held_two_land_frontier"
+  },
+  "availability": {
+    "north_ridge_claim_required": true,
+    "exactly_two_claimed_lands_required": true,
+    "outpost_hidden_before_expansion": true,
+    "duplicate_establishment_rejected": true,
+    "second_outpost_path": false,
+    "second_settlement_path": false,
+    "third_land_path": false,
+    "invalid_state_combination_rejected": true
+  },
+  "event": {
+    "format": "AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED",
+    "single_event": true,
+    "idempotent": true,
+    "restore_event_emission_allowed": false,
+    "duplicate_event_allowed": false
+  },
+  "view_roles": {
+    "village": "HOW_GREENVALE_ESTABLISHES_AND_ADMINISTERS_NORTH_RIDGE_OUTPOST",
+    "map": "WHERE_CLAIMED_NORTH_RIDGE_OUTPOST_IS_INSPECTED_AND_ESTABLISHED",
+    "world": "WHY_NORTH_RIDGE_MUST_BE_HELD_AND_WHICH_FRONTIER_IS_SECURED"
+  },
+  "presentation": {
+    "procedural_only": true,
+    "existing_north_ridge_locus_required": true,
+    "claimed_without_outpost_and_established_cues_required": true,
+    "substantial_visible_transformation_required": true,
+    "label_only_differentiation": false,
+    "whole_scene_recolor": false,
+    "existing_materials_only": true,
+    "new_asset": false,
+    "new_glb": false,
+    "new_terrain": false,
+    "new_camera": false
+  },
+  "shared_geography": {
+    "asset": "aurelian_authored_terrain_v1.glb",
+    "greenvale_origin_unchanged": true,
+    "river_spline_unchanged": true,
+    "river_banks_unchanged": true,
+    "east_bridge_transform_unchanged": true,
+    "bridge_landings_unchanged": true,
+    "east_route_unchanged": true,
+    "north_ridge_transform_unchanged": true,
+    "gilded_crossing_transform_unchanged": true,
+    "routes_and_landmarks_unchanged": true,
+    "camera_topology_unchanged": true,
+    "procedural_outpost_change_allowed_at_existing_north_ridge_only": true,
+    "claimed_lands_exactly": [
+      "east_route",
+      "north_ridge"
+    ],
+    "third_land_allowed": false
+  },
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "new_fields": [
+      "north_ridge_outpost"
+    ],
+    "north_ridge_outpost": "established",
+    "claimed_lands": [
+      "east_route",
+      "north_ridge"
+    ],
+    "first_imperial_expansion": "north_ridge_claimed",
+    "preserve_greenvale_imperial_capital": true,
+    "preserve_national_direction": true,
+    "preserve_empire_proclamation": true,
+    "preserve_imperial_crisis_response": true,
+    "preserve_first_rival_countermove_response": true,
+    "preserve_first_frontier_payoff": true,
+    "native_restart_required": true,
+    "web_reload_required": true,
+    "persistent_profile_reopen_required": true,
+    "map_reopen_required": true,
+    "village_reopen_required": true,
+    "storage_seeding_allowed": false
+  },
+  "evidence": {
+    "both_frontier_payoff_origins_required": true,
+    "all_three_directions_preserved_required": true,
+    "two_lands_before_outpost_required": true,
+    "world_frontier_need_required": true,
+    "map_claimed_inspection_required": true,
+    "explicit_establishment_action_required": true,
+    "map_established_outpost_required": true,
+    "village_greenvale_administers_required": true,
+    "world_held_frontier_required": true,
+    "no_second_outpost_interaction_required": true,
+    "no_second_settlement_interaction_required": true,
+    "no_third_land_interaction_required": true,
+    "normal_input_motion_required": true,
+    "native_persistence_required": true,
+    "web_persistence_required": true,
+    "profile_reopen_required": true,
+    "shared_geography_regression_required": true,
+    "exact_manifest_validation_required": true,
+    "direct_still_and_motion_review_required": true,
+    "one_bounded_visual_correction_maximum": true
+  },
+  "terminal_results": [
+    "GODOT_AURELIAN_NORTH_RIDGE_OUTPOST_PASS",
+    "GODOT_AURELIAN_NORTH_RIDGE_OUTPOST_REJECT"
+  ],
+  "forbidden": [
+    "third_land",
+    "land_picker",
+    "procedural_land_generation",
+    "repeatable_expansion",
+    "second_settlement_progression",
+    "north_ridge_city",
+    "population",
+    "workers",
+    "build_queue",
+    "resources",
+    "costs",
+    "rewards",
+    "timers",
+    "production",
+    "economy",
+    "multiple_outposts",
+    "repeatable_construction",
+    "combat",
+    "units",
+    "attacks",
+    "damage",
+    "victory_simulation",
+    "defeat_simulation",
+    "rival_ai",
+    "diplomacy_simulation",
+    "governance_simulation",
+    "border_conflict",
+    "backend",
+    "accounts",
+    "cloud_save",
+    "multiplayer",
+    "new_assets",
+    "new_glb",
+    "new_terrain",
+    "new_geography",
+    "new_camera",
+    "new_dependency",
+    "public_shell",
+    "P12",
+    "MAX"
+  ]
+}

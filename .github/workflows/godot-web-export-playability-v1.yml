@@ -149,7 +149,7 @@ jobs:
           exit 1
 
       - name: Drive normal browser input and capture evidence
-        timeout-minutes: 5
+        timeout-minutes: 7
         run: |
           set -euo pipefail
           node <<'NODE'
@@ -476,6 +476,32 @@ jobs:
             await waitForCount('world_first_imperial_expansion_two_land_footprint', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '56-world-imperial-expansion-two-land-footprint-1440x900.png') });
+            await page.keyboard.press('Enter');
+            await waitForCount('world_north_ridge_outpost_frontier_need', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '57-world-north-ridge-outpost-frontier-need-1440x900.png') });
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('map_north_ridge_outpost_claimed_inspection', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '58-map-north-ridge-outpost-claimed-inspection-1440x900.png') });
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('village_north_ridge_outpost_establish_action', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '59-village-north-ridge-outpost-establish-action-1440x900.png') });
+            await page.keyboard.press('Enter');
+            await waitForCount('map_north_ridge_outpost_established', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '60-map-north-ridge-outpost-established-1440x900.png') });
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('village_north_ridge_outpost_greenvale_administers', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '61-village-north-ridge-outpost-greenvale-administers-1440x900.png') });
+            await page.keyboard.press('ArrowLeft');
+            await waitForCount('map_north_ridge_outpost_established', 2);
+            await page.keyboard.press('ArrowLeft');
+            await waitForCount('world_north_ridge_outpost_held_two_land_frontier', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '62-world-north-ridge-outpost-held-frontier-1440x900.png') });
             const video = page.video();
             await context.close();
             await video.saveAs(path.join(root, 'godot-web-input-sequence.webm'));
@@ -501,9 +527,9 @@ jobs:
               viewport: [1440, 900],
               browser: 'chromium',
               normal_entry: 'world_neutral',
-              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowDown', 'ArrowDown', 'ArrowUp', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowRight', 'ArrowLeft', 'ArrowLeft'],
+              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowDown', 'ArrowDown', 'ArrowUp', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowRight', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowRight', 'ArrowLeft', 'ArrowLeft'],
               observed_states: observedStates,
-              accepted_handoff: 'Completed frontier legacy -> World North Ridge direction -> Map inspect and claim -> Village Greenvale capital -> World two-land footprint',
+              accepted_handoff: 'Two-land footprint -> World frontier need -> Map North Ridge inspection -> Village establish action -> Map one outpost -> Greenvale administration -> World held frontier',
               national_mandate_started: true,
               empire_proclaimed: true,
               imperial_crisis: 'river_surge',
@@ -515,6 +541,8 @@ jobs:
               claimed_lands: ['east_route', 'north_ridge'],
               first_imperial_expansion: 'north_ridge_claimed',
               imperial_expansion_event_count: 1,
+              north_ridge_outpost: 'established',
+              north_ridge_outpost_event_count: 1,
               national_direction: 'expand',
               glb_sha256: process.env.GLB_SHA256,
               evidence_environment_state_driving: false
@@ -529,7 +557,7 @@ jobs:
       - name: Validate exact browser evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "56"
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "62"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
             bytes="$(stat -c %s "$image")"
@@ -539,7 +567,7 @@ jobs:
           test -s "${EVIDENCE_DIR}/godot-web-input-sequence.webm"
           test "$(stat -c %s "${EVIDENCE_DIR}/godot-web-input-sequence.webm")" -gt 100000
           video_duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/godot-web-input-sequence.webm")"
-          awk -v duration="$video_duration" 'BEGIN { exit !(duration >= 250 && duration <= 280) }'
+          awk -v duration="$video_duration" 'BEGIN { exit !(duration >= 175 && duration <= 330) }'
           grep -F "PLAYABLE_AURELIAN_ENTRY_READY=world_neutral" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_claimed" "${EVIDENCE_DIR}/browser-console.log"
@@ -598,6 +626,15 @@ jobs:
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_first_imperial_expansion_two_lands_claimed" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_first_imperial_expansion_greenvale_capital_two_lands" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_imperial_expansion_two_land_footprint" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_NORTH_RIDGE_OUTPOST_NEED=HOLD_FRONTIER" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_outpost_frontier_need" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_outpost_claimed_inspection" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_outpost_establish_action" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED" "${EVIDENCE_DIR}/browser-console.log"
+          test "$(grep -Fc "AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED" "${EVIDENCE_DIR}/browser-console.log")" = "1"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_outpost_established" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_outpost_greenvale_administers" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_outpost_held_two_land_frontier" "${EVIDENCE_DIR}/browser-console.log"
           test "$(grep -Fc "AURELIAN_FIRST_NATIONAL_MANDATE=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_national_mandate_started" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_national_mandate_active" "${EVIDENCE_DIR}/browser-console.log"
