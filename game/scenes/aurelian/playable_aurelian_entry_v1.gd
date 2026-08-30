@@ -2075,6 +2075,29 @@ func _build_north_ridge_specialization_presentation() -> Node3D:
 	capital_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	capital.add_child(capital_label)
 	root.add_child(capital)
+	var coordination_link := Node3D.new()
+	coordination_link.name = "FirstInterLandCoordinationLink"
+	var greenvale_point := Vector2(354.0, 285.0)
+	var ridge_point := Vector2(700.0, 205.0)
+	for index in range(7):
+		var marker := MeshInstance3D.new()
+		marker.name = "CoordinationPulse%02d" % (index + 1)
+		var marker_mesh := SphereMesh.new()
+		marker_mesh.radius = 0.22
+		marker_mesh.height = 0.44
+		marker.mesh = marker_mesh
+		var mix := float(index) / 6.0
+		marker.position = topology_to_godot(greenvale_point.lerp(ridge_point, mix), 0.96 + sin(mix * PI) * 0.18)
+		coordination_link.add_child(marker)
+	var coordination_label := Label3D.new()
+	coordination_label.name = "CoordinationLinkLabel"
+	coordination_label.font_size = 27
+	coordination_label.outline_size = 8
+	coordination_label.position = topology_to_godot(greenvale_point.lerp(ridge_point, 0.5), 1.64)
+	coordination_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	coordination_link.add_child(coordination_label)
+	coordination_link.visible = false
+	root.add_child(coordination_link)
 	root.visible = false
 	return root
 
@@ -2090,6 +2113,7 @@ func _refresh_north_ridge_specialization_presentation(state_name: String) -> voi
 	var color: String = "#d7ad42ff" if trade_active else "#668fb5ff"
 	var ridge := north_ridge_specialization_presentation.get_node_or_null("NorthRidgeSpecializationCue") as Node3D
 	var capital := north_ridge_specialization_presentation.get_node_or_null("GreenvaleSpecializationAdministrationCue") as Node3D
+	var coordination_link := north_ridge_specialization_presentation.get_node_or_null("FirstInterLandCoordinationLink") as Node3D
 	if ridge != null:
 		ridge.visible = not state_name.begins_with("village_")
 		var trade := ridge.get_node_or_null("TradePostCue") as Node3D
@@ -2107,7 +2131,11 @@ func _refresh_north_ridge_specialization_presentation(state_name: String) -> voi
 		var label := ridge.get_node_or_null("NorthRidgeSpecializationLabel") as Label3D
 		if label != null:
 			label.modulate = Color(color)
-			if north_ridge_specialization_payoff == "ridge_logistics_line_open":
+			if first_inter_land_coordination == "ridge_convoy_dispatched":
+				label.text = "NORTH RIDGE / CONVOY DISPATCHED"
+			elif first_inter_land_coordination == "basin_alert_raised":
+				label.text = "NORTH RIDGE / BASIN ALERT RAISED"
+			elif north_ridge_specialization_payoff == "ridge_logistics_line_open":
 				label.text = "NORTH RIDGE / LOGISTICS LINE OPEN"
 			elif north_ridge_specialization_payoff == "ridge_signal_lit":
 				label.text = "NORTH RIDGE / SIGNAL LIT"
@@ -2121,7 +2149,13 @@ func _refresh_north_ridge_specialization_presentation(state_name: String) -> voi
 		var label := capital.get_node_or_null("SpecializationAdministrationLabel") as Label3D
 		if label != null:
 			label.modulate = Color(color)
-			if state_name == "village_north_ridge_specialization_payoff_action":
+			if state_name == "village_first_inter_land_coordination_action":
+				label.text = "DISPATCH RIDGE CONVOY" if trade_active else "RAISE BASIN ALERT"
+			elif state_name == "village_ridge_convoy_greenvale_acknowledges":
+				label.text = "GREENVALE CONFIRMS RIDGE CONVOY"
+			elif state_name == "village_basin_alert_greenvale_acknowledges":
+				label.text = "GREENVALE CONFIRMS BASIN ALERT"
+			elif state_name == "village_north_ridge_specialization_payoff_action":
 				label.text = "OPEN RIDGE LOGISTICS LINE" if trade_active else "LIGHT NORTH RIDGE SIGNAL"
 			elif state_name == "village_north_ridge_logistics_line_greenvale_acknowledges":
 				label.text = "GREENVALE ACKNOWLEDGES LOGISTICS LINE"
@@ -2129,9 +2163,35 @@ func _refresh_north_ridge_specialization_presentation(state_name: String) -> voi
 				label.text = "GREENVALE ACKNOWLEDGES RIDGE SIGNAL"
 			else:
 				label.text = "GREENVALE COMMITS TRADE POST" if trade_active else "GREENVALE COMMITS WATCH POST"
+	if coordination_link != null:
+		coordination_link.visible = state_name in FIRST_INTER_LAND_COORDINATION_STATES and not state_name.begins_with("village_")
+		if coordination_link.visible:
+			for index in range(7):
+				var marker := coordination_link.get_node_or_null("CoordinationPulse%02d" % (index + 1)) as MeshInstance3D
+				if marker != null:
+					marker.material_override = _material(color, 0.82 if first_inter_land_coordination != "none" else 0.48)
+					marker.position.y = 1.12 + sin(float(index) / 6.0 * PI) * (0.54 if trade_active else 1.18)
+			var link_label := coordination_link.get_node_or_null("CoordinationLinkLabel") as Label3D
+			if link_label != null:
+				link_label.modulate = Color(color)
+				if first_inter_land_coordination == "ridge_convoy_dispatched":
+					link_label.text = "GREENVALE TO NORTH RIDGE / CONVOY ACTIVE"
+				elif first_inter_land_coordination == "basin_alert_raised":
+					link_label.text = "NORTH RIDGE TO GREENVALE / ALERT ACTIVE"
+				else:
+					link_label.text = "INSPECT TWO-LAND LOGISTICS LINK" if trade_active else "INSPECT TWO-LAND ALERT LINK"
 
 func _animate_living_capital_presentation(delta: float) -> void:
 	var seconds := float(Time.get_ticks_msec()) / 1000.0
+	if north_ridge_specialization_presentation != null:
+		var coordination_link := north_ridge_specialization_presentation.get_node_or_null("FirstInterLandCoordinationLink") as Node3D
+		if coordination_link != null and coordination_link.visible:
+			for index in range(7):
+				var marker := coordination_link.get_node_or_null("CoordinationPulse%02d" % (index + 1)) as MeshInstance3D
+				if marker != null:
+					var phase := seconds * (2.2 if north_ridge_specialization == "trade_post" else 3.4) - float(index) * 0.58
+					var pulse := 0.82 + (sin(phase) + 1.0) * 0.22
+					marker.scale = Vector3.ONE * pulse
 	if dispatch_token != null and dispatch_token.visible:
 		var route_mix := (sin(seconds * 0.82) + 1.0) * 0.5
 		var route_point := Vector2(354.0, 285.0).lerp(Vector2(515.0, 340.0), route_mix)
@@ -2424,11 +2484,47 @@ func _update_runtime_hud() -> void:
 		"world_north_ridge_logistics_line_active_frontier_role":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "The open Ridge Logistics Line makes Trade Post the active frontier supply role"
-			controls_label.text = "[LEFT] Inspect activated Map"
+			controls_label.text = "[ENTER] Reveal first two-land coordination    [LEFT] Inspect activated Map"
 		"world_north_ridge_signal_active_frontier_role":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "The lit North Ridge Signal makes Watch Post the active frontier vigilance role"
-			controls_label.text = "[LEFT] Inspect activated Map"
+			controls_label.text = "[ENTER] Reveal first two-land coordination    [LEFT] Inspect activated Map"
+		"world_first_inter_land_coordination_revealed":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "%s now requires Greenvale and North Ridge to act as one network" % ("The open logistics line" if north_ridge_specialization == "trade_post" else "The active ridge signal")
+			controls_label.text = "[RIGHT] Inspect the Greenvale to North Ridge link"
+		"world_coordinated_logistics_network":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "Aurelian now functions as one coordinated two-land logistics network"
+			controls_label.text = "[LEFT] Inspect convoy result on Map"
+		"world_coordinated_vigilance_network":
+			layer_label.text = "WORLD  |  WHY"
+			intent_label.text = "Aurelian now functions as one coordinated two-land vigilance network"
+			controls_label.text = "[LEFT] Inspect alert result on Map"
+		"map_greenvale_north_ridge_link_inspection":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Greenvale and North Ridge are the two endpoints of the %s link" % ("convoy" if north_ridge_specialization == "trade_post" else "alert")
+			controls_label.text = "[RIGHT] Open the matching Village action    [LEFT] World"
+		"village_first_inter_land_coordination_action":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "Greenvale can %s" % ("Dispatch Ridge Convoy" if north_ridge_specialization == "trade_post" else "Raise Basin Alert")
+			controls_label.text = "[ENTER] Commit one coordinated operation    [LEFT] Map"
+		"map_ridge_convoy_dispatched":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Ridge Convoy visibly links Greenvale with North Ridge"
+			controls_label.text = "[RIGHT] Open Greenvale confirmation    [LEFT] World"
+		"village_ridge_convoy_greenvale_acknowledges":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "Greenvale confirms the dispatched Ridge Convoy"
+			controls_label.text = "[RIGHT] View the functioning two-land empire    [LEFT] Map"
+		"map_basin_alert_raised":
+			layer_label.text = "MAP  |  WHERE"
+			intent_label.text = "Basin Alert visibly relays from North Ridge to Greenvale"
+			controls_label.text = "[RIGHT] Open Greenvale confirmation    [LEFT] World"
+		"village_basin_alert_greenvale_acknowledges":
+			layer_label.text = "VILLAGE  |  HOW"
+			intent_label.text = "Greenvale confirms the raised Basin Alert"
+			controls_label.text = "[RIGHT] View the functioning two-land empire    [LEFT] Map"
 		"map_first_frontier_payoff_gilded_crossing_pending":
 			layer_label.text = "MAP  |  WHERE"
 			intent_label.text = "Gilded Crossing is the pending payoff locus"
