@@ -1,0 +1,207 @@
+{
+  "contract": "GODOT_AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF_V1",
+  "issue": 551,
+  "authority_baseline_sha": "e525ef5c1d855a85f9abb31cee071d58f6e84deb",
+  "product_baseline_sha": "5a97741123eeb663010600df497da9935c880208",
+  "entry_requirement": {
+    "empire_proclaimed": true,
+    "greenvale_imperial_capital": true,
+    "claimed_lands": [
+      "east_route",
+      "north_ridge"
+    ],
+    "north_ridge_outpost": "established",
+    "north_ridge_specialization": [
+      "trade_post",
+      "watch_post"
+    ],
+    "north_ridge_specialization_payoff": null,
+    "preserve_all_accepted_progression": true
+  },
+  "payoff": {
+    "locus": "north_ridge",
+    "branches": [
+      {
+        "specialization": "trade_post",
+        "action": "Open Ridge Logistics Line",
+        "result": "ridge_logistics_line_open",
+        "identity": "active_logistics"
+      },
+      {
+        "specialization": "watch_post",
+        "action": "Light North Ridge Signal",
+        "result": "ridge_signal_lit",
+        "identity": "active_vigilance"
+      }
+    ],
+    "inherited_specialization_required": true,
+    "second_choice_offered": false,
+    "branch_switching_allowed": false,
+    "exactly_one_activation": true,
+    "exactly_one_event": true,
+    "repeatable_activation": false
+  },
+  "sequence": {
+    "reveal_state": "world_north_ridge_specialization_payoff_revealed",
+    "inspection_state": "map_north_ridge_specialization_payoff_inspection",
+    "village_action_state": "village_north_ridge_specialization_payoff_action",
+    "trade_result_states": [
+      "map_north_ridge_logistics_line_open",
+      "village_north_ridge_logistics_line_greenvale_acknowledges",
+      "world_north_ridge_logistics_line_active_frontier_role"
+    ],
+    "watch_result_states": [
+      "map_north_ridge_signal_lit",
+      "village_north_ridge_signal_greenvale_acknowledges",
+      "world_north_ridge_signal_active_frontier_role"
+    ]
+  },
+  "availability": {
+    "established_outpost_required": true,
+    "specialization_required": true,
+    "exactly_two_claimed_lands_required": true,
+    "matching_branch_only": true,
+    "premature_activation_rejected": true,
+    "duplicate_activation_rejected": true,
+    "conflicting_branch_rejected": true,
+    "unknown_value_rejected": true,
+    "third_land_path": false
+  },
+  "events": {
+    "ridge_logistics_line_open": "AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=RIDGE_LOGISTICS_LINE_OPEN",
+    "ridge_signal_lit": "AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=RIDGE_SIGNAL_LIT",
+    "single_event_per_profile": true,
+    "idempotent": true,
+    "restore_event_emission_allowed": false,
+    "duplicate_event_allowed": false
+  },
+  "view_roles": {
+    "village": "HOW_GREENVALE_COMMITS_AND_ADMINISTERS_THE_SPECIALIZATION_PAYOFF",
+    "map": "WHERE_THE_ACTIVE_NORTH_RIDGE_PAYOFF_EXISTS",
+    "world": "WHY_THE_ACTIVE_FRONTIER_ROLE_MATTERS_TO_IMPERIAL_DIRECTION"
+  },
+  "presentation": {
+    "trade_post_cues": [
+      "active_route_marker",
+      "cargo_movement_cue",
+      "illuminated_logistics_trace"
+    ],
+    "watch_post_cues": [
+      "signal_flame",
+      "beacon_glow",
+      "elevated_vigilance_cue"
+    ],
+    "branch_outcomes_distinct_at_a_glance": true,
+    "existing_outpost_only": true,
+    "procedural_cues_only": true,
+    "new_asset": false,
+    "new_glb": false,
+    "new_terrain": false,
+    "new_camera": false
+  },
+  "shared_geography": {
+    "asset": "aurelian_authored_terrain_v1.glb",
+    "greenvale_origin_unchanged": true,
+    "river_spline_unchanged": true,
+    "river_banks_unchanged": true,
+    "east_bridge_transform_unchanged": true,
+    "bridge_landings_unchanged": true,
+    "east_route_unchanged": true,
+    "north_ridge_transform_unchanged": true,
+    "gilded_crossing_transform_unchanged": true,
+    "routes_and_landmarks_unchanged": true,
+    "camera_topology_unchanged": true,
+    "claimed_lands_exactly": [
+      "east_route",
+      "north_ridge"
+    ],
+    "procedural_payoff_change_allowed_at_existing_north_ridge_only": true,
+    "third_land_allowed": false
+  },
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "new_fields": [
+      "north_ridge_specialization_payoff"
+    ],
+    "allowed_values": [
+      "ridge_logistics_line_open",
+      "ridge_signal_lit"
+    ],
+    "branch_mapping": {
+      "trade_post": "ridge_logistics_line_open",
+      "watch_post": "ridge_signal_lit"
+    },
+    "preserve_north_ridge_specialization": true,
+    "preserve_north_ridge_outpost": "established",
+    "claimed_lands": [
+      "east_route",
+      "north_ridge"
+    ],
+    "preserve_greenvale_imperial_capital": true,
+    "preserve_all_accepted_progression": true,
+    "older_valid_profile_without_payoff": "not_activated",
+    "native_restart_required": true,
+    "web_reload_required": true,
+    "persistent_profile_reopen_required": true,
+    "map_reopen_required": true,
+    "village_reopen_required": true,
+    "storage_seeding_allowed": false
+  },
+  "evidence": {
+    "accepted_specialization_before_activation_required": true,
+    "branch_matched_world_reveal_required": true,
+    "north_ridge_map_inspection_required": true,
+    "explicit_village_action_required": true,
+    "trade_payoff_result_required": true,
+    "watch_payoff_result_required": true,
+    "greenvale_acknowledgement_required": true,
+    "world_active_role_required": true,
+    "exactly_one_matching_event_required": true,
+    "normal_input_motion_required": true,
+    "native_persistence_required": true,
+    "web_persistence_required": true,
+    "profile_reopen_required": true,
+    "exactly_two_lands_regression_required": true,
+    "accepted_progression_regression_required": true,
+    "shared_geography_regression_required": true,
+    "exact_manifest_validation_required": true,
+    "direct_still_and_motion_review_required": true,
+    "one_bounded_correction_maximum": true
+  },
+  "terminal_results": [
+    "GODOT_AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF_PASS",
+    "GODOT_AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF_REJECT"
+  ],
+  "forbidden": [
+    "resource_economy",
+    "prices",
+    "production",
+    "workers",
+    "queues",
+    "timers",
+    "inventory",
+    "combat_simulation",
+    "units",
+    "attacks",
+    "damage",
+    "third_land",
+    "repeatable_expansion",
+    "second_outpost",
+    "second_settlement_progression",
+    "respecialization",
+    "new_assets",
+    "new_glb",
+    "new_terrain",
+    "new_geography",
+    "new_camera",
+    "new_dependency",
+    "backend",
+    "accounts",
+    "multiplayer",
+    "public_shell",
+    "P12",
+    "MAX",
+    "paid_tools"
+  ]
+}
