@@ -412,7 +412,7 @@ jobs:
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_logistics_line_open" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_logistics_line_greenvale_acknowledges" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_logistics_line_active_frontier_role" "${EVIDENCE_DIR}/playable-entry-sequence.log"
-          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=7830" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=8190" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test -s "${EVIDENCE_DIR}/playable-entry-sequence.avi"
           mediainfo --Output=JSON "${EVIDENCE_DIR}/playable-entry-sequence.avi" > "${EVIDENCE_DIR}/video-metadata.json"
           for direction in trade expand frontier; do
