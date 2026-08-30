@@ -29,6 +29,7 @@ on:
       - "game/scenes/aurelian/first_frontier_payoff_v1_manifest.json"
       - "game/scenes/aurelian/first_imperial_expansion_v1_manifest.json"
       - "game/scenes/aurelian/north_ridge_outpost_v1_manifest.json"
+      - "game/scenes/aurelian/north_ridge_specialization_v1_manifest.json"
       - "game/tests/production_village_v1_test.gd"
       - "game/tests/aurelian_visible_expansion_v1_test.gd"
       - "game/tests/playable_aurelian_entry_v1_test.gd"
@@ -48,6 +49,7 @@ on:
       - "game/tests/aurelian_first_frontier_payoff_v1_test.gd"
       - "game/tests/aurelian_first_imperial_expansion_v1_test.gd"
       - "game/tests/aurelian_north_ridge_outpost_v1_test.gd"
+      - "game/tests/aurelian_north_ridge_specialization_v1_test.gd"
       - ".github/workflows/godot-playable-aurelian-entry-v1.yml"
   workflow_dispatch:
 
@@ -139,6 +141,7 @@ jobs:
           cp game/scenes/aurelian/first_frontier_payoff_v1_manifest.json "${EVIDENCE_DIR}/first-frontier-payoff-manifest.json"
           cp game/scenes/aurelian/first_imperial_expansion_v1_manifest.json "${EVIDENCE_DIR}/first-imperial-expansion-manifest.json"
           cp game/scenes/aurelian/north_ridge_outpost_v1_manifest.json "${EVIDENCE_DIR}/north-ridge-outpost-manifest.json"
+          cp game/scenes/aurelian/north_ridge_specialization_v1_manifest.json "${EVIDENCE_DIR}/north-ridge-specialization-manifest.json"
 
       - name: Download pinned Godot
         timeout-minutes: 5
@@ -164,7 +167,7 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in aurelian_authored_terrain_v1_test production_village_v1_test aurelian_visible_expansion_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test aurelian_first_national_direction_commitment_v1_test aurelian_first_national_mandate_v1_test aurelian_first_empire_proclamation_v1_test aurelian_directional_empire_identity_v1_test aurelian_river_surge_crisis_v1_test aurelian_first_rival_countermove_v1_test aurelian_first_frontier_payoff_v1_test aurelian_first_imperial_expansion_v1_test aurelian_north_ridge_outpost_v1_test; do
+          for test in aurelian_authored_terrain_v1_test production_village_v1_test aurelian_visible_expansion_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test aurelian_first_national_direction_commitment_v1_test aurelian_first_national_mandate_v1_test aurelian_first_empire_proclamation_v1_test aurelian_directional_empire_identity_v1_test aurelian_river_surge_crisis_v1_test aurelian_first_rival_countermove_v1_test aurelian_first_frontier_payoff_v1_test aurelian_first_imperial_expansion_v1_test aurelian_north_ridge_outpost_v1_test aurelian_north_ridge_specialization_v1_test; do
             "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1 || { cat "${EVIDENCE_DIR}/${test}.log"; exit 1; }
           done
           grep -F "AURELIAN_AUTHORED_TERRAIN_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1_test.log"
@@ -191,6 +194,7 @@ jobs:
           grep -F "GODOT_AURELIAN_FIRST_FRONTIER_PAYOFF_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_frontier_payoff_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_IMPERIAL_EXPANSION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_imperial_expansion_v1_test.log"
           grep -F "GODOT_AURELIAN_NORTH_RIDGE_OUTPOST_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_north_ridge_outpost_v1_test.log"
+          grep -F "GODOT_AURELIAN_NORTH_RIDGE_SPECIALIZATION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_north_ridge_specialization_v1_test.log"
 
       - name: Capture normal launch, founding and development states
         timeout-minutes: 9
@@ -305,10 +309,10 @@ jobs:
           done
 
       - name: Capture input-driven development sequence
-        timeout-minutes: 10
+        timeout-minutes: 15
         run: |
           set -euo pipefail
-          timeout 540s xvfb-run -a -s "-screen 0 1280x720x24" env \
+          timeout 840s xvfb-run -a -s "-screen 0 1280x720x24" env \
             AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
             "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
             --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 30 \
@@ -357,19 +361,29 @@ jobs:
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_outpost_established" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_outpost_greenvale_administers" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_outpost_held_two_land_frontier" "${EVIDENCE_DIR}/playable-entry-sequence.log"
-          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=6870" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION_READY=TRADE_POST_OR_WATCH_POST" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_specialization_inspection" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_specialization_choice" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION=TRADE_POST" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          test "$(grep -Fc "AURELIAN_NORTH_RIDGE_SPECIALIZATION=" "${EVIDENCE_DIR}/playable-entry-sequence.log")" = "1"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_trade_post_committed" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_trade_post_greenvale_administers" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_trade_post_logistics_posture" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=7590" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test -s "${EVIDENCE_DIR}/playable-entry-sequence.avi"
           mediainfo --Output=JSON "${EVIDENCE_DIR}/playable-entry-sequence.avi" > "${EVIDENCE_DIR}/video-metadata.json"
           for direction in trade expand frontier; do
             response="shield_greenvale"
             rival_response="stand_firm"
-            if [ "$direction" = "expand" ]; then rival_response="negotiate_passage"; fi
+            specialization="trade_post"
+            if [ "$direction" = "expand" ]; then rival_response="negotiate_passage"; specialization="watch_post"; fi
             if [ "$direction" = "frontier" ]; then response="keep_east_bridge_open"; rival_response="negotiate_passage"; fi
             timeout 90s env \
               AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
               AURELIAN_AUTOMATED_DIRECTION="${direction}" \
               AURELIAN_AUTOMATED_CRISIS_RESPONSE="${response}" \
               AURELIAN_AUTOMATED_RIVAL_RESPONSE="${rival_response}" \
+              AURELIAN_AUTOMATED_NORTH_RIDGE_SPECIALIZATION="${specialization}" \
               "${GODOT_BIN}" --headless --path game --audio-driver Dummy --fixed-fps 480 \
               > "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log" 2>&1
             grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=${direction^^}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
@@ -414,7 +428,16 @@ jobs:
             grep -F "AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
             test "$(grep -Fc "AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_outpost_held_two_land_frontier" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=6870" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            expected_specialization="${specialization^^}"
+            grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION=${expected_specialization}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            test "$(grep -Fc "AURELIAN_NORTH_RIDGE_SPECIALIZATION=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_${specialization}_committed" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            if [ "$specialization" = "trade_post" ]; then
+              grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_trade_post_logistics_posture" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            else
+              grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_watch_post_vigilance_posture" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            fi
+            grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=7590" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
           done
 
       - name: Validate evidence
@@ -448,8 +471,8 @@ jobs:
           if not match: raise SystemExit("duration missing")
           duration=float(match.group(0))
           if duration>1000: duration/=1000
-          if not 228.0<=duration<=230.0: raise SystemExit(f"duration {duration}")
-          qa={"status":"PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_REVIEW","exact_head":(root/"exact-head.txt").read_text().strip(),"stills":report,"video_seconds":duration,"claim":"east_route","settlement":"greenvale","founded":True,"developed":True,"route_connected":True,"world_trade_active":True,"caravan_dispatched":True,"world_first_trade_underway":True,"city_chartered":True,"city_marker_topology":[354,285],"national_direction":"expand","direction_commitment":True,"national_mandate_started":True,"empire_proclaimed":True,"imperial_crisis":"river_surge","imperial_crisis_responses":["shield_greenvale","keep_east_bridge_open"],"first_rival_countermove":"obsidian_march","first_rival_responses":["stand_firm","negotiate_passage"],"first_frontier_payoffs":["secure_gilded_crossing","ratify_east_bridge_passage"],"frontier_payoff_loci":{"secure_gilded_crossing":[515,340],"ratify_east_bridge_passage":[515,340]},"imperial_capital":"greenvale","imperial_heartland":"aurelian","mandate_direction_actions":["trade","expand","frontier"],"mandate_loci":{"trade":[435,313],"expand":[700,205],"frontier":[515,340]},"imperial_expansion_target":"north_ridge","claimed_lands":["east_route","north_ridge"],"first_imperial_expansion":"north_ridge_claimed","imperial_expansion_event_count":1,"north_ridge_outpost":"established","north_ridge_outpost_event_count":1}
+          if not 252.0<=duration<=254.0: raise SystemExit(f"duration {duration}")
+          qa={"status":"PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_REVIEW","exact_head":(root/"exact-head.txt").read_text().strip(),"stills":report,"video_seconds":duration,"claim":"east_route","settlement":"greenvale","founded":True,"developed":True,"route_connected":True,"world_trade_active":True,"caravan_dispatched":True,"world_first_trade_underway":True,"city_chartered":True,"city_marker_topology":[354,285],"national_direction":"expand","direction_commitment":True,"national_mandate_started":True,"empire_proclaimed":True,"imperial_crisis":"river_surge","imperial_crisis_responses":["shield_greenvale","keep_east_bridge_open"],"first_rival_countermove":"obsidian_march","first_rival_responses":["stand_firm","negotiate_passage"],"first_frontier_payoffs":["secure_gilded_crossing","ratify_east_bridge_passage"],"frontier_payoff_loci":{"secure_gilded_crossing":[515,340],"ratify_east_bridge_passage":[515,340]},"imperial_capital":"greenvale","imperial_heartland":"aurelian","mandate_direction_actions":["trade","expand","frontier"],"mandate_loci":{"trade":[435,313],"expand":[700,205],"frontier":[515,340]},"imperial_expansion_target":"north_ridge","claimed_lands":["east_route","north_ridge"],"first_imperial_expansion":"north_ridge_claimed","imperial_expansion_event_count":1,"north_ridge_outpost":"established","north_ridge_outpost_event_count":1,"north_ridge_specializations":["trade_post","watch_post"],"north_ridge_specialization_event_count_per_run":1}
           (root/"evidence-qa.json").write_text(json.dumps(qa,indent=2)+"\n")
           rows=math.ceil(len(names)/3)
           canvas=Image.new("RGB",(1080,rows*225),(32,32,32))

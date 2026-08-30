@@ -1,0 +1,206 @@
+{
+  "contract": "GODOT_AURELIAN_NORTH_RIDGE_SPECIALIZATION_V1",
+  "issue": 547,
+  "authority_baseline_sha": "f01da7d3a928bfb3534cf95ab5251de99ded9497",
+  "product_baseline_sha": "9f184cf9d48b512ee0e4551cfd0b3d6986814c81",
+  "entry_requirement": {
+    "empire_proclaimed": true,
+    "greenvale_imperial_capital": true,
+    "claimed_lands": [
+      "east_route",
+      "north_ridge"
+    ],
+    "first_imperial_expansion": "north_ridge_claimed",
+    "north_ridge_outpost": "established",
+    "north_ridge_specialization": null,
+    "preserve_national_direction": true,
+    "preserve_imperial_crisis_response": true,
+    "preserve_first_rival_countermove_response": true,
+    "preserve_first_frontier_payoff": true
+  },
+  "specialization": {
+    "locus": "north_ridge",
+    "choices": [
+      {
+        "id": "trade_post",
+        "action": "Commit Trade Post",
+        "identity": "logistics_trade"
+      },
+      {
+        "id": "watch_post",
+        "action": "Commit Watch Post",
+        "identity": "vigilance_frontier"
+      }
+    ],
+    "exactly_one_choice": true,
+    "mutually_exclusive": true,
+    "explicit_commit_required": true,
+    "exactly_one_event": true,
+    "repeatable_specialization": false,
+    "third_land_available": false
+  },
+  "sequence": {
+    "held_frontier_state": "world_north_ridge_specialization_held_frontier",
+    "map_inspection_state": "map_north_ridge_specialization_inspection",
+    "village_choice_state": "village_north_ridge_specialization_choice",
+    "trade_result_states": [
+      "map_north_ridge_trade_post_committed",
+      "village_north_ridge_trade_post_greenvale_administers",
+      "world_north_ridge_trade_post_logistics_posture"
+    ],
+    "watch_result_states": [
+      "map_north_ridge_watch_post_committed",
+      "village_north_ridge_watch_post_greenvale_administers",
+      "world_north_ridge_watch_post_vigilance_posture"
+    ]
+  },
+  "availability": {
+    "established_outpost_required": true,
+    "exactly_two_claimed_lands_required": true,
+    "choice_hidden_before_outpost": true,
+    "duplicate_commit_rejected": true,
+    "conflicting_choice_rejected": true,
+    "respecialization_path": false,
+    "second_outpost_path": false,
+    "third_land_path": false,
+    "invalid_state_combination_rejected": true
+  },
+  "events": {
+    "trade_post": "AURELIAN_NORTH_RIDGE_SPECIALIZATION=TRADE_POST",
+    "watch_post": "AURELIAN_NORTH_RIDGE_SPECIALIZATION=WATCH_POST",
+    "single_event_per_profile": true,
+    "idempotent": true,
+    "restore_event_emission_allowed": false,
+    "duplicate_event_allowed": false
+  },
+  "view_roles": {
+    "village": "HOW_GREENVALE_COMMITS_AND_ADMINISTERS_NORTH_RIDGE_SPECIALIZATION",
+    "map": "WHERE_NORTH_RIDGE_SPECIALIZATION_IS_INSPECTED_AND_VISIBLE",
+    "world": "WHY_THE_SELECTED_FRONTIER_POSTURE_MATTERS"
+  },
+  "presentation": {
+    "trade_post_cues": [
+      "route_facing_staging",
+      "cargo_marker_rhythm",
+      "logistics_activity_emphasis"
+    ],
+    "watch_post_cues": [
+      "vertical_lookout_silhouette",
+      "beacon_standard_rhythm",
+      "frontier_vigilance_emphasis"
+    ],
+    "both_outcomes_distinct_at_a_glance": true,
+    "substantial_visible_differentiation_required": true,
+    "label_only_differentiation": false,
+    "whole_scene_recolor": false,
+    "existing_geometry_and_materials_only": true,
+    "new_asset": false,
+    "new_glb": false,
+    "new_terrain": false,
+    "new_camera": false
+  },
+  "shared_geography": {
+    "asset": "aurelian_authored_terrain_v1.glb",
+    "greenvale_origin_unchanged": true,
+    "river_spline_unchanged": true,
+    "river_banks_unchanged": true,
+    "east_bridge_transform_unchanged": true,
+    "bridge_landings_unchanged": true,
+    "east_route_unchanged": true,
+    "north_ridge_transform_unchanged": true,
+    "gilded_crossing_transform_unchanged": true,
+    "routes_and_landmarks_unchanged": true,
+    "camera_topology_unchanged": true,
+    "procedural_specialization_change_allowed_at_existing_north_ridge_only": true,
+    "claimed_lands_exactly": [
+      "east_route",
+      "north_ridge"
+    ],
+    "third_land_allowed": false
+  },
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "new_fields": [
+      "north_ridge_specialization"
+    ],
+    "allowed_values": [
+      "trade_post",
+      "watch_post"
+    ],
+    "mutually_exclusive": true,
+    "preserve_north_ridge_outpost": "established",
+    "claimed_lands": [
+      "east_route",
+      "north_ridge"
+    ],
+    "preserve_greenvale_imperial_capital": true,
+    "preserve_national_direction": true,
+    "preserve_empire_proclamation": true,
+    "preserve_imperial_crisis_response": true,
+    "preserve_first_rival_countermove_response": true,
+    "preserve_first_frontier_payoff": true,
+    "preserve_first_imperial_expansion": true,
+    "native_restart_required": true,
+    "web_reload_required": true,
+    "persistent_profile_reopen_required": true,
+    "map_reopen_required": true,
+    "village_reopen_required": true,
+    "storage_seeding_allowed": false
+  },
+  "evidence": {
+    "established_unspecialized_outpost_required": true,
+    "explicit_choice_and_commit_required": true,
+    "trade_post_result_required": true,
+    "watch_post_result_required": true,
+    "greenvale_administration_consequence_required": true,
+    "world_posture_consequence_required": true,
+    "normal_input_motion_required": true,
+    "native_persistence_required": true,
+    "web_persistence_required": true,
+    "profile_reopen_required": true,
+    "exactly_two_lands_regression_required": true,
+    "accepted_progression_regression_required": true,
+    "shared_geography_regression_required": true,
+    "exact_manifest_validation_required": true,
+    "direct_still_and_motion_review_required": true,
+    "one_bounded_correction_maximum": true
+  },
+  "terminal_results": [
+    "GODOT_AURELIAN_NORTH_RIDGE_SPECIALIZATION_PASS",
+    "GODOT_AURELIAN_NORTH_RIDGE_SPECIALIZATION_REJECT"
+  ],
+  "forbidden": [
+    "third_land",
+    "land_picker",
+    "repeatable_expansion",
+    "second_settlement_progression",
+    "resource_economy",
+    "prices",
+    "production",
+    "workers",
+    "queues",
+    "timers",
+    "combat_simulation",
+    "units",
+    "attacks",
+    "damage",
+    "victory_simulation",
+    "defeat_simulation",
+    "full_diplomacy",
+    "full_governance",
+    "new_assets",
+    "new_glb",
+    "new_terrain",
+    "new_geography",
+    "new_camera",
+    "new_dependency",
+    "backend",
+    "accounts",
+    "multiplayer",
+    "public_shell",
+    "P12",
+    "MAX",
+    "paid_tools"
+  ]
+}
