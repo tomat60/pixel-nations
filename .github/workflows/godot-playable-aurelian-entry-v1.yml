@@ -309,10 +309,10 @@ jobs:
           done
 
       - name: Capture input-driven development sequence
-        timeout-minutes: 10
+        timeout-minutes: 15
         run: |
           set -euo pipefail
-          timeout 540s xvfb-run -a -s "-screen 0 1280x720x24" env \
+          timeout 840s xvfb-run -a -s "-screen 0 1280x720x24" env \
             AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
             "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
             --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 30 \
