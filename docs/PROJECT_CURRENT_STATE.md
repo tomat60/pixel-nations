@@ -2,14 +2,13 @@
 
 Status: ACTIVE
 Updated: 2026-08-30
-Authority baseline: `main@5a97741123eeb663010600df497da9935c880208`
-Product baseline: `main@5a97741123eeb663010600df497da9935c880208`
+Authority baseline SHA: `5a97741123eeb663010600df497da9935c880208`
+Product baseline SHA: `5a97741123eeb663010600df497da9935c880208`
 
-## Current milestone
-
-Authorize exactly one bounded Godot Aurelian candidate for North Ridge Specialization Payoff v1.
+Current milestone: authorize exactly one bounded Godot Aurelian candidate for North Ridge Specialization Payoff v1.
 
 Active execution issue: #551
+Next allowed action: after this transition merges with healthy checks, implement exactly one bounded North Ridge Specialization Payoff v1 candidate.
 
 ## Accepted product baseline
 
