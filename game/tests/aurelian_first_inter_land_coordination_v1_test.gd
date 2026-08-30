@@ -4,6 +4,7 @@ const SESSION = preload("res://scenes/aurelian/aurelian_session_persistence_v2.g
 const TEST_PATH := "user://aurelian-first-inter-land-coordination-v1-test.json"
 const MANIFEST_PATH := "res://scenes/aurelian/first_inter_land_coordination_v1_manifest.json"
 const PERSISTENCE_PATH := "res://scenes/aurelian/aurelian_session_persistence_v2.gd"
+const CONTROLLER_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1.gd"
 
 var failures: Array[String] = []
 
@@ -95,6 +96,30 @@ func _initialize() -> void:
 		"world_coordinated_vigilance_network",
 	]:
 		_check(persistence.contains(token), "persistence_token_%s" % token)
+
+	var controller := _read_text(CONTROLLER_PATH)
+	for token in [
+		"FIRST_INTER_LAND_COORDINATION_STATES",
+		"first_inter_land_coordination",
+		"world_first_inter_land_coordination_revealed",
+		"map_greenvale_north_ridge_link_inspection",
+		"village_first_inter_land_coordination_action",
+		"map_ridge_convoy_dispatched",
+		"village_ridge_convoy_greenvale_acknowledges",
+		"world_coordinated_logistics_network",
+		"map_basin_alert_raised",
+		"village_basin_alert_greenvale_acknowledges",
+		"world_coordinated_vigilance_network",
+		"AURELIAN_FIRST_INTER_LAND_COORDINATION=RIDGE_CONVOY_DISPATCHED",
+		"AURELIAN_FIRST_INTER_LAND_COORDINATION=BASIN_ALERT_RAISED",
+		"FirstInterLandCoordinationLink",
+		"CoordinationPulse%02d",
+	]:
+		_check(controller.contains(token), "controller_token_%s" % token)
+	_check(controller.count("AURELIAN_FIRST_INTER_LAND_COORDINATION=RIDGE_CONVOY_DISPATCHED") == 1, "single_convoy_event")
+	_check(controller.count("AURELIAN_FIRST_INTER_LAND_COORDINATION=BASIN_ALERT_RAISED") == 1, "single_alert_event")
+	_check(controller.find("world_first_inter_land_coordination_revealed") < controller.find("map_greenvale_north_ridge_link_inspection"), "world_before_map_coordination")
+	_check(controller.find("map_greenvale_north_ridge_link_inspection") < controller.find("village_first_inter_land_coordination_action"), "map_before_village_coordination")
 
 	_cleanup()
 	_finish()
