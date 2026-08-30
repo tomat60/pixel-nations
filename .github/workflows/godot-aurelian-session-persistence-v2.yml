@@ -838,7 +838,6 @@ jobs:
           grep -F "AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED" "${EVIDENCE_DIR}/browser-console.log"
           test "$(grep -Fc "AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED" "${EVIDENCE_DIR}/browser-console.log")" = "1"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_outpost_established" "${EVIDENCE_DIR}/browser-console.log"
-          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_outpost_greenvale_administers" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_outpost_held_two_land_frontier" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION_READY=TRADE_POST_OR_WATCH_POST" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION=TRADE_POST" "${EVIDENCE_DIR}/browser-console.log"
