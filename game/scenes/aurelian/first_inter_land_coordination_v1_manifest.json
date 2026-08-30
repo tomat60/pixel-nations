@@ -1,0 +1,229 @@
+{
+  "contract": "GODOT_AURELIAN_FIRST_INTER_LAND_COORDINATION_V1",
+  "issue": 555,
+  "authority_baseline_sha": "a6101b05b5328c27eb39f6470f672dd11f564dbb",
+  "product_baseline_sha": "68ca85b49602125bc4829fe71de1288eb760aefd",
+  "entry_requirement": {
+    "empire_proclaimed": true,
+    "greenvale_imperial_capital": true,
+    "claimed_lands": [
+      "east_route",
+      "north_ridge"
+    ],
+    "north_ridge_outpost": "established",
+    "north_ridge_specialization": [
+      "trade_post",
+      "watch_post"
+    ],
+    "north_ridge_specialization_payoff": [
+      "ridge_logistics_line_open",
+      "ridge_signal_lit"
+    ],
+    "first_inter_land_coordination": null,
+    "preserve_all_accepted_progression": true
+  },
+  "coordination": {
+    "loci": [
+      "greenvale",
+      "north_ridge"
+    ],
+    "branches": [
+      {
+        "specialization": "trade_post",
+        "payoff": "ridge_logistics_line_open",
+        "action": "Dispatch Ridge Convoy",
+        "result": "ridge_convoy_dispatched",
+        "identity": "coordinated_logistics_network"
+      },
+      {
+        "specialization": "watch_post",
+        "payoff": "ridge_signal_lit",
+        "action": "Raise Basin Alert",
+        "result": "basin_alert_raised",
+        "identity": "coordinated_vigilance_network"
+      }
+    ],
+    "inherited_specialization_and_payoff_required": true,
+    "second_choice_offered": false,
+    "branch_switching_allowed": false,
+    "exactly_one_operation": true,
+    "exactly_one_event": true,
+    "repeatable_operation": false,
+    "generic_mission_system": false
+  },
+  "sequence": {
+    "reveal_state": "world_first_inter_land_coordination_revealed",
+    "inspection_state": "map_greenvale_north_ridge_link_inspection",
+    "village_action_state": "village_first_inter_land_coordination_action",
+    "trade_result_states": [
+      "map_ridge_convoy_dispatched",
+      "village_ridge_convoy_greenvale_acknowledges",
+      "world_coordinated_logistics_network"
+    ],
+    "watch_result_states": [
+      "map_basin_alert_raised",
+      "village_basin_alert_greenvale_acknowledges",
+      "world_coordinated_vigilance_network"
+    ]
+  },
+  "availability": {
+    "matching_specialization_required": true,
+    "matching_payoff_required": true,
+    "established_outpost_required": true,
+    "exactly_two_claimed_lands_required": true,
+    "matching_branch_only": true,
+    "premature_operation_rejected": true,
+    "duplicate_operation_rejected": true,
+    "conflicting_branch_rejected": true,
+    "both_results_rejected": true,
+    "unknown_value_rejected": true,
+    "third_land_path": false
+  },
+  "events": {
+    "ridge_convoy_dispatched": "AURELIAN_FIRST_INTER_LAND_COORDINATION=RIDGE_CONVOY_DISPATCHED",
+    "basin_alert_raised": "AURELIAN_FIRST_INTER_LAND_COORDINATION=BASIN_ALERT_RAISED",
+    "single_event_per_profile": true,
+    "idempotent": true,
+    "restore_event_emission_allowed": false,
+    "duplicate_event_allowed": false
+  },
+  "view_roles": {
+    "village": "HOW_GREENVALE_COMMITS_AND_ADMINISTERS_THE_BRANCH_OPERATION",
+    "map": "WHERE_GREENVALE_AND_NORTH_RIDGE_COORDINATE",
+    "world": "WHY_THE_TWO_LAND_EMPIRE_FUNCTIONS_AS_ONE_NETWORK"
+  },
+  "presentation": {
+    "trade_cues": [
+      "convoy_marker",
+      "cargo_pulse",
+      "greenvale_to_north_ridge_route_activity"
+    ],
+    "watch_cues": [
+      "signal_relay",
+      "alert_pulse",
+      "north_ridge_to_greenvale_beacon_response"
+    ],
+    "both_lands_visibly_participate": true,
+    "branch_outcomes_distinct_at_a_glance": true,
+    "procedural_cues_only": true,
+    "simulated_units": false,
+    "pathfinding": false,
+    "new_asset": false,
+    "new_glb": false,
+    "new_terrain": false,
+    "new_camera": false
+  },
+  "shared_geography": {
+    "asset": "aurelian_authored_terrain_v1.glb",
+    "greenvale_origin_unchanged": true,
+    "river_spline_unchanged": true,
+    "river_banks_unchanged": true,
+    "east_bridge_transform_unchanged": true,
+    "bridge_landings_unchanged": true,
+    "east_route_unchanged": true,
+    "north_ridge_transform_unchanged": true,
+    "gilded_crossing_transform_unchanged": true,
+    "routes_and_landmarks_unchanged": true,
+    "camera_topology_unchanged": true,
+    "claimed_lands_exactly": [
+      "east_route",
+      "north_ridge"
+    ],
+    "procedural_coordination_cues_allowed_on_existing_link_only": true,
+    "separate_branch_geography": false,
+    "third_land_allowed": false
+  },
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "new_fields": [
+      "first_inter_land_coordination"
+    ],
+    "allowed_values": [
+      "ridge_convoy_dispatched",
+      "basin_alert_raised"
+    ],
+    "branch_mapping": {
+      "trade_post:ridge_logistics_line_open": "ridge_convoy_dispatched",
+      "watch_post:ridge_signal_lit": "basin_alert_raised"
+    },
+    "preserve_north_ridge_specialization": true,
+    "preserve_north_ridge_specialization_payoff": true,
+    "preserve_north_ridge_outpost": "established",
+    "claimed_lands": [
+      "east_route",
+      "north_ridge"
+    ],
+    "preserve_greenvale_imperial_capital": true,
+    "preserve_all_accepted_progression": true,
+    "older_valid_profile_without_coordination": "not_completed",
+    "native_restart_required": true,
+    "web_reload_required": true,
+    "persistent_profile_reopen_required": true,
+    "village_map_world_reopen_required": true,
+    "storage_seeding_allowed": false
+  },
+  "evidence": {
+    "accepted_specialization_and_payoff_before_operation_required": true,
+    "branch_matched_world_reveal_required": true,
+    "greenvale_north_ridge_map_inspection_required": true,
+    "explicit_village_action_required": true,
+    "trade_operation_result_required": true,
+    "watch_operation_result_required": true,
+    "both_lands_visible_in_result_required": true,
+    "greenvale_acknowledgement_required": true,
+    "world_two_land_network_required": true,
+    "exactly_one_matching_event_required": true,
+    "normal_input_motion_required": true,
+    "native_persistence_required": true,
+    "web_persistence_required": true,
+    "profile_reopen_required": true,
+    "exactly_two_lands_regression_required": true,
+    "accepted_progression_regression_required": true,
+    "shared_geography_regression_required": true,
+    "no_repeatable_or_third_land_path_required": true,
+    "exact_manifest_validation_required": true,
+    "direct_still_and_motion_review_required": true,
+    "one_bounded_correction_maximum": true
+  },
+  "terminal_results": [
+    "GODOT_AURELIAN_FIRST_INTER_LAND_COORDINATION_PASS",
+    "GODOT_AURELIAN_FIRST_INTER_LAND_COORDINATION_REJECT"
+  ],
+  "forbidden": [
+    "resource_economy",
+    "prices",
+    "inventory",
+    "yields",
+    "production",
+    "workers",
+    "queues",
+    "timers",
+    "simulated_units",
+    "pathfinding",
+    "combat",
+    "attacks",
+    "damage",
+    "victory_states",
+    "third_land",
+    "repeatable_expansion",
+    "repeatable_operations",
+    "generic_mission_system",
+    "second_outpost",
+    "second_settlement",
+    "branch_switching",
+    "new_assets",
+    "new_glb",
+    "new_terrain",
+    "new_geography",
+    "new_camera",
+    "new_dependency",
+    "backend",
+    "accounts",
+    "multiplayer",
+    "public_shell",
+    "P12",
+    "MAX",
+    "paid_tools"
+  ]
+}
