@@ -4,6 +4,7 @@ const SESSION = preload("res://scenes/aurelian/aurelian_session_persistence_v2.g
 const TEST_PATH := "user://aurelian-north-ridge-specialization-payoff-v1-test.json"
 const MANIFEST_PATH := "res://scenes/aurelian/north_ridge_specialization_payoff_v1_manifest.json"
 const PERSISTENCE_PATH := "res://scenes/aurelian/aurelian_session_persistence_v2.gd"
+const CONTROLLER_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1.gd"
 
 var failures: Array[String] = []
 
@@ -132,6 +133,30 @@ func _initialize() -> void:
 		"world_north_ridge_signal_active_frontier_role",
 	]:
 		_check(persistence.contains(token), "persistence_token_%s" % token)
+
+	var controller := _read_text(CONTROLLER_PATH)
+	for token in [
+		"NORTH_RIDGE_SPECIALIZATION_PAYOFF_STATES",
+		"north_ridge_specialization_payoff",
+		"world_north_ridge_specialization_payoff_revealed",
+		"map_north_ridge_specialization_payoff_inspection",
+		"village_north_ridge_specialization_payoff_action",
+		"map_north_ridge_logistics_line_open",
+		"village_north_ridge_logistics_line_greenvale_acknowledges",
+		"world_north_ridge_logistics_line_active_frontier_role",
+		"map_north_ridge_signal_lit",
+		"village_north_ridge_signal_greenvale_acknowledges",
+		"world_north_ridge_signal_active_frontier_role",
+		"AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=RIDGE_LOGISTICS_LINE_OPEN",
+		"AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=RIDGE_SIGNAL_LIT",
+		"ActiveLogisticsLine",
+		"ActiveSignalLight",
+	]:
+		_check(controller.contains(token), "controller_token_%s" % token)
+	_check(controller.count("AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=RIDGE_LOGISTICS_LINE_OPEN") == 1, "single_trade_payoff_event")
+	_check(controller.count("AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=RIDGE_SIGNAL_LIT") == 1, "single_watch_payoff_event")
+	_check(controller.find("world_north_ridge_specialization_payoff_revealed") < controller.find("map_north_ridge_specialization_payoff_inspection"), "world_before_map_payoff")
+	_check(controller.find("map_north_ridge_specialization_payoff_inspection") < controller.find("village_north_ridge_specialization_payoff_action"), "map_before_village_payoff")
 
 	_cleanup()
 	_finish()
