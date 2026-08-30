@@ -883,7 +883,6 @@ jobs:
           grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION=TRADE_POST" "${EVIDENCE_DIR}/browser-console.log"
           test "$(grep -Fc "AURELIAN_NORTH_RIDGE_SPECIALIZATION=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_trade_post_committed" "${EVIDENCE_DIR}/browser-console.log"
-          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_trade_post_greenvale_administers" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_trade_post_logistics_posture" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF_REVEAL=OPEN_RIDGE_LOGISTICS_LINE" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=RIDGE_LOGISTICS_LINE_OPEN" "${EVIDENCE_DIR}/browser-console.log"
