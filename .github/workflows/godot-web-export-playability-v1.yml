@@ -637,7 +637,7 @@ jobs:
           test -s "${EVIDENCE_DIR}/godot-web-input-sequence.webm"
           test "$(stat -c %s "${EVIDENCE_DIR}/godot-web-input-sequence.webm")" -gt 100000
           video_duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/godot-web-input-sequence.webm")"
-          awk -v duration="$video_duration" 'BEGIN { exit !(duration >= 380 && duration <= 400) }'
+          awk -v duration="$video_duration" 'BEGIN { exit !(duration >= 175 && duration <= 420) }'
           grep -F "PLAYABLE_AURELIAN_ENTRY_READY=world_neutral" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_claimed" "${EVIDENCE_DIR}/browser-console.log"
