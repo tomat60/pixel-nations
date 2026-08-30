@@ -125,7 +125,7 @@ func _initialize() -> void:
 		"Establish North Ridge Outpost",
 		"AURELIAN_NORTH_RIDGE_OUTPOST_NEED=HOLD_FRONTIER",
 		"AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED",
-		"PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=7590",
+		"PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=7830",
 	]:
 		_check(controller.contains(token), "controller_token_%s" % token)
 	for state in [
