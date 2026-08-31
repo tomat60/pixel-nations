@@ -307,6 +307,18 @@ jobs:
             "watch-map-basin-alert-raised:map_basin_alert_raised"
             "watch-village-basin-alert-ack:village_basin_alert_greenvale_acknowledges"
             "watch-world-coordinated-vigilance:world_coordinated_vigilance_network"
+            "trade-world-third-land-prospect-revealed:world_first_third_land_prospect_revealed"
+            "trade-map-south-marsh-inspection:map_third_land_prospect_inspection"
+            "trade-village-south-marsh-survey-action:village_third_land_survey_action"
+            "trade-map-south-marsh-surveyed:map_south_marsh_surveyed"
+            "trade-village-south-marsh-report:village_south_marsh_report_acknowledged"
+            "trade-world-south-marsh-prospect:world_south_marsh_imperial_prospect"
+            "watch-world-third-land-prospect-revealed:world_first_third_land_prospect_revealed"
+            "watch-map-northgate-inspection:map_third_land_prospect_inspection"
+            "watch-village-northgate-survey-action:village_third_land_survey_action"
+            "watch-map-northgate-surveyed:map_northgate_surveyed"
+            "watch-village-northgate-report:village_northgate_report_acknowledged"
+            "watch-world-northgate-prospect:world_northgate_imperial_prospect"
             "trade-village-mandate-started:village_national_mandate_started:trade"
             "trade-map-mandate-active:map_national_mandate_active:trade"
             "trade-world-mandate-underway:world_national_mandate_underway:trade"
@@ -416,6 +428,19 @@ jobs:
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_logistics_line_open" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_logistics_line_greenvale_acknowledges" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_logistics_line_active_frontier_role" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_inter_land_coordination_revealed" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_greenvale_north_ridge_link_inspection" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_first_inter_land_coordination_action" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "AURELIAN_FIRST_INTER_LAND_COORDINATION=RIDGE_CONVOY_DISPATCHED" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_coordinated_logistics_network" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_third_land_prospect_revealed" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_third_land_prospect_inspection" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_third_land_survey_action" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "AURELIAN_FIRST_THIRD_LAND_PROSPECT=SOUTH_MARSH_SURVEYED" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          test "$(grep -Fc "AURELIAN_FIRST_THIRD_LAND_PROSPECT=" "${EVIDENCE_DIR}/playable-entry-sequence.log")" = "1"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_south_marsh_surveyed" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_south_marsh_report_acknowledged" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_south_marsh_imperial_prospect" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=8190" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test -s "${EVIDENCE_DIR}/playable-entry-sequence.avi"
           mediainfo --Output=JSON "${EVIDENCE_DIR}/playable-entry-sequence.avi" > "${EVIDENCE_DIR}/video-metadata.json"
@@ -487,6 +512,10 @@ jobs:
               expected_coordination_map_state="map_ridge_convoy_dispatched"
               expected_coordination_village_state="village_ridge_convoy_greenvale_acknowledges"
               expected_coordination_world_state="world_coordinated_logistics_network"
+              expected_prospect="SOUTH_MARSH_SURVEYED"
+              expected_prospect_map_state="map_south_marsh_surveyed"
+              expected_prospect_village_state="village_south_marsh_report_acknowledged"
+              expected_prospect_world_state="world_south_marsh_imperial_prospect"
             else
               grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_watch_post_vigilance_posture" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
               expected_specialization_payoff="RIDGE_SIGNAL_LIT"
@@ -495,6 +524,10 @@ jobs:
               expected_coordination_map_state="map_basin_alert_raised"
               expected_coordination_village_state="village_basin_alert_greenvale_acknowledges"
               expected_coordination_world_state="world_coordinated_vigilance_network"
+              expected_prospect="NORTHGATE_SURVEYED"
+              expected_prospect_map_state="map_northgate_surveyed"
+              expected_prospect_village_state="village_northgate_report_acknowledged"
+              expected_prospect_world_state="world_northgate_imperial_prospect"
             fi
             grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=${expected_specialization_payoff}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
             test "$(grep -Fc "AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
@@ -507,6 +540,14 @@ jobs:
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_coordination_map_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_coordination_village_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_coordination_world_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_third_land_prospect_revealed" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_third_land_prospect_inspection" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_third_land_survey_action" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            grep -F "AURELIAN_FIRST_THIRD_LAND_PROSPECT=${expected_prospect}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            test "$(grep -Fc "AURELIAN_FIRST_THIRD_LAND_PROSPECT=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_prospect_map_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_prospect_village_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_prospect_world_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
             grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=8190" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
           done
 
@@ -521,6 +562,7 @@ jobs:
           names=["normal-launch","world-trade-selected","map-east-route-selected","map-east-route-claimed","village-claimed","village-founded","village-developed","returned-claimed-map","map-east-route-connected","world-trade-route-active","reopened-connected-map","reopened-village-developed","village-first-caravan-dispatched","map-east-route-in-use","world-first-trade-underway","village-first-city-chartered","map-greenvale-city","world-first-city-recognized","world-first-nation-founded","map-aurelian-homeland","village-greenvale-capital","village-national-mandate-started","map-national-mandate-active","world-national-mandate-underway","village-aurelian-imperial-capital","map-aurelian-imperial-heartland","world-first-empire-proclaimed","trade-village-mandate-started","trade-map-mandate-active","trade-world-mandate-underway","frontier-village-mandate-started","frontier-map-mandate-active","frontier-world-mandate-underway","trade-village-imperial-capital","trade-map-imperial-heartland","trade-world-first-empire","frontier-village-imperial-capital","frontier-map-imperial-heartland","frontier-world-first-empire","world-river-surge-crisis","map-river-surge-response-loci","village-river-surge-response-pending","village-greenvale-shielded","map-greenvale-response","world-greenvale-response","village-east-bridge-response","map-east-bridge-response","world-east-bridge-response","world-first-rival-countermove","map-first-rival-east-bridge-pressure","map-first-rival-greenvale-pressure","village-first-rival-response-pending","village-first-rival-stand-firm","map-first-rival-stand-firm","world-first-rival-stand-firm","village-first-rival-negotiate-passage","map-first-rival-negotiate-passage","world-first-rival-negotiate-passage","world-frontier-payoff-gilded-revealed","map-frontier-payoff-gilded-pending","village-frontier-payoff-gilded-pending","village-frontier-payoff-gilded-secured","map-frontier-payoff-gilded-secured","world-frontier-legacy-gilded-complete","world-frontier-payoff-bridge-revealed","map-frontier-payoff-bridge-pending","village-frontier-payoff-bridge-pending","village-frontier-payoff-bridge-secured","map-frontier-payoff-bridge-secured","world-frontier-legacy-bridge-complete","world-imperial-expansion-north-ridge-direction","map-imperial-expansion-north-ridge-available","map-imperial-expansion-north-ridge-inspected","map-imperial-expansion-two-lands-claimed","village-imperial-expansion-capital-two-lands","world-imperial-expansion-two-land-footprint","world-north-ridge-outpost-frontier-need","map-north-ridge-outpost-claimed-inspection","village-north-ridge-outpost-establish-action","map-north-ridge-outpost-established","village-north-ridge-outpost-greenvale-administers","world-north-ridge-outpost-held-frontier"]
           names.extend(["trade-world-north-ridge-payoff-revealed","trade-map-north-ridge-payoff-inspection","trade-village-north-ridge-payoff-action","watch-world-north-ridge-payoff-revealed","watch-map-north-ridge-payoff-inspection","watch-village-north-ridge-payoff-action","trade-map-north-ridge-logistics-line-open","trade-village-north-ridge-logistics-ack","trade-world-north-ridge-logistics-role","watch-map-north-ridge-signal-lit","watch-village-north-ridge-signal-ack","watch-world-north-ridge-signal-role"])
           names.extend(["trade-world-inter-land-coordination-revealed","trade-map-inter-land-link-inspection","trade-village-inter-land-action","trade-map-ridge-convoy-dispatched","trade-village-ridge-convoy-ack","trade-world-coordinated-logistics","watch-world-inter-land-coordination-revealed","watch-map-inter-land-link-inspection","watch-village-inter-land-action","watch-map-basin-alert-raised","watch-village-basin-alert-ack","watch-world-coordinated-vigilance"])
+          names.extend(["trade-world-third-land-prospect-revealed","trade-map-south-marsh-inspection","trade-village-south-marsh-survey-action","trade-map-south-marsh-surveyed","trade-village-south-marsh-report","trade-world-south-marsh-prospect","watch-world-third-land-prospect-revealed","watch-map-northgate-inspection","watch-village-northgate-survey-action","watch-map-northgate-surveyed","watch-village-northgate-report","watch-world-northgate-prospect"])
           report={}
           for name in names:
               path=root/f"{name}-1440x900.png"
