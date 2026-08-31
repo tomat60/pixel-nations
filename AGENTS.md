@@ -16,8 +16,9 @@ Before planning or coding:
 2. Read `docs/PROJECT_CURRENT_STATE.md`.
 3. Read the accepted ADR relevant to the task.
 4. Read this file.
-5. Read the active execution issue named in current state.
-6. Read only the operating/QA documents needed for the scoped task.
+5. Read `docs/GAME_STRATEGY_MASTER_PLAN.md` when choosing or changing product direction.
+6. Read the active execution issue named in current state.
+7. Read only the operating/QA documents needed for the scoped task.
 
 If `npm run pn:status` reports `AUTHORITY_STATUS=FAIL` or `BLOCKED_STALE_PROJECT_STATE`, stop product work and repair the authority chain first. Do not work around the gate by trusting prose that says `ACTIVE`.
 
@@ -26,10 +27,11 @@ Authority order:
 1. `docs/PROJECT_CURRENT_STATE.md`
 2. accepted ADRs
 3. this `AGENTS.md`
-4. active execution issue named in current state
-5. exact-head evidence and merged PR for the current milestone
-6. operating/QA protocols
-7. older issues, Command Room comments, sprint briefs, runbooks, reports, and generated handoffs
+4. `docs/GAME_STRATEGY_MASTER_PLAN.md` for durable whole-product direction and sequencing
+5. active execution issue named in current state
+6. exact-head evidence and merged PR for the current milestone
+7. operating/QA protocols
+8. older issues, Command Room comments, sprint briefs, runbooks, reports, and generated handoffs
 
 Do not treat issue #79, an arbitrary open issue, a draft PR, or `public/qa/latest` as current authority unless `PROJECT_CURRENT_STATE.md` explicitly points to it.
 
@@ -55,6 +57,34 @@ Do not treat issue #79, an arbitrary open issue, a draft PR, or `public/qa/lates
 Do not duplicate a milestone snapshot in this file. Read the exact milestone, active issue, active PR, acceptance boundary and next allowed action from `docs/PROJECT_CURRENT_STATE.md` on the current checkout.
 
 When the milestone changes, update `PROJECT_CURRENT_STATE.md`; do not add another convenience summary here. Historical PR or issue references in this file are examples only unless current state explicitly reactivates them.
+
+## Mandatory whole-product portfolio gate
+
+The steward/control-plane must not mechanically infer the next feature from the previous state transition.
+
+Before authorizing a new product milestone when a portfolio trigger applies, perform a lightweight whole-product check against the durable strategy and current evidence.
+
+The check must answer:
+
+1. What is the biggest current bottleneck across world/progression, gameplay/fun, UX/clarity, visuals/gamefeel, strategic depth, technical reliability and demo/business value?
+2. What player-visible delta will the proposed sprint create?
+3. Why is it better now than the strongest alternatives?
+4. What are we deliberately not building?
+5. What exact evidence accepts, rejects or stops the sprint?
+
+Mandatory triggers:
+
+- any terminal product `REJECT`;
+- a major phase boundary;
+- repeated milestones in the same subsystem while another product dimension lags;
+- direct user feedback that pace, clarity, gameplay or visual progress is wrong;
+- logic/state complexity growing materially faster than visible product value.
+
+At high-leverage phase/system decisions, research relevant production practice, comparable games/workflows and current repo evidence before choosing direction.
+
+The portfolio gate must not become bureaucracy. It can be recorded directly in `PROJECT_CURRENT_STATE.md` or the active issue and does not require a separate PR unless authority actually changes.
+
+Prefer one meaningful reviewable sprint that materially advances the whole product over serial micro-state milestones. If the largest bottleneck is world/progression or visual readability, block deeper mechanics until that bottleneck is addressed.
 
 ## Control-plane safety guardrails
 
@@ -149,12 +179,14 @@ Unless the active issue says otherwise:
 | Area | Path |
 |---|---|
 | Current project authority | `docs/PROJECT_CURRENT_STATE.md` |
+| Whole-game strategy | `docs/GAME_STRATEGY_MASTER_PLAN.md` |
 | Documentation authority map | `docs/README.md` |
 | Accepted runtime ADR | `docs/ADR_001_GODOT_DESKTOP_FIRST.md` |
 | Current playable bridge | `app/play/**` |
 | Play state | `app/play/lib/**` |
 | Play scenes | `app/play/components/**`, `app/play/world/**` |
 | Godot project | `game/**` |
+| Project operating system | `docs/PROJECT_OPERATING_SYSTEM.md` |
 | Operating rules | `docs/PROJECT_OPERATING_RULES.md` |
 | QA governance | `docs/QA_GOVERNANCE_PROTOCOL.md` |
 | Cost controls | `docs/AI_COST_CONTROL_CODEX.md` |
