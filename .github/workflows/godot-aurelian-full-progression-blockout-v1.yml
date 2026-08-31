@@ -1,0 +1,270 @@
+name: Godot Aurelian Full Progression Blockout V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/scenes/aurelian/full_progression_blockout_v1.gd"
+      - "game/scenes/aurelian/full_progression_blockout_v1.tscn"
+      - "game/scenes/aurelian/full_progression_blockout_v1_manifest.json"
+      - "game/scenes/aurelian/production_village_v1.gd"
+      - "game/scenes/aurelian/production_village_v1_state_manifest.json"
+      - "game/scenes/aurelian/production_map_v1.gd"
+      - "game/scenes/aurelian/production_map_v1_manifest.json"
+      - "game/scenes/aurelian/production_world_v1.gd"
+      - "game/scenes/aurelian/production_world_v1_manifest.json"
+      - "game/assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb"
+      - "game/tests/aurelian_full_progression_blockout_v1_test.gd"
+      - ".github/workflows/godot-aurelian-full-progression-blockout-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-full-progression-blockout-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EVIDENCE_DIR: "evidence/full-progression-blockout-v1"
+
+jobs:
+  progression-blockout:
+    name: Capture 5x3 whole-game progression matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}/matrix"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+
+      - name: Install focused capture tools
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xdotool ffmpeg
+          python3 -m pip install --disable-pip-version-check --no-cache-dir --user pillow
+
+      - name: Download pinned Godot 4.7.1
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/godot
+          mkdir -p /tmp/godot
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Import and run focused contracts
+        timeout-minutes: 6
+        run: |
+          set -euo pipefail
+          test -s game/assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1 || {
+            cat "${EVIDENCE_DIR}/godot-import.log"; exit 1;
+          }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_full_progression_blockout_v1_test; do
+            "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" \
+              > "${EVIDENCE_DIR}/${test}.log" 2>&1 || { cat "${EVIDENCE_DIR}/${test}.log"; exit 1; }
+          done
+          grep -F "AURELIAN_AUTHORED_TERRAIN_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_authored_terrain_v1_test.log"
+          grep -F "PRODUCTION_VILLAGE_V1_TEST: PASS" "${EVIDENCE_DIR}/production_village_v1_test.log"
+          grep -F "PRODUCTION_MAP_V1_TEST: PASS" "${EVIDENCE_DIR}/production_map_v1_test.log"
+          grep -F "PRODUCTION_WORLD_V1_TEST: PASS" "${EVIDENCE_DIR}/production_world_v1_test.log"
+          grep -F "GODOT_AURELIAN_FULL_PROGRESSION_BLOCKOUT_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_full_progression_blockout_v1_test.log"
+
+      - name: Capture exact-head 5x3 progression matrix
+        timeout-minutes: 12
+        run: |
+          set -euo pipefail
+          for stage in land settlement city nation empire; do
+            case "$stage" in
+              land) village_base=claimed ;;
+              settlement) village_base=founded ;;
+              city|nation|empire) village_base=city_chartered ;;
+            esac
+            for view in village map world; do
+              capture_dir="$PWD/${EVIDENCE_DIR}/capture-${stage}-${view}"
+              mkdir -p "$capture_dir"
+              timeout 90s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+                AURELIAN_EVIDENCE_DIR="$capture_dir" \
+                AURELIAN_CAPTURE_PRESET="$view" \
+                AURELIAN_PROGRESSION_STAGE="$stage" \
+                AURELIAN_PROGRESSION_VIEW="$view" \
+                "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+                res://scenes/aurelian/full_progression_blockout_v1.tscn \
+                > "${EVIDENCE_DIR}/${stage}-${view}.log" 2>&1
+              grep -F "PRODUCTION_VILLAGE_STILL=${view}:" "${EVIDENCE_DIR}/${stage}-${view}.log"
+              if [ "$view" = village ]; then
+                source_file="$capture_dir/village-${village_base}-1440x900.png"
+              else
+                source_file="$capture_dir/${view}-1440x900.png"
+              fi
+              test -s "$source_file"
+              cp "$source_file" "${EVIDENCE_DIR}/matrix/${stage}-${view}-1440x900.png"
+            done
+          done
+          test "$(find "${EVIDENCE_DIR}/matrix" -name '*-1440x900.png' | wc -l)" = "15"
+
+      - name: Capture input-driven progression motion
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          xvfb-run -a -s "-screen 0 1440x900x24" bash -c '
+            set -euo pipefail
+            env \
+              AURELIAN_PROGRESSION_STAGE=land \
+              AURELIAN_PROGRESSION_VIEW=village \
+              "'"${GODOT_BIN}"'" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+              --resolution 1440x900 --position 0,0 \
+              res://scenes/aurelian/full_progression_blockout_v1.tscn \
+              > "'"${EVIDENCE_DIR}"'/input-sequence.log" 2>&1 &
+            game_pid=$!
+            window_id=""
+            for attempt in $(seq 1 80); do
+              window_id="$(xdotool search --onlyvisible --name "Pixel Nations" 2>/dev/null | head -1 || true)"
+              [ -n "$window_id" ] && break
+              sleep 0.25
+            done
+            test -n "$window_id"
+            ffmpeg -y -loglevel error -video_size 1440x900 -framerate 30 -f x11grab -i "$DISPLAY" \
+              -c:v libx264 -preset ultrafast -pix_fmt yuv420p "'"${EVIDENCE_DIR}"'/full-progression-input.mp4" &
+            ffmpeg_pid=$!
+            sleep 1.0
+            xdotool key --window "$window_id" Right; sleep 0.8
+            xdotool key --window "$window_id" Right; sleep 0.8
+            xdotool key --window "$window_id" Return; sleep 0.8
+            xdotool key --window "$window_id" Left; sleep 0.8
+            xdotool key --window "$window_id" Left; sleep 0.8
+            xdotool key --window "$window_id" Return; sleep 0.8
+            xdotool key --window "$window_id" Right; sleep 0.8
+            xdotool key --window "$window_id" Right; sleep 0.8
+            xdotool key --window "$window_id" Return; sleep 0.8
+            xdotool key --window "$window_id" Left; sleep 0.8
+            xdotool key --window "$window_id" Left; sleep 0.8
+            xdotool key --window "$window_id" Return; sleep 0.8
+            xdotool key --window "$window_id" Right; sleep 0.8
+            xdotool key --window "$window_id" Right; sleep 1.0
+            xdotool key --window "$window_id" Escape
+            wait "$game_pid"
+            kill -INT "$ffmpeg_pid" 2>/dev/null || true
+            wait "$ffmpeg_pid" 2>/dev/null || true
+          '
+          test -s "${EVIDENCE_DIR}/full-progression-input.mp4"
+          grep -F "FULL_PROGRESSION_INPUT_SEQUENCE_COMPLETE=empire:world" "${EVIDENCE_DIR}/input-sequence.log"
+          grep -F "FULL_PROGRESSION_STAGE=settlement" "${EVIDENCE_DIR}/input-sequence.log"
+          grep -F "FULL_PROGRESSION_STAGE=city" "${EVIDENCE_DIR}/input-sequence.log"
+          grep -F "FULL_PROGRESSION_STAGE=nation" "${EVIDENCE_DIR}/input-sequence.log"
+          grep -F "FULL_PROGRESSION_STAGE=empire" "${EVIDENCE_DIR}/input-sequence.log"
+
+      - name: Validate matrix and build review contact sheet
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from PIL import Image, ImageStat, ImageChops, ImageDraw
+
+          root = Path(os.environ['EVIDENCE_DIR'])
+          matrix = root / 'matrix'
+          stages = ['land','settlement','city','nation','empire']
+          views = ['village','map','world']
+          samples = {}
+          report = {}
+          for stage in stages:
+              for view in views:
+                  key = f'{stage}-{view}'
+                  path = matrix / f'{key}-1440x900.png'
+                  if not path.is_file():
+                      raise SystemExit(f'missing {path}')
+                  image = Image.open(path).convert('RGB')
+                  if image.size != (1440,900):
+                      raise SystemExit(f'{key}: wrong size {image.size}')
+                  variance = sum(ImageStat.Stat(image).var) / 3.0
+                  sample = image.resize((240,150))
+                  colors = len(set(sample.getdata()))
+                  if path.stat().st_size < 50000 or variance < 45.0 or colors < 200:
+                      raise SystemExit(f'{key}: weak evidence bytes={path.stat().st_size} variance={variance:.2f} colors={colors}')
+                  samples[key] = sample
+                  report[key] = {
+                      'bytes': path.stat().st_size,
+                      'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                      'variance': round(variance,3),
+                      'sample_colors': colors,
+                  }
+
+          delta_report = {}
+          for view in views:
+              for a,b in zip(stages, stages[1:]):
+                  ka,kb = f'{a}-{view}',f'{b}-{view}'
+                  diff = ImageChops.difference(samples[ka], samples[kb])
+                  if diff.getbbox() is None:
+                      raise SystemExit(f'identical stage evidence: {ka}/{kb}')
+                  changed = sum(1 for px in diff.getdata() if px != (0,0,0))
+                  if changed < 120:
+                      raise SystemExit(f'stage delta too small: {ka}/{kb} changed={changed}')
+                  delta_report[f'{ka}->{kb}'] = changed
+
+          manifest = json.loads(Path('game/scenes/aurelian/full_progression_blockout_v1_manifest.json').read_text())
+          if manifest.get('stages') != stages or manifest.get('views') != views:
+              raise SystemExit('manifest matrix order drift')
+          if manifest.get('shared_geography') != 'aurelian_authored_terrain_v1.glb':
+              raise SystemExit('shared geography drift')
+
+          video = root / 'full-progression-input.mp4'
+          if video.stat().st_size < 100000:
+              raise SystemExit(f'input motion too small: {video.stat().st_size}')
+
+          canvas = Image.new('RGB',(1080,1125),(30,30,30))
+          draw = ImageDraw.Draw(canvas)
+          for row,stage in enumerate(stages):
+              for col,view in enumerate(views):
+                  image = Image.open(matrix/f'{stage}-{view}-1440x900.png').convert('RGB').resize((360,225))
+                  canvas.paste(image,(col*360,row*225))
+                  draw.rectangle((col*360,row*225,col*360+359,row*225+25),fill=(15,15,15))
+                  draw.text((col*360+8,row*225+7),f'{stage.upper()} / {view.upper()}',fill=(240,240,240))
+          canvas.save(root/'review-contact-sheet.jpg',quality=92)
+
+          qa = {
+              'status': 'PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_VISUAL_REVIEW',
+              'exact_head': (root/'exact-head.txt').read_text().strip(),
+              'matrix_count': 15,
+              'stills': report,
+              'adjacent_stage_changed_pixels_240x150': delta_report,
+              'input_motion_bytes': video.stat().st_size,
+          }
+          (root/'evidence-qa.json').write_text(json.dumps(qa,indent=2)+'\n')
+          print('GODOT_AURELIAN_FULL_PROGRESSION_BLOCKOUT_V1_EVIDENCE_QA=PASS')
+          PY
+
+      - name: Upload full progression blockout evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-full-progression-blockout-v1-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/full-progression-blockout-v1
+          if-no-files-found: error
+          retention-days: 7
