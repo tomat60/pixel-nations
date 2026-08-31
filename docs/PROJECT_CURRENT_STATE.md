@@ -1,15 +1,15 @@
 # Pixel Nations Current State
 
-Status: ACTIVE
+Status: REVIEW REQUIRED
 Updated: 2026-08-31
-Current state revision: 2
-Authority baseline SHA: `47f425aa63df156abd785958a82944e885b7bf5b`
+Current state revision: 3
+Authority baseline SHA: `851ae771bbf787a41375a7cb7982b4ac4ea767f6`
 Product baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: whole-game progression blockout before deeper mechanics.
-Current milestone: Aurelian Full Progression Blockout v1.
+Current milestone: Aurelian Full Progression Blockout v1 rejected after direct review.
 Active execution issue: #563
-Next allowed action: after this strategy-reset authority merges with healthy exact-head checks, implement exactly one bounded Full Progression Blockout v1 candidate under issue #563.
+Next allowed action: run a bounded art-direction and composition review. Do not implement another candidate until fresh authority explicitly approves its visual grammar and acceptance matrix.
 
 ## Accepted product baseline
 
@@ -29,6 +29,18 @@ Accepted evidence:
 Direct review confirmed two persistent and mutually exclusive Trade/Watch coordination outcomes, correct Village/Map/World roles, exactly two claimed lands, one shared Aurelian geography, and persistence across native restart, Web reload and profile reopen.
 
 ## Rejected and frozen work
+
+PR #565 `Implement Godot Aurelian Full Progression Blockout v1` is terminally rejected at exact head `76eea912f112818b1036ea9977cbc5bef6853bf1` and is closed without merge.
+
+Classification: `GODOT_AURELIAN_FULL_PROGRESSION_BLOCKOUT_V1_REJECT`.
+
+Exact-head deterministic evidence passed in run `33401226854`, artifact `9761347657`, digest `sha256:d6b8e273e520604e20431bcd300f08542a2e8fd7d42b29027d4bffed2b8c2ae0`. The artifact contains all 15 required 1440x900 frames and a 12.77-second input-driven progression recording.
+
+Direct review rejected the candidate because City, Nation and Empire remained variants of the same Village silhouette, while Map and World progression still read primarily as camera zoom plus translucent discs/rings rather than materially evolving homeland, network and imperial frontier geography. A reviewer without labels could not reliably identify all five stages.
+
+The first complete matrix received the one allowed bounded visual correction. The classified head remained below the visual acceptance gate, so no second correction is authorized. The branch is reference only and must not be merged.
+
+Issue #563 is closed as not planned. Full Progression Blockout remains the current product bottleneck, but implementation is paused until art-direction/composition review defines a stronger visual grammar.
 
 PR #561 `Implement Godot First Third-Land Prospect v1` is terminally rejected at head `fd4e0612caae369123b3c374486acf1d208ec908`.
 
@@ -165,4 +177,6 @@ At most one bounded correction is allowed after the first complete 15-frame cand
 
 ## Current stop condition
 
-Stop after one accepted or rejected Aurelian Full Progression Blockout v1 candidate. Do not resume deeper mechanics or Third-Land Prospect work from this authority.
+Stop implementation. Do not reopen or merge PR #565, do not start a second Full Progression Blockout candidate, and do not resume deeper mechanics or Third-Land Prospect work from this authority.
+
+The next authority change may follow only after a bounded art-direction/composition portfolio review compares a stronger whole-progression visual grammar against the current evidence.
