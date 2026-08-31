@@ -1,0 +1,67 @@
+{
+  "contract": "AURELIAN_FULL_PROGRESSION_VISUAL_GRAMMAR_V2",
+  "authority_issue": 567,
+  "stages": ["land", "settlement", "city", "nation", "empire"],
+  "gate_a": {
+    "view": "village",
+    "fixed_camera": true,
+    "unlabeled_strip": true,
+    "recognition_required": true
+  },
+  "shared_geography": "aurelian_authored_terrain_v1.glb",
+  "asset_policy": "reuse accepted Aurelian/KayKit scene nodes and procedural physical composition only",
+  "base_village_states": {
+    "land": "claimed",
+    "settlement": "founded",
+    "city": "city_chartered",
+    "nation": "city_chartered",
+    "empire": "city_chartered"
+  },
+  "visual_grammar": {
+    "land": {
+      "identity": "mostly untouched land with one claim marker",
+      "extra_building_target": 0,
+      "districts": 0
+    },
+    "settlement": {
+      "identity": "compact organic village around green, crossing and work edge",
+      "extra_building_target": 3,
+      "districts": 1
+    },
+    "city": {
+      "identity": "materially broader town footprint with multiple neighborhoods and civic square",
+      "extra_building_target": 10,
+      "districts": 3
+    },
+    "nation": {
+      "identity": "capital with ceremonial core, seat of government and regional identity",
+      "extra_building_target": 18,
+      "districts": 4
+    },
+    "empire": {
+      "identity": "dominant imperial capital with unmistakable seat of power, walls and satellite districts",
+      "extra_building_target": 30,
+      "districts": 5
+    }
+  },
+  "fixed_camera_contract": {
+    "preset": "village",
+    "same_framing_all_stages": true,
+    "camera_zoom_not_stage_signal": true
+  },
+  "forbidden": [
+    "camera zoom as primary progression",
+    "labels as primary progression",
+    "translucent rings as primary progression",
+    "new asset family",
+    "new geography",
+    "main playable controller rewrite",
+    "economy",
+    "combat",
+    "diplomacy",
+    "governance",
+    "Third-Land Prospect",
+    "MAX",
+    "paid tools"
+  ]
+}
