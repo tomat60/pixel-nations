@@ -18,18 +18,18 @@ func _initialize() -> void:
 	_check(branches.size() == 2, "exactly_two_branches")
 	_check(String(branches[0].get("coordination", "")) == "ridge_convoy_dispatched", "trade_coordination")
 	_check(String(branches[0].get("result", "")) == "south_marsh_surveyed", "trade_result")
-	_check(branches[0].get("accepted_transform", []) == [365, 690], "south_marsh_transform")
+	_check(_numeric_pair(branches[0].get("accepted_transform", [])) == [365, 690], "south_marsh_transform")
 	_check(String(branches[1].get("coordination", "")) == "basin_alert_raised", "watch_coordination")
 	_check(String(branches[1].get("result", "")) == "northgate_surveyed", "watch_result")
-	_check(branches[1].get("accepted_transform", []) == [445, 65], "northgate_transform")
+	_check(_numeric_pair(branches[1].get("accepted_transform", [])) == [445, 65], "northgate_transform")
 	_check(bool(prospect.get("exactly_one_prospect", false)), "exactly_one_prospect")
 	_check(bool(prospect.get("exactly_one_event", false)), "exactly_one_event")
 	_check(not bool(prospect.get("land_claimed", true)), "prospect_not_claimed")
 	_check(not bool(prospect.get("repeatable_survey", true)), "survey_not_repeatable")
 	var geography: Dictionary = manifest.get("shared_geography", {})
 	_check(geography.get("claimed_lands_exactly", []) == ["east_route", "north_ridge"], "manifest_exact_two_lands")
-	_check(geography.get("south_marsh_transform", []) == [365, 690], "shared_south_marsh_transform")
-	_check(geography.get("northgate_transform", []) == [445, 65], "shared_northgate_transform")
+	_check(_numeric_pair(geography.get("south_marsh_transform", [])) == [365, 690], "shared_south_marsh_transform")
+	_check(_numeric_pair(geography.get("northgate_transform", [])) == [445, 65], "shared_northgate_transform")
 	_check(not bool(geography.get("third_land_claimed", true)), "shared_no_third_claim")
 
 	var pending_trade := _save("world_first_third_land_prospect_revealed", "trade_post", "ridge_logistics_line_open", "ridge_convoy_dispatched", "none", "trade", "shield_greenvale", "stand_firm", "secure_gilded_crossing")
@@ -135,6 +135,11 @@ func _save(state: String, specialization: String, payoff: String, coordination: 
 		crisis_response, rival_response, frontier_payoff,
 		"north_ridge", "north_ridge_claimed", "established", specialization, payoff, coordination, prospect
 	)
+
+func _numeric_pair(value: Variant) -> Array[int]:
+	if not value is Array or value.size() != 2:
+		return []
+	return [int(value[0]), int(value[1])]
 
 func _read_json(path: String) -> Dictionary:
 	var parsed: Variant = JSON.parse_string(_read_text(path))
