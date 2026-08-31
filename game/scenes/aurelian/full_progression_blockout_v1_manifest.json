@@ -1,0 +1,116 @@
+{
+  "contract": "GODOT_AURELIAN_FULL_PROGRESSION_BLOCKOUT_V1",
+  "authority_issue": 563,
+  "authority_baseline": "851ae771bbf787a41375a7cb7982b4ac4ea767f6",
+  "product_baseline": "cf952cc055af15370bcc99a71893b8f9aa7c83ab",
+  "runtime": "Godot 4.7.1",
+  "shared_geography": "aurelian_authored_terrain_v1.glb",
+  "asset_policy": "reuse accepted Aurelian GLB, repository-pinned assets, existing materials and procedural primitives only",
+  "stages": ["land", "settlement", "city", "nation", "empire"],
+  "views": ["village", "map", "world"],
+  "matrix": {
+    "land": {
+      "village_base": "claimed",
+      "map_base": "no_selection",
+      "world_base": "neutral",
+      "intent": {
+        "village": "one claimed beginning with almost no built footprint",
+        "map": "one territorial origin with no network or frontier structure",
+        "world": "one small home region inside a much larger unknown strategic space"
+      },
+      "camera_size": {"village": 9.4, "map": 14.8, "world": 19.5}
+    },
+    "settlement": {
+      "village_base": "founded",
+      "map_base": "no_selection",
+      "world_base": "neutral",
+      "intent": {
+        "village": "legible settlement cluster organized around road, green and work edge",
+        "map": "Greenvale becomes a local settlement anchor without reading as a nation",
+        "world": "the origin gains weight but remains a local basin presence"
+      },
+      "camera_size": {"village": 9.6, "map": 15.8, "world": 20.5}
+    },
+    "city": {
+      "village_base": "city_chartered",
+      "map_base": "east_route_claimed",
+      "world_base": "selected_trade",
+      "intent": {
+        "village": "dense civic core, market hierarchy and organized urban footprint",
+        "map": "city anchor and first strategic route make Greenvale regionally important",
+        "world": "the city projects one clear external strategic connection"
+      },
+      "camera_size": {"village": 10.0, "map": 16.8, "world": 21.8}
+    },
+    "nation": {
+      "village_base": "city_chartered",
+      "map_base": "east_route_claimed",
+      "world_base": "all_directions",
+      "intent": {
+        "village": "Greenvale reads as a national capital through civic standards and capital hierarchy",
+        "map": "one homeland and connected capital read as a polity rather than a city marker",
+        "world": "Aurelian reads as a nation with multiple strategic directions"
+      },
+      "camera_size": {"village": 10.3, "map": 17.8, "world": 23.4}
+    },
+    "empire": {
+      "village_base": "city_chartered",
+      "map_base": "east_route_claimed",
+      "world_base": "all_directions",
+      "intent": {
+        "village": "Greenvale reads as an imperial capital with unmistakable central hierarchy",
+        "map": "multiple controlled loci, capital network and frontier structure read at a glance",
+        "world": "the polity occupies a larger strategic footprint with outward frontier pressure and room to scale"
+      },
+      "camera_size": {"village": 10.8, "map": 19.2, "world": 27.0}
+    }
+  },
+  "topology_invariants": {
+    "GreenvaleOrigin": [354, 285],
+    "GildedCrossing": [515, 340],
+    "NorthRidge": [700, 205],
+    "ForestWorkEdge": [245, 205],
+    "FieldsPlains": [405, 505],
+    "SouthMarsh": [365, 690],
+    "CoastOutflow": [610, 875],
+    "Northgate": [445, 65]
+  },
+  "evidence": {
+    "required_matrix_count": 15,
+    "resolution": [1440, 900],
+    "input_driven_motion": true,
+    "direct_visual_review_required": true,
+    "exact_head_required": true,
+    "bounded_visual_corrections_max": 1
+  },
+  "preserve": [
+    "accepted First Inter-Land Coordination product baseline",
+    "single Aurelian geography",
+    "existing Village/Map/World production scenes",
+    "existing persistence schema",
+    "existing playable controller"
+  ],
+  "forbidden": [
+    "Third-Land Prospect recovery",
+    "new reducer action",
+    "persistence schema change",
+    "economy",
+    "resources",
+    "workers",
+    "queues",
+    "timers",
+    "combat",
+    "diplomacy",
+    "governance simulation",
+    "third-land claim",
+    "repeatable expansion",
+    "new GLB",
+    "new terrain",
+    "new asset family",
+    "backend",
+    "multiplayer",
+    "P12",
+    "MAX",
+    "paid tools"
+  ]
+}
