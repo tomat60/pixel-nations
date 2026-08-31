@@ -1,19 +1,19 @@
 # Pixel Nations Current State
 
-Status: REVIEW REQUIRED
+Status: ACTIVE
 Updated: 2026-08-31
-Current state revision: 3
-Authority baseline SHA: `851ae771bbf787a41375a7cb7982b4ac4ea767f6`
+Current state revision: 4
+Authority baseline SHA: `62772203cb12157db205f866c48be82789ab009b`
 Product baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: whole-game progression blockout before deeper mechanics.
-Current milestone: Aurelian Full Progression Blockout v1 rejected after direct review.
-Active execution issue: #563
-Next allowed action: run a bounded art-direction and composition review. Do not implement another candidate until fresh authority explicitly approves its visual grammar and acceptance matrix.
+Current milestone: authorize Full Progression Visual Grammar v2 and then build exactly one stronger progression candidate.
+Active execution issue: #567
+Next allowed action: after this authority transition merges with healthy exact-head checks, implement one bounded v2 candidate under #567. The first implementation gate is a five-frame unlabeled fixed-camera Village strip; do not spend on the full 15-frame matrix until that strip clearly reads `land -> settlement -> city -> nation -> empire`.
 
 ## Accepted product baseline
 
-First Inter-Land Coordination v1 is the latest accepted product milestone and remains the rollback baseline.
+First Inter-Land Coordination v1 remains the latest accepted product milestone and rollback baseline.
 
 Terminal result: `GODOT_AURELIAN_FIRST_INTER_LAND_COORDINATION_PASS`.
 
@@ -22,13 +22,13 @@ Merged product baseline: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Accepted evidence:
 
-- Playable Entry: run `33342439470`, artifact `9741137826`, digest `sha256:0fd36bff43afb1dc78743f599153dc628da7778407fba5ec782d88010714ec0b`
-- Web Playability: run `33342439381`, artifact `9741057440`, digest `sha256:9f8ee765190b0b6e4eb159eaa5abd646857b22ee7c7090ba2aa33b7f180275a7`
-- Session Persistence v2: run `33342439433`, artifact `9741046269`, digest `sha256:d9f75167254cd0aef8dd49419e4af0f19bd6c67811611c87602bf6610f3e321c`
+- Playable Entry run `33342439470`, artifact `9741137826`
+- Web Playability run `33342439381`, artifact `9741057440`
+- Session Persistence v2 run `33342439433`, artifact `9741046269`
 
-Direct review confirmed two persistent and mutually exclusive Trade/Watch coordination outcomes, correct Village/Map/World roles, exactly two claimed lands, one shared Aurelian geography, and persistence across native restart, Web reload and profile reopen.
+The accepted baseline preserves one shared Aurelian geography, Village/Map/World roles, two claimed lands and persistent Trade/Watch coordination outcomes.
 
-## Rejected and frozen work
+## Rejected reference candidate
 
 PR #565 `Implement Godot Aurelian Full Progression Blockout v1` is terminally rejected at exact head `76eea912f112818b1036ea9977cbc5bef6853bf1` and is closed without merge.
 
@@ -36,93 +36,161 @@ Classification: `GODOT_AURELIAN_FULL_PROGRESSION_BLOCKOUT_V1_REJECT`.
 
 Exact-head deterministic evidence passed in run `33401226854`, artifact `9761347657`, digest `sha256:d6b8e273e520604e20431bcd300f08542a2e8fd7d42b29027d4bffed2b8c2ae0`. The artifact contains all 15 required 1440x900 frames and a 12.77-second input-driven progression recording.
 
-Direct review rejected the candidate because City, Nation and Empire remained variants of the same Village silhouette, while Map and World progression still read primarily as camera zoom plus translucent discs/rings rather than materially evolving homeland, network and imperial frontier geography. A reviewer without labels could not reliably identify all five stages.
+Direct review rejected the candidate because:
 
-The first complete matrix received the one allowed bounded visual correction. The classified head remained below the visual acceptance gate, so no second correction is authorized. The branch is reference only and must not be merged.
+1. City, Nation and Empire Village states remained variants of the same base silhouette and read mainly as progressively larger central blocks.
+2. Map and World progression read primarily as camera zoom plus translucent discs/rings instead of materially evolving homeland, network and imperial frontier geography.
+3. A reviewer without labels could not reliably identify all five stages.
 
-Issue #563 is closed as not planned. Full Progression Blockout remains the current product bottleneck, but implementation is paused until art-direction/composition review defines a stronger visual grammar.
+The first complete candidate received its one allowed bounded correction and remained below the visual acceptance gate. PR #565 is reference only and must not be reopened or merged.
 
-PR #561 `Implement Godot First Third-Land Prospect v1` is terminally rejected at head `fd4e0612caae369123b3c374486acf1d208ec908`.
+PR #561 Third-Land Prospect is also terminally rejected/reference only. Issues #559 and #562 remain frozen. Do not resume deeper expansion work during this phase.
 
-Classification: `GODOT_AURELIAN_FIRST_THIRD_LAND_PROSPECT_REJECT`.
+## Art-direction reset decision
 
-Reason: exact-head Web and Persistence evidence passed, but the required Playable normal-input sequence stopped at `world_coordinated_logistics_network` and never entered prospect reveal, inspection, survey or terminal prospect states. Static or alternate-path evidence cannot replace the missing reviewed interaction.
+The technical progression-atlas pipeline is proven. The bottleneck is now the **visual grammar of growth**.
 
-The rejected branch is reference material only and must not be merged.
+The next candidate must make progression visible through physical world changes rather than primarily through camera distance, text, colored rings or generic central blocks.
 
-Issue #559 and recovery issue #562 are superseded by the whole-product strategy review. Third-Land Prospect recovery is intentionally frozen during the current phase. Do not resume it unless a later portfolio review explicitly makes expansion-system work the highest-value next move.
+Research principles adopted for v2:
 
-## Whole-product strategy review
+- strategy-scale geography should remain a physical readable world, not become a dashboard;
+- later settlement tiers need stronger density, civic hierarchy and monumental forms;
+- the seat of power should be an unmistakable visual proof of political scale;
+- inspiration is used as a design principle only, never as copied assets or layouts.
 
-### Finding
+Binding detailed art direction and implementation scope live in issue #567.
 
-The project proved the core fantasy and several later mechanic prototypes successfully, but milestone selection became too locally sequential after First Nation / Living Capital. The process optimized each individual PR well while the world/progression skeleton and visible stage differentiation lagged behind the growing state machine.
+## Binding visual grammar v2
 
-This is a roadmap-governance failure, not a reason to discard accepted work.
+### Cross-stage invariant
 
-### Biggest current bottleneck
+Within each view family, keep camera framing substantially stable across all five stages. The world itself must change enough that zoom cannot fake progression.
 
-The player cannot yet see the whole promise `land -> settlement -> city -> nation -> empire` as one coherent, strongly differentiated progression across Village, Map and World.
+### Land
 
-That bottleneck is now more important than another crisis, rival, specialization, coordination or expansion micro-feature.
+- mostly untouched Aurelian terrain;
+- one small claim/camp identity cue;
+- no urban silhouette or national territory treatment.
 
-### Decision
+### Settlement
 
-Build breadth in blockout before adding more depth.
+- compact organic cluster;
+- village green / crossing-road relationship;
+- footpaths and first field/work edge;
+- low skyline and small footprint.
 
-The next candidate must create a representative whole-game progression matrix on the accepted Aurelian geography:
+### City
 
-1. `land`
-2. `settlement`
-3. `city`
-4. `nation`
-5. `empire`
+- materially larger footprint than Settlement;
+- multiple connected neighborhood blocks;
+- primary roads/avenues and civic square;
+- clearly stronger/taller civic landmark;
+- denser residential/work edges.
 
-across:
+### Nation
 
-- Village = HOW
-- Map = WHERE
-- World = WHY / SCALE
+- Greenvale becomes a capital, not merely a larger city;
+- distinct capital district / ceremonial axis / standards or monument language using the existing asset envelope and procedural composition;
+- visible regional network and subordinate strategic nodes;
+- Map shows a coherent homeland area and routes rather than a single disc;
+- World shows Aurelian as a readable political region anchored to geography.
 
-Required primary evidence: **15 key 1440x900 running-game screenshots = 5 stages x 3 views**, plus one short input-driven progression video.
+### Empire
 
-A reviewer who sees only the matrix must understand the stage progression without implementation notes.
+- unmistakable imperial-capital silhouette and expanded physical footprint;
+- dominant seat-of-power composition from existing modular/pinned assets or procedural primitives;
+- satellite district/outpost/network context visible in the same frame;
+- Map shows multiple controlled nodes/province-like areas and connected frontier structure;
+- World shows a materially larger sphere of power and external frontier pressure;
+- empire may not be identifiable only because of a label, color ring or camera distance.
 
-## Current phase scope
+## View roles
 
-### Required visible outcome
+- Village = HOW: footprint, density, roads, civic hierarchy, neighborhoods, work/field edge and capital/imperial skyline.
+- Map = WHERE: settlement anchors, routes, homeland/province footprint and frontier structure. Markers are supporting information only.
+- World = WHY / SCALE: sphere of power, connected regions/frontiers and strategic geography. Preserve atlas-first composition.
 
-- Village must scale materially in footprint, density, civic hierarchy, paths/roads, work/field edges and capital prominence.
-- Map must scale from starting land to settlement/city importance, homeland/network and imperial frontier structure.
-- World must communicate increasing strategic scale while remaining geography/atlas first and UI second.
-- The full 10,000-land promise should be represented structurally; this phase does not build 10,000 final production lands.
-- Existing accepted mechanics may provide continuity and state, but they are not expanded during this phase.
+## Implementation architecture
 
-### Allowed
+Preferred implementation:
+
+- preserve the accepted shared Aurelian geography and GLB;
+- reuse the existing production Village -> Map -> World inheritance where useful;
+- build v2 stage composition in one bounded progression presentation layer;
+- do not touch `playable_aurelian_entry_v1.gd` unless a concrete missing API is proven;
+- do not add a new asset family by default;
+- use deterministic Godot capture for rapid visual review.
+
+## Two-step evidence gate
+
+### Gate A - early silhouette proof
+
+Before building the full matrix, capture exactly five unlabeled Village frames at one fixed camera:
+
+`land -> settlement -> city -> nation -> empire`
+
+PASS only if an uninformed reviewer can order and distinguish all five states from physical silhouette/footprint/hierarchy alone.
+
+If City/Nation/Empire collapse into the same silhouette, reject early and change composition. Do not spend on Map/World or full regression yet.
+
+### Gate B - complete progression atlas
+
+Only after Gate A passes, produce:
+
+- 15 exact-head 1440x900 screenshots = 5 stages x 3 views;
+- unlabeled contact sheet;
+- fixed-camera-per-view comparison sheet;
+- short normal-input progression video;
+- focused shared-geography and Godot regressions;
+- final accepted gameplay/persistence regression before merge.
+
+PASS only if:
+
+1. all five stages are distinguishable without labels;
+2. Village hierarchy and footprint scale materially;
+3. Map reads as evolving physical strategic geography, not static terrain plus glyphs;
+4. World communicates increasing political scale/frontier context;
+5. one shared physical geography remains coherent;
+6. accepted gameplay/persistence baseline is not regressed;
+7. direct screenshot and motion review passes; green CI alone is insufficient.
+
+At most one bounded correction is allowed after the first complete Gate B candidate. Gate A may be iterated cheaply before Gate B because its purpose is specifically to prevent expensive weak full-matrix runs.
+
+## Allowed
 
 - `game/scenes/aurelian/**`
-- existing Aurelian assets, materials, topology and derived procedural nodes
+- existing pinned/licensed Aurelian asset envelope
+- existing procedural/derived presentation nodes
+- procedural roads, plazas, territory surfaces, standards and presentation primitives
 - `game/tests/**`
-- focused evidence workflow changes
-- bounded camera/framing, composition, lighting, fog, hierarchy and gamefeel adjustments when they strengthen the shared progression matrix
-- reuse of already-created staged village/art-target work where it matches current direction
+- one focused evidence workflow
+- bounded shared lighting/framing changes
 
-### Forbidden
+## Forbidden
 
-- Third-Land Prospect recovery during this phase
-- new economy, resources, production, workers, queues or timers
-- new combat, diplomacy or governance systems
-- third-land claim or repeatable expansion system
-- backend, multiplayer, accounts, payments or P12
-- new asset family or paid asset without an explicit later bottleneck decision
-- React/SVG/CSS rebuilding of final game surfaces
-- MAX or paid tools by default
+- Third-Land Prospect recovery
+- economy/resources/workers/timers/queues
+- combat/diplomacy/governance systems
+- third-land or repeatable expansion systems
+- backend/multiplayer/accounts/payments/P12
+- React/SVG/CSS final-game rebuild
+- independent geography
+- broad main-controller rewrite
+- new paid assets/tools or MAX
+- using camera zoom, labels or translucent rings as the primary progression delta
 
-## Build sequence after this phase
+## Tool and cost policy
 
-The durable sequence is defined in `docs/GAME_STRATEGY_MASTER_PLAN.md`. Current intent is:
+- Strategy/art direction/direct review: GPT-5.6 Sol
+- Deterministic GitHub/Godot tooling first
+- Executor: GPT-5.5/Codex-class bounded implementation when this authority merges
+- MAX: OFF
+- Extra spend target: 0 USD
 
-1. Full Progression Blockout
+## Durable build sequence after this phase
+
+1. Full Progression Blockout with accepted visual grammar
 2. Core Playable Loop consolidation
 3. Minimal Economy Foundation
 4. Repeatable Expansion Loop
@@ -130,53 +198,21 @@ The durable sequence is defined in `docs/GAME_STRATEGY_MASTER_PLAN.md`. Current 
 6. Empire gameplay depth and scaling
 7. Content scale, polish, UX, audio and performance
 
-This is a strategy rail, not a promise to implement every listed system. A portfolio review may reorder later phases when evidence shows a different bottleneck.
-
-## Portfolio gate
-
-Before authorizing a new product milestone, the control-plane must identify the biggest current product bottleneck and compare the proposed work against at least the main alternatives. It must not mechanically infer the next feature from the previous state transition.
-
-A portfolio review is mandatory after a terminal REJECT, at a major phase boundary, after repeated work in one subsystem, when user feedback says pace/clarity/visual progress is wrong, or when code/state complexity is growing faster than visible product value.
-
-The review should be lightweight and may live in current state or the active issue; it does not require a separate PR unless authority actually changes.
-
-## Tool and cost policy
-
-- Strategy/control/direct review: GPT-5.6 Sol.
-- Deterministic GitHub/Godot tooling first.
-- Executor: Cursor GPT-5.5 without MAX only when an exact implementation contract is ready and an execution path is available.
-- MAX: OFF.
-- Extra spend target: 0 USD.
-- Paid assets/tools require an explicit bottleneck justification.
-
-## Acceptance gate for Full Progression Blockout v1
-
-PASS only if:
-
-1. one physical Aurelian geography remains coherent across all views;
-2. all 15 required running-game states are captured on the exact candidate head;
-3. the five progression stages are visually distinguishable without reading labels;
-4. Village hierarchy and density scale materially;
-5. Map reads as evolving strategy geography rather than the same picture with new labels;
-6. World communicates increasing scale/frontier context;
-7. accepted gameplay/persistence baseline is not regressed;
-8. direct screenshot and motion review passes; green CI alone is insufficient.
-
-At most one bounded correction is allowed after the first complete 15-frame candidate. If the visual direction is still weak, stop implementation and return to art-direction/composition review rather than micro-polishing.
+A later portfolio review may reorder phases when current evidence shows a different bottleneck.
 
 ## Source-of-truth precedence
 
 1. this `PROJECT_CURRENT_STATE.md`
 2. accepted ADRs
 3. root `AGENTS.md`
-4. `docs/GAME_STRATEGY_MASTER_PLAN.md` for durable product sequencing
-5. active execution issue #563
+4. `docs/GAME_STRATEGY_MASTER_PLAN.md`
+5. active execution issue #567
 6. accepted exact-head evidence and merged product baseline
 7. active operating/QA protocols
-8. older issues, PRs, briefs, runbooks, reports and generated evidence as history only
+8. older issues, PRs, briefs, runbooks and reports as history/reference only
 
 ## Current stop condition
 
-Stop implementation. Do not reopen or merge PR #565, do not start a second Full Progression Blockout candidate, and do not resume deeper mechanics or Third-Land Prospect work from this authority.
+Merge this authority transition only if it leaves #567 as the single active product direction and does not weaken existing exact-head/release/persistence guards.
 
-The next authority change may follow only after a bounded art-direction/composition portfolio review compares a stronger whole-progression visual grammar against the current evidence.
+After merge, implement Gate A first. Do not authorize deeper mechanics or a full Gate B run until the five-frame fixed-camera Village silhouette proof passes direct review.
