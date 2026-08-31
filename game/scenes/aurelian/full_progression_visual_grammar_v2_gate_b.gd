@@ -71,7 +71,7 @@ func _populate_world(parent: Node) -> Node3D:
 	if active_view == "map":
 		_build_map_stage(root, v2_stage)
 	elif active_view == "world":
-		_build_world_stage(root, v2_stage)
+		_build_world_stage(basin, root, v2_stage)
 	return basin
 
 func _add_boundary_loop(
@@ -182,7 +182,7 @@ func _build_map_stage(root: Node3D, stage_name: String) -> void:
 			_add_standard(root, "MapEmpireCrossingProvince", gilded, "#cba25cff", 1.48, 0.90)
 			_add_standard(root, "MapEmpireFieldsProvince", fields, "#c0a064ff", 1.38, 0.90)
 
-func _build_world_stage(root: Node3D, stage_name: String) -> void:
+func _build_world_stage(basin: Node3D, root: Node3D, stage_name: String) -> void:
 	var greenvale := Vector2(354, 285)
 	var gilded := Vector2(515, 340)
 	var ridge := Vector2(700, 205)
@@ -210,19 +210,26 @@ func _build_world_stage(root: Node3D, stage_name: String) -> void:
 				Vector2(155, 125), Vector2(450, 80), Vector2(760, 125),
 				Vector2(820, 390), Vector2(590, 575), Vector2(245, 555), Vector2(115, 350)
 			]
-			_add_boundary_polyline(root, "WorldNationExtent", nation_extent, true, "#a68c5cff", 0.120, 0.110, 0.99)
+			_add_boundary_polyline(root, "WorldNationExtent", nation_extent, true, "#7f714fff", 0.075, 0.080, 0.99)
 			_add_network(root, "WorldNationSpine", [forest, greenvale, gilded, ridge], "#b18d5cff", 0.130, 1.00)
 			_add_network(root, "WorldNationSouthLink", [greenvale, fields], "#a8865aff", 0.115, 1.00)
 			_add_standard(root, "WorldNationCapital", greenvale, "#d6ad50ff", 2.05, 0.99)
 			_add_standard(root, "WorldNationRidge", ridge, "#bd9858ff", 1.55, 0.99)
 			_add_standard(root, "WorldNationCrossing", gilded, "#b4935cff", 1.40, 0.99)
+			# World must read as a regional capital system, not a smaller Map. Physical
+			# subordinate seats make the political reach legible at strategic scale.
+			_add_plaza(root, "WorldNationRidgeCourt", ridge, 0.34, "#8f805fff", 1.00)
+			_add_plaza(root, "WorldNationCrossingCourt", gilded, 0.30, "#938160ff", 1.00)
+			_add_building_clone(basin, "Greenvale_barracks", "WorldNationRidgeSeatPhysical", ridge, 1.10, -12.0)
+			_add_building_clone(basin, "Greenvale_blacksmith", "WorldNationCrossingSeatPhysical", gilded, 0.92, 18.0)
+			_add_building_clone(basin, "Greenvale_blacksmith", "WorldNationForestWardPhysical", forest, 0.76, -22.0)
 		"empire":
 			var empire_extent: Array[Vector2] = [
 				Vector2(70, 65), Vector2(390, 28), Vector2(760, 58),
 				Vector2(910, 285), Vector2(825, 585), Vector2(585, 760),
 				Vector2(245, 735), Vector2(55, 470)
 			]
-			_add_boundary_polyline(root, "WorldEmpireExtent", empire_extent, true, "#bb9d65ff", 0.155, 0.145, 1.04)
+			_add_boundary_polyline(root, "WorldEmpireExtent", empire_extent, true, "#947848ff", 0.085, 0.095, 1.04)
 			_add_network(root, "WorldEmpireEastWest", [forest, greenvale, gilded, ridge], "#c29b60ff", 0.155, 1.05)
 			_add_network(root, "WorldEmpireNorthSouth", [northgate, greenvale, fields, south], "#b9915bff", 0.145, 1.05)
 			_add_standard(root, "WorldEmpireCapital", greenvale, "#e4b849ff", 2.55, 1.04)
@@ -230,8 +237,22 @@ func _build_world_stage(root: Node3D, stage_name: String) -> void:
 			_add_standard(root, "WorldEmpireCrossing", gilded, "#c49d5aff", 1.72, 1.04)
 			_add_standard(root, "WorldEmpireFields", fields, "#b99b62ff", 1.62, 1.04)
 			_add_standard(root, "WorldEmpireForest", forest, "#b99b62ff", 1.52, 1.04)
-			_add_road(root, "WorldEmpireWestFrontier", Vector2(85, 160), Vector2(70, 600), 0.18, "#77584fff", 0.16, 1.06)
-			_add_road(root, "WorldEmpireNorthFrontier", Vector2(205, 70), Vector2(760, 55), 0.18, "#77584fff", 0.16, 1.06)
+			# Empire expands into a connected frontier system with physical regional
+			# strongholds. These use existing Aurelian assets at existing topology points.
+			_add_plaza(root, "WorldEmpireNorthgateCourt", northgate, 0.42, "#9e855cff", 1.05)
+			_add_plaza(root, "WorldEmpireSouthCourt", south, 0.44, "#9a825bff", 1.05)
+			_add_plaza(root, "WorldEmpireRidgeCourt", ridge, 0.40, "#a0885dff", 1.05)
+			_add_building_clone(basin, "Greenvale_church", "WorldEmpireNorthgateCitadel", northgate, 1.55, -8.0)
+			_add_building_clone(basin, "Greenvale_barracks", "WorldEmpireRidgeCitadel", ridge, 1.42, 14.0)
+			_add_building_clone(basin, "Greenvale_barracks", "WorldEmpireSouthCitadel", south, 1.38, -18.0)
+			_add_building_clone(basin, "Greenvale_blacksmith", "WorldEmpireCrossingStronghold", gilded, 1.12, 20.0)
+			_add_building_clone(basin, "Greenvale_blacksmith", "WorldEmpireForestStronghold", forest, 1.04, -24.0)
+			_add_network(root, "WorldEmpireNorthernFrontier", [forest, northgate, ridge], "#795d49ff", 0.115, 1.06)
+			_add_network(root, "WorldEmpireSouthernFrontier", [forest, fields, south, ridge], "#795d49ff", 0.110, 1.06)
+			_add_wall_segment(root, "WorldEmpireNorthgateRampartWest", Vector2(405, 42), Vector2(445, 65), 0.10, 0.18, 1.07)
+			_add_wall_segment(root, "WorldEmpireNorthgateRampartEast", Vector2(445, 65), Vector2(490, 45), 0.10, 0.18, 1.07)
+			_add_wall_segment(root, "WorldEmpireSouthRampartWest", Vector2(315, 710), Vector2(365, 690), 0.10, 0.18, 1.07)
+			_add_wall_segment(root, "WorldEmpireSouthRampartEast", Vector2(365, 690), Vector2(420, 720), 0.10, 0.18, 1.07)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_action_pressed("ui_accept"):
