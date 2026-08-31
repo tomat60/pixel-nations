@@ -1,0 +1,189 @@
+{
+  "contract": "GODOT_AURELIAN_FIRST_THIRD_LAND_PROSPECT_V1",
+  "issue": 559,
+  "authority_baseline_sha": "47f425aa63df156abd785958a82944e885b7bf5b",
+  "product_baseline_sha": "cf952cc055af15370bcc99a71893b8f9aa7c83ab",
+  "entry_requirement": {
+    "claimed_lands": ["east_route", "north_ridge"],
+    "north_ridge_outpost": "established",
+    "first_inter_land_coordination": ["ridge_convoy_dispatched", "basin_alert_raised"],
+    "first_third_land_prospect": null,
+    "preserve_all_accepted_progression": true
+  },
+  "prospect": {
+    "branches": [
+      {
+        "coordination": "ridge_convoy_dispatched",
+        "action": "Survey South Marsh",
+        "location": "south_marsh",
+        "accepted_transform": [365, 690],
+        "result": "south_marsh_surveyed",
+        "world_direction": "south_marsh_imperial_prospect"
+      },
+      {
+        "coordination": "basin_alert_raised",
+        "action": "Survey Northgate",
+        "location": "northgate",
+        "accepted_transform": [445, 65],
+        "result": "northgate_surveyed",
+        "world_direction": "northgate_imperial_prospect"
+      }
+    ],
+    "matching_coordination_required": true,
+    "second_choice_offered": false,
+    "branch_switching_allowed": false,
+    "exactly_one_prospect": true,
+    "exactly_one_event": true,
+    "land_claimed": false,
+    "repeatable_survey": false
+  },
+  "sequence": {
+    "reveal_state": "world_first_third_land_prospect_revealed",
+    "inspection_state": "map_third_land_prospect_inspection",
+    "village_action_state": "village_third_land_survey_action",
+    "trade_result_states": [
+      "map_south_marsh_surveyed",
+      "village_south_marsh_report_acknowledged",
+      "world_south_marsh_imperial_prospect"
+    ],
+    "watch_result_states": [
+      "map_northgate_surveyed",
+      "village_northgate_report_acknowledged",
+      "world_northgate_imperial_prospect"
+    ]
+  },
+  "availability": {
+    "matching_coordination_required": true,
+    "exactly_two_claimed_lands_required": true,
+    "matching_branch_only": true,
+    "premature_survey_rejected": true,
+    "duplicate_survey_rejected": true,
+    "conflicting_branch_rejected": true,
+    "both_results_rejected": true,
+    "unknown_value_rejected": true,
+    "third_land_claim_path": false
+  },
+  "events": {
+    "south_marsh_surveyed": "AURELIAN_FIRST_THIRD_LAND_PROSPECT=SOUTH_MARSH_SURVEYED",
+    "northgate_surveyed": "AURELIAN_FIRST_THIRD_LAND_PROSPECT=NORTHGATE_SURVEYED",
+    "single_event_per_profile": true,
+    "idempotent": true,
+    "restore_event_emission_allowed": false,
+    "duplicate_event_allowed": false
+  },
+  "view_roles": {
+    "village": "HOW_GREENVALE_COMMISSIONS_AND_RECEIVES_THE_SURVEY",
+    "map": "WHERE_THE_EXISTING_UNCLAIMED_PROSPECT_IS_LOCATED",
+    "world": "WHY_THE_PROSPECT_IS_THE_NEXT_IMPERIAL_DIRECTION"
+  },
+  "presentation": {
+    "south_marsh_cues": ["cyan_survey_ring", "reed_edge_pulse", "report_marker"],
+    "northgate_cues": ["pale_survey_ring", "gate_beacon", "ridge_line_marker"],
+    "prospect_reads_as_surveyed_not_claimed": true,
+    "claimed_land_hex_forbidden": true,
+    "settlement_or_outpost_cue_forbidden": true,
+    "procedural_cues_only": true,
+    "new_asset": false,
+    "new_glb": false,
+    "new_terrain": false,
+    "new_camera": false
+  },
+  "shared_geography": {
+    "asset": "aurelian_authored_terrain_v1.glb",
+    "greenvale_origin_unchanged": true,
+    "river_spline_unchanged": true,
+    "east_bridge_transform_unchanged": true,
+    "north_ridge_transform_unchanged": true,
+    "south_marsh_transform": [365, 690],
+    "northgate_transform": [445, 65],
+    "routes_and_landmarks_unchanged": true,
+    "camera_topology_unchanged": true,
+    "claimed_lands_exactly": ["east_route", "north_ridge"],
+    "surveyed_prospects_exactly_one": true,
+    "separate_branch_geography": false,
+    "third_land_claimed": false
+  },
+  "persistence": {
+    "schema": "pixel_nations.aurelian_session",
+    "version": 2,
+    "new_fields": ["first_third_land_prospect"],
+    "allowed_values": ["south_marsh_surveyed", "northgate_surveyed"],
+    "branch_mapping": {
+      "ridge_convoy_dispatched": "south_marsh_surveyed",
+      "basin_alert_raised": "northgate_surveyed"
+    },
+    "preserve_first_inter_land_coordination": true,
+    "preserve_north_ridge_progression": true,
+    "claimed_lands": ["east_route", "north_ridge"],
+    "preserve_greenvale_imperial_capital": true,
+    "preserve_all_accepted_progression": true,
+    "older_valid_profile_without_prospect": "not_completed",
+    "native_restart_required": true,
+    "web_reload_required": true,
+    "persistent_profile_reopen_required": true,
+    "village_map_world_reopen_required": true,
+    "storage_seeding_allowed": false
+  },
+  "evidence": {
+    "accepted_coordination_before_reveal_required": true,
+    "branch_matched_world_reveal_required": true,
+    "existing_transform_map_inspection_required": true,
+    "explicit_village_survey_action_required": true,
+    "south_marsh_result_required": true,
+    "northgate_result_required": true,
+    "surveyed_not_claimed_distinction_required": true,
+    "greenvale_acknowledgement_required": true,
+    "world_direction_required": true,
+    "exactly_one_matching_event_required": true,
+    "normal_input_motion_required": true,
+    "native_persistence_required": true,
+    "web_persistence_required": true,
+    "profile_reopen_required": true,
+    "exactly_two_claimed_lands_regression_required": true,
+    "accepted_progression_regression_required": true,
+    "shared_geography_regression_required": true,
+    "no_claim_settlement_outpost_or_repeatable_path_required": true,
+    "exact_manifest_validation_required": true,
+    "direct_still_and_motion_review_required": true,
+    "one_bounded_correction_maximum": true
+  },
+  "terminal_results": [
+    "GODOT_AURELIAN_FIRST_THIRD_LAND_PROSPECT_PASS",
+    "GODOT_AURELIAN_FIRST_THIRD_LAND_PROSPECT_REJECT"
+  ],
+  "forbidden": [
+    "third_land_claim",
+    "third_settlement",
+    "second_outpost",
+    "repeatable_exploration",
+    "resource_economy",
+    "prices",
+    "inventory",
+    "yields",
+    "production",
+    "workers",
+    "queues",
+    "timers",
+    "simulated_units",
+    "pathfinding",
+    "combat",
+    "attacks",
+    "damage",
+    "victory_states",
+    "generic_mission_system",
+    "branch_switching",
+    "new_assets",
+    "new_glb",
+    "new_terrain",
+    "new_geography",
+    "new_camera",
+    "new_dependency",
+    "backend",
+    "accounts",
+    "multiplayer",
+    "public_shell",
+    "P12",
+    "MAX",
+    "paid_tools"
+  ]
+}
