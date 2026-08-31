@@ -57,15 +57,15 @@ func _init() -> void:
 	_check(String((matrix.get("empire", {}) as Dictionary).get("village_base", "")) == "city_chartered", "empire_village_base")
 
 	var topology: Dictionary = manifest.get("topology_invariants", {})
-	_check(topology.get("GreenvaleOrigin", []) == [354, 285], "greenvale_topology")
-	_check(topology.get("GildedCrossing", []) == [515, 340], "crossing_topology")
-	_check(topology.get("NorthRidge", []) == [700, 205], "north_ridge_topology")
-	_check(topology.get("SouthMarsh", []) == [365, 690], "south_marsh_topology")
-	_check(topology.get("Northgate", []) == [445, 65], "northgate_topology")
+	_check(_numeric_pair_matches(topology.get("GreenvaleOrigin", []), 354.0, 285.0), "greenvale_topology")
+	_check(_numeric_pair_matches(topology.get("GildedCrossing", []), 515.0, 340.0), "crossing_topology")
+	_check(_numeric_pair_matches(topology.get("NorthRidge", []), 700.0, 205.0), "north_ridge_topology")
+	_check(_numeric_pair_matches(topology.get("SouthMarsh", []), 365.0, 690.0), "south_marsh_topology")
+	_check(_numeric_pair_matches(topology.get("Northgate", []), 445.0, 65.0), "northgate_topology")
 
 	var evidence: Dictionary = manifest.get("evidence", {})
 	_check(int(evidence.get("required_matrix_count", 0)) == 15, "evidence_matrix_count")
-	_check(evidence.get("resolution", []) == [1440, 900], "evidence_resolution")
+	_check(_numeric_pair_matches(evidence.get("resolution", []), 1440.0, 900.0), "evidence_resolution")
 	_check(bool(evidence.get("input_driven_motion", false)), "input_driven_motion")
 	_check(bool(evidence.get("direct_visual_review_required", false)), "direct_review")
 	_check(int(evidence.get("bounded_visual_corrections_max", 0)) == 1, "correction_limit")
@@ -75,6 +75,14 @@ func _init() -> void:
 		_check(forbidden.has(item), "forbidden_%s" % String(item).replace(" ", "_").to_lower())
 
 	_finish()
+
+func _numeric_pair_matches(value: Variant, expected_x: float, expected_y: float) -> bool:
+	if not value is Array:
+		return false
+	var pair := value as Array
+	if pair.size() != 2:
+		return false
+	return is_equal_approx(float(pair[0]), expected_x) and is_equal_approx(float(pair[1]), expected_y)
 
 func _check(condition: bool, label: String) -> void:
 	if not condition:
