@@ -8,7 +8,7 @@ Product baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: whole-game progression blockout before deeper mechanics.
 Current milestone: Aurelian Full Progression Blockout v1 rejected after direct review.
-Active execution issue: none; #563 is closed as not planned.
+Active execution issue: #563
 Next allowed action: run a bounded art-direction and composition review. Do not implement another candidate until fresh authority explicitly approves its visual grammar and acceptance matrix.
 
 ## Accepted product baseline
