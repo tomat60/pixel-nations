@@ -1,69 +1,72 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-08-30
+Updated: 2026-08-31
 Current state revision: 1
-Authority baseline SHA: `68ca85b49602125bc4829fe71de1288eb760aefd`
-Product baseline SHA: `68ca85b49602125bc4829fe71de1288eb760aefd`
+Authority baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
+Product baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current milestone: authorize exactly one bounded Godot Aurelian candidate for First Inter-Land Coordination v1.
+Current milestone: authorize exactly one bounded Godot Aurelian candidate for First Third-Land Prospect v1.
 
-Active execution issue: #555
-Next allowed action: after this authority transition merges with healthy exact-head checks, implement exactly one bounded First Inter-Land Coordination v1 candidate.
+Active execution issue: #559
+Next allowed action: after this authority transition merges with healthy exact-head checks, implement exactly one bounded First Third-Land Prospect v1 candidate.
 
 ## Accepted product baseline
 
-North Ridge Specialization Payoff v1 is accepted as `GODOT_AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF_PASS`.
+First Inter-Land Coordination v1 is accepted as `GODOT_AURELIAN_FIRST_INTER_LAND_COORDINATION_PASS`.
 
-Accepted exact head: `b9db7b2dde50c5ef1169117514721e44b4dd1ca9`
-Merge commit: `68ca85b49602125bc4829fe71de1288eb760aefd`
+Accepted exact head: `0f8e5e7636a3f03ba7640801bdee399b839308ab`
+Merge commit: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Exact-head evidence:
 
-- Playable Entry: run `33318965669`, artifact `9734499631`, digest `sha256:9b05179fd838da70ee2f480353656b37b66b1b60962d0858ae3f7834fd58712c`
-- Web Playability: run `33318965887`, artifact `9734381172`, digest `sha256:32b145d3853712aeca00fddc020ecc86e8aeb256f9d45a6c7c3299a3a95ba348`
-- Session Persistence v2: run `33318965840`, artifact `9734411723`, digest `sha256:bb62b7e9d577cc416adacee4205009c72673c75651abcf12cf38181ccddd3578`
+- Playable Entry: run `33342439470`, artifact `9741137826`, digest `sha256:0fd36bff43afb1dc78743f599153dc628da7778407fba5ec782d88010714ec0b`
+- Web Playability: run `33342439381`, artifact `9741057440`, digest `sha256:9f8ee765190b0b6e4eb159eaa5abd646857b22ee7c7090ba2aa33b7f180275a7`
+- Session Persistence v2: run `33342439433`, artifact `9741046269`, digest `sha256:d9f75167254cd0aef8dd49419e4af0f19bd6c67811611c87602bf6610f3e321c`
 
 Direct review confirmed:
 
-- Trade Post exposes and persists `Open Ridge Logistics Line`.
-- Watch Post exposes and persists `Light North Ridge Signal`.
-- Both results remain visually and semantically distinct.
-- Each profile emits exactly one matching payoff event.
-- Native restart, Web reload and profile reopen preserve the chosen payoff.
+- Trade Post completes and persists `Dispatch Ridge Convoy`.
+- Watch Post completes and persists `Raise Basin Alert`.
+- Both operations visibly coordinate Greenvale with North Ridge and remain distinct.
+- Each profile emits exactly one matching coordination event.
+- Native restart, Web reload and profile reopen preserve the chosen result.
 - Village remains HOW, Map remains WHERE and World remains WHY/WHICH DIRECTION.
-- East Route, North Ridge, Greenvale and one physical Aurelian Basin geography remain unchanged.
+- Exactly two lands, prior progression and one physical Aurelian Basin geography remain intact.
 
-Issue #551 is complete. Post-merge Vercel status for the product baseline is `SUCCESS`. Public route smoke remains `PRODUCTION UNVERIFIED` because the deployment check does not expose a canonical public origin.
+Issue #555 is complete. Post-merge Vercel status for the product baseline is `SUCCESS`. Public route smoke remains `PRODUCTION UNVERIFIED` because the deployment check does not expose a canonical public origin.
 
 ## Strategy decision
 
-The accepted frontier role now needs to coordinate the capital and outpost in one deliberate two-land operation.
+The functioning two-land network may now identify one branch-specific prospect beyond the current empire without claiming it.
 
-First Inter-Land Coordination v1 provides exactly one branch-specific action:
+First Third-Land Prospect v1 provides exactly one survey:
 
-- Trade Post plus active logistics line: `Dispatch Ridge Convoy`
-- Watch Post plus active signal: `Raise Basin Alert`
+- completed Trade coordination: `Survey South Marsh`
+- completed Watch coordination: `Survey Northgate`
 
-This slice makes the two-land empire act as one network without adding an economy, simulated units, combat, a third land, repeatable operations or a general mission system.
+Both prospects reuse accepted transforms in the current Aurelian geography. The candidate adds one persistent surveyed prospect while exactly two lands remain claimed.
 
 ## Required product outcome
 
 The candidate must prove this normal-input sequence:
 
-`active North Ridge payoff -> World identifies the coordination need -> Map inspects the Greenvale to North Ridge link -> Village commits the matching operation -> Map shows the coordinated result -> Greenvale acknowledges completion -> World records a functioning two-land empire`
+`completed two-land coordination -> World identifies one branch-specific direction -> Map inspects the existing prospect transform -> Village commissions the matching survey -> Map records one surveyed prospect -> Greenvale acknowledges the report -> World records the next imperial direction`
 
 The result must persist across native restart, Web reload and profile reopen.
 
 ## Binding constraints
 
-- The accepted specialization and payoff determine the only available operation.
-- Exactly one coordination result and one terminal event may exist per profile.
-- Trade and Watch results remain mutually exclusive.
-- Preserve the established outpost, exactly two claimed lands, Greenvale capital and all earlier progression.
+- The accepted coordination result determines the only available prospect.
+- Exactly one surveyed prospect and one terminal event may exist per profile.
+- Trade and Watch prospects remain mutually exclusive.
+- East Route and North Ridge remain the only claimed lands.
+- South Marsh and Northgate retain their accepted transforms.
+- Preserve Greenvale, the established outpost and all earlier progression.
 - Preserve one physical Aurelian Basin geography.
 - Village answers HOW, Map answers WHERE and World answers WHY/WHICH DIRECTION.
-- No resources, prices, inventory, production, workers, queues, timers, simulated units, combat, third land, repeatable operation or generic mission system.
+- No third-land claim, third settlement, second outpost or repeatable exploration.
+- No resources, prices, inventory, production, workers, queues, timers, simulated units, combat or generic mission system.
 - No new GLB, terrain, camera, asset family, dependency, app/play/public shell, P12, MAX, paid tools or extra spend.
 
 ## Steward process
@@ -78,4 +81,4 @@ The result must persist across native restart, Web reload and profile reopen.
 
 ## Current stop condition
 
-After this authority transition merges, implement exactly one First Inter-Land Coordination v1 candidate. Stop after direct classification as `GODOT_AURELIAN_FIRST_INTER_LAND_COORDINATION_PASS` or `GODOT_AURELIAN_FIRST_INTER_LAND_COORDINATION_REJECT`.
+After this authority transition merges, implement exactly one First Third-Land Prospect v1 candidate. Stop after direct classification as `GODOT_AURELIAN_FIRST_THIRD_LAND_PROSPECT_PASS` or `GODOT_AURELIAN_FIRST_THIRD_LAND_PROSPECT_REJECT`.
