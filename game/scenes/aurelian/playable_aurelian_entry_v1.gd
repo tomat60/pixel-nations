@@ -391,6 +391,10 @@ func _ready() -> void:
 			committed_direction = "none"
 		print("AURELIAN_NATIONAL_DIRECTION_RESTORED=%s" % committed_direction)
 		print("AURELIAN_SESSION_V2_LOAD=%s:%s:%s:%s:%s:%s:%s:%s:%s:%s" % [String(restored.get("status", "unknown")), String(restored.get("adapter", "unknown")), entry_state, restored_intent, settlement_founded, settlement_developed, route_connected, caravan_dispatched, city_chartered, nation_founded])
+	if automated_input_mode:
+		# Normal-input evidence must not inherit the prospect written by a focused
+		# persistence test that runs in the same Godot user-data directory.
+		first_third_land_prospect = "none"
 	if not ENTRY_STATES.has(entry_state):
 		entry_state = "world_neutral"
 		restored_intent = "none"
