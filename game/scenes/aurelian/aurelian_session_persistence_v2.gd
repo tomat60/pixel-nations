@@ -99,6 +99,15 @@ const VALID_STATES := [
 	"map_basin_alert_raised",
 	"village_basin_alert_greenvale_acknowledges",
 	"world_coordinated_vigilance_network",
+	"world_first_third_land_prospect_revealed",
+	"map_third_land_prospect_inspection",
+	"village_third_land_survey_action",
+	"map_south_marsh_surveyed",
+	"village_south_marsh_report_acknowledged",
+	"world_south_marsh_imperial_prospect",
+	"map_northgate_surveyed",
+	"village_northgate_report_acknowledged",
+	"world_northgate_imperial_prospect",
 	"village_claimed",
 	"village_founded",
 	"village_developed",
@@ -133,7 +142,12 @@ const FIRST_INTER_LAND_COORDINATION_PENDING_STATES := ["world_first_inter_land_c
 const RIDGE_CONVOY_COORDINATION_STATES := ["map_ridge_convoy_dispatched", "village_ridge_convoy_greenvale_acknowledges", "world_coordinated_logistics_network"]
 const BASIN_ALERT_COORDINATION_STATES := ["map_basin_alert_raised", "village_basin_alert_greenvale_acknowledges", "world_coordinated_vigilance_network"]
 const FIRST_INTER_LAND_COORDINATION_STATES := FIRST_INTER_LAND_COORDINATION_PENDING_STATES + RIDGE_CONVOY_COORDINATION_STATES + BASIN_ALERT_COORDINATION_STATES
-const POST_FRONTIER_STATES := FIRST_IMPERIAL_EXPANSION_STATES + NORTH_RIDGE_OUTPOST_STATES + NORTH_RIDGE_SPECIALIZATION_STATES + NORTH_RIDGE_SPECIALIZATION_PAYOFF_STATES + FIRST_INTER_LAND_COORDINATION_STATES
+const VALID_FIRST_THIRD_LAND_PROSPECTS := ["none", "south_marsh_surveyed", "northgate_surveyed"]
+const FIRST_THIRD_LAND_PROSPECT_PENDING_STATES := ["world_first_third_land_prospect_revealed", "map_third_land_prospect_inspection", "village_third_land_survey_action"]
+const SOUTH_MARSH_PROSPECT_STATES := ["map_south_marsh_surveyed", "village_south_marsh_report_acknowledged", "world_south_marsh_imperial_prospect"]
+const NORTHGATE_PROSPECT_STATES := ["map_northgate_surveyed", "village_northgate_report_acknowledged", "world_northgate_imperial_prospect"]
+const FIRST_THIRD_LAND_PROSPECT_STATES := FIRST_THIRD_LAND_PROSPECT_PENDING_STATES + SOUTH_MARSH_PROSPECT_STATES + NORTHGATE_PROSPECT_STATES
+const POST_FRONTIER_STATES := FIRST_IMPERIAL_EXPANSION_STATES + NORTH_RIDGE_OUTPOST_STATES + NORTH_RIDGE_SPECIALIZATION_STATES + NORTH_RIDGE_SPECIALIZATION_PAYOFF_STATES + FIRST_INTER_LAND_COORDINATION_STATES + FIRST_THIRD_LAND_PROSPECT_STATES
 
 static func fallback(status: String, adapter: String) -> Dictionary:
 	return {
@@ -164,6 +178,7 @@ static func fallback(status: String, adapter: String) -> Dictionary:
 		"north_ridge_specialization": "none",
 		"north_ridge_specialization_payoff": "none",
 		"first_inter_land_coordination": "none",
+		"first_third_land_prospect": "none",
 	}
 
 static func load_session(path: String = NATIVE_PATH) -> Dictionary:
@@ -171,7 +186,7 @@ static func load_session(path: String = NATIVE_PATH) -> Dictionary:
 		return _load_web()
 	return _load_native(path)
 
-static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false, route_connected: bool = false, caravan_dispatched: bool = false, city_chartered: bool = false, nation_founded: bool = false, national_direction: String = "none", national_mandate_started: bool = false, empire_proclaimed: bool = false, imperial_crisis: String = "none", imperial_crisis_response: String = "none", first_rival_countermove_response: String = "none", first_frontier_payoff: String = "none", imperial_expansion_target: String = "none", first_imperial_expansion: String = "none", north_ridge_outpost: String = "none", north_ridge_specialization: String = "none", north_ridge_specialization_payoff: String = "none", first_inter_land_coordination: String = "none") -> Dictionary:
+static func save_session(state: String, intent: String, path: String = NATIVE_PATH, settlement_founded: bool = false, settlement_developed: bool = false, route_connected: bool = false, caravan_dispatched: bool = false, city_chartered: bool = false, nation_founded: bool = false, national_direction: String = "none", national_mandate_started: bool = false, empire_proclaimed: bool = false, imperial_crisis: String = "none", imperial_crisis_response: String = "none", first_rival_countermove_response: String = "none", first_frontier_payoff: String = "none", imperial_expansion_target: String = "none", first_imperial_expansion: String = "none", north_ridge_outpost: String = "none", north_ridge_specialization: String = "none", north_ridge_specialization_payoff: String = "none", first_inter_land_coordination: String = "none", first_third_land_prospect: String = "none") -> Dictionary:
 	if not _is_valid_pair(state, intent):
 		return fallback("invalid_data", _adapter_name())
 	if not VALID_NATIONAL_DIRECTIONS.has(national_direction):
@@ -208,6 +223,8 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		return fallback("invalid_data", _adapter_name())
 	if not VALID_FIRST_INTER_LAND_COORDINATIONS.has(first_inter_land_coordination):
 		return fallback("invalid_data", _adapter_name())
+	if not VALID_FIRST_THIRD_LAND_PROSPECTS.has(first_third_land_prospect):
+		return fallback("invalid_data", _adapter_name())
 	if imperial_expansion_target == "north_ridge" and first_frontier_payoff == "none":
 		return fallback("invalid_data", _adapter_name())
 	if first_imperial_expansion == "north_ridge_claimed" and (imperial_expansion_target != "north_ridge" or first_frontier_payoff == "none"):
@@ -242,19 +259,29 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		return fallback("invalid_data", _adapter_name())
 	if state in BASIN_ALERT_COORDINATION_STATES and (north_ridge_specialization != "watch_post" or north_ridge_specialization_payoff != "ridge_signal_lit" or first_inter_land_coordination != "basin_alert_raised"):
 		return fallback("invalid_data", _adapter_name())
-	if first_inter_land_coordination == "ridge_convoy_dispatched" and state not in RIDGE_CONVOY_COORDINATION_STATES:
+	if state in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and (first_inter_land_coordination == "none" or first_third_land_prospect != "none"):
 		return fallback("invalid_data", _adapter_name())
-	if first_inter_land_coordination == "basin_alert_raised" and state not in BASIN_ALERT_COORDINATION_STATES:
+	if state in SOUTH_MARSH_PROSPECT_STATES and (first_inter_land_coordination != "ridge_convoy_dispatched" or first_third_land_prospect != "south_marsh_surveyed"):
 		return fallback("invalid_data", _adapter_name())
-	if north_ridge_specialization_payoff == "ridge_logistics_line_open" and (north_ridge_specialization != "trade_post" or (state not in NORTH_RIDGE_LOGISTICS_LINE_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in RIDGE_CONVOY_COORDINATION_STATES)):
+	if state in NORTHGATE_PROSPECT_STATES and (first_inter_land_coordination != "basin_alert_raised" or first_third_land_prospect != "northgate_surveyed"):
 		return fallback("invalid_data", _adapter_name())
-	if north_ridge_specialization_payoff == "ridge_signal_lit" and (north_ridge_specialization != "watch_post" or (state not in NORTH_RIDGE_SIGNAL_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in BASIN_ALERT_COORDINATION_STATES)):
+	if first_third_land_prospect == "south_marsh_surveyed" and state not in SOUTH_MARSH_PROSPECT_STATES:
 		return fallback("invalid_data", _adapter_name())
-	if north_ridge_specialization == "trade_post" and state not in NORTH_RIDGE_TRADE_POST_STATES and state not in NORTH_RIDGE_SPECIALIZATION_PAYOFF_PENDING_STATES and state not in NORTH_RIDGE_LOGISTICS_LINE_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in RIDGE_CONVOY_COORDINATION_STATES:
+	if first_third_land_prospect == "northgate_surveyed" and state not in NORTHGATE_PROSPECT_STATES:
 		return fallback("invalid_data", _adapter_name())
-	if north_ridge_specialization == "watch_post" and state not in NORTH_RIDGE_WATCH_POST_STATES and state not in NORTH_RIDGE_SPECIALIZATION_PAYOFF_PENDING_STATES and state not in NORTH_RIDGE_SIGNAL_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in BASIN_ALERT_COORDINATION_STATES:
+	if first_inter_land_coordination == "ridge_convoy_dispatched" and state not in RIDGE_CONVOY_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and state not in SOUTH_MARSH_PROSPECT_STATES:
 		return fallback("invalid_data", _adapter_name())
-	if north_ridge_outpost == "established" and state not in NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES and state not in NORTH_RIDGE_SPECIALIZATION_STATES and state not in NORTH_RIDGE_SPECIALIZATION_PAYOFF_STATES and state not in FIRST_INTER_LAND_COORDINATION_STATES:
+	if first_inter_land_coordination == "basin_alert_raised" and state not in BASIN_ALERT_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and state not in NORTHGATE_PROSPECT_STATES:
+		return fallback("invalid_data", _adapter_name())
+	if north_ridge_specialization_payoff == "ridge_logistics_line_open" and (north_ridge_specialization != "trade_post" or (state not in NORTH_RIDGE_LOGISTICS_LINE_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in RIDGE_CONVOY_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and state not in SOUTH_MARSH_PROSPECT_STATES)):
+		return fallback("invalid_data", _adapter_name())
+	if north_ridge_specialization_payoff == "ridge_signal_lit" and (north_ridge_specialization != "watch_post" or (state not in NORTH_RIDGE_SIGNAL_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in BASIN_ALERT_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and state not in NORTHGATE_PROSPECT_STATES)):
+		return fallback("invalid_data", _adapter_name())
+	if north_ridge_specialization == "trade_post" and state not in NORTH_RIDGE_TRADE_POST_STATES and state not in NORTH_RIDGE_SPECIALIZATION_PAYOFF_PENDING_STATES and state not in NORTH_RIDGE_LOGISTICS_LINE_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in RIDGE_CONVOY_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and state not in SOUTH_MARSH_PROSPECT_STATES:
+		return fallback("invalid_data", _adapter_name())
+	if north_ridge_specialization == "watch_post" and state not in NORTH_RIDGE_WATCH_POST_STATES and state not in NORTH_RIDGE_SPECIALIZATION_PAYOFF_PENDING_STATES and state not in NORTH_RIDGE_SIGNAL_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in BASIN_ALERT_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and state not in NORTHGATE_PROSPECT_STATES:
+		return fallback("invalid_data", _adapter_name())
+	if north_ridge_outpost == "established" and state not in NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES and state not in NORTH_RIDGE_SPECIALIZATION_STATES and state not in NORTH_RIDGE_SPECIALIZATION_PAYOFF_STATES and state not in FIRST_INTER_LAND_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_STATES:
 		return fallback("invalid_data", _adapter_name())
 	if imperial_expansion_target == "north_ridge" and state not in POST_FRONTIER_STATES:
 		return fallback("invalid_data", _adapter_name())
@@ -365,6 +392,7 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		"north_ridge_specialization": north_ridge_specialization,
 		"north_ridge_specialization_payoff": north_ridge_specialization_payoff,
 		"first_inter_land_coordination": first_inter_land_coordination,
+		"first_third_land_prospect": first_third_land_prospect,
 		"saved_at_utc": Time.get_datetime_string_from_system(true),
 	}
 	var payload_text := JSON.stringify(payload)
@@ -415,6 +443,7 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 	var north_ridge_specialization := String(session.get("north_ridge_specialization", "none"))
 	var north_ridge_specialization_payoff := String(session.get("north_ridge_specialization_payoff", "none"))
 	var first_inter_land_coordination := String(session.get("first_inter_land_coordination", "none"))
+	var first_third_land_prospect := String(session.get("first_third_land_prospect", "none"))
 	if not VALID_NATIONAL_DIRECTIONS.has(national_direction):
 		return fallback("invalid_value", adapter)
 	if national_direction != "none" and not nation_founded:
@@ -448,6 +477,8 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 	if not VALID_NORTH_RIDGE_SPECIALIZATION_PAYOFFS.has(north_ridge_specialization_payoff):
 		return fallback("invalid_value", adapter)
 	if not VALID_FIRST_INTER_LAND_COORDINATIONS.has(first_inter_land_coordination):
+		return fallback("invalid_value", adapter)
+	if not VALID_FIRST_THIRD_LAND_PROSPECTS.has(first_third_land_prospect):
 		return fallback("invalid_value", adapter)
 	if not claimed_lands is Array:
 		return fallback("invalid_value", adapter)
@@ -488,19 +519,29 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		return fallback("invalid_value", adapter)
 	if state in BASIN_ALERT_COORDINATION_STATES and (north_ridge_specialization != "watch_post" or north_ridge_specialization_payoff != "ridge_signal_lit" or first_inter_land_coordination != "basin_alert_raised"):
 		return fallback("invalid_value", adapter)
-	if first_inter_land_coordination == "ridge_convoy_dispatched" and state not in RIDGE_CONVOY_COORDINATION_STATES:
+	if state in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and (first_inter_land_coordination == "none" or first_third_land_prospect != "none"):
 		return fallback("invalid_value", adapter)
-	if first_inter_land_coordination == "basin_alert_raised" and state not in BASIN_ALERT_COORDINATION_STATES:
+	if state in SOUTH_MARSH_PROSPECT_STATES and (first_inter_land_coordination != "ridge_convoy_dispatched" or first_third_land_prospect != "south_marsh_surveyed"):
 		return fallback("invalid_value", adapter)
-	if north_ridge_specialization_payoff == "ridge_logistics_line_open" and (north_ridge_specialization != "trade_post" or (state not in NORTH_RIDGE_LOGISTICS_LINE_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in RIDGE_CONVOY_COORDINATION_STATES)):
+	if state in NORTHGATE_PROSPECT_STATES and (first_inter_land_coordination != "basin_alert_raised" or first_third_land_prospect != "northgate_surveyed"):
 		return fallback("invalid_value", adapter)
-	if north_ridge_specialization_payoff == "ridge_signal_lit" and (north_ridge_specialization != "watch_post" or (state not in NORTH_RIDGE_SIGNAL_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in BASIN_ALERT_COORDINATION_STATES)):
+	if first_third_land_prospect == "south_marsh_surveyed" and state not in SOUTH_MARSH_PROSPECT_STATES:
 		return fallback("invalid_value", adapter)
-	if north_ridge_specialization == "trade_post" and state not in NORTH_RIDGE_TRADE_POST_STATES and state not in NORTH_RIDGE_SPECIALIZATION_PAYOFF_PENDING_STATES and state not in NORTH_RIDGE_LOGISTICS_LINE_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in RIDGE_CONVOY_COORDINATION_STATES:
+	if first_third_land_prospect == "northgate_surveyed" and state not in NORTHGATE_PROSPECT_STATES:
 		return fallback("invalid_value", adapter)
-	if north_ridge_specialization == "watch_post" and state not in NORTH_RIDGE_WATCH_POST_STATES and state not in NORTH_RIDGE_SPECIALIZATION_PAYOFF_PENDING_STATES and state not in NORTH_RIDGE_SIGNAL_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in BASIN_ALERT_COORDINATION_STATES:
+	if first_inter_land_coordination == "ridge_convoy_dispatched" and state not in RIDGE_CONVOY_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and state not in SOUTH_MARSH_PROSPECT_STATES:
 		return fallback("invalid_value", adapter)
-	if north_ridge_outpost == "established" and state not in NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES and state not in NORTH_RIDGE_SPECIALIZATION_STATES and state not in NORTH_RIDGE_SPECIALIZATION_PAYOFF_STATES and state not in FIRST_INTER_LAND_COORDINATION_STATES:
+	if first_inter_land_coordination == "basin_alert_raised" and state not in BASIN_ALERT_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and state not in NORTHGATE_PROSPECT_STATES:
+		return fallback("invalid_value", adapter)
+	if north_ridge_specialization_payoff == "ridge_logistics_line_open" and (north_ridge_specialization != "trade_post" or (state not in NORTH_RIDGE_LOGISTICS_LINE_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in RIDGE_CONVOY_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and state not in SOUTH_MARSH_PROSPECT_STATES)):
+		return fallback("invalid_value", adapter)
+	if north_ridge_specialization_payoff == "ridge_signal_lit" and (north_ridge_specialization != "watch_post" or (state not in NORTH_RIDGE_SIGNAL_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in BASIN_ALERT_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and state not in NORTHGATE_PROSPECT_STATES)):
+		return fallback("invalid_value", adapter)
+	if north_ridge_specialization == "trade_post" and state not in NORTH_RIDGE_TRADE_POST_STATES and state not in NORTH_RIDGE_SPECIALIZATION_PAYOFF_PENDING_STATES and state not in NORTH_RIDGE_LOGISTICS_LINE_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in RIDGE_CONVOY_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and state not in SOUTH_MARSH_PROSPECT_STATES:
+		return fallback("invalid_value", adapter)
+	if north_ridge_specialization == "watch_post" and state not in NORTH_RIDGE_WATCH_POST_STATES and state not in NORTH_RIDGE_SPECIALIZATION_PAYOFF_PENDING_STATES and state not in NORTH_RIDGE_SIGNAL_STATES and state not in FIRST_INTER_LAND_COORDINATION_PENDING_STATES and state not in BASIN_ALERT_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_PENDING_STATES and state not in NORTHGATE_PROSPECT_STATES:
+		return fallback("invalid_value", adapter)
+	if north_ridge_outpost == "established" and state not in NORTH_RIDGE_OUTPOST_ESTABLISHED_STATES and state not in NORTH_RIDGE_SPECIALIZATION_STATES and state not in NORTH_RIDGE_SPECIALIZATION_PAYOFF_STATES and state not in FIRST_INTER_LAND_COORDINATION_STATES and state not in FIRST_THIRD_LAND_PROSPECT_STATES:
 		return fallback("invalid_value", adapter)
 	if imperial_expansion_target == "north_ridge" and state not in POST_FRONTIER_STATES:
 		return fallback("invalid_value", adapter)
@@ -614,6 +655,7 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 		"north_ridge_specialization": north_ridge_specialization,
 		"north_ridge_specialization_payoff": north_ridge_specialization_payoff,
 		"first_inter_land_coordination": first_inter_land_coordination,
+		"first_third_land_prospect": first_third_land_prospect,
 		"saved_at_utc": String(session.get("saved_at_utc", "")),
 	}
 
