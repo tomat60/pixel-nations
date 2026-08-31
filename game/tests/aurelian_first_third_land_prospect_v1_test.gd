@@ -4,6 +4,7 @@ const SESSION = preload("res://scenes/aurelian/aurelian_session_persistence_v2.g
 const TEST_PATH := "user://aurelian-first-third-land-prospect-v1-test.json"
 const MANIFEST_PATH := "res://scenes/aurelian/first_third_land_prospect_v1_manifest.json"
 const PERSISTENCE_PATH := "res://scenes/aurelian/aurelian_session_persistence_v2.gd"
+const CONTROLLER_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1.gd"
 
 var failures: Array[String] = []
 
@@ -97,6 +98,31 @@ func _initialize() -> void:
 		"world_northgate_imperial_prospect",
 	]:
 		_check(persistence.contains(token), "persistence_token_%s" % token)
+
+	var controller := _read_text(CONTROLLER_PATH)
+	for token in [
+		"FIRST_THIRD_LAND_PROSPECT_STATES",
+		"first_third_land_prospect",
+		"world_first_third_land_prospect_revealed",
+		"map_third_land_prospect_inspection",
+		"village_third_land_survey_action",
+		"map_south_marsh_surveyed",
+		"village_south_marsh_report_acknowledged",
+		"world_south_marsh_imperial_prospect",
+		"map_northgate_surveyed",
+		"village_northgate_report_acknowledged",
+		"world_northgate_imperial_prospect",
+		"AURELIAN_FIRST_THIRD_LAND_PROSPECT=SOUTH_MARSH_SURVEYED",
+		"AURELIAN_FIRST_THIRD_LAND_PROSPECT=NORTHGATE_SURVEYED",
+		"AurelianFirstThirdLandProspectPresentation",
+		"ReedEdgePulse%02d",
+		"GateBeacon",
+	]:
+		_check(controller.contains(token), "controller_token_%s" % token)
+	_check(controller.count("AURELIAN_FIRST_THIRD_LAND_PROSPECT=SOUTH_MARSH_SURVEYED") == 1, "single_south_marsh_event")
+	_check(controller.count("AURELIAN_FIRST_THIRD_LAND_PROSPECT=NORTHGATE_SURVEYED") == 1, "single_northgate_event")
+	_check(controller.find("world_first_third_land_prospect_revealed") < controller.find("map_third_land_prospect_inspection"), "world_before_map_prospect")
+	_check(controller.find("map_third_land_prospect_inspection") < controller.find("village_third_land_survey_action"), "map_before_village_prospect")
 
 	_cleanup()
 	_finish()
