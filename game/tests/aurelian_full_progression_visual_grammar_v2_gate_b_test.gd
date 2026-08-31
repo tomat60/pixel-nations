@@ -83,6 +83,12 @@ func _init() -> void:
 		_check(source.find("ProductionMapOverlays") == -1, "no_inherited_map_glyph_dependency")
 		_check(source.find("ProductionWorldOverlays") == -1, "no_inherited_world_glyph_dependency")
 		_check(source.find("Third-Land") == -1, "no_third_land_logic")
+		_check(source.find("WorldNationRidgeSeatPhysical") >= 0, "nation_physical_regional_seat")
+		_check(source.find("WorldNationCrossingSeatPhysical") >= 0, "nation_physical_crossing_seat")
+		_check(source.find("WorldEmpireNorthgateCitadel") >= 0, "empire_physical_northgate_citadel")
+		_check(source.find("WorldEmpireSouthCitadel") >= 0, "empire_physical_south_citadel")
+		_check(source.find("WorldEmpireNorthernFrontier") >= 0, "empire_connected_northern_frontier")
+		_check(source.find("WorldEmpireSouthernFrontier") >= 0, "empire_connected_southern_frontier")
 
 	_finish()
 
