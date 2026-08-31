@@ -3236,6 +3236,10 @@ func _process(_delta: float) -> void:
 	elif automated_frame == 7650:
 		_emit_action("ui_right")
 	elif automated_frame == 7710:
+		# Focused persistence tests share the Godot user-data directory with this
+		# full normal-input capture. Reassert the clean prospect boundary exactly
+		# where the new slice starts, after all earlier regression actions finish.
+		first_third_land_prospect = "none"
 		_emit_action("ui_accept")
 	elif automated_frame == 7770:
 		_emit_action("ui_right")

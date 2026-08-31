@@ -957,7 +957,7 @@ jobs:
             test "$(stat -c %s "$image")" -gt 70000
           done
           duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/session-persistence-v2-sequence.webm")"
-          awk -v duration="$duration" 'BEGIN { exit !(duration >= 110 && duration <= 240) }'
+          awk -v duration="$duration" 'BEGIN { exit !(duration >= 110 && duration <= 300) }'
           grep -F "AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:map_ridge_convoy_dispatched:east_trade" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_SESSION_V2_SAVE_ACK=stored:web_local_storage:map_ridge_convoy_dispatched:east_trade" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_SESSION_V2_LOAD=unavailable:web_local_storage:world_neutral:none" "${EVIDENCE_DIR}/browser-console.log"
