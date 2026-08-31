@@ -50,6 +50,7 @@ jobs:
           cp game/scenes/aurelian/first_rival_countermove_v1_manifest.json "${EVIDENCE_DIR}/first-rival-countermove-manifest.json"
           cp game/scenes/aurelian/first_frontier_payoff_v1_manifest.json "${EVIDENCE_DIR}/first-frontier-payoff-manifest.json"
           cp game/scenes/aurelian/first_imperial_expansion_v1_manifest.json "${EVIDENCE_DIR}/first-imperial-expansion-manifest.json"
+          cp game/scenes/aurelian/first_inter_land_coordination_v1_manifest.json "${EVIDENCE_DIR}/first-inter-land-coordination-manifest.json"
           git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
@@ -92,7 +93,7 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
-          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test aurelian_first_national_direction_commitment_v1_test aurelian_first_national_mandate_v1_test aurelian_first_empire_proclamation_v1_test aurelian_directional_empire_identity_v1_test aurelian_river_surge_crisis_v1_test aurelian_first_rival_countermove_v1_test aurelian_first_frontier_payoff_v1_test aurelian_first_imperial_expansion_v1_test; do
+          for test in aurelian_authored_terrain_v1_test production_village_v1_test production_map_v1_test production_world_v1_test aurelian_decision_loop_v1_test playable_aurelian_entry_v1_test aurelian_session_persistence_v2_test aurelian_first_land_claim_v1_test aurelian_first_settlement_development_v1_test aurelian_first_trade_route_connection_v1_test aurelian_first_trade_caravan_dispatch_v1_test aurelian_first_city_charter_v1_test aurelian_first_nation_founding_v1_test aurelian_living_capital_vertical_slice_v1_test aurelian_first_national_direction_commitment_v1_test aurelian_first_national_mandate_v1_test aurelian_first_empire_proclamation_v1_test aurelian_directional_empire_identity_v1_test aurelian_river_surge_crisis_v1_test aurelian_first_rival_countermove_v1_test aurelian_first_frontier_payoff_v1_test aurelian_first_imperial_expansion_v1_test aurelian_first_inter_land_coordination_v1_test; do
             "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1 || { cat "${EVIDENCE_DIR}/${test}.log"; exit 1; }
           done
           grep -F "GODOT_PLAYABLE_AURELIAN_ENTRY_V1_TEST: PASS" "${EVIDENCE_DIR}/playable_aurelian_entry_v1_test.log"
@@ -111,6 +112,7 @@ jobs:
           grep -F "GODOT_AURELIAN_FIRST_RIVAL_COUNTERMOVE_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_rival_countermove_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_FRONTIER_PAYOFF_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_frontier_payoff_v1_test.log"
           grep -F "GODOT_AURELIAN_FIRST_IMPERIAL_EXPANSION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_imperial_expansion_v1_test.log"
+          grep -F "GODOT_AURELIAN_FIRST_INTER_LAND_COORDINATION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_inter_land_coordination_v1_test.log"
 
       - name: Export canonical Linux and Web builds
         timeout-minutes: 8
@@ -502,6 +504,70 @@ jobs:
             await waitForCount('world_north_ridge_outpost_held_two_land_frontier', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '62-world-north-ridge-outpost-held-frontier-1440x900.png') });
+            await page.keyboard.press('Enter');
+            await waitForCount('world_north_ridge_specialization_held_frontier', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '63-world-north-ridge-specialization-held-frontier-1440x900.png') });
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('map_north_ridge_specialization_inspection', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '64-map-north-ridge-specialization-inspection-1440x900.png') });
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('village_north_ridge_specialization_choice', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '65-village-north-ridge-trade-post-choice-1440x900.png') });
+            await page.keyboard.press('Enter');
+            await waitForCount('map_north_ridge_trade_post_committed', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '66-map-north-ridge-trade-post-committed-1440x900.png') });
+            await page.keyboard.press('ArrowLeft');
+            await waitForCount('world_north_ridge_trade_post_logistics_posture', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '67-world-north-ridge-trade-post-logistics-posture-1440x900.png') });
+            await page.keyboard.press('Enter');
+            await waitForCount('world_north_ridge_specialization_payoff_revealed', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '68-world-north-ridge-payoff-revealed-1440x900.png') });
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('map_north_ridge_specialization_payoff_inspection', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '69-map-north-ridge-payoff-inspection-1440x900.png') });
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('village_north_ridge_specialization_payoff_action', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '70-village-open-ridge-logistics-line-action-1440x900.png') });
+            await page.keyboard.press('Enter');
+            await waitForCount('map_north_ridge_logistics_line_open', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '71-map-north-ridge-logistics-line-open-1440x900.png') });
+            await page.keyboard.press('ArrowLeft');
+            await waitForCount('world_north_ridge_logistics_line_active_frontier_role', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '72-world-north-ridge-logistics-line-role-1440x900.png') });
+            await page.keyboard.press('Enter');
+            await waitForCount('world_first_inter_land_coordination_revealed', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '73-world-inter-land-coordination-revealed-1440x900.png') });
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('map_greenvale_north_ridge_link_inspection', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '74-map-greenvale-north-ridge-link-inspection-1440x900.png') });
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('village_first_inter_land_coordination_action', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '75-village-dispatch-ridge-convoy-action-1440x900.png') });
+            await page.keyboard.press('Enter');
+            await waitForCount('map_ridge_convoy_dispatched', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '76-map-ridge-convoy-dispatched-1440x900.png') });
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('village_ridge_convoy_greenvale_acknowledges', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '77-village-ridge-convoy-acknowledged-1440x900.png') });
+            await page.keyboard.press('ArrowRight');
+            await waitForCount('world_coordinated_logistics_network', 1);
+            await sleep(1000);
+            await page.screenshot({ path: path.join(stills, '78-world-coordinated-logistics-network-1440x900.png') });
             const video = page.video();
             await context.close();
             await video.saveAs(path.join(root, 'godot-web-input-sequence.webm'));
@@ -527,9 +593,9 @@ jobs:
               viewport: [1440, 900],
               browser: 'chromium',
               normal_entry: 'world_neutral',
-              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowDown', 'ArrowDown', 'ArrowUp', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowRight', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowRight', 'ArrowLeft', 'ArrowLeft'],
+              input_actions: ['Enter', 'ArrowRight', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowLeft', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowDown', 'ArrowDown', 'ArrowUp', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'Enter', 'Enter', 'ArrowRight', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowRight', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'Enter', 'ArrowRight', 'ArrowRight'],
               observed_states: observedStates,
-              accepted_handoff: 'Two-land footprint -> World frontier need -> Map North Ridge inspection -> Village establish action -> Map one outpost -> Greenvale administration -> World held frontier',
+              accepted_handoff: 'Active Trade payoff -> World coordination need -> Map Greenvale-North Ridge link -> Village Dispatch Ridge Convoy -> coordinated Map -> Greenvale acknowledgement -> World logistics network',
               national_mandate_started: true,
               empire_proclaimed: true,
               imperial_crisis: 'river_surge',
@@ -543,6 +609,10 @@ jobs:
               imperial_expansion_event_count: 1,
               north_ridge_outpost: 'established',
               north_ridge_outpost_event_count: 1,
+              north_ridge_specialization: 'trade_post',
+              north_ridge_specialization_payoff: 'ridge_logistics_line_open',
+              first_inter_land_coordination: 'ridge_convoy_dispatched',
+              first_inter_land_coordination_event_count: 1,
               national_direction: 'expand',
               glb_sha256: process.env.GLB_SHA256,
               evidence_environment_state_driving: false
@@ -557,7 +627,7 @@ jobs:
       - name: Validate exact browser evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "62"
+          test "$(find "${EVIDENCE_DIR}/stills" -name '*.png' | wc -l)" = "78"
           for image in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$image")" = "1440x900"
             bytes="$(stat -c %s "$image")"
@@ -567,7 +637,7 @@ jobs:
           test -s "${EVIDENCE_DIR}/godot-web-input-sequence.webm"
           test "$(stat -c %s "${EVIDENCE_DIR}/godot-web-input-sequence.webm")" -gt 100000
           video_duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/godot-web-input-sequence.webm")"
-          awk -v duration="$video_duration" 'BEGIN { exit !(duration >= 175 && duration <= 330) }'
+          awk -v duration="$video_duration" 'BEGIN { exit !(duration >= 175 && duration <= 420) }'
           grep -F "PLAYABLE_AURELIAN_ENTRY_READY=world_neutral" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_claimed" "${EVIDENCE_DIR}/browser-console.log"
@@ -635,6 +705,18 @@ jobs:
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_outpost_established" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_outpost_greenvale_administers" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_outpost_held_two_land_frontier" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION=TRADE_POST" "${EVIDENCE_DIR}/browser-console.log"
+          test "$(grep -Fc "AURELIAN_NORTH_RIDGE_SPECIALIZATION=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
+          grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=RIDGE_LOGISTICS_LINE_OPEN" "${EVIDENCE_DIR}/browser-console.log"
+          test "$(grep -Fc "AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_inter_land_coordination_revealed" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_greenvale_north_ridge_link_inspection" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_first_inter_land_coordination_action" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "AURELIAN_FIRST_INTER_LAND_COORDINATION=RIDGE_CONVOY_DISPATCHED" "${EVIDENCE_DIR}/browser-console.log"
+          test "$(grep -Fc "AURELIAN_FIRST_INTER_LAND_COORDINATION=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_ridge_convoy_dispatched" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_ridge_convoy_greenvale_acknowledges" "${EVIDENCE_DIR}/browser-console.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_coordinated_logistics_network" "${EVIDENCE_DIR}/browser-console.log"
           test "$(grep -Fc "AURELIAN_FIRST_NATIONAL_MANDATE=" "${EVIDENCE_DIR}/browser-console.log")" = "1"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_national_mandate_started" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_national_mandate_active" "${EVIDENCE_DIR}/browser-console.log"
