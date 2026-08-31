@@ -1,0 +1,55 @@
+{
+  "contract": "AURELIAN_FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B",
+  "authority_issue": 567,
+  "parent_contract": "AURELIAN_FULL_PROGRESSION_VISUAL_GRAMMAR_V2",
+  "stages": ["land", "settlement", "city", "nation", "empire"],
+  "views": ["village", "map", "world"],
+  "matrix_frames": 15,
+  "shared_geography": "aurelian_authored_terrain_v1.glb",
+  "fixed_camera_per_view": true,
+  "unlabeled_contact_sheet": true,
+  "normal_input_motion_required": true,
+  "visual_rules": {
+    "village": "physical footprint, density, civic hierarchy and seat-of-power growth",
+    "map": "physical routes, anchors, boundaries and province/frontier structure",
+    "world": "political footprint, connected regional network and external frontier pressure"
+  },
+  "map_physical_signal_targets": {
+    "land": 1,
+    "settlement": 3,
+    "city": 6,
+    "nation": 10,
+    "empire": 15
+  },
+  "world_physical_signal_targets": {
+    "land": 2,
+    "settlement": 3,
+    "city": 5,
+    "nation": 7,
+    "empire": 10
+  },
+  "acceptance": {
+    "all_five_stages_distinguishable_without_labels": true,
+    "map_not_static_terrain_plus_glyphs": true,
+    "world_political_scale_materially_grows": true,
+    "same_geography_all_views": true,
+    "direct_review_required": true,
+    "green_ci_not_sufficient": true,
+    "bounded_gate_b_corrections_max": 1
+  },
+  "forbidden": [
+    "camera zoom as primary progression",
+    "labels as primary progression",
+    "translucent rings as primary progression",
+    "independent geography",
+    "new asset family",
+    "Third-Land Prospect claim",
+    "economy",
+    "combat",
+    "diplomacy",
+    "governance",
+    "main playable controller rewrite",
+    "MAX",
+    "paid tools"
+  ]
+}
