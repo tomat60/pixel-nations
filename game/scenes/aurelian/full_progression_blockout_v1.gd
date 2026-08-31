@@ -209,6 +209,17 @@ func _add_standard(parent: Node3D, node_name: String, point: Vector2, color_valu
 	parent.add_child(standard)
 	return standard
 
+func _add_civic_block(parent: Node3D, node_name: String, point: Vector2, footprint: Vector2, height: float, color_value: String, world_height: float, emission: float = 0.0) -> MeshInstance3D:
+	var block := MeshInstance3D.new()
+	block.name = node_name
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(footprint.x, height, footprint.y)
+	block.mesh = mesh
+	block.position = topology_to_godot(point, world_height) + Vector3(0.0, height * 0.5, 0.0)
+	block.material_override = _material_alpha(color_value, emission)
+	parent.add_child(block)
+	return block
+
 func _build_blockout_overlays() -> Node3D:
 	var root := Node3D.new()
 	root.name = "FullProgressionBlockoutOverlays"
@@ -265,6 +276,9 @@ func _build_city_cues(village_root: Node3D, map_root: Node3D, world_root: Node3D
 	_add_ring(village_root, "CityCivicRing", Vector2(350, 285), 0.78, "#efcf7b99", 0.78, 0.08)
 	_add_route(village_root, "CityCivicAvenueEast", Vector2(350, 285), Vector2(515, 340), 0.13, "#b5946e99", 0.79)
 	_add_route(village_root, "CityCivicAvenueSouth", Vector2(350, 285), Vector2(405, 505), 0.11, "#a38869aa", 0.79)
+	_add_civic_block(village_root, "CityHall", Vector2(350, 285), Vector2(0.72, 0.56), 0.62, "#d7b967ff", 0.80, 0.08)
+	_add_civic_block(village_root, "CityMarketWest", Vector2(318, 302), Vector2(0.52, 0.42), 0.32, "#a46f54ff", 0.79)
+	_add_civic_block(village_root, "CityMarketEast", Vector2(386, 303), Vector2(0.52, 0.42), 0.32, "#a46f54ff", 0.79)
 
 	_add_disc(map_root, "CityGreenvale", Vector2(354, 285), 0.44, "#d6b96fdd", 0.78, 0.10, 10)
 	_add_ring(map_root, "CityRegionalInfluence", Vector2(354, 285), 1.75, "#d6b96f66", 0.75)
@@ -282,14 +296,22 @@ func _build_nation_cues(village_root: Node3D, map_root: Node3D, world_root: Node
 	_add_standard(village_root, "NationStandardEast", Vector2(390, 292), "#d9b75fee", 0.80, 0.95)
 	_add_standard(village_root, "NationStandardSouth", Vector2(352, 340), "#d9b75fee", 0.79, 0.90)
 	_add_route(village_root, "NationCapitalAvenue", Vector2(350, 285), Vector2(515, 340), 0.15, "#c09c72aa", 0.80)
+	_add_civic_block(village_root, "NationCapitalKeep", Vector2(350, 285), Vector2(1.18, 0.92), 1.10, "#e0bd62ff", 0.82, 0.16)
+	_add_civic_block(village_root, "NationCouncilWest", Vector2(304, 315), Vector2(0.78, 0.52), 0.52, "#b87954ff", 0.80, 0.04)
+	_add_civic_block(village_root, "NationCouncilEast", Vector2(402, 315), Vector2(0.78, 0.52), 0.52, "#b87954ff", 0.80, 0.04)
+	_add_route(village_root, "NationCeremonialAxis", Vector2(350, 245), Vector2(350, 385), 0.18, "#d5b985bb", 0.81, 0.03)
 
-	_add_ring(map_root, "NationHomeland", Vector2(500, 455), 4.25, "#d6b96f77", 0.48, 0.04)
+	_add_disc(map_root, "NationHomelandField", Vector2(500, 455), 3.30, "#d6b96f22", 0.47, 0.02)
+	_add_ring(map_root, "NationCapitalDistrict", Vector2(354, 285), 2.05, "#d6b96f99", 0.75, 0.06)
 	_add_disc(map_root, "NationCapital", Vector2(354, 285), 0.48, "#d9b75fee", 0.80, 0.12, 10)
+	_add_disc(map_root, "NationCrossingDistrict", Vector2(515, 340), 0.58, "#d8c070cc", 0.60, 0.04, 8)
 	_add_disc(map_root, "NationEastLand", Vector2(760, 410), 0.27, "#4d9a5fdd", 0.58, 0.05, 6)
 	_add_route(map_root, "NationTradeNetwork", Vector2(354, 285), Vector2(760, 410), 0.11, "#62b7c8bb", 0.81, 0.06)
+	_add_route(map_root, "NationCrossingNetwork", Vector2(354, 285), Vector2(515, 340), 0.16, "#d6b96fcc", 0.81, 0.05)
+	_add_route(map_root, "NationRidgeNetwork", Vector2(354, 285), Vector2(700, 205), 0.12, "#7abf73aa", 0.81, 0.04)
 	_add_beacon(map_root, "NationNorthDirection", Vector2(700, 205), 0.17, "#7abf73aa", 0.67, 0.06)
 
-	_add_ring(world_root, "WorldNationHomeland", Vector2(500, 455), 4.55, "#d6b96f88", 0.38, 0.04)
+	_add_disc(world_root, "WorldNationHomeland", Vector2(500, 455), 3.85, "#d6b96f22", 0.37, 0.02)
 	_add_beacon(world_root, "WorldNationCapital", Vector2(354, 285), 0.30, "#dfbf67ee", 0.82, 0.12)
 	_add_beacon(world_root, "WorldNationEast", Vector2(850, 430), 0.24, "#62b7c8bb", 0.54, 0.08)
 	_add_beacon(world_root, "WorldNationNorth", Vector2(620, 80), 0.24, "#7abf73bb", 0.72, 0.08)
@@ -308,18 +330,25 @@ func _build_empire_cues(village_root: Node3D, map_root: Node3D, world_root: Node
 	_add_standard(village_root, "EmpireStandardSouthEast", Vector2(390, 345), "#d6a84fff", 0.80, 0.95)
 	_add_route(village_root, "EmpireGrandAvenue", Vector2(350, 285), Vector2(515, 340), 0.19, "#c6a178cc", 0.82, 0.03)
 	_add_route(village_root, "EmpireWorkAxis", Vector2(350, 285), Vector2(405, 505), 0.14, "#aa8969aa", 0.81)
+	_add_civic_block(village_root, "EmpirePalaceCore", Vector2(350, 285), Vector2(1.62, 1.22), 1.55, "#f0c85fff", 0.84, 0.22)
+	_add_civic_block(village_root, "EmpirePalaceWestWing", Vector2(292, 305), Vector2(0.95, 0.62), 0.72, "#c8874fff", 0.82, 0.06)
+	_add_civic_block(village_root, "EmpirePalaceEastWing", Vector2(412, 305), Vector2(0.95, 0.62), 0.72, "#c8874fff", 0.82, 0.06)
+	_add_civic_block(village_root, "EmpireForumSouth", Vector2(352, 365), Vector2(1.35, 0.68), 0.44, "#d9b76aff", 0.81, 0.04)
+	_add_route(village_root, "EmpireCeremonialAxis", Vector2(350, 215), Vector2(350, 430), 0.24, "#e0c28dcc", 0.83, 0.05)
 
-	_add_ring(map_root, "EmpireHeartland", Vector2(500, 455), 5.35, "#d6b96f99", 0.50, 0.05)
+	_add_disc(map_root, "EmpireHeartlandField", Vector2(500, 455), 4.60, "#d6b96f2b", 0.49, 0.02)
+	_add_ring(map_root, "EmpireCapitalDistrict", Vector2(354, 285), 2.35, "#f0c85fbb", 0.78, 0.08)
 	_add_disc(map_root, "EmpireCapital", Vector2(354, 285), 0.54, "#f0c85fff", 0.83, 0.16, 10)
-	_add_disc(map_root, "EmpireEastLand", Vector2(760, 410), 0.32, "#4d9a5fee", 0.59, 0.06, 6)
-	_add_disc(map_root, "EmpireNorthRidgeLand", Vector2(700, 205), 0.34, "#4d9a5fee", 0.68, 0.06, 6)
+	_add_disc(map_root, "EmpireEastLand", Vector2(760, 410), 0.62, "#4d9a5fdd", 0.59, 0.06, 8)
+	_add_disc(map_root, "EmpireNorthRidgeLand", Vector2(700, 205), 0.68, "#4d9a5fdd", 0.68, 0.06, 8)
 	_add_route(map_root, "EmpireEastNetwork", Vector2(354, 285), Vector2(760, 410), 0.13, "#62b7c8cc", 0.83, 0.06)
 	_add_route(map_root, "EmpireRidgeNetwork", Vector2(354, 285), Vector2(700, 205), 0.13, "#d6b96fbb", 0.83, 0.05)
+	_add_route(map_root, "EmpireFrontierArc", Vector2(445, 65), Vector2(365, 690), 0.10, "#ead99f99", 0.62, 0.04)
 	_add_beacon(map_root, "EmpireNorthgateFrontier", Vector2(445, 65), 0.20, "#ead99faa", 0.60, 0.06)
 	_add_beacon(map_root, "EmpireSouthMarshFrontier", Vector2(365, 690), 0.20, "#55b9c8aa", 0.23, 0.06)
 
-	_add_ring(world_root, "WorldEmpireInnerScope", Vector2(500, 455), 5.65, "#d6b96f99", 0.40, 0.05)
-	_add_ring(world_root, "WorldEmpireOuterScope", Vector2(500, 455), 7.15, "#d6b96f44", 0.42)
+	_add_disc(world_root, "WorldEmpireHeartland", Vector2(500, 455), 5.45, "#d6b96f2b", 0.39, 0.03)
+	_add_ring(world_root, "WorldEmpireFrontier", Vector2(500, 455), 6.85, "#ead99f88", 0.42, 0.04)
 	_add_beacon(world_root, "WorldEmpireCapital", Vector2(354, 285), 0.36, "#f0c85fff", 0.86, 0.18)
 	_add_disc(world_root, "WorldEmpireNorthRidge", Vector2(700, 205), 0.30, "#4d9a5fee", 0.70, 0.06, 6)
 	_add_route(world_root, "WorldEmpireRidgeLink", Vector2(354, 285), Vector2(700, 205), 0.10, "#d6b96fbb", 0.86, 0.04)
