@@ -1,0 +1,294 @@
+name: World Scale Sector Generator V4
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/assets/aurelian-basin/source/sector_a01_generator_v4_spec.json"
+      - "game/assets/aurelian-basin/source/aurelian_sector_generator_v4.py"
+      - "game/scenes/aurelian/world_scale_sector_generator_v4.gd"
+      - "game/scenes/aurelian/world_scale_sector_generator_v4.tscn"
+      - "game/tests/aurelian_sector_generator_v4_test.gd"
+      - ".github/workflows/world-scale-sector-generator-v4.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: world-scale-sector-generator-v4-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  BLENDER_VERSION: "4.3.2"
+  BLENDER_BIN: "/tmp/blender/blender-4.3.2-linux-x64/blender"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  BUILD_DIR: "/tmp/aurelian-sector-generator-v4"
+  EVIDENCE_DIR: "evidence/world-scale-sector-generator-v4"
+  CANONICAL_GLB: "game/assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb"
+  TOPOLOGY_MANIFEST: "game/assets/aurelian-basin/export/transform-manifest.json"
+  CITY_MANIFEST: "game/scenes/aurelian/production_village_v1_state_manifest.json"
+  SECTOR_SPEC: "game/assets/aurelian-basin/source/sector_a01_generator_v4_spec.json"
+  GENERATED_GLB: "game/assets/aurelian-basin/export/aurelian_sector_generator_v4.glb"
+  GENERATED_MANIFEST: "game/assets/aurelian-basin/export/aurelian_sector_generator_v4_manifest.json"
+
+jobs:
+  generator-proof:
+    name: Generate A-01 from spec and capture regional proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head and prove accepted inputs untouched
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+          test -s "${CANONICAL_GLB}"
+          test -s "${TOPOLOGY_MANIFEST}"
+          test -s "${CITY_MANIFEST}"
+          test -s "${SECTOR_SPEC}"
+          git diff --exit-code origin/main...HEAD -- \
+            game/assets/aurelian-basin/source/aurelian_authored_terrain_v1.py \
+            game/assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb \
+            game/assets/aurelian-basin/export/transform-manifest.json \
+            game/scenes/aurelian/production_village_v1.gd \
+            game/scenes/aurelian/production_village_v1_state_manifest.json
+          sha256sum "${CANONICAL_GLB}" "${TOPOLOGY_MANIFEST}" "${CITY_MANIFEST}" "${SECTOR_SPEC}" \
+            | tee "${EVIDENCE_DIR}/generator-inputs.sha256"
+
+      - name: Install deterministic authoring tooling
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          command -v curl
+          command -v tar
+          command -v xvfb-run
+          command -v unzip
+          command -v python3
+          rm -rf /tmp/blender /tmp/godot "${BUILD_DIR}"
+          mkdir -p /tmp/blender /tmp/godot "${BUILD_DIR}"
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://download.blender.org/release/Blender4.3/blender-${BLENDER_VERSION}-linux-x64.tar.xz" \
+            -o /tmp/blender/blender.tar.xz
+          tar -xJf /tmp/blender/blender.tar.xz -C /tmp/blender
+          test -x "${BLENDER_BIN}"
+          "${BLENDER_BIN}" --version | head -1 | tee "${EVIDENCE_DIR}/blender-version.txt"
+          python3 -m pip install --disable-pip-version-check --quiet --user pillow
+
+      - name: Build Sector A-01 from spec
+        timeout-minutes: 14
+        run: |
+          set -euo pipefail
+          export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 12m env LIBGL_ALWAYS_SOFTWARE=1 \
+            "${BLENDER_BIN}" -b \
+            --python game/assets/aurelian-basin/source/aurelian_sector_generator_v4.py -- \
+            "$PWD/${CANONICAL_GLB}" \
+            "$PWD/${TOPOLOGY_MANIFEST}" \
+            "$PWD/${CITY_MANIFEST}" \
+            "$PWD/${SECTOR_SPEC}" \
+            "${BUILD_DIR}" \
+            2>&1 | tee "${EVIDENCE_DIR}/blender-generator.log"
+          grep -F "AURELIAN_SECTOR_GENERATOR_V4=PASS" "${EVIDENCE_DIR}/blender-generator.log"
+          test -s "${BUILD_DIR}/aurelian_sector_generator_v4.glb"
+          test -s "${BUILD_DIR}/aurelian_sector_generator_v4_manifest.json"
+          test -s "${BUILD_DIR}/aurelian_sector_generator_v4.blend"
+          cp "${BUILD_DIR}/aurelian_sector_generator_v4.glb" "${GENERATED_GLB}"
+          cp "${BUILD_DIR}/aurelian_sector_generator_v4_manifest.json" "${GENERATED_MANIFEST}"
+          cp "${BUILD_DIR}/aurelian_sector_generator_v4.blend" "${EVIDENCE_DIR}/aurelian_sector_generator_v4.blend"
+          cp "${GENERATED_MANIFEST}" "${EVIDENCE_DIR}/aurelian_sector_generator_v4_manifest.json"
+          cp "${SECTOR_SPEC}" "${EVIDENCE_DIR}/sector_a01_generator_v4_spec.json"
+          sha256sum "${GENERATED_GLB}" | tee "${EVIDENCE_DIR}/generated-glb.sha256"
+
+      - name: Validate generator manifest
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+
+          generated_path = Path(os.environ['GENERATED_MANIFEST'])
+          canonical_path = Path(os.environ['TOPOLOGY_MANIFEST'])
+          city_path = Path(os.environ['CITY_MANIFEST'])
+          spec_path = Path(os.environ['SECTOR_SPEC'])
+          glb_path = Path(os.environ['CANONICAL_GLB'])
+          generated = json.loads(generated_path.read_text())
+          canonical = json.loads(canonical_path.read_text())
+          city = json.loads(city_path.read_text())
+          spec = json.loads(spec_path.read_text())
+
+          assert generated['contract'] == 'AURELIAN_SECTOR_GENERATOR_V4'
+          assert generated['sector_id'] == 'A-01'
+          assert generated['seed'] == spec['seed']
+          assert generated['spec_sha256'] == hashlib.sha256(spec_path.read_bytes()).hexdigest()
+          assert generated['canonical_glb_sha256'] == hashlib.sha256(glb_path.read_bytes()).hexdigest()
+          assert generated['topology_manifest_sha256'] == hashlib.sha256(canonical_path.read_bytes()).hexdigest()
+          assert generated['city_manifest_sha256'] == hashlib.sha256(city_path.read_bytes()).hexdigest()
+          assert generated['kaykit_source_commit'] == canonical['kaykit_source_commit']
+          assert generated['canonical_landmarks'] == canonical['landmarks']
+          assert generated['canonical_routes'] == canonical['routes']
+          assert generated['canonical_river'] == canonical['river_centerline']
+          assert 8 <= generated['macro_loci_count'] <= 12
+          assert 6 <= generated['settlement_count'] <= 9
+          assert generated['relief_chain_count'] >= 2
+          assert generated['vegetation_mass_count'] >= 2
+          assert generated['terrain_face_cells'] >= 5000
+          assert generated['technical_padding'] >= 900
+          assert generated['new_asset_family'] is False
+          assert generated['gameplay_state_changed'] is False
+          assert generated['atlas_implemented'] is False
+          print('AURELIAN_SECTOR_GENERATOR_V4_MANIFEST=PASS')
+          PY
+
+      - name: Download pinned Godot
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Import generated GLB and run focused contracts
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1 || {
+            cat "${EVIDENCE_DIR}/godot-import.log"; exit 1;
+          }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          "${GODOT_BIN}" --headless --path game \
+            --script res://tests/aurelian_full_progression_clarity_composition_v1_test.gd \
+            > "${EVIDENCE_DIR}/clarity-regression.log" 2>&1
+          grep -F "AURELIAN_FULL_PROGRESSION_CLARITY_COMPOSITION_V1_TEST: PASS" \
+            "${EVIDENCE_DIR}/clarity-regression.log"
+          "${GODOT_BIN}" --headless --path game \
+            --script res://tests/aurelian_sector_generator_v4_test.gd \
+            > "${EVIDENCE_DIR}/sector-generator-contract.log" 2>&1
+          grep -F "AURELIAN_SECTOR_GENERATOR_V4_TEST: PASS" "${EVIDENCE_DIR}/sector-generator-contract.log"
+
+      - name: Capture accepted Local Aurelian reference
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          LOCAL_TMP="${EVIDENCE_DIR}/local-tmp"
+          mkdir -p "$LOCAL_TMP"
+          timeout 80s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+            AURELIAN_EVIDENCE_DIR="$PWD/$LOCAL_TMP" \
+            AURELIAN_CAPTURE_PRESET=village \
+            AURELIAN_PROGRESSION_STAGE=empire \
+            "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+            res://scenes/aurelian/full_progression_clarity_composition_v1.tscn \
+            > "${EVIDENCE_DIR}/accepted-local.log" 2>&1
+          grep -F "FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_READY=empire:village" \
+            "${EVIDENCE_DIR}/accepted-local.log"
+          test -s "$LOCAL_TMP/village-city_chartered-1440x900.png"
+          cp "$LOCAL_TMP/village-city_chartered-1440x900.png" \
+            "${EVIDENCE_DIR}/accepted-local-aurelian-1440x900.png"
+          rm -rf "$LOCAL_TMP"
+
+      - name: Capture generated Sector A-01
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          timeout 80s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+            AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}" \
+            AURELIAN_CAPTURE_SECTOR_GENERATOR_V4=1 \
+            "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+            res://scenes/aurelian/world_scale_sector_generator_v4.tscn \
+            > "${EVIDENCE_DIR}/sector-generator.log" 2>&1
+          grep -F "AURELIAN_SECTOR_GENERATOR_V4_STILL=" "${EVIDENCE_DIR}/sector-generator.log"
+          test -s "${EVIDENCE_DIR}/sector-a01-generator-v4-1440x900.png"
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load|^ERROR:" "${EVIDENCE_DIR}/sector-generator.log"; then
+            cat "${EVIDENCE_DIR}/sector-generator.log"
+            exit 1
+          fi
+
+      - name: Validate primary evidence
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from PIL import Image, ImageChops, ImageStat
+
+          root = Path(os.environ['EVIDENCE_DIR'])
+          names = ['accepted-local-aurelian-1440x900.png', 'sector-a01-generator-v4-1440x900.png']
+          images = {}
+          report = {}
+          for name in names:
+              path = root / name
+              image = Image.open(path).convert('RGB')
+              if image.size != (1440, 900):
+                  raise SystemExit(f'{name}: wrong size {image.size}')
+              variance = sum(ImageStat.Stat(image).var) / 3.0
+              colors = len(set(image.resize((240, 150)).getdata()))
+              if path.stat().st_size < 65000 or variance < 40.0 or colors < 250:
+                  raise SystemExit(f'{name}: weak evidence bytes={path.stat().st_size} variance={variance:.2f} colors={colors}')
+              images[name] = image
+              report[name] = {
+                  'bytes': path.stat().st_size,
+                  'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                  'variance': round(variance, 3),
+                  'sample_colors': colors,
+              }
+
+          changed = sum(1 for px in ImageChops.difference(images[names[0]].resize((240,150)), images[names[1]].resize((240,150))).getdata() if px != (0,0,0))
+          if changed < 5000:
+              raise SystemExit(f'local/sector delta too small: {changed}')
+
+          sheet = Image.new('RGB', (960, 300), (37, 40, 38))
+          sheet.paste(images[names[0]].resize((480, 300)), (0, 0))
+          sheet.paste(images[names[1]].resize((480, 300)), (480, 0))
+          sheet.save(root / 'local-vs-sector-generator-v4-review.jpg', quality=95)
+
+          manifest = json.loads((root / 'aurelian_sector_generator_v4_manifest.json').read_text())
+          qa = {
+              'status': 'PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_VISUAL_REVIEW',
+              'exact_head': (root / 'exact-head.txt').read_text().strip(),
+              'frames': report,
+              'local_sector_changed_sample_pixels': changed,
+              'seed': manifest['seed'],
+              'macro_loci_count': manifest['macro_loci_count'],
+              'settlement_count': manifest['settlement_count'],
+              'generator_model': manifest['generator_model'],
+              'atlas_implemented': False,
+          }
+          (root / 'evidence-qa.json').write_text(json.dumps(qa, indent=2) + '\n')
+          print('AURELIAN_SECTOR_GENERATOR_V4_EVIDENCE=PASS')
+          PY
+
+      - name: Stage generated GLB for review artifact
+        if: always()
+        run: |
+          if [ -s "${GENERATED_GLB}" ]; then
+            cp "${GENERATED_GLB}" "${EVIDENCE_DIR}/aurelian_sector_generator_v4.glb"
+          fi
+
+      - name: Upload Sector generator evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: world-scale-sector-generator-v4-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/world-scale-sector-generator-v4
+          if-no-files-found: error
+          retention-days: 1
