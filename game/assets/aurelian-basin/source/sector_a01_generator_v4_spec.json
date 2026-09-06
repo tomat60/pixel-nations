@@ -5,11 +5,11 @@
   "seed": 41027,
   "topography_profile": "basin_fluvial",
   "sector_plane": [3600, 2700],
-  "technical_padding": 1100,
+  "technical_padding": 2000,
   "camera": {
     "focus": [1775, 1325],
-    "orthographic_size": 28.0,
-    "position_offset": [19.0, 24.0, 19.0]
+    "orthographic_size": 32.5,
+    "position_offset": [18.0, 28.0, 18.0]
   },
   "canonical_core": {
     "source_topology_contract": "AURELIAN_AUTHORED_TERRAIN_V1",
@@ -42,21 +42,21 @@
     {"id":"eastbank_grove","center":[2460,1250],"radius":[360,280],"density":32}
   ],
   "land_use_masses": [
-    {"id":"golden_plain_fields","center":[2050,1760],"radius":[500,330],"kind":"fields"},
-    {"id":"southfen_marsh","center":[1460,2110],"radius":[470,300],"kind":"marsh"}
+    {"id":"golden_plain_fields","center":[2050,1760],"radius":[340,220],"kind":"fields"},
+    {"id":"southfen_marsh","center":[1460,2110],"radius":[340,220],"kind":"marsh"}
   ],
   "river_extensions": {
     "upstream": [[820,120],[1020,420]],
     "downstream": [[1700,1420],[2180,1600],[2700,1900],[3300,2270],[3970,2480]]
   },
   "settlement_archetypes": {
-    "capital_home": {"piece_count":5,"sources":["church","barracks","blacksmith","barracks","blacksmith"],"with_flag":true,"span":[0.34,0.48]},
-    "river_crossing_village": {"piece_count":4,"sources":["barracks","blacksmith","blacksmith","barracks"],"with_flag":false,"span":[0.20,0.28]},
-    "forest_edge_village": {"piece_count":3,"sources":["blacksmith","barracks","blacksmith"],"with_flag":false,"span":[0.19,0.26]},
-    "productive_plain_village": {"piece_count":4,"sources":["barracks","blacksmith","barracks","blacksmith"],"with_flag":false,"span":[0.19,0.27]},
-    "ridge_frontier_outpost": {"piece_count":3,"sources":["church","barracks","blacksmith"],"with_flag":false,"span":[0.18,0.24]},
-    "marsh_hamlet": {"piece_count":3,"sources":["blacksmith","barracks","blacksmith"],"with_flag":false,"span":[0.17,0.23]},
-    "frontier_watch": {"piece_count":2,"sources":["church","barracks"],"with_flag":false,"span":[0.16,0.22]},
+    "capital_home": {"piece_count":5,"sources":["church","barracks","blacksmith","barracks","blacksmith"],"with_flag":true,"span":[0.22,0.30]},
+    "river_crossing_village": {"piece_count":4,"sources":["barracks","blacksmith","blacksmith","barracks"],"with_flag":false,"span":[0.12,0.17]},
+    "forest_edge_village": {"piece_count":3,"sources":["blacksmith","barracks","blacksmith"],"with_flag":false,"span":[0.11,0.16]},
+    "productive_plain_village": {"piece_count":4,"sources":["barracks","blacksmith","barracks","blacksmith"],"with_flag":false,"span":[0.11,0.17]},
+    "ridge_frontier_outpost": {"piece_count":3,"sources":["church","barracks","blacksmith"],"with_flag":false,"span":[0.10,0.15]},
+    "marsh_hamlet": {"piece_count":3,"sources":["blacksmith","barracks","blacksmith"],"with_flag":false,"span":[0.10,0.14]},
+    "frontier_watch": {"piece_count":2,"sources":["church","barracks"],"with_flag":false,"span":[0.09,0.13]},
     "ruin_poi": {"piece_count":0,"sources":[],"with_flag":false,"span":[0.0,0.0]}
   },
   "variation": {
