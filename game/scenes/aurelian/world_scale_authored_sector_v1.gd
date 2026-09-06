@@ -2,7 +2,7 @@ extends Node3D
 
 const GLB_PATH := "res://assets/aurelian-sector-a01/export/sector_a01_authored_v1.glb"
 const STILL_SIZE := Vector2i(1440, 900)
-const SECTOR_CAMERA_SIZE := 34.0
+const SECTOR_CAMERA_SIZE := 29.0
 
 var evidence_dir := ""
 
@@ -32,7 +32,7 @@ func _load_sector() -> Node3D:
 func _make_environment() -> Environment:
 	var environment := Environment.new()
 	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color("#26393c")
+	environment.background_color = Color("#31515a")
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color("#bcb79f")
 	environment.ambient_light_energy = 0.38
@@ -78,8 +78,8 @@ func _make_camera(parent: Node) -> Camera3D:
 	camera.size = SECTOR_CAMERA_SIZE
 	camera.near = 0.1
 	camera.far = 500.0
-	var focus := Vector3(0.0, 0.55, 0.0)
-	camera.position = Vector3(22.5, 27.0, 22.5)
+	var focus := Vector3(0.5, 0.55, 0.2)
+	camera.position = focus + Vector3(22.5, 27.0, 22.5)
 	parent.add_child(camera)
 	camera.look_at(focus, Vector3.UP)
 	return camera
