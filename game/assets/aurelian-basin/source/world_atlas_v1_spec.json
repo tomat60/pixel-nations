@@ -6,7 +6,7 @@
   "technical_padding": 4500,
   "camera": {
     "focus": [7100, 4450],
-    "orthographic_size": 72.0,
+    "orthographic_size": 50.0,
     "position_offset": [45.0, 58.0, 45.0]
   },
   "origin_sector": {
