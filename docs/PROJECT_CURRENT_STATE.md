@@ -2,292 +2,239 @@
 
 Status: ACTIVE
 Updated: 2026-09-06
-Current state revision: 10.0
-Authority baseline SHA: `9b43f0c0412a587053d6bb600406ac4e0cfff7a2`
-Product baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
+Current state revision: 11.0
+Authority baseline SHA: `c9d60b86499e9d4ae33b68a4f987a4efbc0ae69e`
+Product baseline SHA: `6e5a9ab4ff684798f13d4de6b4f39df0b2a8ccd9`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: finish the whole-game progression blockout by proving credible world scale before deeper mechanics.
-Current milestone: World Scale Representation Recovery v4 - scalable Sector generator around the canonical Aurelian core.
+Current milestone: World Atlas Blockout v1 - prove Sector A-01 is one small part of a much larger Pixel Nations world.
 Active execution issue: #575
-Next allowed action: after this authority update merges, build one deterministic Sector A-01 generator proof from a data spec and current accepted assets/topology. Atlas remains blocked until direct Sector visual PASS.
+Next allowed action: after this authority update merges, implement exactly one World Atlas blockout candidate reusing the accepted Sector Generator v4 data/pipeline and capture one accepted Sector reference plus one Atlas frame. No deeper mechanics until the Atlas gate is resolved.
 
-## Accepted product baseline
+## Accepted product baselines
 
-Full Progression Visual Grammar v2 and Full Progression Clarity & Composition v1 are accepted and merged.
-
-Terminal results:
+Accepted progression work:
 - `FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_PASS`
 - `FULL_PROGRESSION_CLARITY_COMPOSITION_V1_PASS`
+- merged progression/clarity baseline: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 
-Latest accepted exact product head: `75d2372d9dd3651389bf1cb81da87bc788fe2520`
-Latest merged product baseline: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
+Accepted world-scale work:
+- `WORLD_SCALE_SECTOR_GENERATOR_V4_BLOCKOUT_PASS`
+- accepted exact head: `3e4a2347829dd2b1a35bff2b5c001f23f95414d1`
+- focused run: `34051747083`
+- artifact: `9994765099`
+- artifact digest: `sha256:1fe40664481aa2a1849122d4c2a833dc93e9b4762bb5c21eb5e4e5335aca4828`
+- merged Sector generator baseline: `6e5a9ab4ff684798f13d4de6b4f39df0b2a8ccd9`
 
-The accepted `land -> settlement -> city -> nation -> empire` visual grammar remains unchanged by world-scale work.
+Sector Generator v4 is accepted as a **blockout and scalable content-production base**, not production-final art.
+Regional settlement miniatures, color hierarchy and local asset readability remain later visual-polish debt.
+
+The accepted `land -> settlement -> city -> nation -> empire` visual grammar remains binding.
 
 ## Accepted gameplay rollback baseline
 
 First Inter-Land Coordination v1 remains the latest accepted deep-gameplay rollback point.
 
 Terminal result: `GODOT_AURELIAN_FIRST_INTER_LAND_COORDINATION_PASS`.
-Accepted exact head: `0f8e5e7636a3f03ba7640801bdee399b839308ab`
-Merged gameplay rollback baseline: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
+Accepted exact head: `0f8e5e7636a3f03ba7640801bdee399b839308ab`.
+Merged gameplay rollback baseline: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`.
 
-## World-scale evidence status
+## World-scale status
 
 Issue #575 remains the single active world-scale authority.
 
-Rejected implementations are reference only and must not merge:
+Rejected world-scale implementations remain reference only and must not be revived by incremental polishing:
+1. World Scale Reveal v1 token/board layout.
+2. World Scale Reveal v1 continuous-surface correction.
+3. Runtime regional heightfield R1 at `7ef763c835cf068a0735aacf54ff7bf523c26bab`.
+4. PR #578 authored Sector v1 Candidate 1.
+5. PR #578 authored Sector v1 Candidate 2 at `aea5f140c9c72b0d435bec2b70dc6dc922791b6c`.
+6. PR #580 reuse-first Sector LOD Candidate 1 at `36c75f4d353eff9e2ca16711c1def55b2891b9b0`.
+7. PR #580 bounded correction at `a6809b210fedf46d6f56837c3a8af48923811ac4`.
 
-1. World Scale Reveal v1 token layout - isolated board pieces.
-2. World Scale Reveal v1 continuous-surface correction - technically green but not a credible physical world.
-3. Runtime regional heightfield R1 at `7ef763c835cf068a0735aacf54ff7bf523c26bab` - technically green but visually a board with token-like anchors.
-4. PR #578 authored Sector v1 Candidate 1 - irregular terrain existed, but the complete bounded landmass and large local buildings still read as a floating board.
-5. PR #578 authored Sector v1 Candidate 2 at `aea5f140c9c72b0d435bec2b70dc6dc922791b6c` - technically PASS, terminal visual REJECT.
-6. PR #580 reuse-first Sector LOD Candidate 1 at `36c75f4d353eff9e2ca16711c1def55b2891b9b0` - technically PASS, visual correction required.
-7. PR #580 bounded correction at `a6809b210fedf46d6f56837c3a8af48923811ac4` - focused Sector, Foundation, Web, Pixel Nations CI and Play Visual QA all PASS, terminal visual classification `WORLD_SCALE_SECTOR_LOD_V1_REJECT`.
+The demonstrated blockers in those attempts were representation scale, composition and regional LOD readability, not Godot, Blender, canonical Aurelian topology or the KayKit source family.
 
-PR #580 is closed unmerged. No Candidate 3 from that representation is authorized.
+Sector Generator v4 resolved the current **blockout** need by moving production to a data-driven model:
 
-The repeated failure is classified as:
-- scale composition too small;
-- terrain-generation scope too close to the local Aurelian bounds;
-- settlement LOD still too dominant;
-- insufficient macro relief/vegetation hierarchy.
+`sector_spec.json -> deterministic Blender generator -> GLB -> Godot evidence`
 
-The Blender -> GLB -> Godot pipeline, canonical Aurelian topology and KayKit source family are not the demonstrated blockers.
+The generator preserves a fixed canonical Aurelian core and creates surrounding regional geography/settlement variation from a seed.
+It currently proves 10 macro loci and 8 regional settlement/POI locations in A-01.
+The generator already supports seed override without changing the macro topology.
 
 ## Binding continuity stack
 
-World-scale recovery does not reset Pixel Nations art direction, mechanics or production method.
+World-scale work does not reset Pixel Nations art direction, mechanics or production method.
 
 Binding input remains:
 - PR #439 / `AURELIAN_BASIN_MOODBOARD_V1`: Northgard macro readability + Foundation geography integration + Against the Storm material/lighting discipline + Manor Lords terrain-led route logic + Dorfromantik transition economy;
-- PR #445 capability-first direction: inspect real project context, reuse proven tools/assets first, generated concepts are reference only;
+- PR #445 capability-first direction: inspect the real project first, reuse proven tools/assets, generated concepts are reference only;
 - canonical Aurelian core: major river, Gilded Crossing, Greenvale/Aurelian home relationship, North Ridge, forest/work edge, fields, marsh/coast and route semantics;
 - accepted local Aurelian language: stylized low-poly, earth/olive/moss terrain, cool forest, warmer productive land, blue-green water, warm settlement accents and blue identity cues;
-- deterministic Blender -> GLB -> Godot pipeline and exact-head evidence;
-- pinned zero-cost KayKit family;
+- pinned zero-cost KayKit source family;
+- deterministic Blender -> GLB -> Godot production/evidence path;
 - gameplay semantics `claim -> settle -> grow -> scout/expand -> trade -> nation -> empire`.
 
-A scale change may simplify geometry, reduce prop detail, generate surrounding terrain and use lower-detail regional settlement miniatures. It may not rewrite the accepted Aurelian core, replace mechanics, introduce an unrelated asset family or discard the proven production pipeline without a demonstrated blocker.
+Scale changes may simplify geometry and representation. They may not rewrite the accepted core, replace mechanics, introduce an unrelated asset family or discard proven infrastructure without a demonstrated blocker.
 
-## Research conclusion
+## World model semantics
 
-The next Sector should not be another hand-authored zoom-out of the existing local topology.
-
-Useful comparable patterns:
-- Manor Lords presents a whole playable landscape through a small number of meaningful regions defined by topography and river structure;
-- Northgard uses meaningful colonizable zones and strategic expansion measured in a low-teens number of territories rather than hundreds of visible cells;
-- Foundation generates large organic maps from a small family of topography archetypes plus parameters;
-- Against the Storm uses a separate world-map detail layer while preserving a physical 3D world and blending away rigid map separation;
-- Townscaper's procedural lesson is useful for production: large shapes should remain predictable while small shapes can vary substantially.
-
-This supports a data-driven Sector generator with a fixed canonical core and generated surrounding content.
-
-## Binding representation decision v4
-
-Sector A-01 remains the same Pixel Nations world at regional scale.
-
-The canonical Aurelian core is fixed.
-The surrounding Sector is generated deterministically from a Sector spec.
-The generator is a content-production system, not a new gameplay mechanic.
-
-The systemic world identity remains:
+The canonical systemic world identity remains:
 - 10,000 lands;
 - 100 sectors;
 - 100 lands per sector;
 - Sector A-01 as origin.
 
-These values are simulation/content semantics. Sector presentation groups them into larger readable geographic structures and does not render 100 equal visible land cells.
+These are simulation/content semantics, not a requirement to render 100 sectors or 10,000 equal cells literally.
 
-### Sector visual scale target
+## Post-Sector portfolio gate
 
-Target one Sector frame containing:
-- 8-12 macro geographic/strategic loci or regions;
-- 6-9 settlement/POI miniatures maximum;
-- Aurelian capital/home occupying about 3-6% of the frame;
-- at least two large relief masses;
-- one dominant river system;
-- at least two major vegetation/land-use masses;
-- enough off-camera terrain that the frame clearly implies a larger world beyond the viewport.
+The accepted Sector proof establishes local -> regional scale.
+The largest remaining world/progression bottleneck is macro-world scale: the product still has to prove that Sector A-01 is only one small part of a larger world.
 
-The macro loci are presentation/grouping units, not a replacement for the 100-land systemic model.
+World Atlas Blockout v1 wins the next bounded milestone over Core Playable Loop Consolidation because:
+- it completes the current world-scale promise with a much larger player-visible delta;
+- it can reuse the accepted generator/spec model instead of inventing another system;
+- it requires no economy, workers, timers or simulation;
+- it has low rework risk when treated strictly as data/presentation abstraction;
+- completing the scale blockout now avoids returning to world representation during deeper gameplay work.
+
+After Atlas is resolved, run the whole-product portfolio gate again before deeper mechanics.
+
+## Binding World Atlas representation decision
+
+The Atlas is a **lower-detail macro LOD of the same Pixel Nations world**, not a separate visual universe and not a literal grid of sectors/lands.
+
+The Atlas must preserve continuity through:
+- the same physical-world logic and low-poly material/lighting family;
+- recognizable macro river/coast/highland/forest relationships where relevant;
+- A-01 represented as a small nested part of the wider world;
+- the same blue/home identity language where Aurelian/A-01 needs identification;
+- the same generator principle: stable large shapes, optional seeded small detail.
+
+The Atlas may aggregate systemic sectors into larger readable geographic masses.
+It must not expose a 10x10 dashboard grid or 10,000-land cell field as the primary presentation.
+
+### Atlas visual scale target
+
+The first proof should show one coherent macro-world frame with approximately:
+- 12-20 broad geographic/strategic macro regions or masses;
+- multiple large relief systems and water/coast/river structures;
+- sparse strategic loci only where they improve scale comprehension;
+- Sector A-01 occupying roughly 2-5% of the frame as a recognizable nested origin area;
+- enough off-frame or edge-continuing geography that the world feels larger than the current viewport rather than like a floating board piece.
+
+The exact count is a readability target, not a new simulation model.
 
 At thumbnail size the intended read order is:
-1. terrain masses and water;
-2. Aurelian home/capital;
-3. secondary loci/frontier;
-4. supporting strategic detail.
+1. macro geography / world mass;
+2. A-01 location within that world;
+3. other strategic regions/loci;
+4. supporting detail.
 
-If settlement geometry reads before geography, reject.
+If cells, labels or settlement tokens read before geography, reject.
 
-### A-01 macro profile
+## Atlas implementation strategy
 
-Sector A-01 uses a Basin / Fluvial profile.
+Reuse the accepted Sector Generator v4 concept rather than generating 100 full Sector GLBs.
 
-The fixed canonical core remains:
-- Aurelian/Greenvale home basin;
-- main river and Gilded Crossing relationship;
-- North Ridge role;
-- forest/work edge role;
-- productive fields/plains role;
-- marsh/coast role;
-- current route/frontier semantics.
+First proof architecture:
 
-The generator may extend new surrounding geography outside the accepted local bounds while preserving all canonical core relationships.
+`world_atlas_spec.json -> deterministic macro generator -> GLB -> Godot capture`
 
-### Sector generator architecture
+The Atlas spec may own:
+- deterministic seed;
+- broad world/continent/coast geometry constraints without inventing unrelated lore;
+- 12-20 macro geographic masses;
+- major highland/forest/water systems;
+- placement/reference for A-01;
+- optional sparse strategic POI/region markers.
 
-Build one deterministic pipeline:
+The Atlas generator may reuse Sector/Aurelian colors, materials and source assets where appropriate, but should rely primarily on terrain/geography rather than many settlement miniatures.
 
-`sector_spec.json -> Blender generator -> GLB -> Godot capture`
+Do not generate detailed Sector or local scenes for every macro region during this proof.
 
-The Sector spec owns:
-- seed;
-- topography profile;
-- canonical-core transform/reference;
-- macro relief/forest/water constraints;
-- secondary-locus archetype assignments;
-- settlement seeds;
-- optional route/POI parameters.
-
-Large predictable shapes:
-- canonical Aurelian core;
-- main river basin;
-- major relief chains;
-- coast/marsh role;
-- forest/productive-land masses;
-- macro route graph.
-
-Seeded variable detail:
-- secondary relief variation;
-- tree clusters;
-- field clusters;
-- road wiggle and minor branches;
-- settlement composition;
-- settlement rotation/spacing;
-- minor POI/decorative placement.
-
-The same seed must reproduce the same Sector output.
-
-### Regional settlement archetypes
-
-Authorize a small reusable archetype library derived only from current KayKit/Aurelian language:
-- capital/home;
-- river-crossing village;
-- forest-edge village;
-- productive-plain village;
-- ridge/frontier outpost;
-- marsh/coastal hamlet or POI.
-
-Each regional settlement is a 3-7 piece LOD miniature, not a full local village.
-
-Variation may come from:
-- weighted KayKit source selection;
-- deterministic rotation;
-- spacing jitter;
-- roof/identity role;
-- small prop/tree/field cluster differences.
-
-Aurelian keeps the strongest blue/home hierarchy.
-Secondary settlements remain smaller and more neutral.
-
-Detailed local settlement scenes are not generated for every visible regional miniature during this proof. A detailed local version can be generated or loaded only when a location becomes gameplay-relevant later.
-
-## AI-assisted production rule
-
-AI is used as a project-grounded planner, researcher, evaluator and bounded executor.
-
-The operating pattern is:
-1. inspect current repo, accepted art direction, topology, assets and failed evidence;
-2. make the smallest evidence-driven plan;
-3. preserve unrelated accepted systems by default;
-4. execute through the existing pipeline;
-5. render real runtime evidence;
-6. classify failure before changing technique;
-7. use AI-generated images only as mood/composition references, never automatic implementation authority.
-
-Project context is mandatory before execution. Cursor is executor, not strategist.
-
-## First v4 proof gate
-
-The first implementation after this authority merges is a generator proof, not a finished content system.
+## First Atlas proof gate
 
 Capture exactly:
-- accepted local Aurelian reference;
-- one generated Sector A-01 frame;
-- optional one compact generator manifest/spec summary in evidence, not as gameplay UI.
+- accepted Sector A-01 reference from the Sector Generator v4 baseline;
+- one World Atlas frame.
 
 PASS only if:
-1. the frame reads immediately as a much larger region of the same Pixel Nations world;
-2. no finite terrain/board edge is visible;
-3. 8-12 macro loci/regions are readable through geography and strategic composition;
-4. 6-9 settlement/POI miniatures maximum remain subordinate to terrain;
-5. Aurelian is recognizable at about 3-6% of the frame;
-6. the river, major relief and vegetation masses dominate the first read;
-7. the accepted Aurelian core relationships are preserved;
-8. the output is deterministic from the Sector spec/seed;
-9. the generator can produce at least three visibly different settlement-miniature arrangements by changing only the seed, without changing the canonical Aurelian core;
-10. direct review classifies the frame as a credible strategy-game regional blockout and a scalable production base.
+1. an uninformed viewer immediately reads `Sector A-01 is one small part of a much larger world`;
+2. Atlas geography dominates before markers, labels or UI;
+3. no literal 100-sector/10,000-land grid is the primary read;
+4. no finite floating board silhouette dominates the composition;
+5. A-01 is recognizable but clearly subordinate at roughly 2-5% of the frame;
+6. the Atlas reads as the same Pixel Nations visual world at a lower detail level;
+7. the output is deterministic from its spec/seed;
+8. no gameplay/state change is required;
+9. direct review classifies it as a credible strategy-game macro-world blockout.
 
 Green CI alone is not acceptance.
 
-One complete v4 generator candidate plus at most one bounded correction is authorized.
-
-If it fails, stop before Atlas and classify whether the failure is scale target, generator constraints, terrain art, settlement archetypes or camera/composition. Do not silently invent another representation.
+One complete Atlas candidate plus at most one bounded correction is authorized.
+If it still fails, stop and classify the failed layer as macro composition, scale abstraction or visual continuity before proposing another technique.
 
 ## Implementation boundary
 
-Allowed after this authority merges:
-- one `sector_spec` data contract;
-- one deterministic Sector generator using the existing Blender -> GLB -> Godot path;
-- extension of terrain outside the accepted local Aurelian bounds;
-- 8-12 generated macro loci/regions around the canonical core;
-- the six regional settlement archetypes above;
-- existing KayKit source family and accepted materials/palette;
-- one fixed Sector camera for the proof;
-- one focused contract;
-- exactly two primary visual evidence frames plus deterministic generator evidence;
-- seed-only generation checks for settlement variation.
+Allowed after this authority update merges:
+- one Atlas spec data contract;
+- one deterministic macro-world generator using the existing Blender -> GLB -> Godot pattern;
+- one minimal Godot presentation/capture scene;
+- one focused Atlas contract;
+- exactly two primary evidence frames: accepted Sector reference + Atlas;
+- reuse of accepted palette/material/source family;
+- data aggregation of sectors into broader readable macro regions for presentation.
 
 Forbidden:
-- reopening or extending PR #580;
-- changing the canonical Aurelian core relationships;
-- literal 100-land or 10,000-land visual grids;
-- hand-authoring every surrounding village individually;
-- generating full local scenes for all regional villages during this proof;
-- new paid/unrelated asset family;
+- literal rendering of 100 full Sector scenes or 10,000 lands;
+- 10x10 dashboard/grid-first Atlas presentation;
+- changing canonical Aurelian/A-01 relationships;
+- replacing the accepted KayKit/Aurelian visual family without a demonstrated blocker;
 - new economy/resources/workers/timers/queues;
 - combat/diplomacy/governance;
 - repeatable expansion simulation;
 - broad playable controller rewrite;
-- Atlas before Sector PASS;
 - backend/multiplayer/accounts/payments;
+- new paid/unrelated asset family;
 - MAX or paid tools.
+
+## AI-assisted production rule
+
+For Pixel Nations visual/product work:
+1. inspect current repo, accepted evidence, assets, topology and failed attempts;
+2. research only when it can change a high-leverage decision;
+3. define the smallest evidence-driven delta;
+4. preserve unrelated accepted systems by default;
+5. execute through the existing pipeline unless it is the demonstrated blocker;
+6. inspect real screenshots/video directly before acceptance;
+7. classify a failure before changing technique;
+8. use generated imagery as mood/composition reference, never automatic implementation authority.
+
+Cursor is executor, not strategist.
 
 ## Tool and cost policy
 
 - Strategy, research, art direction and direct review: GPT-5.6 Sol.
-- First v4 generator candidate: deterministic Blender/Godot/GitHub.
-- Cursor remains blocked until the exact generator contract and implementation prompt are reviewed.
+- First Atlas candidate: deterministic Blender/Godot/GitHub.
+- Cursor remains blocked for the first Atlas proof.
 - If Cursor is later used: GPT-5.5, MAX OFF.
 - MAX OFF.
 - Extra spend target: 0 USD.
 
 ## Durable build sequence
 
-1. Sector A-01 generator proof.
-2. World Atlas proof only after Sector PASS.
+1. World Atlas Blockout v1.
+2. Whole-product portfolio gate.
 3. Core Playable Loop Consolidation.
 4. Minimal Economy Foundation.
 5. Repeatable Expansion Loop.
 6. Nation gameplay depth.
 7. Empire gameplay depth and scaling.
 8. Content scale, polish, UX, audio and performance.
-
-A whole-product portfolio gate may reorder later phases when direct evidence identifies a stronger bottleneck.
 
 ## Historical references
 
@@ -298,8 +245,9 @@ A whole-product portfolio gate may reorder later phases when direct evidence ide
 - PR #569 Full Progression Visual Grammar v2: accepted and merged.
 - PR #572 Full Progression Clarity & Composition v1: accepted and merged.
 - Issue #573 World Scale Reveal v1: terminal REJECT, superseded by #575.
-- PR #578 authored Sector v1: terminal REJECT/reference only, closed unmerged.
-- PR #580 reuse-first Sector LOD v1: terminal REJECT/reference only, closed unmerged.
+- PR #578 authored Sector v1: terminal REJECT/reference only.
+- PR #580 reuse-first Sector LOD v1: terminal REJECT/reference only.
+- PR #582 Sector Generator v4: accepted blockout/system base and merged.
 - Historical React world maps: semantic/data reference only, never target runtime presentation.
 
 ## Source-of-truth precedence
@@ -316,6 +264,6 @@ A whole-product portfolio gate may reorder later phases when direct evidence ide
 
 ## Current stop condition
 
-Implementation is blocked until this v4 authority update passes review and merges.
+Implementation is blocked until this Atlas authority update passes review and merges.
 
-After merge, the first action is the Sector generator spec/preflight, then exactly one generated A-01 proof candidate. Atlas and deeper mechanics remain blocked until direct Sector visual PASS.
+After merge, implement exactly one World Atlas blockout candidate from a deterministic spec and capture the accepted Sector reference plus one Atlas frame. One bounded correction maximum. Deeper mechanics remain blocked until the Atlas gate is resolved and the post-Atlas whole-product portfolio gate runs.
