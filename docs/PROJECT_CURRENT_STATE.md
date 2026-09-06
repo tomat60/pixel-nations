@@ -4,12 +4,13 @@ Status: ACTIVE
 Updated: 2026-09-06
 Current state revision: 5
 Authority baseline SHA: `89c47d92e266e4bb4a06e0e5a5cddc0b324db42c`
+Product baseline SHA: `89c47d92e266e4bb4a06e0e5a5cddc0b324db42c`
 Runtime baseline SHA: `89c47d92e266e4bb4a06e0e5a5cddc0b324db42c`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: finish whole-game progression blockout readability before deeper mechanics.
 Current milestone: Full Progression Clarity & Composition Pass v1.
-Active execution issue: #570.
+Active execution issue: #570
 Next allowed action: implement one bounded Gate C1 clarity candidate for exactly six unlabeled Nation/Empire frames across Village, Map and World. Do not start economy, repeatable expansion or deeper nation/empire mechanics before C1 proves that the accepted progression can be made materially calmer and easier to parse.
 
 ## Accepted progression baseline
