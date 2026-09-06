@@ -20,6 +20,14 @@ func _initialize() -> void:
 		controller.core_session_action_for_state("world_river_surge_crisis") == "legacy",
 		"advanced_crisis_remains_legacy"
 	)
+	_check(
+		controller.core_session_right_target_for_state("world_first_imperial_expansion_two_land_footprint") == "map_first_imperial_expansion_two_lands_claimed",
+		"completion_right_opens_two_land_map"
+	)
+	_check(
+		controller.core_session_right_target_for_state("world_north_ridge_outpost_frontier_need").is_empty(),
+		"completion_navigation_does_not_route_to_outpost"
+	)
 
 	# Reproduce the legacy late-state inference that used to fabricate skipped
 	# history on restart, then verify the Phase B wrapper removes only that false
