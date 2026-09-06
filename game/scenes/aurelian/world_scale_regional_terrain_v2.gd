@@ -137,7 +137,7 @@ func _terrain_height(x: float, z: float) -> float:
 
 	# A winding river valley runs from Stormcap through the basin to the east coast.
 	var river_center_x := -2.0 + z * 0.20 + sin(z * 0.24) * 1.8
-	var river_distance := abs(x - river_center_x)
+	var river_distance: float = absf(x - river_center_x)
 	height -= exp(-river_distance * river_distance / 2.2) * 0.34
 
 	# Sink only the outer rim below sea level. The rectangular mesh itself extends
