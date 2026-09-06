@@ -1,0 +1,245 @@
+name: Godot Aurelian Full Progression Clarity C2
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/scenes/aurelian/full_progression_clarity_composition_v1.gd"
+      - "game/scenes/aurelian/full_progression_clarity_composition_v1.tscn"
+      - "game/tests/aurelian_full_progression_clarity_composition_v1_test.gd"
+      - ".github/workflows/godot-aurelian-full-progression-clarity-c2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: full-progression-clarity-c2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EVIDENCE_DIR: "evidence/full-progression-clarity-c2"
+
+jobs:
+  clarity-c2:
+    name: Render full clarity matrix and motion proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+          test -s game/assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb
+
+      - name: Download pinned Godot
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/godot
+          mkdir -p /tmp/godot
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+          python3 -m pip install --disable-pip-version-check --quiet --user pillow
+          command -v mediainfo
+
+      - name: Import and run focused contracts
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1 || {
+            cat "${EVIDENCE_DIR}/godot-import.log"; exit 1;
+          }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_full_progression_visual_grammar_v2_gate_b_test.gd \
+            > "${EVIDENCE_DIR}/gate-b-regression.log" 2>&1
+          grep -F "AURELIAN_FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_TEST: PASS" "${EVIDENCE_DIR}/gate-b-regression.log"
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_full_progression_clarity_composition_v1_test.gd \
+            > "${EVIDENCE_DIR}/clarity-contract.log" 2>&1
+          grep -F "AURELIAN_FULL_PROGRESSION_CLARITY_COMPOSITION_V1_TEST: PASS" "${EVIDENCE_DIR}/clarity-contract.log"
+
+      - name: Capture exact 5x3 clarity matrix
+        timeout-minutes: 12
+        run: |
+          set -euo pipefail
+          for stage in land settlement city nation empire; do
+            case "$stage" in
+              land) base="claimed" ;;
+              settlement) base="founded" ;;
+              *) base="city_chartered" ;;
+            esac
+            for view in village map world; do
+              capture_dir="${EVIDENCE_DIR}/tmp-${stage}-${view}"
+              mkdir -p "$capture_dir"
+              timeout 75s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+                AURELIAN_EVIDENCE_DIR="$PWD/$capture_dir" \
+                AURELIAN_CAPTURE_PRESET="$view" \
+                AURELIAN_PROGRESSION_STAGE="$stage" \
+                "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+                res://scenes/aurelian/full_progression_clarity_composition_v1.tscn \
+                > "${EVIDENCE_DIR}/${stage}-${view}.log" 2>&1
+              grep -F "FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_READY=${stage}:${view}" "${EVIDENCE_DIR}/${stage}-${view}.log"
+              if [ "$view" = "village" ]; then
+                source_file="$capture_dir/village-${base}-1440x900.png"
+              else
+                source_file="$capture_dir/${view}-1440x900.png"
+              fi
+              test -s "$source_file"
+              cp "$source_file" "${EVIDENCE_DIR}/${stage}-${view}-1440x900.png"
+              rm -rf "$capture_dir"
+            done
+          done
+          test "$(find "${EVIDENCE_DIR}" -maxdepth 1 -name '*-1440x900.png' | wc -l)" -eq 15
+
+      - name: Prove early-stage pixel continuity and build review atlas
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from PIL import Image, ImageChops, ImageStat
+
+          root = Path(os.environ['EVIDENCE_DIR'])
+          stages = ['land','settlement','city','nation','empire']
+          views = ['village','map','world']
+          expected_early = {
+              'land-village':'6240914e79a752979f811a10211c4e76182426a8ebe39ec1589860b56825906c',
+              'land-map':'7ea01a2e14b07c5d089aa3b684bd38abebc098fa56d19918b4340a90c9f611db',
+              'land-world':'e40f86751e0dcb16b139c22fb707d4b71702cdf4943a76141acc4be1d5178dfa',
+              'settlement-village':'eabe5d4a4a593ac8da072c711b71cdde434cb341c87a3e21cef59e25721c8129',
+              'settlement-map':'cb4bc646f951e38e26cef3baad775557eda47ccb25baf16ad72d6ebe87f0c157',
+              'settlement-world':'bbae8d0fe62cc98b8ec5705a5ede0c4248f295e1a80e65f7a24712276a1e6d7c',
+              'city-village':'0f166124e6c7e18a081382a90e6fc14871d043c32e568bb78e80eac5f6569000',
+              'city-map':'b0a1bf3b4e8aa65963caeb2d3ba43a92b63c4b561682df204a3626367ff4d3b3',
+              'city-world':'c6acff81fb213c894f30768b0a8aae15770245d9263398774827309c9ffbc364',
+          }
+          images = {}
+          report = {}
+          for stage in stages:
+              for view in views:
+                  key = f'{stage}-{view}'
+                  path = root / f'{key}-1440x900.png'
+                  image = Image.open(path).convert('RGB')
+                  if image.size != (1440,900):
+                      raise SystemExit(f'{key}: wrong size {image.size}')
+                  sha = hashlib.sha256(path.read_bytes()).hexdigest()
+                  variance = sum(ImageStat.Stat(image).var) / 3.0
+                  if path.stat().st_size < 65000 or variance < 42.0:
+                      raise SystemExit(f'{key}: weak evidence')
+                  if key in expected_early and sha != expected_early[key]:
+                      raise SystemExit(f'{key}: accepted baseline continuity mismatch {sha}')
+                  images[key] = image
+                  report[key] = {'bytes': path.stat().st_size, 'sha256': sha, 'variance': round(variance,3)}
+
+          deltas = []
+          thresholds = {'village':280,'map':180,'world':180}
+          for view in views:
+              samples = {stage: images[f'{stage}-{view}'].resize((240,150)) for stage in stages}
+              for a,b in zip(stages,stages[1:]):
+                  diff = ImageChops.difference(samples[a],samples[b])
+                  changed = sum(1 for pixel in diff.getdata() if pixel != (0,0,0))
+                  if changed < thresholds[view]:
+                      raise SystemExit(f'{view} stage delta too small {a}/{b}: {changed}')
+                  deltas.append({'view':view,'from':a,'to':b,'changed_sample_pixels':changed})
+
+          cell_w, cell_h = 360,225
+          atlas = Image.new('RGB',(cell_w*3,cell_h*5),(45,48,44))
+          for row,stage in enumerate(stages):
+              for col,view in enumerate(views):
+                  atlas.paste(images[f'{stage}-{view}'].resize((cell_w,cell_h)),(col*cell_w,row*cell_h))
+          atlas.save(root/'c2-unlabeled-5x3-atlas.jpg',quality=95)
+
+          for view in views:
+              strip = Image.new('RGB',(cell_w*5,cell_h),(45,48,44))
+              for index,stage in enumerate(stages):
+                  strip.paste(images[f'{stage}-{view}'].resize((cell_w,cell_h)),(index*cell_w,0))
+              strip.save(root/f'c2-{view}-fixed-camera-strip.jpg',quality=95)
+
+          qa = {
+              'status':'PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_C2_REVIEW',
+              'exact_head':(root/'exact-head.txt').read_text().strip(),
+              'matrix':'5 stages x 3 fixed-camera views',
+              'early_stage_baseline_sha_match':True,
+              'frames':report,
+              'adjacent_deltas':deltas,
+          }
+          (root/'c2-qa.json').write_text(json.dumps(qa,indent=2)+'\n')
+          print('AURELIAN_FULL_PROGRESSION_CLARITY_C2_MATRIX=PASS')
+          PY
+
+      - name: Capture input-action progression motion
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          timeout 120s xvfb-run -a -s "-screen 0 1280x720x24" env \
+            AURELIAN_CAPTURE_GATE_B_INPUT_SEQUENCE=1 \
+            AURELIAN_GATE_B_SEQUENCE_STEP=0 \
+            AURELIAN_PROGRESSION_STAGE=land \
+            AURELIAN_PROGRESSION_VIEW=village \
+            "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+            --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 30 \
+            --write-movie "$PWD/${EVIDENCE_DIR}/c2-input-progression.avi" \
+            res://scenes/aurelian/full_progression_clarity_composition_v1.tscn \
+            > "${EVIDENCE_DIR}/c2-input-progression.log" 2>&1
+          grep -F "FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_INPUT_SEQUENCE_COMPLETE=empire" "${EVIDENCE_DIR}/c2-input-progression.log"
+          test -s "${EVIDENCE_DIR}/c2-input-progression.avi"
+          mediainfo --Output=JSON "${EVIDENCE_DIR}/c2-input-progression.avi" > "${EVIDENCE_DIR}/c2-video-metadata.json"
+
+      - name: Validate motion and finalize QA
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          root = Path(os.environ['EVIDENCE_DIR'])
+          video = json.loads((root/'c2-video-metadata.json').read_text())
+          tracks = video.get('media',{}).get('track',[])
+          general = next((t for t in tracks if t.get('@type') == 'General'),{})
+          stream = next((t for t in tracks if t.get('@type') == 'Video'),{})
+          value = general.get('Duration') or stream.get('Duration')
+          match = re.search(r'\d+(?:\.\d+)?',str(value or ''))
+          if not match:
+              raise SystemExit('motion duration missing')
+          duration = float(match.group(0))
+          if duration > 1000:
+              duration /= 1000
+          if not 8.0 <= duration <= 24.0:
+              raise SystemExit(f'motion duration wrong: {duration}')
+          qa_path = root/'c2-qa.json'
+          qa = json.loads(qa_path.read_text())
+          qa['motion_seconds'] = duration
+          qa['motion_path'] = 'normal ui_accept land -> settlement -> city -> nation -> empire'
+          qa_path.write_text(json.dumps(qa,indent=2)+'\n')
+          print('AURELIAN_FULL_PROGRESSION_CLARITY_C2_MOTION=PASS')
+          PY
+
+      - name: Upload C2 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-progression-clarity-c2-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/full-progression-clarity-c2
+          if-no-files-found: error
+          retention-days: 3
