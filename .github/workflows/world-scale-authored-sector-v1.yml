@@ -97,11 +97,14 @@ jobs:
             2>&1 | tee "${EVIDENCE_DIR}/blender-author.log"
           grep -F "WORLD_SCALE_AUTHORED_SECTOR_A01_V1=PASS" "${EVIDENCE_DIR}/blender-author.log"
           test -s "${EXPORT_DIR}/sector_a01_authored_v1.glb"
+          test -s "${EXPORT_DIR}/sector_a01_authored_v1.blend"
           test -s "${EXPORT_DIR}/transform-manifest.json"
           test -s "${EXPORT_DIR}/source-manifest.json"
           cp "${EXPORT_DIR}/transform-manifest.json" "${EVIDENCE_DIR}/transform-manifest.json"
           cp "${EXPORT_DIR}/source-manifest.json" "${EVIDENCE_DIR}/source-manifest.json"
           sha256sum "${EXPORT_DIR}/sector_a01_authored_v1.glb" > "${EVIDENCE_DIR}/glb.sha256"
+          mv "${EXPORT_DIR}/sector_a01_authored_v1.blend" "${EVIDENCE_DIR}/sector_a01_authored_v1.blend"
+          test ! -e "${EXPORT_DIR}/sector_a01_authored_v1.blend"
 
       - name: Validate authored manifest before Godot
         run: |
