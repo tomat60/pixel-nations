@@ -1,0 +1,252 @@
+name: World Scale Authored Sector A-01 V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/assets/aurelian-sector-a01/source/sector_a01_authored_v1.py"
+      - "game/scenes/aurelian/world_scale_authored_sector_v1.gd"
+      - "game/scenes/aurelian/world_scale_authored_sector_v1.tscn"
+      - "game/tests/world_scale_authored_sector_v1_test.gd"
+      - ".github/workflows/world-scale-authored-sector-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: world-scale-authored-sector-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  KAYKIT_SHA: "84fa4e91af6a88989be7c99e0891cede11f2ca38"
+  KAYKIT_ARCHIVE_SHA: "cfa7faff403c93fb90e8eeb448c78e6192782802a532bebed0bdb853b39f7028"
+  BLENDER_VERSION: "4.3.2"
+  BLENDER_BIN: "/tmp/blender/blender-4.3.2-linux-x64/blender"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EXPORT_DIR: "game/assets/aurelian-sector-a01/export"
+  EVIDENCE_DIR: "evidence/world-scale-authored-sector-v1"
+
+jobs:
+  authored-sector-proof:
+    name: Author Sector A-01 and capture local vs regional
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+
+      - name: Install deterministic render tooling
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          command -v curl
+          command -v tar
+          command -v xvfb-run
+          command -v python3
+          command -v unzip
+          rm -rf /tmp/blender /tmp/godot /tmp/kaykit
+          mkdir -p /tmp/blender /tmp/godot /tmp/kaykit/src
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://download.blender.org/release/Blender4.3/blender-${BLENDER_VERSION}-linux-x64.tar.xz" \
+            -o /tmp/blender/blender.tar.xz
+          tar -xJf /tmp/blender/blender.tar.xz -C /tmp/blender
+          test -x "${BLENDER_BIN}"
+          "${BLENDER_BIN}" --version | head -1 | tee "${EVIDENCE_DIR}/blender-version.txt"
+          python3 -m pip install --disable-pip-version-check --quiet --user pillow
+
+      - name: Fetch pinned KayKit CC0 source
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0/archive/${KAYKIT_SHA}.zip" \
+            -o /tmp/kaykit/source.zip
+          test "$(sha256sum /tmp/kaykit/source.zip | cut -d' ' -f1)" = "${KAYKIT_ARCHIVE_SHA}"
+          unzip -q /tmp/kaykit/source.zip -d /tmp/kaykit/src
+          ROOT="$(find /tmp/kaykit/src -mindepth 1 -maxdepth 1 -type d | head -1)"
+          test -n "$ROOT"
+          echo "KAYKIT_ROOT=$ROOT" >> "$GITHUB_ENV"
+
+      - name: Author irregular Sector A-01 and export GLB
+        timeout-minutes: 15
+        run: |
+          set -euo pipefail
+          rm -rf "${EXPORT_DIR}"
+          mkdir -p "${EXPORT_DIR}"
+          export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 13m env LIBGL_ALWAYS_SOFTWARE=1 \
+            "${BLENDER_BIN}" -b --python game/assets/aurelian-sector-a01/source/sector_a01_authored_v1.py -- \
+            "$KAYKIT_ROOT" "$PWD/${EXPORT_DIR}" \
+            2>&1 | tee "${EVIDENCE_DIR}/blender-author.log"
+          grep -F "WORLD_SCALE_AUTHORED_SECTOR_A01_V1=PASS" "${EVIDENCE_DIR}/blender-author.log"
+          test -s "${EXPORT_DIR}/sector_a01_authored_v1.glb"
+          test -s "${EXPORT_DIR}/transform-manifest.json"
+          test -s "${EXPORT_DIR}/source-manifest.json"
+          cp "${EXPORT_DIR}/transform-manifest.json" "${EVIDENCE_DIR}/transform-manifest.json"
+          cp "${EXPORT_DIR}/source-manifest.json" "${EVIDENCE_DIR}/source-manifest.json"
+          sha256sum "${EXPORT_DIR}/sector_a01_authored_v1.glb" > "${EVIDENCE_DIR}/glb.sha256"
+
+      - name: Validate authored manifest before Godot
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ['EVIDENCE_DIR'])
+          m = json.loads((root/'transform-manifest.json').read_text())
+          assert m['contract'] == 'WORLD_SCALE_AUTHORED_SECTOR_A01_V1'
+          assert m['atlas_implemented'] is False
+          assert m['runtime_generated_terrain'] is False
+          assert m['visible_grid_representation'] is False
+          assert m['literal_10000_land_rendering'] is False
+          assert len(m['land_outline']) >= 18
+          assert len(m['river_centerline']) >= 9
+          assert len(m['anchors']) >= 8
+          assert len(m['relief_families']) >= 3
+          assert m['terrain_face_cells'] >= 2500
+          print('WORLD_SCALE_AUTHORED_SECTOR_MANIFEST=PASS')
+          PY
+
+      - name: Download pinned Godot 4.7.1
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Import GLB and run focused contracts
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1 || {
+            cat "${EVIDENCE_DIR}/godot-import.log"; exit 1;
+          }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_full_progression_clarity_composition_v1_test.gd \
+            > "${EVIDENCE_DIR}/clarity-regression.log" 2>&1
+          grep -F "AURELIAN_FULL_PROGRESSION_CLARITY_COMPOSITION_V1_TEST: PASS" "${EVIDENCE_DIR}/clarity-regression.log"
+          "${GODOT_BIN}" --headless --path game --script res://tests/world_scale_authored_sector_v1_test.gd \
+            > "${EVIDENCE_DIR}/authored-sector-contract.log" 2>&1
+          grep -F "WORLD_SCALE_AUTHORED_SECTOR_V1_TEST: PASS" "${EVIDENCE_DIR}/authored-sector-contract.log"
+
+      - name: Capture accepted local Aurelian reference
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          LOCAL_TMP="${EVIDENCE_DIR}/local-tmp"
+          mkdir -p "$LOCAL_TMP"
+          timeout 80s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+            AURELIAN_EVIDENCE_DIR="$PWD/$LOCAL_TMP" \
+            AURELIAN_CAPTURE_PRESET=village \
+            AURELIAN_PROGRESSION_STAGE=empire \
+            "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+            res://scenes/aurelian/full_progression_clarity_composition_v1.tscn \
+            > "${EVIDENCE_DIR}/accepted-local.log" 2>&1
+          grep -F "FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_READY=empire:village" "${EVIDENCE_DIR}/accepted-local.log"
+          test -s "$LOCAL_TMP/village-city_chartered-1440x900.png"
+          cp "$LOCAL_TMP/village-city_chartered-1440x900.png" "${EVIDENCE_DIR}/accepted-local-aurelian-1440x900.png"
+          rm -rf "$LOCAL_TMP"
+
+      - name: Capture authored Sector A-01
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          timeout 80s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+            AURELIAN_EVIDENCE_DIR="$PWD/${EVIDENCE_DIR}" \
+            AURELIAN_CAPTURE_AUTHORED_SECTOR=1 \
+            "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+            res://scenes/aurelian/world_scale_authored_sector_v1.tscn \
+            > "${EVIDENCE_DIR}/sector.log" 2>&1
+          grep -F "WORLD_SCALE_AUTHORED_SECTOR_STILL=" "${EVIDENCE_DIR}/sector.log"
+          test -s "${EVIDENCE_DIR}/sector-a01-authored-1440x900.png"
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load|^ERROR:" "${EVIDENCE_DIR}/sector.log"; then
+            cat "${EVIDENCE_DIR}/sector.log"
+            exit 1
+          fi
+
+      - name: Validate two-frame evidence and build review sheet
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from PIL import Image, ImageChops, ImageStat
+
+          root = Path(os.environ['EVIDENCE_DIR'])
+          names = ['accepted-local-aurelian-1440x900.png','sector-a01-authored-1440x900.png']
+          images = {}
+          report = {}
+          for name in names:
+              path = root/name
+              image = Image.open(path).convert('RGB')
+              if image.size != (1440,900):
+                  raise SystemExit(f'{name}: wrong size {image.size}')
+              variance = sum(ImageStat.Stat(image).var)/3.0
+              colors = len(set(image.resize((240,150)).getdata()))
+              if path.stat().st_size < 65000 or variance < 45.0 or colors < 280:
+                  raise SystemExit(f'{name}: weak/blank evidence bytes={path.stat().st_size} variance={variance:.2f} colors={colors}')
+              images[name] = image
+              report[name] = {'bytes':path.stat().st_size,'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'variance':round(variance,3),'sample_colors':colors}
+
+          a = images[names[0]].resize((240,150))
+          b = images[names[1]].resize((240,150))
+          changed = sum(1 for px in ImageChops.difference(a,b).getdata() if px != (0,0,0))
+          if changed < 5000:
+              raise SystemExit(f'local/sector delta too small: {changed}')
+
+          sheet = Image.new('RGB',(960,300),(37,40,38))
+          sheet.paste(images[names[0]].resize((480,300)),(0,0))
+          sheet.paste(images[names[1]].resize((480,300)),(480,0))
+          sheet.save(root/'local-vs-authored-sector-review.jpg',quality=95)
+
+          qa = {
+              'status':'PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_VISUAL_REVIEW',
+              'exact_head':(root/'exact-head.txt').read_text().strip(),
+              'frames':report,
+              'local_sector_changed_sample_pixels':changed,
+              'atlas_implemented':False,
+          }
+          (root/'evidence-qa.json').write_text(json.dumps(qa,indent=2)+'\n')
+          print('WORLD_SCALE_AUTHORED_SECTOR_EVIDENCE=PASS')
+          PY
+
+      - name: Stage generated GLB for review artifact
+        if: always()
+        run: |
+          if [ -s "${EXPORT_DIR}/sector_a01_authored_v1.glb" ]; then
+            cp "${EXPORT_DIR}/sector_a01_authored_v1.glb" "${EVIDENCE_DIR}/sector_a01_authored_v1.glb"
+          fi
+
+      - name: Upload authored Sector evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: world-scale-authored-sector-v1-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/world-scale-authored-sector-v1
+          if-no-files-found: error
+          retention-days: 1
