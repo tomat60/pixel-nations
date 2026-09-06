@@ -3,14 +3,15 @@
 Status: ACTIVE
 Updated: 2026-09-06
 Current state revision: 12.0
-Accepted product/world baseline: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
-Gameplay rollback baseline: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
+Authority baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
+Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
+Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
+Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: Phase B - Core Playable Loop Consolidation.
 Current milestone: make one representative first session clear, satisfying and persistent from first claim to meaningful expansion.
-Active strategic authority: this file + `docs/GAME_STRATEGY_MASTER_PLAN.md`.
-
-Next allowed action after this authority update merges: inspect the current playable sequence and implement one bounded consolidation candidate using accepted mechanics/states only. Do not add a new system to make the loop work.
+Active execution issue: #586
+Next allowed action: after this authority update merges, inspect the current playable entry/controller and state graph, then define one bounded consolidation candidate using accepted mechanics/states only. Do not add a new system to make the loop work.
 
 ## Core truth
 
@@ -255,7 +256,7 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 3. root `AGENTS.md`;
 4. `docs/GAME_STRATEGY_MASTER_PLAN.md`;
 5. accepted exact-head evidence and merged baselines;
-6. active execution issue/PR for the current Phase B candidate;
+6. active execution issue #586 and its active product PR when one exists;
 7. older issues, PRs, briefs and artifacts as history/reference only.
 
 ## Current stop condition
