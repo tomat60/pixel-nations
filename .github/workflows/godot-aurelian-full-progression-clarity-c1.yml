@@ -1,0 +1,186 @@
+name: Godot Aurelian Full Progression Clarity C1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/scenes/aurelian/full_progression_clarity_composition_v1.gd"
+      - "game/scenes/aurelian/full_progression_clarity_composition_v1.tscn"
+      - "game/tests/aurelian_full_progression_clarity_composition_v1_test.gd"
+      - ".github/workflows/godot-aurelian-full-progression-clarity-c1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: full-progression-clarity-c1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EVIDENCE_DIR: "evidence/full-progression-clarity-c1"
+
+jobs:
+  clarity-c1:
+    name: Render six Nation Empire clarity frames
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+          test -s game/assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb
+
+      - name: Download pinned Godot
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/godot
+          mkdir -p /tmp/godot
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+          python3 -m pip install --disable-pip-version-check --quiet --user pillow
+
+      - name: Import and run focused contracts
+        timeout-minutes: 4
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1 || {
+            cat "${EVIDENCE_DIR}/godot-import.log"; exit 1;
+          }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_full_progression_visual_grammar_v2_gate_b_test.gd \
+            > "${EVIDENCE_DIR}/gate-b-regression.log" 2>&1
+          grep -F "AURELIAN_FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_TEST: PASS" "${EVIDENCE_DIR}/gate-b-regression.log"
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_full_progression_clarity_composition_v1_test.gd \
+            > "${EVIDENCE_DIR}/clarity-c1-contract.log" 2>&1
+          grep -F "AURELIAN_FULL_PROGRESSION_CLARITY_COMPOSITION_V1_TEST: PASS" "${EVIDENCE_DIR}/clarity-c1-contract.log"
+
+      - name: Capture six fixed-camera clarity frames
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          for stage in nation empire; do
+            for view in village map world; do
+              capture_dir="${EVIDENCE_DIR}/tmp-${stage}-${view}"
+              mkdir -p "$capture_dir"
+              timeout 75s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+                AURELIAN_EVIDENCE_DIR="$PWD/$capture_dir" \
+                AURELIAN_CAPTURE_PRESET="$view" \
+                AURELIAN_PROGRESSION_STAGE="$stage" \
+                "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+                res://scenes/aurelian/full_progression_clarity_composition_v1.tscn \
+                > "${EVIDENCE_DIR}/${stage}-${view}.log" 2>&1
+              grep -F "FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_READY=${stage}:${view}" "${EVIDENCE_DIR}/${stage}-${view}.log"
+              if [ "$view" = "village" ]; then
+                source_file="$capture_dir/village-city-chartered-1440x900.png"
+              else
+                source_file="$capture_dir/${view}-1440x900.png"
+              fi
+              test -s "$source_file"
+              cp "$source_file" "${EVIDENCE_DIR}/${stage}-${view}-1440x900.png"
+              rm -rf "$capture_dir"
+            done
+          done
+          test "$(find "${EVIDENCE_DIR}" -maxdepth 1 -name '*-1440x900.png' | wc -l)" -eq 6
+
+      - name: Build C1 review sheets and deterministic QA
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from PIL import Image, ImageChops, ImageStat
+
+          root = Path(os.environ['EVIDENCE_DIR'])
+          stages = ['nation','empire']
+          views = ['village','map','world']
+          images = {}
+          report = {}
+
+          for stage in stages:
+              for view in views:
+                  key = f'{stage}-{view}'
+                  path = root / f'{key}-1440x900.png'
+                  image = Image.open(path).convert('RGB')
+                  if image.size != (1440, 900):
+                      raise SystemExit(f'{key}: wrong size {image.size}')
+                  variance = sum(ImageStat.Stat(image).var) / 3.0
+                  if path.stat().st_size < 65000 or variance < 42.0:
+                      raise SystemExit(f'{key}: weak evidence bytes={path.stat().st_size} variance={variance:.2f}')
+                  images[key] = image
+                  report[key] = {
+                      'bytes': path.stat().st_size,
+                      'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                      'variance': round(variance, 3),
+                  }
+
+          deltas = []
+          for view in views:
+              a = images[f'nation-{view}'].resize((240,150))
+              b = images[f'empire-{view}'].resize((240,150))
+              diff = ImageChops.difference(a, b)
+              changed = sum(1 for pixel in diff.getdata() if pixel != (0,0,0))
+              threshold = 260 if view == 'village' else 180
+              if changed < threshold:
+                  raise SystemExit(f'{view}: Nation/Empire delta too small {changed}')
+              deltas.append({'view': view, 'changed_sample_pixels': changed})
+
+          cell_w, cell_h = 480, 300
+          sheet = Image.new('RGB', (cell_w * 3, cell_h * 2), (45,48,44))
+          for row, stage in enumerate(stages):
+              for col, view in enumerate(views):
+                  thumb = images[f'{stage}-{view}'].resize((cell_w, cell_h))
+                  sheet.paste(thumb, (col * cell_w, row * cell_h))
+          sheet.save(root / 'c1-unlabeled-2x3.jpg', quality=95)
+
+          for view in views:
+              strip = Image.new('RGB', (720 * 2, 450), (45,48,44))
+              strip.paste(images[f'nation-{view}'].resize((720,450)), (0,0))
+              strip.paste(images[f'empire-{view}'].resize((720,450)), (720,0))
+              strip.save(root / f'c1-{view}-nation-empire.jpg', quality=95)
+
+          qa = {
+              'status': 'PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_C1_REVIEW',
+              'exact_head': (root/'exact-head.txt').read_text().strip(),
+              'source_frames': 6,
+              'stages': stages,
+              'views': views,
+              'frames': report,
+              'nation_empire_deltas': deltas,
+              'acceptance_requires_direct_baseline_comparison': True,
+          }
+          (root/'c1-qa.json').write_text(json.dumps(qa, indent=2) + '\n')
+          print('AURELIAN_FULL_PROGRESSION_CLARITY_C1_DETERMINISTIC=PASS')
+          PY
+
+      - name: Upload C1 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-progression-clarity-c1-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/full-progression-clarity-c1
+          if-no-files-found: error
+          retention-days: 3
