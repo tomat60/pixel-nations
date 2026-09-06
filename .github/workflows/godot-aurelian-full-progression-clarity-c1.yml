@@ -94,7 +94,7 @@ jobs:
                 > "${EVIDENCE_DIR}/${stage}-${view}.log" 2>&1
               grep -F "FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_READY=${stage}:${view}" "${EVIDENCE_DIR}/${stage}-${view}.log"
               if [ "$view" = "village" ]; then
-                source_file="$capture_dir/village-city-chartered-1440x900.png"
+                source_file="$capture_dir/village-city_chartered-1440x900.png"
               else
                 source_file="$capture_dir/${view}-1440x900.png"
               fi
