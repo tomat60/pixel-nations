@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/aurelian/world_scale_regional_terrain_v2.gd" id="1"]
+
+[node name="WorldScaleRegionalTerrainV2" type="Node3D"]
+script = ExtResource("1")
