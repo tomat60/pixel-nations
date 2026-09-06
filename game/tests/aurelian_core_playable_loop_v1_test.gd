@@ -20,6 +20,27 @@ func _initialize() -> void:
 		controller.core_session_action_for_state("world_river_surge_crisis") == "legacy",
 		"advanced_crisis_remains_legacy"
 	)
+
+	# Reproduce the legacy late-state inference that used to fabricate skipped
+	# history on restart, then verify the Phase B wrapper removes only that false
+	# history while preserving the real North Ridge expansion facts.
+	controller.imperial_crisis = "river_surge"
+	controller.imperial_crisis_response = "shield_greenvale"
+	controller.crisis_response_cursor = 1
+	controller.first_rival_countermove_response = "stand_firm"
+	controller.rival_response_cursor = 1
+	controller.first_frontier_payoff = "secure_gilded_crossing"
+	controller.imperial_expansion_target = "north_ridge"
+	controller.first_imperial_expansion = "north_ridge_claimed"
+	controller._sanitize_core_session_state_for_persistence("world_first_imperial_expansion_two_land_footprint")
+	_check(controller.imperial_crisis == "none", "restore_does_not_invent_crisis")
+	_check(controller.imperial_crisis_response == "none", "restore_does_not_invent_crisis_response")
+	_check(controller.crisis_response_cursor == 0, "restore_resets_crisis_cursor")
+	_check(controller.first_rival_countermove_response == "none", "restore_does_not_invent_rival_response")
+	_check(controller.rival_response_cursor == 0, "restore_resets_rival_cursor")
+	_check(controller.first_frontier_payoff == "none", "restore_does_not_invent_frontier_payoff")
+	_check(controller.imperial_expansion_target == "north_ridge", "restore_preserves_real_expansion_target")
+	_check(controller.first_imperial_expansion == "north_ridge_claimed", "restore_preserves_real_second_land_claim")
 	controller.free()
 
 	var entry_scene := _read_text(ENTRY_SCENE_PATH)
