@@ -42,6 +42,20 @@ func _sector_to_godot(point: Vector2, height: float = 0.0) -> Vector3:
 		(point.y - center.y) * SECTOR_WORLD_SCALE * TOPOLOGY_Z_SIGN
 	)
 
+func _enable_terrain_vertex_colors(instance: Node3D) -> bool:
+	var terrain := instance.find_child("AurelianSectorGeneratorV4Terrain", true, false) as MeshInstance3D
+	if terrain == null or terrain.mesh == null:
+		push_error("AURELIAN_SECTOR_GENERATOR_V4_TERRAIN_MISSING")
+		return false
+	for surface in range(terrain.mesh.get_surface_count()):
+		var material := terrain.get_active_material(surface)
+		if material is StandardMaterial3D:
+			var local_material := (material as StandardMaterial3D).duplicate() as StandardMaterial3D
+			local_material.vertex_color_use_as_albedo = true
+			local_material.vertex_color_is_srgb = true
+			terrain.set_surface_override_material(surface, local_material)
+	return true
+
 func _load_sector() -> Node3D:
 	var packed := load(GLB_PATH) as PackedScene
 	if packed == null:
@@ -52,6 +66,8 @@ func _load_sector() -> Node3D:
 		push_error("AURELIAN_SECTOR_GENERATOR_V4_GLB_INSTANTIATE_FAILED")
 		return null
 	instance.name = "AurelianSectorGeneratorV4Imported"
+	if not _enable_terrain_vertex_colors(instance):
+		return null
 	return instance
 
 func _make_environment() -> Environment:
