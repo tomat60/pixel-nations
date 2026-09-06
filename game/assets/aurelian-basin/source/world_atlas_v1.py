@@ -41,6 +41,7 @@ WORLD_WIDTH, WORLD_HEIGHT = [float(v) for v in atlas_spec["world_plane"]]
 PADDING = float(atlas_spec["technical_padding"])
 WORLD_CENTER = Vector((WORLD_WIDTH * 0.5, WORLD_HEIGHT * 0.5))
 SOURCE_OBJECTS = {}
+SOURCE_LIBRARY_OBJECTS = []
 
 
 def lerp(a, b, t):
@@ -138,6 +139,7 @@ def prepare_source_library():
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=str(CANONICAL_GLB))
     imported = [obj for obj in bpy.data.objects if obj not in before]
+    SOURCE_LIBRARY_OBJECTS.extend(imported)
     names = {
         "blacksmith": "Greenvale_blacksmith",
         "barracks": "Greenvale_barracks",
@@ -157,6 +159,14 @@ def prepare_source_library():
         SOURCE_OBJECTS[key] = obj
     for obj in imported:
         obj.hide_render = True
+
+
+def purge_source_library():
+    for obj in list(SOURCE_LIBRARY_OBJECTS):
+        if obj.name in bpy.data.objects:
+            bpy.data.objects.remove(obj, do_unlink=True)
+    SOURCE_LIBRARY_OBJECTS.clear()
+    SOURCE_OBJECTS.clear()
 
 
 def coast_depth(point):
@@ -437,6 +447,7 @@ def main():
     create_relief_landmarks()
     create_origin_a01()
     create_sparse_loci()
+    purge_source_library()
 
     scene = bpy.context.scene
     scene["pixel_nations_contract"] = "PIXEL_NATIONS_WORLD_ATLAS_V1"
