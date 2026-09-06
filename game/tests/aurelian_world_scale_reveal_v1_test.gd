@@ -10,7 +10,8 @@ func _init() -> void:
 	var instance := WORLD_SCALE_SCRIPT.new()
 	_check(instance.has_method("_build_sector_a01"), "sector_builder")
 	_check(instance.has_method("_build_world_atlas"), "atlas_builder")
-	_check(instance.has_method("_add_land_patch"), "land_patch_builder")
+	_check(instance.has_method("_add_polygon_land"), "polygon_land_builder")
+	_check(instance.has_method("_add_irregular_region"), "irregular_region_builder")
 	_check(instance.has_method("_make_camera"), "camera_override")
 	instance.free()
 
@@ -21,7 +22,8 @@ func _init() -> void:
 
 	_check(WORLD_SCALE_SCRIPT.SCALE_LEVELS == ["local", "sector", "atlas"], "three_scale_levels")
 	_check(WORLD_SCALE_SCRIPT.SECTOR_ANCHORS.size() >= 4, "sector_has_four_plus_non_aurelian_anchors")
-	_check(WORLD_SCALE_SCRIPT.ATLAS_MASSES.size() >= 12, "atlas_has_many_macro_masses")
+	_check(WORLD_SCALE_SCRIPT.ATLAS_CONTINENTS.size() >= 4, "atlas_has_multiple_continents")
+	_check(WORLD_SCALE_SCRIPT.ATLAS_BIOMES.size() >= 10, "atlas_has_many_internal_regions")
 	_check(WORLD_SCALE_SCRIPT.ATLAS_CAMERA_SIZE > WORLD_SCALE_SCRIPT.SECTOR_CAMERA_SIZE, "atlas_camera_wider_than_sector")
 	_check(WORLD_SCALE_SCRIPT.SECTOR_CAMERA_SIZE > 23.4, "sector_camera_wider_than_accepted_local_world")
 
@@ -37,12 +39,14 @@ func _init() -> void:
 		var source := file.get_as_text()
 		_check(source.find("super._populate_world(parent)") >= 0, "accepted_aurelian_inherited")
 		_check(source.find("super._make_camera(preset, parent)") >= 0, "accepted_camera_inherited_for_local")
-		_check(source.find("SectorA01RegionalShelf") >= 0, "sector_physical_shelf")
-		_check(source.find("SectorA01RiverNorth") >= 0, "sector_physical_river")
-		_check(source.find("WorldAtlasOcean") >= 0, "atlas_ocean")
+		_check(source.find("SectorA01ContinuousLand") >= 0, "sector_continuous_landmass")
+		_check(source.find("Geometry2D.triangulate_polygon") >= 0, "irregular_polygon_triangulation")
+		_check(source.find("AtlasContinent_") >= 0, "atlas_continent_geometry")
 		_check(source.find("AtlasA01Origin") >= 0, "atlas_a01_locator")
+		_check(source.find("inherited_overlay.visible = false") >= 0, "higher_scale_local_overlay_suppressed")
 		_check(source.find("range(10000)") == -1, "no_10000_object_render_loop")
-		_check(source.find("grid") == -1 or source.find("grid-first") >= 0, "no_grid_implementation")
+		_check(source.find("SectorAnchorTerrain_") == -1, "no_token_like_sector_anchor_tiles")
+		_check(source.find("AtlasMass_") == -1, "no_token_ring_atlas_masses")
 
 	_finish()
 
