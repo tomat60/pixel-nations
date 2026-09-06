@@ -11,17 +11,21 @@ TOPOLOGY_CENTER = Vector((800.0, 700.0))
 TOPOLOGY_SCALE = 0.020
 SEA_LEVEL = -0.18
 
+# Candidate 2 deliberately extends north and west beyond the regional camera.
+# The player sees a region continuing beyond frame, with meaningful east/south
+# coastline, rather than a complete floating island/board piece.
 LAND_OUTLINE = [
-    (115, 390), (180, 225), (330, 125), (515, 82), (690, 105),
-    (820, 58), (1015, 112), (1175, 205), (1320, 325), (1435, 500),
-    (1470, 675), (1425, 835), (1330, 985), (1200, 1115), (1040, 1215),
-    (855, 1302), (665, 1280), (505, 1210), (350, 1110), (235, 955),
-    (150, 785), (105, 610),
+    (-820, -260), (-430, -470), (20, -520), (380, -430), (670, -360),
+    (930, -255), (1160, -70), (1325, 170), (1435, 420), (1490, 650),
+    (1450, 840), (1360, 1000), (1235, 1135), (1070, 1235), (870, 1325),
+    (655, 1305), (465, 1235), (280, 1120), (115, 970), (-55, 805),
+    (-235, 610), (-430, 405), (-640, 170), (-805, -40),
 ]
 
 RIVER_POINTS = [
-    (430, 205), (470, 315), (520, 425), (585, 535), (635, 620),
-    (705, 705), (800, 750), (910, 780), (1035, 790), (1175, 800), (1360, 775),
+    (-300, -260), (-80, -120), (145, 35), (330, 190), (445, 330),
+    (535, 470), (635, 620), (720, 700), (820, 750), (930, 780),
+    (1050, 790), (1185, 800), (1375, 775),
 ]
 
 ANCHORS = {
@@ -107,35 +111,40 @@ def gaussian(point, center, radius):
 
 def terrain_height(point):
     x, y = point
-    height = 0.56
+    height = 0.64
 
-    # Three distinct relief families form the regional silhouette before any markers.
-    height += 2.55 * gaussian(point, ANCHORS["Stormcap"], 185.0)
-    height += 1.95 * gaussian(point, ANCHORS["EastRidge"], 205.0)
-    height += 1.20 * gaussian(point, ANCHORS["OldCrown"], 175.0)
-    height += 0.72 * gaussian(point, ANCHORS["FrontierPass"], 150.0)
+    # Strong, readable relief families. Terrain shape must carry geography before
+    # settlement props or biome color patches do.
+    height += 3.25 * gaussian(point, ANCHORS["Stormcap"], 205.0)
+    height += 2.65 * gaussian(point, ANCHORS["EastRidge"], 225.0)
+    height += 1.68 * gaussian(point, ANCHORS["OldCrown"], 195.0)
+    height += 1.05 * gaussian(point, ANCHORS["FrontierPass"], 165.0)
 
-    # Aurelian sits in a basin; Southfen is a true lowland rather than a token patch.
-    height -= 0.50 * gaussian(point, ANCHORS["AurelianHome"], 175.0)
-    height -= 0.46 * gaussian(point, ANCHORS["Southfen"], 165.0)
+    # Secondary spurs make the mountain systems read as ranges, not isolated bumps.
+    height += 1.25 * gaussian(point, (220, 150), 190.0)
+    height += 1.00 * gaussian(point, (1260, 245), 185.0)
+    height += 0.70 * gaussian(point, (900, 1110), 180.0)
 
-    # Broad rolling midlands break the procedural-grid read without becoming noise.
-    height += 0.11 * math.sin(x * 0.017) * math.cos(y * 0.015)
-    height += 0.065 * math.sin((x + y) * 0.026)
-    height += 0.045 * math.cos((x - 2.0 * y) * 0.019)
+    # Home basin and southern wetland remain broad lowlands.
+    height -= 0.58 * gaussian(point, ANCHORS["AurelianHome"], 185.0)
+    height -= 0.52 * gaussian(point, ANCHORS["Southfen"], 180.0)
+
+    height += 0.10 * math.sin(x * 0.016) * math.cos(y * 0.014)
+    height += 0.055 * math.sin((x + y) * 0.024)
+    height += 0.035 * math.cos((x - 2.0 * y) * 0.018)
 
     river_distance = distance_to_polyline(point, RIVER_POINTS)
-    valley_radius = 82.0 + 20.0 * max(0.0, min(1.0, y / 1400.0))
+    valley_radius = 92.0 + 22.0 * max(0.0, min(1.0, y / 1400.0))
     if river_distance < valley_radius:
         t = 1.0 - river_distance / valley_radius
-        height -= 0.40 * t * t
+        height -= 0.46 * t * t
 
-    # Pull the irregular perimeter gently down to sea level so the shoreline belongs
-    # to the landmass instead of looking like a board plate resting on water.
+    # Shoreline lowering matters mostly on visible east/south coast. North/west
+    # boundary is intentionally beyond frame and therefore must not read as a plate.
     coast_distance = distance_to_outline(point)
-    if coast_distance < 115.0:
-        t = 1.0 - coast_distance / 115.0
-        height -= 0.62 * t * t
+    if coast_distance < 125.0:
+        t = 1.0 - coast_distance / 125.0
+        height -= 0.72 * t * t
     return height
 
 
@@ -152,27 +161,26 @@ def make_material(name, color, roughness=0.95):
 
 def make_materials():
     return {
-        "meadow": make_material("SectorA01_Meadow", (0.27, 0.34, 0.19, 1.0)),
-        "forest": make_material("SectorA01_ForestGround", (0.12, 0.22, 0.13, 1.0)),
-        "ridge": make_material("SectorA01_Ridge", (0.34, 0.33, 0.29, 1.0)),
-        "dry": make_material("SectorA01_DryEast", (0.42, 0.36, 0.23, 1.0)),
-        "marsh": make_material("SectorA01_Marsh", (0.18, 0.27, 0.22, 1.0)),
-        "coast": make_material("SectorA01_Coast", (0.43, 0.40, 0.28, 1.0)),
+        "meadow": make_material("SectorA01_Meadow", (0.27, 0.34, 0.20, 1.0)),
+        "forest": make_material("SectorA01_ForestGround", (0.20, 0.29, 0.19, 1.0)),
+        "ridge": make_material("SectorA01_Ridge", (0.35, 0.34, 0.30, 1.0)),
+        "marsh": make_material("SectorA01_Marsh", (0.22, 0.31, 0.24, 1.0)),
+        "coast": make_material("SectorA01_Coast", (0.42, 0.39, 0.28, 1.0)),
         "water": make_material("SectorA01_Water", (0.055, 0.20, 0.25, 1.0), 0.42),
     }
 
 
 def material_key(point, height):
-    if distance_to_outline(point) < 72.0:
+    # Candidate 2 deliberately keeps ground zoning restrained. Vegetation, water
+    # and height carry regional identity; color blocks only support them.
+    if distance_to_outline(point) < 58.0:
         return "coast"
-    if gaussian(point, ANCHORS["Pinewatch"], 220.0) > 0.40:
-        return "forest"
-    if gaussian(point, ANCHORS["Southfen"], 190.0) > 0.46:
-        return "marsh"
-    if gaussian(point, ANCHORS["EastRidge"], 260.0) > 0.30 and point[0] > 950:
-        return "dry"
-    if height > 1.55:
+    if height > 1.78:
         return "ridge"
+    if gaussian(point, ANCHORS["Southfen"], 145.0) > 0.72:
+        return "marsh"
+    if gaussian(point, ANCHORS["Pinewatch"], 145.0) > 0.76:
+        return "forest"
     return "meadow"
 
 
@@ -205,7 +213,7 @@ def create_terrain(materials):
             faces.append(tuple(grid[key] for key in keys))
             centers.append((x + step * 0.5, y + step * 0.5))
 
-    if len(faces) < 2500:
+    if len(faces) < 5000:
         raise RuntimeError(f"Sector A-01 terrain unexpectedly sparse: {len(faces)} cells")
 
     mesh = bpy.data.meshes.new("SectorA01AuthoredTerrainMesh")
@@ -215,7 +223,7 @@ def create_terrain(materials):
     bpy.context.collection.objects.link(obj)
     obj["terrain_face_cells"] = len(faces)
 
-    order = ["meadow", "forest", "ridge", "dry", "marsh", "coast"]
+    order = ["meadow", "forest", "ridge", "marsh", "coast"]
     for key in order:
         obj.data.materials.append(materials[key])
     for poly, center in zip(obj.data.polygons, centers):
@@ -228,7 +236,7 @@ def create_ocean(materials):
     bpy.ops.mesh.primitive_plane_add(size=1.0, location=(0.0, 0.0, SEA_LEVEL))
     ocean = bpy.context.object
     ocean.name = "SectorA01Ocean"
-    ocean.scale = (42.0, 36.0, 1.0)
+    ocean.scale = (120.0, 120.0, 1.0)
     ocean.data.materials.append(materials["water"])
     return ocean
 
@@ -272,8 +280,8 @@ def create_strip(name, points, width_fn, z_fn, material):
 
 def create_river(materials):
     def width_fn(point, _i, _n):
-        t = max(0.0, min(1.0, point.x / 1500.0))
-        return 26.0 + 44.0 * t
+        t = max(0.0, min(1.0, (point.x + 300.0) / 1700.0))
+        return 24.0 + 46.0 * t
 
     def z_fn(center, _edge, _i, _n):
         return terrain_height((center.x, center.y)) + 0.045
@@ -323,23 +331,23 @@ def create_aurelian_home():
     root = bpy.data.objects.new("AurelianHome", None)
     bpy.context.collection.objects.link(root)
     placements = [
-        ("church", (626, 604), 0.78, 2),
-        ("barracks", (652, 618), 0.64, 14),
-        ("blacksmith", (615, 640), 0.58, -18),
-        ("flag", (642, 596), 0.34, 0),
+        ("church", (626, 604), 0.90, 2),
+        ("barracks", (654, 618), 0.76, 14),
+        ("blacksmith", (614, 642), 0.70, -18),
+        ("flag", (644, 596), 0.40, 0),
     ]
     for key, point, span, rotation in placements:
         import_asset(key, point, span, rotation, f"AurelianHome_{key}").parent = root
     return root
 
 
-def create_tree_cluster(name, center, points, span=0.70):
+def create_tree_cluster(name, center, points, span=0.64):
     root = bpy.data.objects.new(name, None)
     bpy.context.collection.objects.link(root)
     for i, offset in enumerate(points):
         point = (center[0] + offset[0], center[1] + offset[1])
         key = "tree_a" if i % 2 == 0 else "tree_b"
-        import_asset(key, point, span + 0.06 * (i % 3), i * 31.0, f"{name}_{i:02d}").parent = root
+        import_asset(key, point, span + 0.05 * (i % 3), i * 31.0, f"{name}_{i:02d}").parent = root
     return root
 
 
@@ -347,14 +355,16 @@ def create_highland_cluster(name, center, scale=1.0):
     root = bpy.data.objects.new(name, None)
     bpy.context.collection.objects.link(root)
     specs = [
-        ("hill_a", (-44, 12), 2.25 * scale, -12),
-        ("hill_b", (28, -18), 2.05 * scale, 17),
-        ("rock_a", (-5, 34), 0.82 * scale, 31),
-        ("rock_c", (52, 28), 0.75 * scale, -24),
+        ("hill_a", (-70, 5), 3.00 * scale, -14),
+        ("hill_b", (5, -32), 2.70 * scale, 14),
+        ("hill_a", (72, 8), 2.45 * scale, 28),
+        ("rock_a", (-35, 52), 0.82 * scale, 31),
+        ("rock_c", (40, 50), 0.78 * scale, -24),
+        ("rock_a", (92, -28), 0.68 * scale, 10),
     ]
     for key, offset, span, rot in specs:
         point = (center[0] + offset[0], center[1] + offset[1])
-        import_asset(key, point, span, rot, f"{name}_{key}").parent = root
+        import_asset(key, point, span, rot, f"{name}_{key}_{len(root.children):02d}").parent = root
     return root
 
 
@@ -366,11 +376,12 @@ def create_marsh(materials):
         angle = i * (math.tau / 7.0)
         point = (center[0] + math.cos(angle) * (35 + 7 * i), center[1] + math.sin(angle) * (20 + 5 * i))
         w = topo_to_world(point, terrain_height(point) + 0.025)
-        bpy.ops.mesh.primitive_cylinder_add(vertices=18, radius=0.45 + 0.07 * (i % 3), depth=0.025, location=(w.x, w.y, w.z))
+        bpy.ops.mesh.primitive_cylinder_add(vertices=18, radius=0.42 + 0.06 * (i % 3), depth=0.025, location=(w.x, w.y, w.z))
         pool = bpy.context.object
         pool.name = f"SouthfenPool_{i:02d}"
         pool.scale.y = 0.62 + 0.08 * (i % 2)
         pool.data.materials.append(materials["water"])
+        pool.parent = root
     return root
 
 
@@ -381,17 +392,20 @@ def create_places(materials):
         (-95,-40),(-70,15),(-50,-75),(-30,-15),(-10,45),(20,-55),(40,5),(65,55),
         (85,-20),(100,35),(-90,80),(-55,95),(-20,80),(15,110),(55,95),(90,90),
         (-120,25),(-110,-90),(120,-65),(125,10),(5,-110),(55,-120),(-40,-125),(95,125),
+        (-135,115),(135,105),(-145,-55),(145,-15),
     ]
-    create_tree_cluster("PinewatchForest", ANCHORS["Pinewatch"], forest_offsets, 0.72)
+    create_tree_cluster("PinewatchForest", ANCHORS["Pinewatch"], forest_offsets, 0.64)
 
-    create_highland_cluster("StormcapHighlands", ANCHORS["Stormcap"], 1.12)
-    create_highland_cluster("EastRidgeHighlands", ANCHORS["EastRidge"], 0.96)
-    create_highland_cluster("OldCrownRelief", ANCHORS["OldCrown"], 0.70)
+    create_highland_cluster("StormcapHighlands", ANCHORS["Stormcap"], 1.14)
+    create_highland_cluster("EastRidgeHighlands", ANCHORS["EastRidge"], 1.02)
+    create_highland_cluster("OldCrownRelief", ANCHORS["OldCrown"], 0.74)
 
-    import_asset("barracks", ANCHORS["Pinewatch"], 0.52, -18, "PinewatchKeep")
-    import_asset("church", ANCHORS["OldCrown"], 0.60, 11, "OldCrownRuins")
-    import_asset("blacksmith", ANCHORS["Saltmere"], 0.55, 28, "SaltmereHarbor")
-    import_asset("flag", ANCHORS["FrontierPass"], 0.35, 0, "FrontierPassFlag")
+    # Regional places are deliberately small. Geography, not oversized buildings,
+    # must carry the sector read.
+    import_asset("barracks", ANCHORS["Pinewatch"], 0.30, -18, "PinewatchKeep")
+    import_asset("church", ANCHORS["OldCrown"], 0.32, 11, "OldCrownRuins")
+    import_asset("blacksmith", ANCHORS["Saltmere"], 0.30, 28, "SaltmereHarbor")
+    import_asset("flag", ANCHORS["FrontierPass"], 0.22, 0, "FrontierPassFlag")
     create_marsh(materials)
 
 
@@ -410,12 +424,15 @@ def write_manifests(glb_path, blend_path):
     face_cells = int(terrain.get("terrain_face_cells", 0)) if terrain else 0
     manifest = {
         "contract": "WORLD_SCALE_AUTHORED_SECTOR_A01_V1",
+        "candidate": 2,
+        "bounded_visual_correction": True,
         "representation": "authored irregular regional landmass + integrated river/relief/biomes",
         "land_outline": LAND_OUTLINE,
         "river_centerline": RIVER_POINTS,
         "anchors": ANCHORS,
         "relief_families": ["StormcapHighlands", "EastRidgeHighlands", "OldCrownRelief"],
         "aurelian_role": "subordinate regional home cluster",
+        "region_extends_beyond_camera_north_west": True,
         "atlas_implemented": False,
         "runtime_generated_terrain": False,
         "visible_grid_representation": False,
@@ -450,6 +467,7 @@ def main():
 
     scene = bpy.context.scene
     scene["pixel_nations_contract"] = "WORLD_SCALE_AUTHORED_SECTOR_A01_V1"
+    scene["candidate"] = 2
     scene["kaykit_source_commit"] = KAYKIT_SHA
     scene["atlas_implemented"] = False
     scene["runtime_generated_terrain"] = False
