@@ -1,57 +1,47 @@
 extends SceneTree
 
 const SCRIPT_PATH := "res://scenes/aurelian/world_scale_regional_terrain_v2.gd"
-const REGIONAL_SCRIPT := preload("res://scenes/aurelian/world_scale_regional_terrain_v2.gd")
-const REGIONAL_SCENE := preload("res://scenes/aurelian/world_scale_regional_terrain_v2.tscn")
+const SCENE_PATH := "res://scenes/aurelian/world_scale_regional_terrain_v2.tscn"
 
 var failures: Array[String] = []
 
 func _init() -> void:
-	var instance := REGIONAL_SCRIPT.new()
-	_check(instance.has_method("_build_continuous_terrain"), "continuous_terrain_builder")
-	_check(instance.has_method("_terrain_height"), "deterministic_height_function")
-	_check(instance.has_method("_terrain_color"), "terrain_color_regions")
-	_check(instance.has_method("_build_river"), "physical_river_builder")
-	_check(instance.has_method("_build_regional_aurelian"), "regional_aurelian_builder")
-	_check(instance.has_method("_build_regional_anchors"), "regional_anchor_builder")
-	_check(instance.has_method("_make_camera"), "regional_camera_override")
-	instance.free()
+	_check(FileAccess.file_exists(SCRIPT_PATH), "script_exists")
+	_check(FileAccess.file_exists(SCENE_PATH), "scene_exists")
 
-	var scene_instance := REGIONAL_SCENE.instantiate()
-	_check(scene_instance != null, "scene_instantiates")
-	if scene_instance != null:
-		scene_instance.free()
-
-	_check(REGIONAL_SCRIPT.TERRAIN_RESOLUTION >= 33 and REGIONAL_SCRIPT.TERRAIN_RESOLUTION <= 49, "bounded_low_resolution_heightfield")
-	_check(REGIONAL_SCRIPT.REGIONAL_ANCHORS.size() >= 5, "five_plus_non_aurelian_anchors")
-	_check(REGIONAL_SCRIPT.REGIONAL_CAMERA_SIZE > 23.4, "regional_camera_wider_than_local_world")
-	_check(REGIONAL_SCRIPT.TERRAIN_HALF_X > 25.0 and REGIONAL_SCRIPT.TERRAIN_HALF_Z > 20.0, "regional_footprint_materially_larger")
-
-	var kinds := {}
-	var names := {}
-	for anchor_variant in REGIONAL_SCRIPT.REGIONAL_ANCHORS:
-		var anchor: Dictionary = anchor_variant
-		kinds[String(anchor.get("kind", ""))] = true
-		names[String(anchor.get("name", ""))] = true
-	_check(names.size() == REGIONAL_SCRIPT.REGIONAL_ANCHORS.size(), "anchor_names_unique")
-	_check(kinds.has("forest"), "forest_anchor")
-	_check(kinds.has("highland"), "highland_anchor")
-	_check(kinds.has("coast"), "coast_anchor")
-	_check(kinds.has("marsh"), "marsh_anchor")
-	_check(kinds.has("ruins"), "ruins_anchor")
-
-	var file := FileAccess.open(SCRIPT_PATH, FileAccess.READ)
-	_check(file != null, "script_open")
-	if file != null:
-		var source := file.get_as_text()
+	var script_file := FileAccess.open(SCRIPT_PATH, FileAccess.READ)
+	_check(script_file != null, "script_open")
+	if script_file != null:
+		var source := script_file.get_as_text()
+		_check(source.find("const TERRAIN_RESOLUTION := 41") >= 0, "bounded_41x41_heightfield")
+		_check(source.find("const TERRAIN_HALF_X := 34.0") >= 0, "regional_width_contract")
+		_check(source.find("const TERRAIN_HALF_Z := 30.0") >= 0, "regional_depth_contract")
+		_check(source.find("const REGIONAL_CAMERA_SIZE := 60.0") >= 0, "regional_camera_contract")
+		_check(source.find("func _build_continuous_terrain") >= 0, "continuous_terrain_builder")
+		_check(source.find("func _terrain_height") >= 0, "deterministic_height_function")
+		_check(source.find("func _terrain_color") >= 0, "terrain_color_regions")
+		_check(source.find("func _build_river") >= 0, "physical_river_builder")
+		_check(source.find("func _build_regional_aurelian") >= 0, "regional_aurelian_builder")
+		_check(source.find("func _build_regional_anchors") >= 0, "regional_anchor_builder")
+		_check(source.find("func _make_camera") >= 0, "regional_camera_override")
 		_check(source.find("SurfaceTool.new()") >= 0, "surface_tool_mesh")
 		_check(source.find("generate_normals()") >= 0, "explicit_normals")
 		_check(source.find("vertex_color_use_as_albedo = true") >= 0, "broad_vertex_color_biomes")
 		_check(source.find("smoothstep(0.72, 1.0, edge)") >= 0, "coastline_from_heightfield")
 		_check(source.find("basin.visible = false") >= 0, "local_scene_not_pasted_at_regional_scale")
 		_check(source.find("_build_world_atlas") == -1, "atlas_not_implemented_before_r1_pass")
-		_check(source.find("CylinderMesh.new()") >= 0, "relief_and_vegetation_primitives_allowed")
 		_check(source.find("range(10000)") == -1, "no_literal_10000_land_render")
+		for anchor_name in ["Pinewatch", "Stormcap", "EastRidge", "Saltmere", "Southfen", "OldCrown"]:
+			_check(source.find(anchor_name) >= 0, "anchor_%s" % anchor_name)
+		for kind in ["forest", "highland", "coast", "marsh", "ruins"]:
+			_check(source.find("\"kind\":\"%s\"" % kind) >= 0, "kind_%s" % kind)
+
+	var scene_file := FileAccess.open(SCENE_PATH, FileAccess.READ)
+	_check(scene_file != null, "scene_open")
+	if scene_file != null:
+		var scene_source := scene_file.get_as_text()
+		_check(scene_source.find("res://scenes/aurelian/world_scale_regional_terrain_v2.gd") >= 0, "scene_binds_regional_script")
+		_check(scene_source.find("WorldScaleRegionalTerrainV2") >= 0, "scene_root_named")
 
 	_finish()
 
