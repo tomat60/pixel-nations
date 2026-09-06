@@ -15,6 +15,7 @@ func _init() -> void:
 	_check(instance.has_method("_load_sector"), "sector_loader")
 	_check(instance.has_method("_make_camera"), "sector_camera")
 	_check(instance.has_method("_capture_sector"), "sector_capture")
+	_check(instance.has_method("_apply_regional_lod"), "regional_lod_application")
 	instance.free()
 
 	var scene_instance := SECTOR_SCENE.instantiate()
@@ -27,7 +28,8 @@ func _init() -> void:
 	if source_file != null:
 		var source := source_file.get_as_text()
 		_check(source.find("aurelian_sector_lod_v1.glb") >= 0, "generated_glb_path")
-		_check(source.find("SECTOR_CAMERA_SIZE := 23.0") >= 0, "bounded_sector_camera")
+		_check(source.find("SECTOR_CAMERA_SIZE := 16.0") >= 0, "corrected_sector_camera")
+		_check(source.find("REGIONAL_CITY_SCALE := 0.50") >= 0, "regional_city_reduction")
 		_check(source.find("#27332f") >= 0, "accepted_background_palette")
 		_check(source.find("#f3d4a8") >= 0, "accepted_sun_palette")
 		_check(source.find("World Atlas") == -1, "no_atlas_logic")
