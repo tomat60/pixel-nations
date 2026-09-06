@@ -4,6 +4,7 @@ const CORE_SESSION_ACTION_OPEN_NORTH_RIDGE := "open_north_ridge"
 const CORE_SESSION_ACTION_COMPLETE := "complete"
 const CORE_SESSION_ACTION_LEGACY := "legacy"
 const CORE_SESSION_EXPANSION_READY_STATE := "world_first_imperial_expansion_north_ridge_direction"
+const CORE_SESSION_FINAL_MAP_STATE := "map_first_imperial_expansion_two_lands_claimed"
 const CORE_SESSION_FINAL_STATE := "world_first_imperial_expansion_two_land_footprint"
 
 func core_session_action_for_state(state_name: String) -> String:
@@ -14,6 +15,11 @@ func core_session_action_for_state(state_name: String) -> String:
 			return CORE_SESSION_ACTION_COMPLETE
 		_:
 			return CORE_SESSION_ACTION_LEGACY
+
+func core_session_right_target_for_state(state_name: String) -> String:
+	if state_name == CORE_SESSION_FINAL_STATE:
+		return CORE_SESSION_FINAL_MAP_STATE
+	return ""
 
 func _apply_entry_state(state_name: String) -> void:
 	_sanitize_core_session_state_for_persistence(state_name)
@@ -52,6 +58,14 @@ func _accept_entry() -> void:
 		_:
 			super()
 
+func _right_entry() -> void:
+	if _core_session_active():
+		var target := core_session_right_target_for_state(entry_state)
+		if not target.is_empty():
+			_apply_entry_state(target)
+			return
+	super()
+
 func _update_runtime_hud() -> void:
 	super()
 	if not _core_session_active() or intent_label == null or controls_label == null:
@@ -66,7 +80,7 @@ func _update_runtime_hud() -> void:
 			controls_label.text = "[RIGHT] Inspect North Ridge on Map"
 		CORE_SESSION_FINAL_STATE:
 			intent_label.text = "First session complete: Aurelian now spans East Route and North Ridge"
-			controls_label.text = "[RIGHT] Inspect both lands    [LEFT] Review expansion"
+			controls_label.text = "SESSION COMPLETE    [RIGHT] Inspect both lands"
 
 func _core_session_active() -> bool:
 	if automated_input_mode:
