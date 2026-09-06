@@ -98,6 +98,9 @@ func _check(condition: bool, label: String) -> void:
 	if not condition:
 		failures.append(label)
 
+func _fail(label: String) -> void:
+	failures.append(label)
+
 func _finish() -> void:
 	if failures.is_empty():
 		print("AURELIAN_CORE_PLAYABLE_LOOP_V1_TEST: PASS")
