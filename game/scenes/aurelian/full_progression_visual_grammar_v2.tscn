@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/aurelian/full_progression_visual_grammar_v2.gd" id="1"]
+
+[node name="FullProgressionVisualGrammarV2" type="Node3D"]
+script = ExtResource("1")

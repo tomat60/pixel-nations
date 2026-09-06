@@ -1,0 +1,259 @@
+name: Godot Aurelian Full Progression Visual Grammar v2 Gate B
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/scenes/aurelian/full_progression_visual_grammar_v2.gd"
+      - "game/scenes/aurelian/full_progression_visual_grammar_v2.tscn"
+      - "game/scenes/aurelian/full_progression_visual_grammar_v2_manifest.json"
+      - "game/scenes/aurelian/full_progression_visual_grammar_v2_gate_b.gd"
+      - "game/scenes/aurelian/full_progression_visual_grammar_v2_gate_b.tscn"
+      - "game/scenes/aurelian/full_progression_visual_grammar_v2_gate_b_manifest.json"
+      - "game/tests/aurelian_full_progression_visual_grammar_v2_test.gd"
+      - "game/tests/aurelian_full_progression_visual_grammar_v2_gate_b_test.gd"
+      - ".github/workflows/godot-aurelian-full-progression-visual-grammar-v2-gate-a.yml"
+      - ".github/workflows/godot-aurelian-full-progression-visual-grammar-v2-gate-b.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: full-progression-v2-gate-b-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EVIDENCE_DIR: "evidence/full-progression-visual-grammar-v2-gate-b"
+
+jobs:
+  gate-b-progression-atlas:
+    name: Render 5x3 progression atlas and motion proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+          test -s game/assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb
+
+      - name: Download pinned Godot 4.7.1
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/godot
+          mkdir -p /tmp/godot
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+          python3 -m pip install --disable-pip-version-check --quiet --user pillow
+          command -v mediainfo
+
+      - name: Import and run focused contracts
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1 || {
+            cat "${EVIDENCE_DIR}/godot-import.log"; exit 1;
+          }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_authored_terrain_v1_test.gd \
+            > "${EVIDENCE_DIR}/foundation.log" 2>&1
+          grep -F "AURELIAN_AUTHORED_TERRAIN_V1_TEST: PASS" "${EVIDENCE_DIR}/foundation.log"
+          "${GODOT_BIN}" --headless --path game --script res://tests/production_village_v1_test.gd \
+            > "${EVIDENCE_DIR}/production-village.log" 2>&1
+          grep -F "PRODUCTION_VILLAGE_V1_TEST: PASS" "${EVIDENCE_DIR}/production-village.log"
+          "${GODOT_BIN}" --headless --path game --script res://tests/production_map_v1_test.gd \
+            > "${EVIDENCE_DIR}/production-map.log" 2>&1
+          grep -F "PRODUCTION_MAP_V1_TEST: PASS" "${EVIDENCE_DIR}/production-map.log"
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_full_progression_visual_grammar_v2_test.gd \
+            > "${EVIDENCE_DIR}/visual-grammar-v2.log" 2>&1
+          grep -F "AURELIAN_FULL_PROGRESSION_VISUAL_GRAMMAR_V2_TEST: PASS" "${EVIDENCE_DIR}/visual-grammar-v2.log"
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_full_progression_visual_grammar_v2_gate_b_test.gd \
+            > "${EVIDENCE_DIR}/gate-b.log" 2>&1
+          grep -F "AURELIAN_FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_TEST: PASS" "${EVIDENCE_DIR}/gate-b.log"
+
+      - name: Capture exact 5x3 fixed-camera matrix
+        timeout-minutes: 12
+        run: |
+          set -euo pipefail
+          for stage in land settlement city nation empire; do
+            case "$stage" in
+              land) base="claimed" ;;
+              settlement) base="founded" ;;
+              *) base="city_chartered" ;;
+            esac
+            for view in village map world; do
+              capture_dir="${EVIDENCE_DIR}/tmp-${stage}-${view}"
+              mkdir -p "$capture_dir"
+              timeout 75s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+                AURELIAN_EVIDENCE_DIR="$PWD/$capture_dir" \
+                AURELIAN_CAPTURE_PRESET="$view" \
+                AURELIAN_PROGRESSION_STAGE="$stage" \
+                "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+                res://scenes/aurelian/full_progression_visual_grammar_v2_gate_b.tscn \
+                > "${EVIDENCE_DIR}/${stage}-${view}.log" 2>&1
+              grep -F "FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_READY=${stage}:${view}" "${EVIDENCE_DIR}/${stage}-${view}.log"
+              if [ "$view" = "village" ]; then
+                source_file="$capture_dir/village-${base}-1440x900.png"
+              else
+                source_file="$capture_dir/${view}-1440x900.png"
+              fi
+              test -s "$source_file"
+              cp "$source_file" "${EVIDENCE_DIR}/${stage}-${view}-1440x900.png"
+            done
+          done
+
+      - name: Build unlabeled atlas and deterministic visual-delta QA
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from PIL import Image, ImageChops, ImageStat
+
+          root = Path(os.environ['EVIDENCE_DIR'])
+          stages = ['land','settlement','city','nation','empire']
+          views = ['village','map','world']
+          samples = {}
+          report = {}
+
+          for stage in stages:
+              for view in views:
+                  key = f'{stage}-{view}'
+                  path = root / f'{key}-1440x900.png'
+                  image = Image.open(path).convert('RGB')
+                  if image.size != (1440,900):
+                      raise SystemExit(f'{key}: wrong size {image.size}')
+                  variance = sum(ImageStat.Stat(image).var) / 3.0
+                  if path.stat().st_size < 65000 or variance < 42.0:
+                      raise SystemExit(f'{key}: weak evidence bytes={path.stat().st_size} variance={variance:.2f}')
+                  samples[key] = image.resize((240,150))
+                  report[key] = {
+                      'bytes': path.stat().st_size,
+                      'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                      'variance': round(variance,3),
+                  }
+
+          adjacent = []
+          thresholds = {'village':280, 'map':180, 'world':180}
+          for view in views:
+              for a,b in zip(stages, stages[1:]):
+                  diff = ImageChops.difference(samples[f'{a}-{view}'], samples[f'{b}-{view}'])
+                  changed = sum(1 for pixel in diff.getdata() if pixel != (0,0,0))
+                  if changed < thresholds[view]:
+                      raise SystemExit(f'{view} physical stage delta too small: {a}/{b} changed={changed}')
+                  adjacent.append({'view':view,'from':a,'to':b,'changed_sample_pixels':changed})
+              endpoint = ImageChops.difference(samples[f'land-{view}'], samples[f'empire-{view}'])
+              endpoint_changed = sum(1 for pixel in endpoint.getdata() if pixel != (0,0,0))
+              if endpoint_changed < 900:
+                  raise SystemExit(f'{view} land/empire endpoint delta too small: {endpoint_changed}')
+
+          cell_w, cell_h = 360, 225
+          atlas = Image.new('RGB',(cell_w*3,cell_h*5),(45,48,44))
+          for row,stage in enumerate(stages):
+              for col,view in enumerate(views):
+                  thumb = Image.open(root/f'{stage}-{view}-1440x900.png').convert('RGB').resize((cell_w,cell_h))
+                  atlas.paste(thumb,(col*cell_w,row*cell_h))
+          atlas.save(root/'gate-b-unlabeled-5x3-atlas.jpg',quality=94)
+
+          for view in views:
+              strip = Image.new('RGB',(cell_w*5,cell_h),(45,48,44))
+              for index,stage in enumerate(stages):
+                  thumb = Image.open(root/f'{stage}-{view}-1440x900.png').convert('RGB').resize((cell_w,cell_h))
+                  strip.paste(thumb,(index*cell_w,0))
+              strip.save(root/f'gate-b-{view}-fixed-camera-strip.jpg',quality=94)
+
+          qa = {
+              'status':'PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_GATE_B_REVIEW',
+              'exact_head':(root/'exact-head.txt').read_text().strip(),
+              'matrix':'5 stages x 3 fixed-camera views',
+              'frames':report,
+              'adjacent_deltas':adjacent,
+          }
+          (root/'gate-b-matrix-qa.json').write_text(json.dumps(qa,indent=2)+'\n')
+          print('AURELIAN_FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_MATRIX=PASS')
+          PY
+
+      - name: Capture input-action progression motion
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          timeout 120s xvfb-run -a -s "-screen 0 1280x720x24" env \
+            AURELIAN_CAPTURE_GATE_B_INPUT_SEQUENCE=1 \
+            AURELIAN_GATE_B_SEQUENCE_STEP=0 \
+            AURELIAN_PROGRESSION_STAGE=land \
+            AURELIAN_PROGRESSION_VIEW=village \
+            "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+            --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 30 \
+            --write-movie "$PWD/${EVIDENCE_DIR}/gate-b-input-progression.avi" \
+            res://scenes/aurelian/full_progression_visual_grammar_v2_gate_b.tscn \
+            > "${EVIDENCE_DIR}/gate-b-input-progression.log" 2>&1
+          grep -F "FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_INPUT_SEQUENCE_COMPLETE=empire" \
+            "${EVIDENCE_DIR}/gate-b-input-progression.log"
+          test -s "${EVIDENCE_DIR}/gate-b-input-progression.avi"
+          mediainfo --Output=JSON "${EVIDENCE_DIR}/gate-b-input-progression.avi" > "${EVIDENCE_DIR}/gate-b-video-metadata.json"
+
+      - name: Validate motion duration and finalize QA
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+
+          root = Path(os.environ['EVIDENCE_DIR'])
+          video = json.loads((root/'gate-b-video-metadata.json').read_text())
+          tracks = video.get('media', {}).get('track', [])
+          general = next((track for track in tracks if track.get('@type') == 'General'), {})
+          stream = next((track for track in tracks if track.get('@type') == 'Video'), {})
+
+          def number(value):
+              match = re.search(r'-?\d+(?:\.\d+)?', str(value or ''))
+              if not match:
+                  raise SystemExit(f'video metadata number missing: {value!r}')
+              return float(match.group(0))
+
+          duration = number(general.get('Duration') or stream.get('Duration'))
+          if duration > 1000.0:
+              duration /= 1000.0
+          if not 8.0 <= duration <= 24.0:
+              raise SystemExit(f'gate-b video duration wrong: {duration}')
+
+          qa_path = root/'gate-b-matrix-qa.json'
+          qa = json.loads(qa_path.read_text())
+          qa['motion_seconds'] = duration
+          qa['motion_path'] = 'input-action ui_accept through land -> settlement -> city -> nation -> empire'
+          qa_path.write_text(json.dumps(qa,indent=2)+'\n')
+          print('AURELIAN_FULL_PROGRESSION_VISUAL_GRAMMAR_V2_GATE_B_MOTION=PASS')
+          PY
+
+      - name: Upload Gate B artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-progression-visual-grammar-v2-gate-b-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/full-progression-visual-grammar-v2-gate-b
+          if-no-files-found: error
+          retention-days: 7
