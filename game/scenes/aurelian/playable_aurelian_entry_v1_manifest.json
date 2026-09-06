@@ -81,6 +81,35 @@
     "map_east_route",
     "village_route_context"
   ],
+  "core_session": {
+    "contract": "AURELIAN_CORE_PLAYABLE_LOOP_V1",
+    "default_interactive": true,
+    "critical_beats": [
+      "claim",
+      "develop",
+      "choose",
+      "consequence",
+      "grow",
+      "expand"
+    ],
+    "meaningful_choice_state": "world_first_nation_founded",
+    "consequence_state": "village_national_mandate_started",
+    "growth_state": "world_first_empire_proclaimed",
+    "expansion_ready_state": "world_first_imperial_expansion_north_ridge_direction",
+    "expansion_claim_state": "map_first_imperial_expansion_two_lands_claimed",
+    "completion_state": "world_first_imperial_expansion_two_land_footprint",
+    "completion_land_count": 2,
+    "legacy_full_progression_env": "AURELIAN_FULL_PROGRESSION=1",
+    "automated_regression_keeps_full_progression": true,
+    "advanced_states_non_critical": [
+      "river_surge_crisis",
+      "first_rival_countermove",
+      "first_frontier_payoff",
+      "north_ridge_outpost",
+      "north_ridge_specialization",
+      "first_inter_land_coordination"
+    ]
+  },
   "runtime_rules": {
     "environment_variables_required": false,
     "frame_driven_transitions": false,
@@ -90,7 +119,7 @@
     "founding_is_explicit_player_action": true,
     "opening_village_does_not_found": true,
     "economy_claimed": false,
-    "persistence_scope": "eastern_trade_claim_greenvale_city_charter_aurelian_nation",
+    "persistence_scope": "eastern_trade_greenvale_nation_direction_empire_north_ridge_first_session",
     "development_is_explicit_player_action": true,
     "opening_village_does_not_develop": true,
     "route_connection_is_explicit_player_action": true,
