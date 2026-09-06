@@ -15,6 +15,25 @@ func core_session_action_for_state(state_name: String) -> String:
 		_:
 			return CORE_SESSION_ACTION_LEGACY
 
+func _apply_entry_state(state_name: String) -> void:
+	_sanitize_core_session_state_for_persistence(state_name)
+	super(state_name)
+
+func _sanitize_core_session_state_for_persistence(state_name: String) -> void:
+	if not _core_session_active() or not IMPERIAL_EXPANSION_STATES.has(state_name):
+		return
+
+	# Phase B deliberately skips the legacy crisis/rival/frontier chain. The base
+	# controller infers those prerequisites when restoring a late expansion state
+	# for old evidence/full-progression flows. Clear only that skipped history
+	# before the base renderer persists the restored core-session state.
+	imperial_crisis = "none"
+	imperial_crisis_response = "none"
+	crisis_response_cursor = 0
+	first_rival_countermove_response = "none"
+	rival_response_cursor = 0
+	first_frontier_payoff = "none"
+
 func _accept_entry() -> void:
 	if not _core_session_active():
 		super()
