@@ -5,7 +5,20 @@ const STILL_SIZE := Vector2i(1440, 900)
 const TOPOLOGY_SCALE := 0.018
 const TOPOLOGY_CENTER := Vector2(500.0, 450.0)
 const TOPOLOGY_Z_SIGN := -1.0
-const SECTOR_CAMERA_SIZE := 23.0
+const SECTOR_CAMERA_SIZE := 16.0
+const REGIONAL_CITY_SCALE := 0.50
+const REGIONAL_CITY_ROOTS := [
+	"Greenvale_flag",
+	"Greenvale_blacksmith",
+	"Greenvale_barracks",
+	"Greenvale_church",
+	"Greenvale_gatehouse_road",
+	"Greenvale_city_hall",
+	"Greenvale_market_hall",
+	"Greenvale_civic_house_west",
+	"Greenvale_civic_house_east",
+	"Greenvale_watchtower",
+]
 
 var evidence_dir := ""
 
@@ -49,14 +62,21 @@ func _make_environment() -> Environment:
 	environment.tonemap_exposure = 0.82
 	environment.fog_enabled = true
 	environment.fog_light_color = Color("#777f75")
-	environment.fog_density = 0.0012
+	environment.fog_density = 0.0008
 	return environment
+
+func _apply_regional_lod(sector: Node3D) -> void:
+	for node_name in REGIONAL_CITY_ROOTS:
+		var node := sector.find_child(node_name, true, false) as Node3D
+		if node != null:
+			node.scale *= Vector3.ONE * REGIONAL_CITY_SCALE
 
 func _populate_world(parent: Node) -> bool:
 	var sector := _load_sector()
 	if sector == null:
 		get_tree().quit(51)
 		return false
+	_apply_regional_lod(sector)
 	parent.add_child(sector)
 
 	var world_environment := WorldEnvironment.new()
@@ -66,9 +86,9 @@ func _populate_world(parent: Node) -> bool:
 
 	var sun := DirectionalLight3D.new()
 	sun.name = "LateMorningSun"
-	sun.rotation_degrees = Vector3(-52.0, -38.0, 0.0)
+	sun.rotation_degrees = Vector3(-43.0, -38.0, 0.0)
 	sun.light_color = Color("#f3d4a8")
-	sun.light_energy = 0.62
+	sun.light_energy = 0.66
 	sun.shadow_enabled = true
 	parent.add_child(sun)
 
@@ -88,7 +108,7 @@ func _make_camera(parent: Node) -> Camera3D:
 	camera.size = SECTOR_CAMERA_SIZE
 	camera.near = 0.1
 	camera.far = 500.0
-	camera.position = focus + Vector3(12.4, 14.8, 12.4)
+	camera.position = focus + Vector3(11.6, 10.2, 11.6)
 	parent.add_child(camera)
 	camera.look_at(focus, Vector3.UP)
 	return camera
