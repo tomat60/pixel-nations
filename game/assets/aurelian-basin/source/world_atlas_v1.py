@@ -155,7 +155,6 @@ def prepare_source_library():
         if obj is None:
             raise RuntimeError(f"Canonical source object missing: {name}")
         SOURCE_OBJECTS[key] = obj
-    # Imported canonical geometry is a source library only for the Atlas.
     for obj in imported:
         obj.hide_render = True
 
@@ -281,7 +280,6 @@ def create_terrain():
 
 
 def create_ocean():
-    ocean = bpy.data.objects.new("PixelNationsAtlasOcean", None)
     mesh = bpy.data.meshes.new("PixelNationsAtlasOceanMesh")
     span_x = (WORLD_WIDTH + PADDING * 2.4) * WORLD_SCALE
     span_y = (WORLD_HEIGHT + PADDING * 2.4) * WORLD_SCALE
@@ -289,7 +287,7 @@ def create_ocean():
              (span_x/2, span_y/2, SEA_LEVEL), (-span_x/2, span_y/2, SEA_LEVEL)]
     mesh.from_pydata(verts, [], [(0,1,2,3)])
     mesh.update()
-    ocean.data = mesh
+    ocean = bpy.data.objects.new("PixelNationsAtlasOcean", mesh)
     ocean.data.materials.append(make_material("PixelNations_Atlas_Water", (0.045, 0.145, 0.18, 1.0), 0.40))
     bpy.context.collection.objects.link(ocean)
 
