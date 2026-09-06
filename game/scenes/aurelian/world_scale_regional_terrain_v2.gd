@@ -30,8 +30,6 @@ func _populate_world(parent: Node) -> Node3D:
 	if basin == null:
 		return null
 
-	# The accepted Empire World overlay is a local-scale information layer. It is
-	# intentionally suppressed in the regional abstraction.
 	var inherited_overlay := parent.get_node_or_null("FullProgressionVisualGrammarV2GateB_empire_world")
 	if inherited_overlay != null:
 		inherited_overlay.visible = false
@@ -46,8 +44,6 @@ func _populate_world(parent: Node) -> Node3D:
 	_build_regional_aurelian(basin, regional_root)
 	_build_regional_anchors(basin, regional_root)
 
-	# The full local GLB is only a source library here. Regional Aurelian is a
-	# deliberately simplified landmark cluster built from selected accepted assets.
 	basin.visible = false
 	return basin
 
@@ -79,19 +75,15 @@ func _build_ocean(root: Node3D) -> void:
 func _build_continuous_terrain(root: Node3D) -> void:
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-
 	for row in range(TERRAIN_RESOLUTION - 1):
 		for col in range(TERRAIN_RESOLUTION - 1):
 			var p00 := _terrain_vertex(col, row)
 			var p10 := _terrain_vertex(col + 1, row)
 			var p01 := _terrain_vertex(col, row + 1)
 			var p11 := _terrain_vertex(col + 1, row + 1)
-
-			# Winding is explicit so the terrain faces upward in Godot coordinates.
 			_add_colored_vertex(surface, p00)
 			_add_colored_vertex(surface, p01)
 			_add_colored_vertex(surface, p10)
-
 			_add_colored_vertex(surface, p10)
 			_add_colored_vertex(surface, p01)
 			_add_colored_vertex(surface, p11)
@@ -102,6 +94,7 @@ func _build_continuous_terrain(root: Node3D) -> void:
 	terrain.mesh = surface.commit()
 	var material := StandardMaterial3D.new()
 	material.vertex_color_use_as_albedo = true
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	material.roughness = 0.98
 	material.metallic = 0.0
 	terrain.material_override = material
@@ -113,10 +106,7 @@ func _terrain_vertex(col: int, row: int) -> Dictionary:
 	var x := lerpf(-TERRAIN_HALF_X, TERRAIN_HALF_X, u)
 	var z := lerpf(-TERRAIN_HALF_Z, TERRAIN_HALF_Z, v)
 	var height := _terrain_height(x, z)
-	return {
-		"position": Vector3(x, height, z),
-		"color": _terrain_color(x, z, height),
-	}
+	return {"position": Vector3(x, height, z), "color": _terrain_color(x, z, height)}
 
 func _add_colored_vertex(surface: SurfaceTool, data: Dictionary) -> void:
 	surface.set_color(data["color"])
@@ -125,23 +115,15 @@ func _add_colored_vertex(surface: SurfaceTool, data: Dictionary) -> void:
 func _terrain_height(x: float, z: float) -> float:
 	var height := 1.08
 	height += 0.10 * sin(x * 0.31) + 0.08 * cos(z * 0.27) + 0.05 * sin((x + z) * 0.19)
-
-	# Physical regional structure: a home basin, two mountain systems, marsh
-	# lowlands and a coastal inlet. These are geography, not UI regions.
 	height -= 0.48 * _gaussian(x, z, AURELIAN_CENTER.x, AURELIAN_CENTER.y, 7.0)
 	height += 2.85 * _gaussian(x, z, -16.0, -12.0, 6.2)
 	height += 2.15 * _gaussian(x, z, 17.0, -10.5, 6.5)
 	height += 1.05 * _gaussian(x, z, 11.5, 16.5, 5.0)
 	height -= 0.42 * _gaussian(x, z, -11.0, 17.0, 5.8)
 	height -= 1.25 * _gaussian(x, z, 28.0, 6.0, 7.5)
-
-	# A winding river valley runs from Stormcap through the basin to the east coast.
 	var river_center_x := -2.0 + z * 0.20 + sin(z * 0.24) * 1.8
 	var river_distance: float = absf(x - river_center_x)
 	height -= exp(-river_distance * river_distance / 2.2) * 0.34
-
-	# Sink only the outer rim below sea level. The rectangular mesh itself extends
-	# past the visible coastline, so the player reads a coast rather than a board edge.
 	var edge := maxf(abs(x) / TERRAIN_HALF_X, abs(z) / TERRAIN_HALF_Z)
 	var coast_sink := smoothstep(0.72, 1.0, edge)
 	height -= coast_sink * coast_sink * 2.75
@@ -153,7 +135,6 @@ func _terrain_color(x: float, z: float, height: float) -> Color:
 	var marsh := _gaussian(x, z, -11.0, 17.0, 6.0)
 	var dry_east := _gaussian(x, z, 17.0, 4.0, 9.0)
 	var home_green := _gaussian(x, z, AURELIAN_CENTER.x, AURELIAN_CENTER.y, 8.0)
-
 	color = color.lerp(Color("#405b48"), clampf(pine * 0.72, 0.0, 0.72))
 	color = color.lerp(Color("#53685a"), clampf(marsh * 0.62, 0.0, 0.62))
 	color = color.lerp(Color("#82765a"), clampf(dry_east * 0.45, 0.0, 0.45))
@@ -170,11 +151,7 @@ func _gaussian(x: float, z: float, center_x: float, center_z: float, sigma: floa
 	return exp(-(dx * dx + dz * dz) / (2.0 * sigma * sigma))
 
 func _build_river(root: Node3D) -> void:
-	var points: Array[Vector2] = [
-		Vector2(-13.0, -16.0), Vector2(-9.0, -10.0), Vector2(-6.0, -4.0),
-		Vector2(-3.0, 2.0), Vector2(0.5, 8.0), Vector2(5.0, 12.0),
-		Vector2(11.0, 10.0), Vector2(17.0, 7.5), Vector2(24.5, 6.0)
-	]
+	var points: Array[Vector2] = [Vector2(-13.0, -16.0), Vector2(-9.0, -10.0), Vector2(-6.0, -4.0), Vector2(-3.0, 2.0), Vector2(0.5, 8.0), Vector2(5.0, 12.0), Vector2(11.0, 10.0), Vector2(17.0, 7.5), Vector2(24.5, 6.0)]
 	for index in range(points.size() - 1):
 		_add_river_segment(root, "RegionalRiver_%02d" % index, points[index], points[index + 1], 0.62 if index < 5 else 0.82)
 
@@ -212,16 +189,11 @@ func _build_regional_anchors(basin: Node3D, root: Node3D) -> void:
 		var point: Vector2 = anchor["point"]
 		var kind := String(anchor["kind"])
 		match kind:
-			"forest":
-				_add_tree_cluster(root, "PinewatchForest", point, 28, 5.5, Color("#355344"))
-			"highland":
-				_add_rock_cluster(root, "%sRelief" % anchor["name"], point, 6, 3.8)
-			"marsh":
-				_add_marsh_cluster(root, "SouthfenWetlands", point)
-			"ruins":
-				_add_rock_cluster(root, "OldCrownRuins", point, 4, 2.1)
-			"coast":
-				_add_rock_cluster(root, "SaltmereCliffs", point + Vector2(1.3,-1.0), 4, 2.4)
+			"forest": _add_tree_cluster(root, "PinewatchForest", point, 28, 5.5, Color("#355344"))
+			"highland": _add_rock_cluster(root, "%sRelief" % anchor["name"], point, 6, 3.8)
+			"marsh": _add_marsh_cluster(root, "SouthfenWetlands", point)
+			"ruins": _add_rock_cluster(root, "OldCrownRuins", point, 4, 2.1)
+			"coast": _add_rock_cluster(root, "SaltmereCliffs", point + Vector2(1.3,-1.0), 4, 2.4)
 		_duplicate_landmark(basin, root, String(anchor["source"]), "RegionalAnchor_%s" % anchor["name"], point, 0.25 if kind != "highland" else 0.30, float(index * 23 - 34))
 
 func _duplicate_landmark(basin: Node3D, root: Node3D, source_name: String, node_name: String, point: Vector2, scale_factor: float, rotation_y: float) -> void:
