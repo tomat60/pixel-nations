@@ -52,7 +52,7 @@ func _build_empire(basin: Node3D, root: Node3D) -> void:
 
 func _build_map_stage(root: Node3D, stage_name: String) -> void:
 	if stage_name != "nation" and stage_name != "empire":
-		super(root, stage_name)
+		super._build_map_stage(root, stage_name)
 		return
 
 	var greenvale := Vector2(354, 285)
@@ -90,7 +90,7 @@ func _build_map_stage(root: Node3D, stage_name: String) -> void:
 
 func _build_world_stage(basin: Node3D, root: Node3D, stage_name: String) -> void:
 	if stage_name != "nation" and stage_name != "empire":
-		super(basin, root, stage_name)
+		super._build_world_stage(basin, root, stage_name)
 		return
 
 	var greenvale := Vector2(354, 285)
