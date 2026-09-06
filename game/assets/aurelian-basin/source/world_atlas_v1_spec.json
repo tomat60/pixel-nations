@@ -1,0 +1,72 @@
+{
+  "contract": "PIXEL_NATIONS_WORLD_ATLAS_V1_SPEC",
+  "version": 1,
+  "seed": 71003,
+  "world_plane": [14000, 9000],
+  "technical_padding": 4500,
+  "camera": {
+    "focus": [7100, 4450],
+    "orthographic_size": 72.0,
+    "position_offset": [45.0, 58.0, 45.0]
+  },
+  "origin_sector": {
+    "sector_id": "A-01",
+    "center": [6100, 4150],
+    "visual_radius": 330,
+    "source_sector_spec": "AURELIAN_SECTOR_GENERATOR_V4_SPEC",
+    "preserve_home_identity": true
+  },
+  "macro_regions": [
+    {"id":"northwest_highlands","role":"highland","center":[2200,1150],"radius":[1900,1050]},
+    {"id":"north_forest_belt","role":"forest","center":[4700,1200],"radius":[1750,900]},
+    {"id":"north_basin","role":"riverland","center":[6900,1550],"radius":[1550,950]},
+    {"id":"northeast_spine","role":"highland","center":[9900,1300],"radius":[2150,1050]},
+    {"id":"far_east_shore","role":"coast","center":[12500,2600],"radius":[1350,1500]},
+    {"id":"westwood","role":"forest","center":[1650,3900],"radius":[1450,1650]},
+    {"id":"west_plateau","role":"upland","center":[3800,3650],"radius":[1500,1250]},
+    {"id":"aurelian_macro_basin","role":"basin","center":[6100,4150],"radius":[1150,900]},
+    {"id":"central_ridge","role":"highland","center":[8100,3450],"radius":[1500,1050]},
+    {"id":"eastwood","role":"forest","center":[10800,4100],"radius":[1650,1350]},
+    {"id":"west_riverlands","role":"riverland","center":[3650,6100],"radius":[1650,1250]},
+    {"id":"central_plains","role":"plains","center":[6950,5900],"radius":[1900,1250]},
+    {"id":"east_delta","role":"riverland","center":[10550,6100],"radius":[1600,1200]},
+    {"id":"southwest_coast","role":"coast","center":[1700,7600],"radius":[1500,1150]},
+    {"id":"southern_upland","role":"upland","center":[6500,7600],"radius":[2200,950]},
+    {"id":"southeast_marsh_coast","role":"marsh","center":[10500,7600],"radius":[1900,1100]}
+  ],
+  "relief_chains": [
+    {"id":"northern_crown","points":[[300,800],[2500,650],[4700,950],[6500,1350]],"width":760,"amplitude":5.4},
+    {"id":"eastern_spine","points":[[7800,900],[9700,1250],[11200,2200],[11800,3650]],"width":720,"amplitude":5.8},
+    {"id":"southern_backbone","points":[[4300,7350],[6500,7050],[8500,7350],[10100,7800]],"width":680,"amplitude":3.8}
+  ],
+  "vegetation_masses": [
+    {"id":"north_forest","center":[4550,1650],"radius":[1700,950],"density":64},
+    {"id":"westwood_forest","center":[1750,4100],"radius":[1350,1500],"density":58},
+    {"id":"eastwood_forest","center":[10400,4050],"radius":[1500,1150],"density":56},
+    {"id":"central_grove","center":[7000,5200],"radius":[1050,780],"density":34}
+  ],
+  "water_systems": [
+    {"id":"aurelian_great_river","width":150,"points":[[5000,-700],[5300,900],[5650,2450],[6100,4150],[7050,5250],[8400,6100],[10300,6750],[12500,7300],[15100,7600]]},
+    {"id":"western_river","width":115,"points":[[900,1000],[1550,2350],[2350,3900],[3000,5200],[3650,6100],[4050,7900],[4200,9800]]}
+  ],
+  "coast": {
+    "profile": "south_east_open_sea",
+    "south_base_y": 8350,
+    "east_base_x": 13150,
+    "transition": 900
+  },
+  "strategic_loci": [
+    {"id":"origin_a01","kind":"origin_sector","center":[6100,4150],"identity":"blue","fixed":true},
+    {"id":"north_gate","kind":"regional_node","center":[6500,1550],"identity":"neutral"},
+    {"id":"west_crossing","kind":"regional_node","center":[3350,5600],"identity":"neutral"},
+    {"id":"east_pass","kind":"regional_node","center":[10100,2900],"identity":"neutral"},
+    {"id":"delta_harbor","kind":"regional_node","center":[10850,6400],"identity":"neutral"},
+    {"id":"south_crown","kind":"regional_node","center":[7000,7250],"identity":"neutral"}
+  ],
+  "variation": {
+    "terrain_phase_scale": 0.7,
+    "tree_jitter": 0.62,
+    "relief_prop_jitter": 0.45,
+    "minor_locus_jitter": 120
+  }
+}
