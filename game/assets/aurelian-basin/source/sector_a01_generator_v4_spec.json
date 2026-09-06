@@ -1,0 +1,221 @@
+{
+  "contract": "AURELIAN_SECTOR_GENERATOR_V4_SPEC",
+  "version": 1,
+  "sector_id": "A-01",
+  "seed": 41027,
+  "topography_profile": "basin_fluvial",
+  "sector_plane": [3600, 2700],
+  "technical_padding": 500,
+  "camera": {
+    "focus": [1775, 1325],
+    "orthographic_size": 31.5,
+    "position_offset": [19.0, 24.0, 19.0]
+  },
+  "canonical_core": {
+    "source_topology_contract": "AURELIAN_AUTHORED_TERRAIN_V1",
+    "origin": [1180, 860],
+    "uniform_scale": 0.52,
+    "preserve_landmarks": true,
+    "preserve_river": true,
+    "preserve_routes": true
+  },
+  "macro_locus_slots": [
+    {
+      "id": "aurelian_home",
+      "role": "home_basin",
+      "center": [1365, 1010],
+      "radius": 0,
+      "terrain": "basin",
+      "settlement_archetype": "capital_home",
+      "fixed": true
+    },
+    {
+      "id": "westwood",
+      "role": "forest_region",
+      "center": [560, 930],
+      "radius": 150,
+      "terrain": "forest",
+      "settlement_archetype": "forest_edge_village"
+    },
+    {
+      "id": "northwatch",
+      "role": "highland_region",
+      "center": [1260, 350],
+      "radius": 140,
+      "terrain": "ridge",
+      "settlement_archetype": "ridge_frontier_outpost"
+    },
+    {
+      "id": "high_pass",
+      "role": "mountain_pass",
+      "center": [2200, 380],
+      "radius": 170,
+      "terrain": "ridge",
+      "settlement_archetype": "frontier_watch"
+    },
+    {
+      "id": "eastbank",
+      "role": "river_region",
+      "center": [2250, 1110],
+      "radius": 170,
+      "terrain": "riverland",
+      "settlement_archetype": "river_crossing_village"
+    },
+    {
+      "id": "golden_plain",
+      "role": "productive_region",
+      "center": [2100, 1760],
+      "radius": 180,
+      "terrain": "fields",
+      "settlement_archetype": "productive_plain_village"
+    },
+    {
+      "id": "southfen",
+      "role": "marsh_region",
+      "center": [1450, 2090],
+      "radius": 150,
+      "terrain": "marsh",
+      "settlement_archetype": "marsh_hamlet"
+    },
+    {
+      "id": "westmeadow",
+      "role": "open_region",
+      "center": [570, 1720],
+      "radius": 180,
+      "terrain": "meadow",
+      "settlement_archetype": null
+    },
+    {
+      "id": "old_crown",
+      "role": "ruins_region",
+      "center": [2920, 850],
+      "radius": 170,
+      "terrain": "upland",
+      "settlement_archetype": "ruin_poi"
+    },
+    {
+      "id": "coast_outflow",
+      "role": "coastal_region",
+      "center": [2780, 2120],
+      "radius": 180,
+      "terrain": "coast",
+      "settlement_archetype": null
+    }
+  ],
+  "relief_chains": [
+    {
+      "id": "northwest_highlands",
+      "points": [[180, 300], [760, 260], [1320, 350]],
+      "width": 330,
+      "amplitude": 3.9
+    },
+    {
+      "id": "northeast_spine",
+      "points": [[1880, 250], [2420, 360], [3240, 560]],
+      "width": 360,
+      "amplitude": 4.5
+    },
+    {
+      "id": "eastern_upland",
+      "points": [[2860, 760], [3160, 1200], [3350, 1540]],
+      "width": 300,
+      "amplitude": 2.6
+    }
+  ],
+  "vegetation_masses": [
+    {
+      "id": "westwood_forest",
+      "center": [530, 930],
+      "radius": [520, 390],
+      "density": 72
+    },
+    {
+      "id": "northgate_forest",
+      "center": [1420, 560],
+      "radius": [390, 260],
+      "density": 42
+    },
+    {
+      "id": "eastbank_grove",
+      "center": [2460, 1250],
+      "radius": [360, 280],
+      "density": 32
+    }
+  ],
+  "land_use_masses": [
+    {
+      "id": "golden_plain_fields",
+      "center": [2050, 1760],
+      "radius": [500, 330],
+      "kind": "fields"
+    },
+    {
+      "id": "southfen_marsh",
+      "center": [1460, 2110],
+      "radius": [470, 300],
+      "kind": "marsh"
+    }
+  ],
+  "river_extensions": {
+    "upstream": [[820, 120], [1020, 420]],
+    "downstream": [[1700, 1420], [2180, 1600], [2700, 1900], [3300, 2270], [3970, 2480]]
+  },
+  "settlement_archetypes": {
+    "capital_home": {
+      "piece_count": 5,
+      "sources": ["church", "barracks", "blacksmith", "barracks", "blacksmith"],
+      "with_flag": true,
+      "span": [0.34, 0.48]
+    },
+    "river_crossing_village": {
+      "piece_count": 4,
+      "sources": ["barracks", "blacksmith", "blacksmith", "barracks"],
+      "with_flag": false,
+      "span": [0.20, 0.28]
+    },
+    "forest_edge_village": {
+      "piece_count": 3,
+      "sources": ["blacksmith", "barracks", "blacksmith"],
+      "with_flag": false,
+      "span": [0.19, 0.26]
+    },
+    "productive_plain_village": {
+      "piece_count": 4,
+      "sources": ["barracks", "blacksmith", "barracks", "blacksmith"],
+      "with_flag": false,
+      "span": [0.19, 0.27]
+    },
+    "ridge_frontier_outpost": {
+      "piece_count": 3,
+      "sources": ["church", "barracks", "blacksmith"],
+      "with_flag": false,
+      "span": [0.18, 0.24]
+    },
+    "marsh_hamlet": {
+      "piece_count": 3,
+      "sources": ["blacksmith", "barracks", "blacksmith"],
+      "with_flag": false,
+      "span": [0.17, 0.23]
+    },
+    "frontier_watch": {
+      "piece_count": 2,
+      "sources": ["church", "barracks"],
+      "with_flag": false,
+      "span": [0.16, 0.22]
+    },
+    "ruin_poi": {
+      "piece_count": 0,
+      "sources": [],
+      "with_flag": false,
+      "span": [0.0, 0.0]
+    }
+  },
+  "variation": {
+    "placement_jitter_fraction": 0.55,
+    "rotation_degrees": 26,
+    "building_spacing": [42, 74],
+    "tree_scale": [0.30, 0.52],
+    "field_row_jitter": 14,
+    "minor_road_jitter": 22
+  }
+}
