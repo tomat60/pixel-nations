@@ -161,7 +161,7 @@ jobs:
           grep -F "GODOT_AURELIAN_FIRST_INTER_LAND_COORDINATION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_inter_land_coordination_v1_test.log"
           mkdir -p game/build/linux game/build/web
           "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/export-linux.log" 2>&1
-          "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html > "${EVIDENCE_DIR}/export-web.log" 2>&1
+          "${GODOT_BIN}" --headless --path game --export-release "Web Full Progression Regression" build/web/index.html > "${EVIDENCE_DIR}/export-web.log" 2>&1
           test -x game/build/linux/pixel-nations-foundation.x86_64
           test -s game/build/web/index.pck
           grep -aF "aurelian_session_persistence_v2.gd" game/build/linux/pixel-nations-foundation.pck

@@ -1,0 +1,134 @@
+name: Godot Aurelian Default First Session v2 Gate A
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/export_presets.cfg"
+      - "game/scenes/aurelian/playable_aurelian_first_session_v2.gd"
+      - "game/scenes/aurelian/playable_aurelian_entry_v1.tscn"
+      - "game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
+      - "game/tests/aurelian_default_first_session_v2_test.gd"
+      - ".github/workflows/godot-aurelian-default-first-session-v2.yml"
+      - ".github/workflows/godot-web-export-playability-v1.yml"
+      - ".github/workflows/godot-aurelian-session-persistence-v2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-aurelian-default-first-session-v2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7.1"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EVIDENCE_DIR: "evidence/godot-aurelian-default-first-session-v2-gate-a"
+
+jobs:
+  export-safe-contract:
+    name: Prove export-safe selector and evidence skeleton
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head and contract
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}" game/build/web-default game/build/web-regression
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+          cp game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json "${EVIDENCE_DIR}/playable-manifest.json"
+
+      - name: Install pinned Godot and export templates
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends unzip >/dev/null
+          mkdir -p /tmp/godot /tmp/godot-templates
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz" \
+            -o /tmp/godot/templates.tpz
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          unzip -q /tmp/godot/templates.tpz -d /tmp/godot-templates
+          mkdir -p "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          cp -R /tmp/godot-templates/templates/. "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Validate selector contract
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_default_first_session_v2_test.gd \
+            2>&1 | tee "${EVIDENCE_DIR}/default-first-session-v2-test.log"
+          grep -F "AURELIAN_DEFAULT_FIRST_SESSION_V2_TEST: PASS" "${EVIDENCE_DIR}/default-first-session-v2-test.log"
+          grep -F 'name="Web Full Progression Regression"' game/export_presets.cfg
+          grep -F 'custom_features="aurelian_full_progression"' game/export_presets.cfg
+          grep -F -- '--export-release "Web Full Progression Regression"' .github/workflows/godot-web-export-playability-v1.yml
+          grep -F -- '--export-release "Web Full Progression Regression"' .github/workflows/godot-aurelian-session-persistence-v2.yml
+
+      - name: Export default and historical Web artifacts
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --export-release "Web" build/web-default/index.html \
+            > "${EVIDENCE_DIR}/export-default-web.log" 2>&1
+          "${GODOT_BIN}" --headless --path game --export-release "Web Full Progression Regression" build/web-regression/index.html \
+            > "${EVIDENCE_DIR}/export-regression-web.log" 2>&1
+          for file in game/build/web-default/index.html game/build/web-default/index.pck game/build/web-default/index.wasm \
+                      game/build/web-regression/index.html game/build/web-regression/index.pck game/build/web-regression/index.wasm; do
+            test -s "$file"
+          done
+          sha256sum game/build/web-default/* game/build/web-regression/* | tee "${EVIDENCE_DIR}/export-sha256sums.txt"
+
+      - name: Write and validate fail-closed Gate A manifest
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const root=process.env.EVIDENCE_DIR;
+          const exact=fs.readFileSync(root+'/exact-head.txt','utf8').trim();
+          const sums=fs.readFileSync(root+'/export-sha256sums.txt','utf8').trim().split('\n');
+          fs.writeFileSync(root+'/result-manifest.json',JSON.stringify({
+            contract:'GODOT_AURELIAN_DEFAULT_FIRST_SESSION_V2_GATE_A',
+            exact_head:exact,
+            default_web_feature_tag:null,
+            regression_web_feature_tag:'aurelian_full_progression',
+            default_export:'game/build/web-default/index.html',
+            regression_export:'game/build/web-regression/index.html',
+            export_digest_count:sums.length,
+            runtime_sequence_wired:false,
+            product_acceptance_claimed:false
+          },null,2)+'\n');
+          NODE
+          test -s "${EVIDENCE_DIR}/result-manifest.json"
+          test "$(grep -c 'index\.' "${EVIDENCE_DIR}/export-sha256sums.txt")" -ge 6
+          grep -F '"runtime_sequence_wired": false' "${EVIDENCE_DIR}/result-manifest.json"
+          grep -F '"product_acceptance_claimed": false' "${EVIDENCE_DIR}/result-manifest.json"
+          sha256sum "${EVIDENCE_DIR}"/* | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
+          echo "GODOT_AURELIAN_DEFAULT_FIRST_SESSION_V2_GATE_A=PASS"
+
+      - name: Upload exact-head Gate A evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-aurelian-default-first-session-v2-gate-a-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/godot-aurelian-default-first-session-v2-gate-a
+          if-no-files-found: error
+          retention-days: 7

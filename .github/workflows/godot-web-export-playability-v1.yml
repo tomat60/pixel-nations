@@ -120,7 +120,7 @@ jobs:
           set -euo pipefail
           mkdir -p game/build/linux game/build/web
           "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/godot-export-linux.log" 2>&1
-          "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html > "${EVIDENCE_DIR}/godot-export-web.log" 2>&1
+          "${GODOT_BIN}" --headless --path game --export-release "Web Full Progression Regression" build/web/index.html > "${EVIDENCE_DIR}/godot-export-web.log" 2>&1
           test -x game/build/linux/pixel-nations-foundation.x86_64
           test -s game/build/linux/pixel-nations-foundation.pck
           test -s game/build/web/index.html
