@@ -118,7 +118,8 @@ jobs:
             RUN_HOME="${RUNNER_TEMP}/aurelian-state-gated-run-${run}"
             mkdir -p "$RUN_DIR" "$RUN_HOME"
             env -u AURELIAN_FULL_PROGRESSION -u AURELIAN_PLAYABLE_EVIDENCE_STATE -u AURELIAN_CAPTURE_PLAYABLE_ENTRY \
-              HOME="$RUN_HOME" game/build/linux/pixel-nations-foundation.x86_64 > "$RUN_DIR/runtime.log" 2>&1 &
+              HOME="$RUN_HOME" "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+              res://scenes/aurelian/playable_aurelian_entry_v1.tscn > "$RUN_DIR/runtime.log" 2>&1 &
             APP_PID=$!
             WINDOW_ID="$(xdotool search --sync --onlyvisible --name 'Pixel Nations' | head -n1)"
             sleep 1
