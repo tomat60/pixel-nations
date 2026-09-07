@@ -20,6 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  AURELIAN_FULL_PROGRESSION: "1"
   GODOT_VERSION: "4.7.1"
   GODOT_RELEASE: "4.7.1-stable"
   GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
