@@ -10,7 +10,7 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: Phase B Core Playable Loop Consolidation is terminally rejected; further implementation is not authorized.
 Current milestone: terminal result `GODOT_AURELIAN_CORE_PLAYABLE_LOOP_CONSOLIDATION_REJECT` recorded for PR #587.
-Active execution issue: none. Issue #586 is closed as `not planned`.
+Active execution issue: #586 (closed as `not planned`; no active execution authority).
 Next allowed action: run a new whole-product portfolio gate and merge explicit authority before any further product implementation. Do not reopen PR #587 or issue #586.
 
 ## Latest terminal result
