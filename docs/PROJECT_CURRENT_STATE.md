@@ -2,16 +2,16 @@
 
 Status: ACTIVE
 Updated: 2026-09-07
-Current state revision: 12.4
-Authority baseline SHA: `6fe8b7ec20b9cf6b41ef7177b03131251e0e7190`
+Current state revision: 12.5
+Authority baseline SHA: `691c72380785bb4523e92b36e61aa33d3870be6c`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B portfolio reset after persistence contract rejection.
-Current milestone: select the next highest-value bounded milestone without reopening the rejected persistence candidate.
-Active execution issue: #596
-Next allowed action: execute the strategy-only portfolio gate in issue #596. Runtime implementation remains blocked until that gate selects a bounded candidate and merged authority names its execution issue. Do not reopen PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: Phase B integrated Default First Session v3.
+Current milestone: compose the proven export-safe first path and truthful optional-history persistence into one accepted player-visible session.
+Active execution issue: #597
+Next allowed action: after this authority update merges, perform implementation preflight for issue #597. Name at most twelve files and prove selector, persistence, evidence, and regression composition before changing runtime code. Do not reopen PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
 
 ## Whole-product portfolio gate after the Phase B reject
 
@@ -51,6 +51,22 @@ The bounded correction must make this truthful state representable:
 Historical full-progression saves must retain their completed optional history. Malformed combinations must remain rejected. Prefer a backward-compatible correction using existing fields. A schema migration, broad validation weakening, runtime sequencing, or player-facing change is not authorized.
 
 This prerequisite outranks another first-session attempt because any such attempt would otherwise repeat the same invalid persistence boundary or fabricate player history. Acceptance and stop conditions live in issue #593.
+
+## Whole-product portfolio gate after Persistence Optional History Decoupling v1
+
+Decision: authorize exactly one integrated `Default First Session v3` candidate under issue #597.
+
+The largest bottleneck remains the absence of one accepted coherent default first session. PR #591 proved the export-safe default/full-progression split and bounded first-path structure. PR #594 proved that schema v2 can preserve the two-land North Ridge finale while optional crisis, rival, and frontier-payoff history remains truthfully `none`. The failures were separate acceptance-boundary failures, not evidence that the target session lacks product value.
+
+One integrated candidate now outranks:
+- a standalone workflow repair, which creates no player-visible result;
+- another persistence-only attempt, which still would not deliver the playable loop;
+- Minimal Economy Foundation or deeper expansion, which would deepen an unaccepted first path;
+- broad visual polish, because current evidence identifies sequencing, persistence, and exact-evidence reliability as the immediate constraints.
+
+The candidate may update the historical Session Persistence v2 video upper runtime bound from 240 to 300 seconds, but must preserve the 110-second minimum, all 105 exact frames, every state/event assertion, native/Web/profile checks, manifests, and hashes. This evidence correction is part of the initial contract, not a later correction.
+
+No schema migration, fabricated history, new mechanic, economy, third land, asset, terrain, world expansion, or broad controller rewrite is authorized. Acceptance and stop conditions live in issue #597.
 
 ## Latest terminal result
 
@@ -310,9 +326,9 @@ Stop and re-run the portfolio gate if:
 
 ## Durable build sequence
 
-1. Whole-product portfolio gate - current.
-2. Persistence-compatible Default First Session candidate only if newly authorized.
-3. Minimal Economy Foundation.
+1. Integrated Default First Session v3 - current.
+2. Minimal Economy Foundation.
+3. Repeatable Expansion Loop.
 4. Repeatable Expansion Loop.
 5. Nation gameplay depth.
 6. Empire gameplay depth and scaling.
@@ -347,6 +363,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-Runtime coding is blocked.
+Runtime coding outside issue #597 is blocked.
 
-PR #594 and issue #593 are terminally rejected and must not be reopened. Complete the strategy-only whole-product portfolio gate in issue #596 before creating another execution issue. Any next candidate requires explicit merged authority, a new bounded acceptance contract, and a fresh correction budget.
+After this authority transition merges, complete implementation preflight for issue #597. Reject before coding if the proven closed candidates cannot be composed within twelve named files, schema v2, existing mechanics, the explicit evidence budget, and one fresh bounded correction allowance.
