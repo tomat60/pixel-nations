@@ -2,16 +2,26 @@
 
 Status: ACTIVE
 Updated: 2026-09-07
-Current state revision: 12.7
+Current state revision: 12.8
 Authority baseline SHA: `53d99a1cb8ae102ff7410b5032cfbe62e4ef6299`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B Default First Session v3 rejected.
-Current milestone: no product implementation is authorized.
-Active execution issue: #602
-Next allowed action: complete the strategy-only whole-product portfolio gate in issue #602 and merge explicit authority before any new implementation. Do not reopen PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: Phase B evidence recovery after Default First Session v3 reject.
+Current milestone: prove a deterministic state-gated native normal-input driver with no product delta.
+Active execution issue: #603
+Next allowed action: run implementation preflight for issue #603, name at most three files, and open one draft recovery candidate only after preflight passes. Do not reopen PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Portfolio decision after Default First Session v3
+
+Issue #602 completed the mandatory whole-product portfolio gate.
+
+Decision: authorize exactly one no-product-delta `State-gated native input driver v1` recovery candidate under issue #603. Bulk native keyboard input on PR #600 outran persisted state transitions and stalled at different points, while import, export selection, persistence semantics, and completed independent regressions passed. Reliable normal-input orchestration must therefore be proved or falsified before another integrated first-session candidate.
+
+This recovery outranks shortening the product session or rewriting the controller because both would change product behavior without evidence that the six-beat route itself is defective. The candidate may change at most three preflight-named evidence or workflow files, must gate every key on the preceding persisted state, must pass three clean baseline traversals, and may use one bounded deterministic correction. It may not change product runtime, scenes, manifests, persistence, schema, mechanics, assets, or visuals.
+
+A PASS on #603 is enabling evidence only. It does not itself authorize another Default First Session implementation.
 
 ## Terminal result: Default First Session v3
 
