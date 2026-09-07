@@ -2,8 +2,8 @@
 
 Status: ACTIVE
 Updated: 2026-09-07
-Current state revision: 12.5
-Authority baseline SHA: `691c72380785bb4523e92b36e61aa33d3870be6c`
+Current state revision: 12.6
+Authority baseline SHA: `53d99a1cb8ae102ff7410b5032cfbe62e4ef6299`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
@@ -11,7 +11,7 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 Current product phase: Phase B integrated Default First Session v3.
 Current milestone: compose the proven export-safe first path and truthful optional-history persistence into one accepted player-visible session.
 Active execution issue: #597
-Next allowed action: after this authority update merges, perform implementation preflight for issue #597. Name at most twelve files and prove selector, persistence, evidence, and regression composition before changing runtime code. Do not reopen PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Next allowed action: implementation preflight #597 has passed. Open one draft Gate A candidate using only the twelve named files, then prove import, export-safe selectors, schema v2 semantics, evidence bounds, and all historical regressions before Gate B. Do not reopen PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
 
 ## Whole-product portfolio gate after the Phase B reject
 
@@ -329,10 +329,9 @@ Stop and re-run the portfolio gate if:
 1. Integrated Default First Session v3 - current.
 2. Minimal Economy Foundation.
 3. Repeatable Expansion Loop.
-4. Repeatable Expansion Loop.
-5. Nation gameplay depth.
-6. Empire gameplay depth and scaling.
-7. Content scale, polish, UX, audio and performance.
+4. Nation gameplay depth.
+5. Empire gameplay depth and scaling.
+6. Content scale, polish, UX, audio and performance.
 
 The portfolio gate may reorder later phases when direct evidence identifies a stronger bottleneck.
 
@@ -365,4 +364,4 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 Runtime coding outside issue #597 is blocked.
 
-After this authority transition merges, complete implementation preflight for issue #597. Reject before coding if the proven closed candidates cannot be composed within twelve named files, schema v2, existing mechanics, the explicit evidence budget, and one fresh bounded correction allowance.
+Implementation preflight #597 passed with exactly twelve named files, schema v2, existing mechanics, and the explicit evidence budget. One draft Gate A candidate is authorized with one fresh bounded correction allowance.
