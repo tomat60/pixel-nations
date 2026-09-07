@@ -2,16 +2,26 @@
 
 Status: ACTIVE
 Updated: 2026-09-07
-Current state revision: 13.0
+Current state revision: 13.1
 Authority baseline SHA: `53d99a1cb8ae102ff7410b5032cfbe62e4ef6299`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B deferred input-ready recovery authorized.
-Current milestone: prove or falsify one asynchronous state-keyed input-readiness barrier without changing product behavior.
-Active execution issue: #608
-Next allowed action: complete implementation preflight for exactly one bounded `DEFERRED_INPUT_READY_V1` candidate under issue #608 and merged authority PR #609. Do not reopen PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: Phase B deferred input-ready recovery rejected.
+Current milestone: no implementation is authorized pending input-handler architecture portfolio review.
+Active execution issue: #613
+Next allowed action: complete the strategy-only whole-product portfolio gate in issue #613 and merge explicit authority before any new implementation. Do not reopen PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Terminal result: Deferred Input Ready v1
+
+PR #612 is terminally classified as `GODOT_AURELIAN_DEFERRED_INPUT_READY_V1_REJECT` and closed without merge.
+
+The final exact head was `ef74d3eefc5ae0760483008ee44630d8052e3f9d`. Focused run `34153893331` produced artifact `10030310817` with digest `sha256:c59a37a4d0bdbb0c14a79afd938e807ca675795f7b7cfbf6b04f2999aa995bdb`.
+
+Clean profile run 1 completed all 55 normal OS inputs through `world_first_imperial_expansion_two_land_footprint`. Run 2 received a valid asynchronous readiness token at `map_first_rival_countermove_greenvale`, then the next normal `Right` input was not consumed while the process remained alive. This falsifies the deferred state-keyed token as a sufficient input-delivery barrier.
+
+Issue #608 is closed as not planned. Its stop condition blocks further debounce, delay, retry, or timing-token experiments. Issue #613 must review input-handler architecture before any new implementation.
 
 ## Portfolio decision after Native Input Driver v1
 
@@ -398,6 +408,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-Runtime coding outside issue #608 is blocked.
+All runtime coding is blocked pending the strategy-only portfolio decision in issue #613 and a separately merged explicit authority.
 
-Only the bounded `DEFERRED_INPUT_READY_V1` recovery described by issue #608 and merged authority PR #609 may proceed. Implementation preflight must name at most the existing Aurelian controller, one reusable native input driver, and one focused workflow. This authority does not accept Default First Session or authorize new product behavior.
+Do not add another debounce, delay, retry, readiness token, or timing calibration. The next bounded candidate, if any, must follow the input-handler architecture review.
