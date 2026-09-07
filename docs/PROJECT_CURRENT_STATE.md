@@ -2,16 +2,24 @@
 
 Status: ACTIVE
 Updated: 2026-09-07
-Current state revision: 12.9
+Current state revision: 13.0
 Authority baseline SHA: `53d99a1cb8ae102ff7410b5032cfbe62e4ef6299`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B input-readiness recovery rejected.
-Current milestone: no implementation is authorized pending a fresh portfolio decision.
-Active execution issue: #606
-Next allowed action: complete the strategy-only whole-product portfolio gate in issue #606 and merge explicit authority before any new implementation. Do not reopen PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: Phase B deferred input-ready recovery authorized.
+Current milestone: prove or falsify one asynchronous state-keyed input-readiness barrier without changing product behavior.
+Active execution issue: #608
+Next allowed action: complete implementation preflight for exactly one bounded `DEFERRED_INPUT_READY_V1` candidate under issue #608 and merged authority PR #609. Do not reopen PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Portfolio decision after Native Input Driver v1
+
+Issue #606 selected exactly one bounded `DEFERRED_INPUT_READY_V1` recovery candidate. PR #609 merged explicit authority under issue #608.
+
+The controller may add one minimal state-keyed readiness signal emitted only after state application completes and the runtime crosses a later process frame. Evidence may reuse one state-gated native driver and one focused workflow. Three clean profiles must complete the same normal-input route through the two-land finale. Fixed sleeps are not the primary gate. No progression, persistence schema, UI, camera, asset, visual, economy, mechanics, or broader controller change is authorized.
+
+One deterministic correction is allowed. If valid readiness still permits missed or duplicated input, classify REJECT, stop timing/debounce experiments, and require input-handler architecture review.
 
 ## Terminal result: Native Input Driver v1
 
@@ -390,6 +398,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-Runtime coding outside issue #597 is blocked.
+Runtime coding outside issue #608 is blocked.
 
-Implementation preflight #597 passed with exactly twelve named files, schema v2, existing mechanics, and the explicit evidence budget. One draft Gate A candidate is authorized with one fresh bounded correction allowance.
+Only the bounded `DEFERRED_INPUT_READY_V1` recovery described by issue #608 and merged authority PR #609 may proceed. Implementation preflight must name at most the existing Aurelian controller, one reusable native input driver, and one focused workflow. This authority does not accept Default First Session or authorize new product behavior.
