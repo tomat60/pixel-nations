@@ -1,17 +1,39 @@
 # Pixel Nations Current State
 
-Status: ACTIVE
-Updated: 2026-09-06
-Current state revision: 12.0
+Status: BLOCKED
+Updated: 2026-09-07
+Current state revision: 12.1
 Authority baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B - Core Playable Loop Consolidation.
-Current milestone: make one representative first session clear, satisfying and persistent from first claim to meaningful expansion.
+Current product phase: Phase B Core Playable Loop Consolidation is terminally rejected; further implementation is not authorized.
+Current milestone: terminal result `GODOT_AURELIAN_CORE_PLAYABLE_LOOP_CONSOLIDATION_REJECT` recorded for PR #587.
 Active execution issue: #586
-Next allowed action: after this authority update merges, inspect the current playable entry/controller and state graph, then define one bounded consolidation candidate using accepted mechanics/states only. Do not add a new system to make the loop work.
+Next allowed action: issue #586 is closed as `not planned`; there is no active execution authority. Run a new whole-product portfolio gate and merge explicit authority before any further product implementation. Do not reopen PR #587 or issue #586.
+
+## Latest terminal result
+
+PR #587 `Phase B: bound first playable session to North Ridge expansion` is rejected and closed without merge.
+
+Terminal classification: `GODOT_AURELIAN_CORE_PLAYABLE_LOOP_CONSOLIDATION_REJECT`.
+
+Rejected exact head: `b8352db71b8b6bd2bbb39a02e111700342089d99`.
+
+Accepted exact-head checks:
+- Core Playable Loop contract run `34077508580`: PASS, contract-only, no artifact;
+- Godot Foundation run `34077508545`: PASS, artifact `10002589235`, digest `sha256:4276b16ab31fd71612d45daedfed61e153117a45501d7e197b93e90ddbb932d2`;
+- Playable Entry run `34077508547`: PASS, artifact `10002818669`, digest `sha256:087961f4d7cf04ac2554256a3dde887b638f5f6ed78ffe15345a471321c15b14`;
+- Pixel Nations CI, Play Visual QA, P4 through P11 continuity, and Vercel: PASS.
+
+Terminal blockers:
+- Web Playability run `34077508572`: FAIL, artifact `10002657500`, digest `sha256:d0c89e4431b02a628934f3761269d3b8e8c58c7582361cf04a721dc558ed44af`;
+- Session Persistence v2 run `34077508515`: native PASS, Web reload/profile proof FAIL, artifact `10002679889`, digest `sha256:051a64f638ebc3c7a4be3a252f73bc091a5ec0f2350542cf8b079c39900be96b`;
+- the bounded correction could not pass the full-progression selector into exported Web runtime;
+- required default first-session video, six-beat keyframes and deterministic action/state log were not produced.
+
+The one authorized bounded correction was consumed. Green contract or generic CI does not override missing product evidence or failed Web regressions.
 
 ## Core truth
 
