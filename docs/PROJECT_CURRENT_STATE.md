@@ -2,16 +2,16 @@
 
 Status: ACTIVE
 Updated: 2026-09-07
-Current state revision: 13.2
-Authority baseline SHA: `1b99827482f992d633b96ff98dd0d0a571b41c0c`
+Current state revision: 13.3
+Authority baseline SHA: `9fd12b10c68d2bddb7dc2ea607fa9e835b57b873`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B input ownership and delivery observability recovery authorized.
-Current milestone: authorize exactly one no-product-delta Input Ownership and Delivery Observability v1 recovery candidate.
-Active execution issue: #615
-Next allowed action: after this authority is merged, complete implementation preflight for issue #615 and run exactly one bounded Input Ownership and Delivery Observability v1 candidate. Do not reopen PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: Phase B input evidence architecture portfolio review.
+Current milestone: select one bounded direction after Input Ownership and Delivery Observability v1 rejection.
+Active execution issue: #618
+Next allowed action: complete the strategy-only whole-product portfolio gate in issue #618, then merge a separate explicit authority before any implementation preflight or coding. Do not reopen PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
 
 ## Portfolio decision after Deferred Input Ready v1
 
@@ -28,6 +28,16 @@ This outranks deterministic in-engine injection because injection would bypass t
 No `Input.parse_input_event()`, direct state mutation, progression, navigation, persistence, schema, UI, camera, asset, visual, economy or mechanics change is authorized. No longer delay, debounce, repeated input, blind retry or new readiness token is allowed. At most four preflight-named files and one bounded deterministic correction are permitted.
 
 If a focus-confirmed action is missing or duplicated at the runtime boundary, or a received action produces the wrong transition, classify REJECT and return to portfolio review. Do not continue the timing/debounce family.
+
+## Terminal result: Input Ownership and Delivery Observability v1
+
+PR #617 is terminally classified as `GODOT_AURELIAN_INPUT_OWNERSHIP_DELIVERY_OBSERVABILITY_V1_REJECT` and closed without merge.
+
+The final exact head was `8892618ec11fd3c3be7ef5ee0eaddfc9830b10ac`. Focused run `34158393516`, job `101854903874`, produced artifact `10031743378` with digest `sha256:d9b8e6286459dcaa768a7e93fed70590809ed589732b2cfa67b7fcf00d0311bb`.
+
+The one allowed correction added the fourth preflight-authorized file to repair the Session Persistence v2 evidence duration ceiling. The focused workflow still asserted exactly three changed files, so the final-head job failed at `Record exact scope` before installing Godot. It produced no current-head input ownership or delivery evidence.
+
+Earlier-head run `34157710274` had proved three clean profiles with 55 normal OS actions, 55 monotonic public input receipts and the two-land finale, but that evidence was invalidated by the correction. The architecture hypothesis is therefore neither accepted nor falsified on the final head. The correction budget is exhausted. Issue #615 is closed as not planned, and issue #618 is the mandatory strategy-only portfolio gate.
 
 ## Terminal result: Deferred Input Ready v1
 
@@ -388,7 +398,7 @@ Stop and re-run the portfolio gate if:
 
 ## Durable build sequence
 
-1. Integrated Default First Session v3 - current.
+1. Phase B input evidence architecture portfolio gate - current.
 2. Minimal Economy Foundation.
 3. Repeatable Expansion Loop.
 4. Nation gameplay depth.
@@ -424,6 +434,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-All runtime coding is blocked pending the strategy-only portfolio decision in issue #613 and a separately merged explicit authority.
+All runtime and workflow coding is blocked pending the strategy-only portfolio decision in issue #618 and a separately merged explicit authority.
 
-Do not add another debounce, delay, retry, readiness token, or timing calibration. The next bounded candidate, if any, must follow the input-handler architecture review.
+Do not add another debounce, delay, retry, readiness token, timing calibration, or correction to PR #617. The next bounded candidate, if any, must follow the fresh input-evidence architecture portfolio decision.
