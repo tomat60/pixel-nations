@@ -1,0 +1,155 @@
+name: Godot Aurelian Native Input Driver V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/scripts/aurelian-state-gated-native-input.sh"
+      - ".github/workflows/godot-aurelian-native-input-driver-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-aurelian-native-input-driver-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7.1"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EVIDENCE_DIR: "evidence/godot-aurelian-native-input-driver-v1"
+
+jobs:
+  prove-state-gated-native-input:
+    name: Prove three clean state-gated native traversals
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact scope
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+            git diff --name-only "${{ github.event.pull_request.base.sha }}...HEAD" | tee "${EVIDENCE_DIR}/changed-files.txt"
+            test "$(wc -l < "${EVIDENCE_DIR}/changed-files.txt")" = "2"
+            grep -Fx ".github/scripts/aurelian-state-gated-native-input.sh" "${EVIDENCE_DIR}/changed-files.txt"
+            grep -Fx ".github/workflows/godot-aurelian-native-input-driver-v1.yml" "${EVIDENCE_DIR}/changed-files.txt"
+          fi
+
+      - name: Install pinned Godot runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends unzip libgl1 xvfb xdotool >/dev/null
+          mkdir -p /tmp/godot /tmp/godot-templates
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz" \
+            -o /tmp/godot/templates.tpz
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          unzip -q /tmp/godot/templates.tpz -d /tmp/godot-templates
+          mkdir -p "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          cp -R /tmp/godot-templates/templates/. "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Import and export unchanged product baseline
+        run: |
+          set -euo pipefail
+          mkdir -p game/build/linux
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/export-linux.log" 2>&1
+          test -x game/build/linux/pixel-nations-foundation.x86_64
+
+      - name: Prove three clean normal-input traversals
+        run: |
+          set -euo pipefail
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1440x900x24 > "${EVIDENCE_DIR}/xvfb.log" 2>&1 &
+          sleep 2
+          cat > "${EVIDENCE_DIR}/sequence.txt" <<'SEQUENCE'
+          Return|PLAYABLE_AURELIAN_ENTRY_STATE=world_trade_selected
+          Right|PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_selected
+          Return|PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_claimed
+          Right|PLAYABLE_AURELIAN_ENTRY_STATE=village_claimed
+          Return|PLAYABLE_AURELIAN_ENTRY_STATE=village_founded
+          Return|PLAYABLE_AURELIAN_ENTRY_STATE=village_developed
+          Left|PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_claimed
+          Return|PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_connected
+          Right|PLAYABLE_AURELIAN_ENTRY_STATE=village_developed
+          Return|PLAYABLE_AURELIAN_ENTRY_STATE=village_trade_dispatched
+          Left|PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_in_use
+          Right|PLAYABLE_AURELIAN_ENTRY_STATE=village_trade_dispatched
+          Return|PLAYABLE_AURELIAN_ENTRY_STATE=village_city_chartered
+          Left|PLAYABLE_AURELIAN_ENTRY_STATE=map_greenvale_city
+          Left|PLAYABLE_AURELIAN_ENTRY_STATE=world_first_city_recognized
+          Return|PLAYABLE_AURELIAN_ENTRY_STATE=world_first_nation_founded
+          Down|AURELIAN_NATIONAL_DIRECTION_INSPECT=EXPAND
+          Down|AURELIAN_NATIONAL_DIRECTION_INSPECT=FRONTIER
+          Up|AURELIAN_NATIONAL_DIRECTION_INSPECT=EXPAND
+          Return|PLAYABLE_AURELIAN_ENTRY_STATE=world_first_nation_founded
+          Right|PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_homeland
+          Right|PLAYABLE_AURELIAN_ENTRY_STATE=village_greenvale_capital
+          Return|PLAYABLE_AURELIAN_ENTRY_STATE=village_national_mandate_started
+          Left|PLAYABLE_AURELIAN_ENTRY_STATE=map_national_mandate_active
+          Right|PLAYABLE_AURELIAN_ENTRY_STATE=village_national_mandate_started
+          Return|PLAYABLE_AURELIAN_ENTRY_STATE=village_aurelian_imperial_capital
+          Left|PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_imperial_heartland
+          Left|PLAYABLE_AURELIAN_ENTRY_STATE=world_first_empire_proclaimed
+          SEQUENCE
+          for run in 1 2 3; do
+            RUN_DIR="${EVIDENCE_DIR}/run-${run}"
+            RUN_HOME="${RUNNER_TEMP}/aurelian-state-gated-run-${run}"
+            mkdir -p "$RUN_DIR" "$RUN_HOME"
+            env -u AURELIAN_FULL_PROGRESSION -u AURELIAN_PLAYABLE_EVIDENCE_STATE -u AURELIAN_CAPTURE_PLAYABLE_ENTRY \
+              HOME="$RUN_HOME" game/build/linux/pixel-nations-foundation.x86_64 > "$RUN_DIR/runtime.log" 2>&1 &
+            APP_PID=$!
+            WINDOW_ID="$(xdotool search --sync --onlyvisible --name 'Pixel Nations' | head -n1)"
+            sleep 1
+            AURELIAN_WINDOW_ID="$WINDOW_ID" AURELIAN_LOG="$RUN_DIR/runtime.log" \
+              AURELIAN_APP_PID="$APP_PID" AURELIAN_SEQUENCE="${EVIDENCE_DIR}/sequence.txt" \
+              AURELIAN_TRACE="$RUN_DIR/driver.log" \
+              bash .github/scripts/aurelian-state-gated-native-input.sh
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_empire_proclaimed" "$RUN_DIR/runtime.log"
+            grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=EXPAND" "$RUN_DIR/runtime.log"
+            test "$(grep -c ' status=SEND ' "$RUN_DIR/driver.log")" = "28"
+            grep -F "status=PASS actions=28" "$RUN_DIR/driver.log"
+            kill "$APP_PID" || true
+            wait "$APP_PID" || true
+          done
+
+      - name: Validate fail-closed evidence
+        run: |
+          set -euo pipefail
+          for run in 1 2 3; do
+            grep -F "status=PASS actions=28" "${EVIDENCE_DIR}/run-${run}/driver.log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_empire_proclaimed" "${EVIDENCE_DIR}/run-${run}/runtime.log"
+            if grep -F "status=FAIL" "${EVIDENCE_DIR}/run-${run}/driver.log"; then exit 1; fi
+          done
+          sha256sum "${EVIDENCE_DIR}"/*.txt "${EVIDENCE_DIR}"/run-*/*.log | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
+          echo "GODOT_AURELIAN_NATIVE_INPUT_DRIVER_V1=PASS"
+
+      - name: Upload exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-aurelian-native-input-driver-v1-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 7
