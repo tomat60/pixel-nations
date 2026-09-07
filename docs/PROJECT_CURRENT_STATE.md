@@ -1,6 +1,6 @@
 # Pixel Nations Current State
 
-Status: BLOCKED
+Status: ACTIVE
 Updated: 2026-09-07
 Current state revision: 12.7
 Authority baseline SHA: `53d99a1cb8ae102ff7410b5032cfbe62e4ef6299`
@@ -10,8 +10,8 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: Phase B Default First Session v3 rejected.
 Current milestone: no product implementation is authorized.
-Active execution issue: none
-Next allowed action: run a fresh whole-product portfolio gate and merge explicit authority before any new implementation. Do not reopen PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Active execution issue: #602
+Next allowed action: complete the strategy-only whole-product portfolio gate in issue #602 and merge explicit authority before any new implementation. Do not reopen PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
 
 ## Terminal result: Default First Session v3
 
