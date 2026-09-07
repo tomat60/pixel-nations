@@ -2,16 +2,16 @@
 
 Status: ACTIVE
 Updated: 2026-09-07
-Current state revision: 12.3
-Authority baseline SHA: `d41d92b0efb6a6f76abac50cc1606453d91af565`
+Current state revision: 12.4
+Authority baseline SHA: `6fe8b7ec20b9cf6b41ef7177b03131251e0e7190`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B persistence contract correction.
-Current milestone: decouple optional imperial history from truthful North Ridge expansion persistence.
-Active execution issue: #593
-Next allowed action: after this authority update merges, perform implementation preflight for issue #593. Prove the correction can use existing fields and preserve strict validation before changing persistence code. Do not reopen PR #591, issue #589, PR #587, or issue #586.
+Current product phase: Phase B portfolio reset after persistence contract rejection.
+Current milestone: select the next highest-value bounded milestone without reopening the rejected persistence candidate.
+Active execution issue: none
+Next allowed action: run a fresh whole-product portfolio gate. Runtime implementation remains blocked until a new issue and merged authority explicitly authorize one bounded candidate. Do not reopen PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
 
 ## Whole-product portfolio gate after the Phase B reject
 
@@ -54,25 +54,28 @@ This prerequisite outranks another first-session attempt because any such attemp
 
 ## Latest terminal result
 
-PR #591 `Phase B: prove Default First Session v2 export-safe Gate A` is rejected and closed without merge.
+PR #594 `Phase B: decouple optional history from expansion persistence` is rejected and closed without merge.
 
-Terminal classification: `GODOT_AURELIAN_DEFAULT_FIRST_SESSION_V2_REJECT`.
+Terminal classification: `GODOT_AURELIAN_PERSISTENCE_OPTIONAL_HISTORY_DECOUPLING_V1_REJECT`.
 
-Rejected exact head: `8eaffa1199ce2bc1f41c05ea6eb1c73e3eae59fe`.
+Rejected exact head: `3a5605a760d69267c70d6ecde220a7b4c1629ea4`.
 
-Evidence:
-- Gate A passed on exact head `bb225314086fb1b0b44df4e1ad6dfba989ebca1f`;
-- Gate B run `34103253857`: FAIL;
-- failed job `101682322496`;
-- partial artifact `10011395132`, digest `sha256:d03ae5d64d34be539f01f824193d60161439d204635310f2990eb098147e8b9c`;
-- exact selector validation and normal/tagged exports passed;
-- normal native input reached `map_first_imperial_expansion_two_lands_claimed`, then persistence returned `invalid_data`.
+Accepted exact-head evidence:
+- focused run `34105718572`: PASS;
+- focused artifact `10012312431`, digest `sha256:adf25b547a27fce65c3a237532887e84d1eaf9aba67934508bd1e99c6eb6c800`;
+- direct artifact review confirmed schema v2, exactly East Route plus North Ridge, and crisis, crisis response, rival response, and frontier payoff remaining `none` after native restart, Web reload, and Web profile reopen;
+- Foundation, Web Playability, CI, Visual QA, and P4 through P11 continuity passed.
 
 Terminal blocker:
+- Session Persistence v2 run `34105718341`: FAIL at exact-evidence validation;
+- artifact `10012573346`, digest `sha256:a9b6ac11fde0e7045ea4699afce3668096cea94daba994dd70dd2ddbe1792fca`;
+- all product tests, exports, native restart, Web reload, and profile reopen steps passed;
+- the artifact contains all 105 required 1440x900 frames and the correct restored final-state manifest;
+- the input-driven video is `253.280000` seconds, outside the accepted `110..240` bound.
 
-Persistence v2 requires any North Ridge expansion state to carry a completed frontier payoff, which requires recorded rival and crisis responses. The bounded default session intentionally skips those mechanics. Preserving its two-land finale would therefore require fabricated skipped history, a persistence-contract change, or a new mechanic. All three violate issue #589. The apparent hidden-history workaround is explicitly rejected.
+The one authorized deterministic correction was consumed by aligning the stale imperial-expansion regression with the independent-history contract. A second correction or retry was not authorized. Acceptance condition 5 remained false.
 
-Issue #589 is closed as `not planned`. No runtime implementation is authorized until a fresh portfolio gate reconciles desired onboarding with the accepted state model.
+Issue #593 is closed as `not planned`. Main and all accepted product/runtime baselines remain unchanged.
 
 ## Previous terminal result
 
@@ -307,9 +310,8 @@ Stop and re-run the portfolio gate if:
 
 ## Durable build sequence
 
-1. Persistence Optional History Decoupling v1 - current.
-2. Whole-product portfolio gate.
-3. Persistence-compatible Default First Session candidate.
+1. Whole-product portfolio gate - current.
+2. Persistence-compatible Default First Session candidate only if newly authorized.
 3. Minimal Economy Foundation.
 4. Repeatable Expansion Loop.
 5. Nation gameplay depth.
@@ -345,6 +347,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-Runtime coding outside issue #593 remains blocked.
+Runtime coding is blocked.
 
-After this authority transition merges, the next action is implementation preflight for issue #593. It must prove that existing persistence fields can be decoupled without a schema migration or broad validation weakening. No first-session sequencing is authorized until that contract candidate receives terminal acceptance.
+PR #594 and issue #593 are terminally rejected and must not be reopened. Run a fresh whole-product portfolio gate before creating another execution issue. Any next candidate requires explicit merged authority, a new bounded acceptance contract, and a fresh correction budget.
