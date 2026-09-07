@@ -62,6 +62,7 @@ env:
   GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
   EVIDENCE_DIR: "evidence/godot-aurelian-session-persistence-v2"
   GLB_SHA256: "04116e3d662d461f0d29ca797444193b0873f5aba6012790af7d366c63e01048"
+  AURELIAN_FULL_PROGRESSION: "1"
 
 jobs:
   prove-session-persistence-v2:
