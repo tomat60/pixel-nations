@@ -183,7 +183,7 @@ jobs:
           EXACT_HEAD="$(cat "${EVIDENCE_DIR}/exact-head.txt")"
           cat > "${EVIDENCE_DIR}/result-manifest.json" <<EOF
           {
-            "contract": "GODOT_AURELIAN_INPUT_OWNERSHIP_DELIVERY_OBSERVABILITY_V1",
+            "contract": "GODOT_AURELIAN_INPUT_OWNERSHIP_DELIVERY_OBSERVABILITY_V2",
             "exact_head": "${EXACT_HEAD}",
             "input_mode": "normal_os_keyboard",
             "delivery_barrier": "verified_window_focus_then_runtime_receipt",
@@ -195,7 +195,7 @@ jobs:
           }
           EOF
           sha256sum "${EVIDENCE_DIR}"/*.txt "${EVIDENCE_DIR}"/*.json "${EVIDENCE_DIR}"/run-*/*.log | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
-          echo "GODOT_AURELIAN_INPUT_OWNERSHIP_DELIVERY_OBSERVABILITY_V1=PASS"
+          echo "GODOT_AURELIAN_INPUT_OWNERSHIP_DELIVERY_OBSERVABILITY_V2=PASS"
 
       - name: Upload exact-head evidence
         if: always()
