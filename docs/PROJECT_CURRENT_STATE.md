@@ -2,16 +2,16 @@
 
 Status: ACTIVE
 Updated: 2026-09-07
-Current state revision: 13.3
-Authority baseline SHA: `9fd12b10c68d2bddb7dc2ea607fa9e835b57b873`
+Current state revision: 13.4
+Authority baseline SHA: `abf9e3275c1334b4a859bdeea8ff587141098ddb`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B input evidence architecture portfolio review.
-Current milestone: select one bounded direction after Input Ownership and Delivery Observability v1 rejection.
-Active execution issue: #618
-Next allowed action: complete the strategy-only whole-product portfolio gate in issue #618, then merge a separate explicit authority before any implementation preflight or coding. Do not reopen PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: Phase B Input Ownership and Delivery Observability v2 recovery authorized.
+Current milestone: run exactly one clean four-file, no-product-delta input-boundary proof.
+Active execution issue: #620
+Next allowed action: after this authority is merged, complete implementation preflight for issue #620 and run exactly one bounded Input Ownership and Delivery Observability v2 candidate. Do not reopen PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
 
 ## Portfolio decision after Deferred Input Ready v1
 
@@ -28,6 +28,20 @@ This outranks deterministic in-engine injection because injection would bypass t
 No `Input.parse_input_event()`, direct state mutation, progression, navigation, persistence, schema, UI, camera, asset, visual, economy or mechanics change is authorized. No longer delay, debounce, repeated input, blind retry or new readiness token is allowed. At most four preflight-named files and one bounded deterministic correction are permitted.
 
 If a focus-confirmed action is missing or duplicated at the runtime boundary, or a received action produces the wrong transition, classify REJECT and return to portfolio review. Do not continue the timing/debounce family.
+
+## Portfolio decision after Input Ownership and Delivery Observability v1
+
+Issue #618 completed the mandatory strategy-only whole-product portfolio gate.
+
+Decision: authorize exactly one fresh `Input Ownership and Delivery Observability v2` recovery candidate under issue #620.
+
+The rejected v1 final head failed before Godot because its focused workflow asserted three changed files after the single correction legitimately added a fourth preflight-authorized file. Earlier-head evidence had completed three clean 55-action focus-owned traversals with monotonic public receipts and the two-land finale. The architecture hypothesis is therefore promising but not accepted on one coherent final head.
+
+V2 must start from current `main` and declare exactly four paths from its first commit: the existing Aurelian entry controller, one new v2 driver, one new v2 focused workflow, and the existing Session Persistence v2 workflow. The focused scope gate must require those exact four paths. Session Persistence may change only its upper video duration bound from 240 to 300 seconds while preserving the 110-second minimum, all 105 frames, every state assertion, manifests and hashes.
+
+This outranks a different input architecture because current evidence supports the focus-and-receipt boundary. It outranks shortening the session because that can hide rather than solve delivery loss. It outranks deeper product work and broad visual work because both would build on an unproven default-session evidence path.
+
+No timing token, delay calibration, debounce, repeated action, blind retry, `Input.parse_input_event()`, direct state mutation, product, persistence-schema, UI, visual, camera, asset, mechanic or economy change is authorized. One bounded deterministic correction is allowed. A PASS is enabling architecture evidence only and does not authorize another Default First Session implementation.
 
 ## Terminal result: Input Ownership and Delivery Observability v1
 
@@ -398,7 +412,7 @@ Stop and re-run the portfolio gate if:
 
 ## Durable build sequence
 
-1. Phase B input evidence architecture portfolio gate - current.
+1. Phase B Input Ownership and Delivery Observability v2 recovery - current.
 2. Minimal Economy Foundation.
 3. Repeatable Expansion Loop.
 4. Nation gameplay depth.
@@ -434,6 +448,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-All runtime and workflow coding is blocked pending the strategy-only portfolio decision in issue #618 and a separately merged explicit authority.
+All runtime and workflow coding is blocked until this v2 authority is merged and issue #620 receives an implementation preflight pass.
 
-Do not add another debounce, delay, retry, readiness token, timing calibration, or correction to PR #617. The next bounded candidate, if any, must follow the fresh input-evidence architecture portfolio decision.
+Do not add another debounce, delay, retry, readiness token, timing calibration, or correction to PR #617. The only next candidate is the exact four-file Input Ownership and Delivery Observability v2 proof under issue #620.
