@@ -2,16 +2,24 @@
 
 Status: ACTIVE
 Updated: 2026-09-07
-Current state revision: 12.8
+Current state revision: 12.9
 Authority baseline SHA: `53d99a1cb8ae102ff7410b5032cfbe62e4ef6299`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B evidence recovery after Default First Session v3 reject.
-Current milestone: prove a deterministic state-gated native normal-input driver with no product delta.
-Active execution issue: #603
-Next allowed action: run implementation preflight for issue #603, name at most three files, and open one draft recovery candidate only after preflight passes. Do not reopen PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: Phase B input-readiness recovery rejected.
+Current milestone: no implementation is authorized pending a fresh portfolio decision.
+Active execution issue: #606
+Next allowed action: complete the strategy-only whole-product portfolio gate in issue #606 and merge explicit authority before any new implementation. Do not reopen PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Terminal result: Native Input Driver v1
+
+PR #605 is terminally classified as `GODOT_AURELIAN_NATIVE_INPUT_DRIVER_V1_REJECT` and closed without merge.
+
+The final exact head was `964011c8a9b2453b24c6e7b2d734b4117515fe99`. Run `34129745653` and artifact `10021628394` with digest `sha256:d893d3e7fba6696477c2ae003016d83138e74fdb0b786a301aae4bd236416f14` prove that the corrected driver observed five persisted transitions through `village_founded`, then timed out waiting for `village_developed` after a normal `Return` input while the process remained alive.
+
+The first head used the application default rather than the Aurelian scene. The single authorized correction fixed the launch target. The remaining failure demonstrates that a persisted state line is not itself a reliable input-readiness barrier. No second correction is authorized. Issue #603 is closed as not planned. Independent green checks do not override the failed exact recovery gate.
 
 ## Portfolio decision after Default First Session v3
 
