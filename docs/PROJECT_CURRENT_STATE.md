@@ -8,10 +8,10 @@ Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B portfolio gate after Default First Session v2 rejection.
-Current milestone: reassess the highest-value bounded milestone against the accepted persistence model before authorizing more runtime implementation.
-Active execution issue: none.
-Next allowed action: run a fresh whole-product portfolio gate. Any new first-session proposal must prove that its chosen payoff is representable by accepted persistence without fabricating skipped history or changing the persistence contract implicitly. Do not reopen PR #591, issue #589, PR #587, or issue #586.
+Current product phase: Phase B persistence contract correction.
+Current milestone: decouple optional imperial history from truthful North Ridge expansion persistence.
+Active execution issue: #593
+Next allowed action: after this authority update merges, perform implementation preflight for issue #593. Prove the correction can use existing fields and preserve strict validation before changing persistence code. Do not reopen PR #591, issue #589, PR #587, or issue #586.
 
 ## Whole-product portfolio gate after the Phase B reject
 
@@ -35,6 +35,22 @@ Godot's official feature-tag guidance confirms that custom features can be embed
 No new economy, resources, workers, timers, queues, combat, diplomacy, governance, repeatable expansion system, Atlas/Sector representation, backend, accounts, multiplayer, payments, crypto, paid assets, or broad art pass is authorized.
 
 Acceptance and stop conditions live in issue #589. Authorize one complete candidate and at most one bounded correction after direct review. Green CI alone is not acceptance.
+
+## Whole-product portfolio gate after Default First Session v2
+
+Decision: authorize exactly one `Persistence Optional History Decoupling v1` contract candidate under issue #593.
+
+Default First Session v2 exposed a state-model contradiction rather than a sequencing or runner problem. Existing persistence fields can describe expansion and optional imperial history independently, but validation currently requires crisis, rival, and frontier-payoff completion before North Ridge expansion can be stored.
+
+The bounded correction must make this truthful state representable:
+
+- `imperial_expansion_target = north_ridge`;
+- `first_imperial_expansion = north_ridge_claimed`;
+- crisis, crisis response, rival response, and frontier payoff remain `none` when those threads were not played.
+
+Historical full-progression saves must retain their completed optional history. Malformed combinations must remain rejected. Prefer a backward-compatible correction using existing fields. A schema migration, broad validation weakening, runtime sequencing, or player-facing change is not authorized.
+
+This prerequisite outranks another first-session attempt because any such attempt would otherwise repeat the same invalid persistence boundary or fabricate player history. Acceptance and stop conditions live in issue #593.
 
 ## Latest terminal result
 
@@ -291,8 +307,9 @@ Stop and re-run the portfolio gate if:
 
 ## Durable build sequence
 
-1. Whole-product portfolio gate - current.
-2. Persistence-compatible first-session architecture or the next portfolio-selected milestone.
+1. Persistence Optional History Decoupling v1 - current.
+2. Whole-product portfolio gate.
+3. Persistence-compatible Default First Session candidate.
 3. Minimal Economy Foundation.
 4. Repeatable Expansion Loop.
 5. Nation gameplay depth.
@@ -328,6 +345,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-Runtime coding for Phase B is blocked after the terminal Default First Session v2 rejection.
+Runtime coding outside issue #593 remains blocked.
 
-The next action is a fresh whole-product portfolio gate. It must either choose a payoff already representable by accepted persistence or explicitly authorize a separately reviewed persistence-contract change before any new runtime candidate. No hidden compatibility metadata may claim that skipped mechanics occurred.
+After this authority transition merges, the next action is implementation preflight for issue #593. It must prove that existing persistence fields can be decoupled without a schema migration or broad validation weakening. No first-session sequencing is authorized until that contract candidate receives terminal acceptance.
