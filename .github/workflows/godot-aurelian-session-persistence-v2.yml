@@ -62,6 +62,7 @@ env:
   GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
   EVIDENCE_DIR: "evidence/godot-aurelian-session-persistence-v2"
   GLB_SHA256: "04116e3d662d461f0d29ca797444193b0873f5aba6012790af7d366c63e01048"
+  AURELIAN_FULL_PROGRESSION: "1"
 
 jobs:
   prove-session-persistence-v2:
@@ -161,7 +162,7 @@ jobs:
           grep -F "GODOT_AURELIAN_FIRST_INTER_LAND_COORDINATION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_inter_land_coordination_v1_test.log"
           mkdir -p game/build/linux game/build/web
           "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/export-linux.log" 2>&1
-          "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html > "${EVIDENCE_DIR}/export-web.log" 2>&1
+          "${GODOT_BIN}" --headless --path game --export-release "Web Full Progression Regression" build/web/index.html > "${EVIDENCE_DIR}/export-web.log" 2>&1
           test -x game/build/linux/pixel-nations-foundation.x86_64
           test -s game/build/web/index.pck
           grep -aF "aurelian_session_persistence_v2.gd" game/build/linux/pixel-nations-foundation.pck
@@ -878,7 +879,7 @@ jobs:
             test "$(stat -c %s "$image")" -gt 70000
           done
           duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/session-persistence-v2-sequence.webm")"
-          awk -v duration="$duration" 'BEGIN { exit !(duration >= 110 && duration <= 240) }'
+          awk -v duration="$duration" 'BEGIN { exit !(duration >= 110 && duration <= 300) }'
           grep -F "AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:map_ridge_convoy_dispatched:east_trade" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_SESSION_V2_SAVE_ACK=stored:web_local_storage:map_ridge_convoy_dispatched:east_trade" "${EVIDENCE_DIR}/browser-console.log"
           grep -F "AURELIAN_SESSION_V2_LOAD=unavailable:web_local_storage:world_neutral:none" "${EVIDENCE_DIR}/browser-console.log"
