@@ -10,8 +10,8 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: Phase B portfolio reset after persistence contract rejection.
 Current milestone: select the next highest-value bounded milestone without reopening the rejected persistence candidate.
-Active execution issue: none
-Next allowed action: run a fresh whole-product portfolio gate. Runtime implementation remains blocked until a new issue and merged authority explicitly authorize one bounded candidate. Do not reopen PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Active execution issue: #596
+Next allowed action: execute the strategy-only portfolio gate in issue #596. Runtime implementation remains blocked until that gate selects a bounded candidate and merged authority names its execution issue. Do not reopen PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
 
 ## Whole-product portfolio gate after the Phase B reject
 
@@ -349,4 +349,4 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 Runtime coding is blocked.
 
-PR #594 and issue #593 are terminally rejected and must not be reopened. Run a fresh whole-product portfolio gate before creating another execution issue. Any next candidate requires explicit merged authority, a new bounded acceptance contract, and a fresh correction budget.
+PR #594 and issue #593 are terminally rejected and must not be reopened. Complete the strategy-only whole-product portfolio gate in issue #596 before creating another execution issue. Any next candidate requires explicit merged authority, a new bounded acceptance contract, and a fresh correction budget.
