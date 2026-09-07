@@ -1,17 +1,27 @@
 # Pixel Nations Current State
 
-Status: ACTIVE
+Status: BLOCKED
 Updated: 2026-09-07
-Current state revision: 12.6
+Current state revision: 12.7
 Authority baseline SHA: `53d99a1cb8ae102ff7410b5032cfbe62e4ef6299`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B integrated Default First Session v3.
-Current milestone: compose the proven export-safe first path and truthful optional-history persistence into one accepted player-visible session.
-Active execution issue: #597
-Next allowed action: implementation preflight #597 has passed. Open one draft Gate A candidate using only the twelve named files, then prove import, export-safe selectors, schema v2 semantics, evidence bounds, and all historical regressions before Gate B. Do not reopen PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: Phase B Default First Session v3 rejected.
+Current milestone: no product implementation is authorized.
+Active execution issue: none
+Next allowed action: run a fresh whole-product portfolio gate and merge explicit authority before any new implementation. Do not reopen PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Terminal result: Default First Session v3
+
+PR #600 is terminally classified as `GODOT_AURELIAN_DEFAULT_FIRST_SESSION_V3_REJECT` and closed without merge.
+
+The final exact head was `78003d7769239f5ee33b80e3dd75d31cd600155b`. Gate A run `34127118572` failed in the native normal-input traversal. Import, contract validation, Linux export, default Web export, the explicit full-progression regression export, and completed independent regressions passed. The player path did not reach the required `world_first_imperial_expansion_two_land_footprint` finale, so Web Gate B capture and fail-closed evidence validation did not run.
+
+Artifact `10020606379` has digest `sha256:b2aea0f87d7beebb79aaa2124d7733cb0722132cd927f03d6a7429fe477916aa`.
+
+The single authorized deterministic correction was used to gate the final native Village, Map, and World inputs on persisted state. The corrected run still stalled earlier in the same normal-input path. No second correction is authorized. Issue #597 is closed as not planned. Green independent checks do not override the failed exact product gate.
 
 ## Whole-product portfolio gate after the Phase B reject
 
