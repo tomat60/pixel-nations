@@ -2,16 +2,16 @@
 
 Status: ACTIVE
 Updated: 2026-09-07
-Current state revision: 12.2
-Authority baseline SHA: `564da86e29bc4c3a2ebf98ff3920d7db967de525`
+Current state revision: 12.3
+Authority baseline SHA: `d41d92b0efb6a6f76abac50cc1606453d91af565`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B Default First Session v2.
-Current milestone: prove one export-safe, evidence-first default session from first claim to the two-land North Ridge payoff.
-Active execution issue: #589
-Next allowed action: after this authority update merges, perform implementation preflight for issue #589. Define and validate the export-safe default/regression split and the complete evidence path before runtime sequencing changes. Do not reopen PR #587 or issue #586.
+Current product phase: Phase B persistence contract correction.
+Current milestone: decouple optional imperial history from truthful North Ridge expansion persistence.
+Active execution issue: #593
+Next allowed action: after this authority update merges, perform implementation preflight for issue #593. Prove the correction can use existing fields and preserve strict validation before changing persistence code. Do not reopen PR #591, issue #589, PR #587, or issue #586.
 
 ## Whole-product portfolio gate after the Phase B reject
 
@@ -36,7 +36,45 @@ No new economy, resources, workers, timers, queues, combat, diplomacy, governanc
 
 Acceptance and stop conditions live in issue #589. Authorize one complete candidate and at most one bounded correction after direct review. Green CI alone is not acceptance.
 
+## Whole-product portfolio gate after Default First Session v2
+
+Decision: authorize exactly one `Persistence Optional History Decoupling v1` contract candidate under issue #593.
+
+Default First Session v2 exposed a state-model contradiction rather than a sequencing or runner problem. Existing persistence fields can describe expansion and optional imperial history independently, but validation currently requires crisis, rival, and frontier-payoff completion before North Ridge expansion can be stored.
+
+The bounded correction must make this truthful state representable:
+
+- `imperial_expansion_target = north_ridge`;
+- `first_imperial_expansion = north_ridge_claimed`;
+- crisis, crisis response, rival response, and frontier payoff remain `none` when those threads were not played.
+
+Historical full-progression saves must retain their completed optional history. Malformed combinations must remain rejected. Prefer a backward-compatible correction using existing fields. A schema migration, broad validation weakening, runtime sequencing, or player-facing change is not authorized.
+
+This prerequisite outranks another first-session attempt because any such attempt would otherwise repeat the same invalid persistence boundary or fabricate player history. Acceptance and stop conditions live in issue #593.
+
 ## Latest terminal result
+
+PR #591 `Phase B: prove Default First Session v2 export-safe Gate A` is rejected and closed without merge.
+
+Terminal classification: `GODOT_AURELIAN_DEFAULT_FIRST_SESSION_V2_REJECT`.
+
+Rejected exact head: `8eaffa1199ce2bc1f41c05ea6eb1c73e3eae59fe`.
+
+Evidence:
+- Gate A passed on exact head `bb225314086fb1b0b44df4e1ad6dfba989ebca1f`;
+- Gate B run `34103253857`: FAIL;
+- failed job `101682322496`;
+- partial artifact `10011395132`, digest `sha256:d03ae5d64d34be539f01f824193d60161439d204635310f2990eb098147e8b9c`;
+- exact selector validation and normal/tagged exports passed;
+- normal native input reached `map_first_imperial_expansion_two_lands_claimed`, then persistence returned `invalid_data`.
+
+Terminal blocker:
+
+Persistence v2 requires any North Ridge expansion state to carry a completed frontier payoff, which requires recorded rival and crisis responses. The bounded default session intentionally skips those mechanics. Preserving its two-land finale would therefore require fabricated skipped history, a persistence-contract change, or a new mechanic. All three violate issue #589. The apparent hidden-history workaround is explicitly rejected.
+
+Issue #589 is closed as `not planned`. No runtime implementation is authorized until a fresh portfolio gate reconciles desired onboarding with the accepted state model.
+
+## Previous terminal result
 
 PR #587 `Phase B: bound first playable session to North Ridge expansion` is rejected and closed without merge.
 
@@ -269,8 +307,9 @@ Stop and re-run the portfolio gate if:
 
 ## Durable build sequence
 
-1. Default First Session v2 - current.
+1. Persistence Optional History Decoupling v1 - current.
 2. Whole-product portfolio gate.
+3. Persistence-compatible Default First Session candidate.
 3. Minimal Economy Foundation.
 4. Repeatable Expansion Loop.
 5. Nation gameplay depth.
@@ -301,11 +340,11 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 3. root `AGENTS.md`;
 4. `docs/GAME_STRATEGY_MASTER_PLAN.md`;
 5. accepted exact-head evidence and merged baselines;
-6. active execution issue #589 and its active product PR when one exists;
+6. the active execution issue and its product PR when one exists;
 7. older issues, PRs, briefs and artifacts as history/reference only.
 
 ## Current stop condition
 
-Runtime coding for Phase B remains blocked until this authority transition is reviewed and merged.
+Runtime coding outside issue #593 remains blocked.
 
-After merge, first action is implementation preflight for issue #589: define the exact normal-input six-beat path, prove the export-safe default/regression selector, and make the evidence workflow fail closed before changing runtime sequencing. No new mechanics before that preflight.
+After this authority transition merges, the next action is implementation preflight for issue #593. It must prove that existing persistence fields can be decoupled without a schema migration or broad validation weakening. No first-session sequencing is authorized until that contract candidate receives terminal acceptance.
