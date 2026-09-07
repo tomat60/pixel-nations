@@ -2,16 +2,32 @@
 
 Status: ACTIVE
 Updated: 2026-09-07
-Current state revision: 13.1
-Authority baseline SHA: `53d99a1cb8ae102ff7410b5032cfbe62e4ef6299`
+Current state revision: 13.2
+Authority baseline SHA: `1b99827482f992d633b96ff98dd0d0a571b41c0c`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B deferred input-ready recovery rejected.
-Current milestone: no implementation is authorized pending input-handler architecture portfolio review.
-Active execution issue: #613
-Next allowed action: complete the strategy-only whole-product portfolio gate in issue #613 and merge explicit authority before any new implementation. Do not reopen PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: Phase B input ownership and delivery observability recovery authorized.
+Current milestone: authorize exactly one no-product-delta Input Ownership and Delivery Observability v1 recovery candidate.
+Active execution issue: #615
+Next allowed action: after this authority is merged, complete implementation preflight for issue #615 and run exactly one bounded Input Ownership and Delivery Observability v1 candidate. Do not reopen PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Portfolio decision after Deferred Input Ready v1
+
+Issue #613 completed the mandatory strategy-only whole-product portfolio gate.
+
+Decision: authorize exactly one no-product-delta `Input Ownership and Delivery Observability v1` architecture recovery candidate under issue #615.
+
+PR #612 proved that persisted state readiness is not sufficient: after a valid asynchronous readiness token, a normal OS keyboard action was not consumed while the Godot process remained alive. The exact artifact also reported repeated X11 focus warnings. This makes the highest-value next step a strict separation of driver emission, focused-window ownership, public runtime receipt and resulting state transition.
+
+The candidate must preserve the accepted six-beat player path and all product behavior. Before every normal OS key action it must prove the intended Godot window owns focus, then correlate exactly one emitted action with exactly one monotonic receipt at the existing public input boundary and the expected persisted state. Three clean profiles must complete the same 55-action route through the two-land finale.
+
+This outranks deterministic in-engine injection because injection would bypass the OS/window boundary that failed. It outranks shortening the session because current evidence does not show that the player path is defective. It outranks returning to visuals because the accepted visual grammar and clarity baselines are not the current blocker.
+
+No `Input.parse_input_event()`, direct state mutation, progression, navigation, persistence, schema, UI, camera, asset, visual, economy or mechanics change is authorized. No longer delay, debounce, repeated input, blind retry or new readiness token is allowed. At most four preflight-named files and one bounded deterministic correction are permitted.
+
+If a focus-confirmed action is missing or duplicated at the runtime boundary, or a received action produces the wrong transition, classify REJECT and return to portfolio review. Do not continue the timing/debounce family.
 
 ## Terminal result: Deferred Input Ready v1
 
