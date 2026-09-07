@@ -1,0 +1,244 @@
+name: Godot Aurelian Persistence Optional History Decoupling V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/godot-aurelian-persistence-optional-history-decoupling-v1.yml"
+      - "game/scenes/aurelian/aurelian_session_persistence_v2.gd"
+      - "game/tests/aurelian_session_persistence_v2_test.gd"
+      - "game/tests/aurelian_first_imperial_expansion_v1_test.gd"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-aurelian-persistence-optional-history-decoupling-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7.1"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EVIDENCE_DIR: "evidence/godot-aurelian-persistence-optional-history-decoupling-v1"
+
+jobs:
+  prove-optional-history-decoupling:
+    name: Prove truthful two-land persistence across native and Web reopen
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head and seed
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+          jq -n '{
+            schema:"pixel_nations.aurelian_session",
+            version:2,
+            selected_intent:"east_trade",
+            entry_state:"world_first_imperial_expansion_two_land_footprint",
+            settlement_founded:true,
+            settlement_developed:true,
+            route_connected:true,
+            caravan_dispatched:true,
+            city_chartered:true,
+            nation_founded:true,
+            national_direction:"expand",
+            national_mandate_started:true,
+            empire_proclaimed:true,
+            imperial_crisis:"none",
+            imperial_crisis_response:"none",
+            first_rival_countermove_response:"none",
+            first_frontier_payoff:"none",
+            imperial_expansion_target:"north_ridge",
+            claimed_lands:["east_route","north_ridge"],
+            first_imperial_expansion:"north_ridge_claimed",
+            north_ridge_outpost:"none",
+            north_ridge_specialization:"none",
+            north_ridge_specialization_payoff:"none",
+            first_inter_land_coordination:"none",
+            saved_at_utc:"2026-09-07T00:00:00Z"
+          }' > "${EVIDENCE_DIR}/truthful-two-land-seed.json"
+
+      - name: Install pinned runtime and browser
+        run: |
+          set -euo pipefail
+          npm ci
+          npx playwright install chromium
+          mkdir -p /tmp/godot /tmp/godot-templates
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz" \
+            -o /tmp/godot/templates.tpz
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          unzip -q /tmp/godot/templates.tpz -d /tmp/godot-templates
+          mkdir -p "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          cp -R /tmp/godot-templates/templates/. "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Run focused contracts and export
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1
+          for test in aurelian_session_persistence_v2_test aurelian_first_imperial_expansion_v1_test; do
+            "${GODOT_BIN}" --headless --path game --script "res://tests/${test}.gd" > "${EVIDENCE_DIR}/${test}.log" 2>&1 || { cat "${EVIDENCE_DIR}/${test}.log"; exit 1; }
+          done
+          grep -F "GODOT_AURELIAN_SESSION_PERSISTENCE_V2_TEST: PASS" "${EVIDENCE_DIR}/aurelian_session_persistence_v2_test.log"
+          grep -F "GODOT_AURELIAN_FIRST_IMPERIAL_EXPANSION_V1_TEST: PASS" "${EVIDENCE_DIR}/aurelian_first_imperial_expansion_v1_test.log"
+          mkdir -p game/build/linux game/build/web
+          "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/export-linux.log" 2>&1
+          "${GODOT_BIN}" --headless --path game --export-release "Web" build/web/index.html > "${EVIDENCE_DIR}/export-web.log" 2>&1
+          test -x game/build/linux/pixel-nations-foundation.x86_64
+          test -s game/build/web/index.pck
+
+      - name: Prove native restart
+        run: |
+          set -euo pipefail
+          export HOME="${RUNNER_TEMP}/optional-history-native-profile"
+          save_dir="${HOME}/.local/share/godot/app_userdata/Pixel Nations"
+          mkdir -p "${save_dir}"
+          cp "${EVIDENCE_DIR}/truthful-two-land-seed.json" "${save_dir}/aurelian-session-v2.json"
+          game/build/linux/pixel-nations-foundation.x86_64 --headless --audio-driver Dummy --quit-after 120 > "${EVIDENCE_DIR}/native-first-launch.log" 2>&1
+          game/build/linux/pixel-nations-foundation.x86_64 --headless --audio-driver Dummy --quit-after 120 > "${EVIDENCE_DIR}/native-restart.log" 2>&1
+          expected="AURELIAN_SESSION_V2_LOAD=restored:native_file_access:world_first_imperial_expansion_two_land_footprint:east_trade"
+          grep -F "${expected}" "${EVIDENCE_DIR}/native-first-launch.log"
+          grep -F "${expected}" "${EVIDENCE_DIR}/native-restart.log"
+          jq -e '
+            .version == 2 and
+            .entry_state == "world_first_imperial_expansion_two_land_footprint" and
+            .claimed_lands == ["east_route","north_ridge"] and
+            .imperial_expansion_target == "north_ridge" and
+            .first_imperial_expansion == "north_ridge_claimed" and
+            .imperial_crisis == "none" and
+            .imperial_crisis_response == "none" and
+            .first_rival_countermove_response == "none" and
+            .first_frontier_payoff == "none"
+          ' "${save_dir}/aurelian-session-v2.json"
+          cp "${save_dir}/aurelian-session-v2.json" "${EVIDENCE_DIR}/native-after-restart.json"
+
+      - name: Prove Web reload and profile reopen
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8060 --directory game/build/web > "${EVIDENCE_DIR}/web-server.log" 2>&1 &
+          WEB_SERVER_PID=$!
+          trap 'kill ${WEB_SERVER_PID} || true' EXIT
+          for attempt in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:8060/index.html >/dev/null 2>&1 && break
+            sleep 0.25
+          done
+          curl -fsS http://127.0.0.1:8060/index.html >/dev/null
+          EVIDENCE_DIR="${EVIDENCE_DIR}" node <<'NODE'
+          const {chromium} = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+          (async () => {
+            const root = process.env.EVIDENCE_DIR;
+            const profile = path.resolve(root, 'web-profile');
+            const seed = fs.readFileSync(path.join(root, 'truthful-two-land-seed.json'), 'utf8').trim();
+            const expected = 'AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:world_first_imperial_expansion_two_land_footprint:east_trade';
+            const lines = [];
+            async function open(seeding) {
+              const context = await chromium.launchPersistentContext(profile, {
+                headless: true,
+                viewport: {width: 1280, height: 720},
+                args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist']
+              });
+              if (seeding) {
+                await context.addInitScript(value => localStorage.setItem('pixel_nations.aurelian_session.v2', value), seed);
+              }
+              const page = context.pages()[0] || await context.newPage();
+              page.on('console', msg => lines.push(msg.text()));
+              page.on('pageerror', err => lines.push('PAGEERROR ' + err.message));
+              await page.goto('http://127.0.0.1:8060/index.html', {waitUntil:'domcontentloaded', timeout:90000});
+              await page.locator('canvas').waitFor({state:'visible', timeout:90000});
+              return {context, page};
+            }
+            async function waitForCount(count, label) {
+              const deadline = Date.now() + 90000;
+              while (Date.now() < deadline) {
+                if (lines.filter(x => x.includes(expected)).length >= count) return;
+                await new Promise(r => setTimeout(r, 250));
+              }
+              throw new Error('Missing ' + label + ': ' + expected);
+            }
+            let session = await open(true);
+            await waitForCount(1, 'initial restore');
+            await session.page.reload({waitUntil:'domcontentloaded', timeout:90000});
+            await session.page.locator('canvas').waitFor({state:'visible', timeout:90000});
+            await waitForCount(2, 'reload restore');
+            const stored = await session.page.evaluate(() => localStorage.getItem('pixel_nations.aurelian_session.v2'));
+            await session.context.close();
+            session = await open(false);
+            await waitForCount(3, 'profile reopen restore');
+            await session.context.close();
+            fs.writeFileSync(path.join(root, 'web-console.log'), lines.join('\n') + '\n');
+            fs.writeFileSync(path.join(root, 'web-after-profile-reopen.json'), stored + '\n');
+            if (lines.some(x => /SCRIPT ERROR|Parse Error|PAGEERROR/i.test(x))) throw new Error('Blocking Web runtime error');
+          })().catch(error => { console.error(error); process.exit(1); });
+          NODE
+          test "$(grep -Fc "AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:world_first_imperial_expansion_two_land_footprint:east_trade" "${EVIDENCE_DIR}/web-console.log")" -ge 3
+          jq -e '
+            .version == 2 and
+            .claimed_lands == ["east_route","north_ridge"] and
+            .imperial_expansion_target == "north_ridge" and
+            .first_imperial_expansion == "north_ridge_claimed" and
+            .imperial_crisis == "none" and
+            .imperial_crisis_response == "none" and
+            .first_rival_countermove_response == "none" and
+            .first_frontier_payoff == "none"
+          ' "${EVIDENCE_DIR}/web-after-profile-reopen.json"
+
+      - name: Seal evidence
+        run: |
+          set -euo pipefail
+          jq -n \
+            --arg exact_head "$(cat "${EVIDENCE_DIR}/exact-head.txt")" \
+            '{
+              contract:"GODOT_AURELIAN_PERSISTENCE_OPTIONAL_HISTORY_DECOUPLING_V1",
+              exact_head:$exact_head,
+              schema_version:2,
+              state:"world_first_imperial_expansion_two_land_footprint",
+              claimed_lands:["east_route","north_ridge"],
+              imperial_expansion_target:"north_ridge",
+              first_imperial_expansion:"north_ridge_claimed",
+              optional_history:{imperial_crisis:"none",imperial_crisis_response:"none",first_rival_countermove_response:"none",first_frontier_payoff:"none"},
+              native_first_launch:"restored",
+              native_restart:"restored",
+              web_initial_load:"restored",
+              web_reload:"restored",
+              web_profile_reopen:"restored",
+              evidence_storage_seeding:true
+            }' > "${EVIDENCE_DIR}/result-manifest.json"
+          sha256sum \
+            "${EVIDENCE_DIR}/truthful-two-land-seed.json" \
+            "${EVIDENCE_DIR}/native-after-restart.json" \
+            "${EVIDENCE_DIR}/web-after-profile-reopen.json" \
+            "${EVIDENCE_DIR}/native-first-launch.log" \
+            "${EVIDENCE_DIR}/native-restart.log" \
+            "${EVIDENCE_DIR}/web-console.log" \
+            "${EVIDENCE_DIR}/result-manifest.json" \
+            | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
+          echo "GODOT_AURELIAN_PERSISTENCE_OPTIONAL_HISTORY_DECOUPLING_V1_QA=PASS"
+
+      - name: Upload exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-aurelian-persistence-optional-history-decoupling-v1-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/godot-aurelian-persistence-optional-history-decoupling-v1
+          if-no-files-found: error
+          retention-days: 7
