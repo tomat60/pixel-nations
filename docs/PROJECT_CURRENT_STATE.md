@@ -1,17 +1,40 @@
 # Pixel Nations Current State
 
-Status: BLOCKED
+Status: ACTIVE
 Updated: 2026-09-07
-Current state revision: 12.1
-Authority baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
+Current state revision: 12.2
+Authority baseline SHA: `564da86e29bc4c3a2ebf98ff3920d7db967de525`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B Core Playable Loop Consolidation is terminally rejected; further implementation is not authorized.
-Current milestone: terminal result `GODOT_AURELIAN_CORE_PLAYABLE_LOOP_CONSOLIDATION_REJECT` recorded for PR #587.
-Active execution issue: #586
-Next allowed action: issue #586 is closed as `not planned`; there is no active execution authority. Run a new whole-product portfolio gate and merge explicit authority before any further product implementation. Do not reopen PR #587 or issue #586.
+Current product phase: Phase B Default First Session v2.
+Current milestone: prove one export-safe, evidence-first default session from first claim to the two-land North Ridge payoff.
+Active execution issue: #589
+Next allowed action: after this authority update merges, perform implementation preflight for issue #589. Define and validate the export-safe default/regression split and the complete evidence path before runtime sequencing changes. Do not reopen PR #587 or issue #586.
+
+## Whole-product portfolio gate after the Phase B reject
+
+The terminal result on PR #587 triggered a mandatory portfolio review.
+
+Decision: authorize exactly one `Default First Session v2` candidate under issue #589.
+
+The largest product bottleneck remains the absence of one proven, coherent default first session. Technical reliability is the immediate enabling constraint because the rejected candidate selected different behavior in native and exported Web runtime, but a CI-only repair would create no player-visible delta.
+
+The candidate must therefore solve both together:
+
+- normal native and Web launch use the same default six-beat player path;
+- historical full-progression regression uses an explicit export-safe path present in the built artifact, never a host environment variable as its sole selector;
+- required video, six named key frames, deterministic action/state log, exact-head manifest and digests are fail-closed outputs, not optional review material;
+- the player reaches a visible two-land East Route plus North Ridge payoff through accepted mechanics only.
+
+This outranks Minimal Economy Foundation, more world/progression work, broad visual polish, and a standalone workflow repair. Those alternatives either deepen an unproven loop or add no direct player value.
+
+Godot's official feature-tag guidance confirms that custom features can be embedded through export presets and queried inside exported projects. A dedicated regression scene or another deterministic built-runtime mechanism remains acceptable if it proves the same separation more simply.
+
+No new economy, resources, workers, timers, queues, combat, diplomacy, governance, repeatable expansion system, Atlas/Sector representation, backend, accounts, multiplayer, payments, crypto, paid assets, or broad art pass is authorized.
+
+Acceptance and stop conditions live in issue #589. Authorize one complete candidate and at most one bounded correction after direct review. Green CI alone is not acceptance.
 
 ## Latest terminal result
 
@@ -246,7 +269,7 @@ Stop and re-run the portfolio gate if:
 
 ## Durable build sequence
 
-1. Core Playable Loop Consolidation - current.
+1. Default First Session v2 - current.
 2. Whole-product portfolio gate.
 3. Minimal Economy Foundation.
 4. Repeatable Expansion Loop.
@@ -278,11 +301,11 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 3. root `AGENTS.md`;
 4. `docs/GAME_STRATEGY_MASTER_PLAN.md`;
 5. accepted exact-head evidence and merged baselines;
-6. active execution issue #586 and its active product PR when one exists;
+6. active execution issue #589 and its active product PR when one exists;
 7. older issues, PRs, briefs and artifacts as history/reference only.
 
 ## Current stop condition
 
 Runtime coding for Phase B remains blocked until this authority transition is reviewed and merged.
 
-After merge, first action is implementation preflight: inspect the existing playable state graph and choose the shortest accepted path that proves the six-beat loop. No new mechanics before that preflight.
+After merge, first action is implementation preflight for issue #589: define the exact normal-input six-beat path, prove the export-safe default/regression selector, and make the evidence workflow fail closed before changing runtime sequencing. No new mechanics before that preflight.
