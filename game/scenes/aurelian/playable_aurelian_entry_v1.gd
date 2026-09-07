@@ -207,6 +207,7 @@ var intent_label: Label
 var controls_label: Label
 var automated_input_mode := false
 var automated_frame := 0
+var input_readiness_generation := 0
 var automated_direction := "expand"
 var automated_crisis_response := "shield_greenvale"
 var automated_rival_response := "stand_firm"
@@ -621,9 +622,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_up"):
 		_cycle_national_direction(-1)
+		_schedule_input_ready(entry_state)
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_down"):
 		_cycle_national_direction(1)
+		_schedule_input_ready(entry_state)
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_right"):
 		_right_entry()
@@ -2376,6 +2379,17 @@ func _apply_entry_state(state_name: String) -> void:
 		if not bool(save_result.get("ok", false)) and String(save_result.get("status", "")) != "unavailable":
 			push_error("AURELIAN_SESSION_V2_SAVE_FAILED=%s" % String(save_result.get("status", "unknown")))
 	print("PLAYABLE_AURELIAN_ENTRY_STATE=%s" % entry_state)
+	_schedule_input_ready(entry_state)
+
+func _schedule_input_ready(state_name: String) -> void:
+	input_readiness_generation += 1
+	call_deferred("_emit_input_ready_after_process_frame", state_name, input_readiness_generation)
+
+func _emit_input_ready_after_process_frame(state_name: String, generation: int) -> void:
+	await get_tree().process_frame
+	if generation != input_readiness_generation or entry_state != state_name:
+		return
+	print("PLAYABLE_AURELIAN_INPUT_READY=%s" % state_name)
 
 func _update_runtime_hud() -> void:
 	if layer_label == null:
