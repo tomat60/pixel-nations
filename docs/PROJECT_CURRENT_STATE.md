@@ -483,12 +483,13 @@ Stop and re-run the portfolio gate if:
 
 ## Durable build sequence
 
-1. Phase B Default First Session v4 - current.
-2. Minimal Economy Foundation.
-3. Repeatable Expansion Loop.
-4. Nation gameplay depth.
-5. Empire gameplay depth and scaling.
-6. Content scale, polish, UX, audio and performance.
+1. Exported Startup Ownership v1 architecture recovery - current.
+2. Default First Session, only after startup ownership passes and a new portfolio decision authorizes it.
+3. Minimal Economy Foundation.
+4. Repeatable Expansion Loop.
+5. Nation gameplay depth.
+6. Empire gameplay depth and scaling.
+7. Content scale, polish, UX, audio and performance.
 
 The portfolio gate may reorder later phases when direct evidence identifies a stronger bottleneck.
 
@@ -519,6 +520,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-All runtime and workflow coding is blocked until this Default First Session v4 authority is merged and issue #625 receives `IMPLEMENTATION_PREFLIGHT_PASS`.
+All runtime and workflow coding is blocked until the Exported Startup Ownership v1 authority is merged and issue #630 receives `IMPLEMENTATION_PREFLIGHT_PASS`.
 
-Do not reopen rejected or completed candidates. Do not add another debounce, delay, retry, readiness token or timing calibration. After preflight, the only authorized implementation is one fresh Default First Session v4 candidate with at most one bounded correction.
+Do not reopen rejected or completed candidates. Do not add another debounce, delay, retry, readiness token or timing calibration. After preflight, the only authorized implementation is one no-product-delta Exported Startup Ownership v1 candidate with at most one bounded deterministic correction.
