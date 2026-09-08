@@ -402,6 +402,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: godot-aurelian-strategic-readability-v1-${{ github.event.pull_request.head.sha || github.sha }}
-          path: evidence/godot-aurelian-default-first-session-v6
+          path: evidence/godot-aurelian-strategic-readability-v1
           if-no-files-found: error
           retention-days: 7
