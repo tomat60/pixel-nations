@@ -2,16 +2,40 @@
 
 Status: ACTIVE
 Updated: 2026-09-08
-Current state revision: 18.0
-Authority baseline SHA: `6731125bd671c085f6ceb696f6a87493d51a11fe`
+Current state revision: 19.0
+Authority baseline SHA: `f684c6afbc9df72f42f95ae6e220c954c6d57913`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authorized Aurelian Map and World Strategic Readability v1 product candidate.
-Current milestone: simplify Map and World into immediately distinct strategic views while preserving the accepted Default First Session v6 behavior and unchanged Village presentation.
-Active execution issue: #645
-Next allowed action: after this authority is merged, complete and record the mandatory implementation preflight for issue #645. Runtime and workflow coding remains blocked until `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen issue #640, PR #642, issue #638, issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: strategy gate after the terminal Aurelian Map and World Strategic Readability v1 rejection.
+Current milestone: select a materially different bounded response to the remaining strategic-readability blocker from fresh accepted and rejected evidence.
+Active execution issue: #649
+Next allowed action: complete the strategy-only whole-product portfolio gate in issue #649. No runtime or workflow implementation is authorized until a separate authority PR is merged and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen issue #645, PR #647, issue #644, issue #640, PR #642, issue #638, issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Terminal result: Aurelian Map and World Strategic Readability v1
+
+PR #647 is terminally classified as `GODOT_AURELIAN_MAP_WORLD_STRATEGIC_READABILITY_V1_REJECT` and closed without merge.
+
+Rejected exact head: `4c1d2d8a3e46d174e95b03b6e5bad0e956433956`.
+
+Exact-head evidence inspected:
+- focused run `34250858466`, job `102144711968`: PASS;
+- artifact `10066091024`, digest `sha256:d0b0620707886909eb5d5a75fe700d219ff2f0ca6d62ca07bdd3cf9fd0ea6595`;
+- all internal evidence SHA-256 entries passed;
+- exactly eight named 1440x900 Map and World frames were present;
+- the input-driven Web film was 64.08 seconds at 1440x900, VP8 and 25 fps;
+- native and Web each completed the same 35 normal inputs with 35 SEND and 35 ACK rows and the exact two-land final state;
+- native restart, Web reload and Web profile reopen passed;
+- Foundation, CI, Visual QA, Default First Session v6, Web Playability and P4-P11 exact-head regressions passed;
+- Village source files remained outside the diff.
+
+Terminal direct-review failure:
+- `03-map-imperial-heartland-1440x900.png` violates the explicit no-collision acceptance rule because the `EXPAND IMPERIAL HEARTLAND` in-world label visibly overlaps the Greenvale settlement mass;
+- the competing label and settlement anchor prevent the Map from reaching the required collision-free visual hierarchy;
+- the World treatment is materially cleaner, but this does not override the named frame-level failure.
+
+The single bounded correction was already consumed by the focused artifact upload-path fix. No further correction, retry or incremental polish is authorized on PR #647. Issue #645 is closed as not planned. The accepted Default First Session v6 product/runtime baseline remains unchanged. A fresh strategy-only portfolio gate is mandatory before any new implementation authority.
 
 ## Portfolio decision after Default First Session v6
 
@@ -650,6 +674,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-All runtime and workflow coding is blocked until the Exported Startup Ownership v1 authority is merged and issue #630 receives `IMPLEMENTATION_PREFLIGHT_PASS`.
+All runtime and workflow coding is blocked until a fresh strategy-only whole-product portfolio gate selects the next slice, a separate authority PR is merged, and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
 
-Do not reopen rejected or completed candidates. Do not add another debounce, delay, retry, readiness token or timing calibration. After preflight, the only authorized implementation is one no-product-delta Exported Startup Ownership v1 candidate with at most one bounded deterministic correction.
+Do not reopen or incrementally polish PR #647. Its single correction budget is exhausted. The next strategy must respond materially differently to the proven label-versus-settlement hierarchy failure while preserving the accepted Default First Session v6 product/runtime baseline and one physical Aurelian geography.
