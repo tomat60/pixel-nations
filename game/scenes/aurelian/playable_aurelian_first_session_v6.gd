@@ -24,31 +24,27 @@ func core_session_right_target_for_state(state_name: String) -> String:
 func _apply_entry_state(state_name: String) -> void:
 	_sanitize_core_session_state_for_persistence(state_name)
 	super(state_name)
-	_apply_controller_owned_strategic_copy(state_name)
 
-func controller_owned_strategic_view(state_name: String) -> String:
-	if state_name.begins_with("map_"):
-		return "map"
-	if state_name.begins_with("world_"):
-		return "world"
-	return "village"
-
-func _apply_controller_owned_strategic_copy(state_name: String) -> void:
-	var view := controller_owned_strategic_view(state_name)
-	if view == "village":
-		return
-	_hide_strategic_label_children(main_world_overlay_root)
-	_hide_strategic_label_children(main_overlay_root)
-	_hide_strategic_label_children(main_decision_overlay_root)
-	print("AURELIAN_CONTROLLER_OWNED_STRATEGIC_COPY=%s:%s" % [view, state_name])
-
-func _hide_strategic_label_children(root: Node) -> void:
-	if root == null:
-		return
-	for child: Node in root.get_children():
-		if child is Label3D:
-			child.visible = false
-		_hide_strategic_label_children(child)
+func controller_owned_strategic_copy_for_state(state_name: String) -> Dictionary:
+	match state_name:
+		"world_neutral":
+			return {"layer": "WORLD  |  WHY / DIRECTION", "intent": "Aurelian begins at Greenvale. Choose the first direction."}
+		"map_east_route_selected":
+			return {"layer": "MAP  |  WHERE", "intent": "East Route selected. Claim the first Aurelian land."}
+		"map_aurelian_imperial_heartland":
+			return {"layer": "MAP  |  WHERE", "intent": "Imperial heartland: Greenvale anchors the East Route."}
+		"map_first_imperial_expansion_two_lands_claimed":
+			return {"layer": "MAP  |  WHERE", "intent": "Aurelian lands: East Route and North Ridge."}
+		"world_first_city_recognized":
+			return {"layer": "WORLD  |  WHY / DIRECTION", "intent": "Greenvale is Aurelian's first city and strategic origin."}
+		"world_first_empire_proclaimed":
+			return {"layer": "WORLD  |  WHY / DIRECTION", "intent": "Aurelian is an empire. North Ridge is the next frontier."}
+		"world_first_imperial_expansion_north_ridge_direction":
+			return {"layer": "WORLD  |  WHY / DIRECTION", "intent": "Expand from Greenvale toward adjacent North Ridge."}
+		"world_first_imperial_expansion_two_land_footprint":
+			return {"layer": "WORLD  |  WHY / DIRECTION", "intent": "Aurelian now spans East Route and North Ridge."}
+		_:
+			return {}
 
 func _sanitize_core_session_state_for_persistence(state_name: String) -> void:
 	if not _core_session_active() or not IMPERIAL_EXPANSION_STATES.has(state_name):
@@ -93,6 +89,11 @@ func _right_entry() -> void:
 
 func _update_runtime_hud() -> void:
 	super()
+	var strategic_copy := controller_owned_strategic_copy_for_state(entry_state)
+	if not strategic_copy.is_empty() and layer_label != null and intent_label != null:
+		layer_label.text = String(strategic_copy.get("layer", layer_label.text))
+		intent_label.text = String(strategic_copy.get("intent", intent_label.text))
+		print("AURELIAN_CONTROLLER_OWNED_STRATEGIC_COPY=%s" % entry_state)
 	if not _core_session_active() or intent_label == null or controls_label == null:
 		return
 
