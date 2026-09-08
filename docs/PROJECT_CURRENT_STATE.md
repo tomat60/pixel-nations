@@ -2,16 +2,36 @@
 
 Status: ACTIVE
 Updated: 2026-09-08
-Current state revision: 13.5
-Authority baseline SHA: `56c7ee6e8da417b9bb4e06de305661f90b67f61e`
+Current state revision: 13.6
+Authority baseline SHA: `34afe6511e47ddd4f7ef3fe9a9caeeab5cdbcdff`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B input ownership and delivery architecture accepted; mandatory portfolio review.
-Current milestone: no active implementation candidate.
-Active execution issue: none.
-Next allowed action: run one strategy-only whole-product portfolio gate from the accepted v2 architecture evidence. Runtime and workflow implementation remain blocked until a separate authority is merged. Do not reopen PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: Phase B Default First Session v4 authorized.
+Current milestone: one fresh integrated, visible and export-safe Default First Session v4 candidate.
+Active execution issue: #625
+Next allowed action: after this authority is merged, complete and record the mandatory implementation preflight for issue #625. Runtime and workflow coding remains blocked until `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Portfolio decision after Input Ownership and Delivery Observability v2
+
+Issue #624 completed the mandatory strategy-only whole-product portfolio gate.
+
+Decision: authorize exactly one fresh `Default First Session v4` candidate under issue #625.
+
+Input Ownership and Delivery Observability v2 removed the immediate architecture blocker: three clean profiles delivered all 55 normal OS actions through verified Godot-window focus, monotonic public input receipts and expected transitions, while full persistence and Web regressions passed on the same accepted head.
+
+The biggest remaining bottleneck is again player-visible: Pixel Nations still lacks one accepted coherent default first session. Default First Session v4 now outranks Minimal Economy Foundation, Repeatable Expansion, more input architecture work and broad visual work. Economy or generalized expansion would deepen an unaccepted loop. More input proof adds no player value after v2 passed. Fresh evidence does not make visual composition the primary blocker.
+
+The candidate must present the same export-safe six-beat session in normal native and Web launch:
+
+`claim -> develop -> choose -> consequence -> grow -> expand`
+
+It must end at the visible East Route plus North Ridge two-land finale, preserve that finale across native restart, Web reload and profile reopen, and keep unplayed crisis, rival and frontier-payoff history truthfully `none`. It must reuse the accepted focus-ownership plus public-receipt evidence boundary.
+
+No schema version or field change, fabricated history, new mechanic, economy, resources, workers, timers, queues, combat, diplomacy, governance, third land, repeatable expansion framework, new asset or terrain family, world-scale extension, backend, account, multiplayer, payment, crypto, broad controller rewrite or broad visual polish is authorized.
+
+Before coding, preflight must name at most twelve exact files, define the fail-closed input/video/six-frame/log/manifest evidence and prove the default versus full-progression export split from fresh main. One complete candidate and at most one bounded deterministic correction are allowed. Green CI alone is not acceptance.
 
 ## Portfolio decision after Deferred Input Ready v1
 
@@ -437,7 +457,7 @@ Stop and re-run the portfolio gate if:
 
 ## Durable build sequence
 
-1. Phase B whole-product portfolio gate after accepted input ownership and delivery v2 - current.
+1. Phase B Default First Session v4 - current.
 2. Minimal Economy Foundation.
 3. Repeatable Expansion Loop.
 4. Nation gameplay depth.
@@ -473,6 +493,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-All runtime and workflow coding is blocked pending a fresh whole-product portfolio decision and a separately merged authority.
+All runtime and workflow coding is blocked until this Default First Session v4 authority is merged and issue #625 receives `IMPLEMENTATION_PREFLIGHT_PASS`.
 
-Do not reopen PR #622 or issue #620. Do not add another debounce, delay, retry, readiness token or timing calibration. The next action is strategy-only portfolio review of the accepted v2 architecture evidence.
+Do not reopen rejected or completed candidates. Do not add another debounce, delay, retry, readiness token or timing calibration. After preflight, the only authorized implementation is one fresh Default First Session v4 candidate with at most one bounded correction.
