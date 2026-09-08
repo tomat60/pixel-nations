@@ -2,16 +2,28 @@
 
 Status: ACTIVE
 Updated: 2026-09-08
-Current state revision: 13.6
-Authority baseline SHA: `34afe6511e47ddd4f7ef3fe9a9caeeab5cdbcdff`
+Current state revision: 13.7
+Authority baseline SHA: `770c0579e9b2b6eb9954b60dcd812006ffdae9b3`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B Default First Session v4 authorized.
-Current milestone: one fresh integrated, visible and export-safe Default First Session v4 candidate.
-Active execution issue: #625
-Next allowed action: after this authority is merged, complete and record the mandatory implementation preflight for issue #625. Runtime and workflow coding remains blocked until `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: strategy-only portfolio review after Default First Session v4 reject.
+Current milestone: select exactly one highest-value next move from fresh evidence.
+Active portfolio issue: #628
+Next allowed action: complete issue #628 as a strategy-only whole-product portfolio gate. Runtime, workflow, controller, persistence, visual and mechanic implementation is blocked until a separate authority decision is merged. Do not reopen PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Terminal result: Default First Session v4
+
+PR #627 is terminally classified as `GODOT_AURELIAN_DEFAULT_FIRST_SESSION_V4_REJECT` and closed without merge.
+
+The final exact head was `23ca998eb26810b5003efa6a19aab86f4ddc626e`. Initial Gate A run `34174855054` failed before product input because `xdpyinfo` was unavailable. Its artifact `10036926334` has digest `sha256:8222c96ceba354714be17491b9edaa02c75b0663c8cebf6fdba0327600558d99`.
+
+The single authorized correction added only the missing `x11-utils` package. Corrected run `34175391262`, job `101903649523`, produced artifact `10037096621` with digest `sha256:74e30e281bae5f42a4f087f4437a633e252d31ad62c23ada56896b4aaa044e2d`.
+
+On the corrected head, contract validation, Godot import, Linux export, default Web export and the separate full-progression Web export completed. The launched default native runtime showed a process and window but emitted no `PLAYABLE_AURELIAN_ENTRY_READY`, no public input receipt and no state transition before the fail-closed readiness assertion. The run therefore produced no normal-input traversal, restart proof, Web film, six-frame set or final cross-profile persistence evidence.
+
+The correction budget is exhausted. No further retry, delay, driver experiment or product edit is authorized on PR #627. Issue #625 is closed as not planned. Issue #628 is the mandatory strategy-only whole-product portfolio gate.
 
 ## Portfolio decision after Input Ownership and Delivery Observability v2
 
