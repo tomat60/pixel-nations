@@ -10,7 +10,7 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: strategy gate after successful Exported Startup Ownership v1 architecture recovery.
 Current milestone: select the highest-value next whole-product slice from fresh accepted evidence.
-Active execution issue: none
+Active execution issue: #634
 Next allowed action: run one strategy-only whole-product portfolio gate. No runtime or workflow implementation is authorized until a separate authority PR is merged and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
 
 ## Terminal result: Exported Startup Ownership v1
