@@ -250,7 +250,20 @@ var imperial_expansion_presentation: Node3D
 var north_ridge_outpost_presentation: Node3D
 var north_ridge_specialization_presentation: Node3D
 
+func _startup_identity(phase: String) -> void:
+	var current_scene := get_tree().current_scene
+	var current_scene_name := "none" if current_scene == null else String(current_scene.name)
+	var script_path := "none"
+	var attached_script := get_script()
+	if attached_script != null:
+		script_path = String(attached_script.resource_path)
+	print("AURELIAN_STARTUP_PHASE=%s node=%s scene_file=%s script=%s tree_current=%s" % [phase, name, scene_file_path, script_path, current_scene_name])
+
+func _enter_tree() -> void:
+	_startup_identity("enter_tree")
+
 func _ready() -> void:
+	_startup_identity("ready_enter")
 	if DisplayServer.get_name() == "headless" and not ResourceLoader.exists(GLB_PATH):
 		print("PLAYABLE_AURELIAN_HEADLESS_SMOKE=PASS_NO_RENDER_ASSET")
 		get_tree().quit(0)
@@ -478,6 +491,7 @@ func _ready() -> void:
 	set_process_unhandled_input(true)
 	if automated_input_mode:
 		set_process(true)
+	_startup_identity("public_ready")
 	print("PLAYABLE_AURELIAN_ENTRY_READY=%s" % entry_state)
 	if not evidence_dir.is_empty():
 		call_deferred("_capture_playable_still")
