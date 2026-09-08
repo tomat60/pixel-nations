@@ -1,0 +1,188 @@
+name: Godot Aurelian Exported Startup Ownership V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/scenes/aurelian/playable_aurelian_entry_v1.gd"
+      - ".github/scripts/aurelian-exported-startup-ownership-v1.sh"
+      - ".github/workflows/godot-aurelian-exported-startup-ownership-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-aurelian-exported-startup-ownership-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7.1"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EVIDENCE_DIR: "evidence/godot-aurelian-exported-startup-ownership-v1"
+
+jobs:
+  prove-exported-startup-ownership:
+    name: Compare explicit native and default exported startup
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact scope and startup identity
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}"/{identity,explicit-native,default-exported} game/build/linux
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+            git diff --name-only "${{ github.event.pull_request.base.sha }}...HEAD" | tee "${EVIDENCE_DIR}/changed-files.txt"
+            test "$(wc -l < "${EVIDENCE_DIR}/changed-files.txt")" = "3"
+            grep -Fx "game/scenes/aurelian/playable_aurelian_entry_v1.gd" "${EVIDENCE_DIR}/changed-files.txt"
+            grep -Fx ".github/scripts/aurelian-exported-startup-ownership-v1.sh" "${EVIDENCE_DIR}/changed-files.txt"
+            grep -Fx ".github/workflows/godot-aurelian-exported-startup-ownership-v1.yml" "${EVIDENCE_DIR}/changed-files.txt"
+          fi
+          grep -F 'run/main_scene="res://scenes/aurelian/playable_aurelian_entry_v1.tscn"' game/project.godot
+          grep -F '[node name="PlayableAurelianEntryV1" type="Node3D"]' game/scenes/aurelian/playable_aurelian_entry_v1.tscn
+          grep -F 'path="res://scenes/aurelian/playable_aurelian_entry_v1.gd"' game/scenes/aurelian/playable_aurelian_entry_v1.tscn
+          grep -F 'name="Linux/X11"' game/export_presets.cfg
+          grep -F 'export_path="build/linux/pixel-nations-foundation.x86_64"' game/export_presets.cfg
+          {
+            printf 'main_scene=%s\n' 'res://scenes/aurelian/playable_aurelian_entry_v1.tscn'
+            printf 'scene_root=%s\n' 'PlayableAurelianEntryV1'
+            printf 'controller_script=%s\n' 'res://scenes/aurelian/playable_aurelian_entry_v1.gd'
+            printf 'export_preset=%s\n' 'Linux/X11'
+          } | tee "${EVIDENCE_DIR}/identity/selected-startup.txt"
+          sha256sum game/project.godot game/export_presets.cfg game/scenes/aurelian/playable_aurelian_entry_v1.tscn \
+            game/scenes/aurelian/playable_aurelian_entry_v1.gd | tee "${EVIDENCE_DIR}/identity/source-sha256sums.txt"
+
+      - name: Install pinned Godot runtime and export templates
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends unzip libgl1 xvfb xdotool x11-utils >/dev/null
+          mkdir -p /tmp/godot /tmp/godot-templates
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz" \
+            -o /tmp/godot/templates.tpz
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          unzip -q /tmp/godot/templates.tpz -d /tmp/godot-templates
+          mkdir -p "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          cp -R /tmp/godot-templates/templates/. "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Import and export exact product head
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 \
+            > "${EVIDENCE_DIR}/export-linux.stdout.log" 2> "${EVIDENCE_DIR}/export-linux.stderr.log"
+          test -x game/build/linux/pixel-nations-foundation.x86_64
+          test -s game/build/linux/pixel-nations-foundation.pck
+          sha256sum game/build/linux/pixel-nations-foundation.x86_64 game/build/linux/pixel-nations-foundation.pck \
+            | tee "${EVIDENCE_DIR}/identity/export-sha256sums.txt"
+
+      - name: Compare startup ownership and one normal input
+        run: |
+          set -euo pipefail
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1440x900x24 > "${EVIDENCE_DIR}/xvfb.log" 2>&1 &
+          XVFB_PID=$!
+          trap 'kill "$XVFB_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 80); do
+            xdpyinfo -display :99 >/dev/null 2>&1 && break
+            sleep 0.25
+          done
+          xdpyinfo -display :99 >/dev/null
+
+          run_route() {
+            local route="$1" home="$2" workdir="$3"
+            shift 3
+            local route_dir="${EVIDENCE_DIR}/${route}"
+            mkdir -p "$route_dir" "$home"
+            (
+              cd "$workdir"
+              exec env -u AURELIAN_FULL_PROGRESSION -u AURELIAN_PLAYABLE_EVIDENCE_STATE -u AURELIAN_CAPTURE_PLAYABLE_ENTRY \
+                HOME="$home" stdbuf -oL -eL "$@" \
+                > >(tee "$GITHUB_WORKSPACE/$route_dir/runtime.stdout.log" >> "$GITHUB_WORKSPACE/$route_dir/runtime.log") \
+                2> >(tee "$GITHUB_WORKSPACE/$route_dir/runtime.stderr.log" >> "$GITHUB_WORKSPACE/$route_dir/runtime.log" >&2)
+            ) &
+            local app_pid=$!
+            printf 'pid=%s\nroute=%s\nworkdir=%s\n' "$app_pid" "$route" "$workdir" | tee "$route_dir/process.txt"
+            local window_id=""
+            for attempt in $(seq 1 120); do
+              window_id="$(xdotool search --onlyvisible --name 'Pixel Nations' 2>/dev/null | head -n1 || true)"
+              [ -n "$window_id" ] && break
+              kill -0 "$app_pid" 2>/dev/null || break
+              sleep 0.25
+            done
+            test -n "$window_id"
+            test "$(xdotool search --onlyvisible --name 'Pixel Nations' 2>/dev/null | wc -l)" = "1"
+            printf 'window_id=%s\n' "$window_id" | tee -a "$route_dir/process.txt"
+            AURELIAN_ROUTE="$route" AURELIAN_WINDOW_ID="$window_id" AURELIAN_LOG="$route_dir/runtime.log" \
+              AURELIAN_APP_PID="$app_pid" AURELIAN_TRACE="$route_dir/driver.log" \
+              bash .github/scripts/aurelian-exported-startup-ownership-v1.sh
+            kill "$app_pid" 2>/dev/null || true
+            set +e
+            wait "$app_pid"
+            local exit_code=$?
+            set -e
+            printf 'classification=steward_stop_after_pass\nexit_code=%s\n' "$exit_code" | tee "$route_dir/process-exit.txt"
+            grep -F "route=${route} status=PASS actions=1 receipts=1 final_state=world_trade_selected" "$route_dir/driver.log"
+          }
+
+          run_route explicit-native "${RUNNER_TEMP}/startup-explicit-home" "$GITHUB_WORKSPACE" \
+            "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+            res://scenes/aurelian/playable_aurelian_entry_v1.tscn
+          run_route default-exported "${RUNNER_TEMP}/startup-exported-home" "$GITHUB_WORKSPACE/game/build/linux" \
+            ./pixel-nations-foundation.x86_64 --audio-driver Dummy --rendering-method gl_compatibility
+
+      - name: Validate fail-closed comparison manifest
+        run: |
+          set -euo pipefail
+          for route in explicit-native default-exported; do
+            test "$(grep -c ' status=SEND ' "${EVIDENCE_DIR}/${route}/driver.log")" = "1"
+            test "$(grep -c 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/${route}/runtime.log")" = "1"
+            grep -F 'PLAYABLE_AURELIAN_ENTRY_STATE=world_trade_selected' "${EVIDENCE_DIR}/${route}/runtime.log"
+            grep -F 'classification=steward_stop_after_pass' "${EVIDENCE_DIR}/${route}/process-exit.txt"
+            if grep -F ' status=FAIL ' "${EVIDENCE_DIR}/${route}/driver.log"; then exit 1; fi
+          done
+          EXACT_HEAD="$(cat "${EVIDENCE_DIR}/exact-head.txt")"
+          cat > "${EVIDENCE_DIR}/result-manifest.json" <<EOF
+          {
+            "contract": "GODOT_AURELIAN_EXPORTED_STARTUP_OWNERSHIP_V1",
+            "exact_head": "${EXACT_HEAD}",
+            "routes": ["explicit-native", "default-exported"],
+            "main_scene": "res://scenes/aurelian/playable_aurelian_entry_v1.tscn",
+            "controller_script": "res://scenes/aurelian/playable_aurelian_entry_v1.gd",
+            "input_mode": "one_focus_confirmed_normal_os_keyboard_action",
+            "expected_receipt": "1:ui_accept:world_neutral",
+            "expected_first_state": "world_trade_selected",
+            "product_behavior_changed": false
+          }
+          EOF
+          find "${EVIDENCE_DIR}" -type f ! -name evidence-sha256sums.txt -print0 | sort -z | xargs -0 sha256sum \
+            | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
+          echo "GODOT_AURELIAN_EXPORTED_STARTUP_OWNERSHIP_V1=PASS"
+
+      - name: Upload exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-aurelian-exported-startup-ownership-v1-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 7
