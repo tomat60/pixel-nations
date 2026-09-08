@@ -1,17 +1,17 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-09-07
-Current state revision: 13.4
-Authority baseline SHA: `abf9e3275c1334b4a859bdeea8ff587141098ddb`
+Updated: 2026-09-08
+Current state revision: 13.5
+Authority baseline SHA: `56c7ee6e8da417b9bb4e06de305661f90b67f61e`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Phase B Input Ownership and Delivery Observability v2 recovery authorized.
-Current milestone: run exactly one clean four-file, no-product-delta input-boundary proof.
-Active execution issue: #620
-Next allowed action: after this authority is merged, complete implementation preflight for issue #620 and run exactly one bounded Input Ownership and Delivery Observability v2 candidate. Do not reopen PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: Phase B input ownership and delivery architecture accepted; mandatory portfolio review.
+Current milestone: no active implementation candidate.
+Active execution issue: none.
+Next allowed action: run one strategy-only whole-product portfolio gate from the accepted v2 architecture evidence. Runtime and workflow implementation remain blocked until a separate authority is merged. Do not reopen PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
 
 ## Portfolio decision after Deferred Input Ready v1
 
@@ -42,6 +42,31 @@ V2 must start from current `main` and declare exactly four paths from its first 
 This outranks a different input architecture because current evidence supports the focus-and-receipt boundary. It outranks shortening the session because that can hide rather than solve delivery loss. It outranks deeper product work and broad visual work because both would build on an unproven default-session evidence path.
 
 No timing token, delay calibration, debounce, repeated action, blind retry, `Input.parse_input_event()`, direct state mutation, product, persistence-schema, UI, visual, camera, asset, mechanic or economy change is authorized. One bounded deterministic correction is allowed. A PASS is enabling architecture evidence only and does not authorize another Default First Session implementation.
+
+## Terminal result: Input Ownership and Delivery Observability v2
+
+PR #622 is accepted and merged.
+
+Terminal classification: `GODOT_AURELIAN_INPUT_OWNERSHIP_DELIVERY_OBSERVABILITY_V2_PASS`.
+
+Accepted exact head: `1f50450856ce020a61d35360fe893832ed0a500b`.
+Merged main: `56c7ee6e8da417b9bb4e06de305661f90b67f61e`.
+
+Accepted exact-head evidence:
+- focused run `34171652612`: PASS;
+- focused artifact `10035910943`, digest `sha256:9b7bc9fe3bc1dba7ac6e09bcede5507a2ad68f10986dfc5d47aeaa5087a6e3ab`;
+- direct review confirmed the v2 contract identity, exact four-file scope, valid internal SHA-256 hashes, and three clean profiles with 55 SEND, 55 ACK and 55 monotonic public runtime receipts each;
+- every focused profile had zero FAIL records and ended at the two-land finale;
+- Session Persistence v2 run `34171652615`: PASS;
+- persistence artifact `10036020672`, digest `sha256:998639d04d6face13800d9ba96c5fdda92ce94a5d6bfa2045866f4e185fd0d58`;
+- direct persistence review confirmed 105 frames at 1440x900, a 204.16-second input-driven video inside the authorized 110..300 bound, valid hashes, native restart, Web reload and profile reopen;
+- Web Playability run `34171652618`: PASS, artifact `10036033938`, digest `sha256:f183a84730041b4c04106ceb0afbcb3998ee9e4f9c1947eb30c673b1b859be6f`;
+- Playable Entry run `34171652624`, Foundation, CI, Visual QA and P4 through P11 continuity: PASS;
+- Vercel exact-head deployment: Ready.
+
+The one correction repaired only the stale v1 manifest identity. The candidate made no player-visible product change. Issue #620 is closed as completed.
+
+This PASS validates the focus ownership plus public runtime receipt architecture. It does not authorize another Default First Session implementation. A fresh whole-product portfolio decision and separately merged authority are mandatory before more runtime or workflow coding.
 
 ## Terminal result: Input Ownership and Delivery Observability v1
 
@@ -412,7 +437,7 @@ Stop and re-run the portfolio gate if:
 
 ## Durable build sequence
 
-1. Phase B Input Ownership and Delivery Observability v2 recovery - current.
+1. Phase B whole-product portfolio gate after accepted input ownership and delivery v2 - current.
 2. Minimal Economy Foundation.
 3. Repeatable Expansion Loop.
 4. Nation gameplay depth.
@@ -448,6 +473,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-All runtime and workflow coding is blocked until this v2 authority is merged and issue #620 receives an implementation preflight pass.
+All runtime and workflow coding is blocked pending a fresh whole-product portfolio decision and a separately merged authority.
 
-Do not add another debounce, delay, retry, readiness token, timing calibration, or correction to PR #617. The only next candidate is the exact four-file Input Ownership and Delivery Observability v2 proof under issue #620.
+Do not reopen PR #622 or issue #620. Do not add another debounce, delay, retry, readiness token or timing calibration. The next action is strategy-only portfolio review of the accepted v2 architecture evidence.
