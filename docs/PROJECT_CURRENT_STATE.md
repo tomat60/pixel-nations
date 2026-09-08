@@ -2,16 +2,42 @@
 
 Status: ACTIVE
 Updated: 2026-09-08
-Current state revision: 19.0
-Authority baseline SHA: `f684c6afbc9df72f42f95ae6e220c954c6d57913`
+Current state revision: 20.0
+Authority baseline SHA: `68e127e081b6295bc5bed48c8adbc9a6f883504c`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy gate after the terminal Aurelian Map and World Strategic Readability v1 rejection.
-Current milestone: select a materially different bounded response to the remaining strategic-readability blocker from fresh accepted and rejected evidence.
-Active execution issue: #649
-Next allowed action: complete the strategy-only whole-product portfolio gate in issue #649. No runtime or workflow implementation is authorized until a separate authority PR is merged and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen issue #645, PR #647, issue #644, issue #640, PR #642, issue #638, issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: authorized Aurelian Strategic Overlay Separation v1 product candidate.
+Current milestone: separate Map and World strategic meaning from physical settlement geometry through a sparse collision-free screen-space overlay while preserving the accepted Default First Session v6.
+Active execution issue: #650
+Next allowed action: after this authority is merged, record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #650, then create exactly one fresh bounded implementation candidate from accepted `main`. Runtime and workflow coding remains blocked until that preflight is recorded. Do not reopen or reuse PR #647.
+
+## Portfolio decision after Aurelian Strategic Readability v1
+
+Issue #649 completed the mandatory strategy-only whole-product portfolio gate.
+
+Decision: authorize exactly one fresh bounded `Aurelian Strategic Overlay Separation v1` candidate under issue #650.
+
+Default First Session v6 already proves the complete 35-action native/Web loop, the East Route plus North Ridge finale and cross-profile persistence. PR #647 also proved that the gameplay can survive readability-focused work, but direct review rejected its world-space strategic-label technique when `EXPAND IMPERIAL HEARTLAND` collided with the Greenvale settlement mass. The exhausted correction budget makes another position, camera or visibility micro-adjustment impermissible.
+
+The selected response changes information architecture. Strategic text moves into a dedicated sparse screen-space overlay that is structurally separate from physical settlement, route and ownership geometry:
+
+- Village = HOW and remains visually and behaviorally unchanged;
+- Map = WHERE and exposes ownership, route/network, selected objective and frontier through a compact overlay;
+- World = WHY / direction and exposes polity hierarchy, capital identity and next direction through a separate overlay hierarchy;
+- one physical Aurelian geography, accepted states, camera controls, 35-action v6 path and persistence remain unchanged;
+- in-world strategic text over settlement masses is prohibited.
+
+This candidate outranks structural scene recomposition because the proven failure is semantic-layer collision and the overlay is smaller, more reversible and easier to validate. It outranks onboarding because v6 already proves the action boundary. It outranks Minimal Economy Foundation and Repeatable Expansion because those would deepen unreadable strategic geography.
+
+The candidate must start from accepted `main`. It must not reopen, cherry-pick or incrementally patch PR #647, reproduce its world-space label technique, or depend on its rejected camera and visibility tuning.
+
+Issue #650 locks the exact five-file preflight ceiling, exact eight 1440x900 Map/World frames, normal-input native/Web v6 runs, 35 SEND/ACK/event/state boundaries per runtime, Web film, structural overlay ownership proof, unchanged Village proof, persistence, manifests, SHA-256, direct visual review and historical regressions. Green CI alone is not acceptance.
+
+No new geography, land, GLB, terrain or asset family, mechanic, state, persistence field, economy, resource, worker, timer, queue, combat, diplomacy, governance, repeatable expansion, backend, account, multiplayer, payment, crypto, app shell, broad art polish, paid tool or MAX is authorized.
+
+One complete candidate and at most one bounded correction after direct review are permitted. Any residual collision, overlay obstruction of physical geography, Village change, gameplay/persistence regression, scope expansion or need to reuse PR #647 micro-polish requires terminal `GODOT_AURELIAN_STRATEGIC_OVERLAY_SEPARATION_V1_REJECT`. Otherwise terminal `GODOT_AURELIAN_STRATEGIC_OVERLAY_SEPARATION_V1_PASS`.
 
 ## Terminal result: Aurelian Map and World Strategic Readability v1
 
