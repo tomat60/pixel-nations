@@ -10,7 +10,7 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: strategy-only portfolio review after Default First Session v4 reject.
 Current milestone: select exactly one highest-value next move from fresh evidence.
-Active portfolio issue: #628
+Active execution issue: #628
 Next allowed action: complete issue #628 as a strategy-only whole-product portfolio gate. Runtime, workflow, controller, persistence, visual and mechanic implementation is blocked until a separate authority decision is merged. Do not reopen PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
 
 ## Terminal result: Default First Session v4
