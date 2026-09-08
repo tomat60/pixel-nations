@@ -175,9 +175,9 @@ func _walk(root: Node) -> Array[Node]:
 	var result: Array[Node] = []
 	var pending: Array[Node] = [root]
 	while not pending.is_empty():
-		var node := pending.pop_back()
+		var node: Node = pending.pop_back()
 		result.append(node)
-		for child in node.get_children():
+		for child: Node in node.get_children():
 			pending.append(child)
 	return result
 
