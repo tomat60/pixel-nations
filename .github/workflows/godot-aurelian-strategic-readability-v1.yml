@@ -1,0 +1,407 @@
+name: Godot Aurelian Map and World Strategic Readability v1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/export_presets.cfg"
+      - "game/scenes/aurelian/aurelian_session_persistence_v2.gd"
+      - "game/scenes/aurelian/playable_aurelian_first_session_v6.gd"
+      - "game/scenes/aurelian/playable_aurelian_strategic_readability_v1.gd"
+      - "game/scenes/aurelian/playable_aurelian_entry_v1.tscn"
+      - "game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
+      - "game/tests/aurelian_default_first_session_v6_test.gd"
+      - "game/tests/aurelian_strategic_readability_v1_test.gd"
+      - "game/tests/aurelian_first_imperial_expansion_v1_test.gd"
+      - "game/tests/aurelian_session_persistence_v2_test.gd"
+      - ".github/workflows/godot-aurelian-strategic-readability-v1.yml"
+      - ".github/workflows/godot-aurelian-persistence-optional-history-decoupling-v1.yml"
+      - ".github/workflows/godot-web-export-playability-v1.yml"
+      - ".github/workflows/godot-aurelian-session-persistence-v2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-aurelian-strategic-readability-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7.1"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  EVIDENCE_DIR: "evidence/godot-aurelian-strategic-readability-v1"
+
+jobs:
+  prove-strategic-readability:
+    name: Prove Map and World strategic readability
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact head and contract
+        run: |
+          set -euo pipefail
+          mkdir -p "${EVIDENCE_DIR}/stills" "${EVIDENCE_DIR}/native" "${EVIDENCE_DIR}/web" "${EVIDENCE_DIR}/video-tmp" game/build/linux game/build/web-default game/build/web-regression
+          git rev-parse HEAD | tee "${EVIDENCE_DIR}/exact-head.txt"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          fi
+          cp game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json "${EVIDENCE_DIR}/playable-manifest.json"
+
+      - name: Install pinned runtime and browser tools
+        timeout-minutes: 9
+        run: |
+          set -euo pipefail
+          npm ci
+          npx playwright install chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends unzip libgl1 imagemagick ffmpeg xvfb xdotool x11-utils >/dev/null
+          mkdir -p /tmp/godot /tmp/godot-templates
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz" \
+            -o /tmp/godot/templates.tpz
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "${GODOT_BIN}"
+          unzip -q /tmp/godot/templates.tpz -d /tmp/godot-templates
+          mkdir -p "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          cp -R /tmp/godot-templates/templates/. "${HOME}/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          "${GODOT_BIN}" --version | tee "${EVIDENCE_DIR}/godot-version.txt"
+
+      - name: Validate contract and export isolated runtimes
+        timeout-minutes: 9
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game --editor --quit > "${EVIDENCE_DIR}/godot-import.log" 2>&1
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "${EVIDENCE_DIR}/godot-import.log"; then
+            cat "${EVIDENCE_DIR}/godot-import.log"
+            exit 1
+          fi
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_default_first_session_v6_test.gd 2>&1 | tee "${EVIDENCE_DIR}/default-first-session-v6-test.log"
+          grep -F "AURELIAN_DEFAULT_FIRST_SESSION_V6_TEST: PASS" "${EVIDENCE_DIR}/default-first-session-v6-test.log"
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_strategic_readability_v1_test.gd 2>&1 | tee "${EVIDENCE_DIR}/strategic-readability-test.log"
+          grep -F "AURELIAN_STRATEGIC_READABILITY_V1_TEST: PASS" "${EVIDENCE_DIR}/strategic-readability-test.log"
+          git diff --exit-code f684c6afbc9df72f42f95ae6e220c954c6d57913 HEAD -- game/scenes/aurelian/production_village_v1.gd game/scenes/aurelian/production_village_v1_state_manifest.json
+          grep -F 'custom_features="aurelian_full_progression"' game/export_presets.cfg
+          "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/export-linux.log" 2>&1
+          "${GODOT_BIN}" --headless --path game --export-release "Web" build/web-default/index.html > "${EVIDENCE_DIR}/export-default-web.log" 2>&1
+          "${GODOT_BIN}" --headless --path game --export-release "Web Full Progression Regression" build/web-regression/index.html > "${EVIDENCE_DIR}/export-regression-web.log" 2>&1
+          test -x game/build/linux/pixel-nations-foundation.x86_64
+          for file in game/build/web-default/index.html game/build/web-default/index.pck game/build/web-default/index.wasm game/build/web-regression/index.html game/build/web-regression/index.pck game/build/web-regression/index.wasm; do test -s "$file"; done
+          DEFAULT_PCK="$(sha256sum game/build/web-default/index.pck | cut -d' ' -f1)"
+          REGRESSION_PCK="$(sha256sum game/build/web-regression/index.pck | cut -d' ' -f1)"
+          test "$DEFAULT_PCK" != "$REGRESSION_PCK"
+          sha256sum game/build/linux/* game/build/web-default/* game/build/web-regression/* | tee "${EVIDENCE_DIR}/export-sha256sums.txt"
+
+      - name: Drive native runtime with receipt-gated normal input and restart
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          export DISPLAY=:99
+          export HOME="${RUNNER_TEMP}/aurelian-default-native-home"
+          mkdir -p "$HOME"
+          Xvfb :99 -screen 0 1440x900x24 > "${EVIDENCE_DIR}/native/xvfb.log" 2>&1 &
+          for attempt in $(seq 1 80); do
+            xdpyinfo -display :99 >/dev/null 2>&1 && break
+            sleep 0.25
+          done
+          xdpyinfo -display :99 >/dev/null
+          (
+            exec env -u AURELIAN_FULL_PROGRESSION -u AURELIAN_PLAYABLE_EVIDENCE_STATE -u AURELIAN_CAPTURE_PLAYABLE_ENTRY \
+              HOME="$HOME" stdbuf -oL -eL game/build/linux/pixel-nations-foundation.x86_64 \
+              > >(tee "${EVIDENCE_DIR}/native/first-session.stdout.log" >> "${EVIDENCE_DIR}/native/first-session.log") \
+              2> >(tee "${EVIDENCE_DIR}/native/first-session.stderr.log" >> "${EVIDENCE_DIR}/native/first-session.log" >&2)
+          ) &
+          APP_PID=$!
+          WINDOW_ID="$(xdotool search --sync --onlyvisible --name 'Pixel Nations' | head -n1)"
+          for attempt in $(seq 1 80); do
+            grep -Fq "PLAYABLE_AURELIAN_ENTRY_READY=" "${EVIDENCE_DIR}/native/first-session.log" && break
+            sleep 0.25
+          done
+          grep -F "PLAYABLE_AURELIAN_ENTRY_READY=" "${EVIDENCE_DIR}/native/first-session.log"
+          cat > "${EVIDENCE_DIR}/sequence.txt" <<'SEQUENCE'
+          Return|ui_accept|world_trade_selected|PLAYABLE_AURELIAN_ENTRY_STATE=world_trade_selected
+          Right|ui_right|map_east_route_selected|PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_selected
+          Return|ui_accept|map_east_route_claimed|PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_claimed
+          Right|ui_right|village_claimed|PLAYABLE_AURELIAN_ENTRY_STATE=village_claimed
+          Return|ui_accept|village_founded|PLAYABLE_AURELIAN_ENTRY_STATE=village_founded
+          Return|ui_accept|village_developed|PLAYABLE_AURELIAN_ENTRY_STATE=village_developed
+          Left|ui_left|map_east_route_claimed|PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_claimed
+          Return|ui_accept|map_east_route_connected|PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_connected
+          Right|ui_right|village_developed|PLAYABLE_AURELIAN_ENTRY_STATE=village_developed
+          Return|ui_accept|village_trade_dispatched|PLAYABLE_AURELIAN_ENTRY_STATE=village_trade_dispatched
+          Left|ui_left|map_east_route_in_use|PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_in_use
+          Right|ui_right|village_trade_dispatched|PLAYABLE_AURELIAN_ENTRY_STATE=village_trade_dispatched
+          Return|ui_accept|village_city_chartered|PLAYABLE_AURELIAN_ENTRY_STATE=village_city_chartered
+          Left|ui_left|map_greenvale_city|PLAYABLE_AURELIAN_ENTRY_STATE=map_greenvale_city
+          Left|ui_left|world_first_city_recognized|PLAYABLE_AURELIAN_ENTRY_STATE=world_first_city_recognized
+          Return|ui_accept|world_first_nation_founded|PLAYABLE_AURELIAN_ENTRY_STATE=world_first_nation_founded
+          Down|ui_down|world_first_nation_founded|AURELIAN_NATIONAL_DIRECTION_INSPECT=EXPAND
+          Down|ui_down|world_first_nation_founded|AURELIAN_NATIONAL_DIRECTION_INSPECT=FRONTIER
+          Up|ui_up|world_first_nation_founded|AURELIAN_NATIONAL_DIRECTION_INSPECT=EXPAND
+          Return|ui_accept|world_first_nation_founded|AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=EXPAND
+          Right|ui_right|map_aurelian_homeland|PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_homeland
+          Right|ui_right|village_greenvale_capital|PLAYABLE_AURELIAN_ENTRY_STATE=village_greenvale_capital
+          Return|ui_accept|village_national_mandate_started|PLAYABLE_AURELIAN_ENTRY_STATE=village_national_mandate_started
+          Left|ui_left|map_national_mandate_active|PLAYABLE_AURELIAN_ENTRY_STATE=map_national_mandate_active
+          Right|ui_right|village_national_mandate_started|PLAYABLE_AURELIAN_ENTRY_STATE=village_national_mandate_started
+          Return|ui_accept|village_aurelian_imperial_capital|PLAYABLE_AURELIAN_ENTRY_STATE=village_aurelian_imperial_capital
+          Left|ui_left|map_aurelian_imperial_heartland|PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_imperial_heartland
+          Left|ui_left|world_first_empire_proclaimed|PLAYABLE_AURELIAN_ENTRY_STATE=world_first_empire_proclaimed
+          Return|ui_accept|world_first_imperial_expansion_north_ridge_direction|PLAYABLE_AURELIAN_ENTRY_STATE=world_first_imperial_expansion_north_ridge_direction
+          Right|ui_right|map_first_imperial_expansion_north_ridge_available|PLAYABLE_AURELIAN_ENTRY_STATE=map_first_imperial_expansion_north_ridge_available
+          Return|ui_accept|map_first_imperial_expansion_north_ridge_inspected|PLAYABLE_AURELIAN_ENTRY_STATE=map_first_imperial_expansion_north_ridge_inspected
+          Return|ui_accept|map_first_imperial_expansion_two_lands_claimed|PLAYABLE_AURELIAN_ENTRY_STATE=map_first_imperial_expansion_two_lands_claimed
+          Right|ui_right|village_first_imperial_expansion_greenvale_capital_two_lands|PLAYABLE_AURELIAN_ENTRY_STATE=village_first_imperial_expansion_greenvale_capital_two_lands
+          Left|ui_left|map_first_imperial_expansion_two_lands_claimed|PLAYABLE_AURELIAN_ENTRY_STATE=map_first_imperial_expansion_two_lands_claimed
+          Left|ui_left|world_first_imperial_expansion_two_land_footprint|PLAYABLE_AURELIAN_ENTRY_STATE=world_first_imperial_expansion_two_land_footprint
+          SEQUENCE
+          test "$(grep -c '^[A-Za-z]' "${EVIDENCE_DIR}/sequence.txt")" -eq 35
+          : > "${EVIDENCE_DIR}/native/action-delivery.log"
+          RECEIPT_GENERATION=0
+          CURRENT_STATE=world_neutral
+          while IFS='|' read -r key action expected_state expected_event; do
+            RECEIPT_GENERATION=$((RECEIPT_GENERATION + 1))
+            before_receipts="$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log" || true)"
+            before_event="$(grep -Fc "$expected_event" "${EVIDENCE_DIR}/native/first-session.log" || true)"
+            state_token="PLAYABLE_AURELIAN_ENTRY_STATE=${expected_state}"
+            before_state="$(grep -Fc "$state_token" "${EVIDENCE_DIR}/native/first-session.log" || true)"
+            receipt_token="PLAYABLE_AURELIAN_INPUT_RECEIPT=${RECEIPT_GENERATION}:${action}:${CURRENT_STATE}"
+            xdotool windowfocus --sync "$WINDOW_ID"
+            test "$(xdotool getwindowfocus)" = "$WINDOW_ID"
+            printf 'status=SEND index=%s key=%s action=%s from_state=%s expected_state=%s expected_event=%s\n' \
+              "$RECEIPT_GENERATION" "$key" "$action" "$CURRENT_STATE" "$expected_state" "$expected_event" \
+              | tee -a "${EVIDENCE_DIR}/native/action-delivery.log"
+            xdotool keydown --window "$WINDOW_ID" "$key"
+            xdotool keyup --window "$WINDOW_ID" "$key"
+            complete=false
+            for attempt in $(seq 1 160); do
+              kill -0 "$APP_PID"
+              receipt_count="$(grep -Fc "$receipt_token" "${EVIDENCE_DIR}/native/first-session.log" || true)"
+              receipt_total="$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log" || true)"
+              event_count="$(grep -Fc "$expected_event" "${EVIDENCE_DIR}/native/first-session.log" || true)"
+              state_count="$(grep -Fc "$state_token" "${EVIDENCE_DIR}/native/first-session.log" || true)"
+              state_complete=false
+              if [ "$expected_state" = "$CURRENT_STATE" ] || [ "$state_count" -eq $((before_state + 1)) ]; then state_complete=true; fi
+              if [ "$receipt_count" -eq 1 ] && [ "$receipt_total" -eq $((before_receipts + 1)) ] && \
+                 [ "$event_count" -eq $((before_event + 1)) ] && [ "$state_complete" = true ]; then
+                complete=true
+                break
+              fi
+              sleep 0.125
+            done
+            test "$complete" = true
+            printf 'status=ACK index=%s action=%s state=%s event=%s\n' \
+              "$RECEIPT_GENERATION" "$action" "$expected_state" "$expected_event" \
+              | tee -a "${EVIDENCE_DIR}/native/action-delivery.log"
+            CURRENT_STATE="$expected_state"
+          done < "${EVIDENCE_DIR}/sequence.txt"
+          test "$RECEIPT_GENERATION" -eq 35
+          test "$(grep -c 'status=SEND' "${EVIDENCE_DIR}/native/action-delivery.log")" -eq 35
+          test "$(grep -c 'status=ACK' "${EVIDENCE_DIR}/native/action-delivery.log")" -eq 35
+          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log")" -eq 35
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_imperial_expansion_two_land_footprint" "${EVIDENCE_DIR}/native/first-session.log"
+          kill "$APP_PID" || true
+          wait "$APP_PID" || true
+          (
+            exec env -u AURELIAN_FULL_PROGRESSION -u AURELIAN_PLAYABLE_EVIDENCE_STATE -u AURELIAN_CAPTURE_PLAYABLE_ENTRY \
+              HOME="$HOME" stdbuf -oL -eL game/build/linux/pixel-nations-foundation.x86_64 \
+              > >(tee "${EVIDENCE_DIR}/native/restart.stdout.log" >> "${EVIDENCE_DIR}/native/restart.log") \
+              2> >(tee "${EVIDENCE_DIR}/native/restart.stderr.log" >> "${EVIDENCE_DIR}/native/restart.log" >&2)
+          ) &
+          RESTORE_PID=$!
+          for attempt in $(seq 1 80); do
+            grep -Fq "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:world_first_imperial_expansion_two_land_footprint:east_trade" "${EVIDENCE_DIR}/native/restart.log" && break
+            sleep 0.25
+          done
+          grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:world_first_imperial_expansion_two_land_footprint:east_trade" "${EVIDENCE_DIR}/native/restart.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_imperial_expansion_two_land_footprint" "${EVIDENCE_DIR}/native/restart.log"
+          kill "$RESTORE_PID" || true
+          wait "$RESTORE_PID" || true
+          cat "${EVIDENCE_DIR}/native/first-session.log" "${EVIDENCE_DIR}/native/restart.log" \
+            | grep -E "AURELIAN_FIRST_|AURELIAN_CORE_SESSION_|PLAYABLE_AURELIAN_ENTRY_STATE|AURELIAN_SESSION_V2_(LOAD|SAVE_ACK)" \
+            > "${EVIDENCE_DIR}/native/action-state.log"
+
+      - name: Serve default Web export
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8060 --bind 127.0.0.1 --directory game/build/web-default > "${EVIDENCE_DIR}/web/http-server.log" 2>&1 &
+          echo "WEB_SERVER_PID=$!" >> "$GITHUB_ENV"
+          for attempt in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:8060/index.html >/dev/null && exit 0
+            sleep 1
+          done
+          exit 1
+
+      - name: Capture Web first session, reload, and profile reopen
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+          const root = path.resolve(process.env.EVIDENCE_DIR);
+          const stills = path.join(root, 'stills');
+          const profile = path.join(process.env.RUNNER_TEMP, 'aurelian-default-web-profile');
+          const consoleLines = [], states = [], receipts = [], loads = [], saveAcks = [], requestFailures = [], responseFailures = [];
+          const sequence = fs.readFileSync(path.join(root,'sequence.txt'),'utf8').trim().split('\n').map((line,index)=>{
+            const [key,action,expectedState,expectedEvent]=line.split('|');
+            return {index:index+1,key,action,expectedState,expectedEvent};
+          });
+          if(sequence.length!==35) throw new Error('Expected 35 sequence rows, got '+sequence.length);
+          const keyMap={Return:'Enter',Right:'ArrowRight',Left:'ArrowLeft',Down:'ArrowDown',Up:'ArrowUp'};
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+          function attach(page) {
+            page.on('console', msg => {
+              const text = msg.text();
+              consoleLines.push('[' + msg.type() + '] ' + text);
+              let m = text.match(/PLAYABLE_AURELIAN_ENTRY_STATE=([a-z_]+)/); if (m) states.push(m[1]);
+              m = text.match(/PLAYABLE_AURELIAN_INPUT_RECEIPT=([0-9]+):([^:]+):([a-z_]+)/); if (m) receipts.push({index:Number(m[1]),action:m[2],fromState:m[3]});
+              m = text.match(/AURELIAN_SESSION_V2_LOAD=([a-z_]+):([a-z_]+):([a-z_]+):([a-z_]+)/); if (m) loads.push({status:m[1],adapter:m[2],state:m[3],intent:m[4]});
+              m = text.match(/AURELIAN_SESSION_V2_SAVE_ACK=([a-z_]+):([a-z_]+):([a-z_]+):([a-z_]+)/); if (m) saveAcks.push({status:m[1],adapter:m[2],state:m[3],intent:m[4]});
+            });
+            page.on('pageerror', e => consoleLines.push('[pageerror] ' + (e.stack || e.message)));
+            page.on('requestfailed', r => requestFailures.push({url:r.url(),error:r.failure()?.errorText||'unknown'}));
+            page.on('response', r => { if (r.status() >= 400) responseFailures.push({url:r.url(),status:r.status()}); });
+          }
+          async function waitFor(predicate, label, timeout=90000) {
+            const start=Date.now();
+            while(Date.now()-start<timeout){ if(predicate()) return; await sleep(100); }
+            throw new Error('Timed out for '+label+' states='+states.join(',')+' loads='+JSON.stringify(loads));
+          }
+          async function drive(page){
+            let currentState='world_neutral';
+            const delivery=[];
+            const shots={
+              3:'01-map-east-route-claimed-1440x900.png',
+              14:'02-map-greenvale-city-1440x900.png',
+              27:'03-map-imperial-heartland-1440x900.png',
+              34:'04-map-two-lands-claimed-1440x900.png',
+              15:'05-world-first-city-recognized-1440x900.png',
+              20:'06-world-nation-expand-committed-1440x900.png',
+              28:'07-world-empire-proclaimed-1440x900.png',
+              35:'08-world-two-land-footprint-1440x900.png'
+            };
+            for(const row of sequence){
+              const beforeReceipts=receipts.length;
+              const beforeEvent=consoleLines.filter(x=>x.includes(row.expectedEvent)).length;
+              const beforeState=states.filter(x=>x===row.expectedState).length;
+              delivery.push(`status=SEND index=${row.index} key=${row.key} action=${row.action} from_state=${currentState} expected_state=${row.expectedState} expected_event=${row.expectedEvent}`);
+              await page.keyboard.press(keyMap[row.key]);
+              await waitFor(()=>{
+                if(receipts.length!==beforeReceipts+1) return false;
+                const receipt=receipts[receipts.length-1];
+                if(receipt.index!==row.index||receipt.action!==row.action||receipt.fromState!==currentState) return false;
+                if(consoleLines.filter(x=>x.includes(row.expectedEvent)).length!==beforeEvent+1) return false;
+                return row.expectedState===currentState||states.filter(x=>x===row.expectedState).length===beforeState+1;
+              },`applied result ${row.index} ${row.action} ${row.expectedState}`);
+              delivery.push(`status=ACK index=${row.index} action=${row.action} state=${row.expectedState} event=${row.expectedEvent}`);
+              currentState=row.expectedState;
+              if(shots[row.index]) await shot(page,shots[row.index]);
+            }
+            if(receipts.length!==35) throw new Error('Expected 35 receipts, got '+receipts.length);
+            fs.writeFileSync(path.join(root,'web','action-delivery.log'),delivery.join('\n')+'\n');
+          }
+          async function shot(page,name){ await sleep(650); await page.screenshot({path:path.join(stills,name)}); }
+          async function open(context) {
+            const page=context.pages()[0]||await context.newPage(); attach(page);
+            await page.goto('http://127.0.0.1:8060/index.html',{waitUntil:'domcontentloaded',timeout:90000});
+            await page.locator('canvas').waitFor({state:'visible',timeout:90000}); await page.locator('canvas').click(); return page;
+          }
+          (async()=>{
+            let context=await chromium.launchPersistentContext(profile,{headless:true,viewport:{width:1440,height:900},recordVideo:{dir:path.join(root,'video-tmp'),size:{width:1440,height:900}},args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
+            let page=await open(context); const video=page.video();
+            await waitFor(()=>states.includes('world_neutral'),'initial world');
+            await drive(page);
+            await waitFor(()=>saveAcks.some(x=>x.status==='stored'&&x.adapter==='web_local_storage'&&x.state==='world_first_imperial_expansion_two_land_footprint'),'final web save');
+            await page.reload({waitUntil:'domcontentloaded',timeout:90000}); await page.locator('canvas').waitFor({state:'visible',timeout:90000}); await page.locator('canvas').click();
+            await waitFor(()=>loads.some(x=>x.status==='restored'&&x.adapter==='web_local_storage'&&x.state==='world_first_imperial_expansion_two_land_footprint'),'web reload restore');
+            await waitFor(()=>states.filter(x=>x==='world_first_imperial_expansion_two_land_footprint').length>=2,'web reload final');
+            await page.close(); await video.saveAs(path.join(root,'default-first-session-v6.webm')); await context.close();
+            context=await chromium.launchPersistentContext(profile,{headless:true,viewport:{width:1440,height:900},args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
+            page=await open(context);
+            await waitFor(()=>loads.filter(x=>x.status==='restored'&&x.adapter==='web_local_storage'&&x.state==='world_first_imperial_expansion_two_land_footprint').length>=2,'profile reopen restore');
+            await waitFor(()=>states.filter(x=>x==='world_first_imperial_expansion_two_land_footprint').length>=3,'profile reopen final');
+            await context.close();
+            fs.writeFileSync(path.join(root,'web','browser-console.log'),consoleLines.join('\n')+'\n');
+            fs.writeFileSync(path.join(root,'web','action-state.log'),consoleLines.filter(x=>/AURELIAN_FIRST_|AURELIAN_CORE_SESSION_|PLAYABLE_AURELIAN_ENTRY_STATE|AURELIAN_SESSION_V2_(LOAD|SAVE_ACK)/.test(x)).join('\n')+'\n');
+            fs.writeFileSync(path.join(root,'web','requests.json'),JSON.stringify({request_failures:requestFailures,response_failures:responseFailures},null,2)+'\n');
+            if(requestFailures.length||responseFailures.length) throw new Error('Web request failures');
+          })().catch(error=>{ fs.writeFileSync(path.join(root,'web','browser-console.log'),consoleLines.join('\n')+'\n'); console.error(error); process.exit(1); });
+          NODE
+
+      - name: Validate fail-closed Gate B evidence
+        run: |
+          set -euo pipefail
+          test "$(find "${EVIDENCE_DIR}/stills" -maxdepth 1 -type f -name '*.png' | wc -l)" = "8"
+          for still in "${EVIDENCE_DIR}"/stills/*.png; do
+            test "$(identify -format '%wx%h' "$still")" = "1440x900"
+            test "$(stat -c '%s' "$still")" -gt 50000
+          done
+          test -s "${EVIDENCE_DIR}/default-first-session-v6.webm"
+          DURATION="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/default-first-session-v6.webm")"
+          awk -v d="$DURATION" 'BEGIN { exit !(d >= 8 && d <= 180) }'
+          for delivery in "${EVIDENCE_DIR}/native/action-delivery.log" "${EVIDENCE_DIR}/web/action-delivery.log"; do
+            test "$(grep -c 'status=SEND' "$delivery")" -eq 35
+            test "$(grep -c 'status=ACK' "$delivery")" -eq 35
+          done
+          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log")" -eq 35
+          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/web/browser-console.log")" -eq 35
+          for log in "${EVIDENCE_DIR}/native/action-state.log" "${EVIDENCE_DIR}/web/action-state.log"; do
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_claimed" "$log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_developed" "$log"
+            grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=EXPAND" "$log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_national_mandate_started" "$log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_empire_proclaimed" "$log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_first_imperial_expansion_two_lands_claimed" "$log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_imperial_expansion_two_land_footprint" "$log"
+            if grep -E "RIVER_SURGE|RIVAL_COUNTERMOVE|FRONTIER_PAYOFF" "$log"; then exit 1; fi
+          done
+          grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:world_first_imperial_expansion_two_land_footprint:east_trade" "${EVIDENCE_DIR}/native/action-state.log"
+          test "$(grep -Fc 'AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:world_first_imperial_expansion_two_land_footprint:east_trade' "${EVIDENCE_DIR}/web/action-state.log")" -ge 2
+          node <<'NODE'
+          const fs=require('fs'), path=require('path');
+          const root=process.env.EVIDENCE_DIR;
+          const exact=fs.readFileSync(path.join(root,'exact-head.txt'),'utf8').trim();
+          const frames=[
+            ['map_where','01-map-east-route-claimed-1440x900.png','map_east_route_claimed'],
+            ['map_where','02-map-greenvale-city-1440x900.png','map_greenvale_city'],
+            ['map_where','03-map-imperial-heartland-1440x900.png','map_aurelian_imperial_heartland'],
+            ['map_where','04-map-two-lands-claimed-1440x900.png','map_first_imperial_expansion_two_lands_claimed'],
+            ['world_why','05-world-first-city-recognized-1440x900.png','world_first_city_recognized'],
+            ['world_why','06-world-nation-expand-committed-1440x900.png','world_first_nation_founded'],
+            ['world_why','07-world-empire-proclaimed-1440x900.png','world_first_empire_proclaimed'],
+            ['world_why','08-world-two-land-footprint-1440x900.png','world_first_imperial_expansion_two_land_footprint']
+          ].map(([role,file,state])=>({role,file,state}));
+          fs.writeFileSync(path.join(root,'result-manifest.json'),JSON.stringify({
+            contract:'GODOT_AURELIAN_MAP_WORLD_STRATEGIC_READABILITY_V1_GATE', exact_head:exact,
+            viewport:{width:1440,height:900}, input_mode:'normal_keyboard', input_action_count:35,
+            completion_barrier:'send_plus_exact_receipt_plus_expected_event_plus_resulting_state',
+            native_and_web_sequence_identical:true, frames,
+            final_state:'world_first_imperial_expansion_two_land_footprint', claimed_lands:['east_route','north_ridge'],
+            native_restart:true, web_reload:true, web_profile_reopen:true,
+            historical_regression_feature_tag:'aurelian_full_progression', village_source_unchanged:true, strategic_label_policy_max_per_frame:2, product_acceptance_claimed:false
+          },null,2)+'\n');
+          NODE
+          grep -F '"product_acceptance_claimed": false' "${EVIDENCE_DIR}/result-manifest.json"
+          sha256sum "${EVIDENCE_DIR}/default-first-session-v6.webm" "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}"/native/*.log "${EVIDENCE_DIR}"/web/*.log "${EVIDENCE_DIR}"/web/*.json "${EVIDENCE_DIR}/result-manifest.json" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
+          echo "GODOT_AURELIAN_MAP_WORLD_STRATEGIC_READABILITY_V1_DETERMINISTIC_QA=PASS"
+
+      - name: Upload exact-head Gate B evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-aurelian-strategic-readability-v1-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/godot-aurelian-default-first-session-v6
+          if-no-files-found: error
+          retention-days: 7
