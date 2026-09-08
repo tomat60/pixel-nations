@@ -320,7 +320,7 @@ jobs:
             await page.reload({waitUntil:'domcontentloaded',timeout:90000}); await page.locator('canvas').waitFor({state:'visible',timeout:90000}); await page.locator('canvas').click();
             await waitFor(()=>loads.some(x=>x.status==='restored'&&x.adapter==='web_local_storage'&&x.state==='world_first_imperial_expansion_two_land_footprint'),'web reload restore');
             await waitFor(()=>states.filter(x=>x==='world_first_imperial_expansion_two_land_footprint').length>=2,'web reload final');
-            await context.close(); await video.saveAs(path.join(root,'default-first-session-v6.webm'));
+            await page.close(); await video.saveAs(path.join(root,'default-first-session-v6.webm')); await context.close();
             context=await chromium.launchPersistentContext(profile,{headless:true,viewport:{width:1440,height:900},args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
             page=await open(context);
             await waitFor(()=>loads.filter(x=>x.status==='restored'&&x.adapter==='web_local_storage'&&x.state==='world_first_imperial_expansion_two_land_footprint').length>=2,'profile reopen restore');
