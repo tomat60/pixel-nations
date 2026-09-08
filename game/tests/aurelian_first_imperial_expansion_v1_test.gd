@@ -73,17 +73,23 @@ func _initialize() -> void:
 	_check(String(restored.get("first_rival_countermove_response", "")) == "negotiate_passage", "preserve_rival_response")
 	_check(String(restored.get("first_frontier_payoff", "")) == "ratify_east_bridge_passage", "preserve_bridge_payoff")
 
-	var invalid := SESSION.save_session(
+	var truthful_optional_history := SESSION.save_session(
 		"world_first_imperial_expansion_north_ridge_direction",
 		"east_trade",
 		TEST_PATH,
 		common[0], common[1], common[2], common[3], common[4], common[5],
 		common[6], common[7], common[8], common[9],
-		"shield_greenvale", "stand_firm", "none",
+		"none", "none", "none",
 		"north_ridge", "none"
 	)
-	_check(String(invalid.get("status", "")) == "invalid_data", "reject_reveal_before_payoff")
-	invalid = SESSION.save_session(
+	_check(bool(truthful_optional_history.get("ok", false)), "allow_reveal_without_optional_history")
+	restored = SESSION.load_session(TEST_PATH)
+	_check(String(restored.get("imperial_expansion_target", "")) == "north_ridge", "restore_target_without_optional_history")
+	_check(String(restored.get("imperial_crisis_response", "")) == "none", "preserve_no_crisis_response")
+	_check(String(restored.get("first_rival_countermove_response", "")) == "none", "preserve_no_rival_response")
+	_check(String(restored.get("first_frontier_payoff", "")) == "none", "preserve_no_frontier_payoff")
+
+	var invalid := SESSION.save_session(
 		"map_first_imperial_expansion_two_lands_claimed",
 		"east_trade",
 		TEST_PATH,

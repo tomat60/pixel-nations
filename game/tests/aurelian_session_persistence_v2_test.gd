@@ -63,6 +63,34 @@ func _initialize() -> void:
 	_check(String(restored.get("entry_state", "")) == "map_greenvale_city", "restore_city_map")
 	_check(bool(restored.get("city_chartered", false)), "restore_city_flag")
 
+	# North Ridge expansion is truthful even when optional imperial history was never played.
+	save_result = SESSION.save_session(
+		"world_first_imperial_expansion_two_land_footprint", "east_trade", TEST_PATH,
+		true, true, true, true, true, true, "expand", true, true,
+		"none", "none", "none", "none", "north_ridge", "north_ridge_claimed"
+	)
+	_check(bool(save_result.get("ok", false)), "save_expansion_without_optional_history")
+	restored = SESSION.load_session(TEST_PATH)
+	_check(String(restored.get("status", "")) == "restored", "restore_expansion_status")
+	_check(String(restored.get("entry_state", "")) == "world_first_imperial_expansion_two_land_footprint", "restore_expansion_state")
+	_check(String(restored.get("imperial_expansion_target", "")) == "north_ridge", "restore_expansion_target")
+	_check(String(restored.get("first_imperial_expansion", "")) == "north_ridge_claimed", "restore_expansion_claim")
+	_check(Array(restored.get("claimed_lands", [])).size() == 2, "restore_two_claimed_lands")
+	_check(String(restored.get("imperial_crisis", "")) == "none", "restore_unplayed_crisis")
+	_check(String(restored.get("imperial_crisis_response", "")) == "none", "restore_unplayed_crisis_response")
+	_check(String(restored.get("first_rival_countermove_response", "")) == "none", "restore_unplayed_rival")
+	_check(String(restored.get("first_frontier_payoff", "")) == "none", "restore_unplayed_payoff")
+
+	save_result = SESSION.save_session(
+		"world_first_imperial_expansion_north_ridge_direction", "east_trade", TEST_PATH,
+		true, true, true, true, true, true, "expand", true, true,
+		"none", "none", "none", "none", "north_ridge"
+	)
+	_check(bool(save_result.get("ok", false)), "save_pending_expansion_without_optional_history")
+	restored = SESSION.load_session(TEST_PATH)
+	_check(String(restored.get("entry_state", "")) == "world_first_imperial_expansion_north_ridge_direction", "restore_pending_expansion_state")
+	_check(String(restored.get("first_imperial_expansion", "")) == "none", "restore_pending_unclaimed")
+
 	_write_raw("{broken")
 	var malformed := SESSION.load_session(TEST_PATH)
 	_check(String(malformed.get("status", "")) == "malformed", "malformed_status")
@@ -97,6 +125,23 @@ func _initialize() -> void:
 	_check(String(invalid.get("status", "")) == "invalid_data", "city_state_requires_flag")
 	invalid = SESSION.save_session("map_east_route_in_use", "east_trade", TEST_PATH, true, true, true, true, true)
 	_check(String(invalid.get("status", "")) == "invalid_data", "city_flag_requires_city_state")
+	invalid = SESSION.save_session(
+		"world_first_imperial_expansion_two_land_footprint", "east_trade", TEST_PATH,
+		true, true, true, true, true, true, "expand", true, true,
+		"none", "none", "none", "none", "none", "north_ridge_claimed"
+	)
+	_check(String(invalid.get("status", "")) == "invalid_data", "claimed_expansion_requires_target")
+	invalid = SESSION.save_session(
+		"world_first_imperial_expansion_north_ridge_direction", "east_trade", TEST_PATH,
+		true, true, true, true, true, true, "expand", true, true
+	)
+	_check(String(invalid.get("status", "")) == "invalid_data", "expansion_state_requires_target")
+	invalid = SESSION.save_session(
+		"world_first_imperial_expansion_two_land_footprint", "east_trade", TEST_PATH,
+		true, true, true, true, true, true, "expand", true, true,
+		"none", "none", "stand_firm", "none", "north_ridge", "north_ridge_claimed"
+	)
+	_check(String(invalid.get("status", "")) == "invalid_data", "rival_response_still_requires_crisis_response")
 
 	var transport := "quote\" slash\\ newline\n unicode Ł"
 	var literal := SESSION.javascript_string_literal(transport)
@@ -104,6 +149,8 @@ func _initialize() -> void:
 
 	var source := _read_text(SOURCE_PATH)
 	_check(source.contains('const VERSION := 2'), "schema_version_stays_v2")
+	_check(source.contains("Expansion is an independent progression fact"), "optional_history_decoupling_explicit")
+	_check(source.contains("truthful expansion does not imply completion of optional history"), "load_validation_mirrors_decoupling")
 	_check(source.contains('"map_east_route_selected"'), "selected_state_allowed")
 	_check(source.contains('"map_east_route_claimed"'), "claimed_state_allowed")
 	_check(source.contains('"village_claimed"'), "village_claimed_state_allowed")
