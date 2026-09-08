@@ -3,7 +3,7 @@ extends SceneTree
 const READABILITY_PATH := "res://scenes/aurelian/playable_aurelian_strategic_readability_v1.gd"
 const ENTRY_SCENE_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1.tscn"
 const EXPECTED_MAP_STATES := ["map_east_route_claimed", "map_greenvale_city", "map_aurelian_imperial_heartland", "map_first_imperial_expansion_two_lands_claimed"]
-const EXPECTED_WORLD_STATES := ["world_first_city_recognized", "world_first_nation_founded", "world_first_empire_proclaimed",-lint"]
+const EXPECTED_WORLD_STATES := ["world_first_city_recognized", "world_first_nation_founded", "world_first_empire_proclaimed", "world_first_imperial_expansion_two_land_footprint"]
 var failures: Array[String] = []
 
 func _initialize() -> void:
