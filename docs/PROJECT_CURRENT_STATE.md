@@ -2,16 +2,36 @@
 
 Status: ACTIVE
 Updated: 2026-09-08
-Current state revision: 17.0
-Authority baseline SHA: `5f23e714d011d669c6cecde7f7ec0ebea6f60a7e`
+Current state revision: 18.0
+Authority baseline SHA: `6731125bd671c085f6ceb696f6a87493d51a11fe`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: accepted coherent Default First Session v6; mandatory whole-product portfolio gate before another implementation authority.
-Current milestone: the default native/Web six-beat first session is accepted at a persistent East Route plus North Ridge two-land finale, with every normal input gated through its exact applied result.
-Active execution issue: #644
-Next allowed action: complete strategy-only portfolio gate #644 using the accepted v6 evidence and direct visual review. No new implementation is authorized until a separate authority is merged. Do not reopen issue #640, PR #642, issue #638, issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: authorized Aurelian Map and World Strategic Readability v1 product candidate.
+Current milestone: simplify Map and World into immediately distinct strategic views while preserving the accepted Default First Session v6 behavior and unchanged Village presentation.
+Active execution issue: #645
+Next allowed action: after this authority is merged, complete and record the mandatory implementation preflight for issue #645. Runtime and workflow coding remains blocked until `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen issue #640, PR #642, issue #638, issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Portfolio decision after Default First Session v6
+
+Issue #644 completed the mandatory strategy-only whole-product portfolio gate.
+
+Decision: authorize exactly one bounded `Aurelian Map and World Strategic Readability v1` candidate under issue #645.
+
+The accepted v6 session proves the full first loop, reliable 35-action completion semantics and cross-profile persistence. Direct review now shows visual clarity as the dominant bottleneck. Village reads at its intended close working scale, while Map and World still resemble the same dense diorama at different zoom levels. Small structures, route overlays and labels compete for attention, weakening Map land/network reading and World polity-scale/direction reading.
+
+This candidate outranks first-session input feedback because the exact action boundary is already accepted. It outranks Minimal Economy Foundation and Repeatable Expansion because both would deepen or multiply geography that is not yet cleanly readable. It outranks new content and broad final-art polish because the needed delta is hierarchy and reduction using existing material.
+
+The candidate must preserve one physical Aurelian geography and the binding view roles:
+
+- Village = HOW, visually and behaviorally unchanged;
+- Map = WHERE, prioritizing lands, anchors, route/network, ownership and frontier;
+- World = WHY / scale / direction, prioritizing polity hierarchy, capital and next direction.
+
+It may adjust only existing camera framing, visibility, scale, contrast, grouping, label policy and node composition. It must not add assets, terrain families, geography, mechanics, states, persistence fields, economy, resources, workers, timers, queues, combat, diplomacy, governance, a third land, repeatable expansion, backend, account, multiplayer, payment, crypto, app shell or broad polish.
+
+Evidence requires one exact-head input-driven 1440x900 v6 video preserving all 35 actions, exactly eight named 1440x900 Map/World frames defined by issue #645, proof that Village is unchanged, no strategic label collisions in reviewed frames, manifests, SHA-256, direct visual review and all historical gameplay, persistence and shared-geography regressions. Preflight may name at most eight exact files. One complete candidate and at most one bounded visual correction are permitted. Then terminal PASS or REJECT.
 
 ## Terminal result: Default First Session v6
 
