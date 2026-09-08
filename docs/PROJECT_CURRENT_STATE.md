@@ -2,16 +2,46 @@
 
 Status: ACTIVE
 Updated: 2026-09-08
-Current state revision: 16.0
-Authority baseline SHA: `98a45126f465fd91fc8a876e1f303f8193ff584c`
-Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
-Runtime baseline SHA: `e177477f10c259699d9c1517e9f4f23dfdf24c14`
+Current state revision: 17.0
+Authority baseline SHA: `5f23e714d011d669c6cecde7f7ec0ebea6f60a7e`
+Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
+Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authorized Default First Session v6 product candidate.
-Current milestone: one coherent default native/Web six-beat first session ending at the persistent two-land North Ridge finale, with every input gated through its exact applied result.
-Active execution issue: #640
-Next allowed action: after this authority is merged, complete and record the mandatory implementation preflight for issue #640. Runtime and workflow coding remains blocked until `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen issue #638, issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: accepted coherent Default First Session v6; mandatory whole-product portfolio gate before another implementation authority.
+Current milestone: the default native/Web six-beat first session is accepted at a persistent East Route plus North Ridge two-land finale, with every normal input gated through its exact applied result.
+Active execution issue: #644
+Next allowed action: complete strategy-only portfolio gate #644 using the accepted v6 evidence and direct visual review. No new implementation is authorized until a separate authority is merged. Do not reopen issue #640, PR #642, issue #638, issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Terminal result: Default First Session v6
+
+PR #642 is accepted and merged.
+
+Terminal classification: `GODOT_AURELIAN_DEFAULT_FIRST_SESSION_V6_PASS`.
+
+Accepted exact head: `30c8932a9ad73bc9b72f5277cadb728dc8609ffa`.
+Merged main: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`.
+
+Accepted exact-head evidence:
+- focused run `34216708349`, job `102030062236`: PASS;
+- artifact `10052176118`, digest `sha256:8fff45304769849c27d2246d4c244e09dfa77ba2badd2b5efa49dbd5d31c16f5`;
+- all 22 manifest-listed files pass internal SHA-256;
+- exactly six named 1440x900 frames and a 69.72 second 1440x900 input-driven Web film;
+- native and Web each record 35 SEND and 35 ACK rows from the same sequence;
+- every action waits for its exact monotonic receipt, expected public event and resulting public state;
+- consecutive North Ridge Returns 31 and 32 are independently acknowledged as inspected and then two-lands-claimed;
+- native restart, Web reload and persistent-profile reopen restore `world_first_imperial_expansion_two_land_footprint`;
+- final claimed lands are exactly East Route and North Ridge, while unplayed optional crisis, rival and frontier-payoff history remains `none`;
+- Web Playability run `34216708495`, artifact `10052281937`, digest `sha256:85c7dbf5f7b4f32c5ab213faddaae9dd31b6a59590db648559f5dcbb1c0a867a`: PASS;
+- Session Persistence v2 run `34216708392`, artifact `10052297238`, digest `sha256:4a9f30cf925629e0bfa7684f7de97e8e44cfc0a65fb907465681373017883079`: PASS;
+- Playable Entry run `34216708388`, artifact `10052561555`, digest `sha256:7508a0b04f0c4b54059680d667423ffd09385431a9c927d89be6ac9bafc156e2`: PASS;
+- Foundation, CI, Visual QA, P4-P11, optional-history decoupling and Vercel: PASS.
+
+Direct review confirms one continuous and visible claim, develop, choose, consequence, grow and expand session on the shared physical Aurelian geography. Map remains WHERE, Village remains HOW and World remains WHY/direction. The final frame explicitly communicates session completion and the East Route plus North Ridge footprint.
+
+The one bounded correction fixed only Playwright video finalization order after the first run had already completed the native path and Web actions. No product logic or input semantics changed. The legacy Input Ownership Delivery v2 workflow failed only its historical exact four-file scope assertion before product execution and does not contradict the authorized twelve-file candidate.
+
+Issue #640 is closed as completed. World and Map density remains a direct-review clarity concern for the next mandatory portfolio gate. No deeper mechanic may begin before that gate chooses and separately authorizes the next bounded product slice.
 
 ## Portfolio decision after Default First Session v5
 
