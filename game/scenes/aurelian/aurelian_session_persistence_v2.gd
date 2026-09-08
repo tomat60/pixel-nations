@@ -208,9 +208,8 @@ static func save_session(state: String, intent: String, path: String = NATIVE_PA
 		return fallback("invalid_data", _adapter_name())
 	if not VALID_FIRST_INTER_LAND_COORDINATIONS.has(first_inter_land_coordination):
 		return fallback("invalid_data", _adapter_name())
-	if imperial_expansion_target == "north_ridge" and first_frontier_payoff == "none":
-		return fallback("invalid_data", _adapter_name())
-	if first_imperial_expansion == "north_ridge_claimed" and (imperial_expansion_target != "north_ridge" or first_frontier_payoff == "none"):
+	# Expansion is an independent progression fact; optional crisis, rival, and payoff threads may remain unplayed.
+	if first_imperial_expansion == "north_ridge_claimed" and imperial_expansion_target != "north_ridge":
 		return fallback("invalid_data", _adapter_name())
 	if state in FIRST_IMPERIAL_EXPANSION_PENDING_STATES and (imperial_expansion_target != "north_ridge" or first_imperial_expansion != "none"):
 		return fallback("invalid_data", _adapter_name())
@@ -454,9 +453,8 @@ static func _validate_payload_text(text: String, adapter: String) -> Dictionary:
 	var expected_claimed_lands := ["east_route", "north_ridge"] if first_imperial_expansion == "north_ridge_claimed" else ["east_route"]
 	if claimed_lands != expected_claimed_lands:
 		return fallback("invalid_value", adapter)
-	if imperial_expansion_target == "north_ridge" and first_frontier_payoff == "none":
-		return fallback("invalid_value", adapter)
-	if first_imperial_expansion == "north_ridge_claimed" and (imperial_expansion_target != "north_ridge" or first_frontier_payoff == "none"):
+	# Mirror save validation: truthful expansion does not imply completion of optional history.
+	if first_imperial_expansion == "north_ridge_claimed" and imperial_expansion_target != "north_ridge":
 		return fallback("invalid_value", adapter)
 	if state in FIRST_IMPERIAL_EXPANSION_PENDING_STATES and (imperial_expansion_target != "north_ridge" or first_imperial_expansion != "none"):
 		return fallback("invalid_value", adapter)
