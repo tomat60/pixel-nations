@@ -130,7 +130,7 @@ jobs:
             action="$2"
             expected_state="${3:-}"
             RECEIPT_GENERATION=$((RECEIPT_GENERATION + 1))
-            xdotool windowactivate --sync "$WINDOW_ID"
+            xdotool windowfocus --sync "$WINDOW_ID"
             test "$(xdotool getwindowfocus)" = "$WINDOW_ID"
             xdotool key --clearmodifiers --window "$WINDOW_ID" "$key"
             for attempt in $(seq 1 80); do
