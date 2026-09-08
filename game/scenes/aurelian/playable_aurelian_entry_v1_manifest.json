@@ -126,5 +126,35 @@
     "caravan_dispatched_flag": true,
     "city_chartered_flag": true,
     "nation_founded_flag": true
+  },
+  "core_session": {
+    "contract": "AURELIAN_DEFAULT_FIRST_SESSION_V4",
+    "default_interactive": true,
+    "critical_beats": [
+      "claim",
+      "develop",
+      "choose",
+      "consequence",
+      "grow",
+      "expand"
+    ],
+    "meaningful_choice_state": "world_first_nation_founded",
+    "consequence_state": "village_national_mandate_started",
+    "growth_state": "world_first_empire_proclaimed",
+    "expansion_ready_state": "world_first_imperial_expansion_north_ridge_direction",
+    "expansion_claim_state": "map_first_imperial_expansion_two_lands_claimed",
+    "completion_state": "world_first_imperial_expansion_two_land_footprint",
+    "completion_land_count": 2,
+    "full_progression_feature_tag": "aurelian_full_progression",
+    "native_editor_compatibility_env": "AURELIAN_FULL_PROGRESSION=1",
+    "automated_regression_keeps_full_progression": true,
+    "advanced_states_non_critical": [
+      "river_surge_crisis",
+      "first_rival_countermove",
+      "first_frontier_payoff",
+      "north_ridge_outpost",
+      "north_ridge_specialization",
+      "first_inter_land_coordination"
+    ]
   }
 }
