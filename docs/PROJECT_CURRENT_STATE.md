@@ -2,16 +2,37 @@
 
 Status: ACTIVE
 Updated: 2026-09-08
-Current state revision: 20.0
-Authority baseline SHA: `68e127e081b6295bc5bed48c8adbc9a6f883504c`
+Current state revision: 21.0
+Authority baseline SHA: `ffd50c66c7282e5fd3449fd2669f9b7f88c17af4`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authorized Aurelian Strategic Overlay Separation v1 product candidate.
-Current milestone: separate Map and World strategic meaning from physical settlement geometry through a sparse collision-free screen-space overlay while preserving the accepted Default First Session v6.
-Active execution issue: #650
-Next allowed action: after this authority is merged, record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #650, then create exactly one fresh bounded implementation candidate from accepted `main`. Runtime and workflow coding remains blocked until that preflight is recorded. Do not reopen or reuse PR #647.
+Current product phase: strategy-only portfolio gate after terminal Aurelian Strategic Overlay Separation v1 rejection.
+Current milestone: choose a materially different response to the Map/World readability bottleneck without regressing the accepted Default First Session v6 input path.
+Active execution issue: #653
+Next allowed action: complete strategy-only portfolio gate #653, then merge a separate authority PR before creating any new runtime or workflow candidate. Do not reopen, reuse or incrementally patch PR #647 or PR #652.
+
+## Terminal Aurelian Strategic Overlay Separation v1 rejection
+
+PR #652 was rejected and closed without merge at exact head `69eaaa1386bdaf75b332b459621df517144a2b34`.
+
+The candidate introduced a dedicated screen-space CanvasLayer for Map/World semantics and suppressed world-space Label3D content in those views. Its first exact head failed Godot 4.7.1 parsing. The sole allowed correction added explicit Node typing and restored Foundation CI, but the corrected head then deterministically failed the accepted Default First Session v6 native run.
+
+Exact failure:
+
+- workflow run: `34284176783`;
+- job: `102255757600`;
+- actions 1 through 14 completed with SEND/ACK;
+- action 15 sent `Left` from `map_greenvale_city` and expected `world_first_city_recognized`, but no ACK/state event arrived before the fail-closed timeout;
+- failure artifact: `10078880576`;
+- artifact digest: `sha256:f4f31decec3d3a605c6b591e544fb5872bacfa39ed65b519ed1771974f5b733d`.
+
+Classification: `GODOT_AURELIAN_STRATEGIC_OVERLAY_SEPARATION_V1_REJECT`.
+
+This is product/runtime evidence, not an infrastructure failure. The correction budget is exhausted. PR #652 and issue #650 are terminal reference only.
+
+Portfolio gate #653 must now compare a controller-owned HUD response, structural Map/World composition, targeted transition reliability, Minimal Economy Foundation and Repeatable Expansion. No runtime or workflow work is authorized until that gate selects one slice and a separate authority change is merged.
 
 ## Portfolio decision after Aurelian Strategic Readability v1
 
