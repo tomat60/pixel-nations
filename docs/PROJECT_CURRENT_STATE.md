@@ -2,16 +2,40 @@
 
 Status: ACTIVE
 Updated: 2026-09-08
-Current state revision: 13.8
-Authority baseline SHA: `debebce93166b7e051a6245e4b871de30b68c0a3`
+Current state revision: 13.9
+Authority baseline SHA: `e261309761efdbf6a35830ca780e8d76085eed6e`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
-Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
+Runtime baseline SHA: `e177477f10c259699d9c1517e9f4f23dfdf24c14`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: architecture recovery through Exported Startup Ownership v1.
-Current milestone: one no-product-delta proof of startup ownership parity between explicit native and default exported Linux routes.
-Active execution issue: #630
-Next allowed action: after this authority is merged, complete and record the mandatory implementation preflight for issue #630. Runtime and workflow coding remains blocked until `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: strategy gate after successful Exported Startup Ownership v1 architecture recovery.
+Current milestone: select the highest-value next whole-product slice from fresh accepted evidence.
+Active execution issue: none
+Next allowed action: run one strategy-only whole-product portfolio gate. No runtime or workflow implementation is authorized until a separate authority PR is merged and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Terminal result: Exported Startup Ownership v1
+
+PR #632 is accepted and merged.
+
+Terminal classification: `GODOT_AURELIAN_EXPORTED_STARTUP_OWNERSHIP_V1_PASS`.
+
+Accepted exact head: `84e216a061cdaeac7deec545d851a879faa08b3c`.
+Merged main: `e177477f10c259699d9c1517e9f4f23dfdf24c14`.
+
+Accepted exact-head evidence:
+- focused run `34189043404`: PASS;
+- focused job `101943126278`: every step PASS;
+- artifact `10041553280`, digest `sha256:bc05cffd8d0cc1dfb706d56e1d27c3d441ff0c2eb4035b0daf9fc06d86793d69`;
+- direct review confirmed exact three-file scope and valid internal SHA-256 for all 23 evidence files;
+- explicit native and default exported Linux routes both selected `res://scenes/aurelian/playable_aurelian_entry_v1.tscn`, root `PlayableAurelianEntryV1`, and controller `res://scenes/aurelian/playable_aurelian_entry_v1.gd`;
+- both routes emitted one ordered `enter_tree`, `ready_enter`, and `public_ready` sequence, owned one visible focused window, received exactly one normal OS Return as receipt `1:ui_accept:world_neutral`, and transitioned exactly once to `world_trade_selected`;
+- exported executable SHA-256 was `2cb27aee3f7fdf763d0ae16972f6975606959a071f4cd33f6ef1429eb8385049` and PCK SHA-256 was `5addaabc6d3084abe25a4de6e3ebfbb53c03aa48db2b4228bfffeadb3d5ef64b`;
+- stdout, stderr, PID, window identity, focus ownership and controlled exit classification were present for both routes;
+- Foundation, Playable Entry, Session Persistence v2, Web Playability, CI, Visual QA and P4 through P11 passed on the accepted head; Vercel was Ready.
+
+The single correction fixed only strict GDScript typing in observation code. No product behavior changed. The legacy Input Ownership Delivery v2 workflow failed only at its own exact four-file scope assertion because this separately authorized proof had exactly three files; it did not execute a product test and does not contradict the focused result.
+
+The default exported runtime has startup ownership parity with the accepted explicit route. The rejected v4 symptom came from its evidence launch not exposing line-buffered runtime output before the readiness deadline, not from a divergent main scene or missing controller. Issue #630 is closed as completed. A fresh strategy-only portfolio gate is mandatory before any further implementation.
 
 ## Terminal result: Default First Session v4
 
