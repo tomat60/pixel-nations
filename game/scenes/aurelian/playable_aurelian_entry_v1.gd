@@ -251,10 +251,10 @@ var north_ridge_outpost_presentation: Node3D
 var north_ridge_specialization_presentation: Node3D
 
 func _startup_identity(phase: String) -> void:
-	var current_scene := get_tree().current_scene
+	var current_scene: Node = get_tree().current_scene
 	var current_scene_name := "none" if current_scene == null else String(current_scene.name)
 	var script_path := "none"
-	var attached_script := get_script()
+	var attached_script: Script = get_script() as Script
 	if attached_script != null:
 		script_path = String(attached_script.resource_path)
 	print("AURELIAN_STARTUP_PHASE=%s node=%s scene_file=%s script=%s tree_current=%s" % [phase, name, scene_file_path, script_path, current_scene_name])
