@@ -56,7 +56,7 @@ jobs:
           npm ci
           npx playwright install chromium
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends unzip libgl1 imagemagick ffmpeg xvfb xdotool >/dev/null
+          sudo apt-get install -y -qq --no-install-recommends unzip libgl1 imagemagick ffmpeg xvfb xdotool x11-utils >/dev/null
           mkdir -p /tmp/godot /tmp/godot-templates
           curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
