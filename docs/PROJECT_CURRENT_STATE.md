@@ -1,17 +1,38 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-09-08
-Current state revision: 21.0
-Authority baseline SHA: `ffd50c66c7282e5fd3449fd2669f9b7f88c17af4`
+Updated: 2026-09-09
+Current state revision: 22.0
+Authority baseline SHA: `b4d5b7f56f49dc4fd474b559ad5ce5c3835c9e9b`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy-only portfolio gate after terminal Aurelian Strategic Overlay Separation v1 rejection.
-Current milestone: choose a materially different response to the Map/World readability bottleneck without regressing the accepted Default First Session v6 input path.
-Active execution issue: #653
-Next allowed action: complete strategy-only portfolio gate #653, then merge a separate authority PR before creating any new runtime or workflow candidate. Do not reopen, reuse or incrementally patch PR #647 or PR #652.
+Current product phase: authorized Aurelian Controller-Owned Strategic Copy v1 product candidate.
+Current milestone: make Map and World strategically readable through the accepted controller-owned HUD without a new overlay or input owner.
+Active execution issue: #655
+Next allowed action: after this authority is merged, record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #655, then create exactly one fresh bounded implementation candidate from accepted `main`. Runtime and workflow coding remains blocked until that preflight is recorded.
+
+## Portfolio decision after Strategic Overlay Separation v1
+
+Issue #653 completed the mandatory strategy-only whole-product portfolio gate.
+
+Decision: authorize exactly one fresh bounded `Aurelian Controller-Owned Strategic Copy v1` candidate under issue #655.
+
+The largest bottleneck remains Map/World strategic readability, but two techniques are now rejected:
+
+- PR #647 placed strategic copy in world space and direct review found a label/settlement collision.
+- PR #652 added an independent screen-space CanvasLayer. After its sole correction fixed parsing, the accepted Default First Session v6 native path lost action 15 at the first Map-to-World transition.
+
+The selected response reuses only the accepted controller and its existing `layer_label`, `intent_label` and `controls_label` HUD. The same controller may suppress obsolete strategic Label3D copy in reviewed Map/World states. No new CanvasLayer, scene child, input handler, process loop, readiness protocol, camera rule or presentation owner is allowed.
+
+This candidate outranks structural recomposition because it first establishes one safe semantic owner with a smaller reversible diff. It outranks input-delivery hardening because the accepted baseline already proves 35 actions and the failure appeared only after a rejected presentation owner was added. It outranks Minimal Economy Foundation and Repeatable Expansion because both would deepen unreadable geography.
+
+The player-visible delta is a restrained Map WHERE and World WHY/direction hierarchy that leaves settlement, routes and ownership anchors unobstructed. Village HOW remains visually and behaviorally unchanged.
+
+Issue #655 locks an exact four-file ceiling, native/Web 35 SEND/ACK, exactly eight 1440x900 frames, Web film, controller-only ownership proof, unchanged Village, persistence, manifests, SHA-256, direct visual review and full historical regressions. Green CI alone is not acceptance.
+
+One complete candidate and at most one bounded correction are permitted. Any lost or duplicated input, remaining collision, changed Village, persistence regression, fifth file, extra overlay/input owner or reuse of PR #647/#652 techniques requires terminal `GODOT_AURELIAN_CONTROLLER_OWNED_STRATEGIC_COPY_V1_REJECT`. Otherwise terminal `GODOT_AURELIAN_CONTROLLER_OWNED_STRATEGIC_COPY_V1_PASS`.
 
 ## Terminal Aurelian Strategic Overlay Separation v1 rejection
 
