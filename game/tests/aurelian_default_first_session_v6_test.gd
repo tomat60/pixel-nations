@@ -53,8 +53,8 @@ func _initialize() -> void:
 
 	var entry_scene := _read_text(ENTRY_SCENE_PATH)
 	_check(
-		entry_scene.contains('path="res://scenes/aurelian/playable_aurelian_first_session_v6.gd"'),
-		"entry_scene_uses_first_session_wrapper"
+		entry_scene.contains('path="res://scenes/aurelian/playable_aurelian_strategic_readability_v1.gd"'),
+		"entry_scene_uses_readability_wrapper"
 	)
 
 	var manifest := _read_json(MANIFEST_PATH)
@@ -80,6 +80,8 @@ func _initialize() -> void:
 		String(core_session.get("native_editor_compatibility_env", "")) == "AURELIAN_FULL_PROGRESSION=1",
 		"native_editor_compatibility_escape_hatch"
 	)
+	var readability_source := _read_text("res://scenes/aurelian/playable_aurelian_strategic_readability_v1.gd")
+	_check(readability_source.contains('extends "res://scenes/aurelian/playable_aurelian_first_session_v6.gd"'), "readability_preserves_v6_wrapper")
 	var wrapper_source := _read_text("res://scenes/aurelian/playable_aurelian_first_session_v6.gd")
 	_check(wrapper_source.contains('OS.has_feature("aurelian_full_progression")'), "runtime_queries_export_feature")
 	var presets_source := _read_text("res://export_presets.cfg")
