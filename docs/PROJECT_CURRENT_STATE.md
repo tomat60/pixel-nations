@@ -10,8 +10,8 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: strategy gate after the terminal Aurelian Map and World Strategic Readability v1 rejection.
 Current milestone: select a materially different bounded response to the remaining strategic-readability blocker from fresh accepted and rejected evidence.
-Active execution issue: none.
-Next allowed action: run one strategy-only whole-product portfolio gate. No runtime or workflow implementation is authorized until a separate authority PR is merged and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen issue #645, PR #647, issue #644, issue #640, PR #642, issue #638, issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Active execution issue: #649
+Next allowed action: complete the strategy-only whole-product portfolio gate in issue #649. No runtime or workflow implementation is authorized until a separate authority PR is merged and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen issue #645, PR #647, issue #644, issue #640, PR #642, issue #638, issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
 
 ## Terminal result: Aurelian Map and World Strategic Readability v1
 
