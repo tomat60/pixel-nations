@@ -2,16 +2,36 @@
 
 Status: ACTIVE
 Updated: 2026-09-08
-Current state revision: 13.9
-Authority baseline SHA: `e261309761efdbf6a35830ca780e8d76085eed6e`
+Current state revision: 14.0
+Authority baseline SHA: `9a263741f650299b5f48c43938271102547b6cf2`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `e177477f10c259699d9c1517e9f4f23dfdf24c14`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy gate after successful Exported Startup Ownership v1 architecture recovery.
-Current milestone: select the highest-value next whole-product slice from fresh accepted evidence.
-Active execution issue: #634
-Next allowed action: run one strategy-only whole-product portfolio gate. No runtime or workflow implementation is authorized until a separate authority PR is merged and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: authorized Default First Session v5 product candidate.
+Current milestone: one coherent default native/Web six-beat first session ending at the persistent two-land North Ridge finale.
+Active execution issue: #635
+Next allowed action: after this authority is merged, complete and record the mandatory implementation preflight for issue #635. Runtime and workflow coding remains blocked until `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Portfolio decision after Exported Startup Ownership v1
+
+Issue #634 completed the mandatory strategy-only whole-product portfolio gate.
+
+Decision: authorize exactly one fresh `Default First Session v5` candidate under issue #635.
+
+PR #632 removed the last unresolved startup boundary. Explicit native and default exported Linux routes use the same main scene, root and controller, reach ordered public readiness, own the intended focused window, receive one normal OS Return at the public input boundary and perform the expected first transition. The rejected v4 failure is therefore localized to its evidence launch not exposing line-buffered runtime output before the readiness deadline.
+
+Default First Session v5 is the highest-value next slice because Pixel Nations still lacks one accepted coherent default first session. It outranks Minimal Economy Foundation and Repeatable Expansion because both would deepen an unaccepted loop. It outranks more startup/input architecture because PR #622 and PR #632 already passed those boundaries. It outranks broad visual work because fresh evidence does not show that visual composition blocks the first action; bounded clarity work should follow direct session evidence.
+
+The candidate must present the same normal native and normal Web path:
+
+`claim -> develop -> choose -> consequence -> grow -> expand`
+
+It must end at the visible East Route plus North Ridge two-land finale, preserve that finale across native restart, Web reload and profile reopen, and keep unplayed crisis, rival and frontier-payoff history truthfully `none`.
+
+It must reuse accepted focus ownership and public input receipts, accepted exported startup identity and lifecycle, distinct default/full-progression Web exports, and line-buffered fail-closed evidence transport from process start. Evidence requires one input-driven Web film, exactly six named 1440x900 frames, matching action/receipt/state logs, native/Web persistence, manifests, SHA-256 and direct product review.
+
+No schema migration, fabricated history, new mechanic, economy, resources, workers, timers, queues, combat, diplomacy, governance, third land, repeatable expansion framework, new asset or terrain family, backend, account, multiplayer, payment, crypto, broad controller rewrite or broad visual polish is authorized. Preflight may name at most twelve exact files. One complete candidate and at most one bounded deterministic correction are permitted.
 
 ## Terminal result: Exported Startup Ownership v1
 
