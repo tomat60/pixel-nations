@@ -207,6 +207,7 @@ var intent_label: Label
 var controls_label: Label
 var automated_input_mode := false
 var automated_frame := 0
+var input_receipt_generation := 0
 var automated_direction := "expand"
 var automated_crisis_response := "shield_greenvale"
 var automated_rival_response := "stand_firm"
@@ -615,7 +616,24 @@ func _build_runtime_hud() -> void:
 	controls_label.modulate = Color("#d8e4d6")
 	content.add_child(controls_label)
 
+func _pressed_public_input_action(event: InputEvent) -> String:
+	if event.is_action_pressed("ui_accept"):
+		return "ui_accept"
+	if event.is_action_pressed("ui_left"):
+		return "ui_left"
+	if event.is_action_pressed("ui_right"):
+		return "ui_right"
+	if event.is_action_pressed("ui_up"):
+		return "ui_up"
+	if event.is_action_pressed("ui_down"):
+		return "ui_down"
+	return ""
+
 func _unhandled_input(event: InputEvent) -> void:
+	var receipt_action := _pressed_public_input_action(event)
+	if not receipt_action.is_empty():
+		input_receipt_generation += 1
+		print("PLAYABLE_AURELIAN_INPUT_RECEIPT=%d:%s:%s" % [input_receipt_generation, receipt_action, entry_state])
 	if event.is_action_pressed("ui_accept"):
 		_accept_entry()
 		get_viewport().set_input_as_handled()
