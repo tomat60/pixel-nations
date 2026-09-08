@@ -2,16 +2,16 @@
 
 Status: ACTIVE
 Updated: 2026-09-08
-Current state revision: 13.7
-Authority baseline SHA: `770c0579e9b2b6eb9954b60dcd812006ffdae9b3`
+Current state revision: 13.8
+Authority baseline SHA: `debebce93166b7e051a6245e4b871de30b68c0a3`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `d2c3d7a0dbf603b4a23d72d8fe5494e560c73147`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy-only portfolio review after Default First Session v4 reject.
-Current milestone: select exactly one highest-value next move from fresh evidence.
-Active execution issue: #628
-Next allowed action: complete issue #628 as a strategy-only whole-product portfolio gate. Runtime, workflow, controller, persistence, visual and mechanic implementation is blocked until a separate authority decision is merged. Do not reopen PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: architecture recovery through Exported Startup Ownership v1.
+Current milestone: one no-product-delta proof of startup ownership parity between explicit native and default exported Linux routes.
+Active execution issue: #630
+Next allowed action: after this authority is merged, complete and record the mandatory implementation preflight for issue #630. Runtime and workflow coding remains blocked until `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
 
 ## Terminal result: Default First Session v4
 
@@ -24,6 +24,20 @@ The single authorized correction added only the missing `x11-utils` package. Cor
 On the corrected head, contract validation, Godot import, Linux export, default Web export and the separate full-progression Web export completed. The launched default native runtime showed a process and window but emitted no `PLAYABLE_AURELIAN_ENTRY_READY`, no public input receipt and no state transition before the fail-closed readiness assertion. The run therefore produced no normal-input traversal, restart proof, Web film, six-frame set or final cross-profile persistence evidence.
 
 The correction budget is exhausted. No further retry, delay, driver experiment or product edit is authorized on PR #627. Issue #625 is closed as not planned. Issue #628 is the mandatory strategy-only whole-product portfolio gate.
+
+## Portfolio decision after Default First Session v4
+
+Issue #628 completed the mandatory strategy-only whole-product portfolio gate.
+
+Decision: authorize exactly one no-product-delta `Exported Startup Ownership v1` architecture proof under issue #630.
+
+The corrected Default First Session v4 run completed contract validation, Godot import and Linux/Web exports, and its default native process showed a window. It nevertheless emitted no public ready signal, no input receipt and no first state. The active uncertainty is therefore startup ownership before action 1, not session length, visual composition or mechanics.
+
+The proof must compare the accepted explicit native launch route with the default exported Linux route on one exact head. It must record executable and PCK hashes, export preset and main-scene identity, scene-tree root and attached controller script, ordered startup milestones through `_enter_tree`, `_ready`, window, focus and the existing public input boundary, plus stdout/stderr and process exit classification. After public readiness, exactly one focus-confirmed normal OS input must produce exactly one monotonic receipt and the expected first state on each route.
+
+This outranks a smaller session because the failure preceded the first action. It outranks another orchestration architecture because the divergence boundary is not yet known. It outranks visual work, economy and repeatable expansion because all would build on an unproven default exported startup path.
+
+No product behavior, progression, navigation, persistence, schema, UI, visual, camera, asset, economy or mechanic change is authorized. No delay, retry, debounce, repeated input, new readiness token, direct state mutation or `Input.parse_input_event()` is allowed. Preflight may name at most five exact files. One candidate and at most one bounded deterministic correction are permitted. Green CI alone is not acceptance.
 
 ## Portfolio decision after Input Ownership and Delivery Observability v2
 
@@ -469,12 +483,13 @@ Stop and re-run the portfolio gate if:
 
 ## Durable build sequence
 
-1. Phase B Default First Session v4 - current.
-2. Minimal Economy Foundation.
-3. Repeatable Expansion Loop.
-4. Nation gameplay depth.
-5. Empire gameplay depth and scaling.
-6. Content scale, polish, UX, audio and performance.
+1. Exported Startup Ownership v1 architecture recovery - current.
+2. Default First Session, only after startup ownership passes and a new portfolio decision authorizes it.
+3. Minimal Economy Foundation.
+4. Repeatable Expansion Loop.
+5. Nation gameplay depth.
+6. Empire gameplay depth and scaling.
+7. Content scale, polish, UX, audio and performance.
 
 The portfolio gate may reorder later phases when direct evidence identifies a stronger bottleneck.
 
@@ -505,6 +520,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-All runtime and workflow coding is blocked until this Default First Session v4 authority is merged and issue #625 receives `IMPLEMENTATION_PREFLIGHT_PASS`.
+All runtime and workflow coding is blocked until the Exported Startup Ownership v1 authority is merged and issue #630 receives `IMPLEMENTATION_PREFLIGHT_PASS`.
 
-Do not reopen rejected or completed candidates. Do not add another debounce, delay, retry, readiness token or timing calibration. After preflight, the only authorized implementation is one fresh Default First Session v4 candidate with at most one bounded correction.
+Do not reopen rejected or completed candidates. Do not add another debounce, delay, retry, readiness token or timing calibration. After preflight, the only authorized implementation is one no-product-delta Exported Startup Ownership v1 candidate with at most one bounded deterministic correction.
