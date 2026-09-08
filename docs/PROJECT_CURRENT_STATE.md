@@ -10,8 +10,8 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: accepted coherent Default First Session v6; mandatory whole-product portfolio gate before another implementation authority.
 Current milestone: the default native/Web six-beat first session is accepted at a persistent East Route plus North Ridge two-land finale, with every normal input gated through its exact applied result.
-Active execution issue: none
-Next allowed action: complete a strategy-only whole-product portfolio gate using the accepted v6 evidence and direct visual review. No new implementation is authorized until a separate authority is merged. Do not reopen issue #640, PR #642, issue #638, issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Active execution issue: #644
+Next allowed action: complete strategy-only portfolio gate #644 using the accepted v6 evidence and direct visual review. No new implementation is authorized until a separate authority is merged. Do not reopen issue #640, PR #642, issue #638, issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
 
 ## Terminal result: Default First Session v6
 
