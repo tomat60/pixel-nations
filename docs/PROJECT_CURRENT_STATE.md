@@ -2,16 +2,38 @@
 
 Status: ACTIVE
 Updated: 2026-09-08
-Current state revision: 15.0
-Authority baseline SHA: `84123ce17c33c71ecdfb61df4f8eda50198cd5e9`
+Current state revision: 16.0
+Authority baseline SHA: `98a45126f465fd91fc8a876e1f303f8193ff584c`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `e177477f10c259699d9c1517e9f4f23dfdf24c14`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: mandatory strategy-only portfolio review after Default First Session v5 rejection.
-Current milestone: select the highest-value next slice from fresh product and QA evidence.
-Active execution issue: #638
-Next allowed action: complete the strategy-only portfolio gate in issue #638. Product and workflow implementation remain blocked until a separate authority change is merged and a fresh execution issue records `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: authorized Default First Session v6 product candidate.
+Current milestone: one coherent default native/Web six-beat first session ending at the persistent two-land North Ridge finale, with every input gated through its exact applied result.
+Active execution issue: #640
+Next allowed action: after this authority is merged, complete and record the mandatory implementation preflight for issue #640. Runtime and workflow coding remains blocked until `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen issue #638, issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Portfolio decision after Default First Session v5
+
+Issue #638 completed the mandatory strategy-only whole-product portfolio gate.
+
+Decision: authorize exactly one fresh `Default First Session v6` candidate under issue #640.
+
+Pixel Nations still lacks one accepted coherent default first session. PR #632 accepted default exported startup ownership, and PR #622 accepted the stronger action boundary that waits for the exact monotonic receipt, exact expected public event and exact resulting state before the next input. PR #637 failed because its candidate-specific native driver used a weaker receipt-only boundary and sent the second consecutive North Ridge Return before the first Return's inspected-state transition.
+
+Default First Session v6 is the highest-value next slice because it combines the player-visible six-beat session with the already accepted action-completion semantics. A standalone no-product-delta barrier would duplicate #622. A shorter session would hide product value and avoid the known boundary. Map/World simplification remains important but fresh evidence does not show visual hierarchy blocking action 35; it follows direct review of a completed session. Economy, repeatable expansion and deeper systems would deepen an unaccepted first loop.
+
+The candidate must present the same normal native and normal Web path:
+
+`claim -> develop -> choose -> consequence -> grow -> expand`
+
+It must end at the visible East Route plus North Ridge two-land footprint and preserve that finale across native restart, Web reload and profile reopen while keeping unplayed optional history truthfully `none`.
+
+Every normal OS input must correlate SEND, exactly one monotonic public receipt, its exact expected event and its exact resulting public state before the next input. Consecutive identical keys, including the two North Ridge Returns, must be proven independently. Reuse the accepted #622 completion semantics, #632 exported startup lifecycle, line-buffered process transport and `windowfocus --sync`. Do not introduce another receipt-only driver, timing sleep, retry, debounce, repeated input or direct state mutation.
+
+Evidence requires one exact-head input-driven Web film, exactly six named 1440x900 frames, matching action/receipt/event/state logs, native/Web parity, native restart, Web reload, profile reopen, manifests, SHA-256, historical regressions and direct product review. Preflight may name at most twelve exact files. One complete candidate and at most one bounded deterministic correction are permitted. Then terminal PASS or REJECT.
+
+No new mechanic, economy, resources, workers, timers, queues, combat, diplomacy, governance, third land, repeatable expansion framework, persistence schema migration, fabricated optional history, new asset or terrain family, backend, account, multiplayer, payment, crypto, broad controller rewrite, broad visual polish, MAX or paid tools is authorized.
 
 ## Terminal result: Default First Session v5
 
