@@ -24,6 +24,31 @@ func core_session_right_target_for_state(state_name: String) -> String:
 func _apply_entry_state(state_name: String) -> void:
 	_sanitize_core_session_state_for_persistence(state_name)
 	super(state_name)
+	_apply_controller_owned_strategic_copy(state_name)
+
+func controller_owned_strategic_view(state_name: String) -> String:
+	if state_name.begins_with("map_"):
+		return "map"
+	if state_name.begins_with("world_"):
+		return "world"
+	return "village"
+
+func _apply_controller_owned_strategic_copy(state_name: String) -> void:
+	var view := controller_owned_strategic_view(state_name)
+	if view == "village":
+		return
+	_hide_strategic_label_children(main_world_overlay_root)
+	_hide_strategic_label_children(main_overlay_root)
+	_hide_strategic_label_children(main_decision_overlay_root)
+	print("AURELIAN_CONTROLLER_OWNED_STRATEGIC_COPY=%s:%s" % [view, state_name])
+
+func _hide_strategic_label_children(root: Node) -> void:
+	if root == null:
+		return
+	for child: Node in root.get_children():
+		if child is Label3D:
+			child.visible = false
+		_hide_strategic_label_children(child)
 
 func _sanitize_core_session_state_for_persistence(state_name: String) -> void:
 	if not _core_session_active() or not IMPERIAL_EXPANSION_STATES.has(state_name):
