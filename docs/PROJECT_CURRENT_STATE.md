@@ -31,7 +31,7 @@ It must end at the visible East Route plus North Ridge two-land finale, preserve
 
 It must reuse accepted focus ownership and public input receipts, accepted exported startup identity and lifecycle, distinct default/full-progression Web exports, and line-buffered fail-closed evidence transport from process start. Evidence requires one input-driven Web film, exactly six named 1440x900 frames, matching action/receipt/state logs, native/Web persistence, manifests, SHA-256 and direct product review.
 
-No schema migration, fabricated history, new mechanic, economy, resources, workers, timers, queues, combat, diplomacy, governance, third land, repeatable expansion framework, new asset or terrain family, backend, account, multiplayer, payment, crypto, broad controller rewrited rewrite orful UI pass is many?
+No schema migration, fabricated history, new mechanic, economy, resources, workers, timers, queues, combat, diplomacy, governance, third land, repeatable expansion framework, new asset or terrain family, backend, account, multiplayer, payment, crypto, broad controller rewrite or broad visual polish is authorized. Preflight may name at most twelve exact files. One complete candidate and at most one bounded deterministic correction are permittedable.
 
 ## Terminal result: Exported Startup Ownership v1
 
