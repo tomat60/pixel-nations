@@ -2,16 +2,30 @@
 
 Status: ACTIVE
 Updated: 2026-09-08
-Current state revision: 14.0
-Authority baseline SHA: `9a263741f650299b5f48c43938271102547b6cf2`
+Current state revision: 15.0
+Authority baseline SHA: `84123ce17c33c71ecdfb61df4f8eda50198cd5e9`
 Product baseline SHA: `d24f2f1ec414548a14e31b5d7dfd608320ca08ca`
 Runtime baseline SHA: `e177477f10c259699d9c1517e9f4f23dfdf24c14`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authorized Default First Session v5 product candidate.
-Current milestone: one coherent default native/Web six-beat first session ending at the persistent two-land North Ridge finale.
-Active execution issue: #635
-Next allowed action: after this authority is merged, complete and record the mandatory implementation preflight for issue #635. Runtime and workflow coding remains blocked until `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+Current product phase: mandatory strategy-only portfolio review after Default First Session v5 rejection.
+Current milestone: select the highest-value next slice from fresh product and QA evidence.
+Active execution issue: #638
+Next allowed action: complete the strategy-only portfolio gate in issue #638. Product and workflow implementation remain blocked until a separate authority change is merged and a fresh execution issue records `IMPLEMENTATION_PREFLIGHT_PASS`. Do not reopen issue #635, PR #637, issue #634, PR #632, issue #630, PR #627, issue #625, PR #622, issue #620, PR #617, issue #615, PR #612, issue #608, PR #605, PR #600, issue #597, PR #594, issue #593, PR #591, issue #589, PR #587, or issue #586.
+
+## Terminal result: Default First Session v5
+
+PR #637 is terminally classified as `GODOT_AURELIAN_DEFAULT_FIRST_SESSION_V5_REJECT` and closed without merge.
+
+The final exact head was `c22c43bd579d01315e15723b98db6246d4e98f3a`. Focused run `34213193093`, job `102018746500`, produced artifact `10050729419` with digest `sha256:bbb43cb2714eb25b0cf3c56d5499a1988c734cc16ab864dbf17a3f3eb094914f`.
+
+Contract validation, Godot import and isolated Linux, default Web and full-progression Web exports passed. Line-buffered startup exposed public readiness, and the single bounded correction replaced X11 `windowactivate` with the already accepted `windowfocus --sync` operation.
+
+The corrected run delivered 34 ordered normal OS inputs with monotonic public receipts. After receipt `34:ui_accept:map_first_imperial_expansion_north_ridge_available`, the receipt-only driver emitted the next consecutive Return before observing the inspected-state transition. No receipt 35 arrived before the fail-closed deadline. Native completion, restart proof, Web film, six-frame evidence and final cross-profile persistence were therefore not produced.
+
+The correction budget is exhausted. No retry, delay, second driver correction or product edit is authorized on PR #637. The legacy Input Ownership Delivery v2 workflow failed only at its own exact four-file scope assertion and did not execute a product test. This rejection does not invalidate the accepted startup ownership or public input boundary.
+
+Issue #635 is closed as not planned. Issue #638 is the mandatory strategy-only whole-product portfolio gate before any new implementation authority.
 
 ## Portfolio decision after Exported Startup Ownership v1
 
