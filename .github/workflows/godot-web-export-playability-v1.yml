@@ -189,7 +189,7 @@ jobs:
             const before = releaseReceipts.length;
             const expectedAction = keyActions[key];
             if (!expectedAction) throw new Error('Unmapped normal input key: ' + key);
-            await pressAndWaitRelease(key);
+            await page.keyboard.press(key);
             const started = Date.now();
             while (Date.now() - started < timeout) {
               if (releaseReceipts.length > before + 1) {
