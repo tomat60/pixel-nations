@@ -2,16 +2,41 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 22.0
-Authority baseline SHA: `b4d5b7f56f49dc4fd474b559ad5ce5c3835c9e9b`
+Current state revision: 23.0
+Authority baseline SHA: `07a71805aea0868c9e7a6fb25be79841db177031`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authorized Aurelian Controller-Owned Strategic Copy v1 product candidate.
-Current milestone: make Map and World strategically readable through the accepted controller-owned HUD without a new overlay or input owner.
-Active execution issue: #655
-Next allowed action: after this authority is merged, record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #655, then create exactly one fresh bounded implementation candidate from accepted `main`. Runtime and workflow coding remains blocked until that preflight is recorded.
+Current product phase: strategy-only portfolio gate after terminal Controller-Owned Strategic Copy v1 rejection.
+Current milestone: determine whether normal input delivery robustness must precede further Map/World readability work and deeper mechanics.
+Active execution issue: #658
+Next allowed action: complete issue #658 with one ranked `PORTFOLIO_GATE_DECISION_PASS`. Runtime, workflow and product implementation remain blocked until a separate authority change is merged and a fresh implementation issue records preflight.
+
+## Terminal Aurelian Controller-Owned Strategic Copy v1 rejection
+
+PR #657 was rejected and closed without merge at exact head `72ac94557cb92c2377405567a060541a2bb3805f`.
+
+The candidate reused the accepted controller and existing HUD and added no CanvasLayer, scene child, input owner, process loop, camera rule, gameplay state or persistence field. Its focused workflow completed the native/Web 35-action path and produced the required evidence artifact:
+
+- focused run: `34308525165`;
+- focused artifact: `10087592859`;
+- artifact digest: `sha256:6c08d2b5723d510fb152b80487fe130b93733ebe066e3a1b0c82c882f930d19c`;
+- Foundation, CI, Visual QA and P4/P5/P6/P7/P8/P10/P11: PASS.
+
+The independent required Default First Session v6 regression failed on the same exact head:
+
+- workflow run: `34308525282`;
+- job: `102330140200`;
+- actions 1 through 31 completed with exact SEND/ACK/event/state boundaries;
+- action 32 sent `ui_accept` from `map_first_imperial_expansion_north_ridge_inspected` and expected `map_first_imperial_expansion_two_lands_claimed`, but no receipt, expected event or resulting state arrived before the fail-closed timeout;
+- failure artifact: `10087573541`.
+
+Classification: `GODOT_AURELIAN_CONTROLLER_OWNED_STRATEGIC_COPY_V1_REJECT`.
+
+The focused duplicate passing does not erase a lost normal input in the required independent regression. The single product correction was already consumed. PR #657 and issue #655 are terminal reference only. Accepted product/runtime `main` remains unchanged.
+
+Issue #658 is now the mandatory strategy-only portfolio gate. It must compare normal input delivery robustness, Map/World structural simplification, minimal economy, repeatable expansion and onboarding/feedback, then select exactly one bounded next slice. No implementation is authorized before a separate authority change is merged.
 
 ## Portfolio decision after Strategic Overlay Separation v1
 
