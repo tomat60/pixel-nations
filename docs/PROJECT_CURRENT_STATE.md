@@ -2,16 +2,37 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 29.0
-Authority baseline SHA: `a07128f92fd980e7afce66c804532274dea3b133`
+Current state revision: 30.0
+Authority baseline SHA: `e2e68a396ecc8c1d2a5eee04dad6a5f4b14c6ce3`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy-only historical workflow lifecycle gate after terminal Exact-Head Workflow Topology v1 rejection.
-Current milestone: classify stale one-candidate evidence workflows before another control-plane or product candidate.
-Active execution issue: #673
-Next allowed action: complete strategy-only portfolio gate #673. Product/runtime and workflow implementation remains blocked until its decision is recorded in a separate merged authority PR and a fresh implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+Current product phase: authorized control-plane lifecycle recovery after the historical workflow archival portfolio gate.
+Current milestone: archive two superseded one-candidate evidence workflows from automatic pull-request participation while preserving manual historical evidence.
+Active execution issue: #675
+Next allowed action: after this authority revision is merged and issue #675 records `IMPLEMENTATION_PREFLIGHT_PASS`, create exactly one fresh `Historical Workflow Archival v1` candidate from the new `main`.
+
+## Portfolio decision: Historical Workflow Archival v1
+
+Issue #673 completed the mandatory strategy-only historical workflow lifecycle gate.
+
+Decision: authorize exactly one fresh bounded `Historical Workflow Archival v1` control-plane recovery under issue #675 before any new product candidate.
+
+The audit found that two workflows preserve valuable exact-head historical evidence but no longer describe the accepted product or a reusable current PR contract:
+
+- `.github/workflows/godot-aurelian-input-ownership-delivery-v2.yml` is tied to its original 55-action candidate and hard-coded four-file scope;
+- `.github/workflows/godot-aurelian-exported-startup-ownership-v1.yml` is tied to its original three-file scope and obsolete `playable_aurelian_entry_v1.gd` startup identity.
+
+Both are classified as `HISTORICAL_MANUAL_EVIDENCE`. Their complete historical jobs, tests, exact-head recording, fail-closed checks and artifacts remain available through `workflow_dispatch`, but they must stop running automatically on unrelated current pull requests.
+
+Current canonical PR evidence remains Default First Session v6, Playable Entry v1, Web Playability v1, Session Persistence v2 and a focused workflow explicitly authorized by the active issue. The changed-file enforcement in `.github/workflows/deterministic-patch-issue.yml` remains unchanged because it is an executor security boundary.
+
+The recovery has an exact two-file ceiling containing only the two historical workflows. It must remove only each `pull_request` event and its branches/paths list. Every line from `permissions:` through end of file must remain byte-identical, and `workflow_dispatch` must remain enabled.
+
+Acceptance requires valid workflow syntax, exact two-file scope, direct static proof that neither historical workflow remains in the PR-trigger graph, unchanged historical test bodies, and green selected baseline checks on the same exact head. Product/runtime baseline `4bf57d2faefe382ef1272fe8155d46551a7fbb5f` remains unchanged.
+
+One complete candidate and at most one bounded correction are permitted. A third file, missing manual dispatch, edit below the event block, workflow deletion, product/runtime change or deterministic failure after correction requires terminal `HISTORICAL_WORKFLOW_ARCHIVAL_V1_REJECT`. Otherwise terminal `HISTORICAL_WORKFLOW_ARCHIVAL_V1_PASS`.
 
 ## Terminal Exact-Head Workflow Topology v1 rejection
 
