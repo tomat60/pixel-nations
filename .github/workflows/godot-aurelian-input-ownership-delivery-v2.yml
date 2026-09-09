@@ -1,13 +1,6 @@
 name: Godot Aurelian Input Ownership Delivery V2
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - "game/scenes/aurelian/playable_aurelian_entry_v1.gd"
-      - ".github/scripts/aurelian-input-ownership-delivery-v2.sh"
-      - ".github/workflows/godot-aurelian-input-ownership-delivery-v2.yml"
-      - ".github/workflows/godot-aurelian-session-persistence-v2.yml"
   workflow_dispatch:
 
 permissions:
