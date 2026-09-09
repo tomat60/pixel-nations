@@ -2,16 +2,36 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 28.0
-Authority baseline SHA: `96176afbb703fe2d40c453708d2859e682fcf423`
+Current state revision: 29.0
+Authority baseline SHA: `a07128f92fd980e7afce66c804532274dea3b133`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authorized control-plane recovery after the exact-head workflow topology portfolio gate.
-Current milestone: make reusable exact-head product regressions independent of their original candidate diff shape.
-Active execution issue: #670
-Next allowed action: after this authority revision is merged and issue #670 records `IMPLEMENTATION_PREFLIGHT_PASS`, create exactly one fresh `Exact-Head Workflow Topology v1` recovery candidate from the new `main`.
+Current product phase: strategy-only historical workflow lifecycle gate after terminal Exact-Head Workflow Topology v1 rejection.
+Current milestone: classify stale one-candidate evidence workflows before another control-plane or product candidate.
+Active execution issue: #673
+Next allowed action: complete strategy-only portfolio gate #673. Product/runtime and workflow implementation remains blocked until its decision is recorded in a separate merged authority PR and a fresh implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+
+## Terminal Exact-Head Workflow Topology v1 rejection
+
+PR #672 was rejected and closed without merge at exact head `2c098408656e5152ededac8421075a87fe726bce`.
+
+The exact two-file candidate removed only the authorized original-candidate diff cardinality and required-file membership assertions while preserving exact-head equality and complete changed-file recording. Required workflow `Godot Aurelian Exported Startup Ownership V1` then failed deterministically before runtime comparison:
+
+- run `34341339164`;
+- job `102432585544`;
+- failed step `Record exact scope and startup identity`;
+- artifact `10099852362`;
+- digest `sha256:d489ed02430fbbc9f0abce7cef520c04aedc16090504e4ab07f61d14bcc63e24`.
+
+The workflow successfully recorded exact head and both changed files. Its next unchanged identity assertion required the accepted start scene to attach `res://scenes/aurelian/playable_aurelian_entry_v1.gd`, but fresh accepted `main` attaches `res://scenes/aurelian/playable_aurelian_first_session_v6.gd`. This is a stale historical product-identity contract, not an infrastructure failure and not a product regression caused by the candidate.
+
+Issue #670 authorized removal only of the original diff-shape guards and required every original product test to remain unchanged. Updating the stale startup identity would have exceeded the contract. Correction 0/1 remained unused because no legal bounded correction existed, and blind retry could not change the result.
+
+Classification: `EXACT_HEAD_WORKFLOW_TOPOLOGY_V1_REJECT`.
+
+No code from PR #672 entered `main`. Product/runtime baseline remains `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`. Issue #673 is the only active strategy gate and must define lifecycle policy for historical one-candidate workflows before any further implementation.
 
 ## Portfolio decision: Exact-Head Workflow Topology v1
 
