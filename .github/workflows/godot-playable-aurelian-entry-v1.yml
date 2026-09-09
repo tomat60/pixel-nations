@@ -6,6 +6,7 @@ on:
     paths:
       - "game/project.godot"
       - "game/scenes/aurelian/playable_aurelian_entry_v1.gd"
+      - "game/scenes/aurelian/playable_aurelian_first_session_v6.gd"
       - "game/scenes/aurelian/playable_aurelian_entry_v1.tscn"
       - "game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
       - "game/scenes/aurelian/aurelian_session_persistence_v2.gd"

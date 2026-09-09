@@ -1,4 +1,4 @@
-name: Godot Aurelian Default First Session v6
+name: Godot Aurelian Input Release Boundary v3
 
 on:
   pull_request:
@@ -10,8 +10,10 @@ on:
       - "game/scenes/aurelian/playable_aurelian_entry_v1.tscn"
       - "game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
       - "game/tests/aurelian_default_first_session_v6_test.gd"
+      - "game/tests/aurelian_input_release_boundary_v3_test.gd"
       - "game/tests/aurelian_first_imperial_expansion_v1_test.gd"
       - "game/tests/aurelian_session_persistence_v2_test.gd"
+      - ".github/workflows/godot-aurelian-input-release-boundary-v3.yml"
       - ".github/workflows/godot-aurelian-default-first-session-v6.yml"
       - ".github/workflows/godot-aurelian-persistence-optional-history-decoupling-v1.yml"
       - ".github/workflows/godot-web-export-playability-v1.yml"
@@ -22,20 +24,24 @@ permissions:
   contents: read
 
 concurrency:
-  group: godot-aurelian-default-first-session-v6-${{ github.event.pull_request.number || github.ref }}
+  group: godot-aurelian-input-release-boundary-v3-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
   GODOT_VERSION: "4.7.1"
   GODOT_RELEASE: "4.7.1-stable"
   GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
-  EVIDENCE_DIR: "evidence/godot-aurelian-default-first-session-v6"
+  EVIDENCE_DIR: "evidence/godot-aurelian-input-release-boundary-v3"
 
 jobs:
   prove-default-first-session:
-    name: Prove native and Web default first session
+    name: Prove native and Web release boundary profile ${{ matrix.profile }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [1, 2, 3]
     steps:
       - name: Checkout exact candidate head
         uses: actions/checkout@v4
@@ -388,7 +394,7 @@ jobs:
             ['expand','06-expand-world-two-land-footprint-1440x900.png','world_first_imperial_expansion_two_land_footprint']
           ].map(([beat,file,state])=>({beat,file,state}));
           fs.writeFileSync(path.join(root,'result-manifest.json'),JSON.stringify({
-            contract:'GODOT_AURELIAN_DEFAULT_FIRST_SESSION_V6_GATE_B', exact_head:exact,
+            contract:'GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V3', exact_head:exact, profile:Number('${{ matrix.profile }}'),
             viewport:{width:1440,height:900}, input_mode:'normal_keyboard', input_action_count:35,
             completion_barrier:'send_plus_exact_action_receipt_plus_expected_event_plus_resulting_state_plus_matching_release_receipt',
             native_and_web_sequence_identical:true, frames,
@@ -399,13 +405,13 @@ jobs:
           NODE
           grep -F '"product_acceptance_claimed": false' "${EVIDENCE_DIR}/result-manifest.json"
           sha256sum "${EVIDENCE_DIR}/default-first-session-v6.webm" "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}"/native/*.log "${EVIDENCE_DIR}"/web/*.log "${EVIDENCE_DIR}"/web/*.json "${EVIDENCE_DIR}/result-manifest.json" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
-          echo "GODOT_AURELIAN_DEFAULT_FIRST_SESSION_V6_GATE_B_DETERMINISTIC_QA=PASS"
+          echo "GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V3_DETERMINISTIC_QA=PASS"
 
       - name: Upload exact-head Gate B evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: godot-aurelian-default-first-session-v6-${{ github.event.pull_request.head.sha || github.sha }}
-          path: evidence/godot-aurelian-default-first-session-v6
+          name: godot-aurelian-input-release-boundary-v3-profile-${{ matrix.profile }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/godot-aurelian-input-release-boundary-v3
           if-no-files-found: error
           retention-days: 7
