@@ -2,16 +2,38 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 26.0
-Authority baseline SHA: `03df1eda101e1ea5d0962b55eb827a9252bed62a`
+Current state revision: 27.0
+Authority baseline SHA: `a59622a6ac7cebad508925a800be7d18db2e4f12`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authorized Aurelian Input Release Boundary v2 candidate.
-Current milestone: integrate exact controller-owned key-release completion with a complete exact-head workflow trigger plan.
-Active execution issue: #665
-Next allowed action: after this authority is merged, record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #665, then create exactly one fresh bounded implementation candidate from accepted `main`. Runtime and workflow coding remains blocked until that preflight is recorded.
+Current product phase: strategy-only exact-head workflow topology gate after terminal Aurelian Input Release Boundary v2 rejection.
+Current milestone: select the smallest bounded recovery that makes the complete transitive workflow graph executable.
+Active execution issue: #668
+Next allowed action: complete strategy-only portfolio gate #668. Product/runtime and workflow implementation remains blocked until its decision is recorded in a separate merged authority PR and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+
+## Terminal Aurelian Input Release Boundary v2 rejection
+
+PR #667 was rejected and closed without merge at exact head `6f958091709a2922fa744926c7448c1ed50bd0cd`.
+
+The fresh seven-file candidate correctly selected every named workflow required by issue #665, including separate Playable Entry and Session Persistence v2 runs. Focused Input Release Boundary v2 run `34338556127`, Default First Session v6 run `34338556091`, Foundation, CI, Visual QA, P4-P8 and P10-P11 passed.
+
+A transitive historical workflow made the candidate unmergeable:
+
+- `Godot Aurelian Input Ownership Delivery V2` run `34338556058`;
+- job `102423624131`;
+- failure step: `Record exact scope`, before any product test;
+- artifact `10098728492`;
+- digest `sha256:81def6ab43974d41d560b9b5bd84c6b4d8e1c905563afe8b33f6ac715ffaf0a2`.
+
+That workflow was triggered by the authorized Session Persistence v2 workflow change, but its internal guard hard-coded the four-file shape of its original candidate. It observed the seven authorized v2 files and exited 1. Repairing or generalizing the historical guard required an eighth path outside the locked ceiling, while removing the Session Persistence workflow change would again suppress a required named exact-head run. Blind retry could not change the deterministic result, and no legal bounded correction existed.
+
+Classification: `GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V2_REJECT`.
+
+This is an exact-head workflow-topology rejection, not a demonstrated product-behavior failure. No code from PR #667 entered `main`. The accepted product/runtime baseline remains `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`.
+
+Issue #668 is the only active strategy gate. It must model both path filters and internal scope assertions across all direct and transitive workflows before another implementation is authorized.
 
 ## Terminal Aurelian Input Release Boundary v1 rejection
 
@@ -828,6 +850,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-All runtime and workflow coding is blocked until this v2 authority is merged and issue #665 records `IMPLEMENTATION_PREFLIGHT_PASS` with proof that every named exact-head workflow is selected by the proposed diff.
+All product/runtime and workflow implementation is blocked until strategy-only gate #668 selects one bounded recovery, a separate authority PR is merged, and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS` with proof of every direct and transitive workflow trigger and internal scope guard.
 
-Do not reopen, cherry-pick or incrementally patch PR #662. Its single correction budget is exhausted. The fresh v2 candidate must preserve the directly proven release-boundary learning, the accepted Default First Session v6 product/runtime baseline and one physical Aurelian geography.
+Do not reopen, cherry-pick or incrementally patch PR #662 or #667. The next strategy must preserve the directly proven release-boundary learning, the accepted Default First Session v6 product/runtime baseline and one physical Aurelian geography.
