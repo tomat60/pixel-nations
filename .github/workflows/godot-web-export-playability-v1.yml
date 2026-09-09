@@ -178,34 +178,7 @@ jobs:
             throw new Error(`Timed out waiting for ${value} count ${count}; observed=${observedStates.join(',')}`);
           }
 
-          const keyActions = {
-            Enter: 'ui_accept',
-            ArrowLeft: 'ui_left',
-            ArrowRight: 'ui_right',
-            ArrowUp: 'ui_up',
-            ArrowDown: 'ui_down'
-          };
-          async function pressAndWaitRelease(key, timeout = 30000) {
-            const before = releaseReceipts.length;
-            const expectedAction = keyActions[key];
-            if (!expectedAction) throw new Error('Unmapped normal input key: ' + key);
-            await page.keyboard.press(key);
-            const started = Date.now();
-            while (Date.now() - started < timeout) {
-              if (releaseReceipts.length > before + 1) {
-                throw new Error('Duplicate release receipt after ' + key + ': ' + JSON.stringify(releaseReceipts.slice(before)));
-              }
-              if (releaseReceipts.length === before + 1) {
-                const receipt = releaseReceipts[before];
-                if (receipt.index !== before + 1 || receipt.action !== expectedAction) {
-                  throw new Error('Mismatched release receipt after ' + key + ': ' + JSON.stringify(receipt));
-                }
-                return receipt;
-              }
-              await sleep(100);
-            }
-            throw new Error('Timed out waiting for release receipt after ' + key);
-          }
+
 
           (async () => {
             const browser = await chromium.launch({
@@ -217,6 +190,34 @@ jobs:
               recordVideo: { dir: path.join(root, 'video-tmp'), size: { width: 1440, height: 900 } }
             });
             const page = await context.newPage();
+            const keyActions = {
+              Enter: 'ui_accept',
+              ArrowLeft: 'ui_left',
+              ArrowRight: 'ui_right',
+              ArrowUp: 'ui_up',
+              ArrowDown: 'ui_down'
+            };
+            async function pressAndWaitRelease(key, timeout = 30000) {
+              const before = releaseReceipts.length;
+              const expectedAction = keyActions[key];
+              if (!expectedAction) throw new Error('Unmapped normal input key: ' + key);
+              await page.keyboard.press(key);
+              const started = Date.now();
+              while (Date.now() - started < timeout) {
+                if (releaseReceipts.length > before + 1) {
+                  throw new Error('Duplicate release receipt after ' + key + ': ' + JSON.stringify(releaseReceipts.slice(before)));
+                }
+                if (releaseReceipts.length === before + 1) {
+                  const receipt = releaseReceipts[before];
+                  if (receipt.index !== before + 1 || receipt.action !== expectedAction) {
+                    throw new Error('Mismatched release receipt after ' + key + ': ' + JSON.stringify(receipt));
+                  }
+                  return receipt;
+                }
+                await sleep(100);
+              }
+              throw new Error('Timed out waiting for release receipt after ' + key);
+            }
             page.on('console', msg => {
               const line = `[${msg.type()}] ${msg.text()}`;
               consoleLines.push(line);
