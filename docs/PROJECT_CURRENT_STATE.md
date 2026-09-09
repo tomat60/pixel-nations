@@ -9,9 +9,9 @@ Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: strategy-only portfolio gate after accepted Historical Workflow Archival v1 control-plane recovery.
-Current milestone: select the highest-value next product slice from the clean canonical regression topology.
-Active execution issue: none
-Next allowed action: perform and record one fresh whole-product portfolio decision. Product/runtime and workflow implementation remains blocked until a separate merged authority PR names one fresh execution issue and that issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+Current milestone: complete whole-product portfolio gate #680 and select exactly one highest-value next product slice from the clean canonical regression topology.
+Active execution issue: #680
+Next allowed action: complete strategy-only portfolio gate #680 and record exactly one decision. Product/runtime and workflow implementation remains blocked until a separate merged authority PR names one fresh execution issue and that issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
 
 ## Accepted Historical Workflow Archival v1
 
