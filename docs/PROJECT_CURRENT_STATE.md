@@ -2,16 +2,32 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 31.0
-Authority baseline SHA: `d5fde6b5ea8e6bd7c93212e1a2ca109b584406d4`
+Current state revision: 32.0
+Authority baseline SHA: `4feedcd824c8d3b0021c7c82bbc4577c4d9ec878`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy-only portfolio gate after accepted Historical Workflow Archival v1 control-plane recovery.
-Current milestone: complete whole-product portfolio gate #680 and select exactly one highest-value next product slice from the clean canonical regression topology.
-Active execution issue: #680
-Next allowed action: complete strategy-only portfolio gate #680 and record exactly one decision. Product/runtime and workflow implementation remains blocked until a separate merged authority PR names one fresh execution issue and that issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+Current product phase: bounded input reliability stabilization before the next player-visible Map / World / Atlas presentation sprint.
+Current milestone: land one fresh Aurelian Input Release Boundary v3 candidate, then return portfolio priority immediately to strategic-scale presentation.
+Active execution issue: #682
+Next allowed action: after this authority revision merges, issue #682 must record `IMPLEMENTATION_PREFLIGHT_PASS` against the new `main`; then exactly one fresh seven-file v3 candidate may begin.
+
+## Portfolio decision: Input Release Boundary v3 before World Presentation
+
+Whole-product portfolio gate #680 completed after Historical Workflow Archival v1 cleaned the canonical PR regression topology.
+
+Decision: authorize exactly one fresh bounded `Aurelian Input Release Boundary v3` stabilization candidate under issue #682 before resuming the intended player-visible Map / World / Atlas direction.
+
+This does not change product priority. Map/World/Atlas strategic presentation remains the largest visible weakness and the immediate next product milestone after #682. The one-step prerequisite is justified because the previous presentation candidates exposed lost consecutive identical normal inputs, while rejected-reference PRs #662 and #667 directly proved a controller-owned physical key-release boundary across three native and three Web profiles. Those candidates reached the two-land finale with correct persistence and were rejected by evidence/workflow topology rather than demonstrated product behavior. PR #677 removed the obsolete historical workflow blockers that caused the v2 rejection.
+
+The fresh v3 candidate must preserve the accepted Default First Session v6 gameplay, persistence, cameras, HUD, geography and visible output. The accepted v6 controller remains the sole input owner. Physical key release must be acknowledged from real `InputEventKey` release events and correlated monotonically to the preceding action. Readiness tokens, sleeps, fixed delays, retries, repeated keys, debounce, synthetic input, direct state mutation and extra input/process owners remain forbidden.
+
+Exact implementation ceiling is the seven files named by issue #682. Acceptance requires three clean native and three clean Web profiles with exactly 35 SEND, 35 action receipts and 35 matching release receipts, explicit independent proof for the consecutive 14/15 Left and 31/32 Return pairs, the East Route + North Ridge two-land finale, restart/reload/profile-reopen persistence, exact-head artifacts and the complete canonical regression matrix. One bounded correction maximum.
+
+Any lost or duplicated press/release, correlation mismatch, timing workaround, extra owner, product/persistence delta, eighth file or missing required exact-head regression after correction requires terminal `GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V3_REJECT`. Otherwise classify `GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V3_PASS`, merge, reconcile once and immediately open the player-visible Map / World / Atlas strategic-presentation milestone.
+
+Tool policy: deterministic GitHub/terminal execution first. Cursor GPT-5.5 may be used only from the reviewed #682 contract if it materially reduces execution time. MAX OFF, GPT-6 not justified for this known bounded patch, extra paid-tool target $0.
 
 ## Accepted Historical Workflow Archival v1
 
