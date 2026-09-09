@@ -166,6 +166,7 @@ jobs:
           const requestFailures = [];
           const responseFailures = [];
           const observedStates = [];
+          const releaseReceipts = [];
 
           const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
           async function waitForCount(value, count, timeout = 30000) {
@@ -177,6 +178,8 @@ jobs:
             throw new Error(`Timed out waiting for ${value} count ${count}; observed=${observedStates.join(',')}`);
           }
 
+
+
           (async () => {
             const browser = await chromium.launch({
               headless: true,
@@ -187,11 +190,41 @@ jobs:
               recordVideo: { dir: path.join(root, 'video-tmp'), size: { width: 1440, height: 900 } }
             });
             const page = await context.newPage();
+            const keyActions = {
+              Enter: 'ui_accept',
+              ArrowLeft: 'ui_left',
+              ArrowRight: 'ui_right',
+              ArrowUp: 'ui_up',
+              ArrowDown: 'ui_down'
+            };
+            async function pressAndWaitRelease(key, timeout = 30000) {
+              const before = releaseReceipts.length;
+              const expectedAction = keyActions[key];
+              if (!expectedAction) throw new Error('Unmapped normal input key: ' + key);
+              await page.keyboard.press(key);
+              const started = Date.now();
+              while (Date.now() - started < timeout) {
+                if (releaseReceipts.length > before + 1) {
+                  throw new Error('Duplicate release receipt after ' + key + ': ' + JSON.stringify(releaseReceipts.slice(before)));
+                }
+                if (releaseReceipts.length === before + 1) {
+                  const receipt = releaseReceipts[before];
+                  if (receipt.index !== before + 1 || receipt.action !== expectedAction) {
+                    throw new Error('Mismatched release receipt after ' + key + ': ' + JSON.stringify(receipt));
+                  }
+                  return receipt;
+                }
+                await sleep(100);
+              }
+              throw new Error('Timed out waiting for release receipt after ' + key);
+            }
             page.on('console', msg => {
               const line = `[${msg.type()}] ${msg.text()}`;
               consoleLines.push(line);
               const match = msg.text().match(/PLAYABLE_AURELIAN_ENTRY_STATE=([a-z_]+)/);
               if (match) observedStates.push(match[1]);
+              const releaseMatch = msg.text().match(/PLAYABLE_AURELIAN_INPUT_RELEASE_RECEIPT=([0-9]+):([^:]+):([a-z_]+)/);
+              if (releaseMatch) releaseReceipts.push({ index: Number(releaseMatch[1]), action: releaseMatch[2], state: releaseMatch[3] });
             });
             page.on('pageerror', error => consoleLines.push(`[pageerror] ${error.stack || error.message}`));
             page.on('requestfailed', request => requestFailures.push({
@@ -213,358 +246,358 @@ jobs:
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '01-world-neutral-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('world_trade_selected', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '02-world-trade-selected-1440x900.png') });
 
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('map_east_route_selected', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '03-map-east-route-selected-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('map_east_route_claimed', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '04-map-east-route-claimed-1440x900.png') });
 
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_claimed', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '05-village-claimed-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('village_founded', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '06-village-founded-action-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('village_developed', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '07-village-developed-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('map_east_route_claimed', 2);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '08-returned-claimed-map-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('map_east_route_connected', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '09-map-east-route-connected-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('world_trade_route_active', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '10-world-trade-route-active-1440x900.png') });
 
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('map_east_route_connected', 2);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '11-reopened-connected-map-1440x900.png') });
 
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_developed', 2);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '12-reopened-village-developed-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('village_trade_dispatched', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '13-village-first-caravan-dispatched-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('map_east_route_in_use', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '14-map-east-route-in-use-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('world_first_trade_underway', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '15-world-first-trade-underway-1440x900.png') });
 
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('map_east_route_in_use', 2);
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_trade_dispatched', 2);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '16-village-before-city-charter-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('village_city_chartered', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '17-village-first-city-chartered-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('map_greenvale_city', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '18-map-greenvale-city-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('world_first_city_recognized', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '19-world-first-city-recognized-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('world_first_nation_founded', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '20-world-direction-trade-inspected-1440x900.png') });
-            await page.keyboard.press('ArrowDown');
+            await pressAndWaitRelease('ArrowDown');
             await sleep(700);
             await page.screenshot({ path: path.join(stills, '21-world-direction-expand-inspected-1440x900.png') });
-            await page.keyboard.press('ArrowDown');
+            await pressAndWaitRelease('ArrowDown');
             await sleep(700);
             await page.screenshot({ path: path.join(stills, '22-world-direction-frontier-inspected-1440x900.png') });
-            await page.keyboard.press('ArrowUp');
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('ArrowUp');
+            await pressAndWaitRelease('Enter');
             await waitForCount('world_first_nation_founded', 2);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '23-world-direction-expand-committed-1440x900.png') });
 
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('map_aurelian_homeland', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '24-map-aurelian-homeland-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_greenvale_capital', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '25-village-greenvale-capital-expand-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('village_national_mandate_started', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '26-village-national-mandate-started-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('map_national_mandate_active', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '27-map-national-mandate-active-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('world_national_mandate_underway', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '28-world-national-mandate-underway-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('map_national_mandate_active', 2);
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_national_mandate_started', 2);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '29-village-before-empire-proclamation-expand-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('village_aurelian_imperial_capital', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '30-village-aurelian-imperial-capital-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('map_aurelian_imperial_heartland', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '31-map-aurelian-imperial-heartland-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('world_first_empire_proclaimed', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '32-world-first-empire-proclaimed-expand-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('world_river_surge_crisis', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '33-world-river-surge-crisis-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('map_river_surge_response_loci', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '34-map-river-surge-response-loci-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_river_surge_response_pending', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '35-village-river-surge-response-pending-expand-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('village_aurelian_imperial_capital_greenvale_shielded', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '36-village-greenvale-shielded-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('map_aurelian_imperial_heartland_greenvale_response', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '37-map-greenvale-response-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('world_aurelian_river_surge_greenvale_response', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '38-world-greenvale-response-expand-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('world_first_rival_countermove', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '39-world-first-rival-countermove-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('map_first_rival_countermove_east_bridge', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '40-map-first-rival-east-bridge-pressure-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_first_rival_response_pending', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '41-village-first-rival-response-pending-expand-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('village_first_rival_response_stand_firm', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '42-village-first-rival-stand-firm-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('map_first_rival_response_stand_firm', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '43-map-first-rival-stand-firm-expand-1440x900.png') });
 
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('world_first_rival_response_stand_firm', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '44-world-first-rival-stand-firm-expand-1440x900.png') });
 
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('world_first_frontier_payoff_gilded_crossing_revealed', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '45-world-frontier-payoff-gilded-revealed-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('map_first_frontier_payoff_gilded_crossing_pending', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '46-map-frontier-payoff-gilded-pending-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_first_frontier_payoff_gilded_crossing_pending', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '47-village-frontier-payoff-gilded-pending-1440x900.png') });
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('village_first_frontier_payoff_gilded_crossing_secured', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '48-village-frontier-payoff-gilded-secured-1440x900.png') });
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('map_first_frontier_payoff_gilded_crossing_secured', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '49-map-frontier-payoff-gilded-secured-1440x900.png') });
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('world_first_frontier_legacy_gilded_crossing_complete', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '50-world-frontier-legacy-gilded-complete-1440x900.png') });
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('world_first_imperial_expansion_north_ridge_direction', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '51-world-imperial-expansion-north-ridge-direction-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('map_first_imperial_expansion_north_ridge_available', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '52-map-imperial-expansion-north-ridge-available-1440x900.png') });
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('map_first_imperial_expansion_north_ridge_inspected', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '53-map-imperial-expansion-north-ridge-inspected-1440x900.png') });
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('map_first_imperial_expansion_two_lands_claimed', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '54-map-imperial-expansion-two-lands-claimed-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_first_imperial_expansion_greenvale_capital_two_lands', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '55-village-imperial-expansion-capital-two-lands-1440x900.png') });
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('map_first_imperial_expansion_two_lands_claimed', 2);
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('world_first_imperial_expansion_two_land_footprint', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '56-world-imperial-expansion-two-land-footprint-1440x900.png') });
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('world_north_ridge_outpost_frontier_need', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '57-world-north-ridge-outpost-frontier-need-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('map_north_ridge_outpost_claimed_inspection', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '58-map-north-ridge-outpost-claimed-inspection-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_north_ridge_outpost_establish_action', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '59-village-north-ridge-outpost-establish-action-1440x900.png') });
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('map_north_ridge_outpost_established', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '60-map-north-ridge-outpost-established-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_north_ridge_outpost_greenvale_administers', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '61-village-north-ridge-outpost-greenvale-administers-1440x900.png') });
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('map_north_ridge_outpost_established', 2);
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('world_north_ridge_outpost_held_two_land_frontier', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '62-world-north-ridge-outpost-held-frontier-1440x900.png') });
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('world_north_ridge_specialization_held_frontier', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '63-world-north-ridge-specialization-held-frontier-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('map_north_ridge_specialization_inspection', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '64-map-north-ridge-specialization-inspection-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_north_ridge_specialization_choice', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '65-village-north-ridge-trade-post-choice-1440x900.png') });
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('map_north_ridge_trade_post_committed', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '66-map-north-ridge-trade-post-committed-1440x900.png') });
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('world_north_ridge_trade_post_logistics_posture', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '67-world-north-ridge-trade-post-logistics-posture-1440x900.png') });
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('world_north_ridge_specialization_payoff_revealed', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '68-world-north-ridge-payoff-revealed-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('map_north_ridge_specialization_payoff_inspection', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '69-map-north-ridge-payoff-inspection-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_north_ridge_specialization_payoff_action', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '70-village-open-ridge-logistics-line-action-1440x900.png') });
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('map_north_ridge_logistics_line_open', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '71-map-north-ridge-logistics-line-open-1440x900.png') });
-            await page.keyboard.press('ArrowLeft');
+            await pressAndWaitRelease('ArrowLeft');
             await waitForCount('world_north_ridge_logistics_line_active_frontier_role', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '72-world-north-ridge-logistics-line-role-1440x900.png') });
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('world_first_inter_land_coordination_revealed', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '73-world-inter-land-coordination-revealed-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('map_greenvale_north_ridge_link_inspection', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '74-map-greenvale-north-ridge-link-inspection-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_first_inter_land_coordination_action', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '75-village-dispatch-ridge-convoy-action-1440x900.png') });
-            await page.keyboard.press('Enter');
+            await pressAndWaitRelease('Enter');
             await waitForCount('map_ridge_convoy_dispatched', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '76-map-ridge-convoy-dispatched-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('village_ridge_convoy_greenvale_acknowledges', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '77-village-ridge-convoy-acknowledged-1440x900.png') });
-            await page.keyboard.press('ArrowRight');
+            await pressAndWaitRelease('ArrowRight');
             await waitForCount('world_coordinated_logistics_network', 1);
             await sleep(1000);
             await page.screenshot({ path: path.join(stills, '78-world-coordinated-logistics-network-1440x900.png') });
@@ -574,6 +607,8 @@ jobs:
             await browser.close();
 
             fs.writeFileSync(path.join(root, 'browser-console.log'), consoleLines.join('\n') + '\n');
+            if (releaseReceipts.length !== 82) throw new Error('Expected 82 release receipts, got ' + releaseReceipts.length);
+            fs.writeFileSync(path.join(root, 'release-delivery.json'), JSON.stringify({ expected: 82, observed: releaseReceipts.length, receipts: releaseReceipts }, null, 2) + '\n');
             fs.writeFileSync(path.join(root, 'browser-requests.json'), JSON.stringify({
               request_failures: requestFailures,
               response_failures: responseFailures
@@ -615,7 +650,9 @@ jobs:
               first_inter_land_coordination_event_count: 1,
               national_direction: 'expand',
               glb_sha256: process.env.GLB_SHA256,
-              evidence_environment_state_driving: false
+              evidence_environment_state_driving: false,
+              input_release_completion_barrier: 'matching_controller_owned_release_receipt_before_next_send',
+              input_release_receipt_count: 82
             }, null, 2) + '\n');
           })().catch(error => {
             fs.writeFileSync(path.join(root, 'browser-console.log'), consoleLines.join('\n') + '\n');
@@ -636,6 +673,7 @@ jobs:
           done
           test -s "${EVIDENCE_DIR}/godot-web-input-sequence.webm"
           test "$(stat -c %s "${EVIDENCE_DIR}/godot-web-input-sequence.webm")" -gt 100000
+          test "$(node -e "const x=require('./${EVIDENCE_DIR}/release-delivery.json');process.stdout.write(String(x.observed))")" = "82"
           video_duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/godot-web-input-sequence.webm")"
           awk -v duration="$video_duration" 'BEGIN { exit !(duration >= 175 && duration <= 420) }'
           grep -F "PLAYABLE_AURELIAN_ENTRY_READY=world_neutral" "${EVIDENCE_DIR}/browser-console.log"
