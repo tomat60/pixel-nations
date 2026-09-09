@@ -2,16 +2,35 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 32.0
-Authority baseline SHA: `4feedcd824c8d3b0021c7c82bbc4577c4d9ec878`
-Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
-Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
+Current state revision: 33.0
+Authority baseline SHA: `eff3d57ccc0864027b8386473404e110067b26b9`
+Product baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
+Runtime baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: bounded technical reliability prerequisite before the next player-visible Map / World / Atlas presentation milestone.
-Current milestone: implement and directly validate Aurelian Input Release Boundary v3 under issue #682.
-Active execution issue: #682
-Next allowed action: after this authority PR merges, record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #682, then create exactly one fresh seven-file implementation candidate. Product/runtime and workflow implementation remains blocked until that preflight passes.
+Current product phase: strategy-only player-visible Map / World / Atlas presentation gate after accepted Input Release Boundary v3.
+Current milestone: complete portfolio gate #688 and select exactly one highest-value strategic presentation slice.
+Active execution issue: #688
+Next allowed action: complete strategy-only portfolio gate #688 and record exactly one decision. Product/runtime/workflow implementation remains blocked until a separate merged authority PR names one fresh issue and that issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+
+## Accepted Aurelian Input Release Boundary v3
+
+PR #687 received terminal `GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V3_PASS` and was merged.
+
+- accepted exact head: `cf3f53dc2d5d882d674997ac8b90fd0d874ed775`;
+- merge commit: `4870aaa1a8c9607302d3a958a88fc828228feab4`;
+- exact scope: seven authorized files;
+- focused run `34380518581`: PASS, three exact-head profile artifacts;
+- every native and Web profile recorded exactly 35 SEND, 35 action receipts and 35 matching release receipts;
+- consecutive actions 14/15 Left and 31/32 Return completed independently;
+- every profile reached the two-land East Route + North Ridge final state;
+- native restart, Web reload and Web profile reopen preserved the final state;
+- Default First Session v6, Web Playability, Playable Entry, Session Persistence v2, Foundation, CI, Visual QA, P4-P8 and P10-P11: PASS;
+- direct manifest, log, SHA-256, six-frame and video review: PASS;
+- Vercel: SUCCESS;
+- correction budget consumed: 0/1.
+
+The accepted v6 controller remains the sole input owner. Product appearance, gameplay state graph, cameras, HUD, one physical Aurelian geography and persistence semantics remain unchanged. Issue #682 is completed. Portfolio priority now returns to player-visible strategic presentation under issue #688.
 
 ## Portfolio decision: Aurelian Input Release Boundary v3
 
