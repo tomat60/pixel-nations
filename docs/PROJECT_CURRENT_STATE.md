@@ -2,16 +2,37 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 30.0
-Authority baseline SHA: `e2e68a396ecc8c1d2a5eee04dad6a5f4b14c6ce3`
+Current state revision: 31.0
+Authority baseline SHA: `d5fde6b5ea8e6bd7c93212e1a2ca109b584406d4`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authorized control-plane lifecycle recovery after the historical workflow archival portfolio gate.
-Current milestone: archive two superseded one-candidate evidence workflows from automatic pull-request participation while preserving manual historical evidence.
-Active execution issue: #675
-Next allowed action: after this authority revision is merged and issue #675 records `IMPLEMENTATION_PREFLIGHT_PASS`, create exactly one fresh `Historical Workflow Archival v1` candidate from the new `main`.
+Current product phase: strategy-only portfolio gate after accepted Historical Workflow Archival v1 control-plane recovery.
+Current milestone: complete whole-product portfolio gate #680 and select exactly one highest-value next product slice from the clean canonical regression topology.
+Active execution issue: #680
+Next allowed action: complete strategy-only portfolio gate #680 and record exactly one decision. Product/runtime and workflow implementation remains blocked until a separate merged authority PR names one fresh execution issue and that issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+
+## Accepted Historical Workflow Archival v1
+
+PR #677 received terminal `HISTORICAL_WORKFLOW_ARCHIVAL_V1_PASS` and was merged.
+
+- accepted exact head: `90a2092b2e1265c1002bda553dfc5679c70dc49c`;
+- merge commit: `0954f8ab0934db0d9602b6315254a10aa2a61466`;
+- exact scope: two historical workflow files;
+- diff: 0 additions and 13 event-configuration deletions;
+- both workflows retain `workflow_dispatch`;
+- neither retains a `pull_request` trigger;
+- every byte from `permissions:` through EOF remained identical to the accepted base;
+- Pixel Nations CI run `34368692755`: PASS;
+- Pixel Nations Play Visual QA run `34368693046`: PASS;
+- P4, P5, P6, P7, P8, P10 and P11: PASS;
+- Vercel: SUCCESS;
+- correction budget consumed: 0/1.
+
+The two preserved workflows are now historical manual evidence and no longer block unrelated pull requests with obsolete one-candidate scope or startup identity contracts. No product/runtime/test/artifact logic changed. Product/runtime baseline remains `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`.
+
+Issue #675 is completed. A fresh whole-product portfolio decision is mandatory before any new product or workflow implementation.
 
 ## Portfolio decision: Historical Workflow Archival v1
 
