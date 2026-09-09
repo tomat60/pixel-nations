@@ -7,6 +7,7 @@ on:
       - ".github/workflows/godot-aurelian-session-persistence-v2.yml"
       - "game/scenes/aurelian/aurelian_session_persistence_v2.gd"
       - "game/scenes/aurelian/playable_aurelian_entry_v1.gd"
+      - "game/scenes/aurelian/playable_aurelian_first_session_v6.gd"
       - "game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
       - "game/scenes/aurelian/aurelian_first_settlement_development_v1_manifest.json"
       - "game/scenes/aurelian/aurelian_first_trade_route_connection_v1_manifest.json"
