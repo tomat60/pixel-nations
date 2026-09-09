@@ -2,16 +2,28 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 31.0
-Authority baseline SHA: `d5fde6b5ea8e6bd7c93212e1a2ca109b584406d4`
+Current state revision: 32.0
+Authority baseline SHA: `4feedcd824c8d3b0021c7c82bbc4577c4d9ec878`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy-only portfolio gate after accepted Historical Workflow Archival v1 control-plane recovery.
-Current milestone: complete whole-product portfolio gate #680 and select exactly one highest-value next product slice from the clean canonical regression topology.
-Active execution issue: #680
-Next allowed action: complete strategy-only portfolio gate #680 and record exactly one decision. Product/runtime and workflow implementation remains blocked until a separate merged authority PR names one fresh execution issue and that issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+Current product phase: bounded technical reliability prerequisite before the next player-visible Map / World / Atlas presentation milestone.
+Current milestone: implement and directly validate Aurelian Input Release Boundary v3 under issue #682.
+Active execution issue: #682
+Next allowed action: after this authority PR merges, record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #682, then create exactly one fresh seven-file implementation candidate. Product/runtime and workflow implementation remains blocked until that preflight passes.
+
+## Portfolio decision: Aurelian Input Release Boundary v3
+
+Issue #680 completed the mandatory whole-product portfolio gate.
+
+Decision: authorize exactly one fresh bounded `Aurelian Input Release Boundary v3` candidate under issue #682. This is one final reliability prerequisite, not a new input research program. After terminal PASS and merge, portfolio priority returns immediately to player-visible Map / World / Atlas strategic presentation.
+
+The largest visible weakness remains strategic-scale presentation. Input reliability outranks it for one bounded step because the last two presentation candidates exposed lost consecutive identical inputs, while PRs #662 and #667 directly proved the controller-owned physical release boundary and were rejected by evidence topology rather than product behavior. PR #677 removed the obsolete historical workflow blockers. Onboarding cannot compensate for dropped input, and Minimal Economy or Repeatable Expansion would deepen an unreliable session.
+
+Issue #682 locks an exact seven-file ceiling, the accepted v6 controller as sole input owner, three native and three Web clean profiles, exact 35 SEND / 35 action receipt / 35 release receipt correlation, explicit actions 14/15 and 31/32, two-land completion, restart/reload/reopen persistence, unchanged product output, full canonical exact-head regressions and direct artifact review.
+
+Readiness tokens, sleeps, fixed delays, retries, debounce, synthetic gameplay actions, extra input owners, visual changes, new mechanics, MAX and paid tools are forbidden. One complete candidate and at most one bounded correction are permitted. Any missing named run, lost or duplicated input/release, correlation mismatch, product/persistence delta or eighth file requires terminal `GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V3_REJECT`. Otherwise terminal `GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V3_PASS`.
 
 ## Accepted Historical Workflow Archival v1
 
