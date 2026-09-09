@@ -8,10 +8,10 @@ Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: blocked after terminal Aurelian Input Release Boundary v1 rejection.
-Current milestone: none; a fresh strategy-only whole-product portfolio gate must select the next bounded slice.
-Active execution issue: none. Issue #660 and PR #662 are terminal reference only.
-Next allowed action: run one fresh strategy-only whole-product portfolio gate from accepted `main`. Runtime and workflow coding remains blocked until a separate authority PR is merged and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+Current product phase: strategy-only portfolio gate after terminal Aurelian Input Release Boundary v1 rejection.
+Current milestone: select the next bounded slice with a complete exact-head workflow trigger plan.
+Active execution issue: #664
+Next allowed action: complete strategy-only portfolio gate #664. Runtime and workflow coding remains blocked until its selected decision is recorded in a separate merged authority PR and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
 
 ## Terminal Aurelian Input Release Boundary v1 rejection
 
