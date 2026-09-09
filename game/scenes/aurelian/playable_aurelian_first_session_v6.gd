@@ -7,6 +7,28 @@ const CORE_SESSION_EXPANSION_READY_STATE := "world_first_imperial_expansion_nort
 const CORE_SESSION_FINAL_MAP_STATE := "map_first_imperial_expansion_two_lands_claimed"
 const CORE_SESSION_FINAL_STATE := "world_first_imperial_expansion_two_land_footprint"
 
+var input_release_generation := 0
+
+func _released_public_input_action(event: InputEvent) -> String:
+	if event.is_action_released("ui_accept"):
+		return "ui_accept"
+	if event.is_action_released("ui_left"):
+		return "ui_left"
+	if event.is_action_released("ui_right"):
+		return "ui_right"
+	if event.is_action_released("ui_up"):
+		return "ui_up"
+	if event.is_action_released("ui_down"):
+		return "ui_down"
+	return ""
+
+func _unhandled_input(event: InputEvent) -> void:
+	var release_action := _released_public_input_action(event)
+	if not release_action.is_empty():
+		input_release_generation += 1
+		print("PLAYABLE_AURELIAN_INPUT_RELEASE_RECEIPT=%d:%s:%s" % [input_release_generation, release_action, entry_state])
+	super(event)
+
 func core_session_action_for_state(state_name: String) -> String:
 	match state_name:
 		"world_first_empire_proclaimed":
