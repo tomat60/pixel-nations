@@ -2,16 +2,35 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 24.0
-Authority baseline SHA: `b33041bc9afe541c275d35697cfae57fc2fb47eb`
+Current state revision: 25.0
+Authority baseline SHA: `91317a715c59f68b1aef48a32f17bd584760c0b4`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authorized Aurelian Input Release Boundary v1 candidate.
-Current milestone: make consecutive identical normal keyboard inputs reliable through exact controller-owned release observation.
-Active execution issue: #660
-Next allowed action: after this authority is merged, record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #660, then create exactly one fresh bounded implementation candidate from accepted `main`. Runtime and workflow coding remains blocked until that preflight is recorded.
+Current product phase: blocked after terminal Aurelian Input Release Boundary v1 rejection.
+Current milestone: none; a fresh strategy-only whole-product portfolio gate must select the next bounded slice.
+Active execution issue: none. Issue #660 and PR #662 are terminal reference only.
+Next allowed action: run one fresh strategy-only whole-product portfolio gate from accepted `main`. Runtime and workflow coding remains blocked until a separate authority PR is merged and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+
+## Terminal Aurelian Input Release Boundary v1 rejection
+
+PR #662 was rejected and closed without merge at exact head `099fda335dafa5263278b55e0fa4248c4d5fe6ad`.
+
+Direct artifact and log review proved the intended controller-owned release boundary across three clean native and three clean Web profiles:
+
+- each profile completed exactly 35 SEND, 35 action ACK and 35 matching release ACK records;
+- consecutive identical pairs 14/15 (`Left`) and 31/32 (`Return`) completed independently;
+- each profile reached `world_first_imperial_expansion_two_land_footprint` with exactly East Route and North Ridge;
+- native restart, Web reload and Web profile reopen preserved the final state;
+- manifests, SHA-256, six 1440 x 900 frames per profile and Web video were verified directly;
+- focused run `34312357554`, Default First Session v6 run `34312357618`, Web Playability run `34312357560`, Foundation, CI, Visual QA, P4-P8 and P10-P11 passed.
+
+The locked acceptance contract nevertheless remained incomplete. Separate exact-head runs did not exist for Playable Entry, Session Persistence v2 or P9 because their path filters did not select the candidate's five changed files. The single bounded correction had already been consumed. Another branch or workflow mutation would have exceeded the stop condition, and embedded historical logs in a different artifact were not substitutes for the explicitly required named regressions.
+
+Classification: `GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V1_REJECT`.
+
+This is an evidence-plan rejection, not a demonstrated product-behavior failure. No code from PR #662 entered `main`. The accepted product/runtime baseline remains `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`.
 
 ## Portfolio decision after Controller-Owned Strategic Copy v1
 
@@ -790,4 +809,4 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 All runtime and workflow coding is blocked until a fresh strategy-only whole-product portfolio gate selects the next slice, a separate authority PR is merged, and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
 
-Do not reopen or incrementally polish PR #647. Its single correction budget is exhausted. The next strategy must respond materially differently to the proven label-versus-settlement hierarchy failure while preserving the accepted Default First Session v6 product/runtime baseline and one physical Aurelian geography.
+Do not reopen, cherry-pick or incrementally patch PR #662. Its single correction budget is exhausted. The next strategy must preserve the directly proven release-boundary learning while defining a complete exact-head regression trigger plan before implementation, and it must preserve the accepted Default First Session v6 product/runtime baseline and one physical Aurelian geography.
