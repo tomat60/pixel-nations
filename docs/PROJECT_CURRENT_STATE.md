@@ -2,16 +2,35 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 27.0
-Authority baseline SHA: `a59622a6ac7cebad508925a800be7d18db2e4f12`
+Current state revision: 28.0
+Authority baseline SHA: `96176afbb703fe2d40c453708d2859e682fcf423`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy-only exact-head workflow topology gate after terminal Aurelian Input Release Boundary v2 rejection.
-Current milestone: select the smallest bounded recovery that makes the complete transitive workflow graph executable.
-Active execution issue: #668
-Next allowed action: complete strategy-only portfolio gate #668. Product/runtime and workflow implementation remains blocked until its decision is recorded in a separate merged authority PR and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+Current product phase: authorized control-plane recovery after the exact-head workflow topology portfolio gate.
+Current milestone: make reusable exact-head product regressions independent of their original candidate diff shape.
+Active execution issue: #670
+Next allowed action: after this authority revision is merged and issue #670 records `IMPLEMENTATION_PREFLIGHT_PASS`, create exactly one fresh `Exact-Head Workflow Topology v1` recovery candidate from the new `main`.
+
+## Portfolio decision: Exact-Head Workflow Topology v1
+
+Issue #668 completed the mandatory strategy-only workflow topology gate.
+
+Decision: authorize exactly one fresh bounded `Exact-Head Workflow Topology v1` control-plane recovery under issue #670 before any new product candidate.
+
+The fresh audit covered all 36 workflow files on `main` and modeled pull-request path selection together with internal PR-diff assertions. Exactly two reusable product-evidence workflows contain candidate-specific scope guards:
+
+- `.github/workflows/godot-aurelian-input-ownership-delivery-v2.yml` requires exactly the four files from its original candidate and caused PR #667 to fail before product testing;
+- `.github/workflows/godot-aurelian-exported-startup-ownership-v1.yml` requires exactly the three files from its original candidate and carries the same latent topology defect.
+
+The changed-file enforcement in `.github/workflows/deterministic-patch-issue.yml` is an intentional executor security boundary supplied by the issue contract, not a reusable product regression, and remains unchanged.
+
+The recovery has an exact two-file ceiling containing only the two reusable workflow files above. It must preserve exact-head checkout and equality, record the complete changed-file list, preserve path filters, workflow dispatch, every product test, fail-closed validation and artifact upload, and remove only the original candidate's hard-coded diff count and required-file membership assertions.
+
+Acceptance requires both named workflows to trigger and pass on the same exact head, their artifacts to retain exact-head and changed-file evidence, static audit to confirm removal of the candidate-specific assertions, and all selected baseline checks to pass. Product/runtime `4bf57d2faefe382ef1272fe8155d46551a7fbb5f` remains unchanged.
+
+One complete candidate and at most one bounded correction are permitted. A third file, product/runtime change, weakened exact-head identity, skipped original test, missing named run or artifact, or deterministic failure after correction requires terminal `EXACT_HEAD_WORKFLOW_TOPOLOGY_V1_REJECT`. Otherwise terminal `EXACT_HEAD_WORKFLOW_TOPOLOGY_V1_PASS`.
 
 ## Terminal Aurelian Input Release Boundary v2 rejection
 
