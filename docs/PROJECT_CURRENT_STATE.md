@@ -2,16 +2,16 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 25.0
-Authority baseline SHA: `91317a715c59f68b1aef48a32f17bd584760c0b4`
+Current state revision: 26.0
+Authority baseline SHA: `03df1eda101e1ea5d0962b55eb827a9252bed62a`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy-only portfolio gate after terminal Aurelian Input Release Boundary v1 rejection.
-Current milestone: select the next bounded slice with a complete exact-head workflow trigger plan.
-Active execution issue: #664
-Next allowed action: complete strategy-only portfolio gate #664. Runtime and workflow coding remains blocked until its selected decision is recorded in a separate merged authority PR and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+Current product phase: authorized Aurelian Input Release Boundary v2 candidate.
+Current milestone: integrate exact controller-owned key-release completion with a complete exact-head workflow trigger plan.
+Active execution issue: #665
+Next allowed action: after this authority is merged, record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #665, then create exactly one fresh bounded implementation candidate from accepted `main`. Runtime and workflow coding remains blocked until that preflight is recorded.
 
 ## Terminal Aurelian Input Release Boundary v1 rejection
 
@@ -31,6 +31,27 @@ The locked acceptance contract nevertheless remained incomplete. Separate exact-
 Classification: `GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V1_REJECT`.
 
 This is an evidence-plan rejection, not a demonstrated product-behavior failure. No code from PR #662 entered `main`. The accepted product/runtime baseline remains `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`.
+
+## Portfolio decision after Aurelian Input Release Boundary v1
+
+Issue #664 completed the mandatory strategy-only portfolio gate.
+
+Decision: authorize exactly one fresh bounded `Aurelian Input Release Boundary v2` candidate under issue #665.
+
+PR #662 directly proved the proposed controller-owned release semantics in three native and three Web profiles, but its locked evidence plan could not produce separate Playable Entry and Session Persistence v2 exact-head runs after the single correction was consumed. The portfolio gate selected a fresh candidate because input reliability still outranks presentation and feature expansion, while a standalone evidence-only slice would delay integration without adding player value.
+
+The v2 authority corrects the plan before code:
+
+- exact seven-file ceiling includes the v6 controller, a fresh v2 focused test/workflow, Default First Session v6, Web Playability, Playable Entry and Session Persistence v2 workflow files;
+- Playable Entry and Session Persistence v2 must add the exact v6 controller path to their pull-request filters;
+- Foundation, CI, Visual QA, Default First Session v6, Web Playability, Playable Entry, Session Persistence v2, P4-P8 and P10-P11 form the runnable exact-head matrix;
+- no P9 workflow exists on accepted `main`, so P9 is not represented as a runnable named regression;
+- preflight must prove every trigger from the proposed diff before branch creation;
+- missing expected runs is fail-closed.
+
+The candidate must be implemented fresh from accepted `main`. PR #662 may not be reopened, cherry-picked or incrementally patched. The accepted controller remains the sole input owner and gameplay, cameras, HUD, geography, persistence and current first-session output remain unchanged.
+
+One complete candidate and at most one bounded correction are permitted. Any missing named run after correction, lost or duplicated press/release, mismatched correlation, product or persistence regression, timing workaround, extra input owner or scope breach requires terminal `GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V2_REJECT`. Otherwise terminal `GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V2_PASS`.
 
 ## Portfolio decision after Controller-Owned Strategic Copy v1
 
@@ -807,6 +828,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-All runtime and workflow coding is blocked until a fresh strategy-only whole-product portfolio gate selects the next slice, a separate authority PR is merged, and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+All runtime and workflow coding is blocked until this v2 authority is merged and issue #665 records `IMPLEMENTATION_PREFLIGHT_PASS` with proof that every named exact-head workflow is selected by the proposed diff.
 
-Do not reopen, cherry-pick or incrementally patch PR #662. Its single correction budget is exhausted. The next strategy must preserve the directly proven release-boundary learning while defining a complete exact-head regression trigger plan before implementation, and it must preserve the accepted Default First Session v6 product/runtime baseline and one physical Aurelian geography.
+Do not reopen, cherry-pick or incrementally patch PR #662. Its single correction budget is exhausted. The fresh v2 candidate must preserve the directly proven release-boundary learning, the accepted Default First Session v6 product/runtime baseline and one physical Aurelian geography.
