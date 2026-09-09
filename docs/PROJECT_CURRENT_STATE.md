@@ -10,7 +10,7 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: strategy-only portfolio gate after terminal Controller-Owned Strategic Copy v1 rejection.
 Current milestone: determine whether normal input delivery robustness must precede further Map/World readability work and deeper mechanics.
-Active strategy issue: #658
+Active execution issue: #658
 Next allowed action: complete issue #658 with one ranked `PORTFOLIO_GATE_DECISION_PASS`. Runtime, workflow and product implementation remain blocked until a separate authority change is merged and a fresh implementation issue records preflight.
 
 ## Terminal Aurelian Controller-Owned Strategic Copy v1 rejection
