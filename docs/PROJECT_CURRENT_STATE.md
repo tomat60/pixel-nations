@@ -2,16 +2,37 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 23.0
-Authority baseline SHA: `07a71805aea0868c9e7a6fb25be79841db177031`
+Current state revision: 24.0
+Authority baseline SHA: `b33041bc9afe541c275d35697cfae57fc2fb47eb`
 Product baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Runtime baseline SHA: `4bf57d2faefe382ef1272fe8155d46551a7fbb5f`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy-only portfolio gate after terminal Controller-Owned Strategic Copy v1 rejection.
-Current milestone: determine whether normal input delivery robustness must precede further Map/World readability work and deeper mechanics.
-Active execution issue: #658
-Next allowed action: complete issue #658 with one ranked `PORTFOLIO_GATE_DECISION_PASS`. Runtime, workflow and product implementation remain blocked until a separate authority change is merged and a fresh implementation issue records preflight.
+Current product phase: authorized Aurelian Input Release Boundary v1 candidate.
+Current milestone: make consecutive identical normal keyboard inputs reliable through exact controller-owned release observation.
+Active execution issue: #660
+Next allowed action: after this authority is merged, record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #660, then create exactly one fresh bounded implementation candidate from accepted `main`. Runtime and workflow coding remains blocked until that preflight is recorded.
+
+## Portfolio decision after Controller-Owned Strategic Copy v1
+
+Issue #658 completed the mandatory strategy-only portfolio gate.
+
+Decision: authorize exactly one fresh bounded `Aurelian Input Release Boundary v1` candidate under issue #660.
+
+The decisive evidence is shared by the two latest presentation candidates:
+
+- PR #652 completed action 14 `Left`, then lost the consecutive action 15 `Left`.
+- PR #657 completed action 31 `Return`, then lost the consecutive action 32 `Return`.
+
+The accepted completion boundary proves key-down action receipt, expected public event and resulting state, but it does not prove that the same controller has observed the matching physical key release before the next same-key press. The selected slice extends that boundary with one monotonic controller-owned release receipt and requires evidence to observe it before the next SEND.
+
+This outranks Map/World structural simplification because presentation-only work cannot be accepted while independent required runs can lose consecutive identical input. It outranks onboarding because the failure is delivery, not comprehension. Minimal Economy Foundation and Repeatable Expansion remain blocked because both deepen a session whose input boundary is not yet robust under fast normal play.
+
+The candidate must preserve the accepted controller as the sole input owner and keep gameplay states, navigation, cameras, HUD, geography, persistence and current output unchanged. It must not use the rejected readiness token from #612, sleeps, fixed delays, retries, repeated keys, debounce, direct state mutation, synthetic internal actions, test-only bypasses, extra input/process owners, or any visual technique from #647, #652 or #657.
+
+Issue #660 locks an exact six-file ceiling, three native and three Web clean profiles, exactly 35 SEND, 35 action ACK and 35 matching release ACK records per profile, explicit proof for identical-key pairs 14/15 and 31/32, two-land completion, persistence, manifests, SHA-256, direct log/product review and all historical regressions.
+
+One complete candidate and at most one bounded correction are permitted. Any lost or duplicated press/release, mismatched correlation, changed gameplay/visual/persistence behavior, extra input owner, timing workaround or scope breach requires terminal `GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V1_REJECT`. Otherwise terminal `GODOT_AURELIAN_INPUT_RELEASE_BOUNDARY_V1_PASS`.
 
 ## Terminal Aurelian Controller-Owned Strategic Copy v1 rejection
 
