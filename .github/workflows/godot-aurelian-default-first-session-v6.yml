@@ -84,6 +84,8 @@ jobs:
             cat "${EVIDENCE_DIR}/godot-import.log"
             exit 1
           fi
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_input_release_boundary_v3_test.gd 2>&1 | tee "${EVIDENCE_DIR}/input-release-boundary-v3-test.log"
+          grep -F "AURELIAN_INPUT_RELEASE_BOUNDARY_V3_TEST: PASS" "${EVIDENCE_DIR}/input-release-boundary-v3-test.log"
           "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_default_first_session_v6_test.gd 2>&1 | tee "${EVIDENCE_DIR}/default-first-session-v6-test.log"
           grep -F "AURELIAN_DEFAULT_FIRST_SESSION_V6_TEST: PASS" "${EVIDENCE_DIR}/default-first-session-v6-test.log"
           grep -F 'custom_features="aurelian_full_progression"' game/export_presets.cfg
@@ -167,10 +169,12 @@ jobs:
           while IFS='|' read -r key action expected_state expected_event; do
             RECEIPT_GENERATION=$((RECEIPT_GENERATION + 1))
             before_receipts="$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log" || true)"
+            before_releases="$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RELEASE_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log" || true)"
             before_event="$(grep -Fc "$expected_event" "${EVIDENCE_DIR}/native/first-session.log" || true)"
             state_token="PLAYABLE_AURELIAN_ENTRY_STATE=${expected_state}"
             before_state="$(grep -Fc "$state_token" "${EVIDENCE_DIR}/native/first-session.log" || true)"
             receipt_token="PLAYABLE_AURELIAN_INPUT_RECEIPT=${RECEIPT_GENERATION}:${action}:${CURRENT_STATE}"
+            release_token="PLAYABLE_AURELIAN_INPUT_RELEASE_RECEIPT=${RECEIPT_GENERATION}:${action}:${expected_state}"
             xdotool windowfocus --sync "$WINDOW_ID"
             test "$(xdotool getwindowfocus)" = "$WINDOW_ID"
             printf 'status=SEND index=%s key=%s action=%s from_state=%s expected_state=%s expected_event=%s\n' \
@@ -183,11 +187,14 @@ jobs:
               kill -0 "$APP_PID"
               receipt_count="$(grep -Fc "$receipt_token" "${EVIDENCE_DIR}/native/first-session.log" || true)"
               receipt_total="$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log" || true)"
+              release_count="$(grep -Fc "$release_token" "${EVIDENCE_DIR}/native/first-session.log" || true)"
+              release_total="$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RELEASE_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log" || true)"
               event_count="$(grep -Fc "$expected_event" "${EVIDENCE_DIR}/native/first-session.log" || true)"
               state_count="$(grep -Fc "$state_token" "${EVIDENCE_DIR}/native/first-session.log" || true)"
               state_complete=false
               if [ "$expected_state" = "$CURRENT_STATE" ] || [ "$state_count" -eq $((before_state + 1)) ]; then state_complete=true; fi
               if [ "$receipt_count" -eq 1 ] && [ "$receipt_total" -eq $((before_receipts + 1)) ] && \
+                 [ "$release_count" -eq 1 ] && [ "$release_total" -eq $((before_releases + 1)) ] && \
                  [ "$event_count" -eq $((before_event + 1)) ] && [ "$state_complete" = true ]; then
                 complete=true
                 break
@@ -204,6 +211,7 @@ jobs:
           test "$(grep -c 'status=SEND' "${EVIDENCE_DIR}/native/action-delivery.log")" -eq 35
           test "$(grep -c 'status=ACK' "${EVIDENCE_DIR}/native/action-delivery.log")" -eq 35
           test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log")" -eq 35
+          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RELEASE_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log")" -eq 35
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_imperial_expansion_two_land_footprint" "${EVIDENCE_DIR}/native/first-session.log"
           kill "$APP_PID" || true
           wait "$APP_PID" || true
@@ -248,7 +256,7 @@ jobs:
           const root = path.resolve(process.env.EVIDENCE_DIR);
           const stills = path.join(root, 'stills');
           const profile = path.join(process.env.RUNNER_TEMP, 'aurelian-default-web-profile');
-          const consoleLines = [], states = [], receipts = [], loads = [], saveAcks = [], requestFailures = [], responseFailures = [];
+          const consoleLines = [], states = [], receipts = [], releases = [], loads = [], saveAcks = [], requestFailures = [], responseFailures = [];
           const sequence = fs.readFileSync(path.join(root,'sequence.txt'),'utf8').trim().split('\n').map((line,index)=>{
             const [key,action,expectedState,expectedEvent]=line.split('|');
             return {index:index+1,key,action,expectedState,expectedEvent};
@@ -262,6 +270,7 @@ jobs:
               consoleLines.push('[' + msg.type() + '] ' + text);
               let m = text.match(/PLAYABLE_AURELIAN_ENTRY_STATE=([a-z_]+)/); if (m) states.push(m[1]);
               m = text.match(/PLAYABLE_AURELIAN_INPUT_RECEIPT=([0-9]+):([^:]+):([a-z_]+)/); if (m) receipts.push({index:Number(m[1]),action:m[2],fromState:m[3]});
+              m = text.match(/PLAYABLE_AURELIAN_INPUT_RELEASE_RECEIPT=([0-9]+):([^:]+):([a-z_]+)/); if (m) releases.push({index:Number(m[1]),action:m[2],state:m[3]});
               m = text.match(/AURELIAN_SESSION_V2_LOAD=([a-z_]+):([a-z_]+):([a-z_]+):([a-z_]+)/); if (m) loads.push({status:m[1],adapter:m[2],state:m[3],intent:m[4]});
               m = text.match(/AURELIAN_SESSION_V2_SAVE_ACK=([a-z_]+):([a-z_]+):([a-z_]+):([a-z_]+)/); if (m) saveAcks.push({status:m[1],adapter:m[2],state:m[3],intent:m[4]});
             });
@@ -287,14 +296,17 @@ jobs:
             };
             for(const row of sequence){
               const beforeReceipts=receipts.length;
+              const beforeReleases=releases.length;
               const beforeEvent=consoleLines.filter(x=>x.includes(row.expectedEvent)).length;
               const beforeState=states.filter(x=>x===row.expectedState).length;
               delivery.push(`status=SEND index=${row.index} key=${row.key} action=${row.action} from_state=${currentState} expected_state=${row.expectedState} expected_event=${row.expectedEvent}`);
               await page.keyboard.press(keyMap[row.key]);
               await waitFor(()=>{
-                if(receipts.length!==beforeReceipts+1) return false;
+                if(receipts.length!==beforeReceipts+1||releases.length!==beforeReleases+1) return false;
                 const receipt=receipts[receipts.length-1];
+                const release=releases[releases.length-1];
                 if(receipt.index!==row.index||receipt.action!==row.action||receipt.fromState!==currentState) return false;
+                if(release.index!==row.index||release.action!==row.action||release.state!==row.expectedState) return false;
                 if(consoleLines.filter(x=>x.includes(row.expectedEvent)).length!==beforeEvent+1) return false;
                 return row.expectedState===currentState||states.filter(x=>x===row.expectedState).length===beforeState+1;
               },`applied result ${row.index} ${row.action} ${row.expectedState}`);
@@ -302,7 +314,7 @@ jobs:
               currentState=row.expectedState;
               if(shots[row.index]) await shot(page,shots[row.index]);
             }
-            if(receipts.length!==35) throw new Error('Expected 35 receipts, got '+receipts.length);
+            if(receipts.length!==35||releases.length!==35) throw new Error('Expected 35 press/release receipts, got '+receipts.length+'/'+releases.length);
             fs.writeFileSync(path.join(root,'web','action-delivery.log'),delivery.join('\n')+'\n');
           }
           async function shot(page,name){ await sleep(650); await page.screenshot({path:path.join(stills,name)}); }
@@ -350,6 +362,7 @@ jobs:
           done
           test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log")" -eq 35
           test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/web/browser-console.log")" -eq 35
+          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RELEASE_RECEIPT=' "${EVIDENCE_DIR}/web/browser-console.log")" -eq 35
           for log in "${EVIDENCE_DIR}/native/action-state.log" "${EVIDENCE_DIR}/web/action-state.log"; do
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_claimed" "$log"
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_developed" "$log"
@@ -377,7 +390,7 @@ jobs:
           fs.writeFileSync(path.join(root,'result-manifest.json'),JSON.stringify({
             contract:'GODOT_AURELIAN_DEFAULT_FIRST_SESSION_V6_GATE_B', exact_head:exact,
             viewport:{width:1440,height:900}, input_mode:'normal_keyboard', input_action_count:35,
-            completion_barrier:'send_plus_exact_receipt_plus_expected_event_plus_resulting_state',
+            completion_barrier:'send_plus_exact_action_receipt_plus_expected_event_plus_resulting_state_plus_matching_release_receipt',
             native_and_web_sequence_identical:true, frames,
             final_state:'world_first_imperial_expansion_two_land_footprint', claimed_lands:['east_route','north_ridge'],
             native_restart:true, web_reload:true, web_profile_reopen:true,
