@@ -1,12 +1,6 @@
 name: Godot Aurelian Exported Startup Ownership V1
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - "game/scenes/aurelian/playable_aurelian_entry_v1.gd"
-      - ".github/scripts/aurelian-exported-startup-ownership-v1.sh"
-      - ".github/workflows/godot-aurelian-exported-startup-ownership-v1.yml"
   workflow_dispatch:
 
 permissions:
