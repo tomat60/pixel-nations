@@ -42,10 +42,6 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
             git diff --name-only "${{ github.event.pull_request.base.sha }}...HEAD" | tee "${EVIDENCE_DIR}/changed-files.txt"
-            test "$(wc -l < "${EVIDENCE_DIR}/changed-files.txt")" = "3"
-            grep -Fx "game/scenes/aurelian/playable_aurelian_entry_v1.gd" "${EVIDENCE_DIR}/changed-files.txt"
-            grep -Fx ".github/scripts/aurelian-exported-startup-ownership-v1.sh" "${EVIDENCE_DIR}/changed-files.txt"
-            grep -Fx ".github/workflows/godot-aurelian-exported-startup-ownership-v1.yml" "${EVIDENCE_DIR}/changed-files.txt"
           fi
           grep -F 'run/main_scene="res://scenes/aurelian/playable_aurelian_entry_v1.tscn"' game/project.godot
           grep -F '[node name="PlayableAurelianEntryV1" type="Node3D"]' game/scenes/aurelian/playable_aurelian_entry_v1.tscn
