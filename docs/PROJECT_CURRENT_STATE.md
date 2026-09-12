@@ -2,16 +2,30 @@
 
 Status: ACTIVE
 Updated: 2026-09-12
-Current state revision: 35.0
-Authority baseline SHA: `649703c1edefdc5841db9c90cd73a0d204148720`
+Current state revision: 35.1
+Authority baseline SHA: `963c0c53df9f0c4ed9f48196462c3664306f6ebd`
 Product baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
 Runtime baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy-only whole-product portfolio gate after Aurelian Three-Scale Readability v1 rejection.
-Current milestone: choose exactly one highest-value bounded next slice under issue #695.
-Active execution issue: #695
-Next allowed action: complete the strategy-only portfolio decision under issue #695, then merge a separate authority PR and record `IMPLEMENTATION_PREFLIGHT_PASS` before any product/runtime/workflow implementation.
+Current product phase: authority gate for player-visible Aurelian View LOD Contract v2.
+Current milestone: merge the bounded authority for Aurelian View LOD Contract v2 under issue #696.
+Active execution issue: #696
+Next allowed action: merge this authority PR after terminal exact-head checks, then record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #696 and create exactly one fresh six-file implementation candidate. Product/runtime/workflow implementation remains blocked until that preflight passes.
+
+## Portfolio decision: Aurelian View LOD Contract v2
+
+Issue #695 completed the mandatory whole-product portfolio gate after the terminal Three-Scale Readability v1 rejection.
+
+Decision: authorize exactly one fresh bounded `Aurelian View LOD Contract v2` candidate under issue #696.
+
+Scale hierarchy remains the largest player-visible bottleneck. PR #693 did not establish accepted product evidence, but its corrected deterministic run did prove Village, Map, World and technical bridge LOD behavior before a raw JSON numeric-array equality assertion failed. v2 therefore preserves the product goal while correcting the evidence contract before coding.
+
+The strongest alternatives remain deferred: Atlas/Sector framing would add another representation before the current scale grammar reads; onboarding copy cannot repair visual hierarchy; Minimal Economy Foundation and Repeatable Expansion would deepen a visually unclear two-land session.
+
+Issue #696 locks an exact six-file ceiling, fresh implementation from accepted `main`, existing v6 controller and cameras, state-intersection visibility, technical bridge compatibility, component-normalized topology assertions, unique v2 workflow identity and a complete exact-head trigger matrix. No new gameplay, persistence, topology, GLB, asset, input owner, CanvasLayer, timer, process loop or independent geography is authorized.
+
+Acceptance requires direct native and Web review with continuous videos, at least nine exact 1440 x 900 frames, visible-node manifests, unchanged topology and GLB identity, exact SEND/action/release correlation, persistence and every named regression. One complete candidate and at most one bounded correction are permitted. Any scope breach, missing run/evidence, stale visibility, lost/duplicated input or deterministic failure after correction requires terminal `GODOT_AURELIAN_VIEW_LOD_CONTRACT_V2_REJECT`; otherwise terminal `GODOT_AURELIAN_VIEW_LOD_CONTRACT_V2_PASS`.
 
 ## Portfolio decision: Aurelian Three-Scale Readability v1
 
