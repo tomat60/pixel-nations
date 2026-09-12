@@ -2,16 +2,26 @@
 
 Status: ACTIVE
 Updated: 2026-09-12
-Current state revision: 37.0
-Authority baseline SHA: `45be930b162e2378fc8a6f1522740ef13460562f`
+Current state revision: 37.1
+Authority baseline SHA: `7aecc8ef9ece89abe8a8477f7b59a807f31d86cf`
 Product baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
 Runtime baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authority gate for Aurelian Basin Capacity v1.
-Current milestone: merge the bounded authority for Aurelian Basin Capacity v1 under issue #701.
-Active execution issue: #701
-Next allowed action: merge this authority PR after terminal exact-head checks, then record `IMPLEMENTATION_PREFLIGHT_PASS` or fail closed on issue #701. Product, runtime, persistence, workflow and visual implementation remain blocked until that preflight passes.
+Current product phase: strategy-only whole-product portfolio gate after Aurelian Basin Capacity v1 preflight rejection.
+Current milestone: choose one truthful next bounded player-visible slice under issue #703.
+Active execution issue: #703
+Next allowed action: complete the strategy-only portfolio gate on issue #703. Product, runtime, persistence, workflow and visual implementation remain blocked until a new execution issue and separately merged authority authorize one bounded candidate.
+
+## Terminal Aurelian Basin Capacity v1 preflight rejection
+
+Authority PR #702 merged as `7aecc8ef9ece89abe8a8477f7b59a807f31d86cf`, but issue #701 then received terminal `GODOT_AURELIAN_BASIN_CAPACITY_V1_PREFLIGHT_REJECT`. No product branch was created and accepted product/runtime baselines remain unchanged.
+
+Fresh inspection proved that Ridge Convoy and Basin Alert are downstream consequences, not a free choice at the accepted two-land finale. The accepted coordination contract requires an established North Ridge outpost, a committed Trade Post or Watch Post and its matching payoff. It explicitly forbids a second choice and branch switching. Session persistence v2 validates those relationships.
+
+Offering both operations at the two-land finale would fabricate skipped history, weaken accepted validation, add a new state family or require a schema migration and broad controller rewrite. Each route violates the authority and its fail-closed preflight rule.
+
+Issue #701 is closed as not planned. Issue #703 is the only active strategy-only portfolio gate. It must compare the truthful existing North Ridge specialization boundary against onboarding/first-session compression, a bounded continuation from the two-land result, Repeatable Expansion and holding Phase C for broader research. No implementation is authorized.
 
 ## Portfolio decision: Aurelian Basin Capacity v1
 
