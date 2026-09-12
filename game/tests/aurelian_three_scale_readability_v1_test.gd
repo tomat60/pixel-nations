@@ -34,6 +34,10 @@ func _initialize() -> void:
 	_check(presentation._apply_view_lod("village", basin), "village_lod_reapplies")
 	_check(_visible_names(basin).size() == 13, "return_to_village_restores_exact_developed_state")
 
+	_check(presentation._apply_village_state(basin, "developed"), "developed_state_restores_before_bridge")
+	_check(presentation._apply_view_lod("bridge", basin), "technical_bridge_lod_applies")
+	_check(_visible_names(basin).size() == 13, "technical_bridge_preserves_exact_developed_state")
+
 	var view_lod: Dictionary = presentation.state_contract.get("view_lod", {})
 	_check(view_lod.keys().size() == 3, "exact_three_view_contract")
 	_check(view_lod.has("village") and view_lod.has("map") and view_lod.has("world"), "named_view_contract")
