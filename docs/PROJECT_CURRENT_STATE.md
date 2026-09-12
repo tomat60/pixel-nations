@@ -2,16 +2,28 @@
 
 Status: ACTIVE
 Updated: 2026-09-12
-Current state revision: 38.1
-Authority baseline SHA: `9d749941636d6d836fc9e02ea56ae256378fdf63`
+Current state revision: 39.0
+Authority baseline SHA: `1401d54fa21184d33269ba0cfbe8cb3263071fa6`
 Product baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
 Runtime baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy-only whole-product portfolio gate after Aurelian Frontier Capacity v1 preflight rejection.
-Current milestone: choose one truthful next bounded player-visible slice under issue #707.
-Active execution issue: #707
-Next allowed action: complete the strategy-only portfolio gate on issue #707. Product, runtime, persistence, workflow and visual implementation remain blocked until a new execution issue and separately merged authority authorize one bounded candidate.
+Current product phase: authority gate for Aurelian Frontier Capacity v2.
+Current milestone: authorize exactly one bounded Aurelian Frontier Capacity v2 candidate under issue #709.
+Active execution issue: #709
+Next allowed action: merge this documentation-only authority after exact-head checks, then complete the mandatory preflight on issue #709. No product branch may exist before `IMPLEMENTATION_PREFLIGHT_PASS`.
+
+## Portfolio decision: Aurelian Frontier Capacity v2
+
+Issue #707 completed the mandatory portfolio gate after the v1 preflight rejection.
+
+Decision: authorize exactly one fresh bounded `Aurelian Frontier Capacity v2` candidate under issue #709, only after this authority merges and the issue records terminal `IMPLEMENTATION_PREFLIGHT_PASS`.
+
+Gameplay/fun and strategic depth remain the largest bottleneck. The selected slice uses the truthful existing North Ridge Outpost and mutually exclusive Trade Post / Watch Post specialization boundary. The existing HUD may show derived `Frontier Capacity 1` before the explicit existing commit and `Frontier Capacity 0` afterward. The chosen existing consequence must remain visible and persistent across Village, Map and World.
+
+The v2 ceiling is exactly six files. Relative to rejected v1 it adds only a path-filter update to View LOD v2. Together with the Production Village path-filter update, this selects every named exact-head regression while leaving both regression jobs and tests unchanged. No new state, persistence field, schema, resource system, input owner, geography, asset, topology or camera change is authorized.
+
+Acceptance requires two native and two Web clean profiles covering both existing branches, the accepted first 35 inputs unchanged plus receipt-gated continuation, exact 1440 x 900 stills and continuous videos, exact press/action/release correlation, reopen persistence, unchanged GLB/topology/cameras, all named regressions and direct review. One complete candidate and at most one bounded correction are allowed. PASS is only `GODOT_AURELIAN_FRONTIER_CAPACITY_V2_PASS`; otherwise terminal REJECT.
 
 ## Terminal Aurelian Frontier Capacity v1 preflight rejection
 
