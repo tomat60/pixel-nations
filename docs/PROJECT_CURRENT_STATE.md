@@ -2,7 +2,7 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 34.0
+Current state revision: 34.1
 Authority baseline SHA: `c5a43503b350c782af170210c324d49779ba66db`
 Product baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
 Runtime baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
@@ -11,7 +11,7 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 Current product phase: authority gate for player-visible Aurelian Three-Scale Readability v1.
 Current milestone: merge the bounded authority for Aurelian Three-Scale Readability v1 under issue #690.
 Active execution issue: #690
-Next allowed action: merge this authority PR after terminal exact-head checks, then record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #690 and create exactly one fresh four-file implementation candidate. Product/runtime/workflow implementation remains blocked until that preflight passes.
+Next allowed action: merge this authority PR after terminal exact-head checks, then record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #690 and create exactly one fresh six-file implementation candidate. Product/runtime/workflow implementation remains blocked until that preflight passes.
 
 ## Portfolio decision: Aurelian Three-Scale Readability v1
 
@@ -27,9 +27,9 @@ The largest current bottleneck is scale hierarchy. Accepted shared geography and
 
 Atlas/Sector framing is deferred until the current Basin scale grammar is readable. Onboarding copy is deferred because text cannot repair visual hierarchy. Minimal Economy Foundation and Repeatable Expansion remain deferred until the existing two-land result reads clearly.
 
-Issue #690 locks a maximum four-file ceiling: the production village scene controller, its existing state manifest, one fresh focused test and one fresh focused workflow. No controller mutation, new CanvasLayer, input owner, process loop, timer, gameplay state, persistence field, GLB, asset, topology or independent geography is allowed.
+Issue #690 locks a maximum six-file ceiling: the production village scene controller, its existing state manifest, one fresh focused test, one fresh focused workflow and path-filter-only edits to Default First Session v6 and Session Persistence v2. Preflight proved that the original four-file ceiling could not select both required named regressions; their jobs, tests and artifacts remain unchanged. No controller mutation, new CanvasLayer, input owner, process loop, timer, gameplay state, persistence field, GLB, asset, topology or independent geography is allowed.
 
-Acceptance requires normal-input native and Web view-switch videos, at least nine 1440 x 900 frames, exact visible-node manifests, unchanged topology and GLB identity, complete press/action/release correlation, all canonical exact-head regressions and direct visual review. One complete candidate and at most one bounded correction are permitted. A fifth file, product/state/geography change, stale visibility, missing named run or failed three-scale hierarchy requires terminal `GODOT_AURELIAN_THREE_SCALE_READABILITY_V1_REJECT`. Otherwise terminal `GODOT_AURELIAN_THREE_SCALE_READABILITY_V1_PASS`.
+Acceptance requires normal-input native and Web view-switch videos, at least nine 1440 x 900 frames, exact visible-node manifests, unchanged topology and GLB identity, complete press/action/release correlation, all canonical exact-head regressions and direct visual review. One complete candidate and at most one bounded correction are permitted. A seventh file, product/state/geography change, stale visibility, missing named run or failed three-scale hierarchy requires terminal `GODOT_AURELIAN_THREE_SCALE_READABILITY_V1_REJECT`. Otherwise terminal `GODOT_AURELIAN_THREE_SCALE_READABILITY_V1_PASS`.
 
 ## Accepted Aurelian Input Release Boundary v3
 
