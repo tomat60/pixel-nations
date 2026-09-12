@@ -1,17 +1,17 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-09-09
+Updated: 2026-09-12
 Current state revision: 35.0
 Authority baseline SHA: `649703c1edefdc5841db9c90cd73a0d204148720`
 Product baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
 Runtime baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: terminal rejection recorded for Aurelian Three-Scale Readability v1.
-Current milestone: reconcile the rejected candidate, then run one fresh whole-product portfolio gate.
-Active execution issue: none
-Next allowed action: after this reconciliation merges, open exactly one strategy-only portfolio gate to choose the next highest-value bounded slice. Product/runtime/workflow implementation remains blocked until a separate authority PR is merged and its implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+Current product phase: strategy-only whole-product portfolio gate after Aurelian Three-Scale Readability v1 rejection.
+Current milestone: choose exactly one highest-value bounded next slice under issue #695.
+Active execution issue: #695
+Next allowed action: complete the strategy-only portfolio decision under issue #695, then merge a separate authority PR and record `IMPLEMENTATION_PREFLIGHT_PASS` before any product/runtime/workflow implementation.
 
 ## Portfolio decision: Aurelian Three-Scale Readability v1
 
@@ -48,7 +48,7 @@ The corrected focused run `34685086288`, job `103530582470`, then passed input-r
 
 Classification: `GODOT_AURELIAN_THREE_SCALE_READABILITY_V1_REJECT`.
 
-No code from PR #693 entered `main`. Product/runtime baseline remains `4870aaa1a8c9607302d3a958a88fc828228feab4`. Issue #690 is closed as not planned. A fresh whole-product portfolio gate and separately merged authority are mandatory before any new implementation candidate.
+No code from PR #693 entered `main`. Product/runtime baseline remains `4870aaa1a8c9607302d3a958a88fc828228feab4`. Issue #690 is closed as not planned. Issue #695 is the only active strategy-only whole-product portfolio gate. A separately merged authority remains mandatory before any new implementation candidate.
 
 ## Accepted Aurelian Input Release Boundary v3
 
