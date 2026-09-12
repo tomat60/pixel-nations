@@ -2,16 +2,16 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 34.1
-Authority baseline SHA: `c5a43503b350c782af170210c324d49779ba66db`
+Current state revision: 35.0
+Authority baseline SHA: `649703c1edefdc5841db9c90cd73a0d204148720`
 Product baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
 Runtime baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authority gate for player-visible Aurelian Three-Scale Readability v1.
-Current milestone: merge the bounded authority for Aurelian Three-Scale Readability v1 under issue #690.
-Active execution issue: #690
-Next allowed action: merge this authority PR after terminal exact-head checks, then record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #690 and create exactly one fresh six-file implementation candidate. Product/runtime/workflow implementation remains blocked until that preflight passes.
+Current product phase: terminal rejection recorded for Aurelian Three-Scale Readability v1.
+Current milestone: reconcile the rejected candidate, then run one fresh whole-product portfolio gate.
+Active execution issue: none
+Next allowed action: after this reconciliation merges, open exactly one strategy-only portfolio gate to choose the next highest-value bounded slice. Product/runtime/workflow implementation remains blocked until a separate authority PR is merged and its implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
 
 ## Portfolio decision: Aurelian Three-Scale Readability v1
 
@@ -30,6 +30,25 @@ Atlas/Sector framing is deferred until the current Basin scale grammar is readab
 Issue #690 locks a maximum six-file ceiling: the production village scene controller, its existing state manifest, one fresh focused test, one fresh focused workflow and path-filter-only edits to Default First Session v6 and Session Persistence v2. Preflight proved that the original four-file ceiling could not select both required named regressions; their jobs, tests and artifacts remain unchanged. No controller mutation, new CanvasLayer, input owner, process loop, timer, gameplay state, persistence field, GLB, asset, topology or independent geography is allowed.
 
 Acceptance requires normal-input native and Web view-switch videos, at least nine 1440 x 900 frames, exact visible-node manifests, unchanged topology and GLB identity, complete press/action/release correlation, all canonical exact-head regressions and direct visual review. One complete candidate and at most one bounded correction are permitted. A seventh file, product/state/geography change, stale visibility, missing named run or failed three-scale hierarchy requires terminal `GODOT_AURELIAN_THREE_SCALE_READABILITY_V1_REJECT`. Otherwise terminal `GODOT_AURELIAN_THREE_SCALE_READABILITY_V1_PASS`.
+
+## Terminal Aurelian Three-Scale Readability v1 rejection
+
+PR #693 was rejected and closed without merge at exact head `b741943a60e934482ddd21f2cb6c4902903428cb`.
+
+The initial exact head reached a deterministic Production Village failure after import, contract tests and all three Village captures passed:
+
+- Production Village run `34684782979`;
+- job `103529765450`;
+- failed at the first technical `bridge` capture with exit 54 because the new three-view LOD function treated the non-player bridge camera as a missing player-view contract;
+- artifact `10294819395`, digest `sha256:285b67ee856a05b61c9d78f9f50d6aa1b9464b14128a7f0d606ebe76bff460e0`.
+
+Correction 1/1 preserved the technical bridge capture as the exact current developed state, added a focused compatibility assertion and isolated the focused workflow concurrency/artifact identity from Default First Session v6.
+
+The corrected focused run `34685086288`, job `103530582470`, then passed input-release and all Village/Map/World/bridge LOD behavior assertions but failed two deterministic topology assertions: `gilded_crossing_topology_unchanged` and `forest_edge_topology_unchanged`. The manifest still contained the intended coordinates, identifying an assertion/typing defect in the candidate test rather than an accepted topology movement. The fail-closed contract and exhausted correction budget prohibited another commit.
+
+Classification: `GODOT_AURELIAN_THREE_SCALE_READABILITY_V1_REJECT`.
+
+No code from PR #693 entered `main`. Product/runtime baseline remains `4870aaa1a8c9607302d3a958a88fc828228feab4`. Issue #690 is closed as not planned. A fresh whole-product portfolio gate and separately merged authority are mandatory before any new implementation candidate.
 
 ## Accepted Aurelian Input Release Boundary v3
 
@@ -980,6 +999,6 @@ The portfolio gate may reorder later phases when direct evidence identifies a st
 
 ## Current stop condition
 
-All product/runtime and workflow implementation is blocked until strategy-only gate #668 selects one bounded recovery, a separate authority PR is merged, and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS` with proof of every direct and transitive workflow trigger and internal scope guard.
+All product/runtime and workflow implementation is blocked until a fresh whole-product portfolio gate selects one bounded slice, a separate authority PR is merged, and a new implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS` with proof of every direct and transitive workflow trigger and internal scope guard.
 
-Do not reopen, cherry-pick or incrementally patch PR #662 or #667. The next strategy must preserve the directly proven release-boundary learning, the accepted Default First Session v6 product/runtime baseline and one physical Aurelian geography.
+Do not reopen, cherry-pick or incrementally patch PR #693. The next strategy must preserve accepted Input Release Boundary v3, Default First Session v6, the unchanged product/runtime baseline and one physical Aurelian geography.
