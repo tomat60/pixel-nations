@@ -2,16 +2,34 @@
 
 Status: ACTIVE
 Updated: 2026-09-12
-Current state revision: 36.0
-Authority baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
+Current state revision: 37.0
+Authority baseline SHA: `45be930b162e2378fc8a6f1522740ef13460562f`
 Product baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
 Runtime baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy-only whole-product portfolio gate after accepted Aurelian View LOD Contract v2.
-Current milestone: choose exactly one next highest-value player-visible bounded sprint under issue #699.
-Active execution issue: #699
-Next allowed action: complete the strategy-only portfolio gate on issue #699. Product, runtime, persistence, workflow and visual implementation remain blocked until a separate execution issue and separately merged authority explicitly authorize one bounded candidate.
+Current product phase: authority gate for Aurelian Basin Capacity v1.
+Current milestone: merge the bounded authority for Aurelian Basin Capacity v1 under issue #701.
+Active execution issue: #701
+Next allowed action: merge this authority PR after terminal exact-head checks, then record `IMPLEMENTATION_PREFLIGHT_PASS` or fail closed on issue #701. Product, runtime, persistence, workflow and visual implementation remain blocked until that preflight passes.
+
+## Portfolio decision: Aurelian Basin Capacity v1
+
+Issue #699 completed the mandatory whole-product portfolio gate after accepted Aurelian View LOD Contract v2.
+
+Decision: authorize exactly one fresh bounded `Aurelian Basin Capacity v1` candidate under issue #701, only after this authority merges and the issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+
+The largest current bottleneck is gameplay/fun and strategic depth. Shared geography, native/Web input reliability, persistence, a stable 35-action first session and readable Village/Map/World roles are accepted. The missing proof is a scarce player-owned value that creates an explicit opportunity cost and a visible consequence.
+
+The selected slice starts at the accepted East Route plus North Ridge result. It exposes exactly one `Basin Capacity` and lets the player commit it to one of two already represented outcomes: Logistics dispatches the Ridge Convoy; Vigilance raises the Basin Alert. The commitment consumes the single capacity, blocks the alternative and must remain visible and persistent across the same geography and reopen paths.
+
+Atlas/Sector work is deferred because World Atlas Blockout v1 is already accepted and another representation does not create a decision. Onboarding copy cannot substitute for consequence. Repeatable Expansion remains Phase D and follows the smallest opportunity-cost proof. Broad visual/gamefeel polish remains deferred until the loop has a real scarce commitment.
+
+Issue #701 sets a maximum ten-file initial ceiling and requires preflight to lower it to exact paths. Prefer deriving available/consumed capacity fail-closed from the existing `first_inter_land_coordination` persistence fact. If this cannot be represented truthfully without schema migration or broad controller work, preflight must fail and no implementation branch may exist.
+
+No second resource, income, timer, workers, queues, production chains, price table, upkeep, third land, repeatable expansion, combat, diplomacy, governance expansion, new Atlas, asset, GLB, topology, camera, CanvasLayer, process loop or input owner is authorized.
+
+Acceptance requires both choice branches through normal input in native and Web, exact 1440 x 900 evidence, capacity 1 before commitment and 0 after, same-geography consequences in Village/Map/World, exact press/action/release correlation, persistence across native restart/Web reload/profile reopen, manifests and SHA-256 identities, every named exact-head regression and direct review. One complete candidate and at most one bounded correction are allowed. PASS is only `GODOT_AURELIAN_BASIN_CAPACITY_V1_PASS`; otherwise terminal REJECT.
 
 ## Accepted Aurelian View LOD Contract v2
 
