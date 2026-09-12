@@ -242,13 +242,17 @@ func _apply_view_lod(preset: String, basin: Node3D) -> bool:
 		return false
 	var allowed_nodes: Array = view_lod[preset]
 	var all_nodes: Array = state_contract.get("all_nodes", [])
+	var visible_nodes: Array[String] = []
 	for node_name_variant in all_nodes:
 		var node_name := String(node_name_variant)
 		var node := _named_node(basin, node_name)
 		if node == null:
 			return false
 		node.visible = node.visible and allowed_nodes.has(node_name)
-	print("PRODUCTION_VILLAGE_VIEW_LOD=%s:%d" % [preset, allowed_nodes.size()])
+		if node.visible:
+			visible_nodes.append(node_name)
+	visible_nodes.sort()
+	print("PRODUCTION_VILLAGE_VIEW_LOD=%s:%s" % [preset, ",".join(visible_nodes)])
 	return true
 
 func _activate_camera(preset: String) -> void:
