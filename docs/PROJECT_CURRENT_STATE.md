@@ -2,16 +2,41 @@
 
 Status: ACTIVE
 Updated: 2026-09-12
-Current state revision: 35.1
-Authority baseline SHA: `963c0c53df9f0c4ed9f48196462c3664306f6ebd`
-Product baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
-Runtime baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
+Current state revision: 36.0
+Authority baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
+Product baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
+Runtime baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authority gate for player-visible Aurelian View LOD Contract v2.
-Current milestone: merge the bounded authority for Aurelian View LOD Contract v2 under issue #696.
-Active execution issue: #696
-Next allowed action: merge this authority PR after terminal exact-head checks, then record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #696 and create exactly one fresh six-file implementation candidate. Product/runtime/workflow implementation remains blocked until that preflight passes.
+Current product phase: strategy-only whole-product portfolio gate after accepted Aurelian View LOD Contract v2.
+Current milestone: choose exactly one next highest-value player-visible bounded sprint under issue #699.
+Active execution issue: #699
+Next allowed action: complete the strategy-only portfolio gate on issue #699. Product, runtime, persistence, workflow and visual implementation remain blocked until a separate execution issue and separately merged authority explicitly authorize one bounded candidate.
+
+## Accepted Aurelian View LOD Contract v2
+
+PR #698 received terminal `GODOT_AURELIAN_VIEW_LOD_CONTRACT_V2_PASS` and was merged.
+
+- accepted exact head: `dfb9e92b231bc92c821432abc74a9368b17b01c7`;
+- merge commit: `47816465f21035407038864b0413d38f1f54ae1c`;
+- exact scope: six authorized files;
+- correction budget consumed: 1/1, limited to forcing native evidence capture to 1440 x 900;
+- focused run `34700170231`: PASS, artifact `10299698133`, digest `sha256:70cf32c69a44e576664e3d11e3e477702ddb6fc3a5d0e279a3168a355626b719`;
+- Default First Session v6 run `34700170260`: PASS, artifact `10299453724`, digest `sha256:a1d3916df551dff77d659b363990b65220155ab9b0e9230ac54ce1ec72728d93`;
+- Session Persistence v2 run `34700170254`: PASS, artifact `10299428798`, digest `sha256:11aacad2471b82f925c964f5bbda7100f955d719e984db725834962b7123b284`;
+- Web Playability run `34700170282`: PASS, artifact `10299842898`, digest `sha256:fdc714df300d98a0511b04e4ddd7f13dc3fdd9c951381733ab037e90702fe928`;
+- Playable Entry run `34700170280`: PASS, artifact `10299948144`, digest `sha256:00a8ebc133dfc90a728666155dfce5b355a37bfe7a36c942dbe5b50c277ccfee`;
+- Production Village run `34700170259`: PASS, artifact `10300042093`, digest `sha256:3b2c348edf1ca964b531abc41698d5b65049bda1b788ecdf171508cd10850fec`;
+- Input Release Boundary v3, Foundation, Pixel Nations CI, Play Visual QA, P4-P8 and P10-P11: PASS;
+- Vercel exact-head deployment: SUCCESS;
+- direct review covered 11 exact 1440 x 900 stills, continuous 12.00 s native and 66.08 s Web videos, manifests, logs and SHA-256 identities;
+- native and Web each recorded exactly 35 SEND, 35 action receipts and 35 release receipts;
+- native restart, Web reload and Web profile reopen preserved the two-land East Route plus North Ridge final state;
+- accepted GLB digest remains `04116e3d662d461f0d29ca797444193b0873f5aba6012790af7d366c63e01048`.
+
+Village now preserves full state-visible local detail as HOW. Map retains a restrained state-intersected Greenvale location/civic anchor as WHERE. World suppresses the local Greenvale building cluster while retaining sparse strategic direction markers as WHY / DIRECTION. The physical Aurelian geography, topology, cameras, gameplay state graph, persistence schema and sole v6 input ownership remain unchanged.
+
+Issue #696 is completed. Issue #699 is the only active strategy-only whole-product portfolio gate. No new implementation is authorized until that gate selects one bounded player-visible slice and a separate authority update is merged.
 
 ## Portfolio decision: Aurelian View LOD Contract v2
 
