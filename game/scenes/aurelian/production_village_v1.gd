@@ -235,10 +235,29 @@ func _build_main_world() -> bool:
 		cameras[preset] = _make_camera(preset, self)
 	return true
 
+func _apply_view_lod(preset: String, basin: Node3D) -> bool:
+	var view_lod: Dictionary = state_contract.get("view_lod", {})
+	if not view_lod.has(preset):
+		push_error("PRODUCTION_VILLAGE_VIEW_LOD_MISSING: %s" % preset)
+		return false
+	var allowed_nodes: Array = view_lod[preset]
+	var all_nodes: Array = state_contract.get("all_nodes", [])
+	for node_name_variant in all_nodes:
+		var node_name := String(node_name_variant)
+		var node := _named_node(basin, node_name)
+		if node == null:
+			return false
+		node.visible = node.visible and allowed_nodes.has(node_name)
+	print("PRODUCTION_VILLAGE_VIEW_LOD=%s:%d" % [preset, allowed_nodes.size()])
+	return true
+
 func _activate_camera(preset: String) -> void:
 	if not cameras.has(preset):
 		push_error("PRODUCTION_VILLAGE_CAMERA_MISSING: %s" % preset)
 		get_tree().quit(48)
+		return
+	if not _apply_view_lod(preset, main_basin):
+		get_tree().quit(55)
 		return
 	for key in cameras.keys():
 		(cameras[key] as Camera3D).current = false
@@ -267,6 +286,9 @@ func _capture_still(preset: String) -> void:
 	viewport.add_child(scene_root)
 	var basin := _populate_world(scene_root)
 	if basin == null:
+		return
+	if not _apply_view_lod(preset, basin):
+		get_tree().quit(54)
 		return
 	var camera := _make_camera(preset, scene_root)
 	camera.make_current()
