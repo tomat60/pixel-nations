@@ -2,16 +2,26 @@
 
 Status: ACTIVE
 Updated: 2026-09-12
-Current state revision: 38.0
-Authority baseline SHA: `4562e117990178adf0aeb7688d9c338a93e329e0`
+Current state revision: 38.1
+Authority baseline SHA: `9d749941636d6d836fc9e02ea56ae256378fdf63`
 Product baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
 Runtime baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authority gate for Aurelian Frontier Capacity v1.
-Current milestone: authorize exactly one bounded Aurelian Frontier Capacity v1 candidate under issue #705.
-Active execution issue: #705
-Next allowed action: merge this documentation-only authority after exact-head checks, then complete the mandatory preflight on issue #705. No product branch may exist before `IMPLEMENTATION_PREFLIGHT_PASS`.
+Current product phase: strategy-only whole-product portfolio gate after Aurelian Frontier Capacity v1 preflight rejection.
+Current milestone: choose one truthful next bounded player-visible slice under issue #707.
+Active execution issue: #707
+Next allowed action: complete the strategy-only portfolio gate on issue #707. Product, runtime, persistence, workflow and visual implementation remain blocked until a new execution issue and separately merged authority authorize one bounded candidate.
+
+## Terminal Aurelian Frontier Capacity v1 preflight rejection
+
+Authority PR #706 merged as `9d749941636d6d836fc9e02ea56ae256378fdf63`, but issue #705 then received terminal `GODOT_AURELIAN_FRONTIER_CAPACITY_V1_PREFLIGHT_REJECT`. No product branch was created and accepted product/runtime baselines remain unchanged.
+
+Fresh inspection confirmed that the existing North Ridge Outpost and Trade Post / Watch Post specialization boundary is truthful, mutually exclusive and already persisted. Derived Frontier Capacity needs no new state or schema. The candidate nevertheless cannot satisfy its own exact-head evidence contract within five files.
+
+The controller change selects Default First Session v6, Input Release Boundary v3, Playable Entry, Session Persistence v2 and Web Playability. The allowed Production Village path-filter edit selects that named regression. View LOD v2 observes neither the v6 controller nor the new candidate files and exposes no reusable workflow call. A separate View LOD v2 run therefore requires a sixth path-filter-only workflow edit, while issue #705 mandates immediate rejection for any sixth file.
+
+Issue #705 is closed as not planned. Issue #707 is the only active strategy-only portfolio gate. It must compare an exact six-file re-authorization against onboarding compression, Repeatable Expansion, a smaller continuation and holding Phase C for broader research. No implementation is authorized.
 
 ## Portfolio decision: Aurelian Frontier Capacity v1
 
