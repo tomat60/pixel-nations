@@ -2,16 +2,34 @@
 
 Status: ACTIVE
 Updated: 2026-09-09
-Current state revision: 33.0
-Authority baseline SHA: `eff3d57ccc0864027b8386473404e110067b26b9`
+Current state revision: 34.0
+Authority baseline SHA: `c5a43503b350c782af170210c324d49779ba66db`
 Product baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
 Runtime baseline SHA: `4870aaa1a8c9607302d3a958a88fc828228feab4`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy-only player-visible Map / World / Atlas presentation gate after accepted Input Release Boundary v3.
-Current milestone: complete portfolio gate #688 and select exactly one highest-value strategic presentation slice.
-Active execution issue: #688
-Next allowed action: complete strategy-only portfolio gate #688 and record exactly one decision. Product/runtime/workflow implementation remains blocked until a separate merged authority PR names one fresh issue and that issue records `IMPLEMENTATION_PREFLIGHT_PASS`.
+Current product phase: authority gate for player-visible Aurelian Three-Scale Readability v1.
+Current milestone: merge the bounded authority for Aurelian Three-Scale Readability v1 under issue #690.
+Active execution issue: #690
+Next allowed action: merge this authority PR after terminal exact-head checks, then record `IMPLEMENTATION_PREFLIGHT_PASS` on issue #690 and create exactly one fresh four-file implementation candidate. Product/runtime/workflow implementation remains blocked until that preflight passes.
+
+## Portfolio decision: Aurelian Three-Scale Readability v1
+
+Issue #688 completed the mandatory player-visible Map / World / Atlas portfolio gate.
+
+Decision: authorize exactly one fresh bounded `Aurelian Three-Scale Readability v1` candidate under issue #690.
+
+The largest current bottleneck is scale hierarchy. Accepted shared geography and gameplay already prove the two-land first session, but local Greenvale building detail remains visually present beyond the Village role. The selected slice uses explicit representation-appropriate LOD over the existing scene:
+
+- Village remains the detailed HOW view;
+- Map retains terrain, routes, land-status overlays and only the minimum Greenvale anchor needed for WHERE;
+- World retains terrain and sparse strategic direction markers for WHY / DIRECTION while suppressing local building clutter and Map-status overlays.
+
+Atlas/Sector framing is deferred until the current Basin scale grammar is readable. Onboarding copy is deferred because text cannot repair visual hierarchy. Minimal Economy Foundation and Repeatable Expansion remain deferred until the existing two-land result reads clearly.
+
+Issue #690 locks a maximum four-file ceiling: the production village scene controller, its existing state manifest, one fresh focused test and one fresh focused workflow. No controller mutation, new CanvasLayer, input owner, process loop, timer, gameplay state, persistence field, GLB, asset, topology or independent geography is allowed.
+
+Acceptance requires normal-input native and Web view-switch videos, at least nine 1440 x 900 frames, exact visible-node manifests, unchanged topology and GLB identity, complete press/action/release correlation, all canonical exact-head regressions and direct visual review. One complete candidate and at most one bounded correction are permitted. A fifth file, product/state/geography change, stale visibility, missing named run or failed three-scale hierarchy requires terminal `GODOT_AURELIAN_THREE_SCALE_READABILITY_V1_REJECT`. Otherwise terminal `GODOT_AURELIAN_THREE_SCALE_READABILITY_V1_PASS`.
 
 ## Accepted Aurelian Input Release Boundary v3
 
