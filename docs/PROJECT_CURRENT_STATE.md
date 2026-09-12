@@ -2,16 +2,32 @@
 
 Status: ACTIVE
 Updated: 2026-09-12
-Current state revision: 37.1
-Authority baseline SHA: `7aecc8ef9ece89abe8a8477f7b59a807f31d86cf`
+Current state revision: 38.0
+Authority baseline SHA: `4562e117990178adf0aeb7688d9c338a93e329e0`
 Product baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
 Runtime baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: strategy-only whole-product portfolio gate after Aurelian Basin Capacity v1 preflight rejection.
-Current milestone: choose one truthful next bounded player-visible slice under issue #703.
-Active execution issue: #703
-Next allowed action: complete the strategy-only portfolio gate on issue #703. Product, runtime, persistence, workflow and visual implementation remain blocked until a new execution issue and separately merged authority authorize one bounded candidate.
+Current product phase: authority gate for Aurelian Frontier Capacity v1.
+Current milestone: authorize exactly one bounded Aurelian Frontier Capacity v1 candidate under issue #705.
+Active execution issue: #705
+Next allowed action: merge this documentation-only authority after exact-head checks, then complete the mandatory preflight on issue #705. No product branch may exist before `IMPLEMENTATION_PREFLIGHT_PASS`.
+
+## Portfolio decision: Aurelian Frontier Capacity v1
+
+Issue #703 completed the mandatory whole-product portfolio gate after the Basin Capacity v1 preflight rejection.
+
+Decision: authorize exactly one bounded `Aurelian Frontier Capacity v1` candidate under issue #705, only after this authority merges and the issue records terminal `IMPLEMENTATION_PREFLIGHT_PASS`.
+
+The largest current bottleneck is gameplay/fun and strategic depth. Shared geography, native/Web input reliability, persistence, the stable 35-action first session and the Village/Map/World view hierarchy are accepted. The missing proof is one small player-owned opportunity cost attached to a truthful existing decision.
+
+The selected slice continues from the accepted East Route plus North Ridge finale through the existing North Ridge Outpost path to the already-defined mutually exclusive Trade Post / Watch Post specialization choice. At that boundary, the existing HUD may expose a derived `Frontier Capacity 1` before commitment and `Frontier Capacity 0` afterward. The chosen existing consequence must remain visible and persistent across Village, Map and World.
+
+Capacity is not a new resource or persistence fact. It is derived only when `north_ridge_outpost == established` and `north_ridge_specialization == none`. The mandatory preflight must prove the path can be opened without changing the accepted first 35 inputs, full-progression behavior or optional-history truthfulness. Any fabricated crisis/rival/frontier fact, new state, persistence mutation, schema change or sixth file fails closed before a product branch.
+
+Issue #705 locks the exact five-file ceiling, direct and transitive workflow trigger matrix, two native and two Web clean profiles covering both specialization branches, receipt-gated normal-input continuation, exact 1440 x 900 frames and videos, native/Web reopen persistence, shared-geography review and every named regression. One complete candidate and at most one bounded correction are allowed. PASS is only `GODOT_AURELIAN_FRONTIER_CAPACITY_V1_PASS`; otherwise terminal REJECT.
+
+Onboarding compression is deferred because guidance alone adds no consequence. Repeatable Expansion remains Phase D. Broader economy research is required only if preflight proves the existing specialization boundary cannot carry this derived presentation fact truthfully.
 
 ## Terminal Aurelian Basin Capacity v1 preflight rejection
 
