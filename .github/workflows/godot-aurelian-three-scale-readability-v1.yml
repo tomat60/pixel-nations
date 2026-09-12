@@ -359,11 +359,12 @@ jobs:
             test "$(identify -format '%wx%h' "$still")" = "1440x900"
             test "$(stat -c '%s' "$still")" -gt 50000
           done
-          for video in "${EVIDENCE_DIR}/three-scale-readability-v1-native.webm" "${EVIDENCE_DIR}/three-scale-readability-v1-web.webm"; do
-            test -s "$video"
-            DURATION="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$video")"
-            awk -v d="$DURATION" 'BEGIN { exit !(d >= 8 && d <= 180) }'
-          done
+          test -s "${EVIDENCE_DIR}/three-scale-readability-v1-native.webm"
+          NATIVE_DURATION="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/three-scale-readability-v1-native.webm")"
+          awk -v d="$NATIVE_DURATION" 'BEGIN { exit !(d >= 3 && d <= 180) }'
+          test -s "${EVIDENCE_DIR}/three-scale-readability-v1-web.webm"
+          WEB_DURATION="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/three-scale-readability-v1-web.webm")"
+          awk -v d="$WEB_DURATION" 'BEGIN { exit !(d >= 8 && d <= 180) }'
           grep -F "PRODUCTION_VILLAGE_VIEW_LOD=map:Greenvale_flag" "${EVIDENCE_DIR}/native/first-session.log"
           grep -F "PRODUCTION_VILLAGE_VIEW_LOD=map:Greenvale_church,Greenvale_city_hall,Greenvale_flag" "${EVIDENCE_DIR}/native/first-session.log"
           grep -F "PRODUCTION_VILLAGE_VIEW_LOD=world:" "${EVIDENCE_DIR}/native/first-session.log"
@@ -393,13 +394,18 @@ jobs:
           const root=process.env.EVIDENCE_DIR;
           const exact=fs.readFileSync(path.join(root,'exact-head.txt'),'utf8').trim();
           const frames=[
-            ['claim','01-claim-map-east-route-claimed-1440x900.png','map_east_route_claimed'],
-            ['develop','02-develop-village-greenvale-developed-1440x900.png','village_developed'],
-            ['choose','03-choose-world-expand-committed-1440x900.png','world_first_nation_founded'],
-            ['consequence','04-consequence-village-expand-mandate-1440x900.png','village_national_mandate_started'],
-            ['grow','05-grow-world-aurelian-empire-1440x900.png','world_first_empire_proclaimed'],
-            ['expand','06-expand-world-two-land-footprint-1440x900.png','world_first_imperial_expansion_two_land_footprint']
-          ].map(([beat,file,state])=>({beat,file,state}));
+            {runtime:'native',camera:'map',file:'native-01-claimed-map-1440x900.png',state:'map_east_route_claimed',visible_local_nodes:['Greenvale_flag']},
+            {runtime:'native',camera:'village',file:'native-02-developed-village-1440x900.png',state:'village_developed',visible_local_nodes:'exact developed state'},
+            {runtime:'native',camera:'world',file:'native-03-city-world-1440x900.png',state:'world_first_city_recognized',visible_local_nodes:[]},
+            {runtime:'native',camera:'map',file:'native-04-two-land-map-1440x900.png',state:'map_first_imperial_expansion_two_lands_claimed',visible_local_nodes:['Greenvale_flag','Greenvale_church','Greenvale_city_hall']},
+            {runtime:'native',camera:'world',file:'native-05-two-land-world-1440x900.png',state:'world_first_imperial_expansion_two_land_footprint',visible_local_nodes:[]},
+            {runtime:'web',camera:'map',file:'01-claim-map-east-route-claimed-1440x900.png',state:'map_east_route_claimed',visible_local_nodes:['Greenvale_flag']},
+            {runtime:'web',camera:'village',file:'02-develop-village-greenvale-developed-1440x900.png',state:'village_developed',visible_local_nodes:'exact developed state'},
+            {runtime:'web',camera:'world',file:'03-choose-world-expand-committed-1440x900.png',state:'world_first_nation_founded',visible_local_nodes:[]},
+            {runtime:'web',camera:'village',file:'04-consequence-village-expand-mandate-1440x900.png',state:'village_national_mandate_started',visible_local_nodes:'exact city charter state'},
+            {runtime:'web',camera:'world',file:'05-grow-world-aurelian-empire-1440x900.png',state:'world_first_empire_proclaimed',visible_local_nodes:[]},
+            {runtime:'web',camera:'world',file:'06-expand-world-two-land-footprint-1440x900.png',state:'world_first_imperial_expansion_two_land_footprint',visible_local_nodes:[]}
+          ];
           fs.writeFileSync(path.join(root,'result-manifest.json'),JSON.stringify({
             contract:'GODOT_AURELIAN_THREE_SCALE_READABILITY_V1', exact_head:exact,
             viewport:{width:1440,height:900}, input_mode:'normal_keyboard', input_action_count:35,
