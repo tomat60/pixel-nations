@@ -108,7 +108,7 @@ jobs:
           xdpyinfo -display :99 >/dev/null
           (
             exec env -u AURELIAN_FULL_PROGRESSION -u AURELIAN_PLAYABLE_EVIDENCE_STATE -u AURELIAN_CAPTURE_PLAYABLE_ENTRY \
-              HOME="$HOME" stdbuf -oL -eL game/build/linux/pixel-nations-foundation.x86_64 \
+              HOME="$HOME" stdbuf -oL -eL game/build/linux/pixel-nations-foundation.x86_64 --resolution 1440x900 \
               > >(tee "${EVIDENCE_DIR}/native/first-session.stdout.log" >> "${EVIDENCE_DIR}/native/first-session.log") \
               2> >(tee "${EVIDENCE_DIR}/native/first-session.stderr.log" >> "${EVIDENCE_DIR}/native/first-session.log" >&2)
           ) &
@@ -223,7 +223,7 @@ jobs:
           wait "$APP_PID" || true
           (
             exec env -u AURELIAN_FULL_PROGRESSION -u AURELIAN_PLAYABLE_EVIDENCE_STATE -u AURELIAN_CAPTURE_PLAYABLE_ENTRY \
-              HOME="$HOME" stdbuf -oL -eL game/build/linux/pixel-nations-foundation.x86_64 \
+              HOME="$HOME" stdbuf -oL -eL game/build/linux/pixel-nations-foundation.x86_64 --resolution 1440x900 \
               > >(tee "${EVIDENCE_DIR}/native/restart.stdout.log" >> "${EVIDENCE_DIR}/native/restart.log") \
               2> >(tee "${EVIDENCE_DIR}/native/restart.stderr.log" >> "${EVIDENCE_DIR}/native/restart.log" >&2)
           ) &
