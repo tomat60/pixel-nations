@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: godot-aurelian-default-first-session-v6-${{ github.event.pull_request.number || github.ref }}
+  group: godot-aurelian-three-scale-readability-v1-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -427,7 +427,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: godot-aurelian-default-first-session-v6-${{ github.event.pull_request.head.sha || github.sha }}
+          name: godot-aurelian-three-scale-readability-v1-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/godot-aurelian-three-scale-readability-v1
           if-no-files-found: error
           retention-days: 7
