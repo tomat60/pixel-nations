@@ -236,6 +236,9 @@ func _build_main_world() -> bool:
 	return true
 
 func _apply_view_lod(preset: String, basin: Node3D) -> bool:
+	if preset == "bridge":
+		print("PRODUCTION_VILLAGE_VIEW_LOD=bridge:technical_full_state")
+		return true
 	var view_lod: Dictionary = state_contract.get("view_lod", {})
 	if not view_lod.has(preset):
 		push_error("PRODUCTION_VILLAGE_VIEW_LOD_MISSING: %s" % preset)
