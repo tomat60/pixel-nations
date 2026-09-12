@@ -274,5 +274,39 @@
     "Greenvale_blacksmith": 0.86,
     "Greenvale_barracks": 0.86,
     "Bridge_GildedCrossing": 1.1
+  },
+  "view_lod": {
+    "village": [
+      "Greenvale_flag",
+      "Greenvale_blacksmith",
+      "Greenvale_barracks",
+      "Greenvale_church",
+      "Greenvale_cottage_west",
+      "Greenvale_cottage_south",
+      "Greenvale_workshop_north",
+      "Greenvale_cottage_east",
+      "Greenvale_cottage_lane",
+      "Greenvale_storehouse_fields",
+      "Greenvale_workshop_crossing",
+      "Greenvale_shrine_green",
+      "Greenvale_gatehouse_road",
+      "Greenvale_city_hall",
+      "Greenvale_market_hall",
+      "Greenvale_civic_house_west",
+      "Greenvale_civic_house_east",
+      "Greenvale_watchtower",
+      "Greenvale_archive"
+    ],
+    "map": [
+      "Greenvale_flag",
+      "Greenvale_church",
+      "Greenvale_city_hall"
+    ],
+    "world": []
+  },
+  "view_lod_semantics": {
+    "village": "HOW: preserve every node visible in the current settlement state",
+    "map": "WHERE: retain only the flag and state-dependent civic anchor",
+    "world": "WHY / DIRECTION: local buildings yield to shared terrain and sparse strategic markers"
   }
 }
