@@ -2,16 +2,20 @@
 
 Status: ACTIVE
 Updated: 2026-09-12
-Current state revision: 39.0
-Authority baseline SHA: `1401d54fa21184d33269ba0cfbe8cb3263071fa6`
+Current state revision: 39.1
+Authority baseline SHA: `d3e9ed1f05e30d5c4e4348525514014f85357539`
 Product baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
 Runtime baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authority gate for Aurelian Frontier Capacity v2.
-Current milestone: authorize exactly one bounded Aurelian Frontier Capacity v2 candidate under issue #709.
+Current product phase: mandatory implementation preflight for Aurelian Frontier Capacity v2.
+Current milestone: prove or reject the exact six-file Aurelian Frontier Capacity v2 candidate under issue #709 before any product branch exists.
 Active execution issue: #709
-Next allowed action: merge this documentation-only authority after exact-head checks, then complete the mandatory preflight on issue #709. No product branch may exist before `IMPLEMENTATION_PREFLIGHT_PASS`.
+Next allowed action: complete the mandatory preflight on issue #709. No product branch may exist before terminal `IMPLEMENTATION_PREFLIGHT_PASS`; any seventh file, new persistence fact or fabricated optional history fails closed.
+
+## Accepted Aurelian Frontier Capacity v2 authority
+
+PR #710 passed every exact-head check and Vercel at head `1880f9ed4b4dae5e9586594408a0a9002b39670a` and merged as `d3e9ed1f05e30d5c4e4348525514014f85357539`. Product and runtime remain unchanged. Issue #709 is now the only active execution issue, limited to mandatory preflight before any implementation branch.
 
 ## Portfolio decision: Aurelian Frontier Capacity v2
 
