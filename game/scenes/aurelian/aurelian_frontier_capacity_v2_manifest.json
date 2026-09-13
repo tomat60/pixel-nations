@@ -1,0 +1,18 @@
+{
+  "contract": "AURELIAN_FRONTIER_CAPACITY_V2",
+  "issue": 709,
+  "derived_fact": "frontier_capacity",
+  "before_commit": 1,
+  "after_commit": 0,
+  "derivation": {
+    "one": "north_ridge_outpost == established and north_ridge_specialization == none",
+    "zero": "otherwise"
+  },
+  "persistent_fields_reused": ["north_ridge_outpost", "north_ridge_specialization"],
+  "new_persistent_fields": [],
+  "specializations": ["trade_post", "watch_post"],
+  "first_35_inputs_unchanged": true,
+  "views": ["Village", "Map", "World"],
+  "geography": "aurelian_basin_single_physical_geography",
+  "correction_limit": 1
+}
