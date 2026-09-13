@@ -1,17 +1,37 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-09-12
-Current state revision: 39.1
+Updated: 2026-09-13
+Current state revision: 40.0
 Authority baseline SHA: `d3e9ed1f05e30d5c4e4348525514014f85357539`
-Product baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
-Runtime baseline SHA: `47816465f21035407038864b0413d38f1f54ae1c`
+Product baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
+Runtime baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: mandatory implementation preflight for Aurelian Frontier Capacity v2.
-Current milestone: prove or reject the exact six-file Aurelian Frontier Capacity v2 candidate under issue #709 before any product branch exists.
-Active execution issue: #709
-Next allowed action: complete the mandatory preflight on issue #709. No product branch may exist before terminal `IMPLEMENTATION_PREFLIGHT_PASS`; any seventh file, new persistence fact or fabricated optional history fails closed.
+Current product phase: mandatory whole-product portfolio gate after accepted Aurelian Frontier Capacity v2.
+Current milestone: compare the next highest-value player-visible slice against onboarding compression, Repeatable Expansion, broader economy research and holding the current accepted product.
+Active execution issue: none
+Next allowed action: create exactly one strategy-only whole-product portfolio gate. No implementation is authorized until that gate selects one bounded slice and a separate authority update is merged.
+
+## Accepted Aurelian Frontier Capacity v2
+
+PR #712 received terminal `GODOT_AURELIAN_FRONTIER_CAPACITY_V2_PASS` and merged at exact head `294ca5e1ed8b8d9efbc378cec0292e9cbf27c11c` as `6a67f19034beb9868b3609b9f067430bd8b863af`.
+
+- exact scope: six authorized files;
+- correction budget consumed: 1/1, limited to native evidence capture timing and Xvfb window placement;
+- focused run `34734704918`: PASS for both existing specialization branches;
+- Trade artifact `10310532160`, digest `sha256:c6cb70b7ddfa810c79f5c6b233bab5c17681eb9355d419676456267fef4765e7`;
+- Watch artifact `10310746352`, digest `sha256:add9805a9cb1289b212fb5afb2f3ed9058d16042ae76e72918c91e96e127c40e`;
+- Trade recorded exactly 49 SEND, 49 action receipts and 49 release receipts in native and Web;
+- Watch recorded exactly 50 SEND, 50 action receipts and 50 release receipts in native and Web;
+- all 32 reviewed PNGs are 1440 x 900, and both native plus both Web videos were decoded and sampled;
+- before commitment, the existing Village choice shows derived `Frontier Capacity 1`; after the existing Trade Post or Watch Post commitment, Map, Village and World show derived `Frontier Capacity 0`;
+- native restart, Web reload and Web profile reopen preserve the exact selected outcome;
+- stored sessions truthfully retain East Route plus North Ridge, outpost `established`, the selected specialization and skipped crisis/rival/payoff history at `none`;
+- Default First Session v6, Input Release Boundary v3, Production Village, View LOD v2, Session Persistence v2, Web Playability, Playable Entry, Foundation, CI, Visual QA, P4-P8 and P10-P11: PASS;
+- Vercel exact-head deployment: SUCCESS.
+
+The accepted first 35 normal inputs, persistence schema, GLB, topology, cameras, sole input ownership and one physical Aurelian geography remain unchanged. Issue #709 is completed. No further product implementation is authorized until a fresh whole-product portfolio gate and separate merged authority select exactly one next slice.
 
 ## Accepted Aurelian Frontier Capacity v2 authority
 
