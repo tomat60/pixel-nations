@@ -48,7 +48,12 @@ func _apply_entry_state(state_name: String) -> void:
 	super(state_name)
 
 func _sanitize_core_session_state_for_persistence(state_name: String) -> void:
-	if not _core_session_active() or not IMPERIAL_EXPANSION_STATES.has(state_name):
+	var truthful_core_continuation := (
+		IMPERIAL_EXPANSION_STATES.has(state_name)
+		or NORTH_RIDGE_OUTPOST_STATES.has(state_name)
+		or NORTH_RIDGE_SPECIALIZATION_STATES.has(state_name)
+	)
+	if not _core_session_active() or not truthful_core_continuation:
 		return
 
 	# Phase B deliberately skips the legacy crisis/rival/frontier chain. The base
@@ -76,6 +81,9 @@ func _accept_entry() -> void:
 			return
 		CORE_SESSION_ACTION_COMPLETE:
 			print("AURELIAN_CORE_SESSION_COMPLETE=TWO_LANDS")
+			# Completion remains a truthful milestone, not a terminal input trap.
+			# A deliberate next Enter hands control to the accepted outpost graph.
+			super()
 			return
 		_:
 			super()
@@ -102,7 +110,16 @@ func _update_runtime_hud() -> void:
 			controls_label.text = "[RIGHT] Inspect North Ridge on Map"
 		CORE_SESSION_FINAL_STATE:
 			intent_label.text = "First session complete: Aurelian now spans East Route and North Ridge"
-			controls_label.text = "SESSION COMPLETE    [RIGHT] Inspect both lands"
+			controls_label.text = "SESSION COMPLETE    [ENTER] Hold North Ridge    [RIGHT] Inspect both lands"
+		"map_north_ridge_specialization_inspection", "village_north_ridge_specialization_choice":
+			intent_label.text = "Frontier Capacity %d | %s" % [frontier_capacity(), intent_label.text]
+		"map_north_ridge_trade_post_committed", "village_north_ridge_trade_post_greenvale_administers", "world_north_ridge_trade_post_logistics_posture", "map_north_ridge_watch_post_committed", "village_north_ridge_watch_post_greenvale_administers", "world_north_ridge_watch_post_vigilance_posture":
+			intent_label.text = "Frontier Capacity %d | %s" % [frontier_capacity(), intent_label.text]
+
+func frontier_capacity() -> int:
+	if north_ridge_outpost == "established" and north_ridge_specialization == "none":
+		return 1
+	return 0
 
 func _core_session_active() -> bool:
 	if automated_input_mode:

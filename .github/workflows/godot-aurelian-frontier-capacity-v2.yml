@@ -1,13 +1,14 @@
-name: Godot Aurelian View LOD Contract v2
+name: Godot Aurelian Frontier Capacity v2
 
 on:
   pull_request:
     branches: [main]
     paths:
-      - "game/scenes/aurelian/production_village_v1.gd"
       - "game/scenes/aurelian/playable_aurelian_first_session_v6.gd"
-      - "game/scenes/aurelian/production_village_v1_state_manifest.json"
-      - "game/tests/aurelian_view_lod_contract_v2_test.gd"
+      - "game/scenes/aurelian/aurelian_frontier_capacity_v2_manifest.json"
+      - "game/tests/aurelian_frontier_capacity_v2_test.gd"
+      - ".github/workflows/godot-aurelian-frontier-capacity-v2.yml"
+      - ".github/workflows/production-village-v1.yml"
       - ".github/workflows/godot-aurelian-view-lod-contract-v2.yml"
   workflow_dispatch:
 
@@ -15,20 +16,26 @@ permissions:
   contents: read
 
 concurrency:
-  group: godot-aurelian-view-lod-contract-v2-${{ github.event.pull_request.number || github.ref }}
+  group: godot-aurelian-frontier-capacity-v2-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
   GODOT_VERSION: "4.7.1"
   GODOT_RELEASE: "4.7.1-stable"
   GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
-  EVIDENCE_DIR: "evidence/godot-aurelian-view-lod-contract-v2"
+  EVIDENCE_DIR: "evidence/godot-aurelian-frontier-capacity-v2"
 
 jobs:
-  prove-view-lod-contract:
-    name: Prove native and Web Aurelian view LOD contract v2
+  prove-frontier-capacity:
+    name: Prove native and Web frontier capacity ${{ matrix.specialization }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        specialization: [trade_post, watch_post]
+    env:
+      SPECIALIZATION: ${{ matrix.specialization }}
     steps:
       - name: Checkout exact candidate head
         uses: actions/checkout@v4
@@ -45,6 +52,7 @@ jobs:
             test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
           fi
           cp game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json "${EVIDENCE_DIR}/playable-manifest.json"
+          cp game/scenes/aurelian/aurelian_frontier_capacity_v2_manifest.json "${EVIDENCE_DIR}/frontier-capacity-manifest.json"
 
       - name: Install pinned runtime and browser tools
         timeout-minutes: 9
@@ -79,10 +87,10 @@ jobs:
           fi
           "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_input_release_boundary_v3_test.gd 2>&1 | tee "${EVIDENCE_DIR}/input-release-boundary-v3-test.log"
           grep -F "AURELIAN_INPUT_RELEASE_BOUNDARY_V3_TEST: PASS" "${EVIDENCE_DIR}/input-release-boundary-v3-test.log"
-          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_view_lod_contract_v2_test.gd 2>&1 | tee "${EVIDENCE_DIR}/view-lod-contract-v2-test.log"
-          grep -F "AURELIAN_VIEW_LOD_CONTRACT_V2_TEST: PASS" "${EVIDENCE_DIR}/view-lod-contract-v2-test.log"
           "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_default_first_session_v6_test.gd 2>&1 | tee "${EVIDENCE_DIR}/default-first-session-v6-test.log"
           grep -F "AURELIAN_DEFAULT_FIRST_SESSION_V6_TEST: PASS" "${EVIDENCE_DIR}/default-first-session-v6-test.log"
+          "${GODOT_BIN}" --headless --path game --script res://tests/aurelian_frontier_capacity_v2_test.gd 2>&1 | tee "${EVIDENCE_DIR}/frontier-capacity-v2-test.log"
+          grep -F "AURELIAN_FRONTIER_CAPACITY_V2_TEST: PASS" "${EVIDENCE_DIR}/frontier-capacity-v2-test.log"
           grep -F 'custom_features="aurelian_full_progression"' game/export_presets.cfg
           "${GODOT_BIN}" --headless --path game --export-release "Linux/X11" build/linux/pixel-nations-foundation.x86_64 > "${EVIDENCE_DIR}/export-linux.log" 2>&1
           "${GODOT_BIN}" --headless --path game --export-release "Web" build/web-default/index.html > "${EVIDENCE_DIR}/export-default-web.log" 2>&1
@@ -107,21 +115,23 @@ jobs:
             sleep 0.25
           done
           xdpyinfo -display :99 >/dev/null
+          ffmpeg -y -f x11grab -video_size 1440x900 -framerate 10 -i :99.0 -c:v libvpx-vp9 -deadline realtime -cpu-used 8 "${EVIDENCE_DIR}/native/${SPECIALIZATION}-native.webm" > "${EVIDENCE_DIR}/native/video.log" 2>&1 &
+          VIDEO_PID=$!
           (
             exec env -u AURELIAN_FULL_PROGRESSION -u AURELIAN_PLAYABLE_EVIDENCE_STATE -u AURELIAN_CAPTURE_PLAYABLE_ENTRY \
-              HOME="$HOME" stdbuf -oL -eL game/build/linux/pixel-nations-foundation.x86_64 --resolution 1440x900 \
+              HOME="$HOME" stdbuf -oL -eL game/build/linux/pixel-nations-foundation.x86_64 \
               > >(tee "${EVIDENCE_DIR}/native/first-session.stdout.log" >> "${EVIDENCE_DIR}/native/first-session.log") \
               2> >(tee "${EVIDENCE_DIR}/native/first-session.stderr.log" >> "${EVIDENCE_DIR}/native/first-session.log" >&2)
           ) &
           APP_PID=$!
           WINDOW_ID="$(xdotool search --sync --onlyvisible --name 'Pixel Nations' | head -n1)"
+          xdotool windowsize --sync "$WINDOW_ID" 1440 900
+          xdotool windowmove --sync "$WINDOW_ID" 0 0
           for attempt in $(seq 1 80); do
             grep -Fq "PLAYABLE_AURELIAN_ENTRY_READY=" "${EVIDENCE_DIR}/native/first-session.log" && break
             sleep 0.25
           done
           grep -F "PLAYABLE_AURELIAN_ENTRY_READY=" "${EVIDENCE_DIR}/native/first-session.log"
-          ffmpeg -y -f x11grab -framerate 15 -video_size 1440x900 -i :99 -c:v libvpx-vp9 -deadline realtime -cpu-used 8 -b:v 1400k "${EVIDENCE_DIR}/view-lod-contract-v2-native.webm" > "${EVIDENCE_DIR}/native/video.log" 2>&1 &
-          VIDEO_PID=$!
           cat > "${EVIDENCE_DIR}/sequence.txt" <<'SEQUENCE'
           Return|ui_accept|world_trade_selected|PLAYABLE_AURELIAN_ENTRY_STATE=world_trade_selected
           Right|ui_right|map_east_route_selected|PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_selected
@@ -159,7 +169,41 @@ jobs:
           Left|ui_left|map_first_imperial_expansion_two_lands_claimed|PLAYABLE_AURELIAN_ENTRY_STATE=map_first_imperial_expansion_two_lands_claimed
           Left|ui_left|world_first_imperial_expansion_two_land_footprint|PLAYABLE_AURELIAN_ENTRY_STATE=world_first_imperial_expansion_two_land_footprint
           SEQUENCE
-          test "$(grep -c '^[A-Za-z]' "${EVIDENCE_DIR}/sequence.txt")" -eq 35
+          cat >> "${EVIDENCE_DIR}/sequence.txt" <<'SEQUENCE'
+          Return|ui_accept|world_north_ridge_outpost_frontier_need|PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_outpost_frontier_need
+          Right|ui_right|map_north_ridge_outpost_claimed_inspection|PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_outpost_claimed_inspection
+          Right|ui_right|village_north_ridge_outpost_establish_action|PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_outpost_establish_action
+          Return|ui_accept|map_north_ridge_outpost_established|PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_outpost_established
+          Right|ui_right|village_north_ridge_outpost_greenvale_administers|PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_outpost_greenvale_administers
+          Left|ui_left|map_north_ridge_outpost_established|PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_outpost_established
+          Left|ui_left|world_north_ridge_outpost_held_two_land_frontier|PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_outpost_held_two_land_frontier
+          Return|ui_accept|world_north_ridge_specialization_held_frontier|PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_specialization_held_frontier
+          Right|ui_right|map_north_ridge_specialization_inspection|PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_specialization_inspection
+          Right|ui_right|village_north_ridge_specialization_choice|PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_specialization_choice
+          SEQUENCE
+          if [ "$SPECIALIZATION" = "watch_post" ]; then
+            echo 'Down|ui_down|village_north_ridge_specialization_choice|AURELIAN_NORTH_RIDGE_SPECIALIZATION_INSPECT=WATCH_POST' >> "${EVIDENCE_DIR}/sequence.txt"
+          fi
+          if [ "$SPECIALIZATION" = "trade_post" ]; then
+            cat >> "${EVIDENCE_DIR}/sequence.txt" <<'SEQUENCE'
+          Return|ui_accept|map_north_ridge_trade_post_committed|AURELIAN_NORTH_RIDGE_SPECIALIZATION=TRADE_POST
+          Right|ui_right|village_north_ridge_trade_post_greenvale_administers|PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_trade_post_greenvale_administers
+          Left|ui_left|map_north_ridge_trade_post_committed|PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_trade_post_committed
+          Left|ui_left|world_north_ridge_trade_post_logistics_posture|PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_trade_post_logistics_posture
+          SEQUENCE
+            FINAL_STATE=world_north_ridge_trade_post_logistics_posture
+            EXPECTED_COUNT=49
+          else
+            cat >> "${EVIDENCE_DIR}/sequence.txt" <<'SEQUENCE'
+          Return|ui_accept|map_north_ridge_watch_post_committed|AURELIAN_NORTH_RIDGE_SPECIALIZATION=WATCH_POST
+          Right|ui_right|village_north_ridge_watch_post_greenvale_administers|PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_watch_post_greenvale_administers
+          Left|ui_left|map_north_ridge_watch_post_committed|PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_watch_post_committed
+          Left|ui_left|world_north_ridge_watch_post_vigilance_posture|PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_watch_post_vigilance_posture
+          SEQUENCE
+            FINAL_STATE=world_north_ridge_watch_post_vigilance_posture
+            EXPECTED_COUNT=50
+          fi
+          test "$(grep -c '^[A-Za-z]' "${EVIDENCE_DIR}/sequence.txt")" -eq "$EXPECTED_COUNT"
           : > "${EVIDENCE_DIR}/native/action-delivery.log"
           RECEIPT_GENERATION=0
           CURRENT_STATE=world_neutral
@@ -203,38 +247,41 @@ jobs:
               "$RECEIPT_GENERATION" "$action" "$expected_state" "$expected_event" \
               | tee -a "${EVIDENCE_DIR}/native/action-delivery.log"
             CURRENT_STATE="$expected_state"
-            case "$RECEIPT_GENERATION" in
-              3) import -window "$WINDOW_ID" "${EVIDENCE_DIR}/stills/native-01-claimed-map-1440x900.png" ;;
-              6) import -window "$WINDOW_ID" "${EVIDENCE_DIR}/stills/native-02-developed-village-1440x900.png" ;;
-              15) import -window "$WINDOW_ID" "${EVIDENCE_DIR}/stills/native-03-city-world-1440x900.png" ;;
-              32) import -window "$WINDOW_ID" "${EVIDENCE_DIR}/stills/native-04-two-land-map-1440x900.png" ;;
-              35) import -window "$WINDOW_ID" "${EVIDENCE_DIR}/stills/native-05-two-land-world-1440x900.png" ;;
+            case "$CURRENT_STATE" in
+              map_north_ridge_specialization_inspection) sleep 0.65; import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-01-map-inspection-1440x900.png" ;;
+              village_north_ridge_specialization_choice) sleep 0.65; import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-02-village-choice-capacity-1-1440x900.png" ;;
+              map_north_ridge_trade_post_committed|map_north_ridge_watch_post_committed) sleep 0.65; import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-03-map-commit-capacity-0-1440x900.png" ;;
+              village_north_ridge_trade_post_greenvale_administers|village_north_ridge_watch_post_greenvale_administers) sleep 0.65; import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-04-village-result-1440x900.png" ;;
+              world_north_ridge_trade_post_logistics_posture|world_north_ridge_watch_post_vigilance_posture) sleep 0.65; import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-05-world-result-1440x900.png" ;;
             esac
           done < "${EVIDENCE_DIR}/sequence.txt"
-          test "$RECEIPT_GENERATION" -eq 35
-          test "$(grep -c 'status=SEND' "${EVIDENCE_DIR}/native/action-delivery.log")" -eq 35
-          test "$(grep -c 'status=ACK' "${EVIDENCE_DIR}/native/action-delivery.log")" -eq 35
-          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log")" -eq 35
-          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RELEASE_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log")" -eq 35
-          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_imperial_expansion_two_land_footprint" "${EVIDENCE_DIR}/native/first-session.log"
-          kill -INT "$VIDEO_PID" || true
-          wait "$VIDEO_PID" || true
-          test -s "${EVIDENCE_DIR}/view-lod-contract-v2-native.webm"
+          test "$RECEIPT_GENERATION" -eq "$EXPECTED_COUNT"
+          test "$(grep -c 'status=SEND' "${EVIDENCE_DIR}/native/action-delivery.log")" -eq "$EXPECTED_COUNT"
+          test "$(grep -c 'status=ACK' "${EVIDENCE_DIR}/native/action-delivery.log")" -eq "$EXPECTED_COUNT"
+          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log")" -eq "$EXPECTED_COUNT"
+          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RELEASE_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log")" -eq "$EXPECTED_COUNT"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${FINAL_STATE}" "${EVIDENCE_DIR}/native/first-session.log"
           kill "$APP_PID" || true
           wait "$APP_PID" || true
+          kill "$VIDEO_PID" || true
+          wait "$VIDEO_PID" || true
           (
             exec env -u AURELIAN_FULL_PROGRESSION -u AURELIAN_PLAYABLE_EVIDENCE_STATE -u AURELIAN_CAPTURE_PLAYABLE_ENTRY \
-              HOME="$HOME" stdbuf -oL -eL game/build/linux/pixel-nations-foundation.x86_64 --resolution 1440x900 \
+              HOME="$HOME" stdbuf -oL -eL game/build/linux/pixel-nations-foundation.x86_64 \
               > >(tee "${EVIDENCE_DIR}/native/restart.stdout.log" >> "${EVIDENCE_DIR}/native/restart.log") \
               2> >(tee "${EVIDENCE_DIR}/native/restart.stderr.log" >> "${EVIDENCE_DIR}/native/restart.log" >&2)
           ) &
           RESTORE_PID=$!
           for attempt in $(seq 1 80); do
-            grep -Fq "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:world_first_imperial_expansion_two_land_footprint:east_trade" "${EVIDENCE_DIR}/native/restart.log" && break
+            grep -Fq "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:${FINAL_STATE}:east_trade" "${EVIDENCE_DIR}/native/restart.log" && break
             sleep 0.25
           done
-          grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:world_first_imperial_expansion_two_land_footprint:east_trade" "${EVIDENCE_DIR}/native/restart.log"
-          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_imperial_expansion_two_land_footprint" "${EVIDENCE_DIR}/native/restart.log"
+          grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:${FINAL_STATE}:east_trade" "${EVIDENCE_DIR}/native/restart.log"
+          grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${FINAL_STATE}" "${EVIDENCE_DIR}/native/restart.log"
+          SAVE_PATH="$(find "$HOME" -type f -name 'aurelian-session-v2.json' -print -quit)"
+          test -n "$SAVE_PATH"
+          jq -e --arg s "$FINAL_STATE" --arg branch "$SPECIALIZATION" '.entry_state == $s and .north_ridge_outpost == "established" and .north_ridge_specialization == $branch and .imperial_crisis == "none" and .first_rival_countermove_response == "none" and .first_frontier_payoff == "none"' "$SAVE_PATH"
+          cp "$SAVE_PATH" "${EVIDENCE_DIR}/native/restored-session.json"
           kill "$RESTORE_PID" || true
           wait "$RESTORE_PID" || true
           cat "${EVIDENCE_DIR}/native/first-session.log" "${EVIDENCE_DIR}/native/restart.log" \
@@ -263,12 +310,15 @@ jobs:
           const root = path.resolve(process.env.EVIDENCE_DIR);
           const stills = path.join(root, 'stills');
           const profile = path.join(process.env.RUNNER_TEMP, 'aurelian-default-web-profile');
+          const specialization = process.env.SPECIALIZATION;
+          const finalState = specialization === 'trade_post' ? 'world_north_ridge_trade_post_logistics_posture' : 'world_north_ridge_watch_post_vigilance_posture';
+          const expectedCount = specialization === 'trade_post' ? 49 : 50;
           const consoleLines = [], states = [], receipts = [], releases = [], loads = [], saveAcks = [], requestFailures = [], responseFailures = [];
           const sequence = fs.readFileSync(path.join(root,'sequence.txt'),'utf8').trim().split('\n').map((line,index)=>{
             const [key,action,expectedState,expectedEvent]=line.split('|');
             return {index:index+1,key,action,expectedState,expectedEvent};
           });
-          if(sequence.length!==35) throw new Error('Expected 35 sequence rows, got '+sequence.length);
+          if(sequence.length!==expectedCount) throw new Error(`Expected ${expectedCount} sequence rows, got ${sequence.length}`);
           const keyMap={Return:'Enter',Right:'ArrowRight',Left:'ArrowLeft',Down:'ArrowDown',Up:'ArrowUp'};
           const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
           function attach(page) {
@@ -320,8 +370,19 @@ jobs:
               delivery.push(`status=ACK index=${row.index} action=${row.action} state=${row.expectedState} event=${row.expectedEvent}`);
               currentState=row.expectedState;
               if(shots[row.index]) await shot(page,shots[row.index]);
+              const focusedShots={
+                map_north_ridge_specialization_inspection:`web-${specialization}-01-map-inspection-1440x900.png`,
+                village_north_ridge_specialization_choice:`web-${specialization}-02-village-choice-capacity-1-1440x900.png`,
+                map_north_ridge_trade_post_committed:`web-${specialization}-03-map-commit-capacity-0-1440x900.png`,
+                map_north_ridge_watch_post_committed:`web-${specialization}-03-map-commit-capacity-0-1440x900.png`,
+                village_north_ridge_trade_post_greenvale_administers:`web-${specialization}-04-village-result-1440x900.png`,
+                village_north_ridge_watch_post_greenvale_administers:`web-${specialization}-04-village-result-1440x900.png`,
+                world_north_ridge_trade_post_logistics_posture:`web-${specialization}-05-world-result-1440x900.png`,
+                world_north_ridge_watch_post_vigilance_posture:`web-${specialization}-05-world-result-1440x900.png`
+              };
+              if(focusedShots[currentState]) await shot(page,focusedShots[currentState]);
             }
-            if(receipts.length!==35||releases.length!==35) throw new Error('Expected 35 press/release receipts, got '+receipts.length+'/'+releases.length);
+            if(receipts.length!==expectedCount||releases.length!==expectedCount) throw new Error(`Expected ${expectedCount} press/release receipts, got ${receipts.length}/${releases.length}`);
             fs.writeFileSync(path.join(root,'web','action-delivery.log'),delivery.join('\n')+'\n');
           }
           async function shot(page,name){ await sleep(650); await page.screenshot({path:path.join(stills,name)}); }
@@ -335,15 +396,18 @@ jobs:
             let page=await open(context); const video=page.video();
             await waitFor(()=>states.includes('world_neutral'),'initial world');
             await drive(page);
-            await waitFor(()=>saveAcks.some(x=>x.status==='stored'&&x.adapter==='web_local_storage'&&x.state==='world_first_imperial_expansion_two_land_footprint'),'final web save');
+            await waitFor(()=>saveAcks.some(x=>x.status==='stored'&&x.adapter==='web_local_storage'&&x.state===finalState),'final web save');
+            const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('pixel_nations.aurelian_session.v2')));
+            if(stored.entry_state!==finalState||stored.north_ridge_outpost!=='established'||stored.north_ridge_specialization!==specialization||stored.imperial_crisis!=='none'||stored.first_rival_countermove_response!=='none'||stored.first_frontier_payoff!=='none') throw new Error('Stored Web session is not truthful: '+JSON.stringify(stored));
+            fs.writeFileSync(path.join(root,'web','stored-session.json'),JSON.stringify(stored,null,2)+'\n');
             await page.reload({waitUntil:'domcontentloaded',timeout:90000}); await page.locator('canvas').waitFor({state:'visible',timeout:90000}); await page.locator('canvas').click();
-            await waitFor(()=>loads.some(x=>x.status==='restored'&&x.adapter==='web_local_storage'&&x.state==='world_first_imperial_expansion_two_land_footprint'),'web reload restore');
-            await waitFor(()=>states.filter(x=>x==='world_first_imperial_expansion_two_land_footprint').length>=2,'web reload final');
-            await page.close(); await video.saveAs(path.join(root,'view-lod-contract-v2-web.webm')); await context.close();
+            await waitFor(()=>loads.some(x=>x.status==='restored'&&x.adapter==='web_local_storage'&&x.state===finalState),'web reload restore');
+            await waitFor(()=>states.filter(x=>x===finalState).length>=2,'web reload final');
+            await page.close(); await video.saveAs(path.join(root,`${specialization}-web.webm`)); await context.close();
             context=await chromium.launchPersistentContext(profile,{headless:true,viewport:{width:1440,height:900},args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
             page=await open(context);
-            await waitFor(()=>loads.filter(x=>x.status==='restored'&&x.adapter==='web_local_storage'&&x.state==='world_first_imperial_expansion_two_land_footprint').length>=2,'profile reopen restore');
-            await waitFor(()=>states.filter(x=>x==='world_first_imperial_expansion_two_land_footprint').length>=3,'profile reopen final');
+            await waitFor(()=>loads.filter(x=>x.status==='restored'&&x.adapter==='web_local_storage'&&x.state===finalState).length>=2,'profile reopen restore');
+            await waitFor(()=>states.filter(x=>x===finalState).length>=3,'profile reopen final');
             await context.close();
             fs.writeFileSync(path.join(root,'web','browser-console.log'),consoleLines.join('\n')+'\n');
             fs.writeFileSync(path.join(root,'web','action-state.log'),consoleLines.filter(x=>/AURELIAN_FIRST_|AURELIAN_CORE_SESSION_|PLAYABLE_AURELIAN_ENTRY_STATE|AURELIAN_SESSION_V2_(LOAD|SAVE_ACK)/.test(x)).join('\n')+'\n');
@@ -355,29 +419,27 @@ jobs:
       - name: Validate fail-closed Gate B evidence
         run: |
           set -euo pipefail
-          test "$(find "${EVIDENCE_DIR}/stills" -maxdepth 1 -type f -name '*.png' | wc -l)" = "11"
+          EXPECTED_COUNT=49
+          FINAL_STATE=world_north_ridge_trade_post_logistics_posture
+          if [ "$SPECIALIZATION" = "watch_post" ]; then EXPECTED_COUNT=50; FINAL_STATE=world_north_ridge_watch_post_vigilance_posture; fi
+          test "$(find "${EVIDENCE_DIR}/stills" -maxdepth 1 -type f -name '*.png' | wc -l)" = "16"
           for still in "${EVIDENCE_DIR}"/stills/*.png; do
             test "$(identify -format '%wx%h' "$still")" = "1440x900"
             test "$(stat -c '%s' "$still")" -gt 50000
           done
-          test -s "${EVIDENCE_DIR}/view-lod-contract-v2-native.webm"
-          NATIVE_DURATION="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/view-lod-contract-v2-native.webm")"
-          awk -v d="$NATIVE_DURATION" 'BEGIN { exit !(d >= 3 && d <= 180) }'
-          test -s "${EVIDENCE_DIR}/view-lod-contract-v2-web.webm"
-          WEB_DURATION="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/view-lod-contract-v2-web.webm")"
-          awk -v d="$WEB_DURATION" 'BEGIN { exit !(d >= 8 && d <= 180) }'
-          grep -F "PRODUCTION_VILLAGE_VIEW_LOD=map:Greenvale_flag" "${EVIDENCE_DIR}/native/first-session.log"
-          grep -F "PRODUCTION_VILLAGE_VIEW_LOD=map:Greenvale_church,Greenvale_city_hall,Greenvale_flag" "${EVIDENCE_DIR}/native/first-session.log"
-          grep -F "PRODUCTION_VILLAGE_VIEW_LOD=world:" "${EVIDENCE_DIR}/native/first-session.log"
-          sha256sum game/assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb | tee "${EVIDENCE_DIR}/glb-sha256.txt"
-          grep -F "04116e3d662d461f0d29ca797444193b0873f5aba6012790af7d366c63e01048" "${EVIDENCE_DIR}/glb-sha256.txt"
+          test -s "${EVIDENCE_DIR}/${SPECIALIZATION}-web.webm"
+          test -s "${EVIDENCE_DIR}/native/${SPECIALIZATION}-native.webm"
+          DURATION="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/${SPECIALIZATION}-web.webm")"
+          awk -v d="$DURATION" 'BEGIN { exit !(d >= 8 && d <= 180) }'
+          NATIVE_DURATION="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${EVIDENCE_DIR}/native/${SPECIALIZATION}-native.webm")"
+          awk -v d="$NATIVE_DURATION" 'BEGIN { exit !(d >= 8 && d <= 180) }'
           for delivery in "${EVIDENCE_DIR}/native/action-delivery.log" "${EVIDENCE_DIR}/web/action-delivery.log"; do
-            test "$(grep -c 'status=SEND' "$delivery")" -eq 35
-            test "$(grep -c 'status=ACK' "$delivery")" -eq 35
+            test "$(grep -c 'status=SEND' "$delivery")" -eq "$EXPECTED_COUNT"
+            test "$(grep -c 'status=ACK' "$delivery")" -eq "$EXPECTED_COUNT"
           done
-          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log")" -eq 35
-          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/web/browser-console.log")" -eq 35
-          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RELEASE_RECEIPT=' "${EVIDENCE_DIR}/web/browser-console.log")" -eq 35
+          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/native/first-session.log")" -eq "$EXPECTED_COUNT"
+          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RECEIPT=' "${EVIDENCE_DIR}/web/browser-console.log")" -eq "$EXPECTED_COUNT"
+          test "$(grep -Fc 'PLAYABLE_AURELIAN_INPUT_RELEASE_RECEIPT=' "${EVIDENCE_DIR}/web/browser-console.log")" -eq "$EXPECTED_COUNT"
           for log in "${EVIDENCE_DIR}/native/action-state.log" "${EVIDENCE_DIR}/web/action-state.log"; do
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_east_route_claimed" "$log"
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_developed" "$log"
@@ -386,49 +448,44 @@ jobs:
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_empire_proclaimed" "$log"
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_first_imperial_expansion_two_lands_claimed" "$log"
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_imperial_expansion_two_land_footprint" "$log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_specialization_inspection" "$log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_specialization_choice" "$log"
+            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${FINAL_STATE}" "$log"
             if grep -E "RIVER_SURGE|RIVAL_COUNTERMOVE|FRONTIER_PAYOFF" "$log"; then exit 1; fi
           done
-          grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:world_first_imperial_expansion_two_land_footprint:east_trade" "${EVIDENCE_DIR}/native/action-state.log"
-          test "$(grep -Fc 'AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:world_first_imperial_expansion_two_land_footprint:east_trade' "${EVIDENCE_DIR}/web/action-state.log")" -ge 2
+          grep -F "AURELIAN_SESSION_V2_LOAD=restored:native_file_access:${FINAL_STATE}:east_trade" "${EVIDENCE_DIR}/native/action-state.log"
+          test "$(grep -Fc "AURELIAN_SESSION_V2_LOAD=restored:web_local_storage:${FINAL_STATE}:east_trade" "${EVIDENCE_DIR}/web/action-state.log")" -ge 2
           node <<'NODE'
           const fs=require('fs'), path=require('path');
           const root=process.env.EVIDENCE_DIR;
           const exact=fs.readFileSync(path.join(root,'exact-head.txt'),'utf8').trim();
           const frames=[
-            {runtime:'native',camera:'map',file:'native-01-claimed-map-1440x900.png',state:'map_east_route_claimed',visible_local_nodes:['Greenvale_flag']},
-            {runtime:'native',camera:'village',file:'native-02-developed-village-1440x900.png',state:'village_developed',visible_local_nodes:'exact developed state'},
-            {runtime:'native',camera:'world',file:'native-03-city-world-1440x900.png',state:'world_first_city_recognized',visible_local_nodes:[]},
-            {runtime:'native',camera:'map',file:'native-04-two-land-map-1440x900.png',state:'map_first_imperial_expansion_two_lands_claimed',visible_local_nodes:['Greenvale_flag','Greenvale_church','Greenvale_city_hall']},
-            {runtime:'native',camera:'world',file:'native-05-two-land-world-1440x900.png',state:'world_first_imperial_expansion_two_land_footprint',visible_local_nodes:[]},
-            {runtime:'web',camera:'map',file:'01-claim-map-east-route-claimed-1440x900.png',state:'map_east_route_claimed',visible_local_nodes:['Greenvale_flag']},
-            {runtime:'web',camera:'village',file:'02-develop-village-greenvale-developed-1440x900.png',state:'village_developed',visible_local_nodes:'exact developed state'},
-            {runtime:'web',camera:'world',file:'03-choose-world-expand-committed-1440x900.png',state:'world_first_nation_founded',visible_local_nodes:[]},
-            {runtime:'web',camera:'village',file:'04-consequence-village-expand-mandate-1440x900.png',state:'village_national_mandate_started',visible_local_nodes:'exact city charter state'},
-            {runtime:'web',camera:'world',file:'05-grow-world-aurelian-empire-1440x900.png',state:'world_first_empire_proclaimed',visible_local_nodes:[]},
-            {runtime:'web',camera:'world',file:'06-expand-world-two-land-footprint-1440x900.png',state:'world_first_imperial_expansion_two_land_footprint',visible_local_nodes:[]}
-          ];
+            ['claim','01-claim-map-east-route-claimed-1440x900.png','map_east_route_claimed'],
+            ['develop','02-develop-village-greenvale-developed-1440x900.png','village_developed'],
+            ['choose','03-choose-world-expand-committed-1440x900.png','world_first_nation_founded'],
+            ['consequence','04-consequence-village-expand-mandate-1440x900.png','village_national_mandate_started'],
+            ['grow','05-grow-world-aurelian-empire-1440x900.png','world_first_empire_proclaimed'],
+            ['expand','06-expand-world-two-land-footprint-1440x900.png','world_first_imperial_expansion_two_land_footprint']
+          ].map(([beat,file,state])=>({beat,file,state}));
           fs.writeFileSync(path.join(root,'result-manifest.json'),JSON.stringify({
-            contract:'GODOT_AURELIAN_VIEW_LOD_CONTRACT_V2', exact_head:exact,
-            viewport:{width:1440,height:900}, input_mode:'normal_keyboard', input_action_count:35,
+            contract:'GODOT_AURELIAN_FRONTIER_CAPACITY_V2', exact_head:exact, mode:String('${{ matrix.specialization }}'),
+            viewport:{width:1440,height:900}, input_mode:'normal_keyboard', input_action_count:Number(process.env.SPECIALIZATION==='trade_post'?49:50),
             completion_barrier:'send_plus_exact_action_receipt_plus_expected_event_plus_resulting_state_plus_matching_release_receipt',
             native_and_web_sequence_identical:true, frames,
-            frame_count:11, videos:['view-lod-contract-v2-native.webm','view-lod-contract-v2-web.webm'],
-            view_lod:{village:'state-visible detail',map:['Greenvale_flag','Greenvale_church','Greenvale_city_hall'],world:[]},
-            map_overlays:'unchanged and map-only',world_markers:'unchanged and world-only',
-            final_state:'world_first_imperial_expansion_two_land_footprint', claimed_lands:['east_route','north_ridge'],
+            final_state:process.env.SPECIALIZATION==='trade_post'?'world_north_ridge_trade_post_logistics_posture':'world_north_ridge_watch_post_vigilance_posture', claimed_lands:['east_route','north_ridge'],
             native_restart:true, web_reload:true, web_profile_reopen:true,
             historical_regression_feature_tag:'aurelian_full_progression', product_acceptance_claimed:false
           },null,2)+'\n');
           NODE
           grep -F '"product_acceptance_claimed": false' "${EVIDENCE_DIR}/result-manifest.json"
-          sha256sum "${EVIDENCE_DIR}/view-lod-contract-v2-native.webm" "${EVIDENCE_DIR}/view-lod-contract-v2-web.webm" "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}"/native/*.log "${EVIDENCE_DIR}"/web/*.log "${EVIDENCE_DIR}"/web/*.json "${EVIDENCE_DIR}/result-manifest.json" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
-          echo "GODOT_AURELIAN_VIEW_LOD_CONTRACT_V2_DETERMINISTIC_QA=PASS"
+          sha256sum "${EVIDENCE_DIR}/${SPECIALIZATION}-web.webm" "${EVIDENCE_DIR}/native/${SPECIALIZATION}-native.webm" "${EVIDENCE_DIR}"/stills/*.png "${EVIDENCE_DIR}"/native/*.log "${EVIDENCE_DIR}"/native/*.json "${EVIDENCE_DIR}"/web/*.log "${EVIDENCE_DIR}"/web/*.json "${EVIDENCE_DIR}/result-manifest.json" | tee "${EVIDENCE_DIR}/evidence-sha256sums.txt"
+          echo "GODOT_AURELIAN_FRONTIER_CAPACITY_V2_DETERMINISTIC_QA=PASS"
 
       - name: Upload exact-head Gate B evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: godot-aurelian-view-lod-contract-v2-${{ github.event.pull_request.head.sha || github.sha }}
-          path: evidence/godot-aurelian-view-lod-contract-v2
+          name: godot-aurelian-frontier-capacity-v2-profile-${{ matrix.specialization }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/godot-aurelian-frontier-capacity-v2
           if-no-files-found: error
           retention-days: 7
