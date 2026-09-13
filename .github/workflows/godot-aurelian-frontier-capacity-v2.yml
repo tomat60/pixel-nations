@@ -125,6 +125,8 @@ jobs:
           ) &
           APP_PID=$!
           WINDOW_ID="$(xdotool search --sync --onlyvisible --name 'Pixel Nations' | head -n1)"
+          xdotool windowsize --sync "$WINDOW_ID" 1440 900
+          xdotool windowmove --sync "$WINDOW_ID" 0 0
           for attempt in $(seq 1 80); do
             grep -Fq "PLAYABLE_AURELIAN_ENTRY_READY=" "${EVIDENCE_DIR}/native/first-session.log" && break
             sleep 0.25
@@ -246,11 +248,11 @@ jobs:
               | tee -a "${EVIDENCE_DIR}/native/action-delivery.log"
             CURRENT_STATE="$expected_state"
             case "$CURRENT_STATE" in
-              map_north_ridge_specialization_inspection) import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-01-map-inspection-1440x900.png" ;;
-              village_north_ridge_specialization_choice) import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-02-village-choice-capacity-1-1440x900.png" ;;
-              map_north_ridge_trade_post_committed|map_north_ridge_watch_post_committed) import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-03-map-commit-capacity-0-1440x900.png" ;;
-              village_north_ridge_trade_post_greenvale_administers|village_north_ridge_watch_post_greenvale_administers) import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-04-village-result-1440x900.png" ;;
-              world_north_ridge_trade_post_logistics_posture|world_north_ridge_watch_post_vigilance_posture) import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-05-world-result-1440x900.png" ;;
+              map_north_ridge_specialization_inspection) sleep 0.65; import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-01-map-inspection-1440x900.png" ;;
+              village_north_ridge_specialization_choice) sleep 0.65; import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-02-village-choice-capacity-1-1440x900.png" ;;
+              map_north_ridge_trade_post_committed|map_north_ridge_watch_post_committed) sleep 0.65; import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-03-map-commit-capacity-0-1440x900.png" ;;
+              village_north_ridge_trade_post_greenvale_administers|village_north_ridge_watch_post_greenvale_administers) sleep 0.65; import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-04-village-result-1440x900.png" ;;
+              world_north_ridge_trade_post_logistics_posture|world_north_ridge_watch_post_vigilance_posture) sleep 0.65; import -display :99 -window root "${EVIDENCE_DIR}/stills/native-${SPECIALIZATION}-05-world-result-1440x900.png" ;;
             esac
           done < "${EVIDENCE_DIR}/sequence.txt"
           test "$RECEIPT_GENERATION" -eq "$EXPECTED_COUNT"
