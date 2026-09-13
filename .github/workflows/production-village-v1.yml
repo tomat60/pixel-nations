@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "game/scenes/aurelian/production_village_v1.gd"
+      - "game/scenes/aurelian/playable_aurelian_first_session_v6.gd"
       - "game/scenes/aurelian/production_village_v1.tscn"
       - "game/scenes/aurelian/production_village_v1_state_manifest.json"
       - "game/tests/production_village_v1_test.gd"
