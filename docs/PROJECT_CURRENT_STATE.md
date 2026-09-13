@@ -2,8 +2,8 @@
 
 Status: ACTIVE
 Updated: 2026-09-13
-Current state revision: 40.0
-Authority baseline SHA: `d3e9ed1f05e30d5c4e4348525514014f85357539`
+Current state revision: 40.1
+Authority baseline SHA: `5319d551c13367e6c0c3cc2a5916217094f833ba`
 Product baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Runtime baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
@@ -12,6 +12,20 @@ Current product phase: mandatory whole-product portfolio gate after accepted Aur
 Current milestone: issue #714 compares the next highest-value player-visible slice against onboarding compression, Repeatable Expansion, broader economy research and holding the current accepted product.
 Active execution issue: #714
 Next allowed action: complete the strategy-only whole-product portfolio gate on issue #714. No implementation is authorized until that gate selects one bounded slice and a separate authority update is merged.
+
+## Portfolio decision: Aurelian Minimal Economy Foundation Research v1
+
+Issue #714 completed the mandatory whole-product portfolio gate after accepted Aurelian Frontier Capacity v2.
+
+Decision: authorize exactly one research and contract-definition candidate under issue #715, only after this authority merges. This decision authorizes no product implementation.
+
+The first land claim already occurs on normal input 3, so onboarding is not the largest current blocker. Repeatable Expansion remains Phase D and would generalize land, state and persistence before the product has one real economic tradeoff. HOLD is not justified because the accepted loop still has no scarce resource, cost or production choice. Phase C research now has the highest expected value: Frontier Capacity proves that players can see and persist an opportunity-cost boundary, but it is intentionally derived and one-shot.
+
+Research must compare at least three concrete one-resource models and select exactly one truthful candidate or reject all. A valid candidate needs one acquisition rule, one explicit spend/hold or two-use allocation, mutually exclusive visible consequences across Village, Map and World, the minimum persistence delta and a bounded normal-input native/Web QA topology. A resource that only renames Frontier Capacity, has no alternative use or changes only HUD copy fails.
+
+The research ceiling is exactly two documentation files: `docs/AURELIAN_MINIMAL_ECONOMY_FOUNDATION_V1_RESEARCH.md` and `docs/PROJECT_CURRENT_STATE.md`. No game, test, workflow, schema, asset, configuration, third land, repeatable framework, worker, timer, queue, market, tax, combat, diplomacy, backend or paid-tool change is authorized. PASS is only `AURELIAN_MINIMAL_ECONOMY_FOUNDATION_V1_RESEARCH_PASS`; otherwise terminal REJECT.
+
+Even after research PASS, implementation remains blocked until a fresh implementation preflight and separate merged authority define exact files, workflows, evidence and terminal product labels.
 
 ## Accepted Aurelian Frontier Capacity v2
 
