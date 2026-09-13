@@ -2,16 +2,22 @@
 
 Status: ACTIVE
 Updated: 2026-09-13
-Current state revision: 40.2
+Current state revision: 41.0
 Authority baseline SHA: `b266e79e2a5c550b91417705cdcd3ded53850f6b`
 Product baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Runtime baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: authorized Aurelian Minimal Economy Foundation v1 research and contract definition.
-Current milestone: issue #715 compares at least three concrete one-resource models and must select exactly one bounded truthful candidate or reject all.
+Current product phase: Aurelian Minimal Economy Foundation v1 research candidate.
+Current milestone: issue #715 selects Aurelian Provision Allocation v1 as the smallest truthful one-resource candidate, pending exact-head review and merge.
 Active execution issue: #715
-Next allowed action: complete exactly one research candidate within the two-document ceiling under issue #715. No product implementation is authorized; even research PASS requires a fresh implementation preflight and separate merged authority.
+Next allowed action: validate and directly review the exact two-document research candidate. If it receives terminal `AURELIAN_MINIMAL_ECONOMY_FOUNDATION_V1_RESEARCH_PASS`, merge it, then create a fresh implementation issue and complete preflight plus a separate authority. No product implementation is authorized.
+
+## Aurelian Minimal Economy Foundation v1 research candidate
+
+Issue #715 compares Aurelian Provision, Construction Timber and Trade Cargo. It selects Aurelian Provision Allocation v1: exactly one Provision is acquired by the accepted first-caravan dispatch and later allocated either to the existing North Ridge Outpost or held as a committed Greenvale Reserve. One persisted enum records the destination; quantity is derived and can never exceed one. The two outcomes are geographically distinct and must be visible in Village, Map and World through one canonical provision presentation, not HUD copy alone.
+
+The proposed later implementation ceiling is seven exact files. Implementation remains blocked until this research receives terminal PASS, a fresh implementation issue records `IMPLEMENTATION_PREFLIGHT_PASS`, and a separate authority merges. Full findings and gates are in `docs/AURELIAN_MINIMAL_ECONOMY_FOUNDATION_V1_RESEARCH.md`.
 
 ## Portfolio decision: Aurelian Minimal Economy Foundation Research v1
 
