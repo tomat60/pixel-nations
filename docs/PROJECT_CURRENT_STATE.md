@@ -9,9 +9,9 @@ Runtime baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: mandatory whole-product portfolio gate after accepted Aurelian Frontier Capacity v2.
-Current milestone: compare the next highest-value player-visible slice against onboarding compression, Repeatable Expansion, broader economy research and holding the current accepted product.
-Active execution issue: none
-Next allowed action: create exactly one strategy-only whole-product portfolio gate. No implementation is authorized until that gate selects one bounded slice and a separate authority update is merged.
+Current milestone: issue #714 compares the next highest-value player-visible slice against onboarding compression, Repeatable Expansion, broader economy research and holding the current accepted product.
+Active execution issue: #714
+Next allowed action: complete the strategy-only whole-product portfolio gate on issue #714. No implementation is authorized until that gate selects one bounded slice and a separate authority update is merged.
 
 ## Accepted Aurelian Frontier Capacity v2
 
@@ -31,7 +31,7 @@ PR #712 received terminal `GODOT_AURELIAN_FRONTIER_CAPACITY_V2_PASS` and merged 
 - Default First Session v6, Input Release Boundary v3, Production Village, View LOD v2, Session Persistence v2, Web Playability, Playable Entry, Foundation, CI, Visual QA, P4-P8 and P10-P11: PASS;
 - Vercel exact-head deployment: SUCCESS.
 
-The accepted first 35 normal inputs, persistence schema, GLB, topology, cameras, sole input ownership and one physical Aurelian geography remain unchanged. Issue #709 is completed. No further product implementation is authorized until a fresh whole-product portfolio gate and separate merged authority select exactly one next slice.
+The accepted first 35 normal inputs, persistence schema, GLB, topology, cameras, sole input ownership and one physical Aurelian geography remain unchanged. Issue #709 is completed. Issue #714 is the only active strategy-only whole-product portfolio gate. No further product implementation is authorized until that gate and a separate merged authority select exactly one next slice.
 
 ## Accepted Aurelian Frontier Capacity v2 authority
 
