@@ -2,16 +2,16 @@
 
 Status: ACTIVE
 Updated: 2026-09-13
-Current state revision: 40.1
-Authority baseline SHA: `5319d551c13367e6c0c3cc2a5916217094f833ba`
+Current state revision: 40.2
+Authority baseline SHA: `b266e79e2a5c550b91417705cdcd3ded53850f6b`
 Product baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Runtime baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: mandatory whole-product portfolio gate after accepted Aurelian Frontier Capacity v2.
-Current milestone: issue #714 compares the next highest-value player-visible slice against onboarding compression, Repeatable Expansion, broader economy research and holding the current accepted product.
-Active execution issue: #714
-Next allowed action: complete the strategy-only whole-product portfolio gate on issue #714. No implementation is authorized until that gate selects one bounded slice and a separate authority update is merged.
+Current product phase: authorized Aurelian Minimal Economy Foundation v1 research and contract definition.
+Current milestone: issue #715 compares at least three concrete one-resource models and must select exactly one bounded truthful candidate or reject all.
+Active execution issue: #715
+Next allowed action: complete exactly one research candidate within the two-document ceiling under issue #715. No product implementation is authorized; even research PASS requires a fresh implementation preflight and separate merged authority.
 
 ## Portfolio decision: Aurelian Minimal Economy Foundation Research v1
 
@@ -26,6 +26,10 @@ Research must compare at least three concrete one-resource models and select exa
 The research ceiling is exactly two documentation files: `docs/AURELIAN_MINIMAL_ECONOMY_FOUNDATION_V1_RESEARCH.md` and `docs/PROJECT_CURRENT_STATE.md`. No game, test, workflow, schema, asset, configuration, third land, repeatable framework, worker, timer, queue, market, tax, combat, diplomacy, backend or paid-tool change is authorized. PASS is only `AURELIAN_MINIMAL_ECONOMY_FOUNDATION_V1_RESEARCH_PASS`; otherwise terminal REJECT.
 
 Even after research PASS, implementation remains blocked until a fresh implementation preflight and separate merged authority define exact files, workflows, evidence and terminal product labels.
+
+## Accepted Aurelian Minimal Economy Foundation v1 research authority
+
+PR #716 received terminal `AURELIAN_MINIMAL_ECONOMY_FOUNDATION_V1_RESEARCH_AUTHORITY_PASS` at exact head `a51b304206a3f8b67bb452f6efaf99090d1b2992` and merged as `b266e79e2a5c550b91417705cdcd3ded53850f6b`. The authority changed exactly one documentation file. CI, RC1, Visual QA, P4-P8, P10-P11 and Vercel passed. Issue #714 is complete; issue #715 is the only active research execution issue. Product and runtime remain unchanged.
 
 ## Accepted Aurelian Frontier Capacity v2
 
@@ -45,7 +49,7 @@ PR #712 received terminal `GODOT_AURELIAN_FRONTIER_CAPACITY_V2_PASS` and merged 
 - Default First Session v6, Input Release Boundary v3, Production Village, View LOD v2, Session Persistence v2, Web Playability, Playable Entry, Foundation, CI, Visual QA, P4-P8 and P10-P11: PASS;
 - Vercel exact-head deployment: SUCCESS.
 
-The accepted first 35 normal inputs, persistence schema, GLB, topology, cameras, sole input ownership and one physical Aurelian geography remain unchanged. Issue #709 is completed. Issue #714 is the only active strategy-only whole-product portfolio gate. No further product implementation is authorized until that gate and a separate merged authority select exactly one next slice.
+The accepted first 35 normal inputs, persistence schema, GLB, topology, cameras, sole input ownership and one physical Aurelian geography remain unchanged. Issue #709 and the strategy-only gate #714 are completed. Issue #715 is the only active research execution issue. No product implementation is authorized until research reaches a terminal classification, a fresh implementation preflight passes and a separate authority merges.
 
 ## Accepted Aurelian Frontier Capacity v2 authority
 
