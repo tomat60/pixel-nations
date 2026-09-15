@@ -1,0 +1,40 @@
+{
+  "contract": "CAMPAIGN_MAP_TERRAIN_MASK_BENCHMARK_V1",
+  "version": 1,
+  "sector_id": "A-01",
+  "intent": "renderer and representation fit benchmark only; no gameplay or persistence authority",
+  "mask_size": [320, 240],
+  "regions": {
+    "owned": {
+      "points": [[1000,1240],[960,820],[1030,430],[1220,210],[1450,250],[1690,590],[1680,990],[1510,1300],[1200,1390]],
+      "tint": "#5f8fb8",
+      "strength": 0.43
+    },
+    "frontier": {
+      "points": [[1710,860],[2050,760],[2410,840],[2580,1080],[2480,1390],[2140,1510],[1810,1370],[1630,1100]],
+      "tint": "#d2b878",
+      "strength": 0.48
+    },
+    "rival": {
+      "points": [[1740,150],[2170,110],[2520,300],[2500,560],[2150,720],[1810,560]],
+      "tint": "#a65f58",
+      "strength": 0.38
+    }
+  },
+  "expansion_corridor": {
+    "from": [1430,1030],
+    "to": [2200,1110],
+    "width": 115,
+    "tint": "#e0c174",
+    "strength": 0.58
+  },
+  "visual_contract": {
+    "terrain_is_primary": true,
+    "no_planar_overlay_meshes": true,
+    "no_ring_markers": true,
+    "no_floating_borders": true,
+    "same_sector_geography": true,
+    "dynamic_runtime_mask": true,
+    "compatibility_renderer_required": true
+  }
+}
