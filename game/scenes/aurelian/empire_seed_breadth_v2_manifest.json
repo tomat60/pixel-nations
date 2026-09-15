@@ -1,0 +1,42 @@
+{
+  "contract": "EMPIRE_SEED_BREADTH_V2",
+  "version": 2,
+  "sector_id": "A-01",
+  "source_sector_contract": "AURELIAN_SECTOR_GENERATOR_V4_SPEC",
+  "intent": "single in-engine readability correction; no gameplay or persistence authority",
+  "territories": [
+    {"id":"aurelian_home","status":"ours","importance":"primary","label":"Aurelian","show_marker":true,"show_label":true,"domain_radius":2.25},
+    {"id":"northwatch","status":"ours","importance":"secondary","label":"North Ridge","show_marker":true,"show_label":true,"domain_radius":1.35},
+    {"id":"westwood","status":"claimable","importance":"minor","label":"Westwood","show_marker":false,"show_label":false},
+    {"id":"eastbank","status":"claimable","importance":"primary","label":"Eastbank Frontier","show_marker":true,"show_label":true},
+    {"id":"golden_plain","status":"neutral","importance":"minor","label":"Golden Plain","show_marker":false,"show_label":false},
+    {"id":"southfen","status":"neutral","importance":"minor","label":"Southfen","show_marker":false,"show_label":false},
+    {"id":"westmeadow","status":"neutral","importance":"minor","label":"Westmeadow","show_marker":false,"show_label":false},
+    {"id":"high_pass","status":"rival","importance":"secondary","label":"High Pass","show_marker":true,"show_label":true},
+    {"id":"old_crown","status":"unknown","importance":"minor","label":"Old Crown","show_marker":false,"show_label":false},
+    {"id":"coast_outflow","status":"unknown","importance":"minor","label":"Coast Outflow","show_marker":false,"show_label":false}
+  ],
+  "routes": [
+    {"from":"aurelian_home","to":"northwatch","status":"ours","priority":"primary"},
+    {"from":"aurelian_home","to":"eastbank","status":"claimable","priority":"primary"},
+    {"from":"high_pass","to":"eastbank","status":"rival","priority":"secondary"}
+  ],
+  "visual_contract": {
+    "terrain_first": true,
+    "labels_max": 4,
+    "strategic_markers_max": 4,
+    "one_primary_frontier": "eastbank",
+    "one_primary_expansion_route": "aurelian_home->eastbank",
+    "no_grid": true,
+    "no_board_edge": true,
+    "no_equal_weight_marker_network": true,
+    "aurelian_home_core": true,
+    "ownership_palette": {
+      "ours":"#5f8fb8",
+      "claimable":"#d2b878",
+      "neutral":"#9b9b86",
+      "rival":"#a65f58",
+      "unknown":"#6f786f"
+    }
+  }
+}
