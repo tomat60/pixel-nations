@@ -1,0 +1,54 @@
+{
+  "contract": "EMPIRE_SEED_SURFACE_REGIONS_V1",
+  "version": 1,
+  "sector_id": "A-01",
+  "intent": "rough campaign-map representation proof; no gameplay or persistence authority",
+  "regions": [
+    {
+      "id": "owned_core",
+      "status": "ours",
+      "fill": "#5f8fb833",
+      "border": "#7db4dfd9",
+      "points": [[820,520],[1190,250],[1590,310],[1810,700],[1690,1180],[1260,1320],[880,1080],[700,760]]
+    },
+    {
+      "id": "eastbank_frontier",
+      "status": "frontier",
+      "fill": "#d2b87838",
+      "border": "#ecd18ee6",
+      "points": [[1690,760],[2150,690],[2590,850],[2710,1230],[2410,1510],[1950,1450],[1670,1190]]
+    },
+    {
+      "id": "high_pass_pressure",
+      "status": "rival",
+      "fill": "#a65f582d",
+      "border": "#d27c72d9",
+      "points": [[1830,120],[2350,120],[2780,360],[2830,700],[2470,900],[2020,730],[1780,430]]
+    }
+  ],
+  "sigils": [
+    {"id":"aurelian_home","label":"AURELIAN","status":"ours","importance":"primary"},
+    {"id":"northwatch","label":"NORTH RIDGE","status":"ours","importance":"secondary"},
+    {"id":"eastbank","label":"EASTBANK FRONTIER","status":"frontier","importance":"primary"},
+    {"id":"high_pass","label":"HIGH PASS","status":"rival","importance":"secondary"}
+  ],
+  "primary_corridor": {
+    "status": "frontier",
+    "width": 54,
+    "points": [[1365,1010],[1730,1030],[2020,1080],[2250,1110]]
+  },
+  "visual_contract": {
+    "terrain_first": true,
+    "surface_regions_not_discs": true,
+    "labels_max": 4,
+    "no_grid": true,
+    "no_board_edge": true,
+    "no_ring_markers": true,
+    "no_beam_route_network": true,
+    "ownership_palette": {
+      "ours":"#5f8fb8",
+      "frontier":"#d2b878",
+      "rival":"#a65f58"
+    }
+  }
+}
