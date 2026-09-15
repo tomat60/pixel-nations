@@ -2,7 +2,6 @@ extends "res://scenes/aurelian/world_scale_sector_generator_v4.gd"
 
 const CONTRACT_PATH := "res://scenes/aurelian/empire_seed_surface_regions_v1_manifest.json"
 const SECTOR_SPEC_PATH := "res://assets/aurelian-basin/source/sector_a01_generator_v4_spec.json"
-const STILL_SIZE := Vector2i(1440, 900)
 const SURFACE_Y := 5.04
 const BORDER_Y := 5.09
 const SIGIL_Y := 5.18
