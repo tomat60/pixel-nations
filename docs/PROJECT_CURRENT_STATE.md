@@ -2,7 +2,7 @@
 
 Status: ACTIVE
 Updated: 2026-09-15
-Current state revision: 42.0
+Current state revision: 42.1
 Authority baseline SHA: `f655ee4f2b5a62d528b087a0a82a4b75a08d80dc`
 Product baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Runtime baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
@@ -11,7 +11,13 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 Current product phase: Empire Seed Strategic Breadth Prototype — Map / Sector / World breadth first.
 Current milestone: prove a coherent strategic world where Greenvale/Aurelian is visibly one home inside a wider Sector A-01 containing multiple lands and settlements, with World showing A-01 as a small part of a much larger world.
 Active execution issue: #721
-Next allowed action: verify the live Netcup Godot/MCP execution path, then build and directly review one bounded Map/Sector/World breadth candidate under #721 using the accepted runtime baseline. Do not resume Village polish, Minimal Economy, Frontier Capacity, or another one-land micro-system before this breadth candidate is reviewed.
+Next allowed action: use the art-direction target recorded on issue #721 after the first rough Sector review; verify the live Godot/editor cycle on an isolated checkout of the exact public product `main` (the isolated Netcup smoke and GitHub-hosted Sector render do not prove this), then make one corrected Map/Sector frame using the accepted geography. Directly review home/owned/frontier/expansion hierarchy at thumbnail scale before CI or World work. Village polish, Minimal Economy, Frontier Capacity and another one-land micro-system remain frozen.
+
+## Reviewed Sector reference, not production acceptance
+
+On 2026-09-15, draft PR #723 was terminally classified `EMPIRE_SEED_BREADTH_V1_REFERENCE_PASS_PRODUCT_REJECT` and closed without merge. Exact head `71163e486ab7299f53613fb4e8432a58800dfcd8`; focused [run 34995746649](https://github.com/tomat60/pixel-nations/actions/runs/34995746649); artifact `10408085564` (digest `sha256:03e6f25efbf5b38483dd742846e5d7064ee47d4cc66defba52c34b0293bea630`). Direct review of the 1440x900 image validated the broader physical Sector reuse with 10 canonical macro-loci but rejected crossing diagrammatic connection lines, weak owned/frontier hierarchy, tiny labels and missing empire-expansion read. Neither Map nor World is visually accepted. The accepted production runtime was untouched.
+
+The binding [art-direction target in #721](https://github.com/tomat60/pixel-nations/issues/721#issuecomment-5684369828) asks for one corrected Sector frame: home/core -> grouped owned area -> one readable frontier and expansion route -> a distinct neutral site, readable in about two seconds without tiny labels. Preserve canonical Greenvale west of the river, Crossing, North Ridge and terrain continuity; no new art universe or gameplay/economy state. Treat this as the one remaining root-cause composition/LOD correction, not a new independent prototype/gate loop. If that direct review still fails, classify the visual technique and benchmark before adding further mechanics or World polish.
 
 ## Canonical strategy lock
 
