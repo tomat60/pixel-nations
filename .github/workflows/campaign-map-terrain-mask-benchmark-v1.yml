@@ -1,0 +1,160 @@
+name: Campaign Map Terrain Mask Benchmark V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/scenes/aurelian/campaign_map_terrain_mask_benchmark_v1.gd"
+      - "game/scenes/aurelian/campaign_map_terrain_mask_benchmark_v1.tscn"
+      - "game/scenes/aurelian/campaign_map_terrain_mask_benchmark_v1_manifest.json"
+      - ".github/workflows/campaign-map-terrain-mask-benchmark-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: campaign-map-terrain-mask-benchmark-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  BLENDER_VERSION: "4.3.2"
+  BLENDER_BIN: "/tmp/blender/blender-4.3.2-linux-x64/blender"
+  GODOT_RELEASE: "4.7.1-stable"
+  GODOT_BIN: "/tmp/godot/Godot_v4.7.1-stable_linux.x86_64"
+  BUILD_DIR: "/tmp/campaign-map-terrain-mask-benchmark-v1"
+  EVIDENCE_DIR: "evidence/campaign-map-terrain-mask-benchmark-v1"
+  CANONICAL_GLB: "game/assets/aurelian-basin/export/aurelian_authored_terrain_v1.glb"
+  TOPOLOGY_MANIFEST: "game/assets/aurelian-basin/export/transform-manifest.json"
+  CITY_MANIFEST: "game/scenes/aurelian/production_village_v1_state_manifest.json"
+  SECTOR_SPEC: "game/assets/aurelian-basin/source/sector_a01_generator_v4_spec.json"
+  GENERATED_GLB: "game/assets/aurelian-basin/export/aurelian_sector_generator_v4.glb"
+
+jobs:
+  benchmark-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 32
+    steps:
+      - name: Checkout exact benchmark head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify isolated benchmark scope and inputs
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p "$EVIDENCE_DIR" "$BUILD_DIR" /tmp/blender /tmp/godot
+          git rev-parse HEAD | tee "$EVIDENCE_DIR/exact-head.txt"
+          test -s "$CANONICAL_GLB"
+          test -s "$TOPOLOGY_MANIFEST"
+          test -s "$CITY_MANIFEST"
+          test -s "$SECTOR_SPEC"
+          test -s game/scenes/aurelian/campaign_map_terrain_mask_benchmark_v1.gd
+          test -s game/scenes/aurelian/campaign_map_terrain_mask_benchmark_v1.tscn
+          test -s game/scenes/aurelian/campaign_map_terrain_mask_benchmark_v1_manifest.json
+
+      - name: Install pinned Blender and Godot
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://download.blender.org/release/Blender4.3/blender-${BLENDER_VERSION}-linux-x64.tar.xz" \
+            -o /tmp/blender/blender.tar.xz
+          tar -xJf /tmp/blender/blender.tar.xz -C /tmp/blender
+          test -x "$BLENDER_BIN"
+          "$BLENDER_BIN" --version | head -1 | tee "$EVIDENCE_DIR/blender-version.txt"
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 20 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/godot/godot.zip
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "$GODOT_BIN"
+          "$GODOT_BIN" --version | tee "$EVIDENCE_DIR/godot-version.txt"
+
+      - name: Regenerate canonical Sector A-01 representation
+        timeout-minutes: 14
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          export XDG_RUNTIME_DIR="$RUNNER_TEMP/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          timeout 12m env LIBGL_ALWAYS_SOFTWARE=1 \
+            "$BLENDER_BIN" -b \
+            --python game/assets/aurelian-basin/source/aurelian_sector_generator_v4.py -- \
+            "$PWD/$CANONICAL_GLB" \
+            "$PWD/$TOPOLOGY_MANIFEST" \
+            "$PWD/$CITY_MANIFEST" \
+            "$PWD/$SECTOR_SPEC" \
+            "$BUILD_DIR" \
+            2>&1 | tee "$EVIDENCE_DIR/blender-generator.log"
+          grep -F "AURELIAN_SECTOR_GENERATOR_V4=PASS" "$EVIDENCE_DIR/blender-generator.log"
+          test -s "$BUILD_DIR/aurelian_sector_generator_v4.glb"
+          cp "$BUILD_DIR/aurelian_sector_generator_v4.glb" "$GENERATED_GLB"
+          cp "$BUILD_DIR/aurelian_sector_generator_v4_manifest.json" "$EVIDENCE_DIR/sector-generator-manifest.json"
+          sha256sum "$GENERATED_GLB" > "$EVIDENCE_DIR/generated-sector.sha256"
+
+      - name: Import generated Sector and benchmark scene
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          "$GODOT_BIN" --headless --path game --editor --quit \
+            > "$EVIDENCE_DIR/godot-import.log" 2>&1 || {
+              cat "$EVIDENCE_DIR/godot-import.log"
+              exit 1
+            }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Blender path is invalid" "$EVIDENCE_DIR/godot-import.log"; then
+            cat "$EVIDENCE_DIR/godot-import.log"
+            exit 1
+          fi
+
+      - name: Capture runtime terrain-mask benchmark
+        timeout-minutes: 4
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          timeout 100s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+            AURELIAN_EVIDENCE_DIR="$PWD/$EVIDENCE_DIR" \
+            AURELIAN_CAPTURE_CAMPAIGN_MAP_TERRAIN_MASK_BENCHMARK_V1=1 \
+            LIBGL_ALWAYS_SOFTWARE=1 \
+            "$GODOT_BIN" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+            res://scenes/aurelian/campaign_map_terrain_mask_benchmark_v1.tscn \
+            > "$EVIDENCE_DIR/render.log" 2>&1
+          cat "$EVIDENCE_DIR/render.log"
+          grep -F "CAMPAIGN_MAP_TERRAIN_MASK_BENCHMARK_V1_MASK=runtime_dynamic" "$EVIDENCE_DIR/render.log"
+          test -s "$EVIDENCE_DIR/campaign-map-terrain-mask-benchmark-v1-1440x900.png"
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load|^ERROR:" "$EVIDENCE_DIR/render.log"; then
+            exit 1
+          fi
+
+      - name: Validate image evidence
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, struct
+          p = Path('evidence/campaign-map-terrain-mask-benchmark-v1/campaign-map-terrain-mask-benchmark-v1-1440x900.png')
+          data = p.read_bytes()
+          if len(data) < 65000:
+              raise SystemExit(f'weak image bytes={len(data)}')
+          if data[:8] != b'\x89PNG\r\n\x1a\n':
+              raise SystemExit('not png')
+          width, height = struct.unpack('>II', data[16:24])
+          if (width, height) != (1440, 900):
+              raise SystemExit(f'wrong dimensions {(width,height)}')
+          (p.parent / 'image.sha256').write_text(hashlib.sha256(data).hexdigest() + '\n')
+          print('CAMPAIGN_MAP_TERRAIN_MASK_BENCHMARK_V1_EVIDENCE=PASS')
+          PY
+
+      - name: Upload benchmark proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: campaign-map-terrain-mask-benchmark-v1-${{ github.run_id }}
+          path: ${{ env.EVIDENCE_DIR }}/**
+          if-no-files-found: warn
+          retention-days: 7
