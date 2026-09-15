@@ -106,7 +106,7 @@ func _segment_distance(point: Vector2, a: Vector2, b: Vector2) -> float:
 	var denom := ab.length_squared()
 	if denom <= 0.000001:
 		return point.distance_to(a)
-	var t := clamp((point - a).dot(ab) / denom, 0.0, 1.0)
+	var t: float = clampf((point - a).dot(ab) / denom, 0.0, 1.0)
 	return point.distance_to(a + ab * t)
 
 func _make_mask_texture() -> ImageTexture:
@@ -140,7 +140,7 @@ func _make_mask_texture() -> ImageTexture:
 			var frontier_value := 1.0 if _point_in_polygon(point, frontier) else 0.0
 			var rival_value := 1.0 if _point_in_polygon(point, rival) else 0.0
 			var corridor_distance := _segment_distance(point, corridor_from, corridor_to)
-			var corridor_value := clamp(1.0 - corridor_distance / corridor_width, 0.0, 1.0)
+			var corridor_value: float = clampf(1.0 - corridor_distance / corridor_width, 0.0, 1.0)
 			corridor_value = corridor_value * corridor_value
 			image.set_pixel(x, y, Color(owned_value, frontier_value, rival_value, corridor_value))
 
