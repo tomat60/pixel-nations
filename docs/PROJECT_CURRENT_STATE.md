@@ -2,7 +2,7 @@
 
 Status: ACTIVE
 Updated: 2026-09-16
-Current state revision: 42.3
+Current state revision: 42.4
 Authority baseline SHA: `f655ee4f2b5a62d528b087a0a82a4b75a08d80dc`
 Product baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Runtime baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
@@ -11,7 +11,15 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 Current product phase: Empire Seed Strategic Breadth Prototype — Map / Sector / World breadth first.
 Current milestone: prove a coherent strategic world where Greenvale/Aurelian is visibly one home inside a wider Sector A-01 containing multiple lands and settlements, with World showing A-01 as a small part of a much larger world.
 Active execution issue: #721
-Next allowed action: reconcile the directly reviewed #723/#725/#726/#727 REJECT evidence, then run one bounded, separately scoped cross-technique/engine representation benchmark before any new production Map/World implementation. Compare credible terrain-linked campaign-map techniques with exact real frames and a two-second home -> owned area -> frontier -> expansion read; first prove the live editor on an isolated checkout of exact public `main`. Stop repeating marker/beam, floating planar-region and tint-mask overlay variants. A passing CI or generated still is not product acceptance. Preserve the accepted Godot runtime and Sector v4 shared geography until an actual comparative decision; Village, economy and one-land micro-systems remain frozen.
+Next allowed action: implement exactly one bounded production Map / Sector candidate using the accepted `topography_plus_canvas` technique from merged PR #729. Reuse the canonical Sector v4 topography and loci, translate the benchmark's owned-domain / frontier / pressure / expansion hierarchy into the real Map surface, and preserve the accepted gameplay, persistence and shared geography. Require an exact-head native frame plus Web evidence and direct two-second review; allow at most one named correction. Do not treat the benchmark scene itself as production Map acceptance, do not start World integration before Map passes, and do not reopen marker/beam, floating planar-region, terrain tint-mask, Village, economy or one-land work.
+
+## Accepted representation benchmark, not production Map acceptance
+
+On 2026-09-16, PR #729 was independently merged at main `3822e23a1af3f100556d9fe6b5698583dc29523f` after terminal classification `CAMPAIGN_MAP_2P5D_REPRESENTATION_V1_BENCHMARK_PASS`. Accepted exact head `b187e2b323b3e758ec553114c0740e2cd3d72f4a`; focused [run 35054972805](https://github.com/tomat60/pixel-nations/actions/runs/35054972805); artifact `10429869212` (digest `sha256:cf44e8b27171550cc096e8f0e5f7ad237cfd732041880af918951816506bd2a8`); directly reviewed 1440x900 frame digest `sha256:9c98a8e5413fee8bf8583de626e442bde9c06d12a53b60c08894e852c7c92280`. Godot 4.7.1 and Blender 4.3.2 regenerated the canonical Sector v4 base; generated Sector digest `sha256:be7811a96988614da67723989d15deef36e4a6162afa9a85aa1f21b383a9939e`.
+
+Direct review accepted the representation technique: Aurelian and North Ridge read as one blue owned domain, Eastbank as the adjacent gold frontier, High Pass as red pressure and the primary corridor as eastward expansion, without relying on tiny proof labels. RC1, Visual QA, Web Export, Foundation, CI, P4-P8 and P10-P11 passed on the accepted head; no correction was required. The merge added exactly four isolated benchmark files and did not change accepted Village, production Map/World, gameplay, persistence or Sector v4 source.
+
+This PASS selects `topography_plus_canvas` for one bounded production Map / Sector candidate. It is not acceptance of the benchmark scene as the shipped Map, and it does not authorize World integration, engine migration, new assets, gameplay expansion or broad visual polish. The production candidate must prove the same two-second hierarchy in the real Map path while preserving one physical Aurelian geography and accepted runtime behavior.
 
 ## Reviewed Sector reference, not production acceptance
 
