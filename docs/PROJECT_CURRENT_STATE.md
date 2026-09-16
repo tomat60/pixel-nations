@@ -2,7 +2,7 @@
 
 Status: ACTIVE
 Updated: 2026-09-16
-Current state revision: 42.3
+Current state revision: 42.4
 Authority baseline SHA: `f655ee4f2b5a62d528b087a0a82a4b75a08d80dc`
 Product baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Runtime baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
@@ -11,7 +11,15 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 Current product phase: Empire Seed Strategic Breadth Prototype — Map / Sector / World breadth first.
 Current milestone: prove a coherent strategic world where Greenvale/Aurelian is visibly one home inside a wider Sector A-01 containing multiple lands and settlements, with World showing A-01 as a small part of a much larger world.
 Active execution issue: #721
-Next allowed action: reconcile the directly reviewed #723/#725/#726/#727 REJECT evidence, then run one bounded, separately scoped cross-technique/engine representation benchmark before any new production Map/World implementation. Compare credible terrain-linked campaign-map techniques with exact real frames and a two-second home -> owned area -> frontier -> expansion read; first prove the live editor on an isolated checkout of exact public `main`. Stop repeating marker/beam, floating planar-region and tint-mask overlay variants. A passing CI or generated still is not product acceptance. Preserve the accepted Godot runtime and Sector v4 shared geography until an actual comparative decision; Village, economy and one-land micro-systems remain frozen.
+Next allowed action: run exactly one controlled engine/workflow benchmark comparing the current Godot path with Unity 6 and its current agentic editor workflow. Use the same Sector A-01 geography, the same home / owned domain / frontier / pressure / expansion story and the same 1440x900 owner-facing evidence. Measure time to first real frame, visual ceiling with reused assets, editor-agent reliability, iteration speed, Web viability, CI friction, licensing overhead and migration cost. Do not start production Map/Sector implementation from PR #729 and do not migrate or rewrite gameplay during the benchmark. Switch only if Unity demonstrates a material advantage large enough to repay migration cost; otherwise retain Godot. Preserve accepted gameplay/runtime and Sector v4 geography; Village, economy and one-land micro-systems remain frozen.
+
+## Owner override after the 2.5D benchmark
+
+On 2026-09-16, PR #729 was independently merged at main `3822e23a1af3f100556d9fe6b5698583dc29523f`. Its exact-head evidence remains valid as `2P5D_TECHNIQUE_EVIDENCE_PASS`: accepted head `b187e2b323b3e758ec553114c0740e2cd3d72f4a`, focused [run 35054972805](https://github.com/tomat60/pixel-nations/actions/runs/35054972805), artifact `10429869212` with digest `sha256:cf44e8b27171550cc096e8f0e5f7ad237cfd732041880af918951816506bd2a8`, and reviewed 1440x900 frame digest `sha256:9c98a8e5413fee8bf8583de626e442bde9c06d12a53b60c08894e852c7c92280`.
+
+Direct owner review subsequently classified the result `2P5D_TECHNIQUE_EVIDENCE_PASS / PRODUCT_DIRECTION_NOT_ACCEPTED` in [issue #721](https://github.com/tomat60/pixel-nations/issues/721#issuecomment-5704870790). The frame proves that the technique can produce the tested hierarchy, but it does not authorize the production Map/Sector direction. Reconciliation PR #730 was therefore closed without merge. Do not reopen it, do not promote `topography_plus_canvas` to production acceptance and do not begin World integration.
+
+The only authorized product-direction gate is one bounded Godot-versus-Unity 6 engine/workflow benchmark. It is evidence gathering, not an engine migration or gameplay rewrite. Owner-facing comparison must use the same geography, story and viewport, report the operational tradeoffs named above, and end with an explicit retain-Godot or switch-to-Unity recommendation. GPT-6 remains off unless the final comparative evidence is genuinely ambiguous.
 
 ## Reviewed Sector reference, not production acceptance
 
