@@ -1,0 +1,58 @@
+{
+  "contract": "CAMPAIGN_MAP_2P5D_BENCHMARK_V1",
+  "version": 1,
+  "sector_id": "A-01",
+  "intent": "cross-technique campaign-map benchmark only; no gameplay or persistence authority",
+  "regions": [
+    {
+      "id": "owned_domain",
+      "status": "ours",
+      "fill": "#315a6c78",
+      "border": "#8ac5e8f0",
+      "points": [[760,540],[1160,230],[1580,280],[1840,650],[1740,1120],[1450,1360],[980,1230],[690,900]]
+    },
+    {
+      "id": "eastbank_frontier",
+      "status": "frontier",
+      "fill": "#8c744f70",
+      "border": "#e2c77cf2",
+      "points": [[1680,700],[2140,650],[2620,850],[2700,1230],[2400,1530],[1970,1450],[1650,1180]]
+    },
+    {
+      "id": "high_pass_pressure",
+      "status": "rival",
+      "fill": "#6f3f3f62",
+      "border": "#c97972e8",
+      "points": [[1820,100],[2350,90],[2820,350],[2850,690],[2470,890],[2020,730],[1770,420]]
+    }
+  ],
+  "primary_corridor": {
+    "width": 9.0,
+    "shadow_width": 16.0,
+    "color": "#e0bf66e8",
+    "shadow": "#202923a6",
+    "points": [[1365,1010],[1710,1015],[1990,1060],[2250,1110]]
+  },
+  "sigils": [
+    {"id":"aurelian_home","label":"AURELIAN","status":"ours","size":22.0,"label_size":28},
+    {"id":"northwatch","label":"NORTH RIDGE","status":"ours","size":14.0,"label_size":18},
+    {"id":"eastbank","label":"EASTBANK","status":"frontier","size":19.0,"label_size":23},
+    {"id":"high_pass","label":"HIGH PASS","status":"rival","size":15.0,"label_size":18}
+  ],
+  "palette": {
+    "ours":"#8ac5e8",
+    "frontier":"#e2c77c",
+    "rival":"#c97972",
+    "neutral":"#a8ad9c"
+  },
+  "visual_contract": {
+    "same_sector_geography": true,
+    "topography_base_from_sector_v4": true,
+    "strategic_layer_is_2d_campaign_representation": true,
+    "labels_max": 4,
+    "no_ring_markers": true,
+    "no_3d_overlay_meshes": true,
+    "no_tiny_proof_text": true,
+    "two_second_read": "home -> grouped owned domain -> Eastbank frontier -> eastward expansion"
+  }
+}
