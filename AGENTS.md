@@ -14,7 +14,7 @@ Before planning or coding:
 
 1. Run `npm run pn:status`.
 2. Read `docs/PROJECT_CURRENT_STATE.md`.
-3. Read the accepted ADR relevant to the task.
+3. Read the accepted ADR relevant to the task, but check current state first for any explicitly reopened ADR decision.
 4. Read this file.
 5. Read `docs/GAME_STRATEGY_MASTER_PLAN.md` when choosing or changing product direction.
 6. Read the active execution issue named in current state.
@@ -46,11 +46,12 @@ Do not treat issue #79, an arbitrary open issue, a draft PR, or `public/qa/lates
 
 ## Current runtime direction
 
-- Godot is the target game runtime under accepted ADR-001.
-- Next.js `/play` is currently a functioning bridge, demo shell, and rollback surface.
-- Accepted Aurelian/Godot-derived stages may be hosted in `/play` while behavior and QA remain stable.
+- Godot is the current production incumbent and rollback-safe runtime.
+- ADR-001 records the accepted Godot pivot, but the final engine/workflow lock is explicitly reopened only for the bounded AI-native benchmark in issue #731.
+- Unity migration is **not authorized** while #731 is open. Unity must materially outperform Godot end-to-end to repay migration; tie or small advantage keeps Godot.
+- Next.js `/play` remains a bridge/demo shell and rollback/reference surface, not the production-final scene renderer.
 - Do not restart broad React/SVG scene-engine development as the final visual direction.
-- Do not infer that all `/play` screens are visually accepted. Current state defines the exact acceptance boundary.
+- Do not infer visual acceptance from runtime acceptance. Current state defines the exact acceptance boundary.
 
 ## Current milestone rule
 
@@ -147,6 +148,7 @@ For visual/gamefeel review:
 - No vague cosmetic passes.
 - Preserve behavior and QA semantics, not weak historical composition.
 - Stay inside the active issue's allowed scope.
+- Verify the intended Git ref/HEAD before authority-sensitive work. Never treat a local folder name, old worktree, cache, report, or `latest` path as proof of freshness.
 - Prefer deterministic inspection and evidence before paid or broad execution.
 - Avoid new dependencies and asset families unless explicitly justified.
 - Stop when the same technique fails repeatedly; change strategy instead of micro-polishing forever.
@@ -181,7 +183,7 @@ Unless the active issue says otherwise:
 | Current project authority | `docs/PROJECT_CURRENT_STATE.md` |
 | Whole-game strategy | `docs/GAME_STRATEGY_MASTER_PLAN.md` |
 | Documentation authority map | `docs/README.md` |
-| Accepted runtime ADR | `docs/ADR_001_GODOT_DESKTOP_FIRST.md` |
+| Incumbent runtime ADR | `docs/ADR_001_GODOT_DESKTOP_FIRST.md` — engine-selection status is controlled by current state / #731 while the gate is open |
 | Current playable bridge | `app/play/**` |
 | Play state | `app/play/lib/**` |
 | Play scenes | `app/play/components/**`, `app/play/world/**` |
