@@ -1,177 +1,188 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-09-16
-Current state revision: 42.3
-Authority baseline SHA: `f655ee4f2b5a62d528b087a0a82a4b75a08d80dc`
+Updated: 2026-09-18
+Current state revision: 43.0
+Authority baseline SHA: `3822e23a1af3f100556d9fe6b5698583dc29523f`
 Product baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Runtime baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Empire Seed Strategic Breadth Prototype — Map / Sector / World breadth first.
-Current milestone: prove a coherent strategic world where Greenvale/Aurelian is visibly one home inside a wider Sector A-01 containing multiple lands and settlements, with World showing A-01 as a small part of a much larger world.
-Active execution issue: #721
-Next allowed action: reconcile the directly reviewed #723/#725/#726/#727 REJECT evidence, then run one bounded, separately scoped cross-technique/engine representation benchmark before any new production Map/World implementation. Compare credible terrain-linked campaign-map techniques with exact real frames and a two-second home -> owned area -> frontier -> expansion read; first prove the live editor on an isolated checkout of exact public `main`. Stop repeating marker/beam, floating planar-region and tint-mask overlay variants. A passing CI or generated still is not product acceptance. Preserve the accepted Godot runtime and Sector v4 shared geography until an actual comparative decision; Village, economy and one-land micro-systems remain frozen.
+Current product phase: Empire Seed Strategic Breadth Prototype — final AI-native engine/workflow gate before Map / Sector / World production resumes.
+Current milestone: choose the production engine/workflow from one symmetric AI-native Godot vs Unity benchmark, then lock that decision for the current phase and resume visible world breadth.
+Active execution issue: #731
+Next allowed action: finish the Unity live-editor first-run/Software Terms blocker, establish a real Unity Pipeline/MCP command surface, then run the same bounded inspect -> edit -> run -> screenshot -> self-correction task on both Godot and Unity using the same Sector A-01 source and acceptance target. Unity only wins if it is materially better end-to-end enough to repay migration; tie or small advantage keeps Godot. After the terminal engine verdict, update this file and ADR-001 before any production Map/World implementation.
 
-## Reviewed Sector reference, not production acceptance
+## Binding product strategy
 
-On 2026-09-15, draft PR #723 was terminally classified `EMPIRE_SEED_BREADTH_V1_REFERENCE_PASS_PRODUCT_REJECT` and closed without merge. Exact head `71163e486ab7299f53613fb4e8432a58800dfcd8`; focused [run 34995746649](https://github.com/tomat60/pixel-nations/actions/runs/34995746649); artifact `10408085564` (digest `sha256:03e6f25efbf5b38483dd742846e5d7064ee47d4cc66defba52c34b0293bea630`). Direct review of the 1440x900 image validated the broader physical Sector reuse with 10 canonical macro-loci but rejected crossing diagrammatic connection lines, weak owned/frontier hierarchy, tiny labels and missing empire-expansion read. Neither Map nor World is visually accepted. The accepted production runtime was untouched.
+Issue #721 remains the canonical product-strategy lock.
 
-The binding [art-direction target in #721](https://github.com/tomat60/pixel-nations/issues/721#issuecomment-5684369828) asks for one corrected Sector frame: home/core -> grouped owned area -> one readable frontier and expansion route -> a distinct neutral site, readable in about two seconds without tiny labels. Preserve canonical Greenvale west of the river, Crossing, North Ridge and terrain continuity; no new art universe or gameplay/economy state. This authorized the single composition/LOD correction recorded below; it has since failed direct visual review. Do not treat the target as authorization for another marker/beam attempt.
-
-## Subsequent visual stop: v2 and planar regions
-
-On 2026-09-15, correction PR #725 (head `b3ea0ccbc2fdf4a2a0d34a05a5cbec97ffc233f3`) produced a real Sector frame in [run 35009894410](https://github.com/tomat60/pixel-nations/actions/runs/35009894410), artifact `10413351963` (digest `sha256:a8b1732cf6e786ff6ff9994f4ae0be78d30e92738236d9fbce633ffb46a6b42a`). Direct review found improved home/frontier hierarchy, but circles, discs, route beams and labels still dominated. The same marker/beam technique was stopped, PR closed without merge.
-
-Changed-technique PR #726 was then terminally rejected and closed without merge. Initial exact-head deterministic parse failure came from a duplicate inherited `STILL_SIZE` constant; the one-line fix on the same PR reached head `6f3fef479005572c5193d2b0135c7f43cc24d842`. [Focused run 35015504121](https://github.com/tomat60/pixel-nations/actions/runs/35015504121), artifact `10415725650` (digest `sha256:049b3d9de1318560d96922eb9825603b211716f6d8ca68f929182cd0492d31ee`), produced a reviewed 1440x900 frame. Irregular region outlines and a single corridor preserved the shared geography but still read as an overlay: fixed-height translucent meshes failed to form readable owned/frontier terrain masses across relief; pale borders and the bright line competed with the home. The two-second hierarchy remained label-dependent. No gameplay/runtime production scenes were changed.
-
-This is a representation/LOD failure, not a CI or input-state failure. Do not run v3/v4 polygon-overlay variants, generated concept art or Village/economy work. The one bounded terrain-mask benchmark below also failed direct visual review. The next gate compares genuinely different map-surface or rendering techniques, including the engine only if evidence warrants it; the World scale layer remains unaccepted. Issue #721 stays the canonical product authority.
-
-## Terrain-mask benchmark: stop condition reached
-
-On 2026-09-15/16, draft PR #727 was terminally classified `CAMPAIGN_MAP_TERRAIN_MASK_BENCHMARK_V1_REJECT` at exact head `de103ebf2520344e9b17c4d36ffdd1502e285df2` and closed without merge. First run `35034160892` timed out before a frame, while Foundation `35034160861` exposed deterministic GDScript warning-as-error at lines 109/143. A two-line typed-float correction on the same PR produced [focused run 35037364636](https://github.com/tomat60/pixel-nations/actions/runs/35037364636) and Foundation `35037364747` PASS. Artifact `10424166411` has ZIP digest `sha256:ee40567735059de5f24f04027bb717da7617f5dceb452ddae8b4bc03bc1ed468`; directly reviewed 1440x900 PNG digest `sha256:9827cc7a51c458d601494bc2c7655e6e68c394059bf867e3968a8ba57de1cd73`. Runtime receipt confirms a dynamic terrain material mask. Color technically attaches to the terrain, yet the frame still reads as discrete flat tinted patches with angular boundaries; bright settlements and corridor compete with home, and owned/frontier/expansion hierarchy is not clear in two seconds. The renderer-fit benchmark's explicit product stop condition is met. No accepted production Map/World or gameplay files were modified.
-
-Prior documentation PR #724 containing reviewed #723/#725/#726 evidence was closed without merge on 2026-09-15; public `main` stayed at checkpoint 42.0. This revision replaces that unmerged reconciliation and includes the #727 terminal verdict. Do not interpret closed benchmark or green Foundation as authorization to start another overlay variation.
-
-## Canonical strategy lock
-
-Issue #721 is the current binding product-strategy lock. If an older issue, report, handoff, Command Room comment, or historical section conflicts with #721, #721 wins.
-
-The next player-visible proof must communicate:
+The visible product goal is still:
 
 `my village -> my land -> neighboring lands -> other settlements -> expansion -> Sector A-01 -> larger World`
 
-Target breadth for the first rough-but-real proof:
+Priority order:
 
-- approximately 12 readable lands/territories in Sector A-01;
-- Greenvale/Aurelian clearly nested as the player's home;
-- at least one additional player-owned or claimable settlement site;
-- at least one neutral or rival/other-player-style settlement site;
-- readable ownership, routes/frontiers and expansion relationships;
-- Map/Sector rendered as a dedicated campaign-map representation, not a miniaturized Village;
-- World showing A-01 as a small origin inside a much larger physical world.
+1. Map / Sector breadth and strategic readability.
+2. World / Atlas scale and physicality.
+3. Scale continuity Village -> Map -> Sector -> World.
+4. Only after the above is visibly usable: deeper economy, Village polish, repeatable expansion systems, combat/diplomacy/governance depth.
 
-Production-final art, real multiplayer, full economy and literal rendering of all 10,000 lands are not required for this proof.
+Issue #575 remains the current Sector representation/art-direction reference.
 
-## Frozen until the breadth proof is reviewed
+## Engine decision status
 
-- further Village visual polishing unless a regression blocks the breadth prototype;
-- Aurelian Provision / Minimal Economy continuation from #715/#719;
-- additional Frontier Capacity iterations;
-- new one-land micro-systems;
-- combat, diplomacy, governance depth or repeatable economy systems;
-- broad QA/workflow redesign;
-- migration away from Godot without benchmark evidence;
-- crypto, NFT, wallet, mint, token or pay-to-win direction.
+Godot is the **production incumbent and rollback-safe runtime**, not a final engine lock while #731 is open.
 
-Issue #719 is terminally rejected/closed and is not active authority.
+ADR-001 records the accepted 2026-07 Godot pivot and remains valid for the existing production baseline. Its exclusive engine-selection conclusion is temporarily under review by #731. This does **not** authorize migration.
 
-## Accepted product/runtime baseline
+Decision rule:
 
-### Default First Session v6
+- Unity must show a clear, material advantage in AI production speed, live-editor reliability, visible quality, iteration/recovery and Web viability.
+- A tie, a small visual difference or a tooling novelty is not enough to pay back migration of accepted gameplay, persistence and QA.
+- If Unity does not materially win, Godot remains the production engine.
+- When #731 terminates, lock the chosen engine for at least the current phase / approximately 90 days unless a hard technical blocker appears.
 
-The accepted first session proves the normal-input native/Web loop:
+## Current AI-native benchmark evidence
 
-`claim -> develop -> choose -> consequence -> grow -> expand`
+### Godot lane — live-editor handshake PASS
 
-It ends with the visible East Route + North Ridge two-land footprint and truthful persistence. Preserve this behavior unless the active breadth prototype needs a narrow adapter.
+Verified on Netcup:
 
-### Input Release Boundary v3
+- Godot: 4.7.1 stable.
+- MCP: `godot-editor-mcp 2026.9.17`.
+- Bridge: `ws://127.0.0.1:9180`.
+- Project: Pixel Nations.
+- Benchmark project path: `/home/pnrunner/pn-engine-ab/godot/game/`.
+- Active scene at handshake: `res://scenes/aurelian/playable_aurelian_entry_v1.tscn`.
+- Existing benchmark scene found correctly: `res://scenes/aurelian/campaign_map_2p5d_benchmark_v1.tscn`.
+- Codex successfully inspected the live editor through MCP without file or scene mutation.
 
-Repeated physical inputs are accepted and stable. Do not reopen input-release work without a new demonstrated regression.
+This proves the current Godot + Codex live-editor control path exists. It does **not** yet finish the full edit/run/screenshot/self-correction lane.
 
-### View LOD Contract v2
+### Unity lane — editor/tooling installed, live MCP gate not yet PASS
 
-Village / Map / World roles are accepted structurally:
+Verified on Netcup:
 
-- `Village = HOW` — local lived development and full local detail;
-- `Map = WHERE` — strategic geography, ownership, routes and expansion;
-- `World = WHY / direction` — macro scale and long-term ambition.
+- Unity Editor: 6000.6.1f1.
+- Unity Personal license: active.
+- Official Unity Codex plugin: `unity@unity-agent-plugin 0.1.6-beta`, installed and enabled.
+- Unity Pipeline package: `com.unity.pipeline 0.7.0-exp.1`.
+- URP package: `com.unity.render-pipelines.universal 17.6.0`.
+- Unity CLI/MCP endpoint is configured.
+- Prior non-AI-native Unity benchmark produced a real 1440x900 Sector frame, but did not show a material migration-worthy advantage.
 
-This is a representation contract, not final visual acceptance of Map or World.
+Current blocker:
 
-### Aurelian Frontier Capacity v2
+- the live Unity Editor is stopped on the first-run **Unity Editor Software Terms** modal;
+- until that modal is accepted, Pipeline does not expose the live command surface needed for a fair AI-native benchmark;
+- the configured Unity MCP endpoint responds, but the current Codex session cannot enumerate Unity resources/tools yet.
 
-PR #712 merged as `6a67f19034beb9868b3609b9f067430bd8b863af`. Trade Post / Watch Post continuation and derived Frontier Capacity are accepted behavior. They are not the next product priority.
+The next Unity step is to accept the standard free Software Terms already authorized by the owner, verify Pipeline Server reachable, and repeat the same live-editor task as Godot.
 
-### Sector / World Atlas history
+## Direct Netcup control — PASS
 
-Earlier Sector and Atlas work proved scale concepts but did not finish the player-visible world.
+Remote Desktop Commander is paired and online on device:
 
-World Atlas v1 is a macro-world blockout/reference, not production-final World art. Previous Sector attempts correctly failed when they read as a finite board, weak heightfield, overlaid river, or miniaturized local settlement tokens.
+`pixel-nations-godot-01`
 
-Issue #575 remains the active representation reference for Sector A-01:
+Verified:
 
-- Sector is a campaign-map layer;
-- terrain extends beyond the camera on non-coastal sides;
-- relief, river, forest and basin hierarchy lead before labels/tokens;
-- Aurelian remains semantically recognizable but is not a literal scaled Village;
-- use dedicated low-detail regional settlement miniatures/sigils;
-- no grid/card/dashboard-first read;
-- river belongs to terrain;
-- first thumbnail read should be terrain masses -> Aurelian -> secondary loci.
+- device status: online;
+- ping: PASS;
+- direct terminal: PASS as user `pnrunner`;
+- Remote Desktop Commander: 0.2.51;
+- supported Node runtime for Commander: 22.12.0;
+- filesystem access is restricted to `/home/pnrunner` and `/tmp`;
+- destructive/admin commands including sudo, mount, reboot and disk tools remain blocked.
 
-## Execution model
+Use Commander for the inner benchmark/editor loop. GitHub Actions remains a regression/merge path, not the default mechanism for every shell command.
 
-Primary production loop for the current milestone:
+## Checkout / stale-data guard
 
-`strategy/art direction -> live Godot agent/editor -> run -> screenshot/video -> direct review -> one bounded correction -> CI/regression`
+Do not trust a directory name as proof of freshness.
 
-Use Netcup + private `pixel-nations-ops` as the primary cloud execution path when healthy. The owner Mac is optional and must not block production.
+As of 2026-09-18:
 
-CI is a final regression/merge gate. It must not be the inner visual iteration loop.
+- public `main` baseline for the engine gate is `3822e23a1af3f100556d9fe6b5698583dc29523f`;
+- the old local checkout formerly named `/home/pnrunner/pixel-nations-live` was stale at `9db4716...` and contained editor-generated local changes;
+- it has been moved to `/home/pnrunner/archive/pixel-nations-live.STALE-2026-09-18` and must not be used as project authority;
+- the existing `/home/pnrunner/pn-engine-ab` workspace contains useful benchmark evidence but its original Git worktree/object-alternate wiring depended on that stale checkout;
+- create/use fresh standalone clones from the intended exact ref for subsequent benchmark mutations.
 
-Tool policy:
+GitHub `main` + this current-state file + the active issues are authority. Local caches, old worktrees, reports and `latest` folders are evidence/reference only.
 
-- GPT-5.6 Sol: current Product Lead / strategy / direct review; sufficient for this milestone;
-- GPT-6: OFF for now; reserve for a high-value architecture or cross-engine decision only if the Godot live-agent benchmark fails or future 10,000-land data architecture materially warrants it;
-- Godot live editor/MCP: preferred for scene iteration after current health/version/security verification;
-- Codex/Cursor: bounded executor after the visual target and file scope are explicit;
-- MAX: OFF by default;
-- new paid assets/tools: blocked unless they materially improve quality, speed or probability of success.
+## Accepted production/runtime baseline
 
-## Process correction
+Preserve:
 
-Do not recreate the previous failure mode of serial `portfolio gate -> authority PR -> preflight -> micro-change -> reconciliation` loops for ordinary product work.
+- Default First Session v6:
+  `claim -> develop -> choose -> consequence -> grow -> expand`;
+- truthful persistence and player identity;
+- Input Release Boundary v3;
+- View roles:
+  - Village = HOW;
+  - Map = WHERE;
+  - World = WHY / scale / direction;
+- Aurelian Frontier Capacity v2 behavior at product baseline `6a67f19034beb9868b3609b9f067430bd8b863af`.
 
-For normal bounded iterations:
+Map and World are **not** visually accepted yet.
 
-1. inspect current evidence and relevant references;
-2. make one product/art-direction decision;
-3. implement one meaningful player-visible slice;
-4. inspect the real runtime directly;
-5. allow at most one root-cause correction;
-6. run full regression/CI only after the candidate is visually/product credible;
-7. merge or reject.
+## Rejected representation evidence
 
-Green CI alone is never product or visual acceptance.
+Do not restart these as new product directions:
 
-## Continuity rule for every new chat / Work session / agent
+- #723 breadth v1 marker/network proof;
+- #725 simplified marker/beam v2;
+- #726 floating planar surface regions;
+- #727 terrain tint/mask variant;
+- generated concept-art target as a prerequisite.
+
+#729 2.5D is useful readability evidence, not a final art lock and not sufficient by itself to settle the engine decision.
+
+## Frozen until #731 terminates
+
+- production engine migration;
+- deeper Village polish;
+- Provision / economy continuation;
+- additional one-land micro-systems;
+- combat/diplomacy/governance depth;
+- paid assets;
+- generated visual targets unless explicitly requested;
+- GPT-6;
+- Cursor MAX;
+- broad workflow redesign unrelated to the final engine gate.
+
+## Exact next sequence
+
+1. Create fresh standalone exact-main source clones for both benchmark lanes.
+2. Preserve existing `pn-engine-ab/evidence` as historical benchmark evidence only.
+3. Accept Unity first-run Software Terms and verify live Pipeline/MCP control.
+4. Run one symmetric AI-native task on Godot and Unity:
+   `inspect -> meaningful Map/Sector edit -> run -> screenshot -> one self-correction`.
+5. Compare:
+   - time to first meaningful frame;
+   - critique-to-rerender time;
+   - mutation correctness and recovery;
+   - visible product quality/readability;
+   - asset/import friction;
+   - Web build friction;
+   - operational/licensing overhead.
+6. Make one terminal engine/workflow decision under #731.
+7. Update ADR-001 and this file with that verdict.
+8. Resume Map / Sector / World breadth production under #721.
+
+## Continuity rule for every new chat / agent
 
 Before planning or coding:
 
-1. run `npm run pn:status` when a checkout is available;
+1. run `npm run pn:status` on a fresh/intended checkout;
 2. read this file;
-3. read active issue #721;
-4. read the relevant accepted ADR and issue #575 for Sector representation work;
-5. inspect the current exact repo/branch state and current evidence;
-6. treat all older issues as historical unless this file or #721 explicitly reactivates them.
+3. read #721 and #731;
+4. inspect the exact current ref and real benchmark evidence;
+5. use #575 only for Sector representation principles;
+6. treat all other old issues, briefs, reports, chats, local folders and historical docs as reference-only unless this file explicitly reactivates them.
 
-Do not infer current priority from the most recent narrow feature, the oldest open issue, an old Fable/Cursor directive, or stale `public/qa/latest` evidence.
+If a source conflicts with this file or the active strategy/engine gate, the current authority wins.
 
-## Active supporting work
-
-- #721 — canonical product strategy and Empire Seed Strategic Breadth Prototype.
-- #575 — Sector A-01 campaign-map representation/art-direction reference.
-- #290 — Netcup Godot cloud worker / live editor-MCP execution infrastructure.
-- #79 — persistent AI Command Room, subordinate to this file and #721.
-
-No other historical issue is active product authority unless explicitly named here.
-
-## Success / stop condition
-
-The next major owner-facing evidence must contain real screenshots/video where an uninformed viewer can see multiple lands and settlements and understand that the current Village belongs to a wider strategic world.
-
-The rough breadth proof, marker/beam correction, planar-region treatment and runtime terrain-tint mask all failed the direct two-second player read. Stop iterating these overlay variants. The next decision requires one bounded comparative representation/renderer/asset-fit benchmark with real frames on an isolated exact public checkout, explicit criteria and a stop/decision; do not migrate from Godot or change production gameplay without comparative evidence. If the live Godot editor cannot produce a credible frame on the exact public checkout, document the tool limit instead of claiming production acceptance from a GitHub-hosted still.
-
-Historical milestone details remain available in Git history, merged PRs and issue threads. This file is intentionally current-only so future sessions cannot mistake old sequencing decisions for active strategy.
+Green CI is never visual/product acceptance. Owner confusion or lack of confidence in a real product frame outranks a screenshot/CI PASS.
