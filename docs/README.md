@@ -1,7 +1,7 @@
 # Pixel Nations Docs Map
 
 Status: ACTIVE
-Updated: 2026-08-31
+Updated: 2026-09-18
 Purpose: keep agents on the current product state and durable whole-game strategy without reloading stale milestone history.
 
 ## Start here
@@ -10,7 +10,7 @@ For every new project session:
 
 1. Run `npm run pn:status` when a checkout is available.
 2. Read `docs/PROJECT_CURRENT_STATE.md`.
-3. Read the accepted ADR relevant to the task.
+3. Read the accepted ADR relevant to the task, unless current state explicitly reopens that ADR decision.
 4. Read root `AGENTS.md`.
 5. If choosing/changing product direction, read `docs/GAME_STRATEGY_MASTER_PLAN.md`.
 6. Read the active execution issue named in `PROJECT_CURRENT_STATE.md`.
@@ -46,7 +46,7 @@ The durable build sequence belongs in `GAME_STRATEGY_MASTER_PLAN.md`, not in ind
 - Core fantasy: `one land -> settlement -> city -> nation -> empire`.
 - Full logical world: 100 x 100 lands / 10,000 total.
 - Current demonstration geography: Sector A-01 / Aurelian Basin.
-- Godot is the target runtime under ADR-001.
+- Godot is the production incumbent under ADR-001, but engine/workflow selection is temporarily reopened only by the bounded final AI-native gate in #731. No migration is authorized until that issue reaches a terminal verdict.
 - Next.js `/play` is a functioning bridge, mechanics reference and rollback surface, not production-final visual authority.
 - Village, Map and World are views over one persistent physical geography.
 - Village = HOW, Map = WHERE, World = WHY / SCALE / WHICH DIRECTION.
@@ -111,6 +111,27 @@ For visual/gamefeel work, prefer proof from the running game: deterministic head
 - Prefer one meaningful scoped product PR over a chain of tiny milestone PRs when the changes form one coherent visible outcome.
 - Parallel agents/worktrees are allowed for genuinely isolated work or independent review, but overlapping edits to the same system should stay serialized.
 
+## Active issue roles
+
+- #721 — canonical product-strategy lock: Map / Sector / World breadth first.
+- #731 — current execution gate: final AI-native Godot vs Unity workflow benchmark.
+- #575 — Sector A-01 representation/art-direction reference only.
+
+Open issue state alone is not authority. Issues not listed by current state are historical/reference unless explicitly reactivated.
+
+## Local checkout hygiene
+
+Local folders, worktrees, caches and generated `latest` evidence are never authority by themselves.
+
+Before using a checkout for planning or mutation:
+
+- verify intended remote/ref and exact HEAD;
+- reject stale worktrees or object-alternate clones that depend on an older local checkout;
+- prefer fresh standalone clones for engine/tool benchmarks;
+- preserve stale material as evidence/archive rather than letting it retain a misleading `live` name.
+
+As of 2026-09-18, the old Netcup checkout formerly named `pixel-nations-live` is explicitly stale and archived; do not use it as a planning or implementation source.
+
 ## Current-state maintenance
 
 `PROJECT_CURRENT_STATE.md` must be updated when the accepted milestone, active issue, product baseline, visual classification, blocker, phase or next allowed action changes.
@@ -143,7 +164,7 @@ Rejected branches/candidates are reference only unless a later portfolio review 
 |---|---|
 | Current project authority | `docs/PROJECT_CURRENT_STATE.md` |
 | Whole-game strategy | `docs/GAME_STRATEGY_MASTER_PLAN.md` |
-| Runtime ADR | `docs/ADR_001_GODOT_DESKTOP_FIRST.md` |
+| Incumbent runtime ADR | `docs/ADR_001_GODOT_DESKTOP_FIRST.md` — current state/#731 controls the temporary engine-selection gate |
 | Agent rules | `AGENTS.md` |
 | Project operating system | `docs/PROJECT_OPERATING_SYSTEM.md` |
 | Godot project | `game/**` |

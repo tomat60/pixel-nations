@@ -1,11 +1,14 @@
 # ADR-001 — Godot 4 desktop-first pivot
 
-Status: **ACCEPTED**  
+Status: **ACCEPTED AS CURRENT PRODUCTION INCUMBENT; EXCLUSIVE ENGINE LOCK TEMPORARILY REOPENED BY #731**  
 Date: 2026-07-21  
+Engine-gate update: 2026-09-18  
 Decision owner: GPT-5.6 with owner mandate  
 Independent review: Fable #281
 
-## Binding decision
+> **Current authority note (2026-09-18):** This ADR remains the record for the accepted Godot production/runtime baseline and rollback-safe implementation. It is **not** authority to skip the bounded AI-native Godot vs Unity benchmark in issue #731. No Unity migration is authorized while #731 is open. After #731 reaches a terminal verdict, update this ADR and `PROJECT_CURRENT_STATE.md` together. Current state outranks the older engine-selection wording below when the two conflict.
+
+## Binding decision (historical accepted pivot; subject to #731 engine gate)
 
 Pixel Nations will move its game runtime to **Godot 4**, using **GDScript** and one pinned stable 4.x version.
 
