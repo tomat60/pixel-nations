@@ -2,8 +2,8 @@
 
 Status: ACTIVE
 Updated: 2026-09-18
-Current state revision: 43.0
-Authority baseline SHA: `3822e23a1af3f100556d9fe6b5698583dc29523f`
+Current state revision: 43.1
+Authority baseline SHA: `a56c3182aa0d94d83905b6f42a664b0d257029fe`
 Product baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Runtime baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
@@ -11,7 +11,7 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 Current product phase: Empire Seed Strategic Breadth Prototype — final AI-native engine/workflow gate before Map / Sector / World production resumes.
 Current milestone: choose the production engine/workflow from one symmetric AI-native Godot vs Unity benchmark, then lock that decision for the current phase and resume visible world breadth.
 Active execution issue: #731
-Next allowed action: finish the Unity live-editor first-run/Software Terms blocker, establish a real Unity Pipeline/MCP command surface, then run the same bounded inspect -> edit -> run -> screenshot -> self-correction task on both Godot and Unity using the same Sector A-01 source and acceptance target. Unity only wins if it is materially better end-to-end enough to repay migration; tie or small advantage keeps Godot. After the terminal engine verdict, update this file and ADR-001 before any production Map/World implementation.
+Next allowed action: run the same bounded inspect -> edit -> run -> screenshot -> self-correction task on both Godot and Unity using the fresh exact-main clones, the same Sector A-01 source and the same acceptance target. Unity live Pipeline control is verified and no longer blocks execution. Unity only wins if it is materially better end-to-end enough to repay migration; tie or small advantage keeps Godot. After the terminal engine verdict, update this file and ADR-001 before any production Map/World implementation.
 
 ## Binding product strategy
 
@@ -60,25 +60,23 @@ Verified on Netcup:
 
 This proves the current Godot + Codex live-editor control path exists. It does **not** yet finish the full edit/run/screenshot/self-correction lane.
 
-### Unity lane — editor/tooling installed, live MCP gate not yet PASS
+### Unity lane — live-editor Pipeline handshake PASS
 
 Verified on Netcup:
 
 - Unity Editor: 6000.6.1f1.
 - Unity Personal license: active.
+- Standard Unity Editor Software Terms accepted for the authorized first run.
 - Official Unity Codex plugin: `unity@unity-agent-plugin 0.1.6-beta`, installed and enabled.
 - Unity Pipeline package: `com.unity.pipeline 0.7.0-exp.1`.
 - URP package: `com.unity.render-pipelines.universal 17.6.0`.
-- Unity CLI/MCP endpoint is configured.
+- Official Unity CLI reports the Editor `ready` at `127.0.0.1:7800`.
+- Pipeline enumerates 151 live Editor tools.
+- A real read-only command round-trip passed: `get_authoring_root` returned `Assets`.
+- A second read-only round-trip passed: `list_open_scenes` returned one loaded, active, clean scene with two roots.
 - Prior non-AI-native Unity benchmark produced a real 1440x900 Sector frame, but did not show a material migration-worthy advantage.
 
-Current blocker:
-
-- the live Unity Editor is stopped on the first-run **Unity Editor Software Terms** modal;
-- until that modal is accepted, Pipeline does not expose the live command surface needed for a fair AI-native benchmark;
-- the configured Unity MCP endpoint responds, but the current Codex session cannot enumerate Unity resources/tools yet.
-
-The next Unity step is to accept the standard free Software Terms already authorized by the owner, verify Pipeline Server reachable, and repeat the same live-editor task as Godot.
+This proves the current Unity CLI/Pipeline live-editor control path exists. It does **not** yet finish the full edit/run/screenshot/self-correction lane.
 
 ## Direct Netcup control — PASS
 
@@ -104,7 +102,7 @@ Do not trust a directory name as proof of freshness.
 
 As of 2026-09-18:
 
-- public `main` baseline for the engine gate is `3822e23a1af3f100556d9fe6b5698583dc29523f`;
+- public `main` baseline for the engine gate is `a56c3182aa0d94d83905b6f42a664b0d257029fe`;
 - the old local checkout formerly named `/home/pnrunner/pixel-nations-live` was stale at `9db4716...` and contained editor-generated local changes;
 - it has been moved to `/home/pnrunner/archive/pixel-nations-live.STALE-2026-09-18` and must not be used as project authority;
 - the existing `/home/pnrunner/pn-engine-ab` workspace contains useful benchmark evidence but its original Git worktree/object-alternate wiring depended on that stale checkout;
@@ -155,9 +153,11 @@ Do not restart these as new product directions:
 
 ## Exact next sequence
 
-1. Create fresh standalone exact-main source clones for both benchmark lanes.
+1. Use the fresh standalone exact-main clones for both benchmark lanes:
+   - `/home/pnrunner/pn-engine-gate-20260918/godot-clean`;
+   - `/home/pnrunner/pn-engine-gate-20260918/unity-clean-2`.
 2. Preserve existing `pn-engine-ab/evidence` as historical benchmark evidence only.
-3. Accept Unity first-run Software Terms and verify live Pipeline/MCP control.
+3. Keep the verified Unity CLI/Pipeline session live; do not repeat activation or first-run setup without a diagnosed need.
 4. Run one symmetric AI-native task on Godot and Unity:
    `inspect -> meaningful Map/Sector edit -> run -> screenshot -> one self-correction`.
 5. Compare:
