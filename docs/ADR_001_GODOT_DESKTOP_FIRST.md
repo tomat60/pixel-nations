@@ -1,14 +1,14 @@
 # ADR-001 — Godot 4 desktop-first pivot
 
-Status: **ACCEPTED AS CURRENT PRODUCTION INCUMBENT; EXCLUSIVE ENGINE LOCK TEMPORARILY REOPENED BY #731**  
+Status: **ACCEPTED — GODOT 4 PRODUCTION ENGINE LOCKED FOR CURRENT PHASE (~90 DAYS)**  
 Date: 2026-07-21  
 Engine-gate update: 2026-09-18  
 Decision owner: GPT-5.6 with owner mandate  
 Independent review: Fable #281
 
-> **Current authority note (2026-09-18):** This ADR remains the record for the accepted Godot production/runtime baseline and rollback-safe implementation. It is **not** authority to skip the bounded AI-native Godot vs Unity benchmark in issue #731. No Unity migration is authorized while #731 is open. After #731 reaches a terminal verdict, update this ADR and `PROJECT_CURRENT_STATE.md` together. Current state outranks the older engine-selection wording below when the two conflict.
+> **Terminal engine-gate verdict (2026-09-18):** Issue #731 is complete. Pixel Nations remains on Godot 4 for the current phase and the engine decision is locked for approximately 90 days unless a hard engine-level technical blocker appears. The final AI-native comparison proved both live editor workflows credible on the same Sector A-01 source, but Unity did not show a material end-to-end quality/workflow advantage large enough to repay migration of accepted gameplay, persistence, QA and production architecture. Godot also completed the final corrected 1440×900 benchmark frame and a real Web export successfully. Do not reopen engine benchmarking during this lock merely for a small visual/tooling difference.
 
-## Binding decision (historical accepted pivot; subject to #731 engine gate)
+## Binding decision
 
 Pixel Nations will move its game runtime to **Godot 4**, using **GDScript** and one pinned stable 4.x version.
 
@@ -43,7 +43,11 @@ Rejected as disposable bridge work. It would add a React ↔ Phaser state seam, 
 
 ### Unity 6
 
-Credible runner-up. It has the strongest official engine-integrated AI stack, broad platform support and a large asset/hiring ecosystem. It is rejected for this project because the editor and project overhead are higher, the licensing and subscription model introduce vendor risk, and its serialized project format is less favorable to our text-diff-heavy AI workflow. Reconsider only if Godot fails the Day-30 technical checkpoint for reasons inherent to the engine.
+Credible runner-up and now directly benchmarked. Unity 6000.6.1f1 + official Pipeline/Codex tooling achieved a real live-editor `inspect -> edit -> Play Mode -> 1440x900 screenshot -> one self-correction` loop on the canonical Sector A-01 source. WebGL support is installed and the final WebGL build command validated and entered the real compilation pipeline.
+
+The migration is still rejected for the current phase because the visible result did not show a material quality advantage over Godot, while the workflow carried materially higher setup/import/compile and licensing/editor overhead. The first Unity package/script compile took about 488 seconds, the first-run Software Terms/license path added setup friction, and a WebGL build remained materially heavier than the equivalent Godot Web export. Those costs do not repay migration of the accepted Godot gameplay, persistence, tests and production runtime.
+
+Reconsider only after the current ~90-day engine lock if a hard Godot engine-level blocker appears. Do not reopen the comparison for small visual differences, tooling novelty or speculative future advantage.
 
 ### Unreal Engine
 
@@ -146,5 +150,5 @@ The current Next.js `/play` build remains deployed and unchanged until the Day-3
 
 - Freeze new gameplay and visual implementation in the web runtime.
 - Close Phaser issue #280 as superseded.
-- Start the Godot migration foundation sprint.
+- Resume production in Godot under #721, prioritizing Map -> Sector -> World breadth and strategic readability.
 - Contest submission is not a priority unless explicitly reopened by the owner.
