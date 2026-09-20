@@ -1,3 +1,5 @@
+[Reading 119 lines from start (total: 119 lines, 0 remaining)]
+
 extends SceneTree
 
 const SPEC_PATH := "res://assets/aurelian-basin/source/sector_a01_generator_v4_spec.json"
@@ -30,6 +32,23 @@ func _init() -> void:
 		_check(slots.size() >= 8 and slots.size() <= 12, "macro_loci_target")
 		var archetypes: Dictionary = spec.get("settlement_archetypes", {})
 		_check(archetypes.size() >= 6, "settlement_archetype_library")
+		var states: Dictionary = {}
+		for slot_variant in slots:
+			if slot_variant is Dictionary:
+				var slot: Dictionary = slot_variant
+				states[String(slot.get("strategic_state", "neutral"))] = true
+		_check(bool(states.get("home", false)), "campaign_lod_home_state")
+		_check(bool(states.get("owned", false)), "campaign_lod_owned_state")
+		_check(bool(states.get("frontier", false)), "campaign_lod_frontier_state")
+		_check(bool(states.get("rival", false)), "campaign_lod_rival_state")
+		var campaign_lod: Dictionary = spec.get("campaign_lod", {})
+		_check(campaign_lod.size() >= 5, "campaign_lod_profiles")
+		for state in ["home", "owned", "frontier", "rival"]:
+			var profile: Dictionary = campaign_lod.get(state, {})
+			_check(int(profile.get("hero_index", -1)) >= 0, "campaign_lod_%s_hero" % state)
+			_check(float(profile.get("hero_scale_factor", 0.0)) > 1.0, "campaign_lod_%s_hero_scale" % state)
+			_check((profile.get("flag_offset", []) as Array).size() == 3, "campaign_lod_%s_flag_offset" % state)
+			_check(float(profile.get("flag_rotation_deg", 0.0)) != 0.0, "campaign_lod_%s_flag_facing" % state)
 		var core: Dictionary = spec.get("canonical_core", {})
 		_check(bool(core.get("preserve_landmarks", false)), "preserve_landmarks")
 		_check(bool(core.get("preserve_river", false)), "preserve_river")
@@ -49,6 +68,7 @@ func _init() -> void:
 		_check(not bool(generated.get("new_asset_family", true)), "no_new_asset_family")
 		_check(not bool(generated.get("gameplay_state_changed", true)), "gameplay_untouched")
 		_check(not bool(generated.get("atlas_implemented", true)), "atlas_blocked")
+		_check(bool(generated.get("campaign_lod_enabled", false)), "campaign_lod_manifest")
 		_check(int(generated.get("terrain_face_cells", 0)) >= 5000, "regional_surface_density")
 
 	var scene_instance := SECTOR_SCENE.instantiate()
@@ -99,3 +119,5 @@ func _finish() -> void:
 		push_error("AURELIAN_SECTOR_GENERATOR_V4_TEST_FAILURE: %s" % failure)
 	print("AURELIAN_SECTOR_GENERATOR_V4_TEST: FAIL (%d)" % failures.size())
 	quit(1)
+
+[executed on device: pixel-nations-godot-01 (a52d7d58-52e5-4495-ad5a-62d8d5cdb481)]
