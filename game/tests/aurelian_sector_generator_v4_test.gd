@@ -1,5 +1,3 @@
-[Reading 119 lines from start (total: 119 lines, 0 remaining)]
-
 extends SceneTree
 
 const SPEC_PATH := "res://assets/aurelian-basin/source/sector_a01_generator_v4_spec.json"
@@ -119,5 +117,3 @@ func _finish() -> void:
 		push_error("AURELIAN_SECTOR_GENERATOR_V4_TEST_FAILURE: %s" % failure)
 	print("AURELIAN_SECTOR_GENERATOR_V4_TEST: FAIL (%d)" % failures.size())
 	quit(1)
-
-[executed on device: pixel-nations-godot-01 (a52d7d58-52e5-4495-ad5a-62d8d5cdb481)]
