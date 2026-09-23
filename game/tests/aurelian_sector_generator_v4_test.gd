@@ -45,6 +45,7 @@ func _init() -> void:
 			var profile: Dictionary = campaign_lod.get(state, {})
 			_check(int(profile.get("hero_index", -1)) >= 0, "campaign_lod_%s_hero" % state)
 			_check(float(profile.get("hero_scale_factor", 0.0)) > 1.0, "campaign_lod_%s_hero_scale" % state)
+			_check(float(profile.get("hero_root_scale", 0.0)) > 0.0, "campaign_lod_%s_hero_root_scale" % state)
 			_check((profile.get("flag_offset", []) as Array).size() == 3, "campaign_lod_%s_flag_offset" % state)
 			_check(float(profile.get("flag_rotation_deg", 0.0)) != 0.0, "campaign_lod_%s_flag_facing" % state)
 		var core: Dictionary = spec.get("canonical_core", {})

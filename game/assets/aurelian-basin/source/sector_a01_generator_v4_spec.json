@@ -7,10 +7,10 @@
   "sector_plane": [3600, 2700],
   "technical_padding": 2000,
   "campaign_lod": {
-    "home": {"scale_multiplier":2.15,"spacing_multiplier":0.38,"hero_index":0,"hero_scale_factor":2.61,"hero_offset":[0.0,0.0],"flag_scale":2.88156,"flag_rotation_deg":126.0,"flag_offset":[0.32,-0.39,0.18],"route_width_multiplier":1.00,"clearing_radius":92},
-    "owned": {"scale_multiplier":2.00,"spacing_multiplier":0.44,"hero_index":1,"hero_scale_factor":3.41,"hero_offset":[0.0458,-0.0861],"flag_scale":2.06016,"flag_rotation_deg":126.0,"flag_offset":[0.32,-0.39,0.18],"route_width_multiplier":1.45,"clearing_radius":72},
-    "frontier": {"scale_multiplier":2.15,"spacing_multiplier":0.42,"hero_index":0,"hero_scale_factor":3.60,"hero_offset":[-0.1115,0.0488],"flag_scale":2.70840,"flag_rotation_deg":126.0,"flag_offset":[0.32,-0.39,0.18],"route_width_multiplier":2.45,"clearing_radius":78},
-    "rival": {"scale_multiplier":2.20,"spacing_multiplier":0.44,"hero_index":1,"hero_scale_factor":3.95,"hero_offset":[0.1257,0.0472],"flag_scale":2.59200,"flag_rotation_deg":126.0,"flag_offset":[0.32,-0.39,0.18],"route_width_multiplier":0.85,"clearing_radius":68},
+    "home": {"scale_multiplier":2.15,"spacing_multiplier":0.38,"hero_index":0,"hero_scale_factor":2.61,"hero_root_scale":2.20,"hero_offset":[0.0,0.0],"flag_scale":2.88156,"flag_rotation_deg":126.0,"flag_offset":[0.32,-0.39,0.18],"route_width_multiplier":1.00,"clearing_radius":92},
+    "owned": {"scale_multiplier":2.00,"spacing_multiplier":0.44,"hero_index":1,"hero_scale_factor":3.41,"hero_root_scale":1.35,"hero_offset":[0.0458,-0.0861],"flag_scale":2.06016,"flag_rotation_deg":126.0,"flag_offset":[0.32,-0.39,0.18],"route_width_multiplier":1.45,"clearing_radius":72},
+    "frontier": {"scale_multiplier":2.15,"spacing_multiplier":0.42,"hero_index":0,"hero_scale_factor":3.60,"hero_root_scale":1.65,"hero_offset":[-0.1115,0.0488],"flag_scale":2.70840,"flag_rotation_deg":126.0,"flag_offset":[0.32,-0.39,0.18],"route_width_multiplier":2.45,"clearing_radius":78},
+    "rival": {"scale_multiplier":2.20,"spacing_multiplier":0.44,"hero_index":1,"hero_scale_factor":3.95,"hero_root_scale":1.50,"hero_offset":[0.1257,0.0472],"flag_scale":2.59200,"flag_rotation_deg":126.0,"flag_offset":[0.32,-0.39,0.18],"route_width_multiplier":0.85,"clearing_radius":68},
     "neutral": {"scale_multiplier":1.40,"spacing_multiplier":0.54,"hero_index":-1,"hero_scale_factor":1.00,"hero_offset":[0.0,0.0],"flag_scale":0.34,"flag_rotation_deg":126.0,"flag_offset":[0.18,-0.24,0.10],"route_width_multiplier":0.68,"clearing_radius":58}
   },
   "camera": {

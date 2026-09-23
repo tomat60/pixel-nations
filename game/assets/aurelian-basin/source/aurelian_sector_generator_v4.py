@@ -539,6 +539,7 @@ def create_settlement(slot, center, settlement_index, clearing_material):
     spacing_multiplier = float(lod.get("spacing_multiplier", 1.0))
     hero_index = int(lod.get("hero_index", -1))
     hero_scale_factor = float(lod.get("hero_scale_factor", 1.0))
+    hero_root_scale = float(lod.get("hero_root_scale", 0.0))
     hero_offset = lod.get("hero_offset", [0.0, 0.0])
     rng = random.Random(SEED + 2000 + settlement_index * 97)
     root = bpy.data.objects.new("SectorSettlement_%s" % locus_id, None)
@@ -581,6 +582,11 @@ def create_settlement(slot, center, settlement_index, clearing_material):
         if index == hero_index:
             scale *= hero_scale_factor
         building = clone_source(key, "SectorBuilding_%s_%02d" % (locus_id, index), point, scale, rng.uniform(-rotation_limit, rotation_limit))
+        # Accepted live scenography may provide an absolute root scale. This is
+        # intentionally applied after procedural variation so the deterministic
+        # export reproduces the reviewed editor transform exactly.
+        if index == hero_index and hero_root_scale > 0.0:
+            building.scale = Vector((hero_root_scale, hero_root_scale, hero_root_scale))
         if index == hero_index and len(hero_offset) >= 2:
             building.location.x += float(hero_offset[0])
             building.location.y += float(hero_offset[1])
