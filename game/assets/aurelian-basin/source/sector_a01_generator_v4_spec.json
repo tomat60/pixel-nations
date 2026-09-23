@@ -15,7 +15,7 @@
   },
   "camera": {
     "focus": [1775, 1325],
-    "orthographic_size": 32.5,
+    "orthographic_size": 30.0,
     "position_offset": [18.0, 28.0, 18.0]
   },
   "canonical_core": {
