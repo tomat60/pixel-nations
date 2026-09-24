@@ -67,6 +67,17 @@ async function storedCount(page, count) {
     } catch { return false; }
   }, { key: KEY, count }, { timeout: 5000 });
 }
+async function loadSeed(page, state) {
+  await page.goto(`${URL}/play?qa-preseed=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 10000 });
+  await page.evaluate(() => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+  });
+  await page.evaluate(({ key, state }) => window.localStorage.setItem(key, JSON.stringify(state)), { key: KEY, state });
+  await page.goto(`${URL}/play?qa-seed=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 10000 });
+  await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+}
+
 async function clearRun(page) {
   await page.evaluate((key) => window.localStorage.removeItem(key), KEY);
   await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
@@ -79,10 +90,7 @@ async function runCase(browser, item) {
   const video = page.video();
   const screenshots = [];
   try {
-    await page.goto(`${URL}/play`, { waitUntil: "domcontentloaded", timeout: 10000 });
-    await page.evaluate(({ key, state }) => window.localStorage.setItem(key, JSON.stringify(state)), { key: KEY, state: seed(item) });
-    await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
-    await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    await loadSeed(page, seed(item));
     await dismissFounderRecord(page, { depth: "founder-run", required: true });
 
     const panel = page.locator('[data-qa="imperial-turn-panel"][data-turn-count="0"]').first();
