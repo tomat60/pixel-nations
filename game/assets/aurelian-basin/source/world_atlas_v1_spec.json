@@ -13,6 +13,7 @@
     "sector_id": "A-01",
     "center": [6100, 4150],
     "visual_radius": 330,
+    "terrain_uplift": {"radius":[1200,900],"amplitude":0.75},
     "source_sector_spec": "AURELIAN_SECTOR_GENERATOR_V4_SPEC",
     "preserve_home_identity": true
   },

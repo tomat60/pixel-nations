@@ -34,6 +34,10 @@ func _init() -> void:
 	_check(origin.get("sector_id") == "A-01", "A-01 must remain Atlas origin", failures)
 	_check(origin.get("source_sector_spec") == "AURELIAN_SECTOR_GENERATOR_V4_SPEC", "Atlas origin must derive from accepted Sector generator", failures)
 	_check(origin.get("preserve_home_identity") == true, "A-01 home identity must be preserved", failures)
+	var uplift: Dictionary = origin.get("terrain_uplift", {})
+	var uplift_radius: Array = uplift.get("radius", [0, 0])
+	_check(float(uplift.get("amplitude", 0.0)) >= 0.5, "A-01 origin terrain must remain above World sea level", failures)
+	_check(float(uplift_radius[0]) >= 900.0 and float(uplift_radius[1]) >= 700.0, "A-01 uplift must cover the macro origin basin", failures)
 
 	var world_plane: Array = spec.get("world_plane", [0, 0])
 	var sector_plane: Array = sector_spec.get("sector_plane", [1, 1])
@@ -47,6 +51,7 @@ func _init() -> void:
 	_check(generator.contains("literal_sector_grid\": False"), "generator must reject literal sector grid", failures)
 	_check(generator.contains("literal_land_grid\": False"), "generator must reject literal land grid", failures)
 	_check(generator.contains("gameplay_state_changed\": False"), "Atlas must not change gameplay state", failures)
+	_check(generator.contains("landmark_first_origin"), "World origin must retain landmark-first Sector continuity", failures)
 	_check(FileAccess.file_exists(SCENE_PATH), "Atlas Godot scene must exist", failures)
 
 	if FileAccess.file_exists(GENERATED_MANIFEST_PATH):
@@ -54,6 +59,8 @@ func _init() -> void:
 		_check(manifest.get("contract") == "PIXEL_NATIONS_WORLD_ATLAS_V1", "generated Atlas manifest contract", failures)
 		_check(int(manifest.get("macro_region_count", 0)) == regions.size(), "generated macro-region count must match spec", failures)
 		_check(manifest.get("origin_sector") == "A-01", "generated Atlas origin", failures)
+		_check(manifest.get("origin_visual_grammar") == "landmark_first_home", "generated Atlas keeps landmark-first home identity", failures)
+		_check(float(manifest.get("origin_home_hero_root_scale", 0.0)) >= 2.0, "generated Atlas inherits Sector home hero scale", failures)
 		_check(manifest.get("literal_sector_grid") == false, "generated Atlas has no literal sector grid", failures)
 		_check(manifest.get("literal_land_grid") == false, "generated Atlas has no literal land grid", failures)
 		_check(int(manifest.get("full_sector_glbs_generated", -1)) == 0, "generated Atlas must build zero full Sector GLBs", failures)
