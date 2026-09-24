@@ -394,15 +394,15 @@ def create_origin_a01():
     sector_flag_scale = float(home_lod.get("flag_scale", 1.0))
     flag_rotation = float(home_lod.get("flag_rotation_deg", 0.0))
 
-    hero_scale = 0.12 * max(1.0, min(hero_root_scale, 2.4))
+    hero_scale = 0.18 * max(1.0, min(hero_root_scale, 2.4))
     flag_world_multiplier = max(1.0, min(sector_flag_scale / 1.6, 1.8))
-    flag_world_scale = 0.085 * flag_world_multiplier
+    flag_world_scale = 0.11 * flag_world_multiplier
 
     pieces = [
-        ("church", Vector((0, -58)), hero_scale, 0),
-        ("barracks", Vector((-78, 46)), 0.075, -16),
-        ("blacksmith", Vector((72, 52)), 0.07, 18),
-        ("flag", Vector((18, 26)), flag_world_scale, flag_rotation),
+        ("church", Vector((0, -80)), hero_scale, 0),
+        ("barracks", Vector((-125, 78)), 0.11, -16),
+        ("blacksmith", Vector((115, 88)), 0.10, 18),
+        ("flag", Vector((38, 45)), flag_world_scale, flag_rotation),
     ]
     root = bpy.data.objects.new("AtlasOrigin_A01", None)
     bpy.context.collection.objects.link(root)
