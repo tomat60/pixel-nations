@@ -213,6 +213,14 @@ def terrain_height(point):
             t = 1.0 - distance / valley
             height -= 0.70 * t * t
 
+    origin = atlas_spec.get("origin_sector", {})
+    uplift = origin.get("terrain_uplift", {})
+    uplift_radius = uplift.get("radius", [0, 0])
+    uplift_amplitude = float(uplift.get("amplitude", 0.0))
+    if uplift_amplitude > 0.0 and float(uplift_radius[0]) > 0.0 and float(uplift_radius[1]) > 0.0:
+        origin_weight = ellipse_weight(point, origin.get("center", [0, 0]), uplift_radius)
+        height += uplift_amplitude * origin_weight
+
     depth = coast_depth(point)
     if depth > 0.0:
         transition = float(atlas_spec["coast"]["transition"])
@@ -381,11 +389,20 @@ def create_relief_landmarks():
 
 def create_origin_a01():
     center = Vector(tuple(atlas_spec["origin_sector"]["center"]))
+    home_lod = sector_spec.get("campaign_lod", {}).get("home", {})
+    hero_root_scale = float(home_lod.get("hero_root_scale", 1.0))
+    sector_flag_scale = float(home_lod.get("flag_scale", 1.0))
+    flag_rotation = float(home_lod.get("flag_rotation_deg", 0.0))
+
+    hero_scale = 0.12 * max(1.0, min(hero_root_scale, 2.4))
+    flag_world_multiplier = max(1.0, min(sector_flag_scale / 1.6, 1.8))
+    flag_world_scale = 0.085 * flag_world_multiplier
+
     pieces = [
-        ("church", Vector((0, -85)), 0.12, 0),
-        ("barracks", Vector((-95, 55)), 0.095, -16),
-        ("blacksmith", Vector((85, 60)), 0.09, 18),
-        ("flag", Vector((0, 35)), 0.085, 0),
+        ("church", Vector((0, -58)), hero_scale, 0),
+        ("barracks", Vector((-78, 46)), 0.075, -16),
+        ("blacksmith", Vector((72, 52)), 0.07, 18),
+        ("flag", Vector((18, 26)), flag_world_scale, flag_rotation),
     ]
     root = bpy.data.objects.new("AtlasOrigin_A01", None)
     bpy.context.collection.objects.link(root)
@@ -394,6 +411,9 @@ def create_origin_a01():
         child.parent = root
     root["sector_id"] = "A-01"
     root["nested_origin"] = True
+    root["landmark_first_origin"] = True
+    root["source_home_hero_root_scale"] = hero_root_scale
+    root["source_home_flag_scale"] = sector_flag_scale
 
 
 def create_sparse_loci():
@@ -422,6 +442,9 @@ def write_manifest(glb_path, blend_path, terrain):
         "strategic_loci_count": len(atlas_spec["strategic_loci"]),
         "origin_sector": atlas_spec["origin_sector"]["sector_id"],
         "origin_center": atlas_spec["origin_sector"]["center"],
+        "origin_visual_grammar": "landmark_first_home",
+        "origin_home_hero_root_scale": float(sector_spec.get("campaign_lod", {}).get("home", {}).get("hero_root_scale", 1.0)),
+        "origin_home_flag_scale": float(sector_spec.get("campaign_lod", {}).get("home", {}).get("flag_scale", 1.0)),
         "terrain_face_cells": int(terrain.get("terrain_face_cells", 0)),
         "technical_padding": PADDING,
         "literal_sector_grid": False,
@@ -468,3 +491,5 @@ def main():
 
 
 main()
+
+[executed on device: pixel-nations-godot-01 (a52d7d58-52e5-4495-ad5a-62d8d5cdb481)]
