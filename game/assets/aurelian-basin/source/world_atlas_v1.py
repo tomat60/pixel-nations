@@ -491,5 +491,3 @@ def main():
 
 
 main()
-
-[executed on device: pixel-nations-godot-01 (a52d7d58-52e5-4495-ad5a-62d8d5cdb481)]
