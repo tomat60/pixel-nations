@@ -2,8 +2,8 @@
 
 Status: ACTIVE
 Updated: 2026-09-24
-Current state revision: 44.2
-Authority baseline SHA: `21c65e84582334820dee5a425d88327e48e5e3e9`
+Current state revision: 44.3
+Authority baseline SHA: `83f88b3c76d8868172123dc28b40c827185c3508`
 Product baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Runtime baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
@@ -11,7 +11,7 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 Current product phase: Empire Seed Strategic Breadth Prototype — Godot production lock; Sector A-01 landmark-first regional identity accepted, World / Atlas continuity unresolved.
 Current milestone: carry the accepted Sector A-01 identity one scale higher into a legible, terrain-first World Atlas before deeper systems or Village polish resume.
 Active execution issue: #721
-Next allowed action: independently review and merge the bounded recovery that removes rejected #737 code from `main`. Only after rollback verification may one World / Atlas representation candidate run under #721, using a materially different visibility/composition hypothesis and exact-head 1440×900 direct review. Blind scale-only tuning, Village/economy/deeper mechanics and multiple concurrent product candidates remain blocked.
+Next allowed action: independently review and merge the bounded authority reconciliation that records the completed #739 rollback and #740 QA reliability fix. Only after that reconciliation merges may one World / Atlas representation candidate run under #721, using a materially different visibility/composition hypothesis and exact-head 1440×900 direct review. Blind scale-only tuning, Village/economy/deeper mechanics and multiple concurrent product candidates remain blocked.
 
 ## Binding product strategy
 
@@ -60,6 +60,24 @@ PR #737 received a terminal direct-review REJECT, was closed without merge, and 
 - rejection reason: after uplift and one bounded landmark scale/spacing correction, A-01 remained a tiny pale/green speck cluster rather than the accepted blue landmark-first home identity; the correction changed only 16 pixels in the 1440×900 frame.
 
 Preserve the below-ocean diagnosis as evidence. Do not continue blind scale tuning. The merged #737 delta is not an accepted World baseline and must be removed before the next product candidate.
+
+## Recovery and QA reliability closure — terminal PASS
+
+PR #739 and PR #740 were independently merged on 2026-09-24.
+
+- rollback PR #739 accepted head: `bf0fcf37a905712d0803fd32b20d97c065df6263`;
+- rollback merge/main SHA: `627588a0a3ce6f8d145c0838d5bc9a4d77933929`;
+- #739 restored the three rejected #737 World Atlas files exactly to the accepted #736 baseline;
+- QA reliability PR #740 accepted head: `5f698aecb6cd45032d200772be24c49b220f97fc`;
+- QA reliability merge/main SHA: `83f88b3c76d8868172123dc28b40c827185c3508`;
+- #740 changes only `scripts/qa-imperial-turn.mjs` and removes the mounted-page localStorage hydration race through deterministic preseed and seeded routes;
+- exact-head Visual QA run: `36001232135`, terminal success;
+- Visual QA artifact: `10808890108`, SHA-256 `7d27302b8702adb8f3df2a279e7b081bcdbb7d9889630cb2db6e018b122a6481`;
+- CI, RC1, P4-P8, P10-P11 and Vercel passed on the accepted #740 head;
+- resulting main Vercel status is successful;
+- production `/`, `/play` and `/world` routes remain unverified because the public origin is inaccessible from the steward environment.
+
+The rejected #737 World candidate remains rejected. The accepted product baseline remains #736; #739 and #740 close recovery and reliability only.
 
 ## Engine decision status
 
