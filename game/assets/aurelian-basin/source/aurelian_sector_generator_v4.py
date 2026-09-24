@@ -212,6 +212,7 @@ def build_actual_loci():
             "role": slot["role"],
             "terrain": slot["terrain"],
             "settlement_archetype": slot.get("settlement_archetype"),
+            "strategic_state": slot.get("strategic_state", "neutral"),
         }
 
 
@@ -404,6 +405,41 @@ def clone_source(key, name, sector_point, scale_factor, rotation_deg=0.0):
     return clone
 
 
+STRATEGIC_COLORS = {
+    "home": (0.16, 0.34, 0.72, 1.0),
+    "owned": (0.22, 0.45, 0.82, 1.0),
+    "frontier": (0.92, 0.62, 0.16, 1.0),
+    "rival": (0.66, 0.16, 0.12, 1.0),
+    "neutral": (0.58, 0.52, 0.42, 1.0),
+}
+
+
+def campaign_lod_profile(state):
+    profiles = spec.get("campaign_lod", {})
+    return profiles.get(state, profiles.get("neutral", {}))
+
+
+def make_flat_material(name, color, roughness=0.86):
+    material = bpy.data.materials.get(name)
+    if material is None:
+        material = bpy.data.materials.new(name)
+        material.use_nodes = True
+        bsdf = material.node_tree.nodes.get("Principled BSDF")
+        if bsdf is None:
+            raise RuntimeError("Principled BSDF missing for campaign LOD material")
+        bsdf.inputs["Base Color"].default_value = color
+        bsdf.inputs["Roughness"].default_value = roughness
+    return material
+
+
+def apply_material_recursive(root, material):
+    if getattr(root, "type", None) == "MESH" and getattr(root, "data", None) is not None:
+        root.data.materials.clear()
+        root.data.materials.append(material)
+    for child in root.children:
+        apply_material_recursive(child, material)
+
+
 def create_irregular_patch(name, center, radii, material, seed_offset, vertices=18):
     rng = random.Random(SEED + seed_offset)
     points = []
@@ -491,13 +527,35 @@ def create_field_rows(materials):
         row.parent = root
 
 
-def create_settlement(archetype_name, locus_id, center, settlement_index):
+def create_settlement(slot, center, settlement_index, clearing_material):
+    archetype_name = slot.get("settlement_archetype")
+    locus_id = slot["id"]
     if archetype_name is None:
         return None
     archetype = spec["settlement_archetypes"][archetype_name]
+    strategic_state = slot.get("strategic_state", "neutral")
+    lod = campaign_lod_profile(strategic_state)
+    scale_multiplier = float(lod.get("scale_multiplier", 1.0))
+    spacing_multiplier = float(lod.get("spacing_multiplier", 1.0))
+    hero_index = int(lod.get("hero_index", -1))
+    hero_scale_factor = float(lod.get("hero_scale_factor", 1.0))
+    hero_root_scale = float(lod.get("hero_root_scale", 0.0))
+    hero_offset = lod.get("hero_offset", [0.0, 0.0])
     rng = random.Random(SEED + 2000 + settlement_index * 97)
     root = bpy.data.objects.new("SectorSettlement_%s" % locus_id, None)
     bpy.context.collection.objects.link(root)
+
+    clearing_radius = float(lod.get("clearing_radius", 0.0))
+    if clearing_radius > 0.0 and archetype_name != "ruin_poi":
+        clearing = create_irregular_patch(
+            "SectorSettlementClearing_%s" % locus_id,
+            center,
+            (clearing_radius, clearing_radius * 0.72),
+            clearing_material,
+            4100 + settlement_index * 31,
+            14,
+        )
+        clearing.parent = root
 
     if archetype_name == "ruin_poi":
         for index in range(4):
@@ -516,27 +574,52 @@ def create_settlement(archetype_name, locus_id, center, settlement_index):
 
     for index in range(piece_count):
         angle = (math.tau * index / max(1, piece_count)) + rng.uniform(-0.38, 0.38)
-        distance = rng.uniform(spacing_min, spacing_max) * (0.70 if archetype_name == "capital_home" else 1.0)
+        capital_tightening = 0.82 if archetype_name == "capital_home" else 1.0
+        distance = rng.uniform(spacing_min, spacing_max) * spacing_multiplier * capital_tightening
         point = (center[0] + math.cos(angle) * distance, center[1] + math.sin(angle) * distance)
         key = sources[index % len(sources)]
-        scale = rng.uniform(scale_min, scale_max)
+        scale = rng.uniform(scale_min, scale_max) * scale_multiplier
+        if index == hero_index:
+            scale *= hero_scale_factor
         building = clone_source(key, "SectorBuilding_%s_%02d" % (locus_id, index), point, scale, rng.uniform(-rotation_limit, rotation_limit))
+        # Accepted live scenography may provide an absolute root scale. This is
+        # intentionally applied after procedural variation so the deterministic
+        # export reproduces the reviewed editor transform exactly.
+        if index == hero_index and hero_root_scale > 0.0:
+            building.scale = Vector((hero_root_scale, hero_root_scale, hero_root_scale))
+        if index == hero_index and len(hero_offset) >= 2:
+            building.location.x += float(hero_offset[0])
+            building.location.y += float(hero_offset[1])
         building.parent = root
 
-    if archetype.get("with_flag", False):
-        flag = clone_source("flag", "SectorFlag_%s" % locus_id, center, 0.34, 0.0)
+    # Campaign-scale heraldry is physical world geometry, not a UI token.
+    flag_scale = float(lod.get("flag_scale", 0.0))
+    if flag_scale > 0.0:
+        flag_rotation = float(lod.get("flag_rotation_deg", 0.0))
+        flag_offset = lod.get("flag_offset", [0.0, 0.0, 0.0])
+        flag = clone_source("flag", "SectorFlag_%s" % locus_id, center, flag_scale, flag_rotation)
+        if len(flag_offset) >= 3:
+            flag.location.x += float(flag_offset[0])
+            flag.location.y += float(flag_offset[1])
+            flag.location.z += float(flag_offset[2])
+        flag_material = make_flat_material(
+            "AurelianCampaignFlag_%s" % strategic_state,
+            STRATEGIC_COLORS.get(strategic_state, STRATEGIC_COLORS["neutral"]),
+            0.80,
+        )
+        apply_material_recursive(flag, flag_material)
         flag.parent = root
     return root
 
 
-def create_settlements():
+def create_settlements(materials):
     settlement_index = 0
     for slot in spec["macro_locus_slots"]:
         archetype_name = slot.get("settlement_archetype")
         if archetype_name is None:
             continue
         locus = ACTUAL_LOCI[slot["id"]]
-        create_settlement(archetype_name, slot["id"], locus["point"], settlement_index)
+        create_settlement(slot, locus["point"], settlement_index, materials["road"])
         settlement_index += 1
 
 
@@ -552,7 +635,25 @@ def create_macro_roads(materials):
         midpoint = ((home[0] + target[0]) * 0.5, (home[1] + target[1]) * 0.5)
         rng = random.Random(SEED + 3000 + index)
         bend = (midpoint[0] + rng.uniform(-80.0, 80.0), midpoint[1] + rng.uniform(-80.0, 80.0))
-        road = create_strip("SectorRoad_%s" % locus_id, [home, bend, target], 11.0, materials["road"], 0.07)
+        strategic_state = ACTUAL_LOCI[locus_id].get("strategic_state", "neutral")
+        lod = campaign_lod_profile(strategic_state)
+        width_multiplier = float(lod.get("route_width_multiplier", 1.0))
+        route_material = materials["road"]
+        if strategic_state in ("owned", "frontier"):
+            route_color = STRATEGIC_COLORS[strategic_state]
+            muted = tuple(0.70 * channel + 0.30 * 0.42 for channel in route_color[:3]) + (1.0,)
+            route_material = make_flat_material(
+                "AurelianCampaignRoute_%s" % strategic_state,
+                muted,
+                0.92,
+            )
+        road = create_strip(
+            "SectorRoad_%s" % locus_id,
+            [home, bend, target],
+            11.0 * width_multiplier,
+            route_material,
+            0.075,
+        )
         road.parent = root
 
 
@@ -571,6 +672,7 @@ def write_manifest(glb_path, blend_path, terrain):
             settlements.append({
                 "locus_id": slot["id"],
                 "archetype": archetype,
+                "strategic_state": slot.get("strategic_state", "neutral"),
                 "point": list(ACTUAL_LOCI[slot["id"]]["point"]),
             })
 
@@ -600,7 +702,8 @@ def write_manifest(glb_path, blend_path, terrain):
         "new_asset_family": False,
         "gameplay_state_changed": False,
         "atlas_implemented": False,
-        "generator_model": "fixed canonical core + deterministic macro terrain + seeded regional LOD archetypes",
+        "generator_model": "fixed canonical core + deterministic macro terrain + compact campaign-scale regional settlement LOD",
+        "campaign_lod_enabled": True,
     }
     payload["blend_sha256"] = hashlib.sha256(blend_path.read_bytes()).hexdigest()
     payload["glb_sha256"] = hashlib.sha256(glb_path.read_bytes()).hexdigest()
@@ -628,7 +731,7 @@ def main():
     create_vegetation()
     create_relief_props()
     create_field_rows(materials)
-    create_settlements()
+    create_settlements(materials)
     create_macro_roads(materials)
     remove_canonical_sources()
 
