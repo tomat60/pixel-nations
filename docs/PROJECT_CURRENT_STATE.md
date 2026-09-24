@@ -1,17 +1,17 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-09-18
-Current state revision: 44.0
-Authority baseline SHA: `a56c3182aa0d94d83905b6f42a664b0d257029fe`
-Product baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
-Runtime baseline SHA: `6a67f19034beb9868b3609b9f067430bd8b863af`
+Updated: 2026-09-24
+Current state revision: 44.2
+Authority baseline SHA: `21c65e84582334820dee5a425d88327e48e5e3e9`
+Product baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
+Runtime baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Empire Seed Strategic Breadth Prototype — Godot production lock; Map / Sector / World breadth resumed.
-Current milestone: make the Map -> Sector -> World scale legible and compelling in the existing Godot runtime before deeper systems or Village polish resume.
+Current product phase: Empire Seed Strategic Breadth Prototype — Godot production lock; Sector A-01 landmark-first regional identity accepted, World / Atlas continuity unresolved.
+Current milestone: carry the accepted Sector A-01 identity one scale higher into a legible, terrain-first World Atlas before deeper systems or Village polish resume.
 Active execution issue: #721
-Next allowed action: execute one precise Godot production sprint under #721 focused on Map / Sector breadth, strategic readability and scale continuity. Village/economy/deeper mechanics remain frozen until the broader world is visibly usable.
+Next allowed action: independently review and merge the bounded recovery that removes rejected #737 code from `main`. Only after rollback verification may one World / Atlas representation candidate run under #721, using a materially different visibility/composition hypothesis and exact-head 1440×900 direct review. Blind scale-only tuning, Village/economy/deeper mechanics and multiple concurrent product candidates remain blocked.
 
 ## Binding product strategy
 
@@ -29,6 +29,37 @@ Priority order:
 4. Only after the above is visibly usable: deeper economy, Village polish, repeatable expansion systems, combat/diplomacy/governance depth.
 
 Issue #575 remains the current Sector representation/art-direction reference.
+
+## Fresh production evidence
+
+### Sector A-01 landmark-first regional sigils — terminal PASS
+
+PR #736 was independently merged on 2026-09-24.
+
+- accepted PR head: `0e97b0fa321995459be7f7ba92479db840c2138d`;
+- merge/main SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`;
+- terminal verdict: `SECTOR_A01_LANDMARK_FIRST_REGIONAL_SIGILS_V3_PASS`;
+- direct-review frame: 1440×900, SHA-256 `ebe5ae866daff298f66ba4ca1d6e3ef0f4d39e497dfb938073834d165bc57766`;
+- generator run: `35887145310`;
+- artifact: `10763525681`, SHA-256 `c336d5891b2148fc0ede66a17816b0b59505f93bab06d0d00643d7f0f2c3e4f5`;
+- Aurelian and Northwatch read as blue player areas, Eastbank as the gold frontier and High Pass as red pressure;
+- relief, river, route hierarchy and one physical Aurelian geography remain intact.
+
+This closes the Map / Sector breadth gate. Do not reopen #736.
+
+### World Atlas A-01 landmark continuity — terminal REJECT
+
+PR #737 received a terminal direct-review REJECT, was closed without merge, and was later reopened and merged on 2026-09-24 at `main@21c65e84582334820dee5a425d88327e48e5e3e9` without review. The merge does not convert the product verdict to PASS; the three-file delta is under bounded rollback recovery.
+
+- final reviewed head: `3a35ce27e8a527cb81bed2082f0c567943aff4c3`;
+- terminal verdict: `WORLD_ATLAS_A01_LANDMARK_CONTINUITY_REJECT / DIRECT_VISUAL_REVIEW_FAIL`;
+- exact World Atlas run: `35961630422`, technically successful;
+- artifact: `10793105371`, SHA-256 `9542de38357a9b27fb4502f99447611dd1edf956897ac361352c5c79897bd81b`;
+- World frame SHA-256: `f15b47c17f8998a3e69142934cbb5111025ad86571978c98d27776f855aac090`;
+- useful root-cause evidence: the original A-01 basin sat below the ocean plane;
+- rejection reason: after uplift and one bounded landmark scale/spacing correction, A-01 remained a tiny pale/green speck cluster rather than the accepted blue landmark-first home identity; the correction changed only 16 pixels in the 1440×900 frame.
+
+Preserve the below-ocean diagnosis as evidence. Do not continue blind scale tuning. The merged #737 delta is not an accepted World baseline and must be removed before the next product candidate.
 
 ## Engine decision status
 
@@ -143,7 +174,7 @@ Preserve:
   - World = WHY / scale / direction;
 - Aurelian Frontier Capacity v2 behavior at product baseline `6a67f19034beb9868b3609b9f067430bd8b863af`.
 
-Map and World are **not** visually accepted yet.
+Sector A-01 breadth is visually accepted at product baseline `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`. Fresh `main@21c65e84582334820dee5a425d88327e48e5e3e9` contains the rejected #737 delta pending rollback. World / Atlas is **not** visually accepted.
 
 ## Rejected representation evidence
 
@@ -153,6 +184,7 @@ Do not restart these as new product directions:
 - #725 simplified marker/beam v2;
 - #726 floating planar surface regions;
 - #727 terrain tint/mask variant;
+- #737 World A-01 uplift plus scale/spacing tuning as a final representation; retain only its below-ocean root-cause evidence;
 - generated concept-art target as a prerequisite.
 
 #729 2.5D is useful readability evidence, not a final art lock and not sufficient by itself to settle the engine decision.
@@ -174,12 +206,14 @@ Until Map / Sector / World breadth is visibly usable:
 ## Exact next sequence
 
 1. Treat #731 as terminal and ADR-001 as the engine lock.
-2. Resume #721 in Godot.
-3. Improve Map / Sector breadth and strategic readability first.
-4. Extend World / Atlas scale and physicality second.
-5. Verify Village -> Map -> Sector -> World continuity with real user-facing frames.
-6. Keep Village/economy/deeper mechanics frozen until the broader world reads clearly.
-7. Own every PR through exact-head CI and visible post-merge verification.
+2. Treat #736 as the accepted Map / Sector breadth baseline; do not reopen it.
+3. Treat #737 as a visual rejection despite its later merge; retain only the below-ocean diagnosis.
+4. Remove the rejected three-file #737 delta through the active bounded recovery PR and verify the resulting `main`.
+5. Execute one bounded World / Atlas candidate with a materially different visibility/composition hypothesis, not another blind scale-only pass.
+6. Require exact-head real 1440×900 evidence and direct review before any World acceptance.
+7. After World acceptance, verify Village -> Map -> Sector -> World continuity with real user-facing frames.
+8. Keep Village/economy/deeper mechanics frozen until the broader world reads clearly.
+9. Own every PR through exact-head CI and visible post-merge verification.
 
 ## Continuity rule for every new chat / agent
 
