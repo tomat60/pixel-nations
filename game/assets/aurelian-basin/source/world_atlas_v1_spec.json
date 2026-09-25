@@ -14,7 +14,17 @@
     "center": [6100, 4150],
     "visual_radius": 330,
     "source_sector_spec": "AURELIAN_SECTOR_GENERATOR_V4_SPEC",
-    "preserve_home_identity": true
+    "preserve_home_identity": true,
+    "composition": {
+      "strategy": "surface_anchored_sigil_ridge",
+      "dry_anchor_search_radius": 300,
+      "dry_anchor_samples": 24,
+      "minimum_clearance_above_sea": 0.06,
+      "sigil_ridge_offsets": [[-20, -85], [-8, -42], [0, 0], [8, 42], [20, 85]],
+      "sigil_scale": 0.085,
+      "sigil_color": [0.045, 0.18, 0.56, 1.0],
+      "camera_facing_degrees": -42.0
+    }
   },
   "macro_regions": [
     {"id":"northwest_highlands","role":"highland","center":[2200,1150],"radius":[1900,1050]},
