@@ -39,7 +39,7 @@ func _init() -> void:
 	_check(float(composition.get("dry_anchor_search_radius", 0)) <= float(origin.get("visual_radius", 0)), "A-01 dry anchor must remain inside the canonical origin radius", failures)
 	_check(int(composition.get("dry_anchor_samples", 0)) >= 16, "A-01 dry anchor search must be deterministic and sufficiently sampled", failures)
 	_check(float(composition.get("sigil_scale", 0)) == 0.085, "A-01 sigils must preserve the accepted World flag scale", failures)
-	_check((composition.get("sigil_ridge_offsets", []) as Array).size() == 5, "A-01 physical sigil ridge must contain five existing-asset flags", failures)
+	_check((composition.get("sigil_ridge_offsets", []) as Array).size() == 9, "A-01 physical sigil ridge must contain nine existing-asset flags", failures)
 
 	var world_plane: Array = spec.get("world_plane", [0, 0])
 	var sector_plane: Array = sector_spec.get("sector_plane", [1, 1])
@@ -65,7 +65,7 @@ func _init() -> void:
 		_check(int(manifest.get("macro_region_count", 0)) == regions.size(), "generated macro-region count must match spec", failures)
 		_check(manifest.get("origin_sector") == "A-01", "generated Atlas origin", failures)
 		_check(manifest.get("origin_composition") == "surface_anchored_sigil_ridge", "generated Atlas A-01 composition", failures)
-		_check(int(manifest.get("origin_sigil_count", 0)) == 5, "generated Atlas A-01 sigil count", failures)
+		_check(int(manifest.get("origin_sigil_count", 0)) == 9, "generated Atlas A-01 sigil count", failures)
 		_check(manifest.get("origin_landmark_scale_changed") == false, "generated Atlas must preserve accepted landmark scale", failures)
 		_check(float(manifest.get("origin_terrain_uplift", -1.0)) == 0.0, "generated Atlas must not uplift terrain", failures)
 		_check(manifest.get("literal_sector_grid") == false, "generated Atlas has no literal sector grid", failures)
