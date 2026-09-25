@@ -1,9 +1,9 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-09-24
-Current state revision: 44.3
-Authority baseline SHA: `83f88b3c76d8868172123dc28b40c827185c3508`
+Updated: 2026-09-25
+Current state revision: 44.4
+Authority baseline SHA: `d70a0833853d31dcf901203a1652ece3c4b178cb`
 Product baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Runtime baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
@@ -11,7 +11,7 @@ Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 Current product phase: Empire Seed Strategic Breadth Prototype — Godot production lock; Sector A-01 landmark-first regional identity accepted, World / Atlas continuity unresolved.
 Current milestone: carry the accepted Sector A-01 identity one scale higher into a legible, terrain-first World Atlas before deeper systems or Village polish resume.
 Active execution issue: #721
-Next allowed action: independently review and merge the bounded authority reconciliation that records the completed #739 rollback and #740 QA reliability fix. Only after that reconciliation merges may one World / Atlas representation candidate run under #721, using a materially different visibility/composition hypothesis and exact-head 1440×900 direct review. Blind scale-only tuning, Village/economy/deeper mechanics and multiple concurrent product candidates remain blocked.
+Next allowed action: independently review and merge the bounded reconciliation that records the terminal rejection of #742. Only after that reconciliation merges may one new World / Atlas representation candidate run under #721. It must use a materially different composition primitive; further flag count, flag color, landmark scale or terrain-height tuning is blocked. Exact-head 1440×900 direct review remains mandatory. Village/economy/deeper mechanics and multiple concurrent product candidates remain blocked.
 
 ## Binding product strategy
 
@@ -78,6 +78,23 @@ PR #739 and PR #740 were independently merged on 2026-09-24.
 - production `/`, `/play` and `/world` routes remain unverified because the public origin is inaccessible from the steward environment.
 
 The rejected #737 World candidate remains rejected. The accepted product baseline remains #736; #739 and #740 close recovery and reliability only.
+
+## World A-01 surface-anchored sigil ridge — terminal REJECT
+
+PR #742 was closed without merge on 2026-09-25 after one bounded visual correction.
+
+- initial exact head: `34ae8076e3d65884cdb848305ba6be62d50ef264`;
+- initial World Atlas run: `36144096828`, terminal success;
+- initial artifact: `10868842145`, SHA-256 `913ff0115bb9b9d400b11eba6a6131b08e626ab8e72d28bc379d09c35f00545e`;
+- corrected exact head: `befa192b6fe57017605fbdb9467998c87b7405ff`;
+- corrected World Atlas run: `36144504670`, terminal success;
+- corrected artifact: `10868687625`, SHA-256 `1097d1a8d5b9fb466e006b063fea3d9aead049992ea0e300ebff6ffde5b920d1`;
+- both real 1440x900 World frames have the same SHA-256: `6bcbc45ea5f0174f79bc135a52111c94915ffd212357924919c13cc0cdc2cd78`;
+- the candidate preserved the canonical A-01 radius, World plane, camera, sea level, terrain and accepted landmark scales;
+- surface anchoring, five flags, then nine brighter emissive flags produced no rendered-pixel change;
+- terminal classification: `WORLD_ATLAS_A01_SURFACE_SIGIL_RIDGE_REJECT`.
+
+Preserve the finding: existing World-scale flag geometry is below the camera's pixel visibility threshold even when surface-anchored, repeated and emissive. The next candidate must change the composition primitive rather than continue flag count, flag color, landmark scale or terrain-height tuning.
 
 ## Engine decision status
 
