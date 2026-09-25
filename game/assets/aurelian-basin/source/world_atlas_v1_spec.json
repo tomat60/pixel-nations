@@ -20,7 +20,7 @@
       "dry_anchor_search_radius": 300,
       "dry_anchor_samples": 24,
       "minimum_clearance_above_sea": 0.06,
-      "sigil_ridge_offsets": [[-20, -85], [-8, -42], [0, 0], [8, 42], [20, 85]],
+      "sigil_ridge_offsets": [[-18, -72], [-8, -36], [0, 0], [8, 36], [18, 72]],
       "sigil_scale": 0.085,
       "sigil_color": [0.045, 0.18, 0.56, 1.0],
       "camera_facing_degrees": -42.0
