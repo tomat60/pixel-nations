@@ -105,6 +105,21 @@ def make_material(name, color, roughness=0.94):
     return material
 
 
+def make_sigil_material(name, color):
+    material = make_material(name, color, 0.68)
+    bsdf = material.node_tree.nodes.get("Principled BSDF")
+    if bsdf:
+        emission = bsdf.inputs.get("Emission Color")
+        if emission is None:
+            emission = bsdf.inputs.get("Emission")
+        if emission is not None:
+            emission.default_value = color
+        strength = bsdf.inputs.get("Emission Strength")
+        if strength is not None:
+            strength.default_value = 1.8
+    return material
+
+
 def make_vertex_material():
     material = bpy.data.materials.new("PixelNations_Atlas_VertexColor")
     material.use_nodes = True
@@ -421,7 +436,7 @@ def create_origin_a01():
         child.parent = root
 
     sigil_color = tuple(float(value) for value in composition["sigil_color"])
-    sigil_material = make_material("PixelNations_Atlas_A01_BlueSigil", sigil_color, 0.72)
+    sigil_material = make_sigil_material("PixelNations_Atlas_A01_BlueSigil", sigil_color)
     sigil_scale = float(composition["sigil_scale"])
     sigil_rotation = float(composition["camera_facing_degrees"])
     for index, offset_data in enumerate(composition["sigil_ridge_offsets"]):
