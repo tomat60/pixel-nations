@@ -356,6 +356,31 @@ def clone_source(key, name, point, scale_factor, rotation_deg=0.0):
     return clone
 
 
+def override_material_recursive(root, material):
+    nodes = [root] + list(root.children_recursive)
+    for node in nodes:
+        if node.type == "MESH" and node.data is not None:
+            node.data.materials.clear()
+            node.data.materials.append(material)
+
+
+def find_origin_anchor(center, composition):
+    radius = float(composition["dry_anchor_search_radius"])
+    samples = int(composition["dry_anchor_samples"])
+    dry_floor = SEA_LEVEL + float(composition["minimum_clearance_above_sea"])
+    candidates = [center.copy()]
+    for ring in (0.55, 0.78, 1.0):
+        for index in range(samples):
+            angle = math.tau * index / float(samples)
+            candidates.append(center + Vector((
+                math.cos(angle) * radius * ring,
+                math.sin(angle) * radius * ring,
+            )))
+    dry_candidates = [point for point in candidates if terrain_height(point) >= dry_floor]
+    pool = dry_candidates if dry_candidates else candidates
+    return max(pool, key=lambda point: terrain_height(point))
+
+
 def create_forest_texture():
     for mass in atlas_spec["vegetation_masses"]:
         count = int(mass["density"])
@@ -380,20 +405,43 @@ def create_relief_landmarks():
 
 
 def create_origin_a01():
-    center = Vector(tuple(atlas_spec["origin_sector"]["center"]))
+    origin_spec = atlas_spec["origin_sector"]
+    center = Vector(tuple(origin_spec["center"]))
+    composition = origin_spec["composition"]
+    anchor = find_origin_anchor(center, composition)
     pieces = [
-        ("church", Vector((0, -85)), 0.12, 0),
-        ("barracks", Vector((-95, 55)), 0.095, -16),
-        ("blacksmith", Vector((85, 60)), 0.09, 18),
-        ("flag", Vector((0, 35)), 0.085, 0),
+        ("church", Vector((0, -34)), 0.12, 0),
+        ("barracks", Vector((-24, 24)), 0.095, -16),
+        ("blacksmith", Vector((24, 26)), 0.09, 18),
     ]
     root = bpy.data.objects.new("AtlasOrigin_A01", None)
     bpy.context.collection.objects.link(root)
     for key, offset, scale_factor, rotation in pieces:
-        child = clone_source(key, f"AtlasA01_{key}", tuple(center + offset), scale_factor, rotation)
+        child = clone_source(key, f"AtlasA01_{key}", tuple(anchor + offset), scale_factor, rotation)
         child.parent = root
+
+    sigil_color = tuple(float(value) for value in composition["sigil_color"])
+    sigil_material = make_material("PixelNations_Atlas_A01_BlueSigil", sigil_color, 0.72)
+    sigil_scale = float(composition["sigil_scale"])
+    sigil_rotation = float(composition["camera_facing_degrees"])
+    for index, offset_data in enumerate(composition["sigil_ridge_offsets"]):
+        offset = Vector(tuple(float(value) for value in offset_data))
+        flag = clone_source(
+            "flag",
+            f"AtlasA01_sigil_{index:02d}",
+            tuple(anchor + offset),
+            sigil_scale,
+            sigil_rotation,
+        )
+        override_material_recursive(flag, sigil_material)
+        flag.parent = root
+
     root["sector_id"] = "A-01"
     root["nested_origin"] = True
+    root["composition"] = "surface_anchored_sigil_ridge"
+    root["anchor_x"] = round(float(anchor.x), 3)
+    root["anchor_y"] = round(float(anchor.y), 3)
+    root["sigil_count"] = len(composition["sigil_ridge_offsets"])
 
 
 def create_sparse_loci():
@@ -422,6 +470,10 @@ def write_manifest(glb_path, blend_path, terrain):
         "strategic_loci_count": len(atlas_spec["strategic_loci"]),
         "origin_sector": atlas_spec["origin_sector"]["sector_id"],
         "origin_center": atlas_spec["origin_sector"]["center"],
+        "origin_composition": atlas_spec["origin_sector"]["composition"]["strategy"],
+        "origin_sigil_count": len(atlas_spec["origin_sector"]["composition"]["sigil_ridge_offsets"]),
+        "origin_landmark_scale_changed": False,
+        "origin_terrain_uplift": 0.0,
         "terrain_face_cells": int(terrain.get("terrain_face_cells", 0)),
         "technical_padding": PADDING,
         "literal_sector_grid": False,
