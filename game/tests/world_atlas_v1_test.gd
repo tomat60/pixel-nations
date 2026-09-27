@@ -34,6 +34,18 @@ func _init() -> void:
 	_check(origin.get("sector_id") == "A-01", "A-01 must remain Atlas origin", failures)
 	_check(origin.get("source_sector_spec") == "AURELIAN_SECTOR_GENERATOR_V4_SPEC", "Atlas origin must derive from accepted Sector generator", failures)
 	_check(origin.get("preserve_home_identity") == true, "A-01 home identity must be preserved", failures)
+	var mass: Dictionary = origin.get("cartographic_mass", {})
+	_check(int(mass.get("version", 0)) == 1, "Cartographic Mass v1 contract", failures)
+	var mass_radius: Array = mass.get("radius", [])
+	_check(mass_radius.size() == 2 and float(mass_radius[0]) >= 1000.0 and float(mass_radius[1]) >= 800.0, "A-01 identity must occupy the canonical macro basin", failures)
+	_check(float(mass.get("outer_falloff", 0.0)) > float(mass.get("inner_falloff", 0.0)), "Cartographic mass needs a bounded terrain falloff", failures)
+	var route: Dictionary = mass.get("strategic_route", {})
+	_check(route.get("destination_locus") == "east_pass", "Cartographic route must expose the important eastern direction", failures)
+	_check(float(route.get("width", 0.0)) >= 120.0, "Cartographic route must survive World camera scale", failures)
+	var route_points: Array = route.get("points", [])
+	_check(route_points.size() >= 4, "Cartographic route needs a legible path", failures)
+	var crest: Dictionary = mass.get("crest", {})
+	_check(float(crest.get("radius", 0.0)) >= 220.0, "Aurelian crest must survive thumbnail scale", failures)
 
 	var world_plane: Array = spec.get("world_plane", [0, 0])
 	var sector_plane: Array = sector_spec.get("sector_plane", [1, 1])
@@ -47,6 +59,10 @@ func _init() -> void:
 	_check(generator.contains("literal_sector_grid\": False"), "generator must reject literal sector grid", failures)
 	_check(generator.contains("literal_land_grid\": False"), "generator must reject literal land grid", failures)
 	_check(generator.contains("gameplay_state_changed\": False"), "Atlas must not change gameplay state", failures)
+	_check(generator.contains("def cartographic_mass_weight"), "generator must integrate the home mass into terrain color", failures)
+	_check(generator.contains("def create_cartographic_primitives"), "generator must build crest and strategic route primitives", failures)
+	_check(generator.contains("AtlasA01_CartographicCrest"), "generator must expose the Aurelian crest", failures)
+	_check(generator.contains("AtlasA01_StrategicRoute"), "generator must expose the important regional direction", failures)
 	_check(FileAccess.file_exists(SCENE_PATH), "Atlas Godot scene must exist", failures)
 
 	if FileAccess.file_exists(GENERATED_MANIFEST_PATH):
@@ -59,6 +75,10 @@ func _init() -> void:
 		_check(int(manifest.get("full_sector_glbs_generated", -1)) == 0, "generated Atlas must build zero full Sector GLBs", failures)
 		_check(manifest.get("gameplay_state_changed") == false, "generated Atlas gameplay untouched", failures)
 		_check(manifest.get("new_asset_family") == false, "generated Atlas reuses asset family", failures)
+		if manifest.has("cartographic_mass_version"):
+			_check(int(manifest.get("cartographic_mass_version", 0)) == 1, "generated Cartographic Mass version", failures)
+			_check(manifest.get("cartographic_crest") == true, "generated Atlas includes cartographic crest", failures)
+			_check(manifest.get("strategic_route_destination") == "east_pass", "generated Atlas route destination", failures)
 
 	_finish(failures)
 
