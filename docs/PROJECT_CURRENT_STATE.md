@@ -1,17 +1,19 @@
+[Reading 282 lines from start (total: 282 lines, 0 remaining)]
+
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-09-25
-Current state revision: 44.4
-Authority baseline SHA: `d70a0833853d31dcf901203a1652ece3c4b178cb`
+Updated: 2026-09-27
+Current state revision: 44.5
+Authority baseline SHA: `06a38e097dd3808659aeea90236cb9e2c52991d6`
 Product baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Runtime baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Empire Seed Strategic Breadth Prototype — Godot production lock; Sector A-01 landmark-first regional identity accepted, World / Atlas continuity unresolved.
-Current milestone: carry the accepted Sector A-01 identity one scale higher into a legible, terrain-first World Atlas before deeper systems or Village polish resume.
+Current product phase: Empire Seed Strategic Breadth Prototype — Godot production lock; Sector A-01 landmark-first identity accepted and World Cartographic Mass v1 visual target accepted for bounded runtime translation.
+Current milestone: translate the accepted World A-01 Cartographic Mass v1 target into the existing Godot World generator while preserving one canonical Aurelian geography and proving readability at full and thumbnail scale.
 Active execution issue: #721
-Next allowed action: independently review and merge the bounded reconciliation that records the terminal rejection of #742. Only after that reconciliation merges may one new World / Atlas representation candidate run under #721. It must use a materially different composition primitive; further flag count, flag color, landmark scale or terrain-height tuning is blocked. Exact-head 1440×900 direct review remains mandatory. Village/economy/deeper mechanics and multiple concurrent product candidates remain blocked.
+Next allowed action: execute exactly one bounded Godot World production candidate that translates accepted PR #744 Cartographic Mass v1 into runtime primitives already available in the current pipeline. Preserve the canonical World geography/camera family and #736 Sector identity; no new asset family, Village/economy/deeper mechanics, engine work, generic image-generation target, or competing World candidate. Require exact-head real 1440×900 and 360×225 evidence plus direct visual review before any World acceptance.
 
 ## Binding product strategy
 
@@ -95,6 +97,21 @@ PR #742 was closed without merge on 2026-09-25 after one bounded visual correcti
 - terminal classification: `WORLD_ATLAS_A01_SURFACE_SIGIL_RIDGE_REJECT`.
 
 Preserve the finding: existing World-scale flag geometry is below the camera's pixel visibility threshold even when surface-anchored, repeated and emissive. The next candidate must change the composition primitive rather than continue flag count, flag color, landmark scale or terrain-height tuning.
+
+## World A-01 Cartographic Mass v1 visual target — terminal PASS
+
+PR #744 was independently reviewed and merged on 2026-09-27.
+
+- accepted PR head: `b08e5a9b25edd7137cf9d748ea75f0cb516c619e`;
+- merge/main SHA: `06a38e097dd3808659aeea90236cb9e2c52991d6`;
+- terminal verdict: `WORLD_ATLAS_A01_CARTOGRAPHIC_MASS_TARGET_PASS`;
+- scope: static art-direction evidence only, no runtime/product mutation;
+- evidence: editable SVG plus 1440×900 and 360×225 direct-review frames;
+- accepted hierarchy: HOME A-01 -> IMPORTANT NEIGHBOR/DIRECTION -> LARGE WORLD;
+- composition primitive: terrain-scale irregular cobalt home mass integrated with the canonical river, restrained macro-region masses, and a readable gold strategic route/destination;
+- no tiny building or flag carries World-scale home identity.
+
+This target is implementation-grounded rather than a generic concept image: its visible elements map to the existing World terrain mesh/material path, route geometry, region masks/material treatment and simple Godot sigil/decal primitives. It authorizes one bounded runtime translation under #721, not a new asset family or broad redesign.
 
 ## Engine decision status
 
@@ -209,7 +226,7 @@ Preserve:
   - World = WHY / scale / direction;
 - Aurelian Frontier Capacity v2 behavior at product baseline `6a67f19034beb9868b3609b9f067430bd8b863af`.
 
-Sector A-01 breadth is visually accepted at product baseline `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`. Fresh `main@21c65e84582334820dee5a425d88327e48e5e3e9` contains the rejected #737 delta pending rollback. World / Atlas is **not** visually accepted.
+Sector A-01 breadth is visually accepted at product baseline `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`. The rejected #737 runtime delta was removed by #739. World / Atlas runtime is **not yet visually accepted**; PR #744 is an accepted static implementation target only.
 
 ## Rejected representation evidence
 
@@ -242,13 +259,14 @@ Until Map / Sector / World breadth is visibly usable:
 
 1. Treat #731 as terminal and ADR-001 as the engine lock.
 2. Treat #736 as the accepted Map / Sector breadth baseline; do not reopen it.
-3. Treat #737 as a visual rejection despite its later merge; retain only the below-ocean diagnosis.
-4. Remove the rejected three-file #737 delta through the active bounded recovery PR and verify the resulting `main`.
-5. Execute one bounded World / Atlas candidate with a materially different visibility/composition hypothesis, not another blind scale-only pass.
-6. Require exact-head real 1440×900 evidence and direct review before any World acceptance.
-7. After World acceptance, verify Village -> Map -> Sector -> World continuity with real user-facing frames.
-8. Keep Village/economy/deeper mechanics frozen until the broader world reads clearly.
-9. Own every PR through exact-head CI and visible post-merge verification.
+3. Treat #737 and #742 as terminal World representation rejections; retain only their useful root-cause evidence.
+4. Treat #744 as the accepted static World Cartographic Mass v1 implementation target; do not reopen generic moodboard generation.
+5. Translate that target once into the existing Godot World generator using current runtime primitives and one canonical Aurelian geography.
+6. Require exact-head real 1440×900 and 360×225 evidence plus direct review before any World runtime acceptance.
+7. If the runtime translation fails materially after one bounded correction, stop implementation and revise the production-grounded art-direction mapping rather than tune landmark/flag scale again.
+8. After World acceptance, verify Village -> Map -> Sector -> World continuity with real user-facing frames.
+9. Keep Village/economy/deeper mechanics frozen until the broader world reads clearly.
+10. Own every PR through exact-head CI and visible post-merge verification.
 
 ## Continuity rule for every new chat / agent
 
@@ -264,3 +282,5 @@ Before planning or coding:
 If a source conflicts with this file or the active strategy/engine gate, the current authority wins.
 
 Green CI is never visual/product acceptance. Owner confusion or lack of confidence in a real product frame outranks a screenshot/CI PASS.
+
+[executed on device: pixel-nations-godot-01 (a52d7d58-52e5-4495-ad5a-62d8d5cdb481)]
