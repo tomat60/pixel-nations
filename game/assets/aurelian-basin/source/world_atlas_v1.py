@@ -94,6 +94,24 @@ def mix_color(a, b, t):
     return tuple(lerp(a[i], b[i], t) for i in range(4))
 
 
+def cartographic_mass_weight(point):
+    origin = atlas_spec["origin_sector"]
+    config = origin["cartographic_mass"]
+    center = origin["center"]
+    radius = config["radius"]
+    dx = (float(point[0]) - float(center[0])) / max(float(radius[0]), 1.0)
+    dy = (float(point[1]) - float(center[1])) / max(float(radius[1]), 1.0)
+    irregularity = float(config["irregularity"])
+    distortion = irregularity * (
+        math.sin(float(point[0]) * 0.0041 + float(point[1]) * 0.0017)
+        + 0.55 * math.sin(float(point[1]) * 0.0053 - float(point[0]) * 0.0011)
+    )
+    radial = math.sqrt(dx * dx + dy * dy) + distortion
+    inner = float(config["inner_falloff"])
+    outer = float(config["outer_falloff"])
+    return 1.0 - smoothstep(inner, outer, radial)
+
+
 def make_material(name, color, roughness=0.94):
     material = bpy.data.materials.new(name)
     material.diffuse_color = color
@@ -241,6 +259,11 @@ def terrain_color(point, height):
         elif role == "riverland":
             color = mix_color(color, riverland, min(0.28, weight * 0.28))
 
+    mass_config = atlas_spec["origin_sector"]["cartographic_mass"]
+    mass_weight = cartographic_mass_weight(point)
+    cobalt = tuple(float(value) for value in mass_config["cobalt_color"])
+    color = mix_color(color, cobalt, min(0.88, mass_weight * 0.88))
+
     if height > 2.1:
         color = mix_color(color, ridge, min(0.64, (height - 2.1) * 0.16))
     return color
@@ -356,6 +379,60 @@ def clone_source(key, name, point, scale_factor, rotation_deg=0.0):
     return clone
 
 
+def create_surface_polygon(name, points, material, z_offset=0.12):
+    verts = []
+    for point in points:
+        world = atlas_to_world(point, terrain_height(point) + z_offset)
+        verts.append((world.x, world.y, world.z))
+    mesh = bpy.data.meshes.new(name + "Mesh")
+    mesh.from_pydata(verts, [], [tuple(range(len(verts)))])
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    obj.data.materials.append(material)
+    return obj
+
+
+def create_cartographic_primitives():
+    origin = atlas_spec["origin_sector"]
+    config = origin["cartographic_mass"]
+    route_config = config["strategic_route"]
+    gold = make_material("PixelNations_Atlas_StrategicRoute", (0.82, 0.58, 0.17, 1.0), 0.72)
+    route = create_strip(
+        "AtlasA01_StrategicRoute",
+        route_config["points"],
+        float(route_config["width"]),
+        gold,
+        0.11,
+    )
+    route["destination_locus"] = route_config["destination_locus"]
+    route["cartographic_mass_version"] = int(config["version"])
+
+    crest_config = config["crest"]
+    center = Vector(tuple(origin["center"])) + Vector(tuple(crest_config["center_offset"]))
+    radius = float(crest_config["radius"])
+    shield_offsets = [
+        Vector((-0.62, 0.62)),
+        Vector((0.62, 0.62)),
+        Vector((0.55, -0.18)),
+        Vector((0.0, -0.78)),
+        Vector((-0.55, -0.18)),
+    ]
+    shield_points = [tuple(center + offset * radius) for offset in shield_offsets]
+    shield_material = make_material("PixelNations_Atlas_AurelianCrest", (0.055, 0.20, 0.50, 1.0), 0.78)
+    shield = create_surface_polygon("AtlasA01_CartographicCrest", shield_points, shield_material, 0.16)
+
+    star_points = []
+    for index in range(10):
+        angle = math.radians(90.0 + index * 36.0)
+        point_radius = radius * (0.34 if index % 2 == 0 else 0.15)
+        star_points.append(tuple(center + Vector((math.cos(angle), math.sin(angle))) * point_radius))
+    star = create_surface_polygon("AtlasA01_CartographicCrestStar", star_points, gold, 0.19)
+    shield["cartographic_mass_version"] = int(config["version"])
+    shield["sector_id"] = origin["sector_id"]
+    star.parent = shield
+
+
 def create_forest_texture():
     for mass in atlas_spec["vegetation_masses"]:
         count = int(mass["density"])
@@ -429,6 +506,10 @@ def write_manifest(glb_path, blend_path, terrain):
         "full_sector_glbs_generated": 0,
         "gameplay_state_changed": False,
         "new_asset_family": False,
+        "cartographic_mass_version": int(atlas_spec["origin_sector"]["cartographic_mass"]["version"]),
+        "cartographic_mass_radius": atlas_spec["origin_sector"]["cartographic_mass"]["radius"],
+        "cartographic_crest": True,
+        "strategic_route_destination": atlas_spec["origin_sector"]["cartographic_mass"]["strategic_route"]["destination_locus"],
         "generator_model": "stable macro geography + seeded sparse detail",
     }
     manifest["blend_sha256"] = hashlib.sha256(blend_path.read_bytes()).hexdigest()
@@ -443,6 +524,7 @@ def main():
     terrain = create_terrain()
     create_ocean()
     create_water_systems()
+    create_cartographic_primitives()
     create_forest_texture()
     create_relief_landmarks()
     create_origin_a01()
