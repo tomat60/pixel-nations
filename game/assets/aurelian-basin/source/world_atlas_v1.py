@@ -262,7 +262,7 @@ def terrain_color(point, height):
     mass_config = atlas_spec["origin_sector"]["cartographic_mass"]
     mass_weight = cartographic_mass_weight(point)
     cobalt = tuple(float(value) for value in mass_config["cobalt_color"])
-    color = mix_color(color, cobalt, min(0.88, mass_weight * 0.88))
+    color = mix_color(color, cobalt, min(0.94, mass_weight * 0.94))
 
     if height > 2.1:
         color = mix_color(color, ridge, min(0.64, (height - 2.1) * 0.16))
@@ -418,19 +418,23 @@ def create_cartographic_primitives():
         Vector((0.0, -0.78)),
         Vector((-0.55, -0.18)),
     ]
-    shield_points = [tuple(center + offset * radius) for offset in shield_offsets]
-    shield_material = make_material("PixelNations_Atlas_AurelianCrest", (0.055, 0.20, 0.50, 1.0), 0.78)
-    shield = create_surface_polygon("AtlasA01_CartographicCrest", shield_points, shield_material, 0.16)
+    rim_points = [tuple(center + offset * radius * 1.16) for offset in shield_offsets]
+    rim_material = make_material("PixelNations_Atlas_AurelianCrestRim", (0.72, 0.83, 0.96, 1.0), 0.72)
+    rim = create_surface_polygon("AtlasA01_CartographicCrestRim", rim_points, rim_material, 0.16)
+    shield_points = [tuple(center + offset * radius * 0.92) for offset in shield_offsets]
+    shield_material = make_material("PixelNations_Atlas_AurelianCrest", (0.045, 0.16, 0.48, 1.0), 0.78)
+    shield = create_surface_polygon("AtlasA01_CartographicCrest", shield_points, shield_material, 0.19)
 
     star_points = []
     for index in range(10):
         angle = math.radians(90.0 + index * 36.0)
-        point_radius = radius * (0.34 if index % 2 == 0 else 0.15)
+        point_radius = radius * (0.38 if index % 2 == 0 else 0.17)
         star_points.append(tuple(center + Vector((math.cos(angle), math.sin(angle))) * point_radius))
-    star = create_surface_polygon("AtlasA01_CartographicCrestStar", star_points, gold, 0.19)
-    shield["cartographic_mass_version"] = int(config["version"])
-    shield["sector_id"] = origin["sector_id"]
-    star.parent = shield
+    star = create_surface_polygon("AtlasA01_CartographicCrestStar", star_points, gold, 0.22)
+    rim["cartographic_mass_version"] = int(config["version"])
+    rim["sector_id"] = origin["sector_id"]
+    shield.parent = rim
+    star.parent = rim
 
 
 def create_forest_texture():
