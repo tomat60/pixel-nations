@@ -17,19 +17,19 @@
     "preserve_home_identity": true,
     "cartographic_mass": {
       "version": 1,
-      "radius": [1150, 900],
-      "inner_falloff": 0.62,
-      "outer_falloff": 1.06,
-      "irregularity": 0.09,
-      "cobalt_color": [0.055, 0.18, 0.45, 1.0],
+      "radius": [1550, 1150],
+      "inner_falloff": 0.46,
+      "outer_falloff": 1.12,
+      "irregularity": 0.18,
+      "cobalt_color": [0.045, 0.17, 0.50, 1.0],
       "crest": {
         "center_offset": [260, -120],
-        "radius": 260
+        "radius": 300
       },
       "strategic_route": {
-        "destination_locus": "east_pass",
-        "width": 165,
-        "points": [[6360, 4210], [7350, 4060], [8500, 3570], [10100, 2900]]
+        "destination_locus": "north_gate",
+        "width": 90,
+        "points": [[6320, 4040], [6480, 3380], [6550, 2450], [6500, 1550]]
       }
     }
   },
