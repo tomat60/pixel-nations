@@ -14,7 +14,24 @@
     "center": [6100, 4150],
     "visual_radius": 330,
     "source_sector_spec": "AURELIAN_SECTOR_GENERATOR_V4_SPEC",
-    "preserve_home_identity": true
+    "preserve_home_identity": true,
+    "cartographic_mass": {
+      "version": 1,
+      "radius": [1150, 900],
+      "inner_falloff": 0.62,
+      "outer_falloff": 1.06,
+      "irregularity": 0.09,
+      "cobalt_color": [0.055, 0.18, 0.45, 1.0],
+      "crest": {
+        "center_offset": [260, -120],
+        "radius": 260
+      },
+      "strategic_route": {
+        "destination_locus": "east_pass",
+        "width": 165,
+        "points": [[6360, 4210], [7350, 4060], [8500, 3570], [10100, 2900]]
+      }
+    }
   },
   "macro_regions": [
     {"id":"northwest_highlands","role":"highland","center":[2200,1150],"radius":[1900,1050]},
