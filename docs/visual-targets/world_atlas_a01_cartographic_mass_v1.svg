@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071a24"/>
+      <stop offset="1" stop-color="#0d3440"/>
+    </linearGradient>
+    <linearGradient id="land" x1="0" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#596543"/>
+      <stop offset="0.52" stop-color="#6f7045"/>
+      <stop offset="1" stop-color="#8c7746"/>
+    </linearGradient>
+    <radialGradient id="homeMass" cx="43%" cy="45%" r="62%">
+      <stop offset="0" stop-color="#2c6ecb" stop-opacity="0.95"/>
+      <stop offset="0.68" stop-color="#174a91" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#0d3269" stop-opacity="0.18"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="10"/></filter>
+    <filter id="shadow"><feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#02080d" flood-opacity="0.6"/></filter>
+    <clipPath id="landClip">
+      <path d="M42 50 C180 28 312 65 430 48 C570 28 688 64 810 50 C950 34 1090 48 1218 82 C1310 107 1360 170 1378 246 L1376 595 C1325 627 1280 690 1230 760 C1170 838 1070 872 945 850 C805 825 710 850 575 862 C425 874 295 842 192 774 C92 708 52 625 42 520 Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1440" height="900" fill="url(#sea)"/>
+  <path d="M42 50 C180 28 312 65 430 48 C570 28 688 64 810 50 C950 34 1090 48 1218 82 C1310 107 1360 170 1378 246 L1376 595 C1325 627 1280 690 1230 760 C1170 838 1070 872 945 850 C805 825 710 850 575 862 C425 874 295 842 192 774 C92 708 52 625 42 520 Z" fill="url(#land)" stroke="#b2a56a" stroke-width="5"/>
+
+  <g clip-path="url(#landClip)">
+    <ellipse cx="255" cy="145" rx="205" ry="105" fill="#66705d" opacity="0.85"/>
+    <ellipse cx="478" cy="138" rx="170" ry="90" fill="#263f2d" opacity="0.78"/>
+    <ellipse cx="710" cy="160" rx="155" ry="95" fill="#51654c" opacity="0.72"/>
+    <ellipse cx="1025" cy="152" rx="215" ry="112" fill="#6a6a5e" opacity="0.84"/>
+    <ellipse cx="180" cy="407" rx="155" ry="160" fill="#2a4630" opacity="0.76"/>
+    <ellipse cx="405" cy="378" rx="150" ry="120" fill="#767151" opacity="0.7"/>
+    <ellipse cx="823" cy="364" rx="150" ry="105" fill="#787565" opacity="0.76"/>
+    <ellipse cx="1095" cy="415" rx="170" ry="135" fill="#294532" opacity="0.76"/>
+    <ellipse cx="385" cy="660" rx="170" ry="125" fill="#4f6955" opacity="0.72"/>
+    <ellipse cx="730" cy="640" rx="205" ry="130" fill="#9a844e" opacity="0.72"/>
+    <ellipse cx="1062" cy="662" rx="170" ry="122" fill="#58715d" opacity="0.72"/>
+    <ellipse cx="675" cy="785" rx="225" ry="90" fill="#80754f" opacity="0.72"/>
+
+    <g fill="none" stroke="#b9ad7a" stroke-width="18" opacity="0.3">
+      <path d="M55 135 C220 115 320 120 470 160 C600 194 705 165 802 125"/>
+      <path d="M790 92 C920 122 1035 180 1114 280 C1170 350 1180 410 1165 470"/>
+      <path d="M420 760 C590 718 745 720 930 776 C1050 814 1135 810 1220 768"/>
+    </g>
+    <g fill="none" stroke="#d4c596" stroke-width="6" opacity="0.48">
+      <path d="M55 135 C220 115 320 120 470 160 C600 194 705 165 802 125"/>
+      <path d="M790 92 C920 122 1035 180 1114 280 C1170 350 1180 410 1165 470"/>
+      <path d="M420 760 C590 718 745 720 930 776 C1050 814 1135 810 1220 768"/>
+    </g>
+
+    <path d="M424 369 C465 316 530 287 604 300 C666 311 716 296 770 329 C819 359 835 398 813 440 C795 475 777 516 718 544 C660 572 589 566 528 538 C468 511 430 472 415 426 C409 407 412 387 424 369 Z" fill="#103c77" opacity="0.28" filter="url(#soft)"/>
+    <path d="M432 365 C477 321 532 300 604 309 C666 318 716 307 762 337 C800 362 812 400 793 436 C771 478 750 510 699 532 C643 556 584 548 530 525 C478 502 444 468 427 427 C418 406 420 384 432 365 Z" fill="url(#homeMass)" stroke="#123b72" stroke-width="18" stroke-linejoin="round"/>
+    <path d="M451 374 C493 340 544 325 603 333 C655 340 701 329 742 351 C766 364 780 382 784 404" fill="none" stroke="#78a9ee" stroke-width="6" opacity="0.72" stroke-linecap="round"/>
+    <path d="M459 451 C491 490 540 516 598 523 C650 530 700 517 739 491" fill="none" stroke="#4f82c9" stroke-width="5" opacity="0.66" stroke-linecap="round"/>
+
+    <g fill="none" stroke-linecap="round">
+      <path d="M535 -10 C548 120 565 240 608 380 C644 493 720 566 850 637 C983 710 1115 739 1375 772" stroke="#082d42" stroke-width="33" opacity="0.72"/>
+      <path d="M535 -10 C548 120 565 240 608 380 C644 493 720 566 850 637 C983 710 1115 739 1375 772" stroke="#267b92" stroke-width="14" opacity="0.94"/>
+      <path d="M100 100 C155 240 225 390 310 525 C360 610 395 710 408 900" stroke="#0b3444" stroke-width="25" opacity="0.65"/>
+      <path d="M100 100 C155 240 225 390 310 525 C360 610 395 710 408 900" stroke="#2a7182" stroke-width="11" opacity="0.92"/>
+    </g>
+
+    <path d="M683 451 C748 439 816 419 880 389 C936 364 978 335 1022 298" fill="none" stroke="#d9b75e" stroke-width="26" opacity="0.25" filter="url(#soft)"/>
+    <path d="M683 451 C748 439 816 419 880 389 C936 364 978 335 1022 298" fill="none" stroke="#e1bd63" stroke-width="10" stroke-linecap="round"/>
+    <path d="M1008 280 L1045 292 L1020 322" fill="none" stroke="#ffe099" stroke-width="10" stroke-linejoin="round"/>
+
+    <g opacity="0.8">
+      <circle cx="1025" cy="296" r="25" fill="#8b7746" stroke="#d4bc7b" stroke-width="5"/>
+      <path d="M1013 305 L1025 278 L1037 305 Z" fill="#e2ca88"/>
+      <circle cx="345" cy="580" r="18" fill="#5e675d" stroke="#adae91" stroke-width="4"/>
+      <circle cx="1085" cy="643" r="18" fill="#5e675d" stroke="#adae91" stroke-width="4"/>
+      <circle cx="708" cy="725" r="18" fill="#5e675d" stroke="#adae91" stroke-width="4"/>
+      <circle cx="670" cy="170" r="18" fill="#5e675d" stroke="#adae91" stroke-width="4"/>
+    </g>
+  </g>
+
+  <g transform="translate(627 427)" opacity="0.48">
+    <path d="M0 -62 L45 -42 L38 26 C32 56 12 77 0 86 C-12 77 -32 56 -38 26 L-45 -42 Z" fill="#02080d"/>
+  </g>
+  <g transform="translate(627 420)">
+    <path d="M0 -62 L45 -42 L38 26 C32 56 12 77 0 86 C-12 77 -32 56 -38 26 L-45 -42 Z" fill="#163f83" stroke="#d9e7ff" stroke-width="6"/>
+    <path d="M0 -43 L9 -15 L37 -15 L14 2 L23 31 L0 14 L-23 31 L-14 2 L-37 -15 L-9 -15 Z" fill="#e4c46d"/>
+    <path d="M-20 48 C-5 39 5 39 20 48" fill="none" stroke="#9fc3ff" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <g font-family="Inter,Segoe UI,sans-serif" fill="#e8edf0">
+    <text x="58" y="842" font-size="20" letter-spacing="4" opacity="0.72">WORLD ATLAS • STATIC COMPOSITION TARGET • LABELS HIDDEN</text>
+    <text x="1180" y="54" font-size="16" text-anchor="end" letter-spacing="3" opacity="0.55">A-01 HOME MASS V1</text>
+  </g>
+</svg>
