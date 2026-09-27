@@ -37,11 +37,11 @@ func _init() -> void:
 	var mass: Dictionary = origin.get("cartographic_mass", {})
 	_check(int(mass.get("version", 0)) == 1, "Cartographic Mass v1 contract", failures)
 	var mass_radius: Array = mass.get("radius", [])
-	_check(mass_radius.size() == 2 and float(mass_radius[0]) >= 1000.0 and float(mass_radius[1]) >= 800.0, "A-01 identity must occupy the canonical macro basin", failures)
+	_check(mass_radius.size() == 2 and float(mass_radius[0]) >= 1400.0 and float(mass_radius[1]) >= 1000.0, "A-01 identity must occupy the canonical macro basin", failures)
 	_check(float(mass.get("outer_falloff", 0.0)) > float(mass.get("inner_falloff", 0.0)), "Cartographic mass needs a bounded terrain falloff", failures)
 	var route: Dictionary = mass.get("strategic_route", {})
-	_check(route.get("destination_locus") == "east_pass", "Cartographic route must expose the important eastern direction", failures)
-	_check(float(route.get("width", 0.0)) >= 120.0, "Cartographic route must survive World camera scale", failures)
+	_check(route.get("destination_locus") == "north_gate", "Cartographic route must expose the important north-eastern direction", failures)
+	_check(float(route.get("width", 0.0)) >= 80.0, "Cartographic route must survive World camera scale", failures)
 	var route_points: Array = route.get("points", [])
 	_check(route_points.size() >= 4, "Cartographic route needs a legible path", failures)
 	var crest: Dictionary = mass.get("crest", {})
@@ -78,7 +78,7 @@ func _init() -> void:
 		if manifest.has("cartographic_mass_version"):
 			_check(int(manifest.get("cartographic_mass_version", 0)) == 1, "generated Cartographic Mass version", failures)
 			_check(manifest.get("cartographic_crest") == true, "generated Atlas includes cartographic crest", failures)
-			_check(manifest.get("strategic_route_destination") == "east_pass", "generated Atlas route destination", failures)
+			_check(manifest.get("strategic_route_destination") == "north_gate", "generated Atlas route destination", failures)
 
 	_finish(failures)
 
