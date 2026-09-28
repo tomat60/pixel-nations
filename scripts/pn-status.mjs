@@ -283,16 +283,23 @@ if (!existsSync(handoffPath)) {
 }
 
 section("Public QA check");
-const publicCheck = run("npm run pn:public-check --silent");
-if (publicCheck.ok && publicCheck.text.includes("PUBLIC_QA_CHECK=PASS")) {
-  console.log("PUBLIC_QA_STATUS=PASS");
-  console.log(publicCheck.text);
-} else {
-  console.log("PUBLIC_QA_STATUS=NOT_CURRENT_OR_FAILING");
-  console.log(publicCheck.text || "pn:public-check unavailable");
+if (!handoffCurrent) {
+  console.log("PUBLIC_QA_STATUS=REFERENCE_NOT_CURRENT");
   console.log(
-    "Public QA failure does not override exact-head milestone evidence, but it blocks claims that public/qa/latest is current.",
+    "Automatic public-QA validation skipped because public/qa/latest is missing or stale. Run npm run pn:public-check explicitly only when the active task requires refreshed public QA evidence.",
   );
+} else {
+  const publicCheck = run("npm run pn:public-check --silent");
+  if (publicCheck.ok && publicCheck.text.includes("PUBLIC_QA_CHECK=PASS")) {
+    console.log("PUBLIC_QA_STATUS=PASS");
+    console.log(publicCheck.text);
+  } else {
+    console.log("PUBLIC_QA_STATUS=FAIL");
+    console.log(publicCheck.text || "pn:public-check unavailable");
+    console.log(
+      "Current public QA evidence failed validation; diagnose it before making claims that depend on that evidence.",
+    );
+  }
 }
 
 section("Next allowed action");

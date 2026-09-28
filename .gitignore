@@ -47,3 +47,9 @@ next-env.d.ts
 reports/outbox/
 reports/player-confusion-v0-7/
 reports/player-confusion/
+
+# generated QA evidence (artifact/output, never project authority)
+/public/qa/latest/
+
+# local macOS screenshots accidentally dropped at repo root
+/Zrzut ekranu *.png
