@@ -1,17 +1,17 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-09-27
-Current state revision: 44.6
-Authority baseline SHA: `06a38e097dd3808659aeea90236cb9e2c52991d6`
+Updated: 2026-09-30
+Current state revision: 44.7
+Authority baseline SHA: `f608621bd7d55a85768d34bf5f3d71c4ad686c56`
 Product baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Runtime baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: Empire Seed Strategic Breadth Prototype — Godot production lock; Sector A-01 landmark-first identity accepted, while the first World Cartographic Mass runtime translation is terminally rejected.
-Current milestone: revise the production-grounded World art-direction mapping after the rejected Cartographic Mass runtime translation, before authorizing another implementation candidate.
+Current milestone: prove one materially different World home primitive in the live retained Godot scene using the accepted screen-space footprint mapping before generator or PR work.
 Active execution issue: #721
-Next allowed action: produce exactly one bounded, production-grounded World composition mapping that uses a materially different runtime-supported primitive and proves its projected pixel footprint against the existing camera at 1440×900 and 360×225 before code. Preserve canonical geography and #736 Sector identity. Do not retry Cartographic Mass color-spot sizing, crest sizing, route-point tuning, flags, landmark scale, terrain-height tuning, generic image generation, a new asset family, Village/economy/deeper mechanics, engine work, or a competing implementation candidate.
+Next allowed action: create exactly one live Godot retained-scene proof whose home primitive occupies about 75–100% of the canonical Aurelian macro-basin footprint: about 170–220×110–150 px at 1440×900 and 42–55×28–38 px at 360×225. Capture and directly review both sizes before encoding generator changes or opening a product PR. Preserve canonical geography, the accepted #736 Sector identity and the larger-world read. Do not retry Cartographic Mass color-spot sizing, crest sizing, route-point tuning, flags, landmark scale, terrain-height tuning, generic image generation, a new asset family, Village/economy/deeper mechanics, engine work, or a competing implementation candidate.
 
 ## Binding product strategy
 
@@ -29,6 +29,23 @@ Priority order:
 4. Only after the above is visibly usable: deeper economy, Village polish, repeatable expansion systems, combat/diplomacy/governance depth.
 
 Issue #575 remains the current Sector representation/art-direction reference.
+
+## Authority and repository hygiene closure — terminal PASS
+
+The World rejection reconciliation and the subsequent repository-hygiene corrections are merged.
+
+- PR #748 accepted head: `ded748c62f3221996708081717869027b7aab525`;
+- #748 merge/main SHA: `485a1669cdd117758a25fb474b5ced36189fb6ce`;
+- #748 records the terminal #747 runtime rejection and removes accidental transport trace text;
+- PR #750 accepted head: `84ca623dca1664c212aec8e67fde278b786d6839`;
+- #750 merge/main SHA: `a72a293d3278d479197cf354a21f38f443538ba6`;
+- PR #751 accepted head: `18fdbb59144146c55f7b933415205b156b766ef0`;
+- #751 merge/current main SHA: `f608621bd7d55a85768d34bf5f3d71c4ad686c56`;
+- #750 removes stale generated repository weight and #751 preserves required-check identities while making out-of-scope legacy evidence jobs cheap;
+- PR #749 was closed without merge and has no authority effect;
+- fresh `npm run pn:status` on full-history `main@f608621...`: `AUTHORITY_STATUS=PASS`;
+- current-main Vercel combined status: `success`;
+- no post-merge Actions run is attached to `f608621...`; production `/`, `/play` and `/world` remain `PRODUCTION UNVERIFIED` from the steward environment.
 
 ## Fresh production evidence
 
@@ -126,6 +143,22 @@ PR #747 was closed without merge on 2026-09-27 after its single bounded visual c
 - terminal verdict: `WORLD_ATLAS_A01_CARTOGRAPHIC_MASS_RUNTIME_V1_REJECT`.
 
 Preserve the finding: source-space radius, route destination and primitive presence do not guarantee camera-space hierarchy. The next art-direction mapping must quantify projected screen footprint and use a materially different runtime-supported composition primitive before another implementation is authorized.
+
+## World screen-space composition mapping — pre-code PASS
+
+Issue #721 records a production-grounded projection proof on `main@f608621bd7d55a85768d34bf5f3d71c4ad686c56`.
+
+- runtime evidence uses `STILL_SIZE=1440×900`, `WORLD_SCALE=0.006`, orthographic camera size `50.0`, focus `[7100,4450]` and offset `[45,58,45]`;
+- the legacy A-01 origin radius `330` projects to about 71×48 px at 1440×900 and 18×12 px at 360×225;
+- the canonical Aurelian macro-basin radius `[1150,900]` projects to about 223×150 px at 1440×900 and 56×38 px at 360×225;
+- this explains why building, flag, crest and small color-spot variants remained below the required thumbnail-scale semantic read;
+- the next home primitive must carry the HOME read itself and occupy about 75–100% of the canonical macro-basin footprint;
+- target footprint: about 170–220×110–150 px at 1440×900 and 42–55×28–38 px at 360×225;
+- a crest or glyph may only confirm the home identity; it must not be the primary semantic carrier.
+
+Classification: `WORLD_SCREEN_SPACE_COMPOSITION_MAPPING_PRE_CODE_PASS`.
+
+This closes the mapping gate but does not accept a runtime representation. The next gate is one live retained-scene Godot proof at both review sizes, with direct screenshot review before generator mutation or product PR creation.
 
 ## Engine decision status
 
@@ -276,12 +309,13 @@ Until Map / Sector / World breadth is visibly usable:
 2. Treat #736 as the accepted Map / Sector breadth baseline; do not reopen it.
 3. Treat #737 and #742 as terminal World representation rejections; retain only their useful root-cause evidence.
 4. Treat #744 as accepted static art-direction evidence and #747 as its terminally rejected first runtime translation.
-5. Before more World code, produce one bounded production-grounded composition mapping using a materially different runtime-supported primitive and measured camera-space pixel footprint.
-6. Do not retry Cartographic Mass color-spot sizing, crest sizing, route-point tuning, flags, landmark scale or terrain-height tuning.
-7. Require exact-head real 1440×900 and 360×225 evidence plus direct review before any later World runtime acceptance.
-8. After World acceptance, verify Village -> Map -> Sector -> World continuity with real user-facing frames.
-9. Keep Village/economy/deeper mechanics frozen until the broader world reads clearly.
-10. Own every PR through exact-head CI and visible post-merge verification.
+5. Treat the issue #721 screen-space composition mapping as `PRE_CODE_PASS`; do not repeat the mapping exercise.
+6. Create one live retained-scene Godot proof using a materially different runtime-supported primitive and the measured 75–100% macro-basin footprint before generator or PR work.
+7. Do not retry Cartographic Mass color-spot sizing, crest sizing, route-point tuning, flags, landmark scale or terrain-height tuning.
+8. Require real 1440×900 and 360×225 evidence plus direct review before encoding the proof into the generator, then require exact-head evidence before any World runtime acceptance.
+9. After World acceptance, verify Village -> Map -> Sector -> World continuity with real user-facing frames.
+10. Keep Village/economy/deeper mechanics frozen until the broader world reads clearly.
+11. Own every PR through exact-head CI and visible post-merge verification.
 
 ## Continuity rule for every new chat / agent
 
