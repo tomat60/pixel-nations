@@ -79,6 +79,72 @@ func _force_atlas_vertex_color(node: Node) -> void:
 	for child in node.get_children():
 		_force_atlas_vertex_color(child)
 
+func _home_material(spec: Dictionary) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(String(spec.get("color", "#ffffff")))
+	material.roughness = float(spec.get("roughness", 0.95))
+	return material
+
+
+func _build_home_land_use(parent: Node) -> void:
+	var home: Dictionary = atlas_spec.get("home_land_use", {})
+	if String(home.get("contract", "")) != "WORLD_HOME_INHABITED_BASIN_V1":
+		push_error("PIXEL_NATIONS_WORLD_HOME_LAND_USE_CONTRACT_INVALID")
+		return
+	var materials: Dictionary = home.get("materials", {})
+	var player_roof := _home_material(materials.get("player_roof", {}) as Dictionary)
+	var secondary_roof := _home_material(materials.get("secondary_roof", {}) as Dictionary)
+	var cultivated_land := _home_material(materials.get("cultivated_land", {}) as Dictionary)
+	var piece_sizes: Array = home.get("district_piece_sizes_world", [])
+
+	var root := Node3D.new()
+	root.name = "WorldHomeInhabitedBasin"
+	for district_variant in home.get("districts", []):
+		var district: Dictionary = district_variant
+		var center: Array = district.get("atlas_center", [])
+		var size_index := int(district.get("piece_size_index", -1))
+		if center.size() != 2 or size_index < 0 or size_index >= piece_sizes.size():
+			push_error("PIXEL_NATIONS_WORLD_HOME_DISTRICT_INVALID")
+			continue
+		var size_data: Array = piece_sizes[size_index]
+		if size_data.size() != 3:
+			push_error("PIXEL_NATIONS_WORLD_HOME_DISTRICT_SIZE_INVALID")
+			continue
+		var mesh := BoxMesh.new()
+		mesh.size = Vector3(float(size_data[0]), float(size_data[1]), float(size_data[2]))
+		var piece := MeshInstance3D.new()
+		piece.name = String(district.get("id", "HomeDistrict"))
+		piece.mesh = mesh
+		piece.position = _atlas_to_godot(
+			Vector2(float(center[0]), float(center[1])),
+			float(district.get("world_height", 0.0))
+		)
+		piece.rotation_degrees.y = float(district.get("rotation_deg", 0.0))
+		piece.material_override = player_roof if String(district.get("identity", "player")) == "player" else secondary_roof
+		root.add_child(piece)
+
+	for parcel_variant in home.get("parcels", []):
+		var parcel: Dictionary = parcel_variant
+		var center: Array = parcel.get("atlas_center", [])
+		var size_data: Array = parcel.get("size_world", [])
+		if center.size() != 2 or size_data.size() != 3:
+			push_error("PIXEL_NATIONS_WORLD_HOME_PARCEL_INVALID")
+			continue
+		var mesh := BoxMesh.new()
+		mesh.size = Vector3(float(size_data[0]), float(size_data[1]), float(size_data[2]))
+		var patch := MeshInstance3D.new()
+		patch.name = String(parcel.get("id", "HomeParcel"))
+		patch.mesh = mesh
+		patch.position = _atlas_to_godot(
+			Vector2(float(center[0]), float(center[1])),
+			float(parcel.get("world_height", 0.0))
+		)
+		patch.rotation_degrees.y = float(parcel.get("rotation_deg", 0.0))
+		patch.material_override = cultivated_land
+		root.add_child(patch)
+	parent.add_child(root)
+
+
 func _populate_world(parent: Node) -> bool:
 	var atlas := _load_atlas()
 	if atlas == null:
@@ -86,6 +152,7 @@ func _populate_world(parent: Node) -> bool:
 		return false
 	parent.add_child(atlas)
 	_force_atlas_vertex_color(atlas)
+	_build_home_land_use(parent)
 
 	var world_environment := WorldEnvironment.new()
 	world_environment.name = "PixelNationsWorldAtlasV1Environment"

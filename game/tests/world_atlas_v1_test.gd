@@ -35,6 +35,38 @@ func _init() -> void:
 	_check(origin.get("source_sector_spec") == "AURELIAN_SECTOR_GENERATOR_V4_SPEC", "Atlas origin must derive from accepted Sector generator", failures)
 	_check(origin.get("preserve_home_identity") == true, "A-01 home identity must be preserved", failures)
 
+	var home: Dictionary = spec.get("home_land_use", {})
+	_check(home.get("contract") == "WORLD_HOME_INHABITED_BASIN_V1", "World HOME land-use contract", failures)
+	_check(home.get("semantic") == "home", "World HOME semantic", failures)
+	_check(home.get("carrier") == "terrain_integrated_land_use", "World HOME must be carried by terrain-integrated land use", failures)
+	var home_districts: Array = home.get("districts", [])
+	var home_parcels: Array = home.get("parcels", [])
+	_check(home_districts.size() == 22, "World HOME needs retained settlement fabric", failures)
+	_check(home_parcels.size() == 10, "World HOME needs asymmetric cultivated-land fabric", failures)
+	var screen_contract: Dictionary = home.get("screen_space_target_px", {})
+	_check(_numeric_array_close(screen_contract.get("1440x900", []), [170.0, 220.0, 110.0, 150.0]), "World HOME 1440 screen-space contract", failures)
+	_check(_numeric_array_close(screen_contract.get("360x225", []), [42.0, 55.0, 28.0, 38.0]), "World HOME 360 screen-space contract", failures)
+	var home_x: Array[float] = []
+	var home_y: Array[float] = []
+	for district_variant in home_districts:
+		var district: Dictionary = district_variant
+		var center: Array = district.get("atlas_center", [])
+		if center.size() == 2:
+			home_x.append(float(center[0]))
+			home_y.append(float(center[1]))
+	for parcel_variant in home_parcels:
+		var parcel: Dictionary = parcel_variant
+		var center: Array = parcel.get("atlas_center", [])
+		if center.size() == 2:
+			home_x.append(float(center[0]))
+			home_y.append(float(center[1]))
+	var home_span_x: float = float(home_x.max() - home_x.min()) if not home_x.is_empty() else 0.0
+	var home_span_y: float = float(home_y.max() - home_y.min()) if not home_y.is_empty() else 0.0
+	_check(home_span_x >= 1700.0 and home_span_x <= 1800.0, "World HOME bounded basin span in X", failures)
+	_check(home_span_y >= 1150.0 and home_span_y <= 1250.0, "World HOME bounded basin span in Y", failures)
+	_check(not JSON.stringify(home).to_lower().contains("flag"), "World HOME primitive must not depend on flags", failures)
+	_check(not JSON.stringify(home).to_lower().contains("crest"), "World HOME primitive must not depend on crest", failures)
+
 	var world_plane: Array = spec.get("world_plane", [0, 0])
 	var sector_plane: Array = sector_spec.get("sector_plane", [1, 1])
 	var world_area := float(world_plane[0]) * float(world_plane[1])
@@ -61,6 +93,15 @@ func _init() -> void:
 		_check(manifest.get("new_asset_family") == false, "generated Atlas reuses asset family", failures)
 
 	_finish(failures)
+
+func _numeric_array_close(actual, expected: Array, epsilon := 0.001) -> bool:
+	if not actual is Array or actual.size() != expected.size():
+		return false
+	for index in range(expected.size()):
+		if abs(float(actual[index]) - float(expected[index])) > epsilon:
+			return false
+	return true
+
 
 func _read_json(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)
