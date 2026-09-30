@@ -63,6 +63,54 @@
     {"id":"delta_harbor","kind":"regional_node","center":[10850,6400],"identity":"neutral"},
     {"id":"south_crown","kind":"regional_node","center":[7000,7250],"identity":"neutral"}
   ],
+  "home_land_use": {
+    "contract": "WORLD_HOME_INHABITED_BASIN_V1",
+    "semantic": "home",
+    "carrier": "terrain_integrated_land_use",
+    "screen_space_target_px": {"1440x900":[170,220,110,150],"360x225":[42,55,28,38]},
+    "materials": {
+      "player_roof": {"color":"#355f78ff","roughness":0.92},
+      "secondary_roof": {"color":"#46504cff","roughness":0.94},
+      "cultivated_land": {"color":"#756b3fff","roughness":0.98}
+    },
+    "district_piece_sizes_world": [[0.88,0.42,0.66],[0.62,0.34,0.50]],
+    "districts": [
+      {"id":"home_district_00","atlas_center":[5293.333,4049.333],"world_height":0.584,"rotation_deg":12,"piece_size_index":0,"identity":"player"},
+      {"id":"home_district_01","atlas_center":[5354.934,4010.134],"world_height":0.544,"rotation_deg":25,"piece_size_index":1,"identity":"player"},
+      {"id":"home_district_02","atlas_center":[5489.334,3790.333],"world_height":0.508,"rotation_deg":-15,"piece_size_index":0,"identity":"player"},
+      {"id":"home_district_03","atlas_center":[5543.934,3749.734],"world_height":0.468,"rotation_deg":-2,"piece_size_index":1,"identity":"player"},
+      {"id":"home_district_04","atlas_center":[5832.333,3580.333],"world_height":0.199,"rotation_deg":25,"piece_size_index":0,"identity":"player"},
+      {"id":"home_district_05","atlas_center":[5896.734,3569.134],"world_height":0.159,"rotation_deg":38,"piece_size_index":1,"identity":"player"},
+      {"id":"home_district_06","atlas_center":[6378.333,3566.333],"world_height":0.453,"rotation_deg":-10,"piece_size_index":0,"identity":"player"},
+      {"id":"home_district_07","atlas_center":[6438.534,3587.333],"world_height":0.413,"rotation_deg":3,"piece_size_index":1,"identity":"player"},
+      {"id":"home_district_08","atlas_center":[6728.334,3776.333],"world_height":0.374,"rotation_deg":18,"piece_size_index":0,"identity":"player"},
+      {"id":"home_district_09","atlas_center":[6784.333,3809.933],"world_height":0.334,"rotation_deg":31,"piece_size_index":1,"identity":"player"},
+      {"id":"home_district_10","atlas_center":[6966.333,4091.333],"world_height":0.26,"rotation_deg":0,"piece_size_index":0,"identity":"player"},
+      {"id":"home_district_11","atlas_center":[7019.533,4063.333],"world_height":0.22,"rotation_deg":13,"piece_size_index":1,"identity":"player"},
+      {"id":"home_district_12","atlas_center":[6896.334,4420.333],"world_height":0.156,"rotation_deg":-22,"piece_size_index":0,"identity":"player"},
+      {"id":"home_district_13","atlas_center":[6945.333,4381.133],"world_height":0.116,"rotation_deg":-9,"piece_size_index":1,"identity":"player"},
+      {"id":"home_district_14","atlas_center":[6035.334,4756.333],"world_height":0.273,"rotation_deg":14,"piece_size_index":0,"identity":"player"},
+      {"id":"home_district_15","atlas_center":[6094.134,4728.334],"world_height":0.233,"rotation_deg":27,"piece_size_index":1,"identity":"player"},
+      {"id":"home_district_16","atlas_center":[5622.333,4602.334],"world_height":0.412,"rotation_deg":-18,"piece_size_index":0,"identity":"player"},
+      {"id":"home_district_17","atlas_center":[5678.334,4570.133],"world_height":0.372,"rotation_deg":-5,"piece_size_index":1,"identity":"player"},
+      {"id":"home_district_18","atlas_center":[5272.333,4371.334],"world_height":0.595,"rotation_deg":8,"piece_size_index":0,"identity":"player"},
+      {"id":"home_district_19","atlas_center":[5328.333,4340.533],"world_height":0.555,"rotation_deg":21,"piece_size_index":1,"identity":"player"},
+      {"id":"home_district_20","atlas_center":[6861.333,4567.333],"world_height":0.274,"rotation_deg":24,"piece_size_index":0,"identity":"secondary"},
+      {"id":"home_district_21","atlas_center":[6921.323,4563.392],"world_height":0.234,"rotation_deg":37,"piece_size_index":1,"identity":"secondary"}
+    ],
+    "parcels": [
+      {"id":"home_parcel_00","atlas_center":[5293.333,3727.333],"world_height":0.465,"rotation_deg":-10,"size_world":[2.7,0.05,0.92]},
+      {"id":"home_parcel_01","atlas_center":[5566.333,3622.333],"world_height":0.395,"rotation_deg":7,"size_world":[2.8,0.05,0.98]},
+      {"id":"home_parcel_02","atlas_center":[5867.334,3559.333],"world_height":0.315,"rotation_deg":14,"size_world":[2.6,0.05,1.0]},
+      {"id":"home_parcel_03","atlas_center":[6210.333,3566.333],"world_height":0.285,"rotation_deg":-8,"size_world":[2.9,0.05,0.92]},
+      {"id":"home_parcel_04","atlas_center":[6553.333,3692.333],"world_height":0.255,"rotation_deg":-18,"size_world":[2.8,0.05,0.96]},
+      {"id":"home_parcel_05","atlas_center":[5461.333,4658.333],"world_height":0.425,"rotation_deg":-12,"size_world":[2.7,0.05,0.9]},
+      {"id":"home_parcel_06","atlas_center":[5804.334,4728.334],"world_height":0.285,"rotation_deg":6,"size_world":[2.8,0.05,0.95]},
+      {"id":"home_parcel_07","atlas_center":[6182.334,4686.334],"world_height":0.165,"rotation_deg":14,"size_world":[2.9,0.05,1.0]},
+      {"id":"home_parcel_08","atlas_center":[6658.333,4315.333],"world_height":0.115,"rotation_deg":-20,"size_world":[2.8,0.05,0.92]},
+      {"id":"home_parcel_09","atlas_center":[6812.334,3986.333],"world_height":0.155,"rotation_deg":18,"size_world":[2.7,0.05,0.96]}
+    ]
+  },
   "variation": {
     "terrain_phase_scale": 0.7,
     "tree_jitter": 0.62,
