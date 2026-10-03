@@ -1,17 +1,17 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-09-30
-Current state revision: 44.8
-Authority baseline SHA: `1e6573a0bcfab165b995d4954289bd9d0a2072e3`
+Updated: 2026-10-03
+Current state revision: 44.9
+Authority baseline SHA: `655e5892b976e63da75a5b25a76262acffaf3300`
 Product baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Runtime baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Empire Seed Strategic Breadth Prototype — Godot production lock; Sector A-01 landmark-first identity accepted, while the inhabited-basin World HOME technique has passed its first runtime proof without earning terminal visual acceptance.
-Current milestone: improve the merged inhabited-basin HOME composition in the same retained World scene until it reads as a coherent homeland rather than a boxes-and-plates blockout.
+Current product phase: Empire Seed Strategic Breadth Prototype — Godot production lock; Sector A-01 landmark-first identity accepted, while World HOME remains visually unaccepted after terminal rejection of the inhabited-basin box/plate grammar.
+Current milestone: prove `INHABITED_RELIEF_FABRIC` in the retained World scene as continuous inhabited land with sparse secondary landmarks, not as isolated boxes, rectangular parcel plates or a flat overlay.
 Active execution issue: #721
-Next allowed action: perform exactly one focused live retained-scene composition pass on the merged inhabited-basin HOME primitive, preserving its proven 220×140 px footprint at 1440×900 and 55×35 px footprint at 360×225 while improving settlement and land-use coherence and hierarchy. Directly compare both sizes before encoding generator changes or opening a product PR. Existing accepted asset language may appear only as secondary detail. Do not start a new representation technique or retry Cartographic Mass color spots, crest, route points, flags, landmark scale, terrain-height tuning, generic image generation, a new asset family, Village/economy/deeper mechanics, engine work, or a competing candidate. If the first pass remains promising, one final focused correction is allowed; if two focused passes still read as boxes and plates, stop and reject this primitive instead of continuing parameter tuning.
+Next allowed action: perform exactly one retained-scene proof of `INHABITED_RELIEF_FABRIC` at 1440×900 and 360×225. Use 2–3 asymmetrical terrain-following low-relief habitation/land-use masses with continuous road/field/roof texture that survives thumbnail scale; 2–4 existing Aurelian-derived silhouettes may provide secondary confirmation only. Preserve the canonical basin, current World camera, large-world read and target footprint of about 170–220×110–150 px at 1440×900 / 42–55×28–38 px at 360×225. Godot, persistent MCP and deterministic local capture are allowed for this bounded proof. Generator mutation and a product PR remain blocked until a stronger golden frame exists. Do not make a third box/parcel tuning pass or retry prior rejected primitives. If the fabric collapses to an overlay/blob or does not clearly read as inhabited HOME, stop World implementation and revisit representation rather than tune parameters.
 
 ## Binding product strategy
 
@@ -181,6 +181,24 @@ Classification: `LIVE_EDITOR_WORKFLOW_PASS / INHABITED_BASIN_TECHNIQUE_PASS / WO
 
 Continue only in the same retained World scene and preserve the proven macro-basin footprint. Encode a new generator state only after a clearly stronger 1440×900 and 360×225 golden frame. If two focused retained-scene passes still read as boxes and plates rather than a coherent inhabited homeland, reject the primitive and revisit art direction instead of continuing parameter tuning.
 
+## World HOME retained-scene composition follow-up — terminal REJECT
+
+Issue #721 records the two allowed focused retained-scene passes completed on 2026-10-03 after PR #754 reconciled the visual gate.
+
+- both passes used the same retained Godot scene; no generator mutation and no product PR were created;
+- baseline 1440×900 frame SHA-256: `4fdffcdc957ee9492e94ac5296835b041656757d22a94c464201d80cf301f262`;
+- pass 1 reduced plate dominance but still read as a ring of boxes around water;
+- pass 2 formed three settlement clusters and broken patchwork field groups but still read primarily as blue BoxMesh buildings and thin land-use strips, especially at 360×225;
+- the rejected pass was not encoded;
+- the retained scene was restored from checkpoint;
+- restored 1440×900 frame SHA-256: `4fdffcdc957ee9492e94ac5296835b041656757d22a94c464201d80cf301f262`, pixel-identical to baseline.
+
+Classification: `INHABITED_BASIN_BOX_PLATE_REALIZATION_REJECT / LIVE_WORKFLOW_HEALTHY / ART_DIRECTION_RESET_REQUIRED`.
+
+The #753 macro-basin screen-space finding remains useful, but isolated box buildings and rectangular parcel plates are terminally rejected as the visible grammar for World HOME. Do not make a third tuning pass.
+
+The authorized replacement direction is `INHABITED_RELIEF_FABRIC`: continuous, irregular terrain-following inhabited land first; integrated road/field/roof texture second; 2–4 sparse existing silhouettes only as secondary confirmation. The hierarchy must read inhabited HOME basin first, river/route direction second and larger World geography third. One retained-scene proof at 1440×900 and 360×225 is allowed. Generator mutation and a product PR remain blocked until direct review finds a stronger golden frame. If the fabric collapses to an overlay/blob or fails to read clearly as inhabited HOME, stop implementation and revisit representation.
+
 ## Engine decision status
 
 Godot 4 is the **production engine for the current phase**.
@@ -306,6 +324,7 @@ Do not restart these as new product directions:
 - #727 terrain tint/mask variant;
 - #737 World A-01 uplift plus scale/spacing tuning as a final representation; retain only its below-ocean root-cause evidence;
 - #747 Cartographic Mass runtime color-spot, crest-size and route-point tuning; retain its camera-space pixel-footprint finding;
+- the #753 inhabited-basin box/plate realization and its two focused retained-scene composition passes; retain only the macro-basin footprint and healthy live-workflow findings;
 - generated concept-art target as a prerequisite.
 
 #729 2.5D is useful readability evidence, not a final art lock and not sufficient by itself to settle the engine decision.
@@ -331,14 +350,15 @@ Until Map / Sector / World breadth is visibly usable:
 3. Treat #737 and #742 as terminal World representation rejections; retain only their useful root-cause evidence.
 4. Treat #744 as accepted static art-direction evidence and #747 as its terminally rejected first runtime translation.
 5. Treat the issue #721 screen-space composition mapping as `PRE_CODE_PASS`; do not repeat the mapping exercise.
-6. Treat #753 as `LIVE_EDITOR_WORKFLOW_PASS / INHABITED_BASIN_TECHNIQUE_PASS / WORLD_VISUAL_ACCEPTANCE_PENDING`, not as terminal World visual acceptance.
-7. Continue from the same retained World scene with one focused settlement and land-use coherence pass while preserving the proven macro-basin footprint.
-8. Directly review real 1440×900 and 360×225 frames before encoding generator changes; allow at most one further focused correction if the first pass remains promising.
-9. If two focused passes still read as boxes and plates, reject the inhabited-basin primitive and revisit art direction instead of continuing parameter tuning.
-10. Do not retry Cartographic Mass color-spot sizing, crest sizing, route-point tuning, flags, landmark scale or terrain-height tuning.
-11. After World acceptance, verify Village -> Map -> Sector -> World continuity with real user-facing frames.
-12. Keep Village/economy/deeper mechanics frozen until the broader world reads clearly.
-13. Own every PR through exact-head CI and visible post-merge verification.
+6. Treat #753 as a healthy live-editor and macro-basin footprint finding, not as World visual acceptance.
+7. Treat the two post-#754 retained-scene box/plate passes as terminal `INHABITED_BASIN_BOX_PLATE_REALIZATION_REJECT / ART_DIRECTION_RESET_REQUIRED`; do not make a third tuning pass.
+8. Run exactly one retained-scene `INHABITED_RELIEF_FABRIC` proof at 1440×900 and 360×225, preserving canonical geography, camera, large-world read and the accepted target footprint.
+9. Require continuous terrain-following habitation fabric and road/field/roof macro texture to carry HOME; use sparse existing silhouettes only as secondary confirmation.
+10. Directly review both real frames before generator mutation or a product PR. If the fabric reads as an overlay/blob or not clearly inhabited, stop implementation and revisit representation.
+11. Do not retry Cartographic Mass color-spot sizing, crest sizing, route-point tuning, flags, landmark scale, terrain-height tuning or box/parcel parameter tuning.
+12. After World acceptance, verify Village -> Map -> Sector -> World continuity with real user-facing frames.
+13. Keep Village/economy/deeper mechanics frozen until the broader world reads clearly.
+14. Own every PR through exact-head CI and visible post-merge verification.
 
 ## Continuity rule for every new chat / agent
 
