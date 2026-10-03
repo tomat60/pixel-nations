@@ -2,16 +2,16 @@
 
 Status: ACTIVE
 Updated: 2026-09-30
-Current state revision: 44.7
-Authority baseline SHA: `f608621bd7d55a85768d34bf5f3d71c4ad686c56`
+Current state revision: 44.8
+Authority baseline SHA: `1e6573a0bcfab165b995d4954289bd9d0a2072e3`
 Product baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Runtime baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Empire Seed Strategic Breadth Prototype — Godot production lock; Sector A-01 landmark-first identity accepted, while the first World Cartographic Mass runtime translation is terminally rejected.
-Current milestone: prove one materially different World home primitive in the live retained Godot scene using the accepted screen-space footprint mapping before generator or PR work.
+Current product phase: Empire Seed Strategic Breadth Prototype — Godot production lock; Sector A-01 landmark-first identity accepted, while the inhabited-basin World HOME technique has passed its first runtime proof without earning terminal visual acceptance.
+Current milestone: improve the merged inhabited-basin HOME composition in the same retained World scene until it reads as a coherent homeland rather than a boxes-and-plates blockout.
 Active execution issue: #721
-Next allowed action: create exactly one live Godot retained-scene proof whose home primitive occupies about 75–100% of the canonical Aurelian macro-basin footprint: about 170–220×110–150 px at 1440×900 and 42–55×28–38 px at 360×225. Capture and directly review both sizes before encoding generator changes or opening a product PR. Preserve canonical geography, the accepted #736 Sector identity and the larger-world read. Do not retry Cartographic Mass color-spot sizing, crest sizing, route-point tuning, flags, landmark scale, terrain-height tuning, generic image generation, a new asset family, Village/economy/deeper mechanics, engine work, or a competing implementation candidate.
+Next allowed action: perform exactly one focused live retained-scene composition pass on the merged inhabited-basin HOME primitive, preserving its proven 220×140 px footprint at 1440×900 and 55×35 px footprint at 360×225 while improving settlement and land-use coherence and hierarchy. Directly compare both sizes before encoding generator changes or opening a product PR. Existing accepted asset language may appear only as secondary detail. Do not start a new representation technique or retry Cartographic Mass color spots, crest, route points, flags, landmark scale, terrain-height tuning, generic image generation, a new asset family, Village/economy/deeper mechanics, engine work, or a competing candidate. If the first pass remains promising, one final focused correction is allowed; if two focused passes still read as boxes and plates, stop and reject this primitive instead of continuing parameter tuning.
 
 ## Binding product strategy
 
@@ -159,6 +159,27 @@ Issue #721 records a production-grounded projection proof on `main@f608621bd7d55
 Classification: `WORLD_SCREEN_SPACE_COMPOSITION_MAPPING_PRE_CODE_PASS`.
 
 This closes the mapping gate but does not accept a runtime representation. The next gate is one live retained-scene Godot proof at both review sizes, with direct screenshot review before generator mutation or product PR creation.
+
+## World HOME inhabited-basin runtime proof — technique PASS, visual acceptance PENDING
+
+PR #753 was independently merged on 2026-09-30 after the live-editor proof and exact-head checks passed.
+
+- accepted PR head: `f5c4d6e2ccc3bae8e16ba530e4d970e4472e89c0`;
+- merge/current main SHA: `1e6573a0bcfab165b995d4954289bd9d0a2072e3`;
+- changed production files: `game/scenes/aurelian/world_atlas_v1.gd`, `game/tests/world_atlas_v1_test.gd` and `game/artifacts/aurelian-basin/source/world_atlas_v1_spec.json`;
+- retained-scene workflow proof completed mutation, correction and two-step undo back to a pixel-identical baseline;
+- the inhabited-basin primitive measures 220×140 px at 1440×900 and 55×35 px at 360×225, inside the accepted screen-space contract;
+- exact-head World Atlas run: `36708862295`, terminal success;
+- World Atlas artifact: `11092659613`, SHA-256 `77657e9d2276e5a6227dc12192f3891dabd1c908ca491f331c1812098e0d6677`;
+- exact-head World frame SHA-256: `e2b0efd8ef745852914590e07ee7a5ed039aee90ca2957ddc06549736cabad17`;
+- Godot Foundation, Web Export, CI, Visual QA, RC1, P4-P8, P10-P11 and Vercel passed on the exact head;
+- post-merge Vercel status is successful; no post-merge Actions run is attached to `1e6573a...`, and production `/`, `/play` and `/world` remain `PRODUCTION UNVERIFIED` from the steward environment.
+
+Direct review confirms a materially stronger inhabited HOME read than the empty or marker-led baseline, but the visible result remains a rough blockout: box-like settlement pieces, flat cultivated plates and weak higher-level hierarchy. Green exact-head evidence and the merge do not convert that frame into terminal visual acceptance.
+
+Classification: `LIVE_EDITOR_WORKFLOW_PASS / INHABITED_BASIN_TECHNIQUE_PASS / WORLD_VISUAL_ACCEPTANCE_PENDING`.
+
+Continue only in the same retained World scene and preserve the proven macro-basin footprint. Encode a new generator state only after a clearly stronger 1440×900 and 360×225 golden frame. If two focused retained-scene passes still read as boxes and plates rather than a coherent inhabited homeland, reject the primitive and revisit art direction instead of continuing parameter tuning.
 
 ## Engine decision status
 
@@ -310,12 +331,14 @@ Until Map / Sector / World breadth is visibly usable:
 3. Treat #737 and #742 as terminal World representation rejections; retain only their useful root-cause evidence.
 4. Treat #744 as accepted static art-direction evidence and #747 as its terminally rejected first runtime translation.
 5. Treat the issue #721 screen-space composition mapping as `PRE_CODE_PASS`; do not repeat the mapping exercise.
-6. Create one live retained-scene Godot proof using a materially different runtime-supported primitive and the measured 75–100% macro-basin footprint before generator or PR work.
-7. Do not retry Cartographic Mass color-spot sizing, crest sizing, route-point tuning, flags, landmark scale or terrain-height tuning.
-8. Require real 1440×900 and 360×225 evidence plus direct review before encoding the proof into the generator, then require exact-head evidence before any World runtime acceptance.
-9. After World acceptance, verify Village -> Map -> Sector -> World continuity with real user-facing frames.
-10. Keep Village/economy/deeper mechanics frozen until the broader world reads clearly.
-11. Own every PR through exact-head CI and visible post-merge verification.
+6. Treat #753 as `LIVE_EDITOR_WORKFLOW_PASS / INHABITED_BASIN_TECHNIQUE_PASS / WORLD_VISUAL_ACCEPTANCE_PENDING`, not as terminal World visual acceptance.
+7. Continue from the same retained World scene with one focused settlement and land-use coherence pass while preserving the proven macro-basin footprint.
+8. Directly review real 1440×900 and 360×225 frames before encoding generator changes; allow at most one further focused correction if the first pass remains promising.
+9. If two focused passes still read as boxes and plates, reject the inhabited-basin primitive and revisit art direction instead of continuing parameter tuning.
+10. Do not retry Cartographic Mass color-spot sizing, crest sizing, route-point tuning, flags, landmark scale or terrain-height tuning.
+11. After World acceptance, verify Village -> Map -> Sector -> World continuity with real user-facing frames.
+12. Keep Village/economy/deeper mechanics frozen until the broader world reads clearly.
+13. Own every PR through exact-head CI and visible post-merge verification.
 
 ## Continuity rule for every new chat / agent
 
