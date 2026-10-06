@@ -61,6 +61,7 @@ No pull request may be left for the user to discover as failed, stale, or unsafe
 - Inspect all required checks. A failing check requires exact job/step/log diagnosis; do not blind-rerun unchanged deterministic failures.
 - Review required artifacts directly. Green CI or an uploaded screenshot bundle is not product acceptance.
 - Record `PENDING / BLOCKED / REJECTED / READY`. Do not begin the next product PR while the active one is failing or unreviewed.
+- Mechanical anti-stall SLA: READY >45 min, failed checks >60 min, pending checks >120 min, or merge conflict >30 min is automatically STALLED until resolved or explicitly placed on a waiting-owner/hold label with a concrete dependency.
 
 ### After every merge
 
