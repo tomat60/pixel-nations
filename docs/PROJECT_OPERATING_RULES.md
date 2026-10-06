@@ -1,5 +1,3 @@
-[Reading 139 lines from start (total: 139 lines, 0 remaining)]
-
 # Pixel Nations — Project Operating Rules
 
 This document is the project operating manual for humans and Cursor agents. **Best path for the project comes before speed.**
@@ -139,5 +137,3 @@ Any `/world` visual or interaction work must follow **`docs/WORLD_MAP_V7_SPEC.md
 - `AGENTS.md` — top-level agent entry point
 - `docs/WORLD_MAP_V7_SPEC.md` — playable sector product spec
 - `.cursor/rules/*.mdc` — Cursor project rules (always-applied and topical)
-
-[executed on device: pixel-nations-godot-01 (a52d7d58-52e5-4495-ad5a-62d8d5cdb481)]
