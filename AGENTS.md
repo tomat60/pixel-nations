@@ -1,3 +1,5 @@
+[Reading 209 lines from start (total: 209 lines, 0 remaining)]
+
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
@@ -110,6 +112,7 @@ For every newly opened, synchronized, reopened, or ready-for-review PR:
 4. Prefer the smallest root-cause fix. Never blind-rerun an unchanged deterministic failure.
 5. Directly inspect required JSON, screenshots, video, and other artifacts. Their existence or a green upload step is not acceptance.
 6. Assign one explicit status: `PENDING`, `BLOCKED`, `REJECTED`, or `READY`. Do not start another product PR while the active one is failing or unreviewed.
+7. Mechanical anti-stall SLA: a non-draft PR with terminal non-failing checks that waits more than 90 minutes, a failing check older than 30 minutes, a pending check older than 120 minutes, or a merge conflict older than 30 minutes is a project blocker. `Pixel Nations PR Stall Guard` must surface it automatically; the steward resolves or explicitly classifies it before product work continues.
 
 After every merge:
 
@@ -206,3 +209,5 @@ Final reports must state:
 - acceptance classification;
 - what remains unverified;
 - next allowed action from current state.
+
+[executed on device: pixel-nations-godot-01 (a52d7d58-52e5-4495-ad5a-62d8d5cdb481)]
