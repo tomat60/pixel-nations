@@ -1,5 +1,3 @@
-[Reading 372 lines from start (total: 372 lines, 0 remaining)]
-
 #!/usr/bin/env node
 
 const MARKER = "<!-- pn-pr-stall-watchdog -->";
@@ -372,5 +370,3 @@ main().catch((error) => {
   console.error(error.stack || error);
   process.exitCode = 1;
 });
-
-[executed on device: pixel-nations-godot-01 (a52d7d58-52e5-4495-ad5a-62d8d5cdb481)]
