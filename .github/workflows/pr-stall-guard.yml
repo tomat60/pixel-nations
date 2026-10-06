@@ -1,0 +1,144 @@
+name: Pixel Nations PR Stall Guard
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  schedule:
+    - cron: "17 */4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  checks: read
+  statuses: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  inspect-open-prs:
+    name: Inspect open PR ownership
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Detect silent stalls
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const marker = "<!-- pixel-nations-pr-stall-guard -->";
+            const now = Date.now();
+
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner, repo, state: "open", per_page: 100
+            });
+
+            const roundHours = ms => Math.round((ms / 36e5) * 10) / 10;
+            let stalls = 0;
+
+            for (const pr of prs) {
+              if (pr.draft) continue;
+
+              const commit = await github.rest.repos.getCommit({
+                owner, repo, ref: pr.head.sha
+              });
+              const commitDate =
+                commit.data.commit.committer?.date ||
+                commit.data.commit.author?.date ||
+                pr.updated_at;
+              const headDate = new Date(commitDate).getTime();
+              const headAgeH = (now - headDate) / 36e5;
+
+              const checksResp = await github.rest.checks.listForRef({
+                owner, repo, ref: pr.head.sha, per_page: 100
+              });
+              const checks = checksResp.data.check_runs || [];
+
+              const statusResp = await github.rest.repos.getCombinedStatusForRef({
+                owner, repo, ref: pr.head.sha
+              });
+              const statuses = statusResp.data.statuses || [];
+
+              const runningChecks = checks.filter(c => c.status !== "completed");
+              const failedChecks = checks.filter(c =>
+                c.status === "completed" &&
+                !["success", "neutral", "skipped"].includes(c.conclusion)
+              );
+              const badStatuses = statuses.filter(s =>
+                ["failure", "error"].includes(s.state)
+              );
+              const pendingStatuses = statuses.filter(s => s.state === "pending");
+
+              const hasSignals = checks.length > 0 || statuses.length > 0;
+              const terminalGreen =
+                hasSignals &&
+                runningChecks.length === 0 &&
+                pendingStatuses.length === 0 &&
+                failedChecks.length === 0 &&
+                badStatuses.length === 0;
+
+              let kind = null;
+              let threshold = null;
+
+              if (terminalGreen && headAgeH >= 0.75) {
+                kind = "READY_STALLED";
+                threshold = "45m";
+              } else if ((failedChecks.length || badStatuses.length) && headAgeH >= 1) {
+                kind = "FAILED_STALLED";
+                threshold = "60m";
+              } else if ((runningChecks.length || pendingStatuses.length) && headAgeH >= 2) {
+                kind = "PENDING_STALLED";
+                threshold = "2h";
+              }
+
+              if (!kind) continue;
+              stalls++;
+
+              const fingerprint = kind + ":" + pr.head.sha;
+              const body = [
+                marker,
+                "**STALL GUARD: " + kind + "**",
+                "",
+                "PR #" + pr.number + " has crossed the " + threshold + " no-silent-stall SLA.",
+                "",
+                "- head: " + pr.head.sha,
+                "- head age: ~" + roundHours(now - headDate) + "h",
+                "- mergeable state: " + (pr.mergeable_state || "unknown"),
+                "- running checks: " + runningChecks.length,
+                "- failed checks/statuses: " + (failedChecks.length + badStatuses.length),
+                "- pending statuses: " + pendingStatuses.length,
+                "- fingerprint: " + fingerprint,
+                "",
+                "**Required control-plane action:** re-fetch exact head/base and either merge/close this PR, diagnose the failed/hung check, or record an explicit blocker and concrete next action. Do not start another product PR while this queue item is unresolved.",
+                "",
+                "This alarm does **not** imply product/visual acceptance and must not auto-merge a gated change."
+              ].join("\n");
+
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number: pr.number, per_page: 100
+              });
+              const previous = comments.find(c =>
+                c.user?.type === "Bot" && c.body?.includes(marker)
+              );
+
+              if (previous?.body?.includes(fingerprint)) {
+                core.info("PR #" + pr.number + ": same stall already reported (" + fingerprint + ")");
+                continue;
+              }
+
+              if (previous) {
+                await github.rest.issues.updateComment({
+                  owner, repo, comment_id: previous.id, body
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner, repo, issue_number: pr.number, body
+                });
+              }
+
+              core.warning("PR #" + pr.number + ": " + kind + " at " + pr.head.sha);
+            }
+
+            core.notice("Pixel Nations stall guard inspected " + prs.length + " open PR(s); actionable stalls: " + stalls + ".");
