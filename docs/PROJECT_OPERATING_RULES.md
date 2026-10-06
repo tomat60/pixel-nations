@@ -1,3 +1,5 @@
+[Reading 139 lines from start (total: 139 lines, 0 remaining)]
+
 # Pixel Nations — Project Operating Rules
 
 This document is the project operating manual for humans and Cursor agents. **Best path for the project comes before speed.**
@@ -61,6 +63,7 @@ No pull request may be left for the user to discover as failed, stale, or unsafe
 - Inspect all required checks. A failing check requires exact job/step/log diagnosis; do not blind-rerun unchanged deterministic failures.
 - Review required artifacts directly. Green CI or an uploaded screenshot bundle is not product acceptance.
 - Record `PENDING / BLOCKED / REJECTED / READY`. Do not begin the next product PR while the active one is failing or unreviewed.
+- Anti-stall SLA: `READY` >90 min, deterministic failure >30 min, pending checks >120 min, or merge conflict >30 min is automatically `STALLED` until resolved or explicitly put on an owner-wait/hold label. The repo watchdog must surface this without relying on the user or a chat window.
 
 ### After every merge
 
@@ -136,3 +139,5 @@ Any `/world` visual or interaction work must follow **`docs/WORLD_MAP_V7_SPEC.md
 - `AGENTS.md` — top-level agent entry point
 - `docs/WORLD_MAP_V7_SPEC.md` — playable sector product spec
 - `.cursor/rules/*.mdc` — Cursor project rules (always-applied and topical)
+
+[executed on device: pixel-nations-godot-01 (a52d7d58-52e5-4495-ad5a-62d8d5cdb481)]
