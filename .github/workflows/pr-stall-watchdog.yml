@@ -47,4 +47,9 @@ jobs:
           PN_STALL_FAILED_MINUTES: "30"
           PN_STALL_PENDING_MINUTES: "120"
           PN_STALL_CONFLICT_MINUTES: "30"
-        run: node scripts/pr-stall-watchdog.mjs
+        run: |
+          if [ ! -f scripts/pr-stall-watchdog.mjs ]; then
+            echo "Bootstrap only: watchdog script is not on the default branch yet."
+            exit 0
+          fi
+          node scripts/pr-stall-watchdog.mjs
