@@ -1,0 +1,54 @@
+[Reading 50 lines from start (total: 50 lines, 0 remaining)]
+
+name: Pixel Nations PR Stall Guard
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
+  push:
+    branches: [main]
+  schedule:
+    # Avoid the top of the hour, where GitHub documents higher schedule delay risk.
+    - cron: "23 */2 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: pixel-nations-pr-stall-guard
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    name: PR stall watchdog
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      checks: read
+      statuses: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      # The watchdog never checks out PR-head code with a write-capable token.
+      - name: Checkout trusted default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Inspect all open PRs for mechanical stalls
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PN_STALL_READY_MINUTES: "90"
+          PN_STALL_FAILED_MINUTES: "30"
+          PN_STALL_PENDING_MINUTES: "120"
+          PN_STALL_CONFLICT_MINUTES: "30"
+        run: node scripts/pr-stall-watchdog.mjs
+
+[executed on device: pixel-nations-godot-01 (a52d7d58-52e5-4495-ad5a-62d8d5cdb481)]
