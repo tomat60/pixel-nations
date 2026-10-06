@@ -12,7 +12,7 @@ on:
 
 concurrency:
   group: pixel-nations-pr-stall-guard
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   guard:
