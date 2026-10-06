@@ -130,6 +130,8 @@ A PR is an owned queue item until it is merged, closed, or has an explicit block
 - Once all relevant checks are terminal and green, the PR must be merged/closed or receive an explicit blocker within 45 minutes.
 - A non-draft PR with failed checks must receive diagnosis/action within 60 minutes.
 - A non-draft PR with non-terminal checks for more than 2 hours is a stall and must be investigated.
+- A merge conflict unresolved for more than 30 minutes is a stall.
+- Explicit waiting-owner/hold labels may pause the mechanical timer, but must include a concrete dependency or decision being awaited.
 - A docs-only reconciliation PR must not block authorized product work for more than 60 minutes once its exact diff and checks are green.
 - Never start a new product PR while an older active PR is READY, failing, or unreviewed.
 - If an authorized next product action exists but there is no product-progress activity for 12 hours, treat that as an operational stall even when no PR is open.
