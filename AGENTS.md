@@ -1,5 +1,3 @@
-[Reading 209 lines from start (total: 209 lines, 0 remaining)]
-
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
@@ -209,5 +207,3 @@ Final reports must state:
 - acceptance classification;
 - what remains unverified;
 - next allowed action from current state.
-
-[executed on device: pixel-nations-godot-01 (a52d7d58-52e5-4495-ad5a-62d8d5cdb481)]
