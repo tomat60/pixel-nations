@@ -121,6 +121,22 @@ After every merge:
 
 The active Pixel Nations steward enforces this gate on every run. GitHub event-driven checks provide the immediate mechanical layer; the steward diagnoses and acts on their result without waiting for the user to notice it.
 
+### No-silent-stall SLA
+
+A PR is an owned queue item until it is merged, closed, or has an explicit blocking reason with a concrete next action.
+
+- Recheck the open PR queue at the start of every control-plane session and after every major product step.
+- Within 15 minutes of opening or materially updating a PR, assign PENDING, BLOCKED, REJECTED, or READY.
+- Once all relevant checks are terminal and green, the PR must be merged/closed or receive an explicit blocker within 45 minutes.
+- A non-draft PR with failed checks must receive diagnosis/action within 60 minutes.
+- A non-draft PR with non-terminal checks for more than 2 hours is a stall and must be investigated.
+- A docs-only reconciliation PR must not block authorized product work for more than 60 minutes once its exact diff and checks are green.
+- Never start a new product PR while an older active PR is READY, failing, or unreviewed.
+- If an authorized next product action exists but there is no product-progress activity for 12 hours, treat that as an operational stall even when no PR is open.
+- The mechanical stall guard is an alarm, not a product approver: it must never convert green CI into visual/product acceptance or auto-merge a gated product change.
+
+The repo-level stall guard and the external steward monitor are deliberately redundant. Either one detecting a stall is sufficient to stop new work and clear the queue first.
+
 ## Fable protocol
 
 Do not rely on historical title phrases or labels as universal trigger rules.
