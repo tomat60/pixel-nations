@@ -67,8 +67,8 @@ function classify({ pr, headCommit, checkRuns, combinedStatus }, now = Date.now(
   if (pr.mergeable === false || pr.mergeable_state === "dirty") {
     const age = minutesSince(headDate, now);
     return {
-      state: age >= CONFLICT_MIN ? "CONFLICT_STALLED" : "CONFLICT_RECENT",
-      stale: age >= CONFLICT_MIN,
+      state: age > CONFLICT_MIN ? "CONFLICT_STALLED" : "CONFLICT_RECENT",
+      stale: age > CONFLICT_MIN,
       ageMinutes: age,
       reason: "merge conflict / mergeable_state=" + String(pr.mergeable_state || "unknown"),
     };
@@ -81,8 +81,8 @@ function classify({ pr, headCommit, checkRuns, combinedStatus }, now = Date.now(
     ].filter(Boolean).sort();
     const age = minutesSince(dates.at(-1) || headDate, now);
     return {
-      state: age >= FAILED_MIN ? "CHECK_FAILED_STALLED" : "CHECK_FAILED_RECENT",
-      stale: age >= FAILED_MIN,
+      state: age > FAILED_MIN ? "CHECK_FAILED_STALLED" : "CHECK_FAILED_RECENT",
+      stale: age > FAILED_MIN,
       ageMinutes: age,
       reason: String(failedChecks.length + failedStatuses.length) + " failing check/status signal(s)",
       details: failedChecks.map((r) => String(r.name) + ":" + String(r.conclusion))
@@ -97,8 +97,8 @@ function classify({ pr, headCommit, checkRuns, combinedStatus }, now = Date.now(
     ].filter(Boolean).sort();
     const age = minutesSince(dates.at(0) || headDate, now);
     return {
-      state: age >= PENDING_MIN ? "CHECK_PENDING_STALLED" : "PENDING",
-      stale: age >= PENDING_MIN,
+      state: age > PENDING_MIN ? "CHECK_PENDING_STALLED" : "PENDING",
+      stale: age > PENDING_MIN,
       ageMinutes: age,
       reason: String(pendingChecks.length + pendingStatuses.length) + " pending check/status signal(s)",
       details: pendingChecks.map((r) => String(r.name)).concat(pendingStatuses.map((s) => String(s.context))),
@@ -109,8 +109,8 @@ function classify({ pr, headCommit, checkRuns, combinedStatus }, now = Date.now(
   if (!hasSignals) {
     const age = minutesSince(headDate, now);
     return {
-      state: age >= PENDING_MIN ? "NO_CHECK_SIGNAL_STALLED" : "NO_CHECK_SIGNAL",
-      stale: age >= PENDING_MIN,
+      state: age > PENDING_MIN ? "NO_CHECK_SIGNAL_STALLED" : "NO_CHECK_SIGNAL",
+      stale: age > PENDING_MIN,
       ageMinutes: age,
       reason: "no check/status evidence on current head",
     };
@@ -125,8 +125,8 @@ function classify({ pr, headCommit, checkRuns, combinedStatus }, now = Date.now(
 
   if (pr.mergeable === null || pr.mergeable_state === "unknown") {
     return {
-      state: age >= READY_MIN ? "MERGEABILITY_STALLED" : "MERGEABILITY_PENDING",
-      stale: age >= READY_MIN,
+      state: age > READY_MIN ? "MERGEABILITY_STALLED" : "MERGEABILITY_PENDING",
+      stale: age > READY_MIN,
       ageMinutes: age,
       reason: "checks are terminal but GitHub mergeability is unresolved",
     };
@@ -135,8 +135,8 @@ function classify({ pr, headCommit, checkRuns, combinedStatus }, now = Date.now(
   const readyStates = new Set(["clean", "has_hooks", "unstable", "blocked", "behind"]);
   if (pr.mergeable === true && readyStates.has(pr.mergeable_state)) {
     return {
-      state: age >= READY_MIN ? "READY_STALLED" : "READY_RECENT",
-      stale: age >= READY_MIN,
+      state: age > READY_MIN ? "READY_STALLED" : "READY_RECENT",
+      stale: age > READY_MIN,
       ageMinutes: age,
       reason: "all observed checks terminal/non-failing; mergeable_state=" + String(pr.mergeable_state),
     };
@@ -300,6 +300,13 @@ function selfTest() {
       name: "long pending stalls",
       expected: "CHECK_PENDING_STALLED",
       checks: [{ name: "CI", status: "in_progress", conclusion: null, started_at: "2026-10-06T09:00:00Z" }],
+      status: { statuses: [] },
+    },
+    {
+      name: "old merge conflict stalls",
+      expected: "CONFLICT_STALLED",
+      pr: { ...basePr, mergeable: false, mergeable_state: "dirty" },
+      checks: [],
       status: { statuses: [] },
     },
     {
