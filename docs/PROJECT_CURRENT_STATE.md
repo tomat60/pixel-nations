@@ -1,17 +1,17 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-10-03
-Current state revision: 44.9
-Authority baseline SHA: `655e5892b976e63da75a5b25a76262acffaf3300`
+Updated: 2026-10-07
+Current state revision: 45.0
+Authority baseline SHA: `64e2a0265bef8edf99747cf9cbf01f02c2250b6b`
 Product baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Runtime baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Empire Seed Strategic Breadth Prototype — Godot production lock; Sector A-01 landmark-first identity accepted, while World HOME remains visually unaccepted after terminal rejection of the inhabited-basin box/plate grammar.
-Current milestone: prove `INHABITED_RELIEF_FABRIC` in the retained World scene as continuous inhabited land with sparse secondary landmarks, not as isolated boxes, rectangular parcel plates or a flat overlay.
+Current product phase: Empire Seed Strategic Breadth Prototype. Godot production remains locked; one template-first Greengate/Aurelian visual vertical slice is active before any broader systems or generator encoding.
+Current milestone: transform a proven medieval Godot composition into one believable Pixel Nations Greengate/Aurelian slice, preserving the `land -> settlement/city -> nation -> empire` product model while using repo-safe assets and scale-specific representation.
 Active execution issue: #721
-Next allowed action: perform exactly one retained-scene proof of `INHABITED_RELIEF_FABRIC` at 1440×900 and 360×225. Use 2–3 asymmetrical terrain-following low-relief habitation/land-use masses with continuous road/field/roof texture that survives thumbnail scale; 2–4 existing Aurelian-derived silhouettes may provide secondary confirmation only. Preserve the canonical basin, current World camera, large-world read and target footprint of about 170–220×110–150 px at 1440×900 / 42–55×28–38 px at 360×225. Godot, persistent MCP and deterministic local capture are allowed for this bounded proof. Generator mutation and a product PR remain blocked until a stronger golden frame exists. Do not make a third box/parcel tuning pass or retry prior rejected primitives. If the fabric collapses to an overlay/blob or does not clearly read as inhabited HOME, stop World implementation and revisit representation rather than tune parameters.
+Next allowed action: build exactly one retained working Greengate/Aurelian vertical-slice proof using template-derived strategic camera/composition and repo-safe medieval/nature assets. The proof must visibly connect a 2.5D Living Atlas World/Region frame, Sector A-01 and one coherent inhabited home settlement with road, fields, settlement density, landmark and river/terrain relationship. Use Godot plus persistent MCP, local capture and free current-format Quaternius Standard or Kenney assets; The Free Game may donate MIT/CC BY 4.0 presentation and interaction patterns with attribution/change notice, while Slavica is composition reference only and must not be redistributed without separate license clearance. Run at most two focused composition passes, review real 1440×900 and 360×225 frames plus a normal-input traversal/video, and stop or replace the asset family/art treatment if the slice still does not look like a believable game. Do not encode generators or open a product PR until direct review produces a golden frame. Unity, Cursor/MAX, generic image generation as production art, new generator-first World work, procedural representation experiments, broad infrastructure/docs and unrelated product systems remain blocked. Extra spend remains $0.
 
 ## Binding product strategy
 
@@ -29,6 +29,30 @@ Priority order:
 4. Only after the above is visibly usable: deeper economy, Village polish, repeatable expansion systems, combat/diplomacy/governance depth.
 
 Issue #575 remains the current Sector representation/art-direction reference.
+
+## Template-first visual production lock: active
+
+Fresh #721 evidence on 2026-10-06 supersedes the open-ended `INHABITED_RELIEF_FABRIC` milestone.
+
+- #755 was independently merged as `main@ecdf77557868efc7f3607e71445c6b86967a9e53`;
+- the bounded geometric relief-fabric proof was directly rejected because its low-relief slabs, strips and cubes still read as overlaid geometry at 360×225;
+- the Compatibility renderer does not support Godot Decal, so that route is closed without changing renderer or engine;
+- a terrain `material_overlay` shader produced the strongest rough World reference but still read more as highlighted fields than inhabited homeland;
+- repeated flag, crest, box, parcel, decal and shader-lobe representation experiments are now closed;
+- the existing `campaign_map_2p5d_benchmark_v1` proved that 2.5D is the stronger World/Region family, while physical assets belong at Sector/Village scale;
+- EmacEArt Slavica Free demonstrated that a transformed finished scene can immediately outperform empty procedural composition, but its assets are reference-only unless redistribution rights are separately cleared;
+- The Free Game ran successfully in Godot 4.7.2 and is an eligible presentation/gameplay-pattern donor under MIT code plus CC BY 4.0 art attribution/change notice;
+- Quaternius Medieval Village MegaKit Standard is the preferred CC0 production asset family, with Kenney as the proven CC0 fallback.
+
+The locked workflow is:
+
+`working template -> transform to Pixel Nations -> direct screenshot review -> preserve good template behavior -> retarget repo-safe assets -> integrate Pixel Nations state -> golden slice -> encode -> PR`
+
+World/Region remains a 2.5D Living Atlas guided by `docs/visual-targets/world-map-v8/`. Sector/Village remains a physical Godot scene. Tiny 3D buildings must not carry World HOME semantics, and a third procedural representation-tuning cycle is forbidden.
+
+Acceptance requires one coherent player-visible traversal in which Aurelian Basin is legible at World/Region scale, Sector A-01 is entered, Greengate reads instantly as inhabited, and land-to-settlement progression is visually obvious. User direct review outranks automated QA.
+
+Classification: `TEMPLATE_FIRST_WORKFLOW_PASS / CURRENT_PN_VISUALS_INSUFFICIENT / GREENGATE_VERTICAL_SLICE_ACTIVE`.
 
 ## Authority and repository hygiene closure — terminal PASS
 
