@@ -1,17 +1,17 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-10-07
-Current state revision: 45.0
+Updated: 2026-10-08
+Current state revision: 45.1
 Authority baseline SHA: `64e2a0265bef8edf99747cf9cbf01f02c2250b6b`
 Product baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Runtime baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: Empire Seed Strategic Breadth Prototype. Godot production remains locked; one template-first Greengate/Aurelian visual vertical slice is active before any broader systems or generator encoding.
-Current milestone: transform a proven medieval Godot composition into one believable Pixel Nations Greengate/Aurelian slice, preserving the `land -> settlement/city -> nation -> empire` product model while using repo-safe assets and scale-specific representation.
+Current milestone: transform one complete proven Godot village/environment template scene in place into Greengate, preserving the `land -> settlement/city -> nation -> empire` product model. The old Pixel Nations Sector terrain is not the visual substrate for this slice.
 Active execution issue: #721
-Next allowed action: build exactly one retained working Greengate/Aurelian vertical-slice proof using template-derived strategic camera/composition and repo-safe medieval/nature assets. The proof must visibly connect a 2.5D Living Atlas World/Region frame, Sector A-01 and one coherent inhabited home settlement with road, fields, settlement density, landmark and river/terrain relationship. Use Godot plus persistent MCP, local capture and free current-format Quaternius Standard or Kenney assets; The Free Game may donate MIT/CC BY 4.0 presentation and interaction patterns with attribution/change notice, while Slavica is composition reference only and must not be redistributed without separate license clearance. Run at most two focused composition passes, review real 1440×900 and 360×225 frames plus a normal-input traversal/video, and stop or replace the asset family/art treatment if the slice still does not look like a believable game. Do not encode generators or open a product PR until direct review produces a golden frame. Unity, Cursor/MAX, generic image generation as production art, new generator-first World work, procedural representation experiments, broad infrastructure/docs and unrelated product systems remain blocked. Extra spend remains $0.
+Next allowed action: start from one complete ready Godot village/environment template that already looks coherent as a game, with The Free Game as the preferred production-safe base under its MIT code + CC BY 4.0 art terms. Transform that full scene in place into Greengate: Aurelian palette, lighting, camera, naming, settlement hierarchy, inhabitants/life cues, and Pixel Nations gameplay/HUD semantics. Do NOT use `world_scale_sector_generator_v4`, the old Aurelian Sector GLB, old procedural terrain, Kenney scaffold, old bridge/river layout, legacy settlement markers, or generator output as the working visual base. Those old Pixel Nations materials are reference-only for names, state, progression semantics and later continuity mapping after the transformed template visually passes. World/Region remains a separate 2.5D Living Atlas layer. Review real 1440×900 and 360×225 frames plus normal-input traversal; at most two focused passes per art treatment. No product PR until direct review produces a golden frame. Unity, Cursor/MAX, generic image generation as production art, generator-first World work, procedural representation experiments, broad infrastructure/docs and unrelated product systems remain blocked. Extra spend remains $0.
 
 ## Binding product strategy
 
@@ -31,6 +31,20 @@ Priority order:
 Issue #575 remains the current Sector representation/art-direction reference.
 
 ## Template-first visual production lock: active
+
+### Full-template scene base — hard rule
+
+For the active Greengate slice, **template-first means the complete proven template/demo scene is the working visual substrate**.
+
+- Do not reconstruct the slice on the legacy Pixel Nations Sector terrain.
+- Do not extract only donor buildings and place them back onto the old Aurelian map.
+- Do not use Kenney, old Sector GLBs, old procedural terrain, old bridge/river geometry, legacy markers or generator outputs as the starting scene.
+- Start from the full ready village/environment scene and transform it in place until it reads as Pixel Nations.
+- Preserve Pixel Nations names, gameplay semantics, progression state and product loop, but map those semantics onto the transformed template only after the template frame is visually strong.
+- Retarget to Quaternius/Kenney/original assets only after the full-template scene establishes the accepted composition and quality bar.
+
+This rule exists specifically to prevent regression into `old map + new buildings`, which is not template-first production.
+
 
 Fresh #721 evidence on 2026-10-06 supersedes the open-ended `INHABITED_RELIEF_FABRIC` milestone.
 
