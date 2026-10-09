@@ -91,7 +91,12 @@ async function runCase(browser, item) {
   const screenshots = [];
   try {
     await loadSeed(page, seed(item));
-    await dismissFounderRecord(page, { depth: "founder-run", required: true });
+    await dismissFounderRecord(page, {
+      depth: "founder-run",
+      required: true,
+      rehydrateState: seed(item),
+      storageKey: KEY,
+    });
 
     const panel = page.locator('[data-qa="imperial-turn-panel"][data-turn-count="0"]').first();
     await panel.waitFor({ state: "visible", timeout: 5000 });
