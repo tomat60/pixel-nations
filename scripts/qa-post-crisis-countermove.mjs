@@ -2,7 +2,7 @@ import { chromium } from "playwright";
 import { existsSync } from "node:fs";
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
-import { assertAurelianRestart, dismissFounderRecord } from "./qa-founder-record-helper.mjs";
+import { assertAurelianRestart, dismissFounderRecord, waitForFounderRecord } from "./qa-founder-record-helper.mjs";
 
 const URL = process.env.QA_APP_URL ?? "http://localhost:3000";
 const KEY = "pixelNations.play.v1";
@@ -99,6 +99,12 @@ async function assertStored(page, predicateSource, args, label) {
 
 async function runScenario(page, scenario, evidence) {
   await loadSeed(page, founderSeed(scenario.recoveryId));
+  await waitForFounderRecord(page, {
+    depth: "advanced",
+    required: true,
+    rehydrateState: founderSeed(scenario.recoveryId),
+    storageKey: KEY,
+  });
   await page.locator(`[data-qa="demo-complete-overlay"][data-record-depth="advanced"][data-empire-crisis-recovery="${scenario.recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
   await page.locator(`[data-qa="founder-record-crisis"][data-crisis-recovery="${scenario.recoveryId}"]`).waitFor({ state: "visible", timeout: 5000 });
   const founderShot = `${scenario.prefix}-01-founder-record.png`;
