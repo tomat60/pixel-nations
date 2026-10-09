@@ -1,17 +1,17 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-10-08
-Current state revision: 45.1
+Updated: 2026-10-09
+Current state revision: 45.2
 Authority baseline SHA: `64e2a0265bef8edf99747cf9cbf01f02c2250b6b`
 Product baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Runtime baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Empire Seed Strategic Breadth Prototype. Godot production remains locked; one template-first Greengate/Aurelian visual vertical slice is active before any broader systems or generator encoding.
-Current milestone: transform one complete proven Godot village/environment template scene in place into Greengate, preserving the `land -> settlement/city -> nation -> empire` product model. The old Pixel Nations Sector terrain is not the visual substrate for this slice.
+Current product phase: Empire Seed Strategic Breadth Prototype. Godot production remains locked; the active visible front is one large template-derived Aurelian World/Region map, with Greengate retained as a separate downstream Village scene.
+Current milestone: transform a complete proven Godot map scene into a strategic Aurelian Basin atlas with truthful surrounding regions, selection, routes, and a working route into and back from the separate Greengate village while preserving the `land -> settlement/city -> nation -> empire` product model.
 Active execution issue: #721
-Next allowed action: start from one complete ready Godot village/environment template that already looks coherent as a game, with The Free Game as the preferred production-safe base under its MIT code + CC BY 4.0 art terms. Transform that full scene in place into Greengate: Aurelian palette, lighting, camera, naming, settlement hierarchy, inhabitants/life cues, and Pixel Nations gameplay/HUD semantics. Do NOT use `world_scale_sector_generator_v4`, the old Aurelian Sector GLB, old procedural terrain, Kenney scaffold, old bridge/river layout, legacy settlement markers, or generator output as the working visual base. Those old Pixel Nations materials are reference-only for names, state, progression semantics and later continuity mapping after the transformed template visually passes. World/Region remains a separate 2.5D Living Atlas layer. Review real 1440×900 and 360×225 frames plus normal-input traversal; at most two focused passes per art treatment. No product PR until direct review produces a golden frame. Unity, Cursor/MAX, generic image generation as production art, generator-first World work, procedural representation experiments, broad infrastructure/docs and unrelated product systems remain blocked. Extra spend remains $0.
+Next allowed action: retain the complete OpenGS Godot map scene/camera/province-selection system as the working template base, replace draft geography and hit areas with continuity-correct Aurelian Sector A-01 World/Region representation, and keep the real World -> Greengate Village -> World path green under normal pointer pan/zoom/selection input. The 2026-10-09 scratch proof is a rough playable/technical pass, not an accepted product frame; after two focused passes its current flat relief and small-frame information hierarchy remain below `docs/visual-targets/world-map-v8/`, so re-evaluate the retained map art treatment instead of micro-tuning it. Before any product PR, carry complete OpenGS MIT and village MIT/CC BY 4.0 attribution, third-party notices, Godot notices and an explicit change notice, then review real 1440×900 and 360×225 frames directly. Do NOT use The Free Game village as the map, and do not use `world_scale_sector_generator_v4`, the old Aurelian Sector GLB, old procedural terrain, Kenney scaffold, old bridge/river layout, legacy markers or generator output as the active map base. Unity, Cursor/MAX and generic image generation remain blocked; extra spend remains $0.
 
 ## Binding product strategy
 
@@ -31,6 +31,18 @@ Priority order:
 Issue #575 remains the current Sector representation/art-direction reference.
 
 ## Template-first visual production lock: active
+
+### Strategic map scene base — current front
+
+For the active World/Region slice, **template-first means a complete proven map scene is the working substrate**. The current bounded proof uses OpenGS map rendering, camera and province-selection behavior under MIT; The Free Game remains the separate Village template and must not be mistaken for the World map.
+
+- The map must show Aurelian Basin within surrounding lands, with truthful region selection and strategic routes.
+- The map must enter the separate Greengate Village and support a tested return path without importing an unrelated gameplay framework.
+- Legacy Pixel Nations Sector terrain, procedural World experiments, box/flag/shader proofs and the Kenney scaffold are reference-only and cannot become the active map base.
+- The retained art treatment must meet the 1440×900 and 360×225 `world-map-v8` hierarchy bar before a product PR.
+- Required MIT/CC BY 4.0 attribution, third-party/Godot notices and change notice must ship with any proposed integration.
+
+The 2026-10-09 scratch checkpoint on #721 is `ROUGH PLAYABLE/TECHNICAL PASS / VISUAL AND LEGAL PRODUCTION GATES OPEN`.
 
 ### Full-template scene base — hard rule
 
@@ -66,7 +78,7 @@ World/Region remains a 2.5D Living Atlas guided by `docs/visual-targets/world-ma
 
 Acceptance requires one coherent player-visible traversal in which Aurelian Basin is legible at World/Region scale, Sector A-01 is entered, Greengate reads instantly as inhabited, and land-to-settlement progression is visually obvious. User direct review outranks automated QA.
 
-Classification: `TEMPLATE_FIRST_WORKFLOW_PASS / CURRENT_PN_VISUALS_INSUFFICIENT / GREENGATE_VERTICAL_SLICE_ACTIVE`.
+Classification: `FULL_MAP_TEMPLATE_TRANSFORMATION_ACTIVE / AURELIAN_ATLAS_ROUGH_PLAYABLE_PASS / PRODUCT_PR_BLOCKED`.
 
 ## Authority and repository hygiene closure — terminal PASS
 
