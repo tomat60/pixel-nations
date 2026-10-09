@@ -80,7 +80,12 @@ async function main() {
     await page.evaluate(({ key, state }) => window.localStorage.setItem(key, JSON.stringify(state)), { key: KEY, state: completedSeed() });
     await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await dismissFounderRecord(page, { depth: "founder-run", required: true });
+    await dismissFounderRecord(page, {
+      depth: "founder-run",
+      required: true,
+      rehydrateState: completedSeed(),
+      storageKey: KEY,
+    });
 
     await page.locator('[data-qa="current-objective-text"]').getByText(/Imperial Turn 3\/3/i).waitFor({ state: "visible", timeout: 5000 });
     await page.locator('[data-qa="imperial-turn-action"][data-action-id="reinforce-ridge"]').first().click({ force: true });
