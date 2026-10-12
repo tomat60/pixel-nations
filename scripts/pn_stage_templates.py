@@ -20,7 +20,7 @@ SOURCES = (
 )
 TEXT = {".gd", ".tscn", ".tres", ".gdshader", ".shader", ".material", ".theme", ".json", ".csv", ".cfg", ".txt", ".md", ".svg"}
 IGNORED = {".git", ".godot", "build", "__pycache__", ".github"}
-ARCHIVE_LIMIT = 110 * 1024 * 1024
+ARCHIVE_LIMIT = 430 * 1024 * 1024
 
 def get_archive(owner: str, repo: str, sha: str) -> zipfile.ZipFile:
     url = f"https://codeload.github.com/{owner}/{repo}/zip/{sha}"
