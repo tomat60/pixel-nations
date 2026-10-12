@@ -146,12 +146,12 @@ jobs:
           for name, expected in (("bootstrap-1440x900.png", (1440,900)), ("bootstrap-360x225.png",(360,225))):
               p=d/name
               data=p.read_bytes()
-              if data[:8] != b"\\x89PNG\\r\\n\\x1a\\n":
+              if data[:8] != b"\x89PNG\r\n\x1a\n":
                   raise SystemExit(f"Invalid PNG: {p}")
               size=struct.unpack(">II",data[16:24])
               if size!=expected or len(data)<3000:
                   raise SystemExit(f"Weak/mismatched PNG: {p}, {size}, {len(data)} bytes")
-              (d/(name+".sha256")).write_text(hashlib.sha256(data).hexdigest()+"\\n")
+              (d/(name+".sha256")).write_text(hashlib.sha256(data).hexdigest()+"\n")
           print("PN_CLOUD_FRAME_EVIDENCE=PASS")
           PY
 
