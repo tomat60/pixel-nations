@@ -81,6 +81,12 @@ jobs:
               exit 1
             }
           grep -F "PIXEL_NATIONS_GODOT_TESTS: PASS" "$EVIDENCE_DIR/tests.log"
+          "$GODOT_BIN" --headless --path game --script res://tests/playable_core_controller_test.gd \
+            > "$EVIDENCE_DIR/controller-tests.log" 2>&1 || {
+              cat "$EVIDENCE_DIR/controller-tests.log"
+              exit 1
+            }
+          grep -F "PN_PLAYABLE_CORE_CONTROLLER_TESTS: PASS" "$EVIDENCE_DIR/controller-tests.log"
           echo "PN_CLOUD_GAME_STATE_TESTS=PASS"
 
       - name: Render bootstrap scene at two sizes (foundation smoke only)
