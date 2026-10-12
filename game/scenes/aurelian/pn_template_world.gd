@@ -25,9 +25,22 @@ func _ready() -> void:
 		bridge.name = "PNGameBridge"
 		get_tree().root.add_child(bridge)
 
-	# The upstream 3D map, materials and camera remain intact.
-	# The expensive donor political-map runtime is not initialized here:
-	# real selection uses Pixel Nations' own thirty canonical polygons.
+	# Preserve OpenGS' complete 3D map mesh, camera and input control,
+	# while replacing its *Earth* shader layers with our canonical A-01 plate.
+	# This scoped gameplay material is a rough visual placeholder, not release art.
+	var surface := load("res://_pn_templates/world/map/map_data/pn_aurelian_world_surface.png") as Texture2D
+	if surface == null:
+		push_error("PN_CANONICAL_MAP_TEXTURE_NOT_FOUND")
+		return
+	var material := StandardMaterial3D.new()
+	material.albedo_texture = surface
+	material.roughness = 0.93
+	material.metallic = 0.0
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	$Map/MeshInstance3D.material_override = material
+	# The donor's political overlay intentionally remains inactive: it is keyed
+	# to real-Earth province textures and would project them onto our terrain.
+	# Native A-01 selection comes from the 30 exact canonical polygons.
 	$MapModes.hide()
 	$ProvinceSelected.hide()
 	# Imported Texture2D survives export; direct Image.load_from_file does not.
