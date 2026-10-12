@@ -45,6 +45,8 @@ func _proof() -> void:
 		push_error("PN_TEMPLATE_CLAIM_FAILED")
 		quit(4)
 		return
+	await process_frame
+	await process_frame
 	_frame("aurelian-world")
 	world._enter()
 	await process_frame

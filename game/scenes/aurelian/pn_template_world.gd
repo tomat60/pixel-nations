@@ -18,6 +18,7 @@ var claim_button: Button
 var enter_button: Button
 
 func _ready() -> void:
+	_install_opengs_camera_actions()
 	bridge = get_tree().root.get_node_or_null("PNGameBridge")
 	if bridge == null:
 		bridge = BridgeScript.new()
@@ -29,7 +30,9 @@ func _ready() -> void:
 	# real selection uses Pixel Nations' own thirty canonical polygons.
 	$MapModes.hide()
 	$ProvinceSelected.hide()
-	land_mask = Image.load_from_file(ID_TEXTURE)
+	# Imported Texture2D survives export; direct Image.load_from_file does not.
+	var id_texture := load(ID_TEXTURE) as Texture2D
+	land_mask = id_texture.get_image() if id_texture != null else Image.new()
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string(LAND_JSON))
 	land_records = parsed if parsed is Array else []
 	if land_records.size() != 30:
@@ -37,6 +40,39 @@ func _ready() -> void:
 	_make_ui()
 	_refresh()
 	print("PN_LIVE_ATLAS_READY thirty=",land_records.size())
+
+func _install_opengs_camera_actions() -> void:
+	# Original OpenGS input actions live in its project.godot. Since we embed
+	# the complete map into Pixel Nations, re-register the necessary actions.
+	var keys := {
+		"camera_move_forward": KEY_W,
+		"camera_move_backward": KEY_S,
+		"camera_move_left": KEY_A,
+		"camera_move_right": KEY_D,
+		"camera_rotate_left": KEY_Q,
+		"camera_rotate_right": KEY_E,
+		"camera_rotate_up": KEY_Z,
+		"camera_rotate_down": KEY_X,
+	}
+	for name in keys:
+		if not InputMap.has_action(name):
+			InputMap.add_action(name)
+		var event := InputEventKey.new()
+		event.physical_keycode = keys[name]
+		InputMap.action_add_event(name,event)
+	for pair in [
+		["camera_zoom_in", MOUSE_BUTTON_WHEEL_UP],
+		["camera_zoom_out", MOUSE_BUTTON_WHEEL_DOWN],
+		["camera_rotate_mouse", MOUSE_BUTTON_RIGHT],
+		["province_select", MOUSE_BUTTON_LEFT],
+	]:
+		var name: String = pair[0]
+		if not InputMap.has_action(name):
+			InputMap.add_action(name)
+		var event := InputEventMouseButton.new()
+		event.button_index = pair[1]
+		InputMap.action_add_event(name,event)
+
 
 func _make_ui() -> void:
 	var layer := CanvasLayer.new()

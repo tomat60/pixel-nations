@@ -89,6 +89,17 @@ def stage_source(kind: str, owner: str, repo: str, sha: str, subdir: str) -> Non
         s = s.replace("subdivide_width = 1999", "subdivide_width = 399")
         s = s.replace("subdivide_depth = 999", "subdivide_depth = 199")
         s = s.replace("size = Vector2i(5000, 2500)", "size = Vector2i(2000, 1000)")
+        # The donor's sprite still showed the source geography on top of
+        # our 30-land terrain image. Render the actual canonical A-01 plate
+        # on its original 3D map surface instead of the old province mask.
+        s = s.replace(
+            "res://_pn_templates/world/map/map_data/provinces.png",
+            "res://_pn_templates/world/map/map_data/pn_aurelian_world_surface.png",
+        )
+        s = s.replace(
+            'material = ExtResource("3_lgq1i")\\ntexture = ExtResource("1_hgrid")',
+            'texture = ExtResource("1_hgrid")',
+        )
         p.write_text(s)
     print(f"PN_DONOR_STAGE_{kind.upper()}=PASS files={staged} commit={sha}", flush=True)
 

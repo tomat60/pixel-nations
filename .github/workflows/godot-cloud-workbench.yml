@@ -207,6 +207,10 @@ jobs:
               exit 1
             }
           grep -F "PN_TEMPLATE_WORLD_VILLAGE_BUILD_WORLD_REENTER=PASS" "$EVIDENCE_DIR/template-runtime.log"
+          if grep -E "^(SCRIPT )?ERROR:|Parse Error" "$EVIDENCE_DIR/template-runtime.log"; then
+            echo "Unexpected Godot runtime error: visual/gameplay gate rejected."
+            exit 1
+          fi
           for scene in aurelian-world greengate-village aurelian-after-return; do
             test -s "$EVIDENCE_DIR/$scene-1440x900.png"
             test -s "$EVIDENCE_DIR/$scene-360x225.png"
