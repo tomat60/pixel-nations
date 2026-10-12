@@ -13,6 +13,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import tempfile
@@ -20,6 +21,8 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SPEC = ROOT / "game" / "integration" / "playable_scene_sources.json"
+CANONICAL_MAP_DATA = ROOT / "app" / "play" / "lib" / "map-data.ts"
+RUNTIME_SOURCE = ROOT / "tools" / "playable_core" / "runtime"
 TEXT_SUFFIXES = {
     ".cfg", ".css", ".gd", ".gdshader", ".glsl", ".godot", ".html",
     ".import", ".js", ".json", ".md", ".py", ".shader", ".svg",
@@ -114,12 +117,77 @@ def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -
 - OpenGS files are copied without content changes into the generated project root.
 - Village source: Lucas Marques, from Shiva — The Free Game, `{village_commit}`.
 - Village files are moved below `res://village/`; textual `res://` references are rewritten to that namespace.
-- No artwork, identity, gameplay, canonical A-01 mapping, or navigation transformation is claimed by this materialization step.
-- Pixel Nations integration changes must be documented separately before distribution.
+- Pixel Nations adds a namespaced integration scene, canonical A-01 hit geometry, truthful state UI, and World/Village navigation under `res://pixel_nations/`.
+- Canonical land geometry is extracted from the repository's existing `app/play/lib/map-data.ts`; donor geography is not relabeled as Pixel Nations geography.
+- The integration remains a rough gameplay candidate and does not claim final visual acceptance.
 
-The generated tree is evidence/input only. It is not approved release content.
+The generated tree is review evidence only. It is not approved release content.
 """
     (output / "THIRD_PARTY_CHANGES.md").write_text(notice, encoding="utf-8")
+
+
+LAND_PATTERN = re.compile(
+    r'\{ id: "(?P<slug>[^"]+)", pnid: "(?P<pnid>PN-A01-\d{3})", '
+    r'name: "(?P<name>[^"]+)", region: "(?P<region>[^"]+)", '
+    r'terrain: "(?P<terrain>[^"]+)", role: "(?P<role>[^"]+)".*?'
+    r'd: "(?P<path>[^"]+)", cx: (?P<cx>\d+), cy: (?P<cy>\d+) \}'
+)
+
+
+def extract_canonical_lands(source: Path) -> list[dict[str, object]]:
+    text = source.read_text(encoding="utf-8")
+    lands: list[dict[str, object]] = []
+    for match in LAND_PATTERN.finditer(text):
+        points = [
+            [float(x), float(y)]
+            for x, y in re.findall(r"[ML]([0-9.]+) ([0-9.]+)", match.group("path"))
+        ]
+        lands.append({
+            "slug": match.group("slug"),
+            "id": match.group("pnid"),
+            "name": match.group("name"),
+            "region": match.group("region"),
+            "terrain": match.group("terrain"),
+            "role": match.group("role"),
+            "center": [float(match.group("cx")), float(match.group("cy"))],
+            "points": points,
+        })
+    expected = [f"PN-A01-{index:03d}" for index in range(1, 31)]
+    actual = [str(land["id"]) for land in lands]
+    if actual != expected or any(len(land["points"]) < 3 for land in lands):
+        raise SourceError("canonical A-01 geometry extraction did not produce ordered 30-land data")
+    return lands
+
+
+def install_pixel_nations_runtime(output: Path) -> int:
+    if not RUNTIME_SOURCE.is_dir():
+        raise SourceError(f"missing Pixel Nations runtime templates: {RUNTIME_SOURCE}")
+    runtime_target = output / "pixel_nations"
+    shutil.copytree(RUNTIME_SOURCE, runtime_target)
+    core_target = runtime_target / "core"
+    core_target.mkdir(parents=True, exist_ok=True)
+    for name in ("game_state.gd", "playable_core_session.gd", "playable_core_controller.gd"):
+        target = core_target / name
+        source_text = (ROOT / "game" / "core" / name).read_text(encoding="utf-8")
+        target.write_text(
+            source_text.replace("res://core/", "res://pixel_nations/core/"),
+            encoding="utf-8",
+        )
+    lands = extract_canonical_lands(CANONICAL_MAP_DATA)
+    (runtime_target / "a01_lands.json").write_text(
+        json.dumps({"schema_version": 1, "canvas": [960, 900], "lands": lands}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    project = output / "project.godot"
+    project_text = project.read_text(encoding="utf-8")
+    project_text = re.sub(
+        r'run/main_scene="[^"]+"',
+        'run/main_scene="res://pixel_nations/playable_core.tscn"',
+        project_text,
+        count=1,
+    )
+    project.write_text(project_text, encoding="utf-8")
+    return sum(1 for path in runtime_target.rglob("*") if path.is_file())
 
 
 def materialize(spec_path: Path, output: Path) -> dict[str, object]:
@@ -160,17 +228,21 @@ def materialize(spec_path: Path, output: Path) -> dict[str, object]:
         shutil.copytree(village_repo / "licenses", notices / "licenses")
         write_change_notice(output, opengs["commit"], village["commit"])
 
+        runtime_files = install_pixel_nations_runtime(output)
+
     manifest = {
         "schema_version": 1,
-        "status": "SOURCE_INPUT_ONLY_NOT_PRODUCT_ACCEPTANCE",
+        "status": "ROUGH_PLAYABLE_TRANSFORM_NOT_PRODUCT_ACCEPTANCE",
         "opengs_commit": opengs["commit"],
         "village_commit": village["commit"],
         "opengs_files": opengs_files,
         "village_files": village_files,
         "village_text_files_rewritten": rewritten_files,
         "village_scene": "res://village/scenes/approved.tscn",
+        "playable_scene": "res://pixel_nations/playable_core.tscn",
+        "pixel_nations_runtime_files": runtime_files,
         "unresolved_release_assets": opengs["unresolved_release_assets"],
-        "missing_pixel_nations_transform": True,
+        "missing_pixel_nations_transform": False,
     }
     (output / ".pn-source-manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"

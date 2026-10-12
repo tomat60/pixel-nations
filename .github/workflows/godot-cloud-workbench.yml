@@ -93,7 +93,7 @@ jobs:
 
       - name: Materialize pinned World and Village source inputs
         shell: bash
-        timeout-minutes: 4
+        timeout-minutes: 7
         run: |
           set -Eeuo pipefail
           python3 tools/playable_core/materialize_scene_sources.py \
@@ -119,14 +119,39 @@ jobs:
 
           root = Path("/tmp/pn-playable-scene-sources")
           manifest = json.loads((root / ".pn-source-manifest.json").read_text())
-          assert manifest["missing_pixel_nations_transform"] is True
-          assert manifest["status"] == "SOURCE_INPUT_ONLY_NOT_PRODUCT_ACCEPTANCE"
+          assert manifest["missing_pixel_nations_transform"] is False
+          assert manifest["status"] == "ROUGH_PLAYABLE_TRANSFORM_NOT_PRODUCT_ACCEPTANCE"
           assert manifest["unresolved_release_assets"] == ["map/map_data/ne2.png"]
           assert (root / "game/main_game.tscn").is_file()
           assert (root / "village/scenes/approved.tscn").is_file()
+          assert (root / "pixel_nations/playable_core.tscn").is_file()
+          assert len(__import__("json").loads((root / "pixel_nations/a01_lands.json").read_text())["lands"]) == 30
           assert (root / "third_party/the-free-game/licenses/CC-BY-4.0.txt").is_file()
           assert (root / "THIRD_PARTY_CHANGES.md").is_file()
           print("PN_CLOUD_PLAYABLE_SOURCE_INPUTS=PASS")
+          PY
+          timeout 150s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+            LIBGL_ALWAYS_SOFTWARE=1 \
+            PN_CLOUD_EVIDENCE_DIR="$PWD/$EVIDENCE_DIR" \
+            "$GODOT_BIN" --path /tmp/pn-playable-scene-sources --audio-driver Dummy \
+            --resolution 1440x900 --script res://pixel_nations/test_playable_runtime.gd \
+            > "$EVIDENCE_DIR/playable-runtime.log" 2>&1 || {
+              cat "$EVIDENCE_DIR/playable-runtime.log"
+              exit 1
+            }
+          grep -F "PN_PLAYABLE_RUNTIME_CONTRACT=PASS" "$EVIDENCE_DIR/playable-runtime.log"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, struct
+          evidence = Path("evidence/godot-cloud-workbench")
+          for stem in ("world-claimed", "village-road-built", "world-reopened"):
+              for suffix, expected in (("1440x900", (1440, 900)), ("360x225", (360, 225))):
+                  path = evidence / f"{stem}-{suffix}.png"
+                  data = path.read_bytes()
+                  if data[:8] != b"\x89PNG\r\n\x1a\n" or struct.unpack(">II", data[16:24]) != expected:
+                      raise SystemExit(f"invalid runtime evidence: {path}")
+                  (evidence / f"{path.name}.sha256").write_text(hashlib.sha256(data).hexdigest()+"\n")
+          print("PN_CLOUD_PLAYABLE_FRAMES=PASS")
           PY
 
       - name: Render bootstrap scene at two sizes (foundation smoke only)
