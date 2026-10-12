@@ -6,8 +6,10 @@ on:
       - "steward/playable-core-*"
     paths:
       - "game/core/**"
+      - "game/integration/**"
       - "game/scenes/bootstrap/**"
       - "game/tests/**"
+      - "tools/playable_core/**"
       - "migration/golden_run_v1.json"
       - ".github/workflows/godot-cloud-workbench.yml"
   workflow_dispatch:
@@ -88,6 +90,44 @@ jobs:
             }
           grep -F "PN_PLAYABLE_CORE_CONTROLLER_TESTS: PASS" "$EVIDENCE_DIR/controller-tests.log"
           echo "PN_CLOUD_GAME_STATE_TESTS=PASS"
+
+      - name: Materialize pinned World and Village source inputs
+        shell: bash
+        timeout-minutes: 4
+        run: |
+          set -Eeuo pipefail
+          python3 tools/playable_core/materialize_scene_sources.py \
+            --output /tmp/pn-playable-scene-sources \
+            > "$EVIDENCE_DIR/source-bridge.log" 2>&1 || {
+              cat "$EVIDENCE_DIR/source-bridge.log"
+              exit 1
+            }
+          grep -F "PN_PLAYABLE_SOURCE_BRIDGE=PASS" "$EVIDENCE_DIR/source-bridge.log"
+          "$GODOT_BIN" --headless --editor \
+            --path /tmp/pn-playable-scene-sources --quit \
+            > "$EVIDENCE_DIR/source-bridge-import.log" 2>&1 || {
+              cat "$EVIDENCE_DIR/source-bridge-import.log"
+              exit 1
+            }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|ERROR:" \
+            "$EVIDENCE_DIR/source-bridge-import.log"; then
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("/tmp/pn-playable-scene-sources")
+          manifest = json.loads((root / ".pn-source-manifest.json").read_text())
+          assert manifest["missing_pixel_nations_transform"] is True
+          assert manifest["status"] == "SOURCE_INPUT_ONLY_NOT_PRODUCT_ACCEPTANCE"
+          assert manifest["unresolved_release_assets"] == ["map/map_data/ne2.png"]
+          assert (root / "game/main_game.tscn").is_file()
+          assert (root / "village/scenes/approved.tscn").is_file()
+          assert (root / "third_party/the-free-game/licenses/CC-BY-4.0.txt").is_file()
+          assert (root / "THIRD_PARTY_CHANGES.md").is_file()
+          print("PN_CLOUD_PLAYABLE_SOURCE_INPUTS=PASS")
+          PY
 
       - name: Render bootstrap scene at two sizes (foundation smoke only)
         shell: bash

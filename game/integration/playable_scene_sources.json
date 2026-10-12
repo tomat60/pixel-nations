@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "opengs": {
+    "repository": "https://github.com/Thomas-Holtvedt/opengs.git",
+    "commit": "06838d963cac06b4d345baa6cfe1293a1a237e88",
+    "license": "MIT",
+    "license_sha256": "6320c2a060dd45ec6d5c4ed99aa9e19977714615f151d65c50025a7d30a740bf",
+    "required_paths": [
+      "LICENSE",
+      "project.godot",
+      "game/main_game.gd",
+      "game/main_game.tscn",
+      "map/map.tscn"
+    ],
+    "unresolved_release_assets": [
+      "map/map_data/ne2.png"
+    ]
+  },
+  "village": {
+    "repository": "https://github.com/LucasMarquesShiva/the-free-game.git",
+    "commit": "7798cd9771f99d5c99422789a9b94a69df6c3e3e",
+    "code_license": "MIT",
+    "code_license_sha256": "d65740f4d4ac2cf6f77aa996264cc6b77c7a8ec03d663da1a524af7c90658778",
+    "asset_license": "CC BY 4.0",
+    "asset_license_sha256": "0f3c8f73b09f726494a6691911fc393afba96eb9b8fa743deb1ede5b4f913fd2",
+    "third_party_notices_sha256": "1cb85b55287c56efb001f2707c3550639369711fd61c4e12b3dfe05d093a0c25",
+    "required_paths": [
+      "LICENSE",
+      "LICENSE-ASSETS.md",
+      "THIRD_PARTY_NOTICES.md",
+      "licenses/CC-BY-4.0.txt",
+      "licenses/GODOT-THIRD-PARTY.txt",
+      "game/project.godot",
+      "game/scenes/approved.tscn",
+      "game/presentation/approved_game.gd",
+      "game/simulation/approved_sim.gd",
+      "game/tests/test_approved.gd"
+    ]
+  }
+}
