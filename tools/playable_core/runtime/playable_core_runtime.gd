@@ -40,6 +40,10 @@ func _ready() -> void:
 	world = WorldScene.instantiate()
 	world.name = "OpenGSWorld"
 	add_child(world)
+	for donor_ui_name in ["MapModes", "ProvinceSelected"]:
+		var donor_ui := world.get_node_or_null(donor_ui_name)
+		if donor_ui is CanvasItem:
+			donor_ui.hide()
 	var player := world.get_node("Player")
 	var donor_handler := Callable(world, "_on_player_province_selected")
 	if player.province_selected.is_connected(donor_handler):
@@ -68,12 +72,18 @@ func _load_lands() -> void:
 func _build_ui() -> void:
 	ui_layer = CanvasLayer.new()
 	ui_layer.name = "PlayableUI"
+	ui_layer.layer = 100
 	add_child(ui_layer)
 	panel = PanelContainer.new()
 	panel.name = "ProgressPanel"
 	panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	panel.position = Vector2(-380, 24)
 	panel.size = Vector2(356, 560)
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.055, 0.07, 0.075, 0.94)
+	panel_style.border_color = Color(0.54, 0.69, 0.55, 1.0)
+	panel_style.set_border_width_all(2)
+	panel.add_theme_stylebox_override("panel", panel_style)
 	ui_layer.add_child(panel)
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 20)
@@ -88,6 +98,8 @@ func _build_ui() -> void:
 	identity_label = _label("Select a canonical land on the map", 18)
 	detail_label = _label("30 charted lands · 0 claimed", 15)
 	goal_label = _label("Next: select Greenvale", 15)
+	identity_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	for label in [title_label, identity_label, detail_label, goal_label]:
 		column.add_child(label)
