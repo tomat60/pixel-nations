@@ -115,6 +115,7 @@ def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -
 
 - OpenGS source: Thomas Holtvedt, `{opengs_commit}`, MIT.
 - OpenGS files are copied without content changes into the generated project root.
+- OpenGS `ne2.png` is a Thomas Holtvedt QGIS derivative of the public-domain Natural Earth 2 raster; its exact hash and source URL are pinned in the integration spec.
 - Village source: Lucas Marques, from Shiva — The Free Game, `{village_commit}`.
 - Village files are moved below `res://village/`; textual `res://` references are rewritten to that namespace.
 - Pixel Nations adds a namespaced integration scene, canonical A-01 hit geometry, truthful state UI, and World/Village navigation under `res://pixel_nations/`.
@@ -211,6 +212,8 @@ def materialize(spec_path: Path, output: Path) -> dict[str, object]:
         require_hash(village_repo / "LICENSE", village["code_license_sha256"], "village LICENSE")
         require_hash(village_repo / "LICENSE-ASSETS.md", village["asset_license_sha256"], "village asset license")
         require_hash(village_repo / "THIRD_PARTY_NOTICES.md", village["third_party_notices_sha256"], "village notices")
+        for relative, provenance in opengs.get("asset_provenance", {}).items():
+            require_hash(opengs_repo / relative, provenance["sha256"], f"OpenGS asset {relative}")
 
         opengs_files = copy_tracked(opengs_repo, output)
         village_root = output / "village"
@@ -236,6 +239,7 @@ def materialize(spec_path: Path, output: Path) -> dict[str, object]:
         "opengs_commit": opengs["commit"],
         "village_commit": village["commit"],
         "opengs_files": opengs_files,
+        "opengs_asset_provenance": opengs.get("asset_provenance", {}),
         "village_files": village_files,
         "village_text_files_rewritten": rewritten_files,
         "village_scene": "res://village/scenes/approved.tscn",

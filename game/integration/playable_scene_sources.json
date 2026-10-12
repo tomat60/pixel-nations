@@ -12,9 +12,17 @@
       "game/main_game.tscn",
       "map/map.tscn"
     ],
-    "unresolved_release_assets": [
-      "map/map_data/ne2.png"
-    ]
+    "asset_provenance": {
+      "map/map_data/ne2.png": {
+        "source": "Natural Earth 2 raster",
+        "source_url": "https://www.naturalearthdata.com/downloads/10m-raster-data/10m-natural-earth-2/",
+        "source_license": "Public Domain",
+        "derivative_author": "Thomas Holtvedt",
+        "embedded_author": "Thomas Holtvedt",
+        "sha256": "668970ed38a142a11a54e99348b458dc3f41e2d4e6b82bd527392031fb35afad"
+      }
+    },
+    "unresolved_release_assets": []
   },
   "village": {
     "repository": "https://github.com/LucasMarquesShiva/the-free-game.git",
