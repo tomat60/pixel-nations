@@ -123,6 +123,13 @@ def make_map_from_canonical_data() -> None:
     src = STAGE / "world/map/map_data"
     ids.save(src / "pn_aurelian_land_ids.png")
     visual.save(src / "pn_aurelian_world_surface.png")
+    import json
+    names = re.findall(r'pnid: "(PN-A01-\\d{3})", name: "([^"]+)"', source)
+    if len(names) != 30:
+        raise RuntimeError(f"Invalid canonical land name count: {len(names)}")
+    (src / "pn_aurelian_lands.json").write_text(
+        json.dumps([{"id": id_, "name": name} for id_, name in names], indent=2)
+    )
     print("PN_CANONICAL_MAP_RASTER=PASS count=30", flush=True)
 
 def patch_template_world() -> None:
@@ -146,6 +153,12 @@ def main() -> None:
         stage_source(*args)
     make_map_from_canonical_data()
     patch_template_world()
+    scene = STAGE / "village/scenes/approved.tscn"
+    original = scene.read_text()
+    target = "res://_pn_templates/village/presentation/approved_game.gd"
+    if target not in original:
+        raise RuntimeError("Original village scene root script not found")
+    scene.write_text(original.replace(target, "res://scenes/aurelian/pn_template_village.gd"))
     assert (STAGE / "village/scenes/approved.tscn").exists(), "Complete Village missing"
     assert (STAGE / "world/game/main_game.tscn").exists(), "Complete atlas scene missing"
     for kind in ("world", "village"):
