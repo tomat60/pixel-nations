@@ -7,17 +7,19 @@ const GameState = preload("res://core/game_state.gd")
 
 func _ready() -> void:
 	var actions: Array[Dictionary] = [
-		{"type": "CLAIM_LAND", "land_id": "A-01-0042"},
-		{"type": "FOUND_SETTLEMENT", "name": "Aurelian Haven"},
-		{"type": "COMPLETE_VILLAGE_ORDER", "order_id": "shelter"},
+		{"type": "SELECT_LAND", "land_id": "PN-A01-001"},
+		{"type": "CLAIM_LAND", "land_id": "PN-A01-001"},
+		{"type": "FOUND_SETTLEMENT", "name": "Greengate"},
+		{"type": "BUILD_ROAD"},
 	]
 	var state: Dictionary = GameState.replay(actions)
 	var settlement: Dictionary = state.get("settlement", {})
-	var completed_orders: Array = settlement.get("completed_orders", [])
 	var passed: bool = (
-		String(state.get("claimed_land_id", "")) == "A-01-0042"
+		String(state.get("selected_land_id", "")) == "PN-A01-001"
+		and String(state.get("claimed_land_id", "")) == "PN-A01-001"
 		and bool(settlement.get("founded", false))
-		and completed_orders.has("shelter")
+		and (settlement.get("built_improvements", []) as Array).has("road")
+		and int(state.get("resources", {}).get("stone", 0)) == 5
 	)
 
 	status_label.text = "FOUNDATION TEST: %s" % ("PASS" if passed else "FAIL")
