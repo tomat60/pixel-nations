@@ -46,7 +46,7 @@ def stage_source(kind: str, owner: str, repo: str, sha: str, subdir: str) -> Non
         if member.is_dir() or not name.startswith(nested):
             continue
         rel = name[len(nested):]
-        if not rel or any(part in IGNORED for part in Path(rel).parts):
+        if not rel or rel == "project.godot" or any(part in IGNORED for part in Path(rel).parts):
             continue
         dest = target / rel
         if not dest.resolve().is_relative_to(target.resolve()):
