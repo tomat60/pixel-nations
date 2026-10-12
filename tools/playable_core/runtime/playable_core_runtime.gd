@@ -42,7 +42,9 @@ func _ready() -> void:
 	add_child(world)
 	for donor_ui_name in ["MapModes", "ProvinceSelected"]:
 		var donor_ui := world.get_node_or_null(donor_ui_name)
-		if donor_ui is CanvasItem:
+		if donor_ui is CanvasLayer:
+			donor_ui.visible = false
+		elif donor_ui is CanvasItem:
 			donor_ui.hide()
 	var player := world.get_node("Player")
 	var donor_handler := Callable(world, "_on_player_province_selected")
