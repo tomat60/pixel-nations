@@ -1,7 +1,7 @@
 class_name GameState
 extends RefCounted
 
-const SCHEMA_VERSION := 1
+const SCHEMA_VERSION := 2
 const CHARTED_LANDS := 30
 const ROAD_STONE_COST := 5
 const CANONICAL_LAND_IDS := [
@@ -112,7 +112,7 @@ static func to_json(state: Dictionary) -> String:
 static func from_json(payload: String) -> Dictionary:
 	var parsed = JSON.parse_string(payload)
 	if parsed is Dictionary:
-		return parsed
+		return _normalize_state(parsed)
 	return {}
 
 static func progress(state: Dictionary) -> Dictionary:
@@ -144,3 +144,42 @@ static func _apply_order_reward(state: Dictionary, order_id: String) -> void:
 		"food":
 			resources["food"] = int(resources.get("food", 0)) + 5
 	state["resources"] = resources
+
+static func _normalize_state(saved: Dictionary) -> Dictionary:
+	var normalized := initial_state()
+	normalized["sector_id"] = String(saved.get("sector_id", "A-01"))
+
+	var claimed_land_id := String(saved.get("claimed_land_id", ""))
+	var claimed_is_valid := CANONICAL_LAND_IDS.has(claimed_land_id)
+	if claimed_is_valid:
+		normalized["claimed_land_id"] = claimed_land_id
+
+	var selected_land_id := String(saved.get("selected_land_id", ""))
+	if CANONICAL_LAND_IDS.has(selected_land_id):
+		normalized["selected_land_id"] = selected_land_id
+	elif CANONICAL_LAND_IDS.has(claimed_land_id):
+		normalized["selected_land_id"] = claimed_land_id
+
+	var saved_settlement = saved.get("settlement", {})
+	if saved_settlement is Dictionary:
+		var settlement: Dictionary = normalized["settlement"]
+		var founded := claimed_is_valid and bool(saved_settlement.get("founded", false))
+		settlement["founded"] = founded
+		settlement["name"] = String(saved_settlement.get("name", "")) if founded else ""
+		var completed_orders = saved_settlement.get("completed_orders", [])
+		if founded and completed_orders is Array:
+			settlement["completed_orders"] = completed_orders.duplicate()
+		var built_improvements = saved_settlement.get("built_improvements", [])
+		if founded and built_improvements is Array and built_improvements.has("road"):
+			settlement["built_improvements"] = ["road"]
+		normalized["settlement"] = settlement
+
+	var saved_resources = saved.get("resources", {})
+	if saved_resources is Dictionary:
+		var resources: Dictionary = normalized["resources"]
+		resources["food"] = int(saved_resources.get("food", resources["food"]))
+		resources["timber"] = int(saved_resources.get("timber", resources["timber"]))
+		resources["stone"] = int(saved_resources.get("stone", resources["stone"]))
+		normalized["resources"] = resources
+
+	return normalized

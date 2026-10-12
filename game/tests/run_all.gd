@@ -58,6 +58,7 @@ func _init() -> void:
 	_check(int(low_resource_state.get("resources", {}).get("stone", 0)) == STATE.ROAD_STONE_COST - 1, "road_cost_guard_preserves_resources")
 
 	var restored = STATE.from_json(STATE.to_json(state))
+	_check(int(restored.get("schema_version", 0)) == 2, "save_schema")
 	_check(String(restored.get("selected_land_id", "")) == "PN-A01-001", "save_selection")
 	_check(String(restored.get("claimed_land_id", "")) == "PN-A01-001", "save_claim")
 	_check(bool(restored.get("settlement", {}).get("founded", false)), "save_settlement")
@@ -71,6 +72,46 @@ func _init() -> void:
 	_check(bool(progress.get("road_built", false)), "progress_road")
 	_check(String(progress.get("nation_status", "")) == "not_founded", "progress_honest_nation_status")
 	_check(String(progress.get("next_goal", "")) == "Inspect a neighboring A-01 land", "progress_next_goal")
+
+	var legacy_payload := JSON.stringify({
+		"schema_version": 1,
+		"sector_id": "A-01",
+		"claimed_land_id": "PN-A01-001",
+		"settlement": {
+			"founded": true,
+			"name": "Greengate",
+			"completed_orders": ["shelter"],
+		},
+		"resources": {
+			"food": 2,
+			"timber": 5,
+		},
+	})
+	var migrated: Dictionary = STATE.from_json(legacy_payload)
+	_check(int(migrated.get("schema_version", 0)) == 2, "legacy_schema_migrated")
+	_check(String(migrated.get("selected_land_id", "")) == "PN-A01-001", "legacy_selection_recovered")
+	_check(String(migrated.get("claimed_land_id", "")) == "PN-A01-001", "legacy_claim_preserved")
+	_check(bool(migrated.get("settlement", {}).get("founded", false)), "legacy_settlement_preserved")
+	_check(migrated.get("settlement", {}).get("completed_orders", []).has("shelter"), "legacy_orders_preserved")
+	_check(migrated.get("settlement", {}).get("built_improvements", []).is_empty(), "legacy_improvements_defaulted")
+	_check(int(migrated.get("resources", {}).get("food", 0)) == 2, "legacy_food_preserved")
+	_check(int(migrated.get("resources", {}).get("timber", 0)) == 5, "legacy_timber_preserved")
+	_check(int(migrated.get("resources", {}).get("stone", 0)) == 10, "legacy_stone_defaulted")
+
+	var malformed_save := JSON.stringify({
+		"schema_version": 1,
+		"sector_id": "A-01",
+		"claimed_land_id": "A-01-0042",
+		"settlement": {
+			"founded": true,
+			"name": "Impossible Settlement",
+			"built_improvements": ["road"],
+		},
+	})
+	var repaired: Dictionary = STATE.from_json(malformed_save)
+	_check(String(repaired.get("claimed_land_id", "")).is_empty(), "malformed_claim_rejected")
+	_check(not bool(repaired.get("settlement", {}).get("founded", false)), "malformed_settlement_rejected")
+	_check(repaired.get("settlement", {}).get("built_improvements", []).is_empty(), "malformed_progress_rejected")
 
 	_finish()
 

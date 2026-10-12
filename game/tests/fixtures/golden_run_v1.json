@@ -20,7 +20,7 @@
     }
   ],
   "expected_state": {
-    "schema_version": 1,
+    "schema_version": 2,
     "sector_id": "A-01",
     "selected_land_id": "PN-A01-001",
     "claimed_land_id": "PN-A01-001",
