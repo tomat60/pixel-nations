@@ -10,6 +10,8 @@ on:
       - "game/tests/**"
       - "migration/golden_run_v1.json"
       - ".github/workflows/godot-cloud-workbench.yml"
+      - "scripts/pn_stage_templates.py"
+      - "game/scenes/aurelian/pn_template_*.gd"
   workflow_dispatch:
 
 permissions:
@@ -23,7 +25,7 @@ jobs:
   playable-core-proof:
     name: State tests and rendered foundation frame (cloud)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 18
     env:
       GODOT_RELEASE: "4.7.1-stable"
       GODOT_BIN: "/tmp/pn-godot/Godot_v4.7.1-stable_linux.x86_64"
@@ -165,6 +167,51 @@ jobs:
               (d/(name+".sha256")).write_text(hashlib.sha256(data).hexdigest()+"\n")
           print("PN_CLOUD_FRAME_EVIDENCE=PASS")
           PY
+
+      - name: Rebuild full pinned donor scenes into local project
+        if: github.ref_name == 'steward/playable-core-template-reconstruction'
+        timeout-minutes: 7
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get install -y -qq --no-install-recommends python3-pil > /dev/null
+          python3 scripts/pn_stage_templates.py 2>&1 | tee "$EVIDENCE_DIR/template-stage.log"
+          grep -F "PN_COMPLETE_TEMPLATE_STAGING=PASS" "$EVIDENCE_DIR/template-stage.log"
+          test -s game/_pn_templates/world/game/main_game.tscn
+          test -s game/_pn_templates/village/scenes/approved.tscn
+          test -s game/_pn_templates/notices/village/LICENSE-ASSETS.md
+
+      - name: Verify actual OpenGS and Village integration in Xvfb
+        if: github.ref_name == 'steward/playable-core-template-reconstruction'
+        timeout-minutes: 7
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          "$GODOT_BIN" --headless --path game --editor --quit \
+            > "$EVIDENCE_DIR/template-import.log" 2>&1 || {
+              tail -120 "$EVIDENCE_DIR/template-import.log"
+              exit 1
+            }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "$EVIDENCE_DIR/template-import.log"; then
+            tail -120 "$EVIDENCE_DIR/template-import.log"
+            exit 1
+          fi
+          timeout 150s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+            LIBGL_ALWAYS_SOFTWARE=1 \
+            PN_CLOUD_EVIDENCE_DIR="$PWD/$EVIDENCE_DIR" \
+            "$GODOT_BIN" --path game --audio-driver Dummy \
+            --rendering-method gl_compatibility --resolution 1440x900 \
+            --script res://tests/pn_template_world_village_proof.gd \
+            > "$EVIDENCE_DIR/template-runtime.log" 2>&1 || {
+              tail -120 "$EVIDENCE_DIR/template-runtime.log"
+              exit 1
+            }
+          grep -F "PN_TEMPLATE_WORLD_VILLAGE_BUILD_WORLD_REENTER=PASS" "$EVIDENCE_DIR/template-runtime.log"
+          for scene in aurelian-world greengate-village aurelian-after-return; do
+            test -s "$EVIDENCE_DIR/$scene-1440x900.png"
+            test -s "$EVIDENCE_DIR/$scene-360x225.png"
+          done
+          echo "PN_COMPLETE_TEMPLATE_VISUAL_INPUT_EVIDENCE=PASS"
 
       - name: Always upload exact-SHA logs and images
         if: always()
