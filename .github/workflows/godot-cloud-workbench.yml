@@ -126,7 +126,9 @@ jobs:
           assert manifest["unresolved_release_assets"] == []
           ne2 = root / "map/map_data/ne2.png"
           assert __import__("hashlib").sha256(ne2.read_bytes()).hexdigest() == "668970ed38a142a11a54e99348b458dc3f41e2d4e6b82bd527392031fb35afad"
-          assert manifest["opengs_asset_provenance"]["map/map_data/ne2.png"]["source_license"] == "Public Domain"
+          ne2_provenance = manifest["opengs_asset_provenance"]["map/map_data/ne2.png"]
+          assert ne2_provenance["source_license"] == "Public Domain"
+          assert ne2_provenance["source_url"].startswith("https://www.naturalearthdata.com/")
           assert (root / "game/main_game.tscn").is_file()
           assert (root / "village/scenes/approved.tscn").is_file()
           assert (root / "pixel_nations/playable_core.tscn").is_file()
