@@ -1,6 +1,7 @@
 extends SceneTree
 
 const STATE = preload("res://core/game_state.gd")
+const SESSION = preload("res://core/playable_core_session.gd")
 
 var failures = []
 
@@ -113,7 +114,43 @@ func _init() -> void:
 	_check(not bool(repaired.get("settlement", {}).get("founded", false)), "malformed_settlement_rejected")
 	_check(repaired.get("settlement", {}).get("built_improvements", []).is_empty(), "malformed_progress_rejected")
 
+	_test_playable_session_round_trip()
+
 	_finish()
+
+func _test_playable_session_round_trip() -> void:
+	var session = SESSION.new()
+	_check(not session.enter_greengate(), "session_blocks_unclaimed_entry")
+	_check(session.select_land("PN-A01-001"), "session_selects_greenvale")
+	_check(session.claim_selected_land(), "session_claims_selected_land")
+	_check(session.enter_greengate(), "session_enters_greengate")
+	_check(session.current_view == SESSION.VIEW_VILLAGE, "session_village_view")
+
+	var village_before: Dictionary = session.village_view_model()
+	_check(String(village_before.get("settlement_name", "")) == "Greengate", "session_village_name")
+	_check(int(village_before.get("stone", 0)) == 10, "session_village_starting_stone")
+	_check(int(village_before.get("road_stone_cost", 0)) == 5, "session_village_road_cost_visible")
+	_check(session.build_greengate_road(), "session_builds_road")
+	_check(not session.build_greengate_road(), "session_blocks_duplicate_road")
+	_check(session.return_to_world(), "session_returns_to_world")
+
+	var world_after: Dictionary = session.world_view_model()
+	_check(int(world_after.get("claimed_lands", 0)) == 1, "session_world_claimed_progress")
+	_check(int(world_after.get("charted_lands", 0)) == 30, "session_world_charted_progress")
+	_check(String(world_after.get("settlement_name", "")) == "Greengate", "session_world_settlement_progress")
+	_check(bool(world_after.get("road_built", false)), "session_world_road_progress")
+	_check(String(world_after.get("nation_status", "")) == "not_founded", "session_world_honest_nation_status")
+	_check(String(world_after.get("next_goal", "")) == "Inspect a neighboring A-01 land", "session_world_next_goal")
+
+	var save_path := "user://playable-core-session-test.json"
+	_check(session.save_to_path(save_path), "session_save")
+	var reopened = SESSION.new()
+	_check(reopened.load_from_path(save_path), "session_reopen")
+	_check(reopened.current_view == SESSION.VIEW_WORLD, "session_reopen_starts_world")
+	var reopened_world: Dictionary = reopened.world_view_model()
+	_check(bool(reopened_world.get("road_built", false)), "session_reopen_road_persisted")
+	_check(String(reopened_world.get("next_goal", "")) == "Inspect a neighboring A-01 land", "session_reopen_goal_persisted")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 
 func _check(condition: bool, label: String) -> void:
 	if not condition:
