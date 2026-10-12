@@ -55,7 +55,8 @@ jobs:
           set -Eeuo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y -qq --no-install-recommends \
-            xvfb unzip libgl1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 > /dev/null
+            xvfb unzip libgl1 libvulkan1 mesa-vulkan-drivers vulkan-tools \
+            libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 > /dev/null
           mkdir -p /tmp/pn-godot
           curl -fsSL --retry 3 --connect-timeout 15 \
             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
@@ -63,6 +64,7 @@ jobs:
           unzip -q /tmp/pn-godot/godot.zip -d /tmp/pn-godot
           chmod +x "$GODOT_BIN"
           "$GODOT_BIN" --version | tee "$EVIDENCE_DIR/godot-version.txt"
+          vulkaninfo --summary > "$EVIDENCE_DIR/vulkan-summary.txt"
 
       - name: Import and execute canonical reducer/save tests
         shell: bash
