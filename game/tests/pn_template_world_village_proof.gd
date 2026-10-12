@@ -60,7 +60,7 @@ func _proof() -> void:
 		quit(6)
 		return
 	village._pn_build_road()
-	var bridge=get_tree().root.get_node_or_null("PNGameBridge")
+	var bridge=root.get_node_or_null("PNGameBridge")
 	if bridge == null or not bool(bridge.core.current_snapshot().get("road_built",false)):
 		push_error("PN_TEMPLATE_REAL_ROAD_NOT_BUILT")
 		quit(7)
