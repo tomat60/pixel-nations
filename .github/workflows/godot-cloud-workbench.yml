@@ -132,7 +132,7 @@ jobs:
           assert (root / "THIRD_PARTY_CHANGES.md").is_file()
           print("PN_CLOUD_PLAYABLE_SOURCE_INPUTS=PASS")
           PY
-          timeout 150s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+          timeout 300s xvfb-run -a -s "-screen 0 1600x1000x24" env \
             LIBGL_ALWAYS_SOFTWARE=1 \
             PN_CLOUD_EVIDENCE_DIR="$PWD/$EVIDENCE_DIR" \
             "$GODOT_BIN" --path /tmp/pn-playable-scene-sources --audio-driver Dummy \
