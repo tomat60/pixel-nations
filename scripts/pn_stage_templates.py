@@ -101,6 +101,18 @@ def stage_source(kind: str, owner: str, repo: str, sha: str, subdir: str) -> Non
             'texture = ExtResource("1_hgrid")',
         )
         p.write_text(s)
+        camera = target / "game/player/player.tscn"
+        c = camera.read_text()
+        # Fit all of A-01 into the viewport; 45 shows only a few giant provinces.
+        camera.write_text(c.replace("0, 0, 45)", "0, 0, 230)"))
+    if kind == "village":
+        hud = target / "ui/approved_hud.gd"
+        h = hud.read_text()
+        h = h.replace('_label(_brand_box,"The Free Game",24,WINE_DARK)',
+                      '_label(_brand_box,"Pixel Nations",24,WINE_DARK)')
+        h = h.replace('_label(_brand_box,"Lucas Marques, from Shiva",12,MUTED)',
+                      '_label(_brand_box,"Aurelian Basin · Greengate",12,MUTED)')
+        hud.write_text(h)
     print(f"PN_DONOR_STAGE_{kind.upper()}=PASS files={staged} commit={sha}", flush=True)
 
 def make_map_from_canonical_data() -> None:
@@ -134,6 +146,8 @@ def make_map_from_canonical_data() -> None:
     src = STAGE / "world/map/map_data"
     ids.save(src / "pn_aurelian_land_ids.png")
     visual.save(src / "pn_aurelian_world_surface.png")
+    Image.new("RGB", (w, h), (128,128,128)).save(src / "pn_aurelian_height.png")
+    Image.new("RGB", (w, h), (128,128,255)).save(src / "pn_aurelian_normal.png")
     import json
     names = re.findall(r'pnid: "(PN-A01-\d{3})", name: "([^"]+)"', source)
     if len(names) != 30:
@@ -157,6 +171,10 @@ def patch_template_world() -> None:
                                 "res://_pn_templates/world/map/map_data/pn_aurelian_world_surface.png")
     s = s.replace("shader_parameter/terrain_saturation = 1.4000000665",
                   "shader_parameter/terrain_saturation = 1.0")
+    s = s.replace("res://_pn_templates/world/map/map_data/height.png",
+                  "res://_pn_templates/world/map/map_data/pn_aurelian_height.png")
+    s = s.replace("res://_pn_templates/world/map/map_data/normal.png",
+                  "res://_pn_templates/world/map/map_data/pn_aurelian_normal.png")
     mat.write_text(s)
 
 def main() -> None:
