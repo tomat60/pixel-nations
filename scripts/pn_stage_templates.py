@@ -124,7 +124,7 @@ def make_map_from_canonical_data() -> None:
     ids.save(src / "pn_aurelian_land_ids.png")
     visual.save(src / "pn_aurelian_world_surface.png")
     import json
-    names = re.findall(r'pnid: "(PN-A01-\\d{3})", name: "([^"]+)"', source)
+    names = re.findall(r'pnid: "(PN-A01-\d{3})", name: "([^"]+)"', source)
     if len(names) != 30:
         raise RuntimeError(f"Invalid canonical land name count: {len(names)}")
     (src / "pn_aurelian_lands.json").write_text(
