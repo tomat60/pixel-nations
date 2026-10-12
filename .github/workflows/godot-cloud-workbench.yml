@@ -1,0 +1,165 @@
+name: Godot Cloud Workbench — playable core
+
+on:
+  push:
+    branches:
+      - "steward/playable-core-*"
+    paths:
+      - "game/core/**"
+      - "game/scenes/bootstrap/**"
+      - "game/tests/**"
+      - "migration/golden_run_v1.json"
+      - ".github/workflows/godot-cloud-workbench.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-cloud-workbench-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playable-core-proof:
+    name: State tests and rendered foundation frame (cloud)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GODOT_RELEASE: "4.7.1-stable"
+      GODOT_BIN: "/tmp/pn-godot/Godot_v4.7.1-stable_linux.x86_64"
+      EVIDENCE_DIR: "evidence/godot-cloud-workbench"
+    steps:
+      - name: Checkout exact cloud candidate
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Record provenance and reject fixture mismatch
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p "$EVIDENCE_DIR"
+          git rev-parse HEAD | tee "$EVIDENCE_DIR/commit-sha.txt"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          cmp migration/golden_run_v1.json game/tests/fixtures/golden_run_v1.json
+          test -s game/scenes/bootstrap/bootstrap.tscn
+          test -s game/tests/run_all.gd
+          echo "PN_CLOUD_EXACT_REF=PASS"
+
+      - name: Install pinned Godot and minimal Xvfb dependencies
+        shell: bash
+        timeout-minutes: 4
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            xvfb unzip libgl1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 > /dev/null
+          mkdir -p /tmp/pn-godot
+          curl -fsSL --retry 3 --connect-timeout 15 \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            -o /tmp/pn-godot/godot.zip
+          unzip -q /tmp/pn-godot/godot.zip -d /tmp/pn-godot
+          chmod +x "$GODOT_BIN"
+          "$GODOT_BIN" --version | tee "$EVIDENCE_DIR/godot-version.txt"
+
+      - name: Import and execute canonical reducer/save tests
+        shell: bash
+        timeout-minutes: 3
+        run: |
+          set -Eeuo pipefail
+          "$GODOT_BIN" --headless --path game --editor --quit \
+            > "$EVIDENCE_DIR/import.log" 2>&1 || {
+              cat "$EVIDENCE_DIR/import.log"
+              exit 1
+            }
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" "$EVIDENCE_DIR/import.log"; then
+            exit 1
+          fi
+          "$GODOT_BIN" --headless --path game --script res://tests/run_all.gd \
+            > "$EVIDENCE_DIR/tests.log" 2>&1 || {
+              cat "$EVIDENCE_DIR/tests.log"
+              exit 1
+            }
+          grep -F "PIXEL_NATIONS_GODOT_TESTS: PASS" "$EVIDENCE_DIR/tests.log"
+          echo "PN_CLOUD_GAME_STATE_TESTS=PASS"
+
+      - name: Render bootstrap scene at two sizes (foundation smoke only)
+        shell: bash
+        timeout-minutes: 2
+        run: |
+          set -Eeuo pipefail
+          # Deliberately captures the real bootstrap scene, NOT the unmerged OpenGS atlas.
+          # This proves runner-side Godot rendering only; it is not an art/gameplay PASS.
+          cat > game/tests/_cloud_capture.gd <<'GD'
+          extends SceneTree
+
+          func _initialize() -> void:
+              call_deferred("_capture")
+
+          func _capture() -> void:
+              var packed := load("res://scenes/bootstrap/bootstrap.tscn") as PackedScene
+              if packed == null:
+                  push_error("PN_CLOUD_BOOTSTRAP_SCENE_MISSING")
+                  quit(2)
+                  return
+              var scene := packed.instantiate() as Control
+              root.add_child(scene)
+              await process_frame
+              await process_frame
+              await create_timer(0.3).timeout
+              var status := scene.get_node_or_null("Center/Panel/Margin/Content/StatusLabel") as Label
+              if status == null or status.text != "FOUNDATION TEST: PASS":
+                  push_error("PN_CLOUD_BOOTSTRAP_STATE_FAILED")
+                  quit(3)
+                  return
+              var still := root.get_viewport().get_texture().get_image()
+              if still.get_size() != Vector2i(1440, 900):
+                  push_error("PN_CLOUD_WRONG_FRAME_DIMENSIONS")
+                  quit(4)
+                  return
+              var folder := OS.get_environment("PN_CLOUD_EVIDENCE_DIR")
+              if still.save_png(folder.path_join("bootstrap-1440x900.png")) != OK:
+                  quit(5)
+                  return
+              still.resize(360, 225, Image.INTERPOLATE_LANCZOS)
+              if still.save_png(folder.path_join("bootstrap-360x225.png")) != OK:
+                  quit(6)
+                  return
+              print("PN_CLOUD_BOOTSTRAP_FRAMES=PASS")
+              quit(0)
+          GD
+          timeout 55s xvfb-run -a -s "-screen 0 1600x1000x24" env \
+            LIBGL_ALWAYS_SOFTWARE=1 \
+            PN_CLOUD_EVIDENCE_DIR="$PWD/$EVIDENCE_DIR" \
+            "$GODOT_BIN" --path game --audio-driver Dummy \
+            --rendering-method gl_compatibility --resolution 1440x900 \
+            --script res://tests/_cloud_capture.gd \
+            > "$EVIDENCE_DIR/render.log" 2>&1 || {
+              cat "$EVIDENCE_DIR/render.log"
+              exit 1
+            }
+          grep -F "PN_CLOUD_BOOTSTRAP_FRAMES=PASS" "$EVIDENCE_DIR/render.log"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, struct
+          d = Path("evidence/godot-cloud-workbench")
+          for name, expected in (("bootstrap-1440x900.png", (1440,900)), ("bootstrap-360x225.png",(360,225))):
+              p=d/name
+              data=p.read_bytes()
+              if data[:8] != b"\\x89PNG\\r\\n\\x1a\\n":
+                  raise SystemExit(f"Invalid PNG: {p}")
+              size=struct.unpack(">II",data[16:24])
+              if size!=expected or len(data)<3000:
+                  raise SystemExit(f"Weak/mismatched PNG: {p}, {size}, {len(data)} bytes")
+              (d/(name+".sha256")).write_text(hashlib.sha256(data).hexdigest()+"\\n")
+          print("PN_CLOUD_FRAME_EVIDENCE=PASS")
+          PY
+
+      - name: Always upload exact-SHA logs and images
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pn-cloud-core-${{ github.sha }}-${{ github.run_id }}
+          path: evidence/godot-cloud-workbench/**
+          if-no-files-found: warn
+          retention-days: 7
