@@ -34,6 +34,7 @@ func _run() -> void:
 	var save_path := "user://pixel-nations-runtime-contract.json"
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 	runtime.controller.save_path = save_path
+	_check(String(ProjectSettings.get_setting("application/config/name", "")) == "Pixel Nations", "runnable_game_uses_canonical_identity")
 	var home_world: Vector2 = runtime.canonical_center_world(HOME_ID)
 	_check(is_finite(home_world.x), "home_geometry_available")
 	var player = runtime.world.get_node("Player")
