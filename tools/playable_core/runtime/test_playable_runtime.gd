@@ -89,8 +89,21 @@ func _run() -> void:
 	_check(runtime.controller.load_game(), "frontier_inspection_reopens")
 	var inspected_reopened: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(inspected_reopened.get("riverbend_inspected", false)), "reopen_keeps_frontier_inspection")
+	await _click_control(runtime.claim_button)
+	var claimed_frontier: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(claimed_frontier.get("riverbend_claimed", false)), "claim_button_claims_inspected_frontier")
+	_check(int(claimed_frontier.get("claimed_lands", -1)) == 2, "frontier_claim_reports_two_of_thirty")
+	_check(String(claimed_frontier.get("settlement_name", "")) == "Greengate", "frontier_claim_keeps_single_settlement")
+	_check(String(claimed_frontier.get("nation_status", "")) == "not_founded", "frontier_claim_does_not_invent_nation")
+	_check(String(claimed_frontier.get("next_goal", "")) == "Connect Riverbend to Greengate", "frontier_claim_reveals_link_goal")
+	_check(runtime.frontier_link.visible, "frontier_claim_shows_world_relationship")
+	runtime.controller.session.state["claimed_land_ids"] = [HOME_ID]
+	_check(runtime.controller.load_game(), "frontier_claim_reopens")
+	var claim_reopened: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(claim_reopened.get("riverbend_claimed", false)), "reopen_keeps_frontier_claim")
+	_check(int(claim_reopened.get("claimed_lands", -1)) == 2, "reopen_keeps_two_claimed_lands")
 	await process_frame
-	_capture("world-frontier-inspected")
+	_capture("world-riverbend-claimed")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")
