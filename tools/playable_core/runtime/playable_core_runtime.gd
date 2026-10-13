@@ -30,6 +30,7 @@ var enter_button: Button
 var inspect_button: Button
 var connect_button: Button
 var road_button: Button
+var supply_button: Button
 var save_button: Button
 var return_button: Button
 
@@ -85,7 +86,7 @@ func _build_ui() -> void:
 	panel.name = "ProgressPanel"
 	panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	panel.position = Vector2(-380, 24)
-	panel.size = Vector2(356, 560)
+	panel.size = Vector2(356, 640)
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = Color(0.055, 0.07, 0.075, 0.94)
 	panel_style.border_color = Color(0.54, 0.69, 0.55, 1.0)
@@ -115,9 +116,10 @@ func _build_ui() -> void:
 	inspect_button = _button("Inspect Riverbend frontier", "InspectButton", _inspect_frontier)
 	connect_button = _button("Connect Riverbend · 5 stone", "ConnectButton", _connect_riverbend)
 	road_button = _button("Build village road · 5 stone", "RoadButton", _road)
+	supply_button = _button("Receive Riverbend stone · +5", "SupplyButton", _receive_riverbend_supply)
 	save_button = _button("Save progress", "SaveButton", _save)
 	return_button = _button("Return to World", "ReturnButton", _return_world)
-	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, save_button, return_button]:
+	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, supply_button, save_button, return_button]:
 		column.add_child(button)
 
 
@@ -213,6 +215,11 @@ func _connect_riverbend() -> void:
 		controller.save_game()
 
 
+func _receive_riverbend_supply() -> void:
+	if controller.receive_riverbend_supply():
+		controller.save_game()
+
+
 func _save() -> void:
 	controller.save_game()
 
@@ -257,11 +264,18 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	if view == "village":
 		title_label.text = "Greengate · %s" % String(snapshot.get("land_id", ""))
 		identity_label.text = "Founded settlement"
-		detail_label.text = "Stone: %d · Road: %s" % [
+		detail_label.text = "Stone: %d · Road: %s · Riverbend supply: %s" % [
 			int(snapshot.get("stone", 0)),
 			"built" if bool(snapshot.get("road_built", false)) else "not built",
+			("delivered" if bool(snapshot.get("riverbend_supply_delivered", false)) else (
+				"ready" if bool(snapshot.get("riverbend_connected", false)) else "locked"
+			)),
 		]
-		goal_label.text = "Build one persistent road, save, then return to the World."
+		goal_label.text = (
+			"Riverbend delivered 5 stone for the next expansion."
+			if bool(snapshot.get("riverbend_supply_delivered", false))
+			else "Complete the Riverbend link, then receive its first stone shipment."
+		)
 	else:
 		title_label.text = "Sector A-01 / Aurelian Basin"
 		identity_label.text = _land_title(selected_id)
@@ -282,6 +296,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	inspect_button.visible = view == "world"
 	connect_button.visible = view == "world"
 	road_button.visible = view == "village"
+	supply_button.visible = view == "village"
 	return_button.visible = view == "village"
 	save_button.visible = true
 	var selected_claimed := (snapshot.get("claimed_land_ids", []) as Array).has(selected_id)
@@ -306,6 +321,10 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		or int(snapshot.get("stone", 0)) < int(snapshot.get("frontier_link_stone_cost", 5))
 	)
 	road_button.disabled = bool(snapshot.get("road_built", false)) or int(snapshot.get("stone", 0)) < 5
+	supply_button.disabled = (
+		not bool(snapshot.get("riverbend_connected", false))
+		or bool(snapshot.get("riverbend_supply_delivered", false))
+	)
 	if frontier_link != null:
 		frontier_link.visible = view == "world" and bool(snapshot.get("riverbend_claimed", false))
 		_set_frontier_link_connected(bool(snapshot.get("riverbend_connected", false)))

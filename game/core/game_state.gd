@@ -1,10 +1,12 @@
 class_name GameState
 extends RefCounted
 
-const SCHEMA_VERSION := 5
+const SCHEMA_VERSION := 6
 const CHARTED_LANDS := 30
 const ROAD_STONE_COST := 5
 const FRONTIER_LINK_STONE_COST := 5
+const RIVERBEND_SUPPLY_STONE_REWARD := 5
+const RIVERBEND_SUPPLY_ORDER_ID := "riverbend_stone_shipment"
 const GREENVALE_LAND_ID := "PN-A01-001"
 const RIVERBEND_LAND_ID := "PN-A01-002"
 const CANONICAL_LAND_IDS := [
@@ -155,6 +157,22 @@ static func reduce(state: Dictionary, action: Dictionary) -> Dictionary:
 			next_state["resources"] = resources
 			next_state["connected_land_ids"] = connected_land_ids
 
+		"RECEIVE_RIVERBEND_SUPPLY":
+			var connected_land_ids: Array = next_state.get("connected_land_ids", [])
+			var settlement: Dictionary = next_state.get("settlement", {}).duplicate(true)
+			var completed_orders: Array = settlement.get("completed_orders", []).duplicate()
+			if (
+				not connected_land_ids.has(RIVERBEND_LAND_ID)
+				or completed_orders.has(RIVERBEND_SUPPLY_ORDER_ID)
+			):
+				return next_state
+			var resources: Dictionary = next_state.get("resources", {}).duplicate(true)
+			resources["stone"] = int(resources.get("stone", 0)) + RIVERBEND_SUPPLY_STONE_REWARD
+			completed_orders.append(RIVERBEND_SUPPLY_ORDER_ID)
+			settlement["completed_orders"] = completed_orders
+			next_state["resources"] = resources
+			next_state["settlement"] = settlement
+
 		_:
 			return next_state
 
@@ -185,6 +203,9 @@ static func progress(state: Dictionary) -> Dictionary:
 	var riverbend_inspected := (state.get("inspected_land_ids", []) as Array).has(RIVERBEND_LAND_ID)
 	var riverbend_claimed := claimed_land_ids.has(RIVERBEND_LAND_ID)
 	var riverbend_connected := (state.get("connected_land_ids", []) as Array).has(RIVERBEND_LAND_ID)
+	var riverbend_supply_delivered := (
+		(settlement.get("completed_orders", []) as Array).has(RIVERBEND_SUPPLY_ORDER_ID)
+	)
 	var next_goal := "Select and claim Greenvale"
 	if claimed and not founded:
 		next_goal = "Found Greengate"
@@ -196,8 +217,10 @@ static func progress(state: Dictionary) -> Dictionary:
 		next_goal = "Choose whether to claim Riverbend"
 	elif riverbend_claimed and not riverbend_connected:
 		next_goal = "Connect Riverbend to Greengate"
-	elif riverbend_connected:
-		next_goal = "Await the next A-01 expansion opportunity"
+	elif riverbend_connected and not riverbend_supply_delivered:
+		next_goal = "Return to Greengate for the Riverbend stone shipment"
+	elif riverbend_supply_delivered:
+		next_goal = "Next canonical A-01 land is not yet playable"
 	return {
 		"claimed_lands": claimed_land_ids.size(),
 		"charted_lands": CHARTED_LANDS,
@@ -207,6 +230,10 @@ static func progress(state: Dictionary) -> Dictionary:
 		"riverbend_inspected": riverbend_inspected,
 		"riverbend_claimed": riverbend_claimed,
 		"riverbend_connected": riverbend_connected,
+		"riverbend_supply_delivered": riverbend_supply_delivered,
+		"riverbend_supply_status": (
+			"delivered" if riverbend_supply_delivered else ("ready" if riverbend_connected else "locked")
+		),
 		"frontier_link_status": (
 			"connected" if riverbend_connected else ("pending" if riverbend_claimed else "not_started")
 		),
@@ -291,5 +318,13 @@ static func _normalize_state(saved: Dictionary) -> Dictionary:
 		and normalized_road_built
 	):
 		normalized["connected_land_ids"] = [RIVERBEND_LAND_ID]
+
+	var normalized_completed_orders: Array = normalized["settlement"].get("completed_orders", []).duplicate()
+	if (
+		normalized_completed_orders.has(RIVERBEND_SUPPLY_ORDER_ID)
+		and not normalized["connected_land_ids"].has(RIVERBEND_LAND_ID)
+	):
+		normalized_completed_orders.erase(RIVERBEND_SUPPLY_ORDER_ID)
+		normalized["settlement"]["completed_orders"] = normalized_completed_orders
 
 	return normalized

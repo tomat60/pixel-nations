@@ -81,6 +81,21 @@ func connect_riverbend() -> bool:
 	)
 
 
+func receive_riverbend_supply() -> bool:
+	if current_view != VIEW_VILLAGE:
+		return false
+	var completed_before: Array = state.get("settlement", {}).get("completed_orders", []).duplicate()
+	var stone_before := int(state.get("resources", {}).get("stone", 0))
+	state = GameState.reduce(state, {"type": "RECEIVE_RIVERBEND_SUPPLY"})
+	var completed_after: Array = state.get("settlement", {}).get("completed_orders", [])
+	var stone_after := int(state.get("resources", {}).get("stone", 0))
+	return (
+		completed_after.has(GameState.RIVERBEND_SUPPLY_ORDER_ID)
+		and not completed_before.has(GameState.RIVERBEND_SUPPLY_ORDER_ID)
+		and stone_after == stone_before + GameState.RIVERBEND_SUPPLY_STONE_REWARD
+	)
+
+
 func return_to_world() -> bool:
 	if current_view != VIEW_VILLAGE:
 		return false
@@ -126,6 +141,8 @@ func world_view_model() -> Dictionary:
 		"riverbend_inspected": bool(progress.get("riverbend_inspected", false)),
 		"riverbend_claimed": bool(progress.get("riverbend_claimed", false)),
 		"riverbend_connected": bool(progress.get("riverbend_connected", false)),
+		"riverbend_supply_delivered": bool(progress.get("riverbend_supply_delivered", false)),
+		"riverbend_supply_status": String(progress.get("riverbend_supply_status", "locked")),
 		"frontier_link_status": String(progress.get("frontier_link_status", "not_started")),
 		"stone": int(state.get("resources", {}).get("stone", 0)),
 		"frontier_link_stone_cost": GameState.FRONTIER_LINK_STONE_COST,
@@ -143,4 +160,7 @@ func village_view_model() -> Dictionary:
 		"road_built": (settlement.get("built_improvements", []) as Array).has("road"),
 		"stone": int(state.get("resources", {}).get("stone", 0)),
 		"road_stone_cost": GameState.ROAD_STONE_COST,
+		"riverbend_connected": (state.get("connected_land_ids", []) as Array).has(GameState.RIVERBEND_LAND_ID),
+		"riverbend_supply_delivered": (settlement.get("completed_orders", []) as Array).has(GameState.RIVERBEND_SUPPLY_ORDER_ID),
+		"riverbend_supply_stone_reward": GameState.RIVERBEND_SUPPLY_STONE_REWARD,
 	}

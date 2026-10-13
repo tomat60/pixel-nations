@@ -105,7 +105,7 @@ func _run() -> void:
 	_check(bool(connected_frontier.get("riverbend_connected", false)), "connect_button_completes_frontier_link")
 	_check(String(connected_frontier.get("frontier_link_status", "")) == "connected", "frontier_link_reports_connected")
 	_check(int(connected_frontier.get("stone", -1)) == 0, "frontier_link_costs_remaining_five_stone")
-	_check(String(connected_frontier.get("next_goal", "")) == "Await the next A-01 expansion opportunity", "frontier_link_reveals_honest_next_goal")
+	_check(String(connected_frontier.get("next_goal", "")) == "Return to Greengate for the Riverbend stone shipment", "frontier_link_reveals_honest_next_goal")
 	_check(String(connected_frontier.get("nation_status", "")) == "not_founded", "frontier_link_does_not_invent_nation")
 	_check(runtime.frontier_link_material.albedo_color.g > runtime.frontier_link_material.albedo_color.r, "connected_frontier_link_turns_green")
 	runtime.controller.session.state["claimed_land_ids"] = [HOME_ID]
@@ -119,6 +119,32 @@ func _run() -> void:
 	_check(int(claim_reopened.get("stone", -1)) == 0, "reopen_keeps_frontier_connection_cost")
 	await process_frame
 	_capture("world-riverbend-connected")
+	await _click_position(home_screen)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HOME_ID, "pointer_reselects_home_for_supply")
+	await _click_control(runtime.enter_button)
+	await process_frame
+	await create_timer(0.6).timeout
+	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "supply_path_enters_village")
+	await _click_control(runtime.supply_button)
+	var supplied_village: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(supplied_village.get("riverbend_supply_delivered", false)), "supply_button_delivers_riverbend_stone")
+	_check(int(supplied_village.get("stone", -1)) == 5, "riverbend_supply_restores_five_stone")
+	_check(runtime.supply_button.disabled, "riverbend_supply_is_one_time")
+	await process_frame
+	_capture("village-riverbend-supply")
+	await _click_control(runtime.return_button)
+	await process_frame
+	var supplied_world: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(supplied_world.get("riverbend_supply_delivered", false)), "world_reports_riverbend_supply")
+	_check(String(supplied_world.get("next_goal", "")) == "Next canonical A-01 land is not yet playable", "world_reports_honest_unavailable_next_land")
+	runtime.controller.session.state["settlement"]["completed_orders"] = []
+	runtime.controller.session.state["resources"]["stone"] = 0
+	_check(runtime.controller.load_game(), "riverbend_supply_reopens")
+	var supplied_reopened: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(supplied_reopened.get("riverbend_supply_delivered", false)), "reopen_keeps_riverbend_supply")
+	_check(int(supplied_reopened.get("stone", -1)) == 5, "reopen_keeps_riverbend_supply_reward")
+	await process_frame
+	_capture("world-riverbend-supplied")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")
