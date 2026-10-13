@@ -111,6 +111,36 @@ func commission_highmere_survey() -> bool:
 	)
 
 
+func receive_highmere_link_supply() -> bool:
+	if current_view != VIEW_VILLAGE:
+		return false
+	var completed_before: Array = state.get("settlement", {}).get("completed_orders", []).duplicate()
+	var stone_before := int(state.get("resources", {}).get("stone", 0))
+	state = GameState.reduce(state, {"type": "RECEIVE_HIGHMERE_LINK_SUPPLY"})
+	var completed_after: Array = state.get("settlement", {}).get("completed_orders", [])
+	var stone_after := int(state.get("resources", {}).get("stone", 0))
+	return (
+		completed_after.has(GameState.HIGHMERE_LINK_SUPPLY_ORDER_ID)
+		and not completed_before.has(GameState.HIGHMERE_LINK_SUPPLY_ORDER_ID)
+		and stone_after == stone_before + GameState.HIGHMERE_LINK_SUPPLY_STONE_REWARD
+	)
+
+
+func connect_highmere() -> bool:
+	if current_view != VIEW_WORLD:
+		return false
+	var connected_before: Array = state.get("connected_land_ids", []).duplicate()
+	var stone_before := int(state.get("resources", {}).get("stone", 0))
+	state = GameState.reduce(state, {"type": "CONNECT_HIGHMERE"})
+	var connected_after: Array = state.get("connected_land_ids", [])
+	var stone_after := int(state.get("resources", {}).get("stone", 0))
+	return (
+		connected_after.has(GameState.HIGHMERE_LAND_ID)
+		and not connected_before.has(GameState.HIGHMERE_LAND_ID)
+		and stone_after == stone_before - GameState.HIGHMERE_LINK_STONE_COST
+	)
+
+
 func return_to_world() -> bool:
 	if current_view != VIEW_VILLAGE:
 		return false
@@ -161,10 +191,14 @@ func world_view_model() -> Dictionary:
 		"highmere_survey_commissioned": bool(progress.get("highmere_survey_commissioned", false)),
 		"highmere_inspected": bool(progress.get("highmere_inspected", false)),
 		"highmere_claimed": bool(progress.get("highmere_claimed", false)),
+		"highmere_link_supply_delivered": bool(progress.get("highmere_link_supply_delivered", false)),
+		"highmere_connected": bool(progress.get("highmere_connected", false)),
+		"highmere_link_status": String(progress.get("highmere_link_status", "locked")),
 		"highmere_status": String(progress.get("highmere_status", "locked")),
 		"frontier_link_status": String(progress.get("frontier_link_status", "not_started")),
 		"stone": int(state.get("resources", {}).get("stone", 0)),
 		"frontier_link_stone_cost": GameState.FRONTIER_LINK_STONE_COST,
+		"highmere_link_stone_cost": GameState.HIGHMERE_LINK_STONE_COST,
 		"nation_status": String(progress.get("nation_status", "not_founded")),
 		"next_goal": String(progress.get("next_goal", "")),
 	}
@@ -184,4 +218,8 @@ func village_view_model() -> Dictionary:
 		"riverbend_supply_stone_reward": GameState.RIVERBEND_SUPPLY_STONE_REWARD,
 		"highmere_survey_commissioned": (settlement.get("completed_orders", []) as Array).has(GameState.HIGHMERE_SURVEY_ORDER_ID),
 		"highmere_survey_stone_cost": GameState.HIGHMERE_SURVEY_STONE_COST,
+		"highmere_claimed": (state.get("claimed_land_ids", []) as Array).has(GameState.HIGHMERE_LAND_ID),
+		"highmere_link_supply_delivered": (settlement.get("completed_orders", []) as Array).has(GameState.HIGHMERE_LINK_SUPPLY_ORDER_ID),
+		"highmere_link_supply_stone_reward": GameState.HIGHMERE_LINK_SUPPLY_STONE_REWARD,
+		"highmere_connected": (state.get("connected_land_ids", []) as Array).has(GameState.HIGHMERE_LAND_ID),
 	}

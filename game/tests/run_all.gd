@@ -145,7 +145,25 @@ func _init() -> void:
 	_check(int(claimed_highmere_progress.get("claimed_lands", 0)) == 3, "highmere_claim_reports_three_lands")
 	_check(bool(claimed_highmere_progress.get("highmere_claimed", false)), "highmere_claim_visible")
 	_check(String(claimed_highmere_progress.get("nation_status", "")) == "not_founded", "highmere_claim_does_not_invent_nation")
-	_check(String(claimed_highmere_progress.get("next_goal", "")) == "Highmere is claimed; a permanent ridge link is not yet playable", "highmere_claim_reports_honest_stop_gate")
+	_check(String(claimed_highmere_progress.get("next_goal", "")) == "Return to Greengate for the Highmere ridge stone shipment", "highmere_claim_reports_supply_goal")
+	var premature_highmere_link := STATE.reduce(claimed_highmere, {"type": "CONNECT_HIGHMERE"})
+	_check(not premature_highmere_link.get("connected_land_ids", []).has(STATE.HIGHMERE_LAND_ID), "highmere_link_requires_ridge_supply")
+	var highmere_link_supplied := STATE.reduce(claimed_highmere, {"type": "RECEIVE_HIGHMERE_LINK_SUPPLY"})
+	_check(highmere_link_supplied.get("settlement", {}).get("completed_orders", []).has(STATE.HIGHMERE_LINK_SUPPLY_ORDER_ID), "highmere_link_supply_delivered")
+	_check(int(highmere_link_supplied.get("resources", {}).get("stone", -1)) == 5, "highmere_link_supply_restores_five_stone")
+	_check(String(STATE.progress(highmere_link_supplied).get("next_goal", "")) == "Connect Highmere ridge to Riverbend", "highmere_link_supply_goal_truthful")
+	var connected_highmere := STATE.reduce(highmere_link_supplied, {"type": "CONNECT_HIGHMERE"})
+	var connected_highmere_progress := STATE.progress(connected_highmere)
+	_check(connected_highmere.get("connected_land_ids", []) == ["PN-A01-002", "PN-A01-003"], "highmere_link_recorded")
+	_check(int(connected_highmere.get("resources", {}).get("stone", -1)) == 0, "highmere_link_costs_five_stone")
+	_check(bool(connected_highmere_progress.get("highmere_connected", false)), "highmere_link_visible")
+	_check(String(connected_highmere_progress.get("next_goal", "")) == "Highmere is linked; the next expansion is not yet playable", "highmere_link_reports_honest_stop_gate")
+	_check(String(connected_highmere_progress.get("nation_status", "")) == "not_founded", "highmere_link_does_not_invent_nation")
+	var duplicate_highmere_link := STATE.reduce(connected_highmere, {"type": "CONNECT_HIGHMERE"})
+	_check(duplicate_highmere_link.get("connected_land_ids", []).size() == 2, "highmere_link_idempotent")
+	_check(int(duplicate_highmere_link.get("resources", {}).get("stone", -1)) == 0, "highmere_link_cost_idempotent")
+	var connected_highmere_restored := STATE.from_json(STATE.to_json(connected_highmere))
+	_check(connected_highmere_restored.get("connected_land_ids", []) == ["PN-A01-002", "PN-A01-003"], "highmere_link_persists")
 	var duplicate_highmere_claim := STATE.reduce(claimed_highmere, {"type": "CLAIM_LAND", "land_id": STATE.HIGHMERE_LAND_ID})
 	_check(duplicate_highmere_claim.get("claimed_land_ids", []).size() == 3, "highmere_claim_idempotent")
 	var claimed_highmere_restored := STATE.from_json(STATE.to_json(claimed_highmere))
@@ -175,7 +193,7 @@ func _init() -> void:
 		},
 	})
 	var migrated: Dictionary = STATE.from_json(legacy_payload)
-	_check(int(migrated.get("schema_version", 0)) == 8, "legacy_schema_migrated")
+	_check(int(migrated.get("schema_version", 0)) == 9, "legacy_schema_migrated")
 	_check(String(migrated.get("selected_land_id", "")) == "PN-A01-001", "legacy_selection_recovered")
 	_check(String(migrated.get("claimed_land_id", "")) == "PN-A01-001", "legacy_claim_preserved")
 	_check(migrated.get("claimed_land_ids", []) == ["PN-A01-001"], "legacy_claim_collection_recovered")
@@ -238,6 +256,16 @@ func _init() -> void:
 	var repaired_highmere: Dictionary = STATE.from_json(injected_highmere_save)
 	_check(not repaired_highmere.get("settlement", {}).get("completed_orders", []).has("highmere_survey"), "highmere_survey_requires_persisted_supply")
 	_check(not repaired_highmere.get("inspected_land_ids", []).has("PN-A01-003"), "highmere_inspection_requires_persisted_survey")
+	var injected_highmere_link_save := JSON.stringify({
+		"schema_version": 9,
+		"claimed_land_id": "PN-A01-001",
+		"claimed_land_ids": ["PN-A01-001", "PN-A01-002"],
+		"connected_land_ids": ["PN-A01-002", "PN-A01-003"],
+		"settlement": {"founded": true, "name": "Greengate", "built_improvements": ["road"], "completed_orders": ["riverbend_stone_shipment", "highmere_survey", "highmere_link_stone_shipment"]},
+	})
+	var repaired_highmere_link: Dictionary = STATE.from_json(injected_highmere_link_save)
+	_check(not repaired_highmere_link.get("settlement", {}).get("completed_orders", []).has("highmere_link_stone_shipment"), "highmere_link_supply_requires_persisted_claim")
+	_check(not repaired_highmere_link.get("connected_land_ids", []).has("PN-A01-003"), "highmere_link_requires_persisted_claim_and_supply")
 
 	_test_playable_session_round_trip()
 
@@ -322,7 +350,22 @@ func _test_playable_session_round_trip() -> void:
 	_check(int(highmere_claimed_world.get("claimed_lands", 0)) == 3, "session_world_reports_three_claimed_lands")
 	_check(String(highmere_claimed_world.get("settlement_name", "")) == "Greengate", "session_highmere_keeps_single_settlement")
 	_check(String(highmere_claimed_world.get("nation_status", "")) == "not_founded", "session_highmere_claim_keeps_nation_unfounded")
-	_check(String(highmere_claimed_world.get("next_goal", "")) == "Highmere is claimed; a permanent ridge link is not yet playable", "session_highmere_claim_goal_truthful")
+	_check(String(highmere_claimed_world.get("next_goal", "")) == "Return to Greengate for the Highmere ridge stone shipment", "session_highmere_claim_goal_truthful")
+	_check(session.select_land("PN-A01-001"), "session_reselects_greenvale_for_highmere_link_supply")
+	_check(session.enter_greengate(), "session_reenters_greengate_for_highmere_link_supply")
+	_check(session.receive_highmere_link_supply(), "session_receives_highmere_link_supply")
+	_check(not session.receive_highmere_link_supply(), "session_blocks_duplicate_highmere_link_supply")
+	var highmere_supplied_village: Dictionary = session.village_view_model()
+	_check(int(highmere_supplied_village.get("stone", -1)) == 5, "session_highmere_link_supply_restores_five_stone")
+	_check(bool(highmere_supplied_village.get("highmere_link_supply_delivered", false)), "session_village_reports_highmere_link_supply")
+	_check(session.return_to_world(), "session_returns_to_world_for_highmere_link")
+	_check(session.select_land("PN-A01-003"), "session_reselects_highmere_for_link")
+	_check(session.connect_highmere(), "session_connects_highmere")
+	_check(not session.connect_highmere(), "session_blocks_duplicate_highmere_link")
+	var highmere_connected_world: Dictionary = session.world_view_model()
+	_check(bool(highmere_connected_world.get("highmere_connected", false)), "session_world_reports_highmere_link")
+	_check(int(highmere_connected_world.get("stone", -1)) == 0, "session_highmere_link_spends_five_stone")
+	_check(String(highmere_connected_world.get("next_goal", "")) == "Highmere is linked; the next expansion is not yet playable", "session_highmere_link_goal_truthful")
 
 	var save_path := "user://playable-core-session-test.json"
 	_check(session.save_to_path(save_path), "session_save")
@@ -339,8 +382,10 @@ func _test_playable_session_round_trip() -> void:
 	_check(bool(reopened_world.get("highmere_survey_commissioned", false)), "session_reopen_highmere_survey_persisted")
 	_check(bool(reopened_world.get("highmere_inspected", false)), "session_reopen_highmere_inspection_persisted")
 	_check(bool(reopened_world.get("highmere_claimed", false)), "session_reopen_highmere_claim_persisted")
-	_check(int(reopened_world.get("stone", -1)) == 0, "session_reopen_highmere_survey_cost_persisted")
-	_check(String(reopened_world.get("next_goal", "")) == "Highmere is claimed; a permanent ridge link is not yet playable", "session_reopen_goal_persisted")
+	_check(bool(reopened_world.get("highmere_link_supply_delivered", false)), "session_reopen_highmere_link_supply_persisted")
+	_check(bool(reopened_world.get("highmere_connected", false)), "session_reopen_highmere_link_persisted")
+	_check(int(reopened_world.get("stone", -1)) == 0, "session_reopen_highmere_link_cost_persisted")
+	_check(String(reopened_world.get("next_goal", "")) == "Highmere is linked; the next expansion is not yet playable", "session_reopen_goal_persisted")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 
 func _check(condition: bool, label: String) -> void:

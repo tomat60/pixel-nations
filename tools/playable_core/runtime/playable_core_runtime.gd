@@ -238,9 +238,9 @@ func _build_ui() -> void:
 	claim_button = _button("Claim selected land", "ClaimButton", _claim)
 	enter_button = _button("Enter Greengate", "EnterButton", _enter)
 	inspect_button = _button("Inspect Riverbend frontier", "InspectButton", _inspect_frontier)
-	connect_button = _button("Connect Riverbend · 5 stone", "ConnectButton", _connect_riverbend)
+	connect_button = _button("Connect Riverbend · 5 stone", "ConnectButton", _connect_selected_link)
 	road_button = _button("Build village road · 5 stone", "RoadButton", _road)
-	supply_button = _button("Receive Riverbend stone · +5", "SupplyButton", _receive_riverbend_supply)
+	supply_button = _button("Receive Riverbend stone · +5", "SupplyButton", _receive_next_supply)
 	survey_button = _button("Commission Highmere survey · 5 stone", "SurveyButton", _commission_highmere_survey)
 	save_button = _button("Save progress", "SaveButton", _save)
 	return_button = _button("Return to World", "ReturnButton", _return_world)
@@ -328,7 +328,7 @@ func _build_highmere_survey_link() -> void:
 	highmere_survey_material.emission_energy_multiplier = 2.2
 	highmere_survey_material.no_depth_test = true
 	route_mesh.material = highmere_survey_material
-	_set_highmere_survey_state(false, false)
+	_set_highmere_survey_state(false, false, false)
 	highmere_survey_link = MeshInstance3D.new()
 	highmere_survey_link.name = "RiverbendHighmereSurveyRoute"
 	highmere_survey_link.mesh = route_mesh
@@ -357,13 +357,21 @@ func _inspect_frontier() -> void:
 		controller.save_game()
 
 
-func _connect_riverbend() -> void:
-	if controller.connect_riverbend():
+func _connect_selected_link() -> void:
+	var selected_id := String(controller.current_snapshot().get("selected_land_id", ""))
+	var connected := controller.connect_highmere() if selected_id == "PN-A01-003" else controller.connect_riverbend()
+	if connected:
 		controller.save_game()
 
 
-func _receive_riverbend_supply() -> void:
-	if controller.receive_riverbend_supply():
+func _receive_next_supply() -> void:
+	var snapshot := controller.current_snapshot()
+	var delivered := (
+		controller.receive_highmere_link_supply()
+		if bool(snapshot.get("highmere_claimed", false))
+		else controller.receive_riverbend_supply()
+	)
+	if delivered:
 		controller.save_game()
 
 
@@ -416,20 +424,28 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	if view == "village":
 		title_label.text = "Greengate · %s" % String(snapshot.get("land_id", ""))
 		identity_label.text = "Founded settlement"
-		detail_label.text = "Stone: %d · Road: %s · Riverbend supply: %s · Highmere survey: %s" % [
+		detail_label.text = "Stone: %d · Road: %s · Riverbend supply: %s · Highmere survey: %s · Ridge stone: %s" % [
 			int(snapshot.get("stone", 0)),
 			"built" if bool(snapshot.get("road_built", false)) else "not built",
 			("delivered" if bool(snapshot.get("riverbend_supply_delivered", false)) else (
 				"ready" if bool(snapshot.get("riverbend_connected", false)) else "locked"
 			)),
 			"commissioned" if bool(snapshot.get("highmere_survey_commissioned", false)) else "not commissioned",
+			"delivered" if bool(snapshot.get("highmere_link_supply_delivered", false)) else "not delivered",
 		]
 		goal_label.text = (
-			("Highmere survey commissioned. Return to World and inspect the northern ridge."
-			if bool(snapshot.get("highmere_survey_commissioned", false)) else
-			"Riverbend delivered 5 stone. Commission the Highmere survey.")
-			if bool(snapshot.get("riverbend_supply_delivered", false))
-			else "Complete the Riverbend link, then receive its first stone shipment."
+			"Ridge stone staged. Return to World and connect Highmere."
+			if bool(snapshot.get("highmere_link_supply_delivered", false)) else (
+				"Highmere claimed. Receive its one-time ridge stone shipment."
+				if bool(snapshot.get("highmere_claimed", false)) else (
+					"Highmere survey commissioned. Return to World and inspect the northern ridge."
+					if bool(snapshot.get("highmere_survey_commissioned", false)) else (
+						"Riverbend delivered 5 stone. Commission the Highmere survey."
+						if bool(snapshot.get("riverbend_supply_delivered", false))
+						else "Complete the Riverbend link, then receive its first stone shipment."
+					)
+				)
+			)
 		)
 	else:
 		title_label.text = "Sector A-01 / Aurelian Basin"
@@ -487,16 +503,34 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		"Inspect Highmere frontier" if selected_id == "PN-A01-003" else "Inspect Riverbend frontier"
 	)
 	inspect_button.disabled = not (riverbend_inspection_ready or highmere_inspection_ready)
+	var highmere_link_selected := selected_id == "PN-A01-003"
+	connect_button.text = "Connect Highmere ridge · 5 stone" if highmere_link_selected else "Connect Riverbend · 5 stone"
 	connect_button.disabled = (
-		selected_id != "PN-A01-002"
-		or not bool(snapshot.get("riverbend_claimed", false))
-		or bool(snapshot.get("riverbend_connected", false))
-		or int(snapshot.get("stone", 0)) < int(snapshot.get("frontier_link_stone_cost", 5))
+		(
+			not bool(snapshot.get("highmere_claimed", false))
+			or not bool(snapshot.get("highmere_link_supply_delivered", false))
+			or bool(snapshot.get("highmere_connected", false))
+			or int(snapshot.get("stone", 0)) < int(snapshot.get("highmere_link_stone_cost", 5))
+		)
+		if highmere_link_selected else (
+			selected_id != "PN-A01-002"
+			or not bool(snapshot.get("riverbend_claimed", false))
+			or bool(snapshot.get("riverbend_connected", false))
+			or int(snapshot.get("stone", 0)) < int(snapshot.get("frontier_link_stone_cost", 5))
+		)
 	)
 	road_button.disabled = bool(snapshot.get("road_built", false)) or int(snapshot.get("stone", 0)) < 5
+	supply_button.text = (
+		"Receive Highmere ridge stone · +5"
+		if bool(snapshot.get("highmere_claimed", false))
+		else "Receive Riverbend stone · +5"
+	)
 	supply_button.disabled = (
-		not bool(snapshot.get("riverbend_connected", false))
-		or bool(snapshot.get("riverbend_supply_delivered", false))
+		bool(snapshot.get("highmere_link_supply_delivered", false))
+		if bool(snapshot.get("highmere_claimed", false)) else (
+			not bool(snapshot.get("riverbend_connected", false))
+			or bool(snapshot.get("riverbend_supply_delivered", false))
+		)
 	)
 	survey_button.disabled = (
 		not bool(snapshot.get("riverbend_supply_delivered", false))
@@ -510,7 +544,8 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		highmere_survey_link.visible = view == "world" and bool(snapshot.get("highmere_survey_commissioned", false))
 		_set_highmere_survey_state(
 			bool(snapshot.get("highmere_inspected", false)),
-			bool(snapshot.get("highmere_claimed", false))
+			bool(snapshot.get("highmere_claimed", false)),
+			bool(snapshot.get("highmere_connected", false))
 		)
 	_refresh_land_visuals(snapshot)
 
@@ -548,18 +583,20 @@ func _set_frontier_link_connected(connected: bool) -> void:
 	)
 
 
-func _set_highmere_survey_state(inspected: bool, claimed: bool) -> void:
+func _set_highmere_survey_state(inspected: bool, claimed: bool, connected: bool) -> void:
 	if highmere_survey_material == null:
 		return
 	highmere_survey_material.albedo_color = (
-		Color(0.30, 0.92, 0.48, 1.0) if claimed else (
+		Color(0.30, 0.92, 0.48, 1.0) if connected else (
+			Color(0.95, 0.68, 0.18, 1.0) if claimed else (
 			Color(0.38, 0.86, 0.95, 1.0) if inspected else Color(0.72, 0.74, 0.70, 1.0)
-		)
+		))
 	)
 	highmere_survey_material.emission = (
-		Color(0.12, 0.72, 0.32, 1.0) if claimed else (
+		Color(0.12, 0.72, 0.32, 1.0) if connected else (
+			Color(0.95, 0.47, 0.08, 1.0) if claimed else (
 			Color(0.12, 0.62, 0.82, 1.0) if inspected else Color(0.42, 0.44, 0.40, 1.0)
-		)
+		))
 	)
 
 
