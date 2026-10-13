@@ -41,6 +41,7 @@ jobs:
           mkdir -p dist
           git rev-parse HEAD | tee dist/commit-sha.txt
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 -m py_compile tools/playable_core/materialize_scene_sources.py
 
       - name: Install pinned Godot editor and templates
         shell: bash
