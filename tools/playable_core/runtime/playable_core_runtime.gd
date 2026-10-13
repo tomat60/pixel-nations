@@ -359,14 +359,14 @@ func _inspect_frontier() -> void:
 
 func _connect_selected_link() -> void:
 	var selected_id := String(controller.current_snapshot().get("selected_land_id", ""))
-	var connected := controller.connect_highmere() if selected_id == "PN-A01-003" else controller.connect_riverbend()
+	var connected: bool = controller.connect_highmere() if selected_id == "PN-A01-003" else controller.connect_riverbend()
 	if connected:
 		controller.save_game()
 
 
 func _receive_next_supply() -> void:
-	var snapshot := controller.current_snapshot()
-	var delivered := (
+	var snapshot: Dictionary = controller.current_snapshot()
+	var delivered: bool = (
 		controller.receive_highmere_link_supply()
 		if bool(snapshot.get("highmere_claimed", false))
 		else controller.receive_riverbend_supply()
