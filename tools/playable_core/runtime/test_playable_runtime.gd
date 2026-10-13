@@ -36,6 +36,10 @@ func _run() -> void:
 	var home_world: Vector2 = runtime.canonical_center_world(HOME_ID)
 	_check(is_finite(home_world.x), "home_geometry_available")
 	var player = runtime.world.get_node("Player")
+	_check(not runtime.world.get_node("Map/MeshInstance3D").visible, "natural_earth_surface_hidden")
+	_check(runtime.atlas_root != null, "fictional_a01_atlas_instantiated")
+	_check(runtime.land_materials.size() == 30, "all_canonical_lands_have_visible_surfaces")
+	_check(runtime.land_labels.size() == 3, "home_and_adjacent_lands_are_named")
 	var home_screen: Vector2 = player.camera.unproject_position(
 		Vector3(home_world.x, 0.0, home_world.y)
 	)
@@ -51,6 +55,10 @@ func _run() -> void:
 	await create_timer(0.6).timeout
 	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "enter_button_opens_village")
 	_check(runtime.village != null, "real_village_scene_instantiated")
+	_check(String(runtime.village.hud._brand.text) == "Pixel Nations", "village_brand_is_pixel_nations")
+	_check(String(runtime.village.hud._credit_label.text) == "Greengate · Aurelian Basin", "village_location_is_canonical")
+	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate's first road", "village_onboarding_matches_product_loop")
+	_check("Credits" in String(runtime.village.hud._code_button.text), "village_credits_remain_accessible")
 	await _click_control(runtime.road_button)
 	_check(bool(runtime.controller.current_snapshot().get("road_built", false)), "road_action_built")
 	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 5, "road_costs_five_stone")

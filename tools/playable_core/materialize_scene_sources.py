@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SPEC = ROOT / "game" / "integration" / "playable_scene_sources.json"
 CANONICAL_MAP_DATA = ROOT / "app" / "play" / "lib" / "map-data.ts"
 RUNTIME_SOURCE = ROOT / "tools" / "playable_core" / "runtime"
+ATLAS_SOURCE = ROOT / "docs" / "visual-targets" / "world_atlas_a01_cartographic_mass_v1.svg"
 TEXT_SUFFIXES = {
     ".cfg", ".css", ".gd", ".gdshader", ".glsl", ".godot", ".html",
     ".import", ".js", ".json", ".md", ".py", ".shader", ".svg",
@@ -110,6 +111,73 @@ def namespace_village(village: Path) -> int:
     return changed
 
 
+def apply_pixel_nations_village_identity(village: Path) -> int:
+    """Replace player-visible donor identity while retaining legal/source access."""
+    replacements = {
+        "The Free Game": "Pixel Nations",
+        "Lucas Marques, from Shiva": "Greengate · Aurelian Basin",
+        "Primeiro, ligue a escola": "Greengate's first road",
+        "Você começa com o Prédio principal, sua praça e a Escola de instrutores. Em Estradas, parta de uma borda da praça até a entrada da escola: 1 pedra por trecho.": (
+            "Use the Pixel Nations command panel to build Greengate's road for 5 stone. "
+            "Then return to World to see the settlement progress on Greenvale."
+        ),
+        "Depois, construa lenhador, pedreira e horta. Clique na escola concluída para formar os profissionais.": (
+            "Village construction remains available here; the strategic loop currently tracks "
+            "one founded settlement and two claimed lands."
+        ),
+        "Entendi, vamos começar": "Continue in Greengate",
+        "Código e artes do jogo ↗": "Credits, licenses and source ↗",
+    }
+    targets = [
+        village / "ui" / "approved_hud.gd",
+        village / "presentation" / "approved_game.gd",
+    ]
+    changed = 0
+    for path in targets:
+        text = path.read_text(encoding="utf-8")
+        rewritten = text
+        for source, replacement in replacements.items():
+            rewritten = rewritten.replace(source, replacement)
+        if rewritten != text:
+            path.write_text(rewritten, encoding="utf-8")
+            changed += 1
+    hud_text = targets[0].read_text(encoding="utf-8")
+    required = (
+        "Pixel Nations",
+        "Greengate · Aurelian Basin",
+        "Greengate's first road",
+        "Credits, licenses and source ↗",
+    )
+    if any(value not in hud_text for value in required):
+        raise SourceError("Pixel Nations Village identity transform is incomplete")
+    if "The Free Game" in hud_text or "Primeiro, ligue a escola" in hud_text:
+        raise SourceError("player-visible donor identity remains after Village transform")
+    return changed
+
+
+def install_a01_atlas_substrate(output: Path) -> dict[str, str]:
+    """Install the retained editable A-01 composition without target-only captions."""
+    if not ATLAS_SOURCE.is_file():
+        raise SourceError(f"missing retained A-01 atlas source: {ATLAS_SOURCE}")
+    source_text = ATLAS_SOURCE.read_text(encoding="utf-8")
+    transformed = re.sub(
+        r'\n  <g font-family="Inter,Segoe UI,sans-serif" fill="#e8edf0">.*?</g>\n',
+        "\n",
+        source_text,
+        count=1,
+        flags=re.DOTALL,
+    )
+    if transformed == source_text or "STATIC COMPOSITION TARGET" in transformed:
+        raise SourceError("A-01 atlas target-caption transform did not apply")
+    destination = output / "pixel_nations" / "a01_atlas_substrate.svg"
+    destination.write_text(transformed, encoding="utf-8")
+    return {
+        "source": str(ATLAS_SOURCE.relative_to(ROOT)),
+        "source_sha256": sha256(ATLAS_SOURCE),
+        "generated_sha256": sha256(destination),
+    }
+
+
 def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -> None:
     notice = f"""# Third-party source changes
 
@@ -118,7 +186,9 @@ def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -
 - OpenGS `ne2.png` is a Thomas Holtvedt QGIS derivative of the public-domain Natural Earth 2 raster; its exact hash and source URL are pinned in the integration spec.
 - Village source: Lucas Marques, from Shiva — The Free Game, `{village_commit}`.
 - Village files are moved below `res://village/`; textual `res://` references are rewritten to that namespace.
+- Player-visible Village branding and first-run guidance are changed to Pixel Nations / Greengate; donor credits, licenses, source link and notices remain available under Credits.
 - Pixel Nations adds a namespaced integration scene, canonical A-01 hit geometry, truthful state UI, and World/Village navigation under `res://pixel_nations/`.
+- The player-visible Natural Earth surface and labels are hidden. A caption-free derivative of the repository-authored editable A-01 cartographic source is installed as the broad atlas substrate, with all 30 canonical land polygons rendered above it.
 - Canonical land geometry is extracted from the repository's existing `app/play/lib/map-data.ts`; donor geography is not relabeled as Pixel Nations geography.
 - The integration remains a rough gameplay candidate and does not claim final visual acceptance.
 
@@ -223,6 +293,7 @@ def materialize(spec_path: Path, output: Path) -> dict[str, object]:
             project_file.unlink()
             village_files -= 1
         rewritten_files = namespace_village(village_root)
+        village_identity_files = apply_pixel_nations_village_identity(village_root)
 
         notices = output / "third_party" / "the-free-game"
         notices.mkdir(parents=True, exist_ok=True)
@@ -232,6 +303,7 @@ def materialize(spec_path: Path, output: Path) -> dict[str, object]:
         write_change_notice(output, opengs["commit"], village["commit"])
 
         runtime_files = install_pixel_nations_runtime(output)
+        atlas_substrate = install_a01_atlas_substrate(output)
 
     manifest = {
         "schema_version": 1,
@@ -242,9 +314,11 @@ def materialize(spec_path: Path, output: Path) -> dict[str, object]:
         "opengs_asset_provenance": opengs.get("asset_provenance", {}),
         "village_files": village_files,
         "village_text_files_rewritten": rewritten_files,
+        "village_identity_files_transformed": village_identity_files,
         "village_scene": "res://village/scenes/approved.tscn",
         "playable_scene": "res://pixel_nations/playable_core.tscn",
         "pixel_nations_runtime_files": runtime_files,
+        "a01_atlas_substrate": atlas_substrate,
         "unresolved_release_assets": opengs["unresolved_release_assets"],
         "missing_pixel_nations_transform": False,
     }
