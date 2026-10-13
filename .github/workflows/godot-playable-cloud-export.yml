@@ -84,6 +84,8 @@ jobs:
           assert manifest["missing_pixel_nations_transform"] is False
           assert manifest["unresolved_release_assets"] == []
           assert manifest["playable_scene"] == "res://pixel_nations/playable_core.tscn"
+          assert 'config/name="Pixel Nations"' in (p / "project.godot").read_text()
+          assert 'config/name="Open Grand Strategy"' not in (p / "project.godot").read_text()
           PY
 
       - name: Add minimal export presets to transformed project
@@ -175,7 +177,8 @@ jobs:
           test -s "$PN_GAME/build/Pixel-Nations-Linux.pck"
           test -s "$PN_GAME/build/Pixel-Nations-macOS.zip"
           unzip -l "$PN_GAME/build/Pixel-Nations-macOS.zip" | tee dist/macos-contents.txt
-          grep -F ".app/Contents/MacOS/" dist/macos-contents.txt
+          grep -F "Pixel Nations.app/Contents/MacOS/Pixel Nations" dist/macos-contents.txt
+          if grep -F "Open Grand Strategy" dist/macos-contents.txt; then exit 1; fi
           cp "$PN_GAME/build/Pixel-Nations-Linux.x86_64" dist/
           cp "$PN_GAME/build/Pixel-Nations-Linux.pck" dist/
           cp "$PN_GAME/build/Pixel-Nations-macOS.zip" dist/
