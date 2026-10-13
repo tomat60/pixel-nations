@@ -36,7 +36,7 @@ func claim_selected_land() -> bool:
 	if session.claim_selected_land():
 		_publish_snapshot()
 		return true
-	return _reject("claim_land", "Select an unclaimed canonical A-01 land first.")
+	return _reject("claim_land", "Select an eligible unclaimed canonical A-01 land first.")
 
 
 func enter_selected_land() -> bool:

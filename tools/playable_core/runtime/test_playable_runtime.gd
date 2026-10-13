@@ -180,18 +180,34 @@ func _run() -> void:
 	_check(bool(inspected_highmere.get("highmere_inspected", false)), "highmere_inspection_recorded")
 	_check(int(inspected_highmere.get("claimed_lands", -1)) == 2, "highmere_inspection_does_not_claim_third_land")
 	_check(String(inspected_highmere.get("nation_status", "")) == "not_founded", "highmere_inspection_does_not_invent_nation")
-	_check(String(inspected_highmere.get("next_goal", "")) == "Highmere is surveyed; claiming it is not yet playable", "highmere_inspection_stops_before_claim")
+	_check(String(inspected_highmere.get("next_goal", "")) == "Choose whether to claim Highmere", "highmere_inspection_reveals_claim_choice")
 	_check(runtime.highmere_survey_link.visible, "highmere_survey_shows_world_route")
 	_check(runtime.highmere_survey_material.albedo_color.b > runtime.highmere_survey_material.albedo_color.r, "inspected_highmere_route_turns_blue")
+	await process_frame
+	_capture("world-highmere-inspected")
+	await _click_control(runtime.claim_button)
+	var claimed_highmere: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(claimed_highmere.get("highmere_claimed", false)), "highmere_claim_recorded")
+	_check(int(claimed_highmere.get("claimed_lands", -1)) == 3, "highmere_claim_advances_to_three_of_thirty")
+	_check(String(claimed_highmere.get("nation_status", "")) == "not_founded", "third_land_does_not_invent_nation")
+	_check(String(claimed_highmere.get("settlement_name", "")) == "Greengate", "third_land_does_not_invent_settlement")
+	_check(String(claimed_highmere.get("next_goal", "")) == "Highmere is claimed; a permanent ridge link is not yet playable", "third_land_reports_honest_stop_gate")
+	_check(runtime.highmere_survey_material.albedo_color.g > runtime.highmere_survey_material.albedo_color.b, "claimed_highmere_route_turns_green")
+	_check(runtime.controller.save_game(), "highmere_claim_saves")
+	await process_frame
+	_capture("world-highmere-claimed")
 	runtime.controller.session.state["inspected_land_ids"] = [FRONTIER_ID]
 	runtime.controller.session.state["settlement"]["completed_orders"].erase("highmere_survey")
+	runtime.controller.session.state["claimed_land_ids"] = [HOME_ID, FRONTIER_ID]
 	_check(runtime.controller.load_game(), "highmere_inspection_reopens")
 	var highmere_reopened: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(highmere_reopened.get("highmere_survey_commissioned", false)), "reopen_keeps_highmere_survey")
 	_check(bool(highmere_reopened.get("highmere_inspected", false)), "reopen_keeps_highmere_inspection")
+	_check(bool(highmere_reopened.get("highmere_claimed", false)), "reopen_keeps_highmere_claim")
+	_check(int(highmere_reopened.get("claimed_lands", -1)) == 3, "reopen_keeps_three_claimed_lands")
 	_check(int(highmere_reopened.get("stone", -1)) == 0, "reopen_keeps_highmere_survey_cost")
 	await process_frame
-	_capture("world-highmere-inspected")
+	_capture("world-highmere-claimed-reopened")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")
