@@ -265,7 +265,21 @@ def install_pixel_nations_runtime(output: Path) -> int:
         1,
     )
     project_text = re.sub(
-        r'^config/description="[^"]+"
+        r'^config/description="[^"]+"$',
+        'config/description="One land can become an empire."',
+        project_text,
+        count=1,
+        flags=re.MULTILINE,
+    )
+    # Never ship the donor launcher icon under Pixel Nations branding.
+    project_text = re.sub(
+        r'^config/icon="[^"]+"\n',
+        "",
+        project_text,
+        count=1,
+        flags=re.MULTILINE,
+    )
+    project.write_text(project_text, encoding="utf-8")
     return sum(1 for path in runtime_target.rglob("*") if path.is_file())
 
 
