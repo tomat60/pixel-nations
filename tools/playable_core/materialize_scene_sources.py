@@ -126,11 +126,19 @@ def apply_village_product_identity(village: Path) -> int:
             '_brand = _label(_brand_box,"PIXEL NATIONS",24,WINE_DARK)',
         '_credit_label = _label(_brand_box,"Lucas Marques, from Shiva",12,MUTED)':
             '_credit_label = _label(_brand_box,"Aurelian Basin · Greengate",12,MUTED)',
+        '_tabs["objectives"].visible = width >= 960.0':
+            '_tabs["objectives"].visible = false',
+        '"trunks":"Troncos"': '"trunks":"Logs"',
+        '"loaves":"Pães"': '"loaves":"Bread"',
+        '"gold":"Ouro"': '"gold":"Gold"',
     }
     for old, new in hud_substitutions.items():
         if hud.count(old) != 1:
             raise SourceError(f"pinned donor HUD branding drift: expected once: {old}")
         hud = hud.replace(old, new, 1)
+    if 'tr("Exército")' not in hud:
+        raise SourceError("pinned donor army tab label drift")
+    hud = hud.replace('tr("Exército")', 'tr("Defense")')
 
     # Existing playable-core navigation/actions remain authoritative. The
     # donor's school-first onboarding and native objective tracker are unrelated
