@@ -135,7 +135,7 @@ jobs:
           export_path="build/Pixel-Nations-macOS.zip"
           patches=PackedStringArray()
           encryption_include_filters=""
-          exclude_filter=""
+          encryption_exclude_filters=""
           seed=0
           encrypt_pck=false
           encrypt_directory=false
@@ -151,6 +151,14 @@ jobs:
           application/version="0.1.0"
           application/copyright="Pixel Nations — third party notices are included"
           codesign/codesign=0
+          CFG
+          # Universal macOS exports require ARM texture compression support.
+          # Enable it before importing donor assets (not merely in preset metadata).
+          cat >> "$PN_GAME/project.godot" <<'CFG'
+          
+          [rendering]
+          
+          textures/vram_compression/import_etc2_astc=true
           CFG
           mkdir -p "$PN_GAME/build"
 
