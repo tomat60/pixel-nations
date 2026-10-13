@@ -390,6 +390,9 @@ func _set_frontier_link_connected(connected: bool) -> void:
 	frontier_link_material.albedo_color = (
 		Color(0.30, 0.92, 0.48, 1.0) if connected else Color(0.95, 0.68, 0.18, 1.0)
 	)
+	frontier_link_material.emission = (
+		Color(0.12, 0.72, 0.32, 1.0) if connected else Color(0.95, 0.47, 0.08, 1.0)
+	)
 
 
 func _set_highmere_survey_inspected(inspected: bool) -> void:
@@ -400,9 +403,6 @@ func _set_highmere_survey_inspected(inspected: bool) -> void:
 	)
 	highmere_survey_material.emission = (
 		Color(0.12, 0.62, 0.82, 1.0) if inspected else Color(0.42, 0.44, 0.40, 1.0)
-	)
-	frontier_link_material.emission = (
-		Color(0.12, 0.72, 0.32, 1.0) if connected else Color(0.95, 0.47, 0.08, 1.0)
 	)
 
 
