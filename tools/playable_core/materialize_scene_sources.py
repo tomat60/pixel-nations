@@ -122,8 +122,8 @@ def apply_pixel_nations_village_identity(village: Path) -> int:
             "Then return to World to see the settlement progress on Greenvale."
         ),
         "Depois, construa lenhador, pedreira e horta. Clique na escola concluída para formar os profissionais.": (
-            "Village construction remains available here; the strategic loop currently tracks "
-            "one founded settlement and two claimed lands."
+            "Village construction remains available here. The Pixel Nations panel reports the "
+            "canonical land, settlement progress and claim count from the current save."
         ),
         "Entendi, vamos começar": "Continue in Greengate",
         "Código e artes do jogo ↗": "Credits, licenses and source ↗",

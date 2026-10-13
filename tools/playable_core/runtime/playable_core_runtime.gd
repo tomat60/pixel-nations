@@ -63,7 +63,7 @@ func _ready() -> void:
 		player.province_selected.disconnect(donor_handler)
 	player.province_selected.connect(_on_world_position_selected)
 	player.position = Vector3(-35.0, 0.0, -46.0)
-	player.camera.position.z = 220.0
+	player.camera.position.z = 250.0
 	_build_a01_atlas()
 	_build_frontier_link()
 	_build_highmere_survey_link()
@@ -176,11 +176,11 @@ func _build_land_label(land_id: String, text_value: String, color: Color) -> voi
 	label.position = Vector3(center.x, 2.0, center.y)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
-	label.font_size = 28
-	label.outline_size = 10
+	label.font_size = 32
+	label.outline_size = 12
 	label.modulate = color
 	label.outline_modulate = Color(0.02, 0.04, 0.05, 0.95)
-	label.pixel_size = 0.08
+	label.pixel_size = 0.12
 	atlas_root.add_child(label)
 	land_labels[land_id] = label
 
