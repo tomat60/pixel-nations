@@ -3,6 +3,7 @@ extends SceneTree
 const PlayableCoreController = preload("res://core/playable_core_controller.gd")
 const HOME_LAND_ID := "PN-A01-001"
 const OTHER_LAND_ID := "PN-A01-002"
+const HIGHMERE_LAND_ID := "PN-A01-003"
 
 var failures := 0
 var rejection_count := 0
@@ -29,6 +30,7 @@ func _run() -> void:
 
 	_expect(String(controller.current_snapshot().get("view", "")) == "world", "starts in World")
 	_expect(not controller.enter_selected_land(), "rejects entry before claim")
+	_expect(not controller.commission_highmere_survey(), "rejects Highmere survey from World")
 	_expect(controller.select_land_from_map(OTHER_LAND_ID), "selects another canonical land")
 	_expect(controller.claim_selected_land(), "claims the selected canonical land")
 	_expect(not controller.enter_selected_land(), "does not relabel another land as Greengate")
@@ -108,8 +110,30 @@ func _run() -> void:
 	var supplied_reopened := reopened.current_snapshot()
 	_expect(bool(supplied_reopened.get("riverbend_supply_delivered", false)), "reopen preserves delivered shipment")
 	_expect(int(supplied_reopened.get("stone", -1)) == 5, "reopen preserves shipment reward")
-	_expect(String(supplied_reopened.get("next_goal", "")) == "Next canonical A-01 land is not yet playable", "reports honest next unavailable land")
-	_expect(rejection_count == 8, "emits one rejection for each invalid action")
+	_expect(String(supplied_reopened.get("next_goal", "")) == "Commission the Highmere survey in Greengate", "reports honest Highmere survey goal")
+	_expect(reopened.select_land_from_map(HOME_LAND_ID), "reselects Greenvale for Highmere survey")
+	_expect(reopened.enter_selected_land(), "reenters Greengate for Highmere survey")
+	_expect(reopened.commission_highmere_survey(), "commissions Highmere survey for five stone")
+	var survey_village := reopened.current_snapshot()
+	_expect(bool(survey_village.get("highmere_survey_commissioned", false)), "Village reports Highmere survey")
+	_expect(int(survey_village.get("stone", -1)) == 0, "Highmere survey spends delivered stone")
+	_expect(not reopened.commission_highmere_survey(), "rejects duplicate Highmere survey")
+	_expect(reopened.save_game(), "saves Highmere survey")
+	_expect(reopened.return_to_world(), "returns to World for Highmere inspection")
+	_expect(reopened.select_land_from_map(HIGHMERE_LAND_ID), "selects canonical Highmere")
+	_expect(reopened.inspect_selected_frontier(), "inspects surveyed Highmere")
+	_expect(not reopened.inspect_selected_frontier(), "rejects duplicate Highmere inspection")
+	_expect(reopened.save_game(), "saves Highmere inspection")
+	reopened.session.state["inspected_land_ids"] = [OTHER_LAND_ID]
+	reopened.session.state["settlement"]["completed_orders"].erase("highmere_survey")
+	_expect(reopened.load_game(), "reloads Highmere survey and inspection")
+	var highmere_reopened := reopened.current_snapshot()
+	_expect(bool(highmere_reopened.get("highmere_survey_commissioned", false)), "reopen preserves Highmere survey")
+	_expect(bool(highmere_reopened.get("highmere_inspected", false)), "reopen preserves Highmere inspection")
+	_expect(int(highmere_reopened.get("claimed_lands", -1)) == 2, "Highmere inspection does not claim third land")
+	_expect(String(highmere_reopened.get("nation_status", "")) == "not_founded", "Highmere inspection does not invent nation")
+	_expect(String(highmere_reopened.get("next_goal", "")) == "Highmere is surveyed; claiming it is not yet playable", "reports honest Highmere stop gate")
+	_expect(rejection_count == 11, "emits one rejection for each invalid action")
 	_expect(view_events == ["village", "world"], "emits exact observed navigation transitions")
 
 	_remove_save(save_path)

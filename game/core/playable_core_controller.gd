@@ -74,6 +74,13 @@ func receive_riverbend_supply() -> bool:
 	return _reject("receive_riverbend_supply", "The one-time Riverbend shipment requires a completed link and the Village view.")
 
 
+func commission_highmere_survey() -> bool:
+	if session.commission_highmere_survey():
+		_publish_snapshot()
+		return true
+	return _reject("commission_highmere_survey", "The Highmere survey requires the delivered Riverbend shipment, the Village view, and 5 stone.")
+
+
 func return_to_world() -> bool:
 	if session.return_to_world():
 		_publish_view()

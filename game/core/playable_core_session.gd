@@ -96,6 +96,21 @@ func receive_riverbend_supply() -> bool:
 	)
 
 
+func commission_highmere_survey() -> bool:
+	if current_view != VIEW_VILLAGE:
+		return false
+	var completed_before: Array = state.get("settlement", {}).get("completed_orders", []).duplicate()
+	var stone_before := int(state.get("resources", {}).get("stone", 0))
+	state = GameState.reduce(state, {"type": "COMMISSION_HIGHMERE_SURVEY"})
+	var completed_after: Array = state.get("settlement", {}).get("completed_orders", [])
+	var stone_after := int(state.get("resources", {}).get("stone", 0))
+	return (
+		completed_after.has(GameState.HIGHMERE_SURVEY_ORDER_ID)
+		and not completed_before.has(GameState.HIGHMERE_SURVEY_ORDER_ID)
+		and stone_after == stone_before - GameState.HIGHMERE_SURVEY_STONE_COST
+	)
+
+
 func return_to_world() -> bool:
 	if current_view != VIEW_VILLAGE:
 		return false
@@ -143,6 +158,9 @@ func world_view_model() -> Dictionary:
 		"riverbend_connected": bool(progress.get("riverbend_connected", false)),
 		"riverbend_supply_delivered": bool(progress.get("riverbend_supply_delivered", false)),
 		"riverbend_supply_status": String(progress.get("riverbend_supply_status", "locked")),
+		"highmere_survey_commissioned": bool(progress.get("highmere_survey_commissioned", false)),
+		"highmere_inspected": bool(progress.get("highmere_inspected", false)),
+		"highmere_status": String(progress.get("highmere_status", "locked")),
 		"frontier_link_status": String(progress.get("frontier_link_status", "not_started")),
 		"stone": int(state.get("resources", {}).get("stone", 0)),
 		"frontier_link_stone_cost": GameState.FRONTIER_LINK_STONE_COST,
@@ -163,4 +181,6 @@ func village_view_model() -> Dictionary:
 		"riverbend_connected": (state.get("connected_land_ids", []) as Array).has(GameState.RIVERBEND_LAND_ID),
 		"riverbend_supply_delivered": (settlement.get("completed_orders", []) as Array).has(GameState.RIVERBEND_SUPPLY_ORDER_ID),
 		"riverbend_supply_stone_reward": GameState.RIVERBEND_SUPPLY_STONE_REWARD,
+		"highmere_survey_commissioned": (settlement.get("completed_orders", []) as Array).has(GameState.HIGHMERE_SURVEY_ORDER_ID),
+		"highmere_survey_stone_cost": GameState.HIGHMERE_SURVEY_STONE_COST,
 	}
