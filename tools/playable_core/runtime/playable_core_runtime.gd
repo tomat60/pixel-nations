@@ -328,7 +328,7 @@ func _build_highmere_survey_link() -> void:
 	highmere_survey_material.emission_energy_multiplier = 2.2
 	highmere_survey_material.no_depth_test = true
 	route_mesh.material = highmere_survey_material
-	_set_highmere_survey_inspected(false)
+	_set_highmere_survey_state(false, false)
 	highmere_survey_link = MeshInstance3D.new()
 	highmere_survey_link.name = "RiverbendHighmereSurveyRoute"
 	highmere_survey_link.mesh = route_mesh
@@ -462,8 +462,15 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		and bool(snapshot.get("riverbend_inspected", false))
 		and not bool(snapshot.get("riverbend_claimed", false))
 	)
+	var highmere_claim_ready := (
+		selected_id == "PN-A01-003"
+		and bool(snapshot.get("highmere_inspected", false))
+		and not bool(snapshot.get("highmere_claimed", false))
+	)
+	claim_button.text = "Claim Highmere ridge" if selected_id == "PN-A01-003" else "Claim selected land"
 	claim_button.disabled = selected_id.is_empty() or selected_claimed or (
-		not String(snapshot.get("claimed_land_id", "")).is_empty() and not riverbend_claim_ready
+		not String(snapshot.get("claimed_land_id", "")).is_empty()
+		and not (riverbend_claim_ready or highmere_claim_ready)
 	)
 	enter_button.disabled = selected_id != "PN-A01-001" or String(snapshot.get("claimed_land_id", "")) != "PN-A01-001"
 	var riverbend_inspection_ready := (
@@ -501,7 +508,10 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		_set_frontier_link_connected(bool(snapshot.get("riverbend_connected", false)))
 	if highmere_survey_link != null:
 		highmere_survey_link.visible = view == "world" and bool(snapshot.get("highmere_survey_commissioned", false))
-		_set_highmere_survey_inspected(bool(snapshot.get("highmere_inspected", false)))
+		_set_highmere_survey_state(
+			bool(snapshot.get("highmere_inspected", false)),
+			bool(snapshot.get("highmere_claimed", false))
+		)
 	_refresh_land_visuals(snapshot)
 
 
@@ -538,14 +548,18 @@ func _set_frontier_link_connected(connected: bool) -> void:
 	)
 
 
-func _set_highmere_survey_inspected(inspected: bool) -> void:
+func _set_highmere_survey_state(inspected: bool, claimed: bool) -> void:
 	if highmere_survey_material == null:
 		return
 	highmere_survey_material.albedo_color = (
-		Color(0.38, 0.86, 0.95, 1.0) if inspected else Color(0.72, 0.74, 0.70, 1.0)
+		Color(0.30, 0.92, 0.48, 1.0) if claimed else (
+			Color(0.38, 0.86, 0.95, 1.0) if inspected else Color(0.72, 0.74, 0.70, 1.0)
+		)
 	)
 	highmere_survey_material.emission = (
-		Color(0.12, 0.62, 0.82, 1.0) if inspected else Color(0.42, 0.44, 0.40, 1.0)
+		Color(0.12, 0.72, 0.32, 1.0) if claimed else (
+			Color(0.12, 0.62, 0.82, 1.0) if inspected else Color(0.42, 0.44, 0.40, 1.0)
+		)
 	)
 
 

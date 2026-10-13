@@ -160,6 +160,7 @@ func world_view_model() -> Dictionary:
 		"riverbend_supply_status": String(progress.get("riverbend_supply_status", "locked")),
 		"highmere_survey_commissioned": bool(progress.get("highmere_survey_commissioned", false)),
 		"highmere_inspected": bool(progress.get("highmere_inspected", false)),
+		"highmere_claimed": bool(progress.get("highmere_claimed", false)),
 		"highmere_status": String(progress.get("highmere_status", "locked")),
 		"frontier_link_status": String(progress.get("frontier_link_status", "not_started")),
 		"stone": int(state.get("resources", {}).get("stone", 0)),
