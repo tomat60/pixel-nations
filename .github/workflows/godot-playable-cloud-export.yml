@@ -1,0 +1,186 @@
+name: Pixel Nations playable macOS and Linux exports
+
+on:
+  push:
+    branches:
+      - "steward/playable-core-delivery-*"
+      - main
+    paths:
+      - "tools/playable_core/**"
+      - "game/core/**"
+      - "game/integration/**"
+      - ".github/workflows/godot-playable-cloud-export.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pn-playable-export-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playable-exports:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GODOT_RELEASE: "4.7.1-stable"
+      GODOT_VERSION: "4.7.1.stable"
+      GODOT_BIN: "/tmp/pn-godot/Godot_v4.7.1-stable_linux.x86_64"
+      PN_GAME: "/tmp/pn-playable-scene-sources"
+    steps:
+      - name: Checkout immutable candidate
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Record exact Git source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p dist
+          git rev-parse HEAD | tee dist/commit-sha.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+
+      - name: Install pinned Godot editor and templates
+        shell: bash
+        timeout-minutes: 12
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends xvfb unzip libgl1 libvulkan1 mesa-vulkan-drivers libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 > /dev/null
+          mkdir -p /tmp/pn-godot
+          curl -fsSL --retry 3 --connect-timeout 15 "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" -o /tmp/pn-godot/editor.zip
+          curl -fsSL --retry 3 --connect-timeout 15 "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz" -o /tmp/pn-godot/templates.tpz
+          unzip -q /tmp/pn-godot/editor.zip -d /tmp/pn-godot
+          chmod +x "$GODOT_BIN"
+          "$GODOT_BIN" --version | tee dist/godot-version.txt
+          unzip -q /tmp/pn-godot/templates.tpz -d /tmp/pn-godot/extracted
+          export_dir="$HOME/.local/share/godot/export_templates/$GODOT_VERSION"
+          mkdir -p "$export_dir"
+          cp -a /tmp/pn-godot/extracted/templates/. "$export_dir/"
+          test -s "$export_dir/macos.zip"
+          test -s "$export_dir/linux_release.x86_64"
+
+      - name: Reconstruct pinned scene and verify redistribution notices
+        shell: bash
+        timeout-minutes: 10
+        run: |
+          set -Eeuo pipefail
+          python3 tools/playable_core/materialize_scene_sources.py --output "$PN_GAME" > dist/source.log
+          grep -F "PN_PLAYABLE_SOURCE_BRIDGE=PASS" dist/source.log
+          test -s "$PN_GAME/pixel_nations/playable_core_runtime.gd"
+          test -s "$PN_GAME/third_party/the-free-game/LICENSE"
+          test -s "$PN_GAME/third_party/the-free-game/licenses/CC-BY-4.0.txt"
+          test -s "$PN_GAME/THIRD_PARTY_CHANGES.md"
+          cp -a "$PN_GAME/third_party" dist/third_party
+          cp "$PN_GAME/THIRD_PARTY_CHANGES.md" dist/THIRD_PARTY_CHANGES.md
+          cp "$PN_GAME/LICENSE" dist/OpenGS_LICENSE.txt
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("/tmp/pn-playable-scene-sources")
+          manifest = json.loads((p / ".pn-source-manifest.json").read_text())
+          assert manifest["missing_pixel_nations_transform"] is False
+          assert manifest["unresolved_release_assets"] == []
+          assert manifest["playable_scene"] == "res://pixel_nations/playable_core.tscn"
+          PY
+
+      - name: Add minimal export presets to transformed project
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          cat > "$PN_GAME/export_presets.cfg" <<'CFG'
+          [preset.0]
+
+          name="Playable Linux"
+          platform="Linux"
+          runnable=true
+          advanced_options=false
+          dedicated_server=false
+          custom_features=""
+          export_filter="all_resources"
+          include_filter=""
+          exclude_filter=""
+          export_path="build/Pixel-Nations-Linux.x86_64"
+          patches=PackedStringArray()
+          encryption_include_filters=""
+          encryption_exclude_filters=""
+          seed=0
+          encrypt_pck=false
+          encrypt_directory=false
+          script_export_mode=2
+
+          [preset.0.options]
+
+          custom_template/debug=""
+          custom_template/release=""
+          debug/export_console_wrapper=1
+          binary_format/embed_pck=false
+          binary_format/architecture="x86_64"
+          texture_format/s3tc_bptc=true
+          texture_format/etc2_astc=false
+
+          [preset.1]
+
+          name="Playable macOS"
+          platform="macOS"
+          runnable=true
+          advanced_options=false
+          dedicated_server=false
+          custom_features=""
+          export_filter="all_resources"
+          include_filter=""
+          exclude_filter=""
+          export_path="build/Pixel-Nations-macOS.zip"
+          patches=PackedStringArray()
+          encryption_include_filters=""
+          exclude_filter=""
+          seed=0
+          encrypt_pck=false
+          encrypt_directory=false
+          script_export_mode=2
+
+          [preset.1.options]
+
+          binary_format/architecture="universal"
+          custom_template/debug=""
+          custom_template/release=""
+          application/bundle_identifier="games.pixelnations.playable"
+          application/short_version="0.1.0"
+          application/version="0.1.0"
+          application/copyright="Pixel Nations — third party notices are included"
+          codesign/codesign=0
+          CFG
+          mkdir -p "$PN_GAME/build"
+
+      - name: Import exact transformed project and export runnable binaries
+        shell: bash
+        timeout-minutes: 8
+        run: |
+          set -Eeuo pipefail
+          "$GODOT_BIN" --headless --path "$PN_GAME" --editor --quit > dist/import.log 2>&1 || { cat dist/import.log; exit 1; }
+          if grep -E 'SCRIPT ERROR|Parse Error|Failed to load script' dist/import.log; then exit 1; fi
+          "$GODOT_BIN" --headless --path "$PN_GAME" --export-release "Playable Linux" "$PN_GAME/build/Pixel-Nations-Linux.x86_64" > dist/linux-export.log 2>&1 || { cat dist/linux-export.log; exit 1; }
+          "$GODOT_BIN" --headless --path "$PN_GAME" --export-release "Playable macOS" "$PN_GAME/build/Pixel-Nations-macOS.zip" > dist/macos-export.log 2>&1 || { cat dist/macos-export.log; exit 1; }
+          test -s "$PN_GAME/build/Pixel-Nations-Linux.x86_64"
+          test -s "$PN_GAME/build/Pixel-Nations-Linux.pck"
+          test -s "$PN_GAME/build/Pixel-Nations-macOS.zip"
+          unzip -l "$PN_GAME/build/Pixel-Nations-macOS.zip" | tee dist/macos-contents.txt
+          grep -F ".app/Contents/MacOS/" dist/macos-contents.txt
+          cp "$PN_GAME/build/Pixel-Nations-Linux.x86_64" dist/
+          cp "$PN_GAME/build/Pixel-Nations-Linux.pck" dist/
+          cp "$PN_GAME/build/Pixel-Nations-macOS.zip" dist/
+          chmod +x dist/Pixel-Nations-Linux.x86_64
+          file dist/Pixel-Nations-Linux.x86_64
+          sha256sum dist/Pixel-Nations-* > dist/SHA256SUMS
+          echo "PN_PLAYABLE_DESKTOP_EXPORTS=PASS"
+
+      - name: Always attach build proof and runnable distribution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pn-playable-desktop-${{ github.sha }}-${{ github.run_id }}
+          path: dist/**
+          if-no-files-found: warn
+          retention-days: 7
