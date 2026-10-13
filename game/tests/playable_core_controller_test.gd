@@ -4,6 +4,7 @@ const PlayableCoreController = preload("res://core/playable_core_controller.gd")
 const HOME_LAND_ID := "PN-A01-001"
 const OTHER_LAND_ID := "PN-A01-002"
 const HIGHMERE_LAND_ID := "PN-A01-003"
+const NORTHGATE_LAND_ID := "PN-A01-024"
 
 var failures := 0
 var rejection_count := 0
@@ -162,7 +163,7 @@ func _run() -> void:
 	_expect(bool(highmere_connected.get("highmere_connected", false)), "reports completed Highmere link")
 	_expect(String(highmere_connected.get("highmere_link_status", "")) == "connected", "reports factual Highmere connected status")
 	_expect(int(highmere_connected.get("stone", -1)) == 0, "Highmere link spends five stone")
-	_expect(String(highmere_connected.get("next_goal", "")) == "Highmere is linked; the next expansion is not yet playable", "reports honest post-link stop gate")
+	_expect(String(highmere_connected.get("next_goal", "")) == "Inspect Northgate beyond the Highmere ridge", "reports honest Northgate inspection goal")
 	_expect(String(highmere_connected.get("nation_status", "")) == "not_founded", "Highmere link does not invent nation")
 	_expect(not reopened.connect_highmere(), "rejects duplicate Highmere link")
 	_expect(reopened.save_game(), "saves Highmere link")
@@ -173,7 +174,19 @@ func _run() -> void:
 	_expect(bool(highmere_link_reopened.get("highmere_link_supply_delivered", false)), "reopen preserves Highmere ridge shipment")
 	_expect(bool(highmere_link_reopened.get("highmere_connected", false)), "reopen preserves Highmere link")
 	_expect(int(highmere_link_reopened.get("stone", -1)) == 0, "reopen preserves Highmere link cost")
-	_expect(rejection_count == 15, "emits one rejection for each invalid action")
+	_expect(reopened.select_land_from_map(NORTHGATE_LAND_ID), "selects canonical Northgate")
+	_expect(reopened.inspect_selected_frontier(), "inspects Northgate after Highmere link")
+	var northgate_inspected := reopened.current_snapshot()
+	_expect(bool(northgate_inspected.get("northgate_inspected", false)), "reports Northgate inspection")
+	_expect(int(northgate_inspected.get("claimed_lands", -1)) == 3, "Northgate inspection does not claim fourth land")
+	_expect(String(northgate_inspected.get("nation_status", "")) == "not_founded", "Northgate inspection does not invent nation")
+	_expect(String(northgate_inspected.get("next_goal", "")) == "Northgate is inspected; claiming it is not yet playable", "reports honest Northgate stop gate")
+	_expect(not reopened.inspect_selected_frontier(), "rejects duplicate Northgate inspection")
+	_expect(reopened.save_game(), "saves Northgate inspection")
+	reopened.session.state["inspected_land_ids"].erase(NORTHGATE_LAND_ID)
+	_expect(reopened.load_game(), "reloads Northgate inspection")
+	_expect(bool(reopened.current_snapshot().get("northgate_inspected", false)), "reopen preserves Northgate inspection")
+	_expect(rejection_count == 16, "emits one rejection for each invalid action")
 	_expect(view_events == ["village", "world"], "emits exact observed navigation transitions")
 
 	_remove_save(save_path)

@@ -1,7 +1,7 @@
 class_name GameState
 extends RefCounted
 
-const SCHEMA_VERSION := 9
+const SCHEMA_VERSION := 10
 const CHARTED_LANDS := 30
 const ROAD_STONE_COST := 5
 const FRONTIER_LINK_STONE_COST := 5
@@ -15,6 +15,7 @@ const HIGHMERE_LINK_SUPPLY_ORDER_ID := "highmere_link_stone_shipment"
 const GREENVALE_LAND_ID := "PN-A01-001"
 const RIVERBEND_LAND_ID := "PN-A01-002"
 const HIGHMERE_LAND_ID := "PN-A01-003"
+const NORTHGATE_LAND_ID := "PN-A01-024"
 const CANONICAL_LAND_IDS := [
 	"PN-A01-001", "PN-A01-002", "PN-A01-003", "PN-A01-004", "PN-A01-005",
 	"PN-A01-006", "PN-A01-007", "PN-A01-008", "PN-A01-009", "PN-A01-010",
@@ -150,10 +151,14 @@ static func reduce(state: Dictionary, action: Dictionary) -> Dictionary:
 				and completed_orders.has(RIVERBEND_SUPPLY_ORDER_ID)
 				and completed_orders.has(HIGHMERE_SURVEY_ORDER_ID)
 			)
+			var northgate_ready := (
+				land_id == NORTHGATE_LAND_ID
+				and connected_land_ids.has(HIGHMERE_LAND_ID)
+			)
 			if (
 				String(next_state.get("selected_land_id", "")) != land_id
 				or String(next_state.get("claimed_land_id", "")) != GREENVALE_LAND_ID
-				or not (riverbend_ready or highmere_ready)
+				or not (riverbend_ready or highmere_ready or northgate_ready)
 			):
 				return next_state
 			var inspected: Array = next_state.get("inspected_land_ids", []).duplicate()
@@ -300,6 +305,7 @@ static func progress(state: Dictionary) -> Dictionary:
 		(settlement.get("completed_orders", []) as Array).has(HIGHMERE_LINK_SUPPLY_ORDER_ID)
 	)
 	var highmere_connected := (state.get("connected_land_ids", []) as Array).has(HIGHMERE_LAND_ID)
+	var northgate_inspected := (state.get("inspected_land_ids", []) as Array).has(NORTHGATE_LAND_ID)
 	var next_goal := "Select and claim Greenvale"
 	if claimed and not founded:
 		next_goal = "Found Greengate"
@@ -323,14 +329,16 @@ static func progress(state: Dictionary) -> Dictionary:
 		next_goal = "Return to Greengate for the Highmere ridge stone shipment"
 	elif highmere_link_supply_delivered and not highmere_connected:
 		next_goal = "Connect Highmere ridge to Riverbend"
-	elif highmere_connected:
-		next_goal = "Highmere is linked; the next expansion is not yet playable"
+	elif highmere_connected and not northgate_inspected:
+		next_goal = "Inspect Northgate beyond the Highmere ridge"
+	elif northgate_inspected:
+		next_goal = "Northgate is inspected; claiming it is not yet playable"
 	return {
 		"claimed_lands": claimed_land_ids.size(),
 		"charted_lands": CHARTED_LANDS,
 		"settlement_founded": founded,
 		"road_built": road_built,
-		"inspected_frontiers": (1 if riverbend_inspected else 0) + (1 if highmere_inspected else 0),
+		"inspected_frontiers": (1 if riverbend_inspected else 0) + (1 if highmere_inspected else 0) + (1 if northgate_inspected else 0),
 		"riverbend_inspected": riverbend_inspected,
 		"riverbend_claimed": riverbend_claimed,
 		"riverbend_connected": riverbend_connected,
@@ -343,6 +351,8 @@ static func progress(state: Dictionary) -> Dictionary:
 		"highmere_claimed": highmere_claimed,
 		"highmere_link_supply_delivered": highmere_link_supply_delivered,
 		"highmere_connected": highmere_connected,
+		"northgate_inspected": northgate_inspected,
+		"northgate_status": "inspected" if northgate_inspected else ("reachable" if highmere_connected else "locked"),
 		"highmere_link_status": (
 			"connected" if highmere_connected else (
 				"ready" if highmere_link_supply_delivered else ("pending" if highmere_claimed else "locked")
@@ -483,5 +493,11 @@ static func _normalize_state(saved: Dictionary) -> Dictionary:
 		and normalized_completed_orders.has(HIGHMERE_LINK_SUPPLY_ORDER_ID)
 	):
 		normalized["connected_land_ids"].append(HIGHMERE_LAND_ID)
+	if (
+		saved_inspected is Array
+		and saved_inspected.has(NORTHGATE_LAND_ID)
+		and normalized["connected_land_ids"].has(HIGHMERE_LAND_ID)
+	):
+		normalized["inspected_land_ids"].append(NORTHGATE_LAND_ID)
 
 	return normalized

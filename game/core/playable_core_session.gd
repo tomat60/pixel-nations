@@ -193,6 +193,8 @@ func world_view_model() -> Dictionary:
 		"highmere_claimed": bool(progress.get("highmere_claimed", false)),
 		"highmere_link_supply_delivered": bool(progress.get("highmere_link_supply_delivered", false)),
 		"highmere_connected": bool(progress.get("highmere_connected", false)),
+		"northgate_inspected": bool(progress.get("northgate_inspected", false)),
+		"northgate_status": String(progress.get("northgate_status", "locked")),
 		"highmere_link_status": String(progress.get("highmere_link_status", "locked")),
 		"highmere_status": String(progress.get("highmere_status", "locked")),
 		"frontier_link_status": String(progress.get("frontier_link_status", "not_started")),

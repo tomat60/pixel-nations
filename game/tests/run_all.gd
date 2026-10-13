@@ -60,7 +60,7 @@ func _init() -> void:
 	_check(int(low_resource_state.get("resources", {}).get("stone", 0)) == STATE.ROAD_STONE_COST - 1, "road_cost_guard_preserves_resources")
 
 	var restored = STATE.from_json(STATE.to_json(state))
-	_check(int(restored.get("schema_version", 0)) == 9, "save_schema")
+	_check(int(restored.get("schema_version", 0)) == 10, "save_schema")
 	_check(String(restored.get("selected_land_id", "")) == "PN-A01-001", "save_selection")
 	_check(String(restored.get("claimed_land_id", "")) == "PN-A01-001", "save_claim")
 	_check(bool(restored.get("settlement", {}).get("founded", false)), "save_settlement")
@@ -157,13 +157,22 @@ func _init() -> void:
 	_check(connected_highmere.get("connected_land_ids", []) == ["PN-A01-002", "PN-A01-003"], "highmere_link_recorded")
 	_check(int(connected_highmere.get("resources", {}).get("stone", -1)) == 0, "highmere_link_costs_five_stone")
 	_check(bool(connected_highmere_progress.get("highmere_connected", false)), "highmere_link_visible")
-	_check(String(connected_highmere_progress.get("next_goal", "")) == "Highmere is linked; the next expansion is not yet playable", "highmere_link_reports_honest_stop_gate")
+	_check(String(connected_highmere_progress.get("next_goal", "")) == "Inspect Northgate beyond the Highmere ridge", "highmere_link_reveals_northgate")
 	_check(String(connected_highmere_progress.get("nation_status", "")) == "not_founded", "highmere_link_does_not_invent_nation")
 	var duplicate_highmere_link := STATE.reduce(connected_highmere, {"type": "CONNECT_HIGHMERE"})
 	_check(duplicate_highmere_link.get("connected_land_ids", []).size() == 2, "highmere_link_idempotent")
 	_check(int(duplicate_highmere_link.get("resources", {}).get("stone", -1)) == 0, "highmere_link_cost_idempotent")
 	var connected_highmere_restored := STATE.from_json(STATE.to_json(connected_highmere))
 	_check(connected_highmere_restored.get("connected_land_ids", []) == ["PN-A01-002", "PN-A01-003"], "highmere_link_persists")
+	var selected_northgate := STATE.reduce(connected_highmere, {"type": "SELECT_LAND", "land_id": STATE.NORTHGATE_LAND_ID})
+	var inspected_northgate := STATE.reduce(selected_northgate, {"type": "INSPECT_LAND", "land_id": STATE.NORTHGATE_LAND_ID})
+	var northgate_progress := STATE.progress(inspected_northgate)
+	_check(inspected_northgate.get("inspected_land_ids", []).has(STATE.NORTHGATE_LAND_ID), "northgate_inspection_recorded")
+	_check(int(northgate_progress.get("claimed_lands", 0)) == 3, "northgate_inspection_does_not_claim_fourth_land")
+	_check(String(northgate_progress.get("nation_status", "")) == "not_founded", "northgate_inspection_does_not_invent_nation")
+	_check(String(northgate_progress.get("next_goal", "")) == "Northgate is inspected; claiming it is not yet playable", "northgate_inspection_reports_honest_stop_gate")
+	var inspected_northgate_restored := STATE.from_json(STATE.to_json(inspected_northgate))
+	_check(inspected_northgate_restored.get("inspected_land_ids", []).has(STATE.NORTHGATE_LAND_ID), "northgate_inspection_persists")
 	var duplicate_highmere_claim := STATE.reduce(claimed_highmere, {"type": "CLAIM_LAND", "land_id": STATE.HIGHMERE_LAND_ID})
 	_check(duplicate_highmere_claim.get("claimed_land_ids", []).size() == 3, "highmere_claim_idempotent")
 	var claimed_highmere_restored := STATE.from_json(STATE.to_json(claimed_highmere))
@@ -193,7 +202,7 @@ func _init() -> void:
 		},
 	})
 	var migrated: Dictionary = STATE.from_json(legacy_payload)
-	_check(int(migrated.get("schema_version", 0)) == 9, "legacy_schema_migrated")
+	_check(int(migrated.get("schema_version", 0)) == 10, "legacy_schema_migrated")
 	_check(String(migrated.get("selected_land_id", "")) == "PN-A01-001", "legacy_selection_recovered")
 	_check(String(migrated.get("claimed_land_id", "")) == "PN-A01-001", "legacy_claim_preserved")
 	_check(migrated.get("claimed_land_ids", []) == ["PN-A01-001"], "legacy_claim_collection_recovered")
@@ -266,6 +275,16 @@ func _init() -> void:
 	var repaired_highmere_link: Dictionary = STATE.from_json(injected_highmere_link_save)
 	_check(not repaired_highmere_link.get("settlement", {}).get("completed_orders", []).has("highmere_link_stone_shipment"), "highmere_link_supply_requires_persisted_claim")
 	_check(not repaired_highmere_link.get("connected_land_ids", []).has("PN-A01-003"), "highmere_link_requires_persisted_claim_and_supply")
+	var injected_northgate_save := JSON.stringify({
+		"schema_version": 10,
+		"claimed_land_id": "PN-A01-001",
+		"claimed_land_ids": ["PN-A01-001", "PN-A01-002", "PN-A01-003"],
+		"inspected_land_ids": ["PN-A01-002", "PN-A01-003", "PN-A01-024"],
+		"connected_land_ids": ["PN-A01-002"],
+		"settlement": {"founded": true, "name": "Greengate", "built_improvements": ["road"], "completed_orders": ["riverbend_stone_shipment", "highmere_survey", "highmere_link_stone_shipment"]},
+	})
+	var repaired_northgate: Dictionary = STATE.from_json(injected_northgate_save)
+	_check(not repaired_northgate.get("inspected_land_ids", []).has(STATE.NORTHGATE_LAND_ID), "northgate_inspection_requires_persisted_highmere_link")
 
 	_test_playable_session_round_trip()
 
@@ -365,7 +384,14 @@ func _test_playable_session_round_trip() -> void:
 	var highmere_connected_world: Dictionary = session.world_view_model()
 	_check(bool(highmere_connected_world.get("highmere_connected", false)), "session_world_reports_highmere_link")
 	_check(int(highmere_connected_world.get("stone", -1)) == 0, "session_highmere_link_spends_five_stone")
-	_check(String(highmere_connected_world.get("next_goal", "")) == "Highmere is linked; the next expansion is not yet playable", "session_highmere_link_goal_truthful")
+	_check(String(highmere_connected_world.get("next_goal", "")) == "Inspect Northgate beyond the Highmere ridge", "session_highmere_link_reveals_northgate")
+	_check(session.select_land(STATE.NORTHGATE_LAND_ID), "session_selects_northgate")
+	_check(session.inspect_selected_frontier(), "session_inspects_reachable_northgate")
+	_check(not session.inspect_selected_frontier(), "session_blocks_duplicate_northgate_inspection")
+	var northgate_world: Dictionary = session.world_view_model()
+	_check(bool(northgate_world.get("northgate_inspected", false)), "session_world_reports_northgate_inspection")
+	_check(int(northgate_world.get("claimed_lands", 0)) == 3, "session_northgate_keeps_three_claims")
+	_check(String(northgate_world.get("next_goal", "")) == "Northgate is inspected; claiming it is not yet playable", "session_northgate_stop_gate_truthful")
 
 	var save_path := "user://playable-core-session-test.json"
 	_check(session.save_to_path(save_path), "session_save")
@@ -384,8 +410,9 @@ func _test_playable_session_round_trip() -> void:
 	_check(bool(reopened_world.get("highmere_claimed", false)), "session_reopen_highmere_claim_persisted")
 	_check(bool(reopened_world.get("highmere_link_supply_delivered", false)), "session_reopen_highmere_link_supply_persisted")
 	_check(bool(reopened_world.get("highmere_connected", false)), "session_reopen_highmere_link_persisted")
+	_check(bool(reopened_world.get("northgate_inspected", false)), "session_reopen_northgate_inspection_persisted")
 	_check(int(reopened_world.get("stone", -1)) == 0, "session_reopen_highmere_link_cost_persisted")
-	_check(String(reopened_world.get("next_goal", "")) == "Highmere is linked; the next expansion is not yet playable", "session_reopen_goal_persisted")
+	_check(String(reopened_world.get("next_goal", "")) == "Northgate is inspected; claiming it is not yet playable", "session_reopen_goal_persisted")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 
 func _check(condition: bool, label: String) -> void:

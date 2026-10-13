@@ -57,7 +57,7 @@ func inspect_selected_frontier() -> bool:
 	if session.inspect_selected_frontier():
 		_publish_snapshot()
 		return true
-	return _reject("inspect_frontier", "Riverbend can be inspected after Greengate's road is built.")
+	return _reject("inspect_frontier", "The selected canonical frontier is not yet reachable or was already inspected.")
 
 
 func connect_riverbend() -> bool:
