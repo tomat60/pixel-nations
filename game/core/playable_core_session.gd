@@ -55,6 +55,16 @@ func build_greengate_road() -> bool:
 	return road_built and stone_after == stone_before - GameState.ROAD_STONE_COST
 
 
+func inspect_selected_frontier() -> bool:
+	if current_view != VIEW_WORLD:
+		return false
+	var selected_land_id := String(state.get("selected_land_id", ""))
+	var inspected_before: Array = state.get("inspected_land_ids", []).duplicate()
+	state = GameState.reduce(state, {"type": "INSPECT_LAND", "land_id": selected_land_id})
+	var inspected_after: Array = state.get("inspected_land_ids", [])
+	return inspected_after.has(selected_land_id) and not inspected_before.has(selected_land_id)
+
+
 func return_to_world() -> bool:
 	if current_view != VIEW_VILLAGE:
 		return false
@@ -94,6 +104,9 @@ func world_view_model() -> Dictionary:
 		"settlement_name": String(settlement.get("name", "")),
 		"settlement_founded": bool(progress.get("settlement_founded", false)),
 		"road_built": bool(progress.get("road_built", false)),
+		"inspected_land_ids": (state.get("inspected_land_ids", []) as Array).duplicate(),
+		"inspected_frontiers": int(progress.get("inspected_frontiers", 0)),
+		"riverbend_inspected": bool(progress.get("riverbend_inspected", false)),
 		"nation_status": String(progress.get("nation_status", "not_founded")),
 		"next_goal": String(progress.get("next_goal", "")),
 	}

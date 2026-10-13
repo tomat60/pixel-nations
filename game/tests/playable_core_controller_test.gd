@@ -59,7 +59,11 @@ func _run() -> void:
 	_expect(fresh.return_to_world(), "returns to World")
 	var world := fresh.current_snapshot()
 	_expect(bool(world.get("road_built", false)), "World reports road progress")
-	_expect(String(world.get("next_goal", "")) == "Inspect a neighboring A-01 land", "World reports honest next goal")
+	_expect(String(world.get("next_goal", "")) == "Inspect Riverbend, Greenvale's eastern neighbor", "World reports honest next goal")
+	_expect(fresh.select_land_from_map(OTHER_LAND_ID), "selects Riverbend frontier")
+	_expect(fresh.inspect_selected_frontier(), "inspects Riverbend after road")
+	_expect(not fresh.inspect_selected_frontier(), "rejects duplicate frontier inspection")
+	_expect(fresh.save_game(), "saves inspected frontier")
 
 	var reopened := PlayableCoreController.new()
 	reopened.save_path = save_path
@@ -71,7 +75,9 @@ func _run() -> void:
 	_expect(bool(restored.get("road_built", false)), "reopen preserves road")
 	_expect(int(restored.get("claimed_lands", -1)) == 1, "reopen reports one claimed land")
 	_expect(int(restored.get("charted_lands", -1)) == 30, "reopen reports canonical A-01 total")
-	_expect(rejection_count == 4, "emits one rejection for each invalid action")
+	_expect(bool(restored.get("riverbend_inspected", false)), "reopen preserves Riverbend inspection")
+	_expect(String(restored.get("next_goal", "")) == "Choose whether to claim Riverbend", "reopen reports honest claim goal")
+	_expect(rejection_count == 5, "emits one rejection for each invalid action")
 	_expect(view_events == ["village", "world"], "emits exact navigation transitions")
 
 	_remove_save(save_path)

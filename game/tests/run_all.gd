@@ -59,7 +59,7 @@ func _init() -> void:
 	_check(int(low_resource_state.get("resources", {}).get("stone", 0)) == STATE.ROAD_STONE_COST - 1, "road_cost_guard_preserves_resources")
 
 	var restored = STATE.from_json(STATE.to_json(state))
-	_check(int(restored.get("schema_version", 0)) == 2, "save_schema")
+	_check(int(restored.get("schema_version", 0)) == 3, "save_schema")
 	_check(String(restored.get("selected_land_id", "")) == "PN-A01-001", "save_selection")
 	_check(String(restored.get("claimed_land_id", "")) == "PN-A01-001", "save_claim")
 	_check(bool(restored.get("settlement", {}).get("founded", false)), "save_settlement")
@@ -72,7 +72,26 @@ func _init() -> void:
 	_check(bool(progress.get("settlement_founded", false)), "progress_settlement")
 	_check(bool(progress.get("road_built", false)), "progress_road")
 	_check(String(progress.get("nation_status", "")) == "not_founded", "progress_honest_nation_status")
-	_check(String(progress.get("next_goal", "")) == "Inspect a neighboring A-01 land", "progress_next_goal")
+	_check(String(progress.get("next_goal", "")) == "Inspect Riverbend, Greenvale's eastern neighbor", "progress_next_goal")
+	_check(int(progress.get("inspected_frontiers", -1)) == 0, "progress_no_invented_frontier_inspection")
+
+	var early_inspection := STATE.reduce(restored, {"type": "INSPECT_LAND", "land_id": "PN-A01-002"})
+	_check(early_inspection.get("inspected_land_ids", []).is_empty(), "inspection_requires_selected_frontier")
+	var before_road_inspection: Dictionary = STATE.replay([
+		{"type": "SELECT_LAND", "land_id": "PN-A01-001"},
+		{"type": "CLAIM_LAND", "land_id": "PN-A01-001"},
+		{"type": "FOUND_SETTLEMENT", "name": "Greengate"},
+		{"type": "SELECT_LAND", "land_id": "PN-A01-002"},
+		{"type": "INSPECT_LAND", "land_id": "PN-A01-002"},
+	])
+	_check(before_road_inspection.get("inspected_land_ids", []).is_empty(), "inspection_requires_greengate_road")
+	var inspected_state := STATE.reduce(restored, {"type": "SELECT_LAND", "land_id": "PN-A01-002"})
+	inspected_state = STATE.reduce(inspected_state, {"type": "INSPECT_LAND", "land_id": "PN-A01-002"})
+	_check(inspected_state.get("inspected_land_ids", []).has("PN-A01-002"), "riverbend_inspection_recorded")
+	_check(int(STATE.progress(inspected_state).get("claimed_lands", 0)) == 1, "inspection_does_not_invent_claim")
+	_check(String(STATE.progress(inspected_state).get("next_goal", "")) == "Choose whether to claim Riverbend", "inspection_advances_honest_goal")
+	var inspected_restored := STATE.from_json(STATE.to_json(inspected_state))
+	_check(inspected_restored.get("inspected_land_ids", []).has("PN-A01-002"), "inspection_persists")
 
 	var legacy_payload := JSON.stringify({
 		"schema_version": 1,
@@ -89,7 +108,7 @@ func _init() -> void:
 		},
 	})
 	var migrated: Dictionary = STATE.from_json(legacy_payload)
-	_check(int(migrated.get("schema_version", 0)) == 2, "legacy_schema_migrated")
+	_check(int(migrated.get("schema_version", 0)) == 3, "legacy_schema_migrated")
 	_check(String(migrated.get("selected_land_id", "")) == "PN-A01-001", "legacy_selection_recovered")
 	_check(String(migrated.get("claimed_land_id", "")) == "PN-A01-001", "legacy_claim_preserved")
 	_check(bool(migrated.get("settlement", {}).get("founded", false)), "legacy_settlement_preserved")
@@ -140,7 +159,14 @@ func _test_playable_session_round_trip() -> void:
 	_check(String(world_after.get("settlement_name", "")) == "Greengate", "session_world_settlement_progress")
 	_check(bool(world_after.get("road_built", false)), "session_world_road_progress")
 	_check(String(world_after.get("nation_status", "")) == "not_founded", "session_world_honest_nation_status")
-	_check(String(world_after.get("next_goal", "")) == "Inspect a neighboring A-01 land", "session_world_next_goal")
+	_check(String(world_after.get("next_goal", "")) == "Inspect Riverbend, Greenvale's eastern neighbor", "session_world_next_goal")
+	_check(session.select_land("PN-A01-002"), "session_selects_riverbend")
+	_check(session.inspect_selected_frontier(), "session_inspects_riverbend")
+	_check(not session.inspect_selected_frontier(), "session_blocks_duplicate_inspection")
+	var inspected_world: Dictionary = session.world_view_model()
+	_check(bool(inspected_world.get("riverbend_inspected", false)), "session_world_reports_riverbend_inspection")
+	_check(int(inspected_world.get("claimed_lands", 0)) == 1, "session_inspection_keeps_one_claim")
+	_check(String(inspected_world.get("next_goal", "")) == "Choose whether to claim Riverbend", "session_world_claim_goal_truthful")
 
 	var save_path := "user://playable-core-session-test.json"
 	_check(session.save_to_path(save_path), "session_save")
@@ -149,7 +175,8 @@ func _test_playable_session_round_trip() -> void:
 	_check(reopened.current_view == SESSION.VIEW_WORLD, "session_reopen_starts_world")
 	var reopened_world: Dictionary = reopened.world_view_model()
 	_check(bool(reopened_world.get("road_built", false)), "session_reopen_road_persisted")
-	_check(String(reopened_world.get("next_goal", "")) == "Inspect a neighboring A-01 land", "session_reopen_goal_persisted")
+	_check(bool(reopened_world.get("riverbend_inspected", false)), "session_reopen_inspection_persisted")
+	_check(String(reopened_world.get("next_goal", "")) == "Choose whether to claim Riverbend", "session_reopen_goal_persisted")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 
 func _check(condition: bool, label: String) -> void:

@@ -1,6 +1,7 @@
 extends SceneTree
 
 const HOME_ID := "PN-A01-001"
+const FRONTIER_ID := "PN-A01-002"
 var failures: Array[String] = []
 
 
@@ -71,8 +72,25 @@ func _run() -> void:
 	_check(String(reopened.get("view", "")) == "world", "reopen_starts_world")
 	_check(bool(reopened.get("road_built", false)), "reopen_keeps_road")
 	_check(String(reopened.get("claimed_land_id", "")) == HOME_ID, "reopen_keeps_claim")
+	var frontier_world: Vector2 = runtime.canonical_center_world(FRONTIER_ID)
+	_check(is_finite(frontier_world.x), "frontier_geometry_available")
+	var frontier_screen: Vector2 = player.camera.unproject_position(
+		Vector3(frontier_world.x, 0.0, frontier_world.y)
+	)
+	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(frontier_screen), "frontier_projects_inside_viewport")
+	await _click_position(frontier_screen)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == FRONTIER_ID, "pointer_raycast_selects_frontier")
+	await _click_control(runtime.inspect_button)
+	var inspected: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(inspected.get("riverbend_inspected", false)), "frontier_inspection_recorded")
+	_check(int(inspected.get("claimed_lands", -1)) == 1, "inspection_does_not_invent_claim")
+	_check(String(inspected.get("next_goal", "")) == "Choose whether to claim Riverbend", "inspection_reveals_honest_next_goal")
+	runtime.controller.session.state["inspected_land_ids"] = []
+	_check(runtime.controller.load_game(), "frontier_inspection_reopens")
+	var inspected_reopened: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(inspected_reopened.get("riverbend_inspected", false)), "reopen_keeps_frontier_inspection")
 	await process_frame
-	_capture("world-reopened")
+	_capture("world-frontier-inspected")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")

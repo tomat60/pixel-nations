@@ -25,6 +25,7 @@ var detail_label: Label
 var goal_label: Label
 var claim_button: Button
 var enter_button: Button
+var inspect_button: Button
 var road_button: Button
 var save_button: Button
 var return_button: Button
@@ -107,10 +108,11 @@ func _build_ui() -> void:
 		column.add_child(label)
 	claim_button = _button("Claim selected land", "ClaimButton", _claim)
 	enter_button = _button("Enter Greengate", "EnterButton", _enter)
+	inspect_button = _button("Inspect Riverbend frontier", "InspectButton", _inspect_frontier)
 	road_button = _button("Build village road · 5 stone", "RoadButton", _road)
 	save_button = _button("Save progress", "SaveButton", _save)
 	return_button = _button("Return to World", "ReturnButton", _return_world)
-	for button in [claim_button, enter_button, road_button, save_button, return_button]:
+	for button in [claim_button, enter_button, inspect_button, road_button, save_button, return_button]:
 		column.add_child(button)
 
 
@@ -173,6 +175,11 @@ func _road() -> void:
 		controller.save_game()
 
 
+func _inspect_frontier() -> void:
+	if controller.inspect_selected_frontier():
+		controller.save_game()
+
+
 func _save() -> void:
 	controller.save_game()
 
@@ -225,20 +232,27 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	else:
 		title_label.text = "Sector A-01 / Aurelian Basin"
 		identity_label.text = _land_title(selected_id)
-		detail_label.text = "%d/%d claimed · Greengate: %s · Road: %s · Nation: %s" % [
+		detail_label.text = "%d/%d claimed · Greengate: %s · Road: %s · Riverbend: %s · Nation: %s" % [
 			int(snapshot.get("claimed_lands", 0)), int(snapshot.get("charted_lands", 30)),
 			"founded" if bool(snapshot.get("settlement_founded", false)) else "not founded",
 			"built" if bool(snapshot.get("road_built", false)) else "not built",
+			"inspected" if bool(snapshot.get("riverbend_inspected", false)) else "not inspected",
 			String(snapshot.get("nation_status", "not_founded")),
 		]
 		goal_label.text = "Next expansion goal: %s" % String(snapshot.get("next_goal", ""))
 	claim_button.visible = view == "world"
 	enter_button.visible = view == "world"
+	inspect_button.visible = view == "world"
 	road_button.visible = view == "village"
 	return_button.visible = view == "village"
 	save_button.visible = true
 	claim_button.disabled = selected_id.is_empty() or not String(snapshot.get("claimed_land_id", "")).is_empty()
 	enter_button.disabled = selected_id != "PN-A01-001" or String(snapshot.get("claimed_land_id", "")) != "PN-A01-001"
+	inspect_button.disabled = (
+		selected_id != "PN-A01-002"
+		or not bool(snapshot.get("road_built", false))
+		or bool(snapshot.get("riverbend_inspected", false))
+	)
 	road_button.disabled = bool(snapshot.get("road_built", false)) or int(snapshot.get("stone", 0)) < 5
 
 
@@ -248,5 +262,8 @@ func _land_title(land_id: String) -> String:
 	for land_value in lands:
 		var land: Dictionary = land_value
 		if String(land.get("id", "")) == land_id:
-			return "%s · %s · %s" % [land_id, String(land.get("name", "")), String(land.get("region", ""))]
+			var relationship := " · east of Greenvale" if land_id == "PN-A01-002" else ""
+			return "%s · %s · %s%s" % [
+				land_id, String(land.get("name", "")), String(land.get("region", "")), relationship
+			]
 	return land_id
