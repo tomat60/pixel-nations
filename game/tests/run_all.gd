@@ -60,7 +60,7 @@ func _init() -> void:
 	_check(int(low_resource_state.get("resources", {}).get("stone", 0)) == STATE.ROAD_STONE_COST - 1, "road_cost_guard_preserves_resources")
 
 	var restored = STATE.from_json(STATE.to_json(state))
-	_check(int(restored.get("schema_version", 0)) == 5, "save_schema")
+	_check(int(restored.get("schema_version", 0)) == 6, "save_schema")
 	_check(String(restored.get("selected_land_id", "")) == "PN-A01-001", "save_selection")
 	_check(String(restored.get("claimed_land_id", "")) == "PN-A01-001", "save_claim")
 	_check(bool(restored.get("settlement", {}).get("founded", false)), "save_settlement")
@@ -113,8 +113,21 @@ func _init() -> void:
 	var connected_progress := STATE.progress(connected_frontier)
 	_check(String(connected_progress.get("frontier_link_status", "")) == "connected", "riverbend_connection_status_visible")
 	_check(bool(connected_progress.get("riverbend_connected", false)), "riverbend_connection_progress_visible")
-	_check(String(connected_progress.get("next_goal", "")) == "Await the next A-01 expansion opportunity", "riverbend_connection_goal_truthful")
+	_check(String(connected_progress.get("next_goal", "")) == "Return to Greengate for the Riverbend stone shipment", "riverbend_connection_goal_truthful")
 	_check(String(connected_progress.get("nation_status", "")) == "not_founded", "riverbend_connection_does_not_invent_nation")
+	var premature_supply := STATE.reduce(claimed_frontier, {"type": "RECEIVE_RIVERBEND_SUPPLY"})
+	_check(int(premature_supply.get("resources", {}).get("stone", -1)) == 5, "riverbend_supply_requires_connection")
+	var supplied_frontier := STATE.reduce(connected_frontier, {"type": "RECEIVE_RIVERBEND_SUPPLY"})
+	_check(int(supplied_frontier.get("resources", {}).get("stone", -1)) == 5, "riverbend_supply_restores_five_stone")
+	var supplied_progress := STATE.progress(supplied_frontier)
+	_check(bool(supplied_progress.get("riverbend_supply_delivered", false)), "riverbend_supply_visible")
+	_check(String(supplied_progress.get("riverbend_supply_status", "")) == "delivered", "riverbend_supply_status_visible")
+	_check(String(supplied_progress.get("next_goal", "")) == "Next canonical A-01 land is not yet playable", "riverbend_supply_goal_truthful")
+	_check(String(supplied_progress.get("nation_status", "")) == "not_founded", "riverbend_supply_does_not_invent_nation")
+	var duplicate_supply := STATE.reduce(supplied_frontier, {"type": "RECEIVE_RIVERBEND_SUPPLY"})
+	_check(int(duplicate_supply.get("resources", {}).get("stone", -1)) == 5, "riverbend_supply_idempotent")
+	var supplied_restored := STATE.from_json(STATE.to_json(supplied_frontier))
+	_check(bool(STATE.progress(supplied_restored).get("riverbend_supply_delivered", false)), "riverbend_supply_persists")
 	var duplicate_connection := STATE.reduce(connected_frontier, {"type": "CONNECT_RIVERBEND"})
 	_check(duplicate_connection.get("connected_land_ids", []).size() == 1, "riverbend_connection_idempotent")
 	_check(int(duplicate_connection.get("resources", {}).get("stone", -1)) == 0, "riverbend_connection_cost_idempotent")
@@ -136,7 +149,7 @@ func _init() -> void:
 		},
 	})
 	var migrated: Dictionary = STATE.from_json(legacy_payload)
-	_check(int(migrated.get("schema_version", 0)) == 5, "legacy_schema_migrated")
+	_check(int(migrated.get("schema_version", 0)) == 6, "legacy_schema_migrated")
 	_check(String(migrated.get("selected_land_id", "")) == "PN-A01-001", "legacy_selection_recovered")
 	_check(String(migrated.get("claimed_land_id", "")) == "PN-A01-001", "legacy_claim_preserved")
 	_check(migrated.get("claimed_land_ids", []) == ["PN-A01-001"], "legacy_claim_collection_recovered")
@@ -180,6 +193,14 @@ func _init() -> void:
 	})
 	var repaired_connection: Dictionary = STATE.from_json(injected_connection_save)
 	_check(repaired_connection.get("connected_land_ids", []).is_empty(), "frontier_connection_requires_persisted_claim")
+	var injected_supply_save := JSON.stringify({
+		"schema_version": 6,
+		"claimed_land_id": "PN-A01-001",
+		"claimed_land_ids": ["PN-A01-001"],
+		"settlement": {"founded": true, "name": "Greengate", "completed_orders": ["riverbend_stone_shipment"]},
+	})
+	var repaired_supply: Dictionary = STATE.from_json(injected_supply_save)
+	_check(not repaired_supply.get("settlement", {}).get("completed_orders", []).has("riverbend_stone_shipment"), "riverbend_supply_requires_persisted_connection")
 
 	_test_playable_session_round_trip()
 
@@ -230,7 +251,18 @@ func _test_playable_session_round_trip() -> void:
 	_check(bool(connected_world.get("riverbend_connected", false)), "session_world_reports_riverbend_connection")
 	_check(String(connected_world.get("frontier_link_status", "")) == "connected", "session_world_reports_connected_status")
 	_check(int(connected_world.get("stone", -1)) == 0, "session_connection_spends_remaining_stone")
-	_check(String(connected_world.get("next_goal", "")) == "Await the next A-01 expansion opportunity", "session_connected_goal_truthful")
+	_check(String(connected_world.get("next_goal", "")) == "Return to Greengate for the Riverbend stone shipment", "session_connected_goal_truthful")
+	_check(session.select_land("PN-A01-001"), "session_reselects_greenvale_for_supply")
+	_check(session.enter_greengate(), "session_reenters_greengate_for_supply")
+	_check(session.receive_riverbend_supply(), "session_receives_riverbend_supply")
+	_check(not session.receive_riverbend_supply(), "session_blocks_duplicate_riverbend_supply")
+	var supplied_village: Dictionary = session.village_view_model()
+	_check(int(supplied_village.get("stone", -1)) == 5, "session_supply_restores_five_stone")
+	_check(bool(supplied_village.get("riverbend_supply_delivered", false)), "session_village_reports_supply")
+	_check(session.return_to_world(), "session_returns_to_world_after_supply")
+	var supplied_world: Dictionary = session.world_view_model()
+	_check(bool(supplied_world.get("riverbend_supply_delivered", false)), "session_world_reports_supply")
+	_check(String(supplied_world.get("next_goal", "")) == "Next canonical A-01 land is not yet playable", "session_supply_goal_truthful")
 
 	var save_path := "user://playable-core-session-test.json"
 	_check(session.save_to_path(save_path), "session_save")
@@ -243,8 +275,9 @@ func _test_playable_session_round_trip() -> void:
 	_check(bool(reopened_world.get("riverbend_claimed", false)), "session_reopen_frontier_claim_persisted")
 	_check(bool(reopened_world.get("riverbend_connected", false)), "session_reopen_frontier_connection_persisted")
 	_check(int(reopened_world.get("claimed_lands", 0)) == 2, "session_reopen_two_claims_persisted")
-	_check(int(reopened_world.get("stone", -1)) == 0, "session_reopen_connection_cost_persisted")
-	_check(String(reopened_world.get("next_goal", "")) == "Await the next A-01 expansion opportunity", "session_reopen_goal_persisted")
+	_check(bool(reopened_world.get("riverbend_supply_delivered", false)), "session_reopen_supply_persisted")
+	_check(int(reopened_world.get("stone", -1)) == 5, "session_reopen_supply_reward_persisted")
+	_check(String(reopened_world.get("next_goal", "")) == "Next canonical A-01 land is not yet playable", "session_reopen_goal_persisted")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 
 func _check(condition: bool, label: String) -> void:

@@ -67,6 +67,13 @@ func connect_riverbend() -> bool:
 	return _reject("connect_riverbend", "Claim Riverbend and select it with 5 stone available.")
 
 
+func receive_riverbend_supply() -> bool:
+	if session.receive_riverbend_supply():
+		_publish_snapshot()
+		return true
+	return _reject("receive_riverbend_supply", "The one-time Riverbend shipment requires a completed link and the Village view.")
+
+
 func return_to_world() -> bool:
 	if session.return_to_world():
 		_publish_view()
