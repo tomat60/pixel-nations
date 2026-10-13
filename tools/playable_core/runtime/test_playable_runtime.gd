@@ -60,9 +60,19 @@ func _run() -> void:
 	_check(String(runtime.village.hud._credit_label.text) == "Greengate · Aurelian Basin", "village_location_is_canonical")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate's first road", "village_onboarding_matches_product_loop")
 	_check("Credits" in String(runtime.village.hud._code_button.text), "village_credits_remain_accessible")
+	_check(runtime.village_paved_road == null, "canonical_road_absent_before_build")
+	var donor_stock_hidden := true
+	for stock_button in runtime.village.hud._resource_buttons.values():
+		donor_stock_hidden = donor_stock_hidden and not (stock_button as Button).visible
+	_check(donor_stock_hidden, "misleading_donor_stock_not_visible")
 	await _click_control(runtime.road_button)
 	_check(bool(runtime.controller.current_snapshot().get("road_built", false)), "road_action_built")
 	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 5, "road_costs_five_stone")
+	_check(runtime.village_paved_road != null, "canonical_road_scene_created")
+	if runtime.village_paved_road != null:
+		_check(runtime.village_paved_road.get_child_count() == 5, "canonical_road_has_five_real_tiles")
+		for tile in runtime.village_paved_road.get_children():
+			_check((tile as Node3D).get_node_or_null("StoneSurface") is MeshInstance3D, "canonical_tile_uses_retained_paving_mesh")
 	await process_frame
 	_capture("village-road-built")
 	await _click_control(runtime.return_button)
@@ -135,6 +145,8 @@ func _run() -> void:
 	await process_frame
 	await create_timer(0.6).timeout
 	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "supply_path_enters_village")
+	_check(runtime.village_paved_road != null and runtime.village_paved_road.get_child_count() == 5, "saved_road_reappears_on_village_reentry")
+	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 0, "village_reentry_still_uses_canonical_stock")
 	await _click_control(runtime.supply_button)
 	var supplied_village: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(supplied_village.get("riverbend_supply_delivered", false)), "supply_button_delivers_riverbend_stone")
