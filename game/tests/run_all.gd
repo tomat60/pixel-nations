@@ -60,7 +60,7 @@ func _init() -> void:
 	_check(int(low_resource_state.get("resources", {}).get("stone", 0)) == STATE.ROAD_STONE_COST - 1, "road_cost_guard_preserves_resources")
 
 	var restored = STATE.from_json(STATE.to_json(state))
-	_check(int(restored.get("schema_version", 0)) == 8, "save_schema")
+	_check(int(restored.get("schema_version", 0)) == 9, "save_schema")
 	_check(String(restored.get("selected_land_id", "")) == "PN-A01-001", "save_selection")
 	_check(String(restored.get("claimed_land_id", "")) == "PN-A01-001", "save_claim")
 	_check(bool(restored.get("settlement", {}).get("founded", false)), "save_settlement")
