@@ -60,6 +60,13 @@ func inspect_selected_frontier() -> bool:
 	return _reject("inspect_frontier", "Riverbend can be inspected after Greengate's road is built.")
 
 
+func connect_riverbend() -> bool:
+	if session.connect_riverbend():
+		_publish_snapshot()
+		return true
+	return _reject("connect_riverbend", "Claim Riverbend and select it with 5 stone available.")
+
+
 func return_to_world() -> bool:
 	if session.return_to_world():
 		_publish_view()

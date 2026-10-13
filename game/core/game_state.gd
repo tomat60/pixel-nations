@@ -1,9 +1,10 @@
 class_name GameState
 extends RefCounted
 
-const SCHEMA_VERSION := 4
+const SCHEMA_VERSION := 5
 const CHARTED_LANDS := 30
 const ROAD_STONE_COST := 5
+const FRONTIER_LINK_STONE_COST := 5
 const GREENVALE_LAND_ID := "PN-A01-001"
 const RIVERBEND_LAND_ID := "PN-A01-002"
 const CANONICAL_LAND_IDS := [
@@ -23,6 +24,7 @@ static func initial_state() -> Dictionary:
 		"claimed_land_id": "",
 		"claimed_land_ids": [],
 		"inspected_land_ids": [],
+		"connected_land_ids": [],
 		"settlement": {
 			"founded": false,
 			"name": "",
@@ -132,6 +134,27 @@ static func reduce(state: Dictionary, action: Dictionary) -> Dictionary:
 			inspected.append(land_id)
 			next_state["inspected_land_ids"] = inspected
 
+		"CONNECT_RIVERBEND":
+			var claimed_land_ids: Array = next_state.get("claimed_land_ids", [])
+			var settlement: Dictionary = next_state.get("settlement", {})
+			var road_built := (settlement.get("built_improvements", []) as Array).has("road")
+			var connected_land_ids: Array = next_state.get("connected_land_ids", []).duplicate()
+			if (
+				String(next_state.get("selected_land_id", "")) != RIVERBEND_LAND_ID
+				or String(next_state.get("claimed_land_id", "")) != GREENVALE_LAND_ID
+				or not claimed_land_ids.has(RIVERBEND_LAND_ID)
+				or not road_built
+				or connected_land_ids.has(RIVERBEND_LAND_ID)
+			):
+				return next_state
+			var resources: Dictionary = next_state.get("resources", {}).duplicate(true)
+			if int(resources.get("stone", 0)) < FRONTIER_LINK_STONE_COST:
+				return next_state
+			resources["stone"] = int(resources.get("stone", 0)) - FRONTIER_LINK_STONE_COST
+			connected_land_ids.append(RIVERBEND_LAND_ID)
+			next_state["resources"] = resources
+			next_state["connected_land_ids"] = connected_land_ids
+
 		_:
 			return next_state
 
@@ -161,6 +184,7 @@ static func progress(state: Dictionary) -> Dictionary:
 	var road_built := (settlement.get("built_improvements", []) as Array).has("road")
 	var riverbend_inspected := (state.get("inspected_land_ids", []) as Array).has(RIVERBEND_LAND_ID)
 	var riverbend_claimed := claimed_land_ids.has(RIVERBEND_LAND_ID)
+	var riverbend_connected := (state.get("connected_land_ids", []) as Array).has(RIVERBEND_LAND_ID)
 	var next_goal := "Select and claim Greenvale"
 	if claimed and not founded:
 		next_goal = "Found Greengate"
@@ -170,8 +194,10 @@ static func progress(state: Dictionary) -> Dictionary:
 		next_goal = "Inspect Riverbend, Greenvale's eastern neighbor"
 	elif riverbend_inspected and not riverbend_claimed:
 		next_goal = "Choose whether to claim Riverbend"
-	elif riverbend_claimed:
+	elif riverbend_claimed and not riverbend_connected:
 		next_goal = "Connect Riverbend to Greengate"
+	elif riverbend_connected:
+		next_goal = "Await the next A-01 expansion opportunity"
 	return {
 		"claimed_lands": claimed_land_ids.size(),
 		"charted_lands": CHARTED_LANDS,
@@ -180,7 +206,10 @@ static func progress(state: Dictionary) -> Dictionary:
 		"inspected_frontiers": 1 if riverbend_inspected else 0,
 		"riverbend_inspected": riverbend_inspected,
 		"riverbend_claimed": riverbend_claimed,
-		"frontier_link_status": "pending" if riverbend_claimed else "not_started",
+		"riverbend_connected": riverbend_connected,
+		"frontier_link_status": (
+			"connected" if riverbend_connected else ("pending" if riverbend_claimed else "not_started")
+		),
 		"nation_status": "not_founded",
 		"next_goal": next_goal,
 	}
@@ -253,5 +282,14 @@ static func _normalize_state(saved: Dictionary) -> Dictionary:
 		resources["timber"] = int(saved_resources.get("timber", resources["timber"]))
 		resources["stone"] = int(saved_resources.get("stone", resources["stone"]))
 		normalized["resources"] = resources
+
+	var saved_connected_land_ids = saved.get("connected_land_ids", [])
+	if (
+		saved_connected_land_ids is Array
+		and saved_connected_land_ids.has(RIVERBEND_LAND_ID)
+		and normalized["claimed_land_ids"].has(RIVERBEND_LAND_ID)
+		and normalized_road_built
+	):
+		normalized["connected_land_ids"] = [RIVERBEND_LAND_ID]
 
 	return normalized

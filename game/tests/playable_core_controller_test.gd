@@ -69,6 +69,9 @@ func _run() -> void:
 
 	var reopened := PlayableCoreController.new()
 	reopened.save_path = save_path
+	reopened.action_rejected.connect(func(_action: String, _reason: String) -> void:
+		rejection_count += 1
+	)
 	root.add_child(reopened)
 	_expect(reopened.load_game(), "reopens saved state")
 	var restored := reopened.current_snapshot()
@@ -82,7 +85,15 @@ func _run() -> void:
 	_expect(String(restored.get("settlement_name", "")) == "Greengate", "reopen keeps Greengate as only settlement")
 	_expect(String(restored.get("nation_status", "")) == "not_founded", "reopen keeps nation unfounded")
 	_expect(String(restored.get("next_goal", "")) == "Connect Riverbend to Greengate", "reopen reports honest link goal")
-	_expect(rejection_count == 6, "emits one rejection for each invalid action")
+	_expect(reopened.connect_riverbend(), "connects claimed Riverbend to Greengate")
+	var connected := reopened.current_snapshot()
+	_expect(bool(connected.get("riverbend_connected", false)), "reports completed Riverbend connection")
+	_expect(String(connected.get("frontier_link_status", "")) == "connected", "reports factual connected status")
+	_expect(int(connected.get("stone", -1)) == 0, "connection spends remaining five stone")
+	_expect(String(connected.get("next_goal", "")) == "Await the next A-01 expansion opportunity", "reports honest post-connection goal")
+	_expect(not reopened.connect_riverbend(), "rejects duplicate Riverbend connection")
+	_expect(reopened.save_game(), "saves completed Riverbend connection")
+	_expect(rejection_count == 7, "emits one rejection for each invalid action")
 	_expect(view_events == ["village", "world"], "emits exact navigation transitions")
 
 	_remove_save(save_path)

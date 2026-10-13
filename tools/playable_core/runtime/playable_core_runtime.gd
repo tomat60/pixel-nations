@@ -16,6 +16,7 @@ var controller: Node
 var world: Node3D
 var village: Node
 var frontier_link: MeshInstance3D
+var frontier_link_material: StandardMaterial3D
 var lands: Array = []
 var selected_land: Dictionary = {}
 var ui_layer: CanvasLayer
@@ -27,6 +28,7 @@ var goal_label: Label
 var claim_button: Button
 var enter_button: Button
 var inspect_button: Button
+var connect_button: Button
 var road_button: Button
 var save_button: Button
 var return_button: Button
@@ -111,10 +113,11 @@ func _build_ui() -> void:
 	claim_button = _button("Claim selected land", "ClaimButton", _claim)
 	enter_button = _button("Enter Greengate", "EnterButton", _enter)
 	inspect_button = _button("Inspect Riverbend frontier", "InspectButton", _inspect_frontier)
+	connect_button = _button("Connect Riverbend · 5 stone", "ConnectButton", _connect_riverbend)
 	road_button = _button("Build village road · 5 stone", "RoadButton", _road)
 	save_button = _button("Save progress", "SaveButton", _save)
 	return_button = _button("Return to World", "ReturnButton", _return_world)
-	for button in [claim_button, enter_button, inspect_button, road_button, save_button, return_button]:
+	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, save_button, return_button]:
 		column.add_child(button)
 
 
@@ -170,14 +173,13 @@ func _build_frontier_link() -> void:
 	var delta := frontier - home
 	var route_mesh := BoxMesh.new()
 	route_mesh.size = Vector3(delta.length(), 0.45, 1.8)
-	var route_material := StandardMaterial3D.new()
-	route_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	route_material.albedo_color = Color(0.95, 0.68, 0.18, 1.0)
-	route_material.emission_enabled = true
-	route_material.emission = Color(0.95, 0.47, 0.08, 1.0)
-	route_material.emission_energy_multiplier = 2.5
-	route_material.no_depth_test = true
-	route_mesh.material = route_material
+	frontier_link_material = StandardMaterial3D.new()
+	frontier_link_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	frontier_link_material.emission_enabled = true
+	frontier_link_material.emission_energy_multiplier = 2.5
+	frontier_link_material.no_depth_test = true
+	route_mesh.material = frontier_link_material
+	_set_frontier_link_connected(false)
 	frontier_link = MeshInstance3D.new()
 	frontier_link.name = "GreenvaleRiverbendClaimLink"
 	frontier_link.mesh = route_mesh
@@ -203,6 +205,11 @@ func _road() -> void:
 
 func _inspect_frontier() -> void:
 	if controller.inspect_selected_frontier():
+		controller.save_game()
+
+
+func _connect_riverbend() -> void:
+	if controller.connect_riverbend():
 		controller.save_game()
 
 
@@ -258,8 +265,9 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	else:
 		title_label.text = "Sector A-01 / Aurelian Basin"
 		identity_label.text = _land_title(selected_id)
-		detail_label.text = "%d/%d claimed · Greengate: %s · Road: %s · Riverbend: %s · Link: %s · Nation: %s" % [
+		detail_label.text = "%d/%d claimed · Stone: %d · Greengate: %s · Road: %s · Riverbend: %s · Link: %s · Nation: %s" % [
 			int(snapshot.get("claimed_lands", 0)), int(snapshot.get("charted_lands", 30)),
+			int(snapshot.get("stone", 0)),
 			"founded" if bool(snapshot.get("settlement_founded", false)) else "not founded",
 			"built" if bool(snapshot.get("road_built", false)) else "not built",
 			("claimed" if bool(snapshot.get("riverbend_claimed", false)) else (
@@ -272,6 +280,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	claim_button.visible = view == "world"
 	enter_button.visible = view == "world"
 	inspect_button.visible = view == "world"
+	connect_button.visible = view == "world"
 	road_button.visible = view == "village"
 	return_button.visible = view == "village"
 	save_button.visible = true
@@ -290,9 +299,27 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		or not bool(snapshot.get("road_built", false))
 		or bool(snapshot.get("riverbend_inspected", false))
 	)
+	connect_button.disabled = (
+		selected_id != "PN-A01-002"
+		or not bool(snapshot.get("riverbend_claimed", false))
+		or bool(snapshot.get("riverbend_connected", false))
+		or int(snapshot.get("stone", 0)) < int(snapshot.get("frontier_link_stone_cost", 5))
+	)
 	road_button.disabled = bool(snapshot.get("road_built", false)) or int(snapshot.get("stone", 0)) < 5
 	if frontier_link != null:
 		frontier_link.visible = view == "world" and bool(snapshot.get("riverbend_claimed", false))
+		_set_frontier_link_connected(bool(snapshot.get("riverbend_connected", false)))
+
+
+func _set_frontier_link_connected(connected: bool) -> void:
+	if frontier_link_material == null:
+		return
+	frontier_link_material.albedo_color = (
+		Color(0.30, 0.92, 0.48, 1.0) if connected else Color(0.95, 0.68, 0.18, 1.0)
+	)
+	frontier_link_material.emission = (
+		Color(0.12, 0.72, 0.32, 1.0) if connected else Color(0.95, 0.47, 0.08, 1.0)
+	)
 
 
 func _land_title(land_id: String) -> String:
