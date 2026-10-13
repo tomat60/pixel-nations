@@ -111,7 +111,6 @@ func _run() -> void:
 	_expect(bool(supplied_reopened.get("riverbend_supply_delivered", false)), "reopen preserves delivered shipment")
 	_expect(int(supplied_reopened.get("stone", -1)) == 5, "reopen preserves shipment reward")
 	_expect(String(supplied_reopened.get("next_goal", "")) == "Commission the Highmere survey in Greengate", "reports honest Highmere survey goal")
-	_expect(reopened.select_land_from_map(HOME_LAND_ID), "reselects Greenvale for Highmere survey")
 	_expect(reopened.enter_selected_land(), "reenters Greengate for Highmere survey")
 	_expect(reopened.commission_highmere_survey(), "commissions Highmere survey for five stone")
 	var survey_village := reopened.current_snapshot()

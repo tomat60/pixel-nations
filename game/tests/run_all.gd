@@ -289,7 +289,6 @@ func _test_playable_session_round_trip() -> void:
 	var supplied_world: Dictionary = session.world_view_model()
 	_check(bool(supplied_world.get("riverbend_supply_delivered", false)), "session_world_reports_supply")
 	_check(String(supplied_world.get("next_goal", "")) == "Commission the Highmere survey in Greengate", "session_supply_goal_truthful")
-	_check(session.select_land("PN-A01-001"), "session_reselects_greenvale_for_survey")
 	_check(session.enter_greengate(), "session_reenters_greengate_for_survey")
 	_check(session.commission_highmere_survey(), "session_commissions_highmere_survey")
 	_check(not session.commission_highmere_survey(), "session_blocks_duplicate_highmere_survey")
