@@ -133,6 +133,16 @@ jobs:
           assert (root / "village/scenes/approved.tscn").is_file()
           assert (root / "pixel_nations/playable_core.tscn").is_file()
           assert len(__import__("json").loads((root / "pixel_nations/a01_lands.json").read_text())["lands"]) == 30
+          assert (root / "pixel_nations/a01_atlas_substrate.svg").is_file()
+          assert "STATIC COMPOSITION TARGET" not in (root / "pixel_nations/a01_atlas_substrate.svg").read_text()
+          hud = (root / "village/ui/approved_hud.gd").read_text()
+          assert "Pixel Nations" in hud
+          assert "Greengate's first road" in hud
+          assert "Credits, licenses and source" in hud
+          assert "The Free Game" not in hud
+          assert "Primeiro, ligue a escola" not in hud
+          assert manifest["village_identity_files_transformed"] == 2
+          assert manifest["a01_atlas_substrate"]["source"] == "docs/visual-targets/world_atlas_a01_cartographic_mass_v1.svg"
           assert (root / "third_party/the-free-game/licenses/CC-BY-4.0.txt").is_file()
           assert (root / "THIRD_PARTY_CHANGES.md").is_file()
           print("PN_CLOUD_PLAYABLE_SOURCE_INPUTS=PASS")

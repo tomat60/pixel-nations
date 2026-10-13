@@ -19,6 +19,9 @@ var frontier_link: MeshInstance3D
 var frontier_link_material: StandardMaterial3D
 var highmere_survey_link: MeshInstance3D
 var highmere_survey_material: StandardMaterial3D
+var atlas_root: Node3D
+var land_materials: Dictionary = {}
+var land_labels: Dictionary = {}
 var lands: Array = []
 var selected_land: Dictionary = {}
 var ui_layer: CanvasLayer
@@ -60,7 +63,8 @@ func _ready() -> void:
 		player.province_selected.disconnect(donor_handler)
 	player.province_selected.connect(_on_world_position_selected)
 	player.position = Vector3(-35.0, 0.0, -46.0)
-	player.camera.position.z = 220.0
+	player.camera.position.z = 250.0
+	_build_a01_atlas()
 	_build_frontier_link()
 	_build_highmere_survey_link()
 	_build_ui()
@@ -79,6 +83,122 @@ func _load_lands() -> void:
 		lands = parsed.get("lands", [])
 	if lands.size() != 30:
 		push_error("PN_A01_LAND_COUNT_INVALID")
+
+
+func _build_a01_atlas() -> void:
+	var donor_surface := world.get_node_or_null("Map/MeshInstance3D") as MeshInstance3D
+	if donor_surface != null:
+		donor_surface.visible = false
+	var donor_country_labels := world.get_node_or_null("Map/CountryLabels3D")
+	if donor_country_labels is Node3D:
+		(donor_country_labels as Node3D).visible = false
+	atlas_root = Node3D.new()
+	atlas_root.name = "CanonicalA01Atlas"
+	world.add_child(atlas_root)
+	var substrate := MeshInstance3D.new()
+	substrate.name = "FictionalAurelianSubstrate"
+	var substrate_mesh := PlaneMesh.new()
+	substrate_mesh.size = Vector2(500.0, 250.0)
+	var substrate_material := StandardMaterial3D.new()
+	substrate_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	substrate_material.albedo_texture = load("res://pixel_nations/a01_atlas_substrate.svg")
+	substrate_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	substrate_mesh.material = substrate_material
+	substrate.mesh = substrate_mesh
+	substrate.position.y = 0.04
+	atlas_root.add_child(substrate)
+	for land_value in lands:
+		_build_land_polygon(land_value as Dictionary)
+	_build_land_label("PN-A01-001", "GREENVALE\nHOME", Color("dbe9ff"))
+	_build_land_label("PN-A01-002", "RIVERBEND", Color("d6ffff"))
+	_build_land_label("PN-A01-003", "HIGHMERE", Color("f2ead2"))
+
+
+func _build_land_polygon(land: Dictionary) -> void:
+	var points := PackedVector2Array()
+	for raw_point in land.get("points", []):
+		points.append(Vector2(float(raw_point[0]), float(raw_point[1])))
+	var triangles := Geometry2D.triangulate_polygon(points)
+	if triangles.is_empty():
+		push_error("PN_A01_POLYGON_INVALID_%s" % String(land.get("id", "")))
+		return
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for index in triangles:
+		var point := points[int(index)]
+		surface.add_vertex(Vector3(
+			WORLD_LEFT + point.x / MAP_WIDTH * WORLD_WIDTH,
+			0.18,
+			WORLD_TOP + point.y / MAP_HEIGHT * WORLD_HEIGHT
+		))
+	var mesh := surface.commit()
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = _terrain_color(String(land.get("terrain", "grassland")))
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mesh.surface_set_material(0, material)
+	var polygon := MeshInstance3D.new()
+	polygon.name = String(land.get("id", "Land")).replace("-", "_")
+	polygon.mesh = mesh
+	atlas_root.add_child(polygon)
+	land_materials[String(land.get("id", ""))] = material
+	var outline_material := StandardMaterial3D.new()
+	outline_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	outline_material.albedo_color = Color(0.82, 0.79, 0.61, 0.92)
+	outline_material.no_depth_test = true
+	var outline_mesh := ImmediateMesh.new()
+	outline_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, outline_material)
+	for point in points:
+		outline_mesh.surface_add_vertex(Vector3(
+			WORLD_LEFT + point.x / MAP_WIDTH * WORLD_WIDTH,
+			0.30,
+			WORLD_TOP + point.y / MAP_HEIGHT * WORLD_HEIGHT
+		))
+	var first := points[0]
+	outline_mesh.surface_add_vertex(Vector3(
+		WORLD_LEFT + first.x / MAP_WIDTH * WORLD_WIDTH,
+		0.30,
+		WORLD_TOP + first.y / MAP_HEIGHT * WORLD_HEIGHT
+	))
+	outline_mesh.surface_end()
+	var outline := MeshInstance3D.new()
+	outline.name = "%s_Border" % polygon.name
+	outline.mesh = outline_mesh
+	atlas_root.add_child(outline)
+
+
+func _build_land_label(land_id: String, text_value: String, color: Color) -> void:
+	var center := canonical_center_world(land_id)
+	var label := Label3D.new()
+	label.name = "%s_Label" % land_id.replace("-", "_")
+	label.text = text_value
+	label.position = Vector3(center.x, 2.0, center.y)
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.no_depth_test = true
+	label.font_size = 32
+	label.outline_size = 12
+	label.modulate = color
+	label.outline_modulate = Color(0.02, 0.04, 0.05, 0.95)
+	label.pixel_size = 0.12
+	atlas_root.add_child(label)
+	land_labels[land_id] = label
+
+
+func _terrain_color(terrain: String) -> Color:
+	var colors := {
+		"grassland": Color("718b4e"),
+		"forest": Color("28583b"),
+		"river": Color("3989a4"),
+		"hill": Color("856d47"),
+		"ruins": Color("695f56"),
+		"coast": Color("a8874e"),
+		"marsh": Color("466f5a"),
+		"field": Color("9e8a4e"),
+	}
+	var color: Color = colors.get(terrain, Color("718b4e"))
+	color.a = 0.94
+	return color
 
 
 func _build_ui() -> void:
@@ -382,6 +502,29 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	if highmere_survey_link != null:
 		highmere_survey_link.visible = view == "world" and bool(snapshot.get("highmere_survey_commissioned", false))
 		_set_highmere_survey_inspected(bool(snapshot.get("highmere_inspected", false)))
+	_refresh_land_visuals(snapshot)
+
+
+func _refresh_land_visuals(snapshot: Dictionary) -> void:
+	var selected_id := String(snapshot.get("selected_land_id", ""))
+	var claimed_ids: Array = snapshot.get("claimed_land_ids", []) as Array
+	for land_value in lands:
+		var land: Dictionary = land_value
+		var land_id := String(land.get("id", ""))
+		var material := land_materials.get(land_id) as StandardMaterial3D
+		if material == null:
+			continue
+		var color := _terrain_color(String(land.get("terrain", "grassland")))
+		if claimed_ids.has(land_id):
+			color = Color("2868b8") if land_id == "PN-A01-001" else Color("2b8b88")
+			color.a = 0.98
+		elif land_id == "PN-A01-003" and bool(snapshot.get("highmere_inspected", false)):
+			color = Color(0.42, 0.68, 0.78, 0.98)
+		if land_id == selected_id:
+			color = color.lightened(0.22)
+		material.albedo_color = color
+	for label_value in land_labels.values():
+		(label_value as Label3D).visible = String(snapshot.get("view", "world")) == "world"
 
 
 func _set_frontier_link_connected(connected: bool) -> void:
