@@ -182,7 +182,7 @@ def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -
     notice = f"""# Third-party source changes
 
 - OpenGS source: Thomas Holtvedt, `{opengs_commit}`, MIT.
-- OpenGS files are copied without content changes into the generated project root.
+- OpenGS scene/code files are copied unchanged; generated project.godot is rebranded for Pixel Nations and starts the canonical playable scene.
 - OpenGS `ne2.png` is a Thomas Holtvedt QGIS derivative of the public-domain Natural Earth 2 raster; its exact hash and source URL are pinned in the integration spec.
 - Village source: Lucas Marques, from Shiva — The Free Game, `{village_commit}`.
 - Village files are moved below `res://village/`; textual `res://` references are rewritten to that namespace.
@@ -256,6 +256,120 @@ def install_pixel_nations_runtime(output: Path) -> int:
         'run/main_scene="res://pixel_nations/playable_core.tscn"',
         project_text,
         count=1,
+    )
+    if 'config/name="Open Grand Strategy"' not in project_text:
+        raise SourceError("unexpected OpenGS project name; refuse unsafe donor rebrand")
+    project_text = project_text.replace(
+        'config/name="Open Grand Strategy"',
+        'config/name="Pixel Nations"',
+        1,
+    )
+    project_text = re.sub(
+        r'^config/description="[^"]+"
+    return sum(1 for path in runtime_target.rglob("*") if path.is_file())
+
+
+def materialize(spec_path: Path, output: Path) -> dict[str, object]:
+    if output.exists() and any(output.iterdir()):
+        raise SourceError(f"output must be absent or empty: {output}")
+    output.mkdir(parents=True, exist_ok=True)
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    opengs = spec["opengs"]
+    village = spec["village"]
+
+    with tempfile.TemporaryDirectory(prefix="pn-scene-sources-") as temp_name:
+        temp = Path(temp_name)
+        opengs_repo = temp / "opengs"
+        village_repo = temp / "the-free-game"
+        clone_pinned(opengs["repository"], opengs["commit"], opengs_repo)
+        clone_pinned(village["repository"], village["commit"], village_repo)
+
+        require_paths(opengs_repo, opengs["required_paths"], "OpenGS")
+        require_paths(village_repo, village["required_paths"], "village")
+        require_hash(opengs_repo / "LICENSE", opengs["license_sha256"], "OpenGS LICENSE")
+        require_hash(village_repo / "LICENSE", village["code_license_sha256"], "village LICENSE")
+        require_hash(village_repo / "LICENSE-ASSETS.md", village["asset_license_sha256"], "village asset license")
+        require_hash(village_repo / "THIRD_PARTY_NOTICES.md", village["third_party_notices_sha256"], "village notices")
+        for relative, provenance in opengs.get("asset_provenance", {}).items():
+            require_hash(opengs_repo / relative, provenance["sha256"], f"OpenGS asset {relative}")
+
+        opengs_files = copy_tracked(opengs_repo, output)
+        village_root = output / "village"
+        village_files = copy_tracked(village_repo, village_root, "game")
+        project_file = village_root / "project.godot"
+        if project_file.exists():
+            project_file.unlink()
+            village_files -= 1
+        rewritten_files = namespace_village(village_root)
+        village_identity_files = apply_pixel_nations_village_identity(village_root)
+
+        notices = output / "third_party" / "the-free-game"
+        notices.mkdir(parents=True, exist_ok=True)
+        for relative in ("LICENSE", "LICENSE-ASSETS.md", "THIRD_PARTY_NOTICES.md"):
+            shutil.copy2(village_repo / relative, notices / relative)
+        shutil.copytree(village_repo / "licenses", notices / "licenses")
+        write_change_notice(output, opengs["commit"], village["commit"])
+
+        runtime_files = install_pixel_nations_runtime(output)
+        atlas_substrate = install_a01_atlas_substrate(output)
+
+    manifest = {
+        "schema_version": 1,
+        "status": "ROUGH_PLAYABLE_TRANSFORM_NOT_PRODUCT_ACCEPTANCE",
+        "opengs_commit": opengs["commit"],
+        "village_commit": village["commit"],
+        "opengs_files": opengs_files,
+        "opengs_asset_provenance": opengs.get("asset_provenance", {}),
+        "village_files": village_files,
+        "village_text_files_rewritten": rewritten_files,
+        "village_identity_files_transformed": village_identity_files,
+        "village_scene": "res://village/scenes/approved.tscn",
+        "playable_scene": "res://pixel_nations/playable_core.tscn",
+        "pixel_nations_runtime_files": runtime_files,
+        "a01_atlas_substrate": atlas_substrate,
+        "unresolved_release_assets": opengs["unresolved_release_assets"],
+        "missing_pixel_nations_transform": False,
+    }
+    (output / ".pn-source-manifest.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return manifest
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--spec", type=Path, default=DEFAULT_SPEC)
+    parser.add_argument("--output", type=Path, required=True)
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    try:
+        manifest = materialize(args.spec.resolve(), args.output.resolve())
+    except (OSError, SourceError, ValueError, json.JSONDecodeError) as error:
+        print(f"PN_PLAYABLE_SOURCE_BRIDGE=FAIL {error}")
+        return 1
+    print(json.dumps(manifest, sort_keys=True))
+    print("PN_PLAYABLE_SOURCE_BRIDGE=PASS")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+,
+        'config/description="One land can become an empire."',
+        project_text,
+        count=1,
+        flags=re.MULTILINE,
+    )
+    # Never ship the donor launcher icon under Pixel Nations branding.
+    project_text = re.sub(
+        r'^config/icon="[^"]+"\n',
+        "",
+        project_text,
+        count=1,
+        flags=re.MULTILINE,
     )
     project.write_text(project_text, encoding="utf-8")
     return sum(1 for path in runtime_target.rglob("*") if path.is_file())
