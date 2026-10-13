@@ -53,6 +53,13 @@ func build_road() -> bool:
 	return _reject("build_road", "The Greengate road requires the Village view and 5 stone.")
 
 
+func inspect_selected_frontier() -> bool:
+	if session.inspect_selected_frontier():
+		_publish_snapshot()
+		return true
+	return _reject("inspect_frontier", "Riverbend can be inspected after Greengate's road is built.")
+
+
 func return_to_world() -> bool:
 	if session.return_to_world():
 		_publish_view()
