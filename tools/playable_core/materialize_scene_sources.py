@@ -110,6 +110,46 @@ def namespace_village(village: Path) -> int:
     return changed
 
 
+def apply_village_product_identity(village: Path) -> int:
+    """Apply bounded visible Pixel Nations copy to the retained donor scene.
+
+    Third-party licensing and author attribution are preserved separately in
+    THIRD_PARTY_CHANGES.md and third_party/the-free-game/**.
+    Never mutate upstream checkout bytes; this runs only on the local export.
+    """
+    hud_path = village / "ui" / "approved_hud.gd"
+    game_path = village / "presentation" / "approved_game.gd"
+    hud = hud_path.read_text(encoding="utf-8")
+    game = game_path.read_text(encoding="utf-8")
+    hud_substitutions = {
+        '_brand = _label(_brand_box,"The Free Game",24,WINE_DARK)':
+            '_brand = _label(_brand_box,"PIXEL NATIONS",24,WINE_DARK)',
+        '_credit_label = _label(_brand_box,"Lucas Marques, from Shiva",12,MUTED)':
+            '_credit_label = _label(_brand_box,"Aurelian Basin · Greengate",12,MUTED)',
+    }
+    for old, new in hud_substitutions.items():
+        if hud.count(old) != 1:
+            raise SourceError(f"pinned donor HUD branding drift: expected once: {old}")
+        hud = hud.replace(old, new, 1)
+
+    # Existing playable-core navigation/actions remain authoritative. The
+    # donor's school-first onboarding and native objective tracker are unrelated
+    # to Greenvale -> Greengate -> Riverbend -> Highmere, so hide them rather
+    # than giving conflicting instructions. Donor city mechanics remain intact.
+    before = "\thud.setup(sim)\n"
+    after = (
+        "\thud.setup(sim)\n"
+        "\thud._dismiss_tutorial()\n"
+        "\thud._objectives_panel.hide()\n"
+    )
+    if game.count(before) != 1:
+        raise SourceError("pinned village scene entry drift: hud.setup(sim) not unique")
+    game = game.replace(before, after, 1)
+    hud_path.write_text(hud, encoding="utf-8")
+    game_path.write_text(game, encoding="utf-8")
+    return 2
+
+
 def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -> None:
     notice = f"""# Third-party source changes
 
@@ -118,6 +158,7 @@ def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -
 - OpenGS `ne2.png` is a Thomas Holtvedt QGIS derivative of the public-domain Natural Earth 2 raster; its exact hash and source URL are pinned in the integration spec.
 - Village source: Lucas Marques, from Shiva — The Free Game, `{village_commit}`.
 - Village files are moved below `res://village/`; textual `res://` references are rewritten to that namespace.
+- Export-only Pixel Nations presentation transform changes the visible donor HUD title/subtitle and hides its unrelated native school tutorial/objective panel. The donor's MIT/CC BY credits and complete license texts remain present in the third-party notices and Credits/source link; this is NOT a change in licensing.
 - Pixel Nations adds a namespaced integration scene, canonical A-01 hit geometry, truthful state UI, and World/Village navigation under `res://pixel_nations/`.
 - Canonical land geometry is extracted from the repository's existing `app/play/lib/map-data.ts`; donor geography is not relabeled as Pixel Nations geography.
 - The integration remains a rough gameplay candidate and does not claim final visual acceptance.
@@ -223,6 +264,7 @@ def materialize(spec_path: Path, output: Path) -> dict[str, object]:
             project_file.unlink()
             village_files -= 1
         rewritten_files = namespace_village(village_root)
+        identity_files = apply_village_product_identity(village_root)
 
         notices = output / "third_party" / "the-free-game"
         notices.mkdir(parents=True, exist_ok=True)
@@ -242,6 +284,7 @@ def materialize(spec_path: Path, output: Path) -> dict[str, object]:
         "opengs_asset_provenance": opengs.get("asset_provenance", {}),
         "village_files": village_files,
         "village_text_files_rewritten": rewritten_files,
+        "pixel_nations_village_identity_files": identity_files,
         "village_scene": "res://village/scenes/approved.tscn",
         "playable_scene": "res://pixel_nations/playable_core.tscn",
         "pixel_nations_runtime_files": runtime_files,
