@@ -191,8 +191,8 @@ func _run() -> void:
 	_check(int(claimed_highmere.get("claimed_lands", -1)) == 3, "highmere_claim_advances_to_three_of_thirty")
 	_check(String(claimed_highmere.get("nation_status", "")) == "not_founded", "third_land_does_not_invent_nation")
 	_check(String(claimed_highmere.get("settlement_name", "")) == "Greengate", "third_land_does_not_invent_settlement")
-	_check(String(claimed_highmere.get("next_goal", "")) == "Highmere is claimed; a permanent ridge link is not yet playable", "third_land_reports_honest_stop_gate")
-	_check(runtime.highmere_survey_material.albedo_color.g > runtime.highmere_survey_material.albedo_color.b, "claimed_highmere_route_turns_green")
+	_check(String(claimed_highmere.get("next_goal", "")) == "Return to Greengate for the Highmere ridge stone shipment", "third_land_reports_ridge_supply_goal")
+	_check(runtime.highmere_survey_material.albedo_color.r > runtime.highmere_survey_material.albedo_color.g, "claimed_highmere_route_turns_pending_amber")
 	_check(runtime.controller.save_game(), "highmere_claim_saves")
 	await process_frame
 	_capture("world-highmere-claimed")
@@ -208,6 +208,41 @@ func _run() -> void:
 	_check(int(highmere_reopened.get("stone", -1)) == 0, "reopen_keeps_highmere_survey_cost")
 	await process_frame
 	_capture("world-highmere-claimed-reopened")
+	await _click_position(home_screen)
+	await _click_control(runtime.enter_button)
+	await process_frame
+	await create_timer(0.6).timeout
+	await _click_control(runtime.supply_button)
+	var highmere_link_supplied: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(highmere_link_supplied.get("highmere_link_supply_delivered", false)), "highmere_ridge_supply_delivered")
+	_check(int(highmere_link_supplied.get("stone", -1)) == 5, "highmere_ridge_supply_restores_five_stone")
+	_check(runtime.supply_button.disabled, "highmere_ridge_supply_is_one_time")
+	await process_frame
+	_capture("village-highmere-link-supply")
+	await _click_control(runtime.return_button)
+	await process_frame
+	await _click_position(highmere_screen)
+	await _click_control(runtime.connect_button)
+	var highmere_connected: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(highmere_connected.get("highmere_connected", false)), "highmere_link_completed")
+	_check(String(highmere_connected.get("highmere_link_status", "")) == "connected", "highmere_link_reports_connected")
+	_check(int(highmere_connected.get("stone", -1)) == 0, "highmere_link_costs_five_stone")
+	_check(String(highmere_connected.get("next_goal", "")) == "Highmere is linked; the next expansion is not yet playable", "highmere_link_reports_honest_stop_gate")
+	_check(String(highmere_connected.get("nation_status", "")) == "not_founded", "highmere_link_does_not_invent_nation")
+	_check(runtime.highmere_survey_material.albedo_color.g > runtime.highmere_survey_material.albedo_color.r, "connected_highmere_route_turns_green")
+	_check(runtime.controller.save_game(), "highmere_link_saves")
+	await process_frame
+	_capture("world-highmere-connected")
+	runtime.controller.session.state["connected_land_ids"] = [FRONTIER_ID]
+	runtime.controller.session.state["resources"]["stone"] = 5
+	runtime.controller.session.state["settlement"]["completed_orders"].erase("highmere_link_stone_shipment")
+	_check(runtime.controller.load_game(), "highmere_link_reopens")
+	var highmere_link_reopened: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(highmere_link_reopened.get("highmere_link_supply_delivered", false)), "reopen_keeps_highmere_ridge_supply")
+	_check(bool(highmere_link_reopened.get("highmere_connected", false)), "reopen_keeps_highmere_link")
+	_check(int(highmere_link_reopened.get("stone", -1)) == 0, "reopen_keeps_highmere_link_cost")
+	await process_frame
+	_capture("world-highmere-connected-reopened")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")

@@ -161,7 +161,7 @@ jobs:
           from pathlib import Path
           import hashlib, struct
           evidence = Path("evidence/godot-cloud-workbench")
-          for stem in ("world-claimed", "village-road-built", "world-riverbend-claimed", "world-riverbend-connected", "village-riverbend-supply", "world-riverbend-supplied", "village-highmere-survey", "world-highmere-inspected", "world-highmere-claimed", "world-highmere-claimed-reopened"):
+          for stem in ("world-claimed", "village-road-built", "world-riverbend-claimed", "world-riverbend-connected", "village-riverbend-supply", "world-riverbend-supplied", "village-highmere-survey", "world-highmere-inspected", "world-highmere-claimed", "world-highmere-claimed-reopened", "village-highmere-link-supply", "world-highmere-connected", "world-highmere-connected-reopened"):
               for suffix, expected in (("1440x900", (1440, 900)), ("360x225", (360, 225))):
                   path = evidence / f"{stem}-{suffix}.png"
                   data = path.read_bytes()

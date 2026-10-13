@@ -1,7 +1,7 @@
 class_name GameState
 extends RefCounted
 
-const SCHEMA_VERSION := 8
+const SCHEMA_VERSION := 9
 const CHARTED_LANDS := 30
 const ROAD_STONE_COST := 5
 const FRONTIER_LINK_STONE_COST := 5
@@ -9,6 +9,9 @@ const RIVERBEND_SUPPLY_STONE_REWARD := 5
 const RIVERBEND_SUPPLY_ORDER_ID := "riverbend_stone_shipment"
 const HIGHMERE_SURVEY_STONE_COST := 5
 const HIGHMERE_SURVEY_ORDER_ID := "highmere_survey"
+const HIGHMERE_LINK_STONE_COST := 5
+const HIGHMERE_LINK_SUPPLY_STONE_REWARD := 5
+const HIGHMERE_LINK_SUPPLY_ORDER_ID := "highmere_link_stone_shipment"
 const GREENVALE_LAND_ID := "PN-A01-001"
 const RIVERBEND_LAND_ID := "PN-A01-002"
 const HIGHMERE_LAND_ID := "PN-A01-003"
@@ -215,6 +218,46 @@ static func reduce(state: Dictionary, action: Dictionary) -> Dictionary:
 			next_state["resources"] = resources
 			next_state["settlement"] = settlement
 
+		"RECEIVE_HIGHMERE_LINK_SUPPLY":
+			var claimed_land_ids: Array = next_state.get("claimed_land_ids", [])
+			var connected_land_ids: Array = next_state.get("connected_land_ids", [])
+			var settlement: Dictionary = next_state.get("settlement", {}).duplicate(true)
+			var completed_orders: Array = settlement.get("completed_orders", []).duplicate()
+			if (
+				not claimed_land_ids.has(HIGHMERE_LAND_ID)
+				or not connected_land_ids.has(RIVERBEND_LAND_ID)
+				or not completed_orders.has(HIGHMERE_SURVEY_ORDER_ID)
+				or completed_orders.has(HIGHMERE_LINK_SUPPLY_ORDER_ID)
+			):
+				return next_state
+			var resources: Dictionary = next_state.get("resources", {}).duplicate(true)
+			resources["stone"] = int(resources.get("stone", 0)) + HIGHMERE_LINK_SUPPLY_STONE_REWARD
+			completed_orders.append(HIGHMERE_LINK_SUPPLY_ORDER_ID)
+			settlement["completed_orders"] = completed_orders
+			next_state["resources"] = resources
+			next_state["settlement"] = settlement
+
+		"CONNECT_HIGHMERE":
+			var claimed_land_ids: Array = next_state.get("claimed_land_ids", [])
+			var connected_land_ids: Array = next_state.get("connected_land_ids", []).duplicate()
+			var settlement: Dictionary = next_state.get("settlement", {})
+			var completed_orders: Array = settlement.get("completed_orders", [])
+			if (
+				String(next_state.get("selected_land_id", "")) != HIGHMERE_LAND_ID
+				or not claimed_land_ids.has(HIGHMERE_LAND_ID)
+				or not connected_land_ids.has(RIVERBEND_LAND_ID)
+				or not completed_orders.has(HIGHMERE_LINK_SUPPLY_ORDER_ID)
+				or connected_land_ids.has(HIGHMERE_LAND_ID)
+			):
+				return next_state
+			var resources: Dictionary = next_state.get("resources", {}).duplicate(true)
+			if int(resources.get("stone", 0)) < HIGHMERE_LINK_STONE_COST:
+				return next_state
+			resources["stone"] = int(resources.get("stone", 0)) - HIGHMERE_LINK_STONE_COST
+			connected_land_ids.append(HIGHMERE_LAND_ID)
+			next_state["resources"] = resources
+			next_state["connected_land_ids"] = connected_land_ids
+
 		_:
 			return next_state
 
@@ -253,6 +296,10 @@ static func progress(state: Dictionary) -> Dictionary:
 	)
 	var highmere_inspected := (state.get("inspected_land_ids", []) as Array).has(HIGHMERE_LAND_ID)
 	var highmere_claimed := claimed_land_ids.has(HIGHMERE_LAND_ID)
+	var highmere_link_supply_delivered := (
+		(settlement.get("completed_orders", []) as Array).has(HIGHMERE_LINK_SUPPLY_ORDER_ID)
+	)
+	var highmere_connected := (state.get("connected_land_ids", []) as Array).has(HIGHMERE_LAND_ID)
 	var next_goal := "Select and claim Greenvale"
 	if claimed and not founded:
 		next_goal = "Found Greengate"
@@ -272,8 +319,12 @@ static func progress(state: Dictionary) -> Dictionary:
 		next_goal = "Inspect Highmere, the northern homeland ridge"
 	elif highmere_inspected and not highmere_claimed:
 		next_goal = "Choose whether to claim Highmere"
-	elif highmere_claimed:
-		next_goal = "Highmere is claimed; a permanent ridge link is not yet playable"
+	elif highmere_claimed and not highmere_link_supply_delivered:
+		next_goal = "Return to Greengate for the Highmere ridge stone shipment"
+	elif highmere_link_supply_delivered and not highmere_connected:
+		next_goal = "Connect Highmere ridge to Riverbend"
+	elif highmere_connected:
+		next_goal = "Highmere is linked; the next expansion is not yet playable"
 	return {
 		"claimed_lands": claimed_land_ids.size(),
 		"charted_lands": CHARTED_LANDS,
@@ -290,10 +341,17 @@ static func progress(state: Dictionary) -> Dictionary:
 		"highmere_survey_commissioned": highmere_survey_commissioned,
 		"highmere_inspected": highmere_inspected,
 		"highmere_claimed": highmere_claimed,
-		"highmere_status": (
-			"claimed" if highmere_claimed else (
-				"inspected" if highmere_inspected else ("survey_ready" if highmere_survey_commissioned else "locked")
+		"highmere_link_supply_delivered": highmere_link_supply_delivered,
+		"highmere_connected": highmere_connected,
+		"highmere_link_status": (
+			"connected" if highmere_connected else (
+				"ready" if highmere_link_supply_delivered else ("pending" if highmere_claimed else "locked")
 			)
+		),
+		"highmere_status": (
+			"linked" if highmere_connected else ("claimed" if highmere_claimed else (
+				"inspected" if highmere_inspected else ("survey_ready" if highmere_survey_commissioned else "locked")
+			))
 		),
 		"frontier_link_status": (
 			"connected" if riverbend_connected else ("pending" if riverbend_claimed else "not_started")
@@ -411,5 +469,19 @@ static func _normalize_state(saved: Dictionary) -> Dictionary:
 		and normalized_completed_orders.has(HIGHMERE_SURVEY_ORDER_ID)
 	):
 		normalized["claimed_land_ids"].append(HIGHMERE_LAND_ID)
+	if (
+		normalized_completed_orders.has(HIGHMERE_LINK_SUPPLY_ORDER_ID)
+		and not normalized["claimed_land_ids"].has(HIGHMERE_LAND_ID)
+	):
+		normalized_completed_orders.erase(HIGHMERE_LINK_SUPPLY_ORDER_ID)
+		normalized["settlement"]["completed_orders"] = normalized_completed_orders
+	if (
+		saved_connected_land_ids is Array
+		and saved_connected_land_ids.has(HIGHMERE_LAND_ID)
+		and normalized["claimed_land_ids"].has(HIGHMERE_LAND_ID)
+		and normalized["connected_land_ids"].has(RIVERBEND_LAND_ID)
+		and normalized_completed_orders.has(HIGHMERE_LINK_SUPPLY_ORDER_ID)
+	):
+		normalized["connected_land_ids"].append(HIGHMERE_LAND_ID)
 
 	return normalized

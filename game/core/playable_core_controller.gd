@@ -81,6 +81,20 @@ func commission_highmere_survey() -> bool:
 	return _reject("commission_highmere_survey", "The Highmere survey requires the delivered Riverbend shipment, the Village view, and 5 stone.")
 
 
+func receive_highmere_link_supply() -> bool:
+	if session.receive_highmere_link_supply():
+		_publish_snapshot()
+		return true
+	return _reject("receive_highmere_link_supply", "The one-time ridge shipment requires claimed Highmere and the Village view.")
+
+
+func connect_highmere() -> bool:
+	if session.connect_highmere():
+		_publish_snapshot()
+		return true
+	return _reject("connect_highmere", "Claim and select Highmere after receiving its ridge shipment with 5 stone available.")
+
+
 func return_to_world() -> bool:
 	if session.return_to_world():
 		_publish_view()
