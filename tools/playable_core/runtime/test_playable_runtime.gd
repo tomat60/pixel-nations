@@ -2,6 +2,7 @@ extends SceneTree
 
 const HOME_ID := "PN-A01-001"
 const FRONTIER_ID := "PN-A01-002"
+const HIGHMERE_ID := "PN-A01-003"
 var failures: Array[String] = []
 
 
@@ -136,7 +137,7 @@ func _run() -> void:
 	await process_frame
 	var supplied_world: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(supplied_world.get("riverbend_supply_delivered", false)), "world_reports_riverbend_supply")
-	_check(String(supplied_world.get("next_goal", "")) == "Next canonical A-01 land is not yet playable", "world_reports_honest_unavailable_next_land")
+	_check(String(supplied_world.get("next_goal", "")) == "Commission the Highmere survey in Greengate", "world_reports_highmere_survey_goal")
 	runtime.controller.session.state["settlement"]["completed_orders"] = []
 	runtime.controller.session.state["resources"]["stone"] = 0
 	_check(runtime.controller.load_game(), "riverbend_supply_reopens")
@@ -145,6 +146,44 @@ func _run() -> void:
 	_check(int(supplied_reopened.get("stone", -1)) == 5, "reopen_keeps_riverbend_supply_reward")
 	await process_frame
 	_capture("world-riverbend-supplied")
+	await _click_position(home_screen)
+	await _click_control(runtime.enter_button)
+	await process_frame
+	await create_timer(0.6).timeout
+	await _click_control(runtime.survey_button)
+	var survey_village: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(survey_village.get("highmere_survey_commissioned", false)), "survey_button_commissions_highmere")
+	_check(int(survey_village.get("stone", -1)) == 0, "highmere_survey_spends_delivered_stone")
+	_check(runtime.survey_button.disabled, "highmere_survey_is_one_time")
+	await process_frame
+	_capture("village-highmere-survey")
+	await _click_control(runtime.return_button)
+	await process_frame
+	var highmere_world: Vector2 = runtime.canonical_center_world(HIGHMERE_ID)
+	_check(is_finite(highmere_world.x), "highmere_geometry_available")
+	var highmere_screen: Vector2 = player.camera.unproject_position(
+		Vector3(highmere_world.x, 0.0, highmere_world.y)
+	)
+	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(highmere_screen), "highmere_projects_inside_viewport")
+	await _click_position(highmere_screen)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HIGHMERE_ID, "pointer_raycast_selects_highmere")
+	await _click_control(runtime.inspect_button)
+	var inspected_highmere: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(inspected_highmere.get("highmere_inspected", false)), "highmere_inspection_recorded")
+	_check(int(inspected_highmere.get("claimed_lands", -1)) == 2, "highmere_inspection_does_not_claim_third_land")
+	_check(String(inspected_highmere.get("nation_status", "")) == "not_founded", "highmere_inspection_does_not_invent_nation")
+	_check(String(inspected_highmere.get("next_goal", "")) == "Highmere is surveyed; claiming it is not yet playable", "highmere_inspection_stops_before_claim")
+	_check(runtime.highmere_survey_link.visible, "highmere_survey_shows_world_route")
+	_check(runtime.highmere_survey_material.albedo_color.b > runtime.highmere_survey_material.albedo_color.r, "inspected_highmere_route_turns_blue")
+	runtime.controller.session.state["inspected_land_ids"] = [FRONTIER_ID]
+	runtime.controller.session.state["settlement"]["completed_orders"].erase("highmere_survey")
+	_check(runtime.controller.load_game(), "highmere_inspection_reopens")
+	var highmere_reopened: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(highmere_reopened.get("highmere_survey_commissioned", false)), "reopen_keeps_highmere_survey")
+	_check(bool(highmere_reopened.get("highmere_inspected", false)), "reopen_keeps_highmere_inspection")
+	_check(int(highmere_reopened.get("stone", -1)) == 0, "reopen_keeps_highmere_survey_cost")
+	await process_frame
+	_capture("world-highmere-inspected")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")

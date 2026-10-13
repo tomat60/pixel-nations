@@ -60,7 +60,7 @@ func _init() -> void:
 	_check(int(low_resource_state.get("resources", {}).get("stone", 0)) == STATE.ROAD_STONE_COST - 1, "road_cost_guard_preserves_resources")
 
 	var restored = STATE.from_json(STATE.to_json(state))
-	_check(int(restored.get("schema_version", 0)) == 6, "save_schema")
+	_check(int(restored.get("schema_version", 0)) == 7, "save_schema")
 	_check(String(restored.get("selected_land_id", "")) == "PN-A01-001", "save_selection")
 	_check(String(restored.get("claimed_land_id", "")) == "PN-A01-001", "save_claim")
 	_check(bool(restored.get("settlement", {}).get("founded", false)), "save_settlement")
@@ -122,12 +122,27 @@ func _init() -> void:
 	var supplied_progress := STATE.progress(supplied_frontier)
 	_check(bool(supplied_progress.get("riverbend_supply_delivered", false)), "riverbend_supply_visible")
 	_check(String(supplied_progress.get("riverbend_supply_status", "")) == "delivered", "riverbend_supply_status_visible")
-	_check(String(supplied_progress.get("next_goal", "")) == "Next canonical A-01 land is not yet playable", "riverbend_supply_goal_truthful")
+	_check(String(supplied_progress.get("next_goal", "")) == "Commission the Highmere survey in Greengate", "riverbend_supply_goal_truthful")
 	_check(String(supplied_progress.get("nation_status", "")) == "not_founded", "riverbend_supply_does_not_invent_nation")
 	var duplicate_supply := STATE.reduce(supplied_frontier, {"type": "RECEIVE_RIVERBEND_SUPPLY"})
 	_check(int(duplicate_supply.get("resources", {}).get("stone", -1)) == 5, "riverbend_supply_idempotent")
 	var supplied_restored := STATE.from_json(STATE.to_json(supplied_frontier))
 	_check(bool(STATE.progress(supplied_restored).get("riverbend_supply_delivered", false)), "riverbend_supply_persists")
+	var premature_highmere_survey := STATE.reduce(connected_frontier, {"type": "COMMISSION_HIGHMERE_SURVEY"})
+	_check(not premature_highmere_survey.get("settlement", {}).get("completed_orders", []).has(STATE.HIGHMERE_SURVEY_ORDER_ID), "highmere_survey_requires_delivered_supply")
+	var surveyed_highmere := STATE.reduce(supplied_frontier, {"type": "COMMISSION_HIGHMERE_SURVEY"})
+	_check(surveyed_highmere.get("settlement", {}).get("completed_orders", []).has(STATE.HIGHMERE_SURVEY_ORDER_ID), "highmere_survey_commissioned")
+	_check(int(surveyed_highmere.get("resources", {}).get("stone", -1)) == 0, "highmere_survey_costs_five_stone")
+	_check(String(STATE.progress(surveyed_highmere).get("next_goal", "")) == "Inspect Highmere, the northern homeland ridge", "highmere_survey_goal_truthful")
+	var selected_highmere := STATE.reduce(surveyed_highmere, {"type": "SELECT_LAND", "land_id": STATE.HIGHMERE_LAND_ID})
+	var inspected_highmere := STATE.reduce(selected_highmere, {"type": "INSPECT_LAND", "land_id": STATE.HIGHMERE_LAND_ID})
+	_check(inspected_highmere.get("inspected_land_ids", []).has(STATE.HIGHMERE_LAND_ID), "highmere_inspection_recorded")
+	_check(int(STATE.progress(inspected_highmere).get("claimed_lands", 0)) == 2, "highmere_inspection_does_not_claim_third_land")
+	_check(String(STATE.progress(inspected_highmere).get("next_goal", "")) == "Highmere is surveyed; claiming it is not yet playable", "highmere_inspection_stops_before_claim")
+	var duplicate_highmere_survey := STATE.reduce(surveyed_highmere, {"type": "COMMISSION_HIGHMERE_SURVEY"})
+	_check(int(duplicate_highmere_survey.get("resources", {}).get("stone", -1)) == 0, "highmere_survey_idempotent")
+	var inspected_highmere_restored := STATE.from_json(STATE.to_json(inspected_highmere))
+	_check(inspected_highmere_restored.get("inspected_land_ids", []).has(STATE.HIGHMERE_LAND_ID), "highmere_inspection_persists")
 	var duplicate_connection := STATE.reduce(connected_frontier, {"type": "CONNECT_RIVERBEND"})
 	_check(duplicate_connection.get("connected_land_ids", []).size() == 1, "riverbend_connection_idempotent")
 	_check(int(duplicate_connection.get("resources", {}).get("stone", -1)) == 0, "riverbend_connection_cost_idempotent")
@@ -149,7 +164,7 @@ func _init() -> void:
 		},
 	})
 	var migrated: Dictionary = STATE.from_json(legacy_payload)
-	_check(int(migrated.get("schema_version", 0)) == 6, "legacy_schema_migrated")
+	_check(int(migrated.get("schema_version", 0)) == 7, "legacy_schema_migrated")
 	_check(String(migrated.get("selected_land_id", "")) == "PN-A01-001", "legacy_selection_recovered")
 	_check(String(migrated.get("claimed_land_id", "")) == "PN-A01-001", "legacy_claim_preserved")
 	_check(migrated.get("claimed_land_ids", []) == ["PN-A01-001"], "legacy_claim_collection_recovered")
@@ -201,6 +216,17 @@ func _init() -> void:
 	})
 	var repaired_supply: Dictionary = STATE.from_json(injected_supply_save)
 	_check(not repaired_supply.get("settlement", {}).get("completed_orders", []).has("riverbend_stone_shipment"), "riverbend_supply_requires_persisted_connection")
+	var injected_highmere_save := JSON.stringify({
+		"schema_version": 7,
+		"claimed_land_id": "PN-A01-001",
+		"claimed_land_ids": ["PN-A01-001", "PN-A01-002"],
+		"inspected_land_ids": ["PN-A01-002", "PN-A01-003"],
+		"connected_land_ids": ["PN-A01-002"],
+		"settlement": {"founded": true, "name": "Greengate", "built_improvements": ["road"], "completed_orders": ["highmere_survey"]},
+	})
+	var repaired_highmere: Dictionary = STATE.from_json(injected_highmere_save)
+	_check(not repaired_highmere.get("settlement", {}).get("completed_orders", []).has("highmere_survey"), "highmere_survey_requires_persisted_supply")
+	_check(not repaired_highmere.get("inspected_land_ids", []).has("PN-A01-003"), "highmere_inspection_requires_persisted_survey")
 
 	_test_playable_session_round_trip()
 
@@ -262,7 +288,22 @@ func _test_playable_session_round_trip() -> void:
 	_check(session.return_to_world(), "session_returns_to_world_after_supply")
 	var supplied_world: Dictionary = session.world_view_model()
 	_check(bool(supplied_world.get("riverbend_supply_delivered", false)), "session_world_reports_supply")
-	_check(String(supplied_world.get("next_goal", "")) == "Next canonical A-01 land is not yet playable", "session_supply_goal_truthful")
+	_check(String(supplied_world.get("next_goal", "")) == "Commission the Highmere survey in Greengate", "session_supply_goal_truthful")
+	_check(session.enter_greengate(), "session_reenters_greengate_for_survey")
+	_check(session.commission_highmere_survey(), "session_commissions_highmere_survey")
+	_check(not session.commission_highmere_survey(), "session_blocks_duplicate_highmere_survey")
+	var surveyed_village: Dictionary = session.village_view_model()
+	_check(int(surveyed_village.get("stone", -1)) == 0, "session_highmere_survey_spends_five_stone")
+	_check(bool(surveyed_village.get("highmere_survey_commissioned", false)), "session_village_reports_highmere_survey")
+	_check(session.return_to_world(), "session_returns_to_world_for_highmere")
+	_check(session.select_land("PN-A01-003"), "session_selects_highmere")
+	_check(session.inspect_selected_frontier(), "session_inspects_highmere")
+	_check(not session.inspect_selected_frontier(), "session_blocks_duplicate_highmere_inspection")
+	var highmere_world: Dictionary = session.world_view_model()
+	_check(bool(highmere_world.get("highmere_inspected", false)), "session_world_reports_highmere_inspection")
+	_check(int(highmere_world.get("claimed_lands", 0)) == 2, "session_highmere_inspection_keeps_two_claims")
+	_check(String(highmere_world.get("nation_status", "")) == "not_founded", "session_highmere_keeps_nation_unfounded")
+	_check(String(highmere_world.get("next_goal", "")) == "Highmere is surveyed; claiming it is not yet playable", "session_highmere_goal_truthful")
 
 	var save_path := "user://playable-core-session-test.json"
 	_check(session.save_to_path(save_path), "session_save")
@@ -276,8 +317,10 @@ func _test_playable_session_round_trip() -> void:
 	_check(bool(reopened_world.get("riverbend_connected", false)), "session_reopen_frontier_connection_persisted")
 	_check(int(reopened_world.get("claimed_lands", 0)) == 2, "session_reopen_two_claims_persisted")
 	_check(bool(reopened_world.get("riverbend_supply_delivered", false)), "session_reopen_supply_persisted")
-	_check(int(reopened_world.get("stone", -1)) == 5, "session_reopen_supply_reward_persisted")
-	_check(String(reopened_world.get("next_goal", "")) == "Next canonical A-01 land is not yet playable", "session_reopen_goal_persisted")
+	_check(bool(reopened_world.get("highmere_survey_commissioned", false)), "session_reopen_highmere_survey_persisted")
+	_check(bool(reopened_world.get("highmere_inspected", false)), "session_reopen_highmere_inspection_persisted")
+	_check(int(reopened_world.get("stone", -1)) == 0, "session_reopen_highmere_survey_cost_persisted")
+	_check(String(reopened_world.get("next_goal", "")) == "Highmere is surveyed; claiming it is not yet playable", "session_reopen_goal_persisted")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 
 func _check(condition: bool, label: String) -> void:
