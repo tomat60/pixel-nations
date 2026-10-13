@@ -26,9 +26,10 @@ func claim_selected_land() -> bool:
 	var selected_land_id := String(state.get("selected_land_id", ""))
 	if selected_land_id.is_empty():
 		return false
-	var previous := String(state.get("claimed_land_id", ""))
+	var previous_claims: Array = state.get("claimed_land_ids", []).duplicate()
 	state = GameState.reduce(state, {"type": "CLAIM_LAND", "land_id": selected_land_id})
-	return String(state.get("claimed_land_id", "")) == selected_land_id and previous != selected_land_id
+	var current_claims: Array = state.get("claimed_land_ids", [])
+	return current_claims.has(selected_land_id) and current_claims.size() > previous_claims.size()
 
 
 func enter_greengate() -> bool:
@@ -99,6 +100,7 @@ func world_view_model() -> Dictionary:
 		"view": VIEW_WORLD,
 		"selected_land_id": String(state.get("selected_land_id", "")),
 		"claimed_land_id": String(state.get("claimed_land_id", "")),
+		"claimed_land_ids": (state.get("claimed_land_ids", []) as Array).duplicate(),
 		"claimed_lands": int(progress.get("claimed_lands", 0)),
 		"charted_lands": int(progress.get("charted_lands", 0)),
 		"settlement_name": String(settlement.get("name", "")),
@@ -107,6 +109,8 @@ func world_view_model() -> Dictionary:
 		"inspected_land_ids": (state.get("inspected_land_ids", []) as Array).duplicate(),
 		"inspected_frontiers": int(progress.get("inspected_frontiers", 0)),
 		"riverbend_inspected": bool(progress.get("riverbend_inspected", false)),
+		"riverbend_claimed": bool(progress.get("riverbend_claimed", false)),
+		"frontier_link_status": String(progress.get("frontier_link_status", "not_started")),
 		"nation_status": String(progress.get("nation_status", "not_founded")),
 		"next_goal": String(progress.get("next_goal", "")),
 	}

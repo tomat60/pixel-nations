@@ -15,6 +15,7 @@ const WORLD_HEIGHT := 250.0
 var controller: Node
 var world: Node3D
 var village: Node
+var frontier_link: MeshInstance3D
 var lands: Array = []
 var selected_land: Dictionary = {}
 var ui_layer: CanvasLayer
@@ -54,6 +55,7 @@ func _ready() -> void:
 	player.province_selected.connect(_on_world_position_selected)
 	player.position = Vector3(-35.0, 0.0, -46.0)
 	player.camera.position.z = 220.0
+	_build_frontier_link()
 	_build_ui()
 	if not controller.load_game():
 		_render_snapshot(controller.current_snapshot())
@@ -162,8 +164,32 @@ func canonical_center_world(land_id: String) -> Vector2:
 	return Vector2(INF, INF)
 
 
+func _build_frontier_link() -> void:
+	var home := canonical_center_world("PN-A01-001")
+	var frontier := canonical_center_world("PN-A01-002")
+	var delta := frontier - home
+	var route_mesh := BoxMesh.new()
+	route_mesh.size = Vector3(delta.length(), 0.45, 1.8)
+	var route_material := StandardMaterial3D.new()
+	route_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	route_material.albedo_color = Color(0.95, 0.68, 0.18, 1.0)
+	route_material.emission_enabled = true
+	route_material.emission = Color(0.95, 0.47, 0.08, 1.0)
+	route_material.emission_energy_multiplier = 2.5
+	route_material.no_depth_test = true
+	route_mesh.material = route_material
+	frontier_link = MeshInstance3D.new()
+	frontier_link.name = "GreenvaleRiverbendClaimLink"
+	frontier_link.mesh = route_mesh
+	frontier_link.position = Vector3((home.x + frontier.x) * 0.5, 1.2, (home.y + frontier.y) * 0.5)
+	frontier_link.rotation.y = -atan2(delta.y, delta.x)
+	frontier_link.visible = false
+	world.add_child(frontier_link)
+
+
 func _claim() -> void:
-	controller.claim_selected_land()
+	if controller.claim_selected_land():
+		controller.save_game()
 
 
 func _enter() -> void:
@@ -232,11 +258,14 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	else:
 		title_label.text = "Sector A-01 / Aurelian Basin"
 		identity_label.text = _land_title(selected_id)
-		detail_label.text = "%d/%d claimed · Greengate: %s · Road: %s · Riverbend: %s · Nation: %s" % [
+		detail_label.text = "%d/%d claimed · Greengate: %s · Road: %s · Riverbend: %s · Link: %s · Nation: %s" % [
 			int(snapshot.get("claimed_lands", 0)), int(snapshot.get("charted_lands", 30)),
 			"founded" if bool(snapshot.get("settlement_founded", false)) else "not founded",
 			"built" if bool(snapshot.get("road_built", false)) else "not built",
-			"inspected" if bool(snapshot.get("riverbend_inspected", false)) else "not inspected",
+			("claimed" if bool(snapshot.get("riverbend_claimed", false)) else (
+				"inspected" if bool(snapshot.get("riverbend_inspected", false)) else "not inspected"
+			)),
+			String(snapshot.get("frontier_link_status", "not started")).replace("_", " "),
 			String(snapshot.get("nation_status", "not_founded")),
 		]
 		goal_label.text = "Next expansion goal: %s" % String(snapshot.get("next_goal", ""))
@@ -246,7 +275,15 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	road_button.visible = view == "village"
 	return_button.visible = view == "village"
 	save_button.visible = true
-	claim_button.disabled = selected_id.is_empty() or not String(snapshot.get("claimed_land_id", "")).is_empty()
+	var selected_claimed := (snapshot.get("claimed_land_ids", []) as Array).has(selected_id)
+	var riverbend_claim_ready := (
+		selected_id == "PN-A01-002"
+		and bool(snapshot.get("riverbend_inspected", false))
+		and not bool(snapshot.get("riverbend_claimed", false))
+	)
+	claim_button.disabled = selected_id.is_empty() or selected_claimed or (
+		not String(snapshot.get("claimed_land_id", "")).is_empty() and not riverbend_claim_ready
+	)
 	enter_button.disabled = selected_id != "PN-A01-001" or String(snapshot.get("claimed_land_id", "")) != "PN-A01-001"
 	inspect_button.disabled = (
 		selected_id != "PN-A01-002"
@@ -254,6 +291,8 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		or bool(snapshot.get("riverbend_inspected", false))
 	)
 	road_button.disabled = bool(snapshot.get("road_built", false)) or int(snapshot.get("stone", 0)) < 5
+	if frontier_link != null:
+		frontier_link.visible = view == "world" and bool(snapshot.get("riverbend_claimed", false))
 
 
 func _land_title(land_id: String) -> String:

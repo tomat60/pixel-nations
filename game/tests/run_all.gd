@@ -25,6 +25,7 @@ func _init() -> void:
 	_check(STATE.CANONICAL_LAND_IDS.back() == "PN-A01-030", "canonical_land_last")
 	_check(String(state.get("selected_land_id", "")) == "PN-A01-001", "selected_land")
 	_check(String(state.get("claimed_land_id", "")) == "PN-A01-001", "claimed_land")
+	_check(state.get("claimed_land_ids", []) == ["PN-A01-001"], "claimed_land_collection")
 
 	var settlement = state.get("settlement", {})
 	_check(bool(settlement.get("founded", false)), "settlement_founded")
@@ -59,7 +60,7 @@ func _init() -> void:
 	_check(int(low_resource_state.get("resources", {}).get("stone", 0)) == STATE.ROAD_STONE_COST - 1, "road_cost_guard_preserves_resources")
 
 	var restored = STATE.from_json(STATE.to_json(state))
-	_check(int(restored.get("schema_version", 0)) == 3, "save_schema")
+	_check(int(restored.get("schema_version", 0)) == 4, "save_schema")
 	_check(String(restored.get("selected_land_id", "")) == "PN-A01-001", "save_selection")
 	_check(String(restored.get("claimed_land_id", "")) == "PN-A01-001", "save_claim")
 	_check(bool(restored.get("settlement", {}).get("founded", false)), "save_settlement")
@@ -92,6 +93,18 @@ func _init() -> void:
 	_check(String(STATE.progress(inspected_state).get("next_goal", "")) == "Choose whether to claim Riverbend", "inspection_advances_honest_goal")
 	var inspected_restored := STATE.from_json(STATE.to_json(inspected_state))
 	_check(inspected_restored.get("inspected_land_ids", []).has("PN-A01-002"), "inspection_persists")
+	var claimed_frontier := STATE.reduce(inspected_state, {"type": "CLAIM_LAND", "land_id": "PN-A01-002"})
+	_check(claimed_frontier.get("claimed_land_ids", []) == ["PN-A01-001", "PN-A01-002"], "riverbend_claim_recorded")
+	_check(String(claimed_frontier.get("claimed_land_id", "")) == "PN-A01-001", "riverbend_claim_keeps_home_identity")
+	var claimed_progress := STATE.progress(claimed_frontier)
+	_check(int(claimed_progress.get("claimed_lands", 0)) == 2, "riverbend_claim_reports_two_lands")
+	_check(bool(claimed_progress.get("riverbend_claimed", false)), "riverbend_claim_visible")
+	_check(String(claimed_progress.get("nation_status", "")) == "not_founded", "riverbend_claim_does_not_invent_nation")
+	_check(String(claimed_progress.get("next_goal", "")) == "Connect Riverbend to Greengate", "riverbend_claim_reveals_link_goal")
+	var duplicate_frontier_claim := STATE.reduce(claimed_frontier, {"type": "CLAIM_LAND", "land_id": "PN-A01-002"})
+	_check(duplicate_frontier_claim.get("claimed_land_ids", []).size() == 2, "riverbend_claim_idempotent")
+	var claimed_frontier_restored := STATE.from_json(STATE.to_json(claimed_frontier))
+	_check(claimed_frontier_restored.get("claimed_land_ids", []) == ["PN-A01-001", "PN-A01-002"], "riverbend_claim_persists")
 
 	var legacy_payload := JSON.stringify({
 		"schema_version": 1,
@@ -108,9 +121,10 @@ func _init() -> void:
 		},
 	})
 	var migrated: Dictionary = STATE.from_json(legacy_payload)
-	_check(int(migrated.get("schema_version", 0)) == 3, "legacy_schema_migrated")
+	_check(int(migrated.get("schema_version", 0)) == 4, "legacy_schema_migrated")
 	_check(String(migrated.get("selected_land_id", "")) == "PN-A01-001", "legacy_selection_recovered")
 	_check(String(migrated.get("claimed_land_id", "")) == "PN-A01-001", "legacy_claim_preserved")
+	_check(migrated.get("claimed_land_ids", []) == ["PN-A01-001"], "legacy_claim_collection_recovered")
 	_check(bool(migrated.get("settlement", {}).get("founded", false)), "legacy_settlement_preserved")
 	_check(migrated.get("settlement", {}).get("completed_orders", []).has("shelter"), "legacy_orders_preserved")
 	_check(migrated.get("settlement", {}).get("built_improvements", []).is_empty(), "legacy_improvements_defaulted")
@@ -132,6 +146,16 @@ func _init() -> void:
 	_check(String(repaired.get("claimed_land_id", "")).is_empty(), "malformed_claim_rejected")
 	_check(not bool(repaired.get("settlement", {}).get("founded", false)), "malformed_settlement_rejected")
 	_check(repaired.get("settlement", {}).get("built_improvements", []).is_empty(), "malformed_progress_rejected")
+	var injected_frontier_save := JSON.stringify({
+		"schema_version": 4,
+		"claimed_land_id": "PN-A01-001",
+		"claimed_land_ids": ["PN-A01-001", "PN-A01-002"],
+		"inspected_land_ids": ["PN-A01-002"],
+		"settlement": {"founded": true, "name": "Greengate", "built_improvements": []},
+	})
+	var repaired_frontier: Dictionary = STATE.from_json(injected_frontier_save)
+	_check(repaired_frontier.get("claimed_land_ids", []) == ["PN-A01-001"], "frontier_claim_requires_persisted_road")
+	_check(repaired_frontier.get("inspected_land_ids", []).is_empty(), "frontier_inspection_requires_persisted_road")
 
 	_test_playable_session_round_trip()
 
@@ -167,6 +191,14 @@ func _test_playable_session_round_trip() -> void:
 	_check(bool(inspected_world.get("riverbend_inspected", false)), "session_world_reports_riverbend_inspection")
 	_check(int(inspected_world.get("claimed_lands", 0)) == 1, "session_inspection_keeps_one_claim")
 	_check(String(inspected_world.get("next_goal", "")) == "Choose whether to claim Riverbend", "session_world_claim_goal_truthful")
+	_check(session.claim_selected_land(), "session_claims_inspected_riverbend")
+	_check(not session.claim_selected_land(), "session_blocks_duplicate_riverbend_claim")
+	var claimed_world: Dictionary = session.world_view_model()
+	_check(int(claimed_world.get("claimed_lands", 0)) == 2, "session_world_reports_two_claimed_lands")
+	_check(bool(claimed_world.get("riverbend_claimed", false)), "session_world_reports_riverbend_claim")
+	_check(String(claimed_world.get("settlement_name", "")) == "Greengate", "session_frontier_keeps_single_settlement")
+	_check(String(claimed_world.get("nation_status", "")) == "not_founded", "session_frontier_keeps_nation_unfounded")
+	_check(String(claimed_world.get("next_goal", "")) == "Connect Riverbend to Greengate", "session_world_link_goal_truthful")
 
 	var save_path := "user://playable-core-session-test.json"
 	_check(session.save_to_path(save_path), "session_save")
@@ -176,7 +208,9 @@ func _test_playable_session_round_trip() -> void:
 	var reopened_world: Dictionary = reopened.world_view_model()
 	_check(bool(reopened_world.get("road_built", false)), "session_reopen_road_persisted")
 	_check(bool(reopened_world.get("riverbend_inspected", false)), "session_reopen_inspection_persisted")
-	_check(String(reopened_world.get("next_goal", "")) == "Choose whether to claim Riverbend", "session_reopen_goal_persisted")
+	_check(bool(reopened_world.get("riverbend_claimed", false)), "session_reopen_frontier_claim_persisted")
+	_check(int(reopened_world.get("claimed_lands", 0)) == 2, "session_reopen_two_claims_persisted")
+	_check(String(reopened_world.get("next_goal", "")) == "Connect Riverbend to Greengate", "session_reopen_goal_persisted")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 
 func _check(condition: bool, label: String) -> void:
