@@ -66,6 +66,21 @@ func inspect_selected_frontier() -> bool:
 	return inspected_after.has(selected_land_id) and not inspected_before.has(selected_land_id)
 
 
+func connect_riverbend() -> bool:
+	if current_view != VIEW_WORLD:
+		return false
+	var connected_before: Array = state.get("connected_land_ids", []).duplicate()
+	var stone_before := int(state.get("resources", {}).get("stone", 0))
+	state = GameState.reduce(state, {"type": "CONNECT_RIVERBEND"})
+	var connected_after: Array = state.get("connected_land_ids", [])
+	var stone_after := int(state.get("resources", {}).get("stone", 0))
+	return (
+		connected_after.has(GameState.RIVERBEND_LAND_ID)
+		and not connected_before.has(GameState.RIVERBEND_LAND_ID)
+		and stone_after == stone_before - GameState.FRONTIER_LINK_STONE_COST
+	)
+
+
 func return_to_world() -> bool:
 	if current_view != VIEW_VILLAGE:
 		return false
@@ -110,7 +125,10 @@ func world_view_model() -> Dictionary:
 		"inspected_frontiers": int(progress.get("inspected_frontiers", 0)),
 		"riverbend_inspected": bool(progress.get("riverbend_inspected", false)),
 		"riverbend_claimed": bool(progress.get("riverbend_claimed", false)),
+		"riverbend_connected": bool(progress.get("riverbend_connected", false)),
 		"frontier_link_status": String(progress.get("frontier_link_status", "not_started")),
+		"stone": int(state.get("resources", {}).get("stone", 0)),
+		"frontier_link_stone_cost": GameState.FRONTIER_LINK_STONE_COST,
 		"nation_status": String(progress.get("nation_status", "not_founded")),
 		"next_goal": String(progress.get("next_goal", "")),
 	}

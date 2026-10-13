@@ -97,13 +97,28 @@ func _run() -> void:
 	_check(String(claimed_frontier.get("nation_status", "")) == "not_founded", "frontier_claim_does_not_invent_nation")
 	_check(String(claimed_frontier.get("next_goal", "")) == "Connect Riverbend to Greengate", "frontier_claim_reveals_link_goal")
 	_check(runtime.frontier_link.visible, "frontier_claim_shows_world_relationship")
+	_check(String(claimed_frontier.get("frontier_link_status", "")) == "pending", "frontier_claim_link_is_pending")
+	await process_frame
+	_capture("world-riverbend-claimed")
+	await _click_control(runtime.connect_button)
+	var connected_frontier: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(connected_frontier.get("riverbend_connected", false)), "connect_button_completes_frontier_link")
+	_check(String(connected_frontier.get("frontier_link_status", "")) == "connected", "frontier_link_reports_connected")
+	_check(int(connected_frontier.get("stone", -1)) == 0, "frontier_link_costs_remaining_five_stone")
+	_check(String(connected_frontier.get("next_goal", "")) == "Await the next A-01 expansion opportunity", "frontier_link_reveals_honest_next_goal")
+	_check(String(connected_frontier.get("nation_status", "")) == "not_founded", "frontier_link_does_not_invent_nation")
+	_check(runtime.frontier_link_material.albedo_color.g > runtime.frontier_link_material.albedo_color.r, "connected_frontier_link_turns_green")
 	runtime.controller.session.state["claimed_land_ids"] = [HOME_ID]
+	runtime.controller.session.state["connected_land_ids"] = []
+	runtime.controller.session.state["resources"]["stone"] = 5
 	_check(runtime.controller.load_game(), "frontier_claim_reopens")
 	var claim_reopened: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(claim_reopened.get("riverbend_claimed", false)), "reopen_keeps_frontier_claim")
+	_check(bool(claim_reopened.get("riverbend_connected", false)), "reopen_keeps_frontier_connection")
 	_check(int(claim_reopened.get("claimed_lands", -1)) == 2, "reopen_keeps_two_claimed_lands")
+	_check(int(claim_reopened.get("stone", -1)) == 0, "reopen_keeps_frontier_connection_cost")
 	await process_frame
-	_capture("world-riverbend-claimed")
+	_capture("world-riverbend-connected")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")
