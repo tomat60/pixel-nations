@@ -3,6 +3,7 @@ extends SceneTree
 const HOME_ID := "PN-A01-001"
 const FRONTIER_ID := "PN-A01-002"
 const HIGHMERE_ID := "PN-A01-003"
+const NORTHGATE_ID := "PN-A01-024"
 var failures: Array[String] = []
 
 
@@ -39,7 +40,7 @@ func _run() -> void:
 	_check(not runtime.world.get_node("Map/MeshInstance3D").visible, "natural_earth_surface_hidden")
 	_check(runtime.atlas_root != null, "fictional_a01_atlas_instantiated")
 	_check(runtime.land_materials.size() == 30, "all_canonical_lands_have_visible_surfaces")
-	_check(runtime.land_labels.size() == 3, "home_and_adjacent_lands_are_named")
+	_check(runtime.land_labels.size() == 4, "home_and_reachable_lands_are_named")
 	var home_screen: Vector2 = player.camera.unproject_position(
 		Vector3(home_world.x, 0.0, home_world.y)
 	)
@@ -227,7 +228,7 @@ func _run() -> void:
 	_check(bool(highmere_connected.get("highmere_connected", false)), "highmere_link_completed")
 	_check(String(highmere_connected.get("highmere_link_status", "")) == "connected", "highmere_link_reports_connected")
 	_check(int(highmere_connected.get("stone", -1)) == 0, "highmere_link_costs_five_stone")
-	_check(String(highmere_connected.get("next_goal", "")) == "Highmere is linked; the next expansion is not yet playable", "highmere_link_reports_honest_stop_gate")
+	_check(String(highmere_connected.get("next_goal", "")) == "Inspect Northgate beyond the Highmere ridge", "highmere_link_reveals_northgate")
 	_check(String(highmere_connected.get("nation_status", "")) == "not_founded", "highmere_link_does_not_invent_nation")
 	_check(runtime.highmere_survey_material.albedo_color.g > runtime.highmere_survey_material.albedo_color.r, "connected_highmere_route_turns_green")
 	_check(runtime.controller.save_game(), "highmere_link_saves")
@@ -243,6 +244,29 @@ func _run() -> void:
 	_check(int(highmere_link_reopened.get("stone", -1)) == 0, "reopen_keeps_highmere_link_cost")
 	await process_frame
 	_capture("world-highmere-connected-reopened")
+	var northgate_world: Vector2 = runtime.canonical_center_world(NORTHGATE_ID)
+	_check(is_finite(northgate_world.x), "northgate_geometry_available")
+	var northgate_screen: Vector2 = player.camera.unproject_position(Vector3(northgate_world.x, 0.0, northgate_world.y))
+	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(northgate_screen), "northgate_projects_inside_viewport")
+	await _click_position(northgate_screen)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == NORTHGATE_ID, "pointer_raycast_selects_northgate")
+	_check(runtime.northgate_scout_link.visible, "highmere_link_shows_northgate_scout_route")
+	await _click_control(runtime.inspect_button)
+	var northgate_inspected: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(northgate_inspected.get("northgate_inspected", false)), "northgate_inspection_recorded")
+	_check(int(northgate_inspected.get("claimed_lands", -1)) == 3, "northgate_inspection_does_not_claim_fourth_land")
+	_check(String(northgate_inspected.get("nation_status", "")) == "not_founded", "northgate_inspection_does_not_invent_nation")
+	_check(String(northgate_inspected.get("next_goal", "")) == "Northgate is inspected; claiming it is not yet playable", "northgate_inspection_reports_honest_stop_gate")
+	_check(runtime.northgate_scout_material.albedo_color.b > runtime.northgate_scout_material.albedo_color.r, "inspected_northgate_route_turns_blue")
+	await process_frame
+	_capture("world-northgate-inspected")
+	runtime.controller.session.state["inspected_land_ids"].erase(NORTHGATE_ID)
+	_check(runtime.controller.load_game(), "northgate_inspection_reopens")
+	var northgate_reopened: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(northgate_reopened.get("northgate_inspected", false)), "reopen_keeps_northgate_inspection")
+	_check(int(northgate_reopened.get("claimed_lands", -1)) == 3, "reopen_keeps_three_claims_after_northgate")
+	await process_frame
+	_capture("world-northgate-inspected-reopened")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")

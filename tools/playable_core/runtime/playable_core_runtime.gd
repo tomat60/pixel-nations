@@ -19,6 +19,8 @@ var frontier_link: MeshInstance3D
 var frontier_link_material: StandardMaterial3D
 var highmere_survey_link: MeshInstance3D
 var highmere_survey_material: StandardMaterial3D
+var northgate_scout_link: MeshInstance3D
+var northgate_scout_material: StandardMaterial3D
 var atlas_root: Node3D
 var land_materials: Dictionary = {}
 var land_labels: Dictionary = {}
@@ -67,6 +69,7 @@ func _ready() -> void:
 	_build_a01_atlas()
 	_build_frontier_link()
 	_build_highmere_survey_link()
+	_build_northgate_scout_link()
 	_build_ui()
 	if not controller.load_game():
 		_render_snapshot(controller.current_snapshot())
@@ -112,6 +115,7 @@ func _build_a01_atlas() -> void:
 	_build_land_label("PN-A01-001", "GREENVALE\nHOME", Color("dbe9ff"))
 	_build_land_label("PN-A01-002", "RIVERBEND", Color("d6ffff"))
 	_build_land_label("PN-A01-003", "HIGHMERE", Color("f2ead2"))
+	_build_land_label("PN-A01-024", "NORTHGATE", Color("e3f1df"))
 
 
 func _build_land_polygon(land: Dictionary) -> void:
@@ -338,6 +342,28 @@ func _build_highmere_survey_link() -> void:
 	world.add_child(highmere_survey_link)
 
 
+func _build_northgate_scout_link() -> void:
+	var highmere := canonical_center_world("PN-A01-003")
+	var northgate := canonical_center_world("PN-A01-024")
+	var delta := northgate - highmere
+	var route_mesh := BoxMesh.new()
+	route_mesh.size = Vector3(delta.length(), 0.30, 1.0)
+	northgate_scout_material = StandardMaterial3D.new()
+	northgate_scout_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	northgate_scout_material.emission_enabled = true
+	northgate_scout_material.emission_energy_multiplier = 2.0
+	northgate_scout_material.no_depth_test = true
+	route_mesh.material = northgate_scout_material
+	_set_northgate_scout_state(false)
+	northgate_scout_link = MeshInstance3D.new()
+	northgate_scout_link.name = "HighmereNorthgateScoutRoute"
+	northgate_scout_link.mesh = route_mesh
+	northgate_scout_link.position = Vector3((highmere.x + northgate.x) * 0.5, 1.1, (highmere.y + northgate.y) * 0.5)
+	northgate_scout_link.rotation.y = -atan2(delta.y, delta.x)
+	northgate_scout_link.visible = false
+	world.add_child(northgate_scout_link)
+
+
 func _claim() -> void:
 	if controller.claim_selected_land():
 		controller.save_game()
@@ -499,10 +525,17 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		and bool(snapshot.get("highmere_survey_commissioned", false))
 		and not bool(snapshot.get("highmere_inspected", false))
 	)
-	inspect_button.text = (
-		"Inspect Highmere frontier" if selected_id == "PN-A01-003" else "Inspect Riverbend frontier"
+	var northgate_inspection_ready := (
+		selected_id == "PN-A01-024"
+		and bool(snapshot.get("highmere_connected", false))
+		and not bool(snapshot.get("northgate_inspected", false))
 	)
-	inspect_button.disabled = not (riverbend_inspection_ready or highmere_inspection_ready)
+	inspect_button.text = (
+		"Inspect Northgate frontier" if selected_id == "PN-A01-024" else (
+			"Inspect Highmere frontier" if selected_id == "PN-A01-003" else "Inspect Riverbend frontier"
+		)
+	)
+	inspect_button.disabled = not (riverbend_inspection_ready or highmere_inspection_ready or northgate_inspection_ready)
 	var highmere_link_selected := selected_id == "PN-A01-003"
 	connect_button.text = "Connect Highmere ridge · 5 stone" if highmere_link_selected else "Connect Riverbend · 5 stone"
 	connect_button.disabled = (
@@ -547,6 +580,9 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 			bool(snapshot.get("highmere_claimed", false)),
 			bool(snapshot.get("highmere_connected", false))
 		)
+	if northgate_scout_link != null:
+		northgate_scout_link.visible = view == "world" and bool(snapshot.get("highmere_connected", false))
+		_set_northgate_scout_state(bool(snapshot.get("northgate_inspected", false)))
 	_refresh_land_visuals(snapshot)
 
 
@@ -565,6 +601,8 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 			color.a = 0.98
 		elif land_id == "PN-A01-003" and bool(snapshot.get("highmere_inspected", false)):
 			color = Color(0.42, 0.68, 0.78, 0.98)
+		elif land_id == "PN-A01-024" and bool(snapshot.get("northgate_inspected", false)):
+			color = Color(0.42, 0.72, 0.62, 0.98)
 		if land_id == selected_id:
 			color = color.lightened(0.22)
 		material.albedo_color = color
@@ -581,6 +619,13 @@ func _set_frontier_link_connected(connected: bool) -> void:
 	frontier_link_material.emission = (
 		Color(0.12, 0.72, 0.32, 1.0) if connected else Color(0.95, 0.47, 0.08, 1.0)
 	)
+
+
+func _set_northgate_scout_state(inspected: bool) -> void:
+	if northgate_scout_material == null:
+		return
+	northgate_scout_material.albedo_color = Color(0.28, 0.78, 0.92, 1.0) if inspected else Color(0.72, 0.76, 0.58, 1.0)
+	northgate_scout_material.emission = Color(0.12, 0.58, 0.86, 1.0) if inspected else Color(0.48, 0.52, 0.26, 1.0)
 
 
 func _set_highmere_survey_state(inspected: bool, claimed: bool, connected: bool) -> void:
