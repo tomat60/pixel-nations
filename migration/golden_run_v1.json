@@ -4,32 +4,36 @@
   "sector_id": "A-01",
   "actions": [
     {
+      "type": "SELECT_LAND",
+      "land_id": "PN-A01-001"
+    },
+    {
       "type": "CLAIM_LAND",
-      "land_id": "A-01-0042"
+      "land_id": "PN-A01-001"
     },
     {
       "type": "FOUND_SETTLEMENT",
-      "name": "Aurelian Haven"
+      "name": "Greengate"
     },
     {
-      "type": "COMPLETE_VILLAGE_ORDER",
-      "order_id": "shelter"
+      "type": "BUILD_ROAD"
     }
   ],
   "expected_state": {
-    "schema_version": 1,
+    "schema_version": 2,
     "sector_id": "A-01",
-    "claimed_land_id": "A-01-0042",
+    "selected_land_id": "PN-A01-001",
+    "claimed_land_id": "PN-A01-001",
     "settlement": {
       "founded": true,
-      "name": "Aurelian Haven",
-      "completed_orders": [
-        "shelter"
-      ]
+      "name": "Greengate",
+      "completed_orders": [],
+      "built_improvements": ["road"]
     },
     "resources": {
       "food": 0,
-      "timber": 5
+      "timber": 0,
+      "stone": 5
     }
   }
 }
