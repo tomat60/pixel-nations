@@ -171,6 +171,38 @@ func found_riverbend_hamlet() -> bool:
 	)
 
 
+func receive_riverbend_storehouse_stone() -> bool:
+	if current_view != VIEW_VILLAGE:
+		return false
+	var completed_before: Array = state.get("settlement", {}).get("completed_orders", []).duplicate()
+	var stone_before := int(state.get("resources", {}).get("stone", 0))
+	state = GameState.reduce(state, {"type": "RECEIVE_RIVERBEND_STOREHOUSE_STONE"})
+	var completed_after: Array = state.get("settlement", {}).get("completed_orders", [])
+	var stone_after := int(state.get("resources", {}).get("stone", 0))
+	return (
+		completed_after.has(GameState.RIVERBEND_STOREHOUSE_STONE_ORDER_ID)
+		and not completed_before.has(GameState.RIVERBEND_STOREHOUSE_STONE_ORDER_ID)
+		and stone_after == stone_before + GameState.RIVERBEND_STOREHOUSE_STONE_REWARD
+	)
+
+
+func build_riverbend_storehouse() -> bool:
+	if current_view != VIEW_WORLD:
+		return false
+	var improvements_before: Dictionary = state.get("settlement_improvements_by_land", {}).duplicate(true)
+	var riverbend_before: Array = improvements_before.get(GameState.RIVERBEND_LAND_ID, [])
+	var stone_before := int(state.get("resources", {}).get("stone", 0))
+	state = GameState.reduce(state, {"type": "BUILD_RIVERBEND_STOREHOUSE"})
+	var improvements_after: Dictionary = state.get("settlement_improvements_by_land", {})
+	var riverbend_after: Array = improvements_after.get(GameState.RIVERBEND_LAND_ID, [])
+	var stone_after := int(state.get("resources", {}).get("stone", 0))
+	return (
+		riverbend_after.has(GameState.RIVERBEND_STOREHOUSE_IMPROVEMENT_ID)
+		and not riverbend_before.has(GameState.RIVERBEND_STOREHOUSE_IMPROVEMENT_ID)
+		and stone_after == stone_before - GameState.RIVERBEND_STOREHOUSE_STONE_COST
+	)
+
+
 func return_to_world() -> bool:
 	if current_view != VIEW_VILLAGE:
 		return false
@@ -229,6 +261,8 @@ func world_view_model() -> Dictionary:
 		"northgate_status": String(progress.get("northgate_status", "locked")),
 		"northgate_settlement_timber_delivered": bool(progress.get("northgate_settlement_timber_delivered", false)),
 		"riverbend_hamlet_founded": bool(progress.get("riverbend_hamlet_founded", false)),
+		"riverbend_storehouse_stone_delivered": bool(progress.get("riverbend_storehouse_stone_delivered", false)),
+		"riverbend_storehouse_built": bool(progress.get("riverbend_storehouse_built", false)),
 		"highmere_link_status": String(progress.get("highmere_link_status", "locked")),
 		"highmere_status": String(progress.get("highmere_status", "locked")),
 		"frontier_link_status": String(progress.get("frontier_link_status", "not_started")),
@@ -237,6 +271,7 @@ func world_view_model() -> Dictionary:
 		"frontier_link_stone_cost": GameState.FRONTIER_LINK_STONE_COST,
 		"highmere_link_stone_cost": GameState.HIGHMERE_LINK_STONE_COST,
 		"riverbend_hamlet_timber_cost": GameState.RIVERBEND_HAMLET_TIMBER_COST,
+		"riverbend_storehouse_stone_cost": GameState.RIVERBEND_STOREHOUSE_STONE_COST,
 		"nation_status": String(progress.get("nation_status", "not_founded")),
 		"next_goal": String(progress.get("next_goal", "")),
 	}
@@ -265,4 +300,7 @@ func village_view_model() -> Dictionary:
 		"northgate_settlement_timber_delivered": (settlement.get("completed_orders", []) as Array).has(GameState.NORTHGATE_SETTLEMENT_TIMBER_ORDER_ID),
 		"northgate_settlement_timber_reward": GameState.NORTHGATE_SETTLEMENT_TIMBER_REWARD,
 		"riverbend_hamlet_founded": (state.get("settlement_land_ids", []) as Array).has(GameState.RIVERBEND_LAND_ID),
+		"riverbend_storehouse_stone_delivered": (settlement.get("completed_orders", []) as Array).has(GameState.RIVERBEND_STOREHOUSE_STONE_ORDER_ID),
+		"riverbend_storehouse_stone_reward": GameState.RIVERBEND_STOREHOUSE_STONE_REWARD,
+		"riverbend_storehouse_built": ((state.get("settlement_improvements_by_land", {}) as Dictionary).get(GameState.RIVERBEND_LAND_ID, []) as Array).has(GameState.RIVERBEND_STOREHOUSE_IMPROVEMENT_ID),
 	}

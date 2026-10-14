@@ -109,6 +109,20 @@ func found_riverbend_hamlet() -> bool:
 	return _reject("found_riverbend_hamlet", "Select linked Riverbend after receiving 5 settlement timber.")
 
 
+func receive_riverbend_storehouse_stone() -> bool:
+	if session.receive_riverbend_storehouse_stone():
+		_publish_snapshot()
+		return true
+	return _reject("receive_riverbend_storehouse_stone", "The storehouse shipment requires founded Riverbend Hamlet and the Village view.")
+
+
+func build_riverbend_storehouse() -> bool:
+	if session.build_riverbend_storehouse():
+		_publish_snapshot()
+		return true
+	return _reject("build_riverbend_storehouse", "Select Riverbend after receiving 5 storehouse stone.")
+
+
 func return_to_world() -> bool:
 	if session.return_to_world():
 		_publish_view()
