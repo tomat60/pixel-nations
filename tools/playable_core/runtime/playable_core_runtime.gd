@@ -11,6 +11,9 @@ const WORLD_LEFT := -133.333333
 const WORLD_TOP := -125.0
 const WORLD_WIDTH := 266.666666
 const WORLD_HEIGHT := 250.0
+const ATLAS_OVERVIEW_POSITION := Vector3(-35.0, 0.0, -46.0)
+const ATLAS_OVERVIEW_ZOOM := 250.0
+const ATLAS_FOCUS_ZOOM := 82.0
 
 var controller: Node
 var world: Node3D
@@ -40,8 +43,12 @@ var connect_button: Button
 var road_button: Button
 var supply_button: Button
 var survey_button: Button
+var focus_button: Button
+var overview_button: Button
 var save_button: Button
 var return_button: Button
+var atlas_is_focused := false
+var camera_zoom_tween: Tween
 
 
 func _ready() -> void:
@@ -65,8 +72,8 @@ func _ready() -> void:
 	if player.province_selected.is_connected(donor_handler):
 		player.province_selected.disconnect(donor_handler)
 	player.province_selected.connect(_on_world_position_selected)
-	player.position = Vector3(-35.0, 0.0, -46.0)
-	player.camera.position.z = 250.0
+	player.position = ATLAS_OVERVIEW_POSITION
+	player.camera.position.z = ATLAS_OVERVIEW_ZOOM
 	_build_a01_atlas()
 	_build_frontier_link()
 	_build_highmere_survey_link()
@@ -253,9 +260,11 @@ func _build_ui() -> void:
 	road_button = _button("Build village road · 5 stone", "RoadButton", _road)
 	supply_button = _button("Receive Riverbend stone · +5", "SupplyButton", _receive_next_supply)
 	survey_button = _button("Commission Highmere survey · 5 stone", "SurveyButton", _commission_highmere_survey)
+	focus_button = _button("Focus selected land", "FocusButton", _focus_selected_land)
+	overview_button = _button("Return to atlas overview", "OverviewButton", _show_atlas_overview)
 	save_button = _button("Save progress", "SaveButton", _save)
 	return_button = _button("Return to World", "ReturnButton", _return_world)
-	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, supply_button, survey_button, save_button, return_button]:
+	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, supply_button, survey_button, focus_button, overview_button, save_button, return_button]:
 		column.add_child(button)
 
 
@@ -290,7 +299,47 @@ func _on_world_position_selected(world_position: Vector2) -> void:
 		if Geometry2D.is_point_in_polygon(point, polygon):
 			selected_land = land
 			controller.select_land_from_map(String(land.get("id", "")))
+			if atlas_is_focused:
+				_move_camera_to_land(String(land.get("id", "")))
 			return
+
+
+func _focus_selected_land() -> void:
+	var land_id := String(controller.current_snapshot().get("selected_land_id", ""))
+	if land_id.is_empty():
+		return
+	atlas_is_focused = true
+	_move_camera_to_land(land_id)
+	_render_snapshot(controller.current_snapshot())
+
+
+func _show_atlas_overview() -> void:
+	atlas_is_focused = false
+	var player := world.get_node("Player")
+	player.move_to(Vector2(ATLAS_OVERVIEW_POSITION.x, ATLAS_OVERVIEW_POSITION.z))
+	_tween_camera_zoom(ATLAS_OVERVIEW_ZOOM)
+	_render_snapshot(controller.current_snapshot())
+
+
+func _move_camera_to_land(land_id: String) -> void:
+	var center := canonical_center_world(land_id)
+	if not is_finite(center.x):
+		return
+	var player := world.get_node("Player")
+	# Retain OpenGS camera navigation: its native move_to keeps panning semantics,
+	# while the closer scale makes the selected canonical parcel readable.
+	player.move_to(center)
+	_tween_camera_zoom(ATLAS_FOCUS_ZOOM)
+
+
+func _tween_camera_zoom(target_zoom: float) -> void:
+	var player := world.get_node("Player")
+	if camera_zoom_tween != null and camera_zoom_tween.is_running():
+		camera_zoom_tween.kill()
+	camera_zoom_tween = create_tween()
+	camera_zoom_tween.set_trans(Tween.TRANS_SINE)
+	camera_zoom_tween.set_ease(Tween.EASE_OUT)
+	camera_zoom_tween.tween_property(player.camera, "position:z", target_zoom, 0.35)
 
 
 func canonical_center_world(land_id: String) -> Vector2:
@@ -506,8 +555,14 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	road_button.visible = false
 	supply_button.visible = false
 	survey_button.visible = false
+	focus_button.visible = false
+	overview_button.visible = false
 	return_button.visible = view == "village"
 	save_button.visible = true
+	focus_button.visible = view == "world" and not selected_id.is_empty() and not atlas_is_focused
+	focus_button.disabled = not focus_button.visible
+	overview_button.visible = view == "world" and atlas_is_focused
+	overview_button.disabled = not overview_button.visible
 	var selected_claimed := (snapshot.get("claimed_land_ids", []) as Array).has(selected_id)
 	var riverbend_claim_ready := (
 		selected_id == "PN-A01-002"
