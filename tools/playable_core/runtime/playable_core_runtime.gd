@@ -714,13 +714,19 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 		var color := _terrain_color(String(land.get("terrain", "grassland")))
 		if claimed_ids.has(land_id):
 			color = Color("2868b8") if land_id == "PN-A01-001" else Color("2b8b88")
-			color.a = 0.98
+			color.a = 0.82
 		elif land_id == "PN-A01-003" and bool(snapshot.get("highmere_inspected", false)):
-			color = Color(0.42, 0.68, 0.78, 0.98)
+			color = Color(0.42, 0.68, 0.78, 0.70)
 		elif land_id == "PN-A01-024" and bool(snapshot.get("northgate_inspected", false)):
-			color = Color(0.42, 0.72, 0.62, 0.98)
+			color = Color(0.42, 0.72, 0.62, 0.70)
+		else:
+			# Let the retained authored landmass, rivers and regional route carry
+			# the World composition. Parcels remain interactive boundaries rather
+			# than an opaque quilt laid over the geographic plate.
+			color.a = 0.16 if atlas_is_focused else 0.30
 		if land_id == selected_id:
 			color = color.lightened(0.22)
+			color.a = 0.92
 		material.albedo_color = color
 	for label_value in land_labels.values():
 		(label_value as Label3D).visible = String(snapshot.get("view", "world")) == "world"
