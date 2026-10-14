@@ -236,6 +236,13 @@ func _build_ui() -> void:
 	panel_style.texture_margin_right = 28
 	panel_style.texture_margin_top = 28
 	panel_style.texture_margin_bottom = 28
+	# The parchment's 9-patch border is decorative. Keep layout padding in the
+	# explicit MarginContainer below so the authored texture cannot inflate the
+	# compact World/Village command panel.
+	panel_style.content_margin_left = 0
+	panel_style.content_margin_right = 0
+	panel_style.content_margin_top = 0
+	panel_style.content_margin_bottom = 0
 	panel.add_theme_stylebox_override("panel", panel_style)
 	ui_layer.add_child(panel)
 	var margin := MarginContainer.new()
