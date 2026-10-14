@@ -14,6 +14,10 @@ const WORLD_HEIGHT := 250.0
 const ATLAS_OVERVIEW_POSITION := Vector3(-35.0, 0.0, -46.0)
 const ATLAS_OVERVIEW_ZOOM := 250.0
 const ATLAS_FOCUS_ZOOM := 82.0
+const HUD_PAPER := Color("f5e4bd")
+const HUD_INK := Color("3a2a18")
+const HUD_BRONZE := Color("b58a48")
+const HUD_WINE := Color("5c1710")
 
 var controller: Node
 var world: Node3D
@@ -224,13 +228,21 @@ func _build_ui() -> void:
 	panel.position = Vector2(-346, 16)
 	panel.custom_minimum_size = Vector2(330, 0)
 	panel.size = Vector2(330, 0)
-	var panel_style := StyleBoxFlat.new()
-	panel_style.bg_color = Color(0.035, 0.045, 0.05, 0.88)
-	panel_style.border_color = Color(0.70, 0.60, 0.34, 0.88)
-	panel_style.set_border_width_all(1)
-	panel_style.set_corner_radius_all(10)
-	panel_style.shadow_color = Color(0.0, 0.0, 0.0, 0.42)
-	panel_style.shadow_size = 8
+	# Reuse the retained Village's authored parchment surface so the strategic
+	# and settlement views read as one game rather than unrelated overlays.
+	var panel_style := StyleBoxTexture.new()
+	panel_style.texture = load("res://village/assets/approved/ui/papiro.png")
+	panel_style.texture_margin_left = 28
+	panel_style.texture_margin_right = 28
+	panel_style.texture_margin_top = 28
+	panel_style.texture_margin_bottom = 28
+	# The parchment's 9-patch border is decorative. Keep layout padding in the
+	# explicit MarginContainer below so the authored texture cannot inflate the
+	# compact World/Village command panel.
+	panel_style.content_margin_left = 0
+	panel_style.content_margin_right = 0
+	panel_style.content_margin_top = 0
+	panel_style.content_margin_bottom = 0
 	panel.add_theme_stylebox_override("panel", panel_style)
 	ui_layer.add_child(panel)
 	var margin := MarginContainer.new()
@@ -246,8 +258,10 @@ func _build_ui() -> void:
 	identity_label = _label("Select a canonical land on the map", 18)
 	detail_label = _label("0/30 lands · 0 settlements · Stone 10", 14)
 	goal_label = _label("NEXT · Select Greenvale", 14)
-	title_label.add_theme_color_override("font_color", Color("d6bd78"))
-	goal_label.add_theme_color_override("font_color", Color("ead79c"))
+	title_label.add_theme_color_override("font_color", HUD_WINE)
+	identity_label.add_theme_color_override("font_color", HUD_INK)
+	detail_label.add_theme_color_override("font_color", HUD_INK)
+	goal_label.add_theme_color_override("font_color", HUD_WINE)
 	identity_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -280,8 +294,47 @@ func _button(text_value: String, node_name: String, handler: Callable) -> Button
 	button.name = node_name
 	button.text = text_value
 	button.custom_minimum_size = Vector2(0, 38)
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	button.add_theme_stylebox_override("normal", _hud_button_style("normal"))
+	button.add_theme_stylebox_override("hover", _hud_button_style("hover"))
+	button.add_theme_stylebox_override("pressed", _hud_button_style("pressed"))
+	button.add_theme_stylebox_override("disabled", _hud_button_style("disabled"))
+	button.add_theme_color_override("font_color", HUD_INK)
+	button.add_theme_color_override("font_hover_color", HUD_INK)
+	button.add_theme_color_override("font_pressed_color", HUD_INK)
+	button.add_theme_color_override("font_disabled_color", Color("766650"))
 	button.pressed.connect(handler)
 	return button
+
+
+func _hud_button_style(state: String) -> StyleBoxFlat:
+	var surface := Color("c5a475")
+	var rim := Color("82613b")
+	match state:
+		"hover":
+			surface = surface.lightened(0.18)
+			rim = Color("ad7636")
+		"pressed":
+			surface = surface.darkened(0.12)
+			rim = Color("60442b")
+		"disabled":
+			surface = Color("b5a48a")
+			rim = Color("93826b")
+	var style := StyleBoxFlat.new()
+	style.bg_color = surface
+	style.border_color = rim
+	style.set_border_width_all(2)
+	style.border_width_top = 4 if state == "pressed" else 2
+	style.border_width_bottom = 2 if state == "pressed" else 4
+	style.set_corner_radius_all(3)
+	style.content_margin_left = 16
+	style.content_margin_right = 16
+	style.content_margin_top = 8
+	style.content_margin_bottom = 8
+	style.shadow_color = Color(0.16, 0.10, 0.05, 0.0 if state == "disabled" else 0.22)
+	style.shadow_size = 1 if state == "pressed" else 2
+	style.shadow_offset = Vector2(0, 0 if state == "pressed" else 1)
+	return style
 
 
 func _on_world_position_selected(world_position: Vector2) -> void:
