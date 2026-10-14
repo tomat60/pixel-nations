@@ -103,7 +103,7 @@ jobs:
           dedicated_server=false
           custom_features=""
           export_filter="all_resources"
-          include_filter=""
+          include_filter="*.txt,*.json,*.csv,*.tsv,*.dat"
           exclude_filter=""
           export_path="build/Pixel-Nations-Linux.x86_64"
           patches=PackedStringArray()
@@ -133,7 +133,7 @@ jobs:
           dedicated_server=false
           custom_features=""
           export_filter="all_resources"
-          include_filter=""
+          include_filter="*.txt,*.json,*.csv,*.tsv,*.dat"
           exclude_filter=""
           export_path="build/Pixel-Nations-macOS.zip"
           patches=PackedStringArray()
@@ -187,6 +187,28 @@ jobs:
           file dist/Pixel-Nations-Linux.x86_64
           sha256sum dist/Pixel-Nations-* > dist/SHA256SUMS
           echo "PN_PLAYABLE_DESKTOP_EXPORTS=PASS"
+
+      - name: Smoke exported Linux game (not the editor source)
+        shell: bash
+        timeout-minutes: 2
+        run: |
+          set -Eeuo pipefail
+          cd "$PN_GAME/build"
+          set +e
+          timeout -s TERM 50s xvfb-run -a -s "-screen 0 1600x1000x24" env LIBGL_ALWAYS_SOFTWARE=1 \
+            "./Pixel-Nations-Linux.x86_64" --audio-driver Dummy --resolution 1440x900 \
+            > "$GITHUB_WORKSPACE/dist/linux-launch-smoke.log" 2>&1
+          launch_status=$?
+          set -e
+          if [[ "$launch_status" != 0 && "$launch_status" != 124 ]]; then
+            cat "$GITHUB_WORKSPACE/dist/linux-launch-smoke.log"
+            exit 1
+          fi
+          if grep -E "SCRIPT ERROR|ERROR:|Parse Error" "$GITHUB_WORKSPACE/dist/linux-launch-smoke.log"; then
+            exit 1
+          fi
+          grep -F "PN_PLAYABLE_RUNTIME_READY=PASS" "$GITHUB_WORKSPACE/dist/linux-launch-smoke.log"
+          echo "PN_PACKED_LINUX_SMOKE=PASS"
 
       - name: Always attach build proof and runnable distribution
         if: always()
