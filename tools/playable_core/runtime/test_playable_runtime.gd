@@ -51,6 +51,9 @@ func _run() -> void:
 	await _click_control(runtime.claim_button)
 	_check(String(runtime.controller.current_snapshot().get("claimed_land_id", "")) == HOME_ID, "claim_button_claims_home")
 	await process_frame
+	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 420.0, "world_context_panel_is_compact")
+	_check(runtime.enter_button.visible and runtime.save_button.visible, "world_shows_relevant_actions")
+	_check(not runtime.claim_button.visible and not runtime.inspect_button.visible and not runtime.connect_button.visible, "world_hides_irrelevant_actions")
 	_capture("world-claimed")
 	await _click_control(runtime.enter_button)
 	await process_frame
@@ -62,6 +65,9 @@ func _run() -> void:
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate's first road", "village_onboarding_matches_product_loop")
 	_check("Credits" in String(runtime.village.hud._code_button.text), "village_credits_remain_accessible")
 	_check(runtime.village_paved_road == null, "canonical_road_absent_before_build")
+	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 460.0, "village_context_panel_is_compact")
+	_check(runtime.road_button.visible and runtime.return_button.visible and runtime.save_button.visible, "village_shows_relevant_actions")
+	_check(not runtime.claim_button.visible and not runtime.inspect_button.visible and not runtime.connect_button.visible, "village_hides_world_actions")
 	var donor_stock_hidden := true
 	for stock_button in runtime.village.hud._resource_buttons.values():
 		donor_stock_hidden = donor_stock_hidden and not (stock_button as Button).visible
@@ -271,6 +277,7 @@ func _run() -> void:
 	_check(String(northgate_inspected.get("nation_status", "")) == "not_founded", "northgate_inspection_does_not_invent_nation")
 	_check(String(northgate_inspected.get("next_goal", "")) == "Northgate is inspected; claiming it is not yet playable", "northgate_inspection_reports_honest_stop_gate")
 	_check(runtime.northgate_scout_material.albedo_color.b > runtime.northgate_scout_material.albedo_color.r, "inspected_northgate_route_turns_blue")
+	_check(not runtime.inspect_button.visible, "completed_northgate_action_is_hidden")
 	await process_frame
 	_capture("world-northgate-inspected")
 	runtime.controller.session.state["inspected_land_ids"].erase(NORTHGATE_ID)
