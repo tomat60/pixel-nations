@@ -42,6 +42,9 @@ func _run() -> void:
 	_check(runtime.atlas_root != null, "fictional_a01_atlas_instantiated")
 	_check(runtime.land_materials.size() == 30, "all_canonical_lands_have_visible_surfaces")
 	_check(runtime.land_labels.size() == 4, "home_and_reachable_lands_are_named")
+	_check(runtime.panel.get_theme_stylebox("panel") is StyleBoxTexture, "pixel_nations_panel_reuses_village_parchment")
+	_check(runtime.claim_button.get_theme_stylebox("normal") is StyleBoxFlat, "pixel_nations_actions_use_retained_village_button_language")
+	_check(runtime.detail_label.get_theme_color("font_color") == runtime.HUD_INK, "parchment_panel_uses_readable_dark_ink")
 	var home_screen: Vector2 = player.camera.unproject_position(
 		Vector3(home_world.x, 0.0, home_world.y)
 	)
