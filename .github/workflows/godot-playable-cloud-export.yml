@@ -203,7 +203,9 @@ jobs:
               exit 1
             }
           cat "$GITHUB_WORKSPACE/dist/linux-headless-smoke.log"
-          if grep -E "SCRIPT ERROR|ERROR:|Parse Error" "$GITHUB_WORKSPACE/dist/linux-headless-smoke.log"; then exit 1; fi
+          # Short --quit-after can emit Godot's engine teardown-only ResourceDB warning.
+          # Keep the full log; reject all other engine and GDScript runtime errors.
+          if grep -vE '^ERROR: [0-9]+ resources still in use at exit' "$GITHUB_WORKSPACE/dist/linux-headless-smoke.log" | grep -E 'SCRIPT ERROR|ERROR:|Parse Error'; then exit 1; fi
           grep -F "PN_PLAYABLE_RUNTIME_READY=PASS" "$GITHUB_WORKSPACE/dist/linux-headless-smoke.log"
           echo "PN_PACKED_HEADLESS_SMOKE=PASS"
           # Software OpenGL fallback on GitHub's GPU-less Linux runner.
@@ -216,7 +218,7 @@ jobs:
               exit 1
             }
           cat "$GITHUB_WORKSPACE/dist/linux-launch-smoke.log"
-          if grep -E "SCRIPT ERROR|ERROR:|Parse Error" "$GITHUB_WORKSPACE/dist/linux-launch-smoke.log"; then exit 1; fi
+          if grep -vE '^ERROR: [0-9]+ resources still in use at exit' "$GITHUB_WORKSPACE/dist/linux-launch-smoke.log" | grep -E 'SCRIPT ERROR|ERROR:|Parse Error'; then exit 1; fi
           grep -F "PN_PLAYABLE_RUNTIME_READY=PASS" "$GITHUB_WORKSPACE/dist/linux-launch-smoke.log"
           echo "PN_PACKED_WINDOW_SMOKE=PASS"
 
