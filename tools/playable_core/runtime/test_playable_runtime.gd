@@ -48,6 +48,19 @@ func _run() -> void:
 	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(home_screen), "home_projects_inside_viewport")
 	await _click_position(home_screen)
 	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HOME_ID, "pointer_raycast_selects_home")
+	_check(runtime.focus_button.visible and not runtime.overview_button.visible, "selected_land_offers_focus")
+	await _click_control(runtime.focus_button)
+	await create_timer(0.6).timeout
+	_check(runtime.atlas_is_focused, "atlas_focus_mode_enabled")
+	_check(player.position.distance_to(Vector3(home_world.x, 0.0, home_world.y)) < 1.0, "atlas_focus_centers_selected_land")
+	_check(absf(player.camera.position.z - runtime.ATLAS_FOCUS_ZOOM) < 1.0, "atlas_focus_uses_readable_zoom")
+	_check(runtime.overview_button.visible and not runtime.focus_button.visible, "focused_land_offers_overview_recovery")
+	_capture("world-home-focused")
+	await _click_control(runtime.overview_button)
+	await create_timer(0.6).timeout
+	_check(not runtime.atlas_is_focused, "atlas_overview_mode_restored")
+	_check(player.position.distance_to(runtime.ATLAS_OVERVIEW_POSITION) < 1.0, "atlas_overview_restores_position")
+	_check(absf(player.camera.position.z - runtime.ATLAS_OVERVIEW_ZOOM) < 1.0, "atlas_overview_restores_zoom")
 	await _click_control(runtime.claim_button)
 	_check(String(runtime.controller.current_snapshot().get("claimed_land_id", "")) == HOME_ID, "claim_button_claims_home")
 	await process_frame
