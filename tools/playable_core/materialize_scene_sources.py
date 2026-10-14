@@ -182,7 +182,8 @@ def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -
     notice = f"""# Third-party source changes
 
 - OpenGS source: Thomas Holtvedt, `{opengs_commit}`, MIT.
-- OpenGS scene/code files are copied unchanged; generated project.godot is rebranded for Pixel Nations and starts the canonical playable scene.
+- OpenGS scene/data files are copied; generated project.godot is rebranded for Pixel Nations and starts the canonical playable scene.
+- The donor `game/main_game.gd` editor-only PNG preview export is removed from the generated runtime: release packs cannot write into `res://`, and these diagnostic previews are not gameplay resources.
 - OpenGS `ne2.png` is a Thomas Holtvedt QGIS derivative of the public-domain Natural Earth 2 raster; its exact hash and source URL are pinned in the integration spec.
 - Village source: Lucas Marques, from Shiva — The Free Game, `{village_commit}`.
 - Village files are moved below `res://village/`; textual `res://` references are rewritten to that namespace.
@@ -280,6 +281,17 @@ def install_pixel_nations_runtime(output: Path) -> int:
         flags=re.MULTILINE,
     )
     project.write_text(project_text, encoding="utf-8")
+    # Donor diagnostic PNG dumps write to res:// on every launch.
+    # This path is read-only inside exported PCKs, so remove only that hook.
+    game_entry = output / "game/main_game.gd"
+    game_entry_text = game_entry.read_text(encoding="utf-8")
+    debug_preview_call = "\t$Map.get_preview_images()\n"
+    if game_entry_text.count(debug_preview_call) != 1:
+        raise SourceError("missing unique OpenGS debug-preview hook")
+    game_entry.write_text(
+        game_entry_text.replace(debug_preview_call, "", 1),
+        encoding="utf-8",
+    )
     return sum(1 for path in runtime_target.rglob("*") if path.is_file())
 
 
