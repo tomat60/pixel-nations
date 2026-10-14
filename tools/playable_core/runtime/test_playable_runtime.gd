@@ -296,7 +296,7 @@ func _run() -> void:
 	_check(bool(northgate_inspected.get("northgate_inspected", false)), "northgate_inspection_recorded")
 	_check(int(northgate_inspected.get("claimed_lands", -1)) == 3, "northgate_inspection_does_not_claim_fourth_land")
 	_check(String(northgate_inspected.get("nation_status", "")) == "not_founded", "northgate_inspection_does_not_invent_nation")
-	_check(String(northgate_inspected.get("next_goal", "")) == "Northgate is inspected; claiming it is not yet playable", "northgate_inspection_reports_honest_stop_gate")
+	_check(String(northgate_inspected.get("next_goal", "")) == "Return to Greengate for the Northgate settlement timber", "northgate_inspection_reports_settlement_supply_goal")
 	_check(runtime.northgate_scout_material.albedo_color.b > runtime.northgate_scout_material.albedo_color.r, "inspected_northgate_route_turns_blue")
 	_check(not runtime.inspect_button.visible, "completed_northgate_action_is_hidden")
 	await process_frame
@@ -308,6 +308,41 @@ func _run() -> void:
 	_check(int(northgate_reopened.get("claimed_lands", -1)) == 3, "reopen_keeps_three_claims_after_northgate")
 	await process_frame
 	_capture("world-northgate-inspected-reopened")
+	var home_screen_after_northgate: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.0, home_world.y))
+	await _click_position(home_screen_after_northgate)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HOME_ID, "pointer_reselects_home_for_settlement_timber")
+	await _click_control(runtime.enter_button)
+	await process_frame
+	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "settlement_timber_path_enters_village")
+	_check("Northgate settlement timber" in String(runtime.supply_button.text), "village_offers_settlement_timber")
+	await _click_control(runtime.supply_button)
+	var timber_village: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(timber_village.get("northgate_settlement_timber_delivered", false)), "settlement_timber_delivered")
+	_check(int(timber_village.get("timber", -1)) == 5, "settlement_timber_adds_five")
+	_capture("village-northgate-settlement-timber")
+	await _click_control(runtime.return_button)
+	await process_frame
+	var riverbend_screen_for_hamlet: Vector2 = player.camera.unproject_position(Vector3(frontier_world.x, 0.0, frontier_world.y))
+	await _click_position(riverbend_screen_for_hamlet)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == FRONTIER_ID, "pointer_selects_riverbend_for_hamlet")
+	_check(runtime.hamlet_button.visible and not runtime.hamlet_button.disabled, "riverbend_hamlet_action_is_clickable")
+	await _click_control(runtime.hamlet_button)
+	var hamlet_world: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(hamlet_world.get("riverbend_hamlet_founded", false)), "riverbend_hamlet_founded")
+	_check(int(hamlet_world.get("settlement_count", -1)) == 2, "world_reports_two_settlements")
+	_check(int(hamlet_world.get("timber", -1)) == 0, "riverbend_hamlet_costs_five_timber")
+	_check(String(hamlet_world.get("nation_status", "")) == "not_founded", "riverbend_hamlet_does_not_invent_nation")
+	_check("HAMLET" in String((runtime.land_labels.get(FRONTIER_ID) as Label3D).text), "riverbend_label_shows_hamlet")
+	await process_frame
+	_capture("world-riverbend-hamlet")
+	runtime.controller.session.state["settlement_land_ids"] = [HOME_ID]
+	_check(runtime.controller.load_game(), "riverbend_hamlet_reopens")
+	var hamlet_reopened: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(hamlet_reopened.get("riverbend_hamlet_founded", false)), "reopen_keeps_riverbend_hamlet")
+	_check(int(hamlet_reopened.get("settlement_count", -1)) == 2, "reopen_keeps_two_settlements")
+	_check(String(hamlet_reopened.get("next_goal", "")) == "Riverbend Hamlet founded; its first improvement is not yet playable", "hamlet_reopen_reports_honest_stop_gate")
+	await process_frame
+	_capture("world-riverbend-hamlet-reopened")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")
