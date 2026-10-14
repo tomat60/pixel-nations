@@ -281,17 +281,29 @@ def install_pixel_nations_runtime(output: Path) -> int:
         flags=re.MULTILINE,
     )
     project.write_text(project_text, encoding="utf-8")
-    # Donor diagnostic PNG dumps write to res:// on every launch.
-    # This path is read-only inside exported PCKs, so remove only that hook.
+    # Keep the proven OpenGS scene, player camera, mouse picking and map collider.
+    # Its Earth province DB/GPU SDF generation is unused: PN renders 30 canonical
+    # lands on its own atlas and handles selection itself. Generating those
+    # donor-only 5000x2500 textures can prevent exported games starting on
+    # computers without Vulkan compute support.
     game_entry = output / "game/main_game.gd"
     game_entry_text = game_entry.read_text(encoding="utf-8")
-    debug_preview_call = "\t$Map.get_preview_images()\n"
-    if game_entry_text.count(debug_preview_call) != 1:
-        raise SourceError("missing unique OpenGS debug-preview hook")
-    game_entry.write_text(
-        game_entry_text.replace(debug_preview_call, "", 1),
-        encoding="utf-8",
+    donor_ready = (
+        "func _ready() -> void:\n"
+        "\tDataImporter.new(db)\n"
+        "\t$Map.create_map_textures(db)\n"
+        "\t$Map.create_map_modes(db)\n"
+        "\t$Map.create_country_labels(db)\n"
+        "\t$Map.get_preview_images()\n"
     )
+    pn_ready = (
+        "func _ready() -> void:\n"
+        "\t# Canonical A-01 gameplay is owned by PixelNationsPlayableCore.\n"
+        "\tpass\n"
+    )
+    if game_entry_text.count(donor_ready) != 1:
+        raise SourceError("OpenGS main_game bootstrap changed; refuse unsafe runtime transform")
+    game_entry.write_text(game_entry_text.replace(donor_ready, pn_ready, 1), encoding="utf-8")
     return sum(1 for path in runtime_target.rglob("*") if path.is_file())
 
 
