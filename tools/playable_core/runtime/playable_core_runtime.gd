@@ -214,27 +214,33 @@ func _build_ui() -> void:
 	panel = PanelContainer.new()
 	panel.name = "ProgressPanel"
 	panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	panel.position = Vector2(-380, 24)
-	panel.size = Vector2(356, 700)
+	panel.position = Vector2(-346, 16)
+	panel.custom_minimum_size = Vector2(330, 0)
+	panel.size = Vector2(330, 0)
 	var panel_style := StyleBoxFlat.new()
-	panel_style.bg_color = Color(0.055, 0.07, 0.075, 1.0)
-	panel_style.border_color = Color(0.54, 0.69, 0.55, 1.0)
-	panel_style.set_border_width_all(2)
+	panel_style.bg_color = Color(0.035, 0.045, 0.05, 0.88)
+	panel_style.border_color = Color(0.70, 0.60, 0.34, 0.88)
+	panel_style.set_border_width_all(1)
+	panel_style.set_corner_radius_all(10)
+	panel_style.shadow_color = Color(0.0, 0.0, 0.0, 0.42)
+	panel_style.shadow_size = 8
 	panel.add_theme_stylebox_override("panel", panel_style)
 	ui_layer.add_child(panel)
 	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 20)
-	margin.add_theme_constant_override("margin_top", 18)
-	margin.add_theme_constant_override("margin_right", 20)
-	margin.add_theme_constant_override("margin_bottom", 18)
+	margin.add_theme_constant_override("margin_left", 14)
+	margin.add_theme_constant_override("margin_top", 12)
+	margin.add_theme_constant_override("margin_right", 14)
+	margin.add_theme_constant_override("margin_bottom", 12)
 	panel.add_child(margin)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 12)
+	column.add_theme_constant_override("separation", 8)
 	margin.add_child(column)
-	title_label = _label("Sector A-01 / Aurelian Basin", 22)
+	title_label = _label("AURELIAN BASIN · A-01", 16)
 	identity_label = _label("Select a canonical land on the map", 18)
-	detail_label = _label("30 charted lands · 0 claimed", 15)
-	goal_label = _label("Next: select Greenvale", 15)
+	detail_label = _label("0/30 lands · 0 settlements · Stone 10", 14)
+	goal_label = _label("NEXT · Select Greenvale", 14)
+	title_label.add_theme_color_override("font_color", Color("d6bd78"))
+	goal_label.add_theme_color_override("font_color", Color("ead79c"))
 	identity_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -264,7 +270,7 @@ func _button(text_value: String, node_name: String, handler: Callable) -> Button
 	var button := Button.new()
 	button.name = node_name
 	button.text = text_value
-	button.custom_minimum_size = Vector2(0, 48)
+	button.custom_minimum_size = Vector2(0, 38)
 	button.pressed.connect(handler)
 	return button
 
@@ -454,54 +460,52 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	var view := String(snapshot.get("view", "world"))
 	var selected_id := String(snapshot.get("selected_land_id", ""))
 	if view == "village":
-		title_label.text = "Greengate · %s" % String(snapshot.get("land_id", ""))
-		identity_label.text = "Founded settlement"
-		detail_label.text = "Stone: %d · Road: %s · Riverbend supply: %s · Highmere survey: %s · Ridge stone: %s" % [
+		title_label.text = "PIXEL NATIONS · GREENGATE"
+		identity_label.text = "Greenvale settlement"
+		detail_label.text = "Stone %d · Road %s\nRiverbend supply %s · Ridge stone %s" % [
 			int(snapshot.get("stone", 0)),
 			"built" if bool(snapshot.get("road_built", false)) else "not built",
 			("delivered" if bool(snapshot.get("riverbend_supply_delivered", false)) else (
 				"ready" if bool(snapshot.get("riverbend_connected", false)) else "locked"
 			)),
-			"commissioned" if bool(snapshot.get("highmere_survey_commissioned", false)) else "not commissioned",
 			"delivered" if bool(snapshot.get("highmere_link_supply_delivered", false)) else "not delivered",
 		]
 		goal_label.text = (
-			"Ridge stone staged. Return to World and connect Highmere."
+			"NEXT · Return to World and connect Highmere"
 			if bool(snapshot.get("highmere_link_supply_delivered", false)) else (
-				"Highmere claimed. Receive its one-time ridge stone shipment."
+				"NEXT · Receive the Highmere ridge stone"
 				if bool(snapshot.get("highmere_claimed", false)) else (
-					"Highmere survey commissioned. Return to World and inspect the northern ridge."
+					"NEXT · Return to World and inspect Highmere"
 					if bool(snapshot.get("highmere_survey_commissioned", false)) else (
-						"Riverbend delivered 5 stone. Commission the Highmere survey."
+						"NEXT · Commission the Highmere survey"
 						if bool(snapshot.get("riverbend_supply_delivered", false))
-						else "Complete the Riverbend link, then receive its first stone shipment."
+						else "NEXT · Build the road or advance the frontier"
 					)
 				)
 			)
 		)
 	else:
-		title_label.text = "Sector A-01 / Aurelian Basin"
+		title_label.text = "AURELIAN BASIN · A-01"
 		identity_label.text = _land_title(selected_id)
-		detail_label.text = "%d/%d claimed · Stone: %d · Greengate: %s · Road: %s · Riverbend: %s · Link: %s · Highmere: %s · Nation: %s" % [
+		detail_label.text = "%d/%d lands · %d settlement · Stone %d\nRoad %s · Riverbend %s · Highmere %s · Nation not founded" % [
 			int(snapshot.get("claimed_lands", 0)), int(snapshot.get("charted_lands", 30)),
+			1 if bool(snapshot.get("settlement_founded", false)) else 0,
 			int(snapshot.get("stone", 0)),
-			"founded" if bool(snapshot.get("settlement_founded", false)) else "not founded",
 			"built" if bool(snapshot.get("road_built", false)) else "not built",
-			("claimed" if bool(snapshot.get("riverbend_claimed", false)) else (
+			("linked" if bool(snapshot.get("riverbend_connected", false)) else (
+				"claimed" if bool(snapshot.get("riverbend_claimed", false)) else (
 				"inspected" if bool(snapshot.get("riverbend_inspected", false)) else "not inspected"
-			)),
-			String(snapshot.get("frontier_link_status", "not started")).replace("_", " "),
+			))),
 			String(snapshot.get("highmere_status", "locked")).replace("_", " "),
-			String(snapshot.get("nation_status", "not_founded")),
 		]
-		goal_label.text = "Next expansion goal: %s" % String(snapshot.get("next_goal", ""))
-	claim_button.visible = view == "world"
-	enter_button.visible = view == "world"
-	inspect_button.visible = view == "world"
-	connect_button.visible = view == "world"
-	road_button.visible = view == "village"
-	supply_button.visible = view == "village"
-	survey_button.visible = view == "village"
+		goal_label.text = "NEXT · %s" % String(snapshot.get("next_goal", ""))
+	claim_button.visible = false
+	enter_button.visible = false
+	inspect_button.visible = false
+	connect_button.visible = false
+	road_button.visible = false
+	supply_button.visible = false
+	survey_button.visible = false
 	return_button.visible = view == "village"
 	save_button.visible = true
 	var selected_claimed := (snapshot.get("claimed_land_ids", []) as Array).has(selected_id)
@@ -515,12 +519,15 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		and bool(snapshot.get("highmere_inspected", false))
 		and not bool(snapshot.get("highmere_claimed", false))
 	)
+	var home_claim_ready := selected_id == "PN-A01-001" and String(snapshot.get("claimed_land_id", "")).is_empty()
+	claim_button.visible = view == "world" and (home_claim_ready or riverbend_claim_ready or highmere_claim_ready)
 	claim_button.text = "Claim Highmere ridge" if selected_id == "PN-A01-003" else "Claim selected land"
 	claim_button.disabled = selected_id.is_empty() or selected_claimed or (
 		not String(snapshot.get("claimed_land_id", "")).is_empty()
 		and not (riverbend_claim_ready or highmere_claim_ready)
 	)
-	enter_button.disabled = selected_id != "PN-A01-001" or String(snapshot.get("claimed_land_id", "")) != "PN-A01-001"
+	enter_button.visible = view == "world" and selected_id == "PN-A01-001" and String(snapshot.get("claimed_land_id", "")) == "PN-A01-001"
+	enter_button.disabled = not enter_button.visible
 	var riverbend_inspection_ready := (
 		selected_id == "PN-A01-002"
 		and bool(snapshot.get("road_built", false))
@@ -542,6 +549,11 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		)
 	)
 	inspect_button.disabled = not (riverbend_inspection_ready or highmere_inspection_ready or northgate_inspection_ready)
+	inspect_button.visible = view == "world" and selected_id in ["PN-A01-002", "PN-A01-003", "PN-A01-024"] and not (
+		bool(snapshot.get("riverbend_inspected", false)) if selected_id == "PN-A01-002" else (
+			bool(snapshot.get("highmere_inspected", false)) if selected_id == "PN-A01-003" else bool(snapshot.get("northgate_inspected", false))
+		)
+	)
 	var highmere_link_selected := selected_id == "PN-A01-003"
 	connect_button.text = "Connect Highmere ridge · 5 stone" if highmere_link_selected else "Connect Riverbend · 5 stone"
 	connect_button.disabled = (
@@ -558,7 +570,12 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 			or int(snapshot.get("stone", 0)) < int(snapshot.get("frontier_link_stone_cost", 5))
 		)
 	)
+	connect_button.visible = view == "world" and (
+		(selected_id == "PN-A01-002" and bool(snapshot.get("riverbend_claimed", false)) and not bool(snapshot.get("riverbend_connected", false)))
+		or (selected_id == "PN-A01-003" and bool(snapshot.get("highmere_claimed", false)) and not bool(snapshot.get("highmere_connected", false)))
+	)
 	road_button.disabled = bool(snapshot.get("road_built", false)) or int(snapshot.get("stone", 0)) < 5
+	road_button.visible = view == "village" and not bool(snapshot.get("road_built", false))
 	supply_button.text = (
 		"Receive Highmere ridge stone · +5"
 		if bool(snapshot.get("highmere_claimed", false))
@@ -571,11 +588,16 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 			or bool(snapshot.get("riverbend_supply_delivered", false))
 		)
 	)
+	supply_button.visible = view == "village" and (
+		(bool(snapshot.get("highmere_claimed", false)) and not bool(snapshot.get("highmere_link_supply_delivered", false)))
+		or (bool(snapshot.get("riverbend_connected", false)) and not bool(snapshot.get("riverbend_supply_delivered", false)))
+	)
 	survey_button.disabled = (
 		not bool(snapshot.get("riverbend_supply_delivered", false))
 		or bool(snapshot.get("highmere_survey_commissioned", false))
 		or int(snapshot.get("stone", 0)) < int(snapshot.get("highmere_survey_stone_cost", 5))
 	)
+	survey_button.visible = view == "village" and bool(snapshot.get("riverbend_supply_delivered", false)) and not bool(snapshot.get("highmere_survey_commissioned", false))
 	if frontier_link != null:
 		frontier_link.visible = view == "world" and bool(snapshot.get("riverbend_claimed", false))
 		_set_frontier_link_connected(bool(snapshot.get("riverbend_connected", false)))
@@ -591,6 +613,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		_set_northgate_scout_state(bool(snapshot.get("northgate_inspected", false)))
 	_refresh_land_visuals(snapshot)
 	_sync_village_road_visual(snapshot)
+	panel.reset_size()
 
 
 # Project only the canonical BUILD_ROAD action onto the retained donor's real
@@ -694,6 +717,8 @@ func _land_title(land_id: String) -> String:
 				relationship = " · east of Greenvale"
 			elif land_id == "PN-A01-003":
 				relationship = " · north of Riverbend"
+			elif land_id == "PN-A01-024":
+				relationship = " · beyond the Highmere ridge"
 			return "%s · %s · %s%s" % [
 				land_id, String(land.get("name", "")), String(land.get("region", "")), relationship
 			]
