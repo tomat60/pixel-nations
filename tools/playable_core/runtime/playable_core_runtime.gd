@@ -495,7 +495,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 			("linked" if bool(snapshot.get("riverbend_connected", false)) else (
 				"claimed" if bool(snapshot.get("riverbend_claimed", false)) else (
 				"inspected" if bool(snapshot.get("riverbend_inspected", false)) else "not inspected"
-			)),
+			))),
 			String(snapshot.get("highmere_status", "locked")).replace("_", " "),
 		]
 		goal_label.text = "NEXT · %s" % String(snapshot.get("next_goal", ""))
