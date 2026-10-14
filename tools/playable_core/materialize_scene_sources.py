@@ -182,7 +182,8 @@ def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -
     notice = f"""# Third-party source changes
 
 - OpenGS source: Thomas Holtvedt, `{opengs_commit}`, MIT.
-- OpenGS files are copied without content changes into the generated project root.
+- OpenGS scene/data files are copied; generated project.godot is rebranded for Pixel Nations and starts the canonical playable scene.
+- The donor `game/main_game.gd` editor-only PNG preview export is removed from the generated runtime: release packs cannot write into `res://`, and these diagnostic previews are not gameplay resources.
 - OpenGS `ne2.png` is a Thomas Holtvedt QGIS derivative of the public-domain Natural Earth 2 raster; its exact hash and source URL are pinned in the integration spec.
 - Village source: Lucas Marques, from Shiva — The Free Game, `{village_commit}`.
 - Village files are moved below `res://village/`; textual `res://` references are rewritten to that namespace.
@@ -257,7 +258,52 @@ def install_pixel_nations_runtime(output: Path) -> int:
         project_text,
         count=1,
     )
+    if 'config/name="Open Grand Strategy"' not in project_text:
+        raise SourceError("unexpected OpenGS project name; refuse unsafe donor rebrand")
+    project_text = project_text.replace(
+        'config/name="Open Grand Strategy"',
+        'config/name="Pixel Nations"',
+        1,
+    )
+    project_text = re.sub(
+        r'^config/description="[^"]+"$',
+        'config/description="One land can become an empire."',
+        project_text,
+        count=1,
+        flags=re.MULTILINE,
+    )
+    # Never ship the donor launcher icon under Pixel Nations branding.
+    project_text = re.sub(
+        r'^config/icon="[^"]+"\n',
+        "",
+        project_text,
+        count=1,
+        flags=re.MULTILINE,
+    )
     project.write_text(project_text, encoding="utf-8")
+    # Keep the proven OpenGS scene, player camera, mouse picking and map collider.
+    # Its Earth province DB/GPU SDF generation is unused: PN renders 30 canonical
+    # lands on its own atlas and handles selection itself. Generating those
+    # donor-only 5000x2500 textures can prevent exported games starting on
+    # computers without Vulkan compute support.
+    game_entry = output / "game/main_game.gd"
+    game_entry_text = game_entry.read_text(encoding="utf-8")
+    donor_ready = (
+        "func _ready() -> void:\n"
+        "\tDataImporter.new(db)\n"
+        "\t$Map.create_map_textures(db)\n"
+        "\t$Map.create_map_modes(db)\n"
+        "\t$Map.create_country_labels(db)\n"
+        "\t$Map.get_preview_images()\n"
+    )
+    pn_ready = (
+        "func _ready() -> void:\n"
+        "\t# Canonical A-01 gameplay is owned by PixelNationsPlayableCore.\n"
+        "\tpass\n"
+    )
+    if game_entry_text.count(donor_ready) != 1:
+        raise SourceError("OpenGS main_game bootstrap changed; refuse unsafe runtime transform")
+    game_entry.write_text(game_entry_text.replace(donor_ready, pn_ready, 1), encoding="utf-8")
     return sum(1 for path in runtime_target.rglob("*") if path.is_file())
 
 

@@ -43,6 +43,7 @@ jobs:
           mkdir -p "$EVIDENCE_DIR"
           git rev-parse HEAD | tee "$EVIDENCE_DIR/commit-sha.txt"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 -m py_compile tools/playable_core/materialize_scene_sources.py
           cmp migration/golden_run_v1.json game/tests/fixtures/golden_run_v1.json
           test -s game/scenes/bootstrap/bootstrap.tscn
           test -s game/tests/run_all.gd

@@ -15,6 +15,7 @@ const WORLD_HEIGHT := 250.0
 var controller: Node
 var world: Node3D
 var village: Node
+var village_paved_road: Node3D
 var frontier_link: MeshInstance3D
 var frontier_link_material: StandardMaterial3D
 var highmere_survey_link: MeshInstance3D
@@ -216,7 +217,7 @@ func _build_ui() -> void:
 	panel.position = Vector2(-380, 24)
 	panel.size = Vector2(356, 700)
 	var panel_style := StyleBoxFlat.new()
-	panel_style.bg_color = Color(0.055, 0.07, 0.075, 0.94)
+	panel_style.bg_color = Color(0.055, 0.07, 0.075, 1.0)
 	panel_style.border_color = Color(0.54, 0.69, 0.55, 1.0)
 	panel_style.set_border_width_all(2)
 	panel.add_theme_stylebox_override("panel", panel_style)
@@ -431,6 +432,10 @@ func _show_village() -> void:
 		village.name = "GreengateVillage"
 		add_child(village)
 	village.process_mode = Node.PROCESS_MODE_INHERIT
+	# The donor's economy is separate from the canonical Pixel Nations save.
+	# Never display its 160-stone fixture next to the real five-stone balance.
+	for donor_button in village.hud._resource_buttons.values():
+		(donor_button as Button).visible = false
 	panel.move_to_front()
 
 
@@ -439,6 +444,7 @@ func _show_world() -> void:
 		village.process_mode = Node.PROCESS_MODE_DISABLED
 		village.queue_free()
 		village = null
+	village_paved_road = null
 	world.visible = true
 	world.process_mode = Node.PROCESS_MODE_INHERIT
 	panel.move_to_front()
@@ -584,6 +590,38 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		northgate_scout_link.visible = view == "world" and bool(snapshot.get("highmere_connected", false))
 		_set_northgate_scout_state(bool(snapshot.get("northgate_inspected", false)))
 	_refresh_land_visuals(snapshot)
+	_sync_village_road_visual(snapshot)
+
+
+# Project only the canonical BUILD_ROAD action onto the retained donor's real
+# textured road geometry; do not mutate its separate simulation or resource stock.
+# Five physical paved tiles connect the plaza's east edge to the school entrance.
+func _sync_village_road_visual(snapshot: Dictionary) -> void:
+	if village == null or not is_instance_valid(village):
+		return
+	if not bool(snapshot.get("road_built", false)):
+		if village_paved_road != null and is_instance_valid(village_paved_road):
+			village_paved_road.queue_free()
+			village_paved_road = null
+		return
+	if village_paved_road != null and is_instance_valid(village_paved_road):
+		return
+	var donor_terrain: Node3D = village.world.terrain
+	village_paved_road = Node3D.new()
+	village_paved_road.name = "PixelNationsCanonicalRoad"
+	donor_terrain.roads.add_child(village_paved_road)
+	var cells: Array[Vector2i] = [
+		Vector2i(10, 14), Vector2i(11, 14), Vector2i(12, 14),
+		Vector2i(13, 14), Vector2i(13, 13),
+	]
+	for cell in cells:
+		var tile := Node3D.new()
+		tile.name = "CanonicalRoadTile_%d_%d" % [cell.x, cell.y]
+		village_paved_road.add_child(tile)
+		# Uses the existing authored, terrain-conforming stone mesh/material.
+		donor_terrain._build_road_visual(
+			tile, {"cell": cell, "stage": "complete"}, Vector4.ONE
+		)
 
 
 func _refresh_land_visuals(snapshot: Dictionary) -> void:
