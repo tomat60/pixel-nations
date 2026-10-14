@@ -116,7 +116,7 @@ func _build_a01_atlas() -> void:
 	substrate_mesh.size = Vector2(500.0, 250.0)
 	var substrate_material := StandardMaterial3D.new()
 	substrate_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	substrate_material.albedo_texture = load("res://pixel_nations/a01_atlas_substrate.svg")
+	substrate_material.albedo_texture = load("res://pixel_nations/a01_atlas_substrate.png")
 	substrate_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	substrate_mesh.material = substrate_material
 	substrate.mesh = substrate_mesh
@@ -213,7 +213,9 @@ func _terrain_color(terrain: String) -> Color:
 		"field": Color("9e8a4e"),
 	}
 	var color: Color = colors.get(terrain, Color("718b4e"))
-	color.a = 0.94
+	# Keep canonical land state legible while allowing the retained painted Basin
+	# to carry the physical geography instead of flattening it into opaque parcels.
+	color.a = 0.34
 	return color
 
 

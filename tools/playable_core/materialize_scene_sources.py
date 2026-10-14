@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SPEC = ROOT / "game" / "integration" / "playable_scene_sources.json"
 CANONICAL_MAP_DATA = ROOT / "app" / "play" / "lib" / "map-data.ts"
 RUNTIME_SOURCE = ROOT / "tools" / "playable_core" / "runtime"
-ATLAS_SOURCE = ROOT / "docs" / "visual-targets" / "world_atlas_a01_cartographic_mass_v1.svg"
+ATLAS_SOURCE = ROOT / "public" / "assets" / "world-map" / "aurelian-basin-v1.png"
 TEXT_SUFFIXES = {
     ".cfg", ".css", ".gd", ".gdshader", ".glsl", ".godot", ".html",
     ".import", ".js", ".json", ".md", ".py", ".shader", ".svg",
@@ -156,21 +156,11 @@ def apply_pixel_nations_village_identity(village: Path) -> int:
 
 
 def install_a01_atlas_substrate(output: Path) -> dict[str, str]:
-    """Install the retained editable A-01 composition without target-only captions."""
+    """Install the retained repository-owned painted Aurelian Basin substrate."""
     if not ATLAS_SOURCE.is_file():
         raise SourceError(f"missing retained A-01 atlas source: {ATLAS_SOURCE}")
-    source_text = ATLAS_SOURCE.read_text(encoding="utf-8")
-    transformed = re.sub(
-        r'\n  <g font-family="Inter,Segoe UI,sans-serif" fill="#e8edf0">.*?</g>\n',
-        "\n",
-        source_text,
-        count=1,
-        flags=re.DOTALL,
-    )
-    if transformed == source_text or "STATIC COMPOSITION TARGET" in transformed:
-        raise SourceError("A-01 atlas target-caption transform did not apply")
-    destination = output / "pixel_nations" / "a01_atlas_substrate.svg"
-    destination.write_text(transformed, encoding="utf-8")
+    destination = output / "pixel_nations" / "a01_atlas_substrate.png"
+    shutil.copy2(ATLAS_SOURCE, destination)
     return {
         "source": str(ATLAS_SOURCE.relative_to(ROOT)),
         "source_sha256": sha256(ATLAS_SOURCE),
@@ -189,7 +179,7 @@ def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -
 - Village files are moved below `res://village/`; textual `res://` references are rewritten to that namespace.
 - Player-visible Village branding and first-run guidance are changed to Pixel Nations / Greengate; donor credits, licenses, source link and notices remain available under Credits.
 - Pixel Nations adds a namespaced integration scene, canonical A-01 hit geometry, truthful state UI, and World/Village navigation under `res://pixel_nations/`.
-- The player-visible Natural Earth surface and labels are hidden. A caption-free derivative of the repository-authored editable A-01 cartographic source is installed as the broad atlas substrate, with all 30 canonical land polygons rendered above it.
+- The player-visible Natural Earth surface and labels are hidden. The repository's owner-committed Aurelian Basin prototype painting (`304d1a5aa4690cf001dc0488d7bd95433244b387`) is installed as the broad atlas substrate, with all 30 canonical land polygons rendered above it.
 - Canonical land geometry is extracted from the repository's existing `app/play/lib/map-data.ts`; donor geography is not relabeled as Pixel Nations geography.
 - The integration remains a rough gameplay candidate and does not claim final visual acceptance.
 
