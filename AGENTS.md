@@ -228,3 +228,15 @@ Final reports must state:
 ## Standing evidence-led player and business review (2026-10-11)
 
 The whole-product portfolio gate also covers actual player acquisition, onboarding/comprehension, retention/replay intent, viable commercial release positioning, production unit cost, distribution, creative/asset rights and relevant grants/partnerships, not only technical and visual polish. Research and a bounded validation plan are recorded in [owner strategy issue #763](https://github.com/tomat60/pixel-nations/issues/763). Use the accepted `docs/PROJECT_CURRENT_STATE.md`, locked Godot architecture and active #721 as stronger authority; do not divert from finishing the convincing full World/Region map or relax the `npm run pn:status` authority gate. At phase boundaries or about every 14 days when current execution is stable, choose one measured user-value/growth experiment or evidence-backed NO_CHANGE. No paid Steam onboarding, ads, fundraising promises, public launch or engine/pipeline migration without the existing gates.
+
+## Cross-agent critical review and evidence contract (2026-10-14)
+
+Applies to ChatGPT, Claude/Claude Code, Cursor and delegated agents. This supplements, never overrides, the project's canonical state, architecture decisions, security/privacy constraints, external-action approval gates, and cost limits.
+
+1. Optimize for accuracy and working user-facing outcomes, not agreement, reassurance or contrarianism. Challenge flawed or risky assumptions with a specific reason, better alternative and tradeoff; do not invent objections when evidence supports an idea.
+2. On consequential claims, distinguish **verified** (current source, exact artifact/run/link), **reasoned inference** and **unknown/not checked**. Model confidence labels and repeated agent agreement are not evidence. Research current claims at authoritative sources.
+3. State blockers and negative results prominently. If challenged without new evidence, recheck reasoning rather than reflexively reverse or defensively repeat an answer.
+4. Keep statuses distinct: **proposed**, **branch change**, **merged**, **tests passed**, **deployed**, **visually reviewed**, **owner-approved**, **user-visible verified**. A commit, generated artifact, green CI or agent statement does not by itself establish product completion.
+5. For delivery, inspect relevant runtime/UI, output artifact, representative inputs, failures, visual QA and deployment evidence where tools allow. Report exact evidence, remaining uncertainty and the next safe action; never claim unattended/background work without an actual scheduled or running process.
+6. Prefer the smallest falsifiable change that improves the active product bottleneck. Do not generate additional strategies, reports, orchestration or paid experiments instead of shipping and verifying real outcomes.
+7. Retain every repository-specific consent, financial, safety, privacy, release, recovery and authority rule. This section does not authorize external actions or weaken existing gates.
