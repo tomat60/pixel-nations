@@ -141,6 +141,36 @@ func connect_highmere() -> bool:
 	)
 
 
+func receive_northgate_settlement_timber() -> bool:
+	if current_view != VIEW_VILLAGE:
+		return false
+	var completed_before: Array = state.get("settlement", {}).get("completed_orders", []).duplicate()
+	var timber_before := int(state.get("resources", {}).get("timber", 0))
+	state = GameState.reduce(state, {"type": "RECEIVE_NORTHGATE_SETTLEMENT_TIMBER"})
+	var completed_after: Array = state.get("settlement", {}).get("completed_orders", [])
+	var timber_after := int(state.get("resources", {}).get("timber", 0))
+	return (
+		completed_after.has(GameState.NORTHGATE_SETTLEMENT_TIMBER_ORDER_ID)
+		and not completed_before.has(GameState.NORTHGATE_SETTLEMENT_TIMBER_ORDER_ID)
+		and timber_after == timber_before + GameState.NORTHGATE_SETTLEMENT_TIMBER_REWARD
+	)
+
+
+func found_riverbend_hamlet() -> bool:
+	if current_view != VIEW_WORLD:
+		return false
+	var settlements_before: Array = state.get("settlement_land_ids", []).duplicate()
+	var timber_before := int(state.get("resources", {}).get("timber", 0))
+	state = GameState.reduce(state, {"type": "FOUND_RIVERBEND_HAMLET"})
+	var settlements_after: Array = state.get("settlement_land_ids", [])
+	var timber_after := int(state.get("resources", {}).get("timber", 0))
+	return (
+		settlements_after.has(GameState.RIVERBEND_LAND_ID)
+		and not settlements_before.has(GameState.RIVERBEND_LAND_ID)
+		and timber_after == timber_before - GameState.RIVERBEND_HAMLET_TIMBER_COST
+	)
+
+
 func return_to_world() -> bool:
 	if current_view != VIEW_VILLAGE:
 		return false
@@ -180,6 +210,8 @@ func world_view_model() -> Dictionary:
 		"charted_lands": int(progress.get("charted_lands", 0)),
 		"settlement_name": String(settlement.get("name", "")),
 		"settlement_founded": bool(progress.get("settlement_founded", false)),
+		"settlement_count": int(progress.get("settlement_count", 0)),
+		"settlement_land_ids": (progress.get("settlement_land_ids", []) as Array).duplicate(),
 		"road_built": bool(progress.get("road_built", false)),
 		"inspected_land_ids": (state.get("inspected_land_ids", []) as Array).duplicate(),
 		"inspected_frontiers": int(progress.get("inspected_frontiers", 0)),
@@ -195,12 +227,16 @@ func world_view_model() -> Dictionary:
 		"highmere_connected": bool(progress.get("highmere_connected", false)),
 		"northgate_inspected": bool(progress.get("northgate_inspected", false)),
 		"northgate_status": String(progress.get("northgate_status", "locked")),
+		"northgate_settlement_timber_delivered": bool(progress.get("northgate_settlement_timber_delivered", false)),
+		"riverbend_hamlet_founded": bool(progress.get("riverbend_hamlet_founded", false)),
 		"highmere_link_status": String(progress.get("highmere_link_status", "locked")),
 		"highmere_status": String(progress.get("highmere_status", "locked")),
 		"frontier_link_status": String(progress.get("frontier_link_status", "not_started")),
 		"stone": int(state.get("resources", {}).get("stone", 0)),
+		"timber": int(state.get("resources", {}).get("timber", 0)),
 		"frontier_link_stone_cost": GameState.FRONTIER_LINK_STONE_COST,
 		"highmere_link_stone_cost": GameState.HIGHMERE_LINK_STONE_COST,
+		"riverbend_hamlet_timber_cost": GameState.RIVERBEND_HAMLET_TIMBER_COST,
 		"nation_status": String(progress.get("nation_status", "not_founded")),
 		"next_goal": String(progress.get("next_goal", "")),
 	}
@@ -214,6 +250,7 @@ func village_view_model() -> Dictionary:
 		"settlement_name": String(settlement.get("name", "")),
 		"road_built": (settlement.get("built_improvements", []) as Array).has("road"),
 		"stone": int(state.get("resources", {}).get("stone", 0)),
+		"timber": int(state.get("resources", {}).get("timber", 0)),
 		"road_stone_cost": GameState.ROAD_STONE_COST,
 		"riverbend_connected": (state.get("connected_land_ids", []) as Array).has(GameState.RIVERBEND_LAND_ID),
 		"riverbend_supply_delivered": (settlement.get("completed_orders", []) as Array).has(GameState.RIVERBEND_SUPPLY_ORDER_ID),
@@ -224,4 +261,8 @@ func village_view_model() -> Dictionary:
 		"highmere_link_supply_delivered": (settlement.get("completed_orders", []) as Array).has(GameState.HIGHMERE_LINK_SUPPLY_ORDER_ID),
 		"highmere_link_supply_stone_reward": GameState.HIGHMERE_LINK_SUPPLY_STONE_REWARD,
 		"highmere_connected": (state.get("connected_land_ids", []) as Array).has(GameState.HIGHMERE_LAND_ID),
+		"northgate_inspected": (state.get("inspected_land_ids", []) as Array).has(GameState.NORTHGATE_LAND_ID),
+		"northgate_settlement_timber_delivered": (settlement.get("completed_orders", []) as Array).has(GameState.NORTHGATE_SETTLEMENT_TIMBER_ORDER_ID),
+		"northgate_settlement_timber_reward": GameState.NORTHGATE_SETTLEMENT_TIMBER_REWARD,
+		"riverbend_hamlet_founded": (state.get("settlement_land_ids", []) as Array).has(GameState.RIVERBEND_LAND_ID),
 	}

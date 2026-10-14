@@ -47,6 +47,7 @@ var connect_button: Button
 var road_button: Button
 var supply_button: Button
 var survey_button: Button
+var hamlet_button: Button
 var focus_button: Button
 var overview_button: Button
 var save_button: Button
@@ -276,11 +277,12 @@ func _build_ui() -> void:
 	road_button = _button("Build village road · 5 stone", "RoadButton", _road)
 	supply_button = _button("Receive Riverbend stone · +5", "SupplyButton", _receive_next_supply)
 	survey_button = _button("Commission Highmere survey · 5 stone", "SurveyButton", _commission_highmere_survey)
+	hamlet_button = _button("Found Riverbend Hamlet · 5 timber", "HamletButton", _found_riverbend_hamlet)
 	focus_button = _button("Focus selected land", "FocusButton", _focus_selected_land)
 	overview_button = _button("Return to atlas overview", "OverviewButton", _show_atlas_overview)
 	save_button = _button("Save progress", "SaveButton", _save)
 	return_button = _button("Return to World", "ReturnButton", _return_world)
-	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, supply_button, survey_button, focus_button, overview_button, save_button, return_button]:
+	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, supply_button, survey_button, hamlet_button, focus_button, overview_button, save_button, return_button]:
 		column.add_child(button)
 
 
@@ -504,9 +506,12 @@ func _connect_selected_link() -> void:
 func _receive_next_supply() -> void:
 	var snapshot: Dictionary = controller.current_snapshot()
 	var delivered: bool = (
-		controller.receive_highmere_link_supply()
-		if bool(snapshot.get("highmere_claimed", false))
-		else controller.receive_riverbend_supply()
+		controller.receive_northgate_settlement_timber()
+		if bool(snapshot.get("northgate_inspected", false)) else (
+			controller.receive_highmere_link_supply()
+			if bool(snapshot.get("highmere_claimed", false))
+			else controller.receive_riverbend_supply()
+		)
 	)
 	if delivered:
 		controller.save_game()
@@ -514,6 +519,11 @@ func _receive_next_supply() -> void:
 
 func _commission_highmere_survey() -> void:
 	if controller.commission_highmere_survey():
+		controller.save_game()
+
+
+func _found_riverbend_hamlet() -> void:
+	if controller.found_riverbend_hamlet():
 		controller.save_game()
 
 
@@ -563,38 +573,42 @@ func _show_world() -> void:
 func _render_snapshot(snapshot: Dictionary) -> void:
 	var view := String(snapshot.get("view", "world"))
 	var selected_id := String(snapshot.get("selected_land_id", ""))
+	var settlement_count := int(snapshot.get("settlement_count", 0))
 	if view == "village":
 		title_label.text = "PIXEL NATIONS · GREENGATE"
 		identity_label.text = "Greenvale settlement"
-		detail_label.text = "Stone %d · Road %s\nRiverbend supply %s · Ridge stone %s" % [
+		detail_label.text = "Stone %d · Timber %d · Road %s\nRiverbend supply %s · Ridge stone %s" % [
 			int(snapshot.get("stone", 0)),
+			int(snapshot.get("timber", 0)),
 			"built" if bool(snapshot.get("road_built", false)) else "not built",
 			("delivered" if bool(snapshot.get("riverbend_supply_delivered", false)) else (
 				"ready" if bool(snapshot.get("riverbend_connected", false)) else "locked"
 			)),
 			"delivered" if bool(snapshot.get("highmere_link_supply_delivered", false)) else "not delivered",
 		]
-		goal_label.text = (
-			"NEXT · Return to World and connect Highmere"
-			if bool(snapshot.get("highmere_link_supply_delivered", false)) else (
-				"NEXT · Receive the Highmere ridge stone"
-				if bool(snapshot.get("highmere_claimed", false)) else (
-					"NEXT · Return to World and inspect Highmere"
-					if bool(snapshot.get("highmere_survey_commissioned", false)) else (
-						"NEXT · Commission the Highmere survey"
-						if bool(snapshot.get("riverbend_supply_delivered", false))
-						else "NEXT · Build the road or advance the frontier"
-					)
-				)
-			)
-		)
+		if bool(snapshot.get("northgate_settlement_timber_delivered", false)):
+			goal_label.text = "NEXT · Return to World and found Riverbend Hamlet"
+		elif bool(snapshot.get("northgate_inspected", false)):
+			goal_label.text = "NEXT · Receive Northgate settlement timber"
+		elif bool(snapshot.get("highmere_link_supply_delivered", false)):
+			goal_label.text = "NEXT · Return to World and connect Highmere"
+		elif bool(snapshot.get("highmere_claimed", false)):
+			goal_label.text = "NEXT · Receive the Highmere ridge stone"
+		elif bool(snapshot.get("highmere_survey_commissioned", false)):
+			goal_label.text = "NEXT · Return to World and inspect Highmere"
+		elif bool(snapshot.get("riverbend_supply_delivered", false)):
+			goal_label.text = "NEXT · Commission the Highmere survey"
+		else:
+			goal_label.text = "NEXT · Build the road or advance the frontier"
 	else:
 		title_label.text = "AURELIAN BASIN · A-01"
 		identity_label.text = _land_title(selected_id)
-		detail_label.text = "%d/%d lands · %d settlement · Stone %d\nRoad %s · Riverbend %s · Highmere %s · Nation not founded" % [
+		detail_label.text = "%d/%d lands · %d settlement%s · Stone %d · Timber %d\nRoad %s · Riverbend %s · Highmere %s · Nation not founded" % [
 			int(snapshot.get("claimed_lands", 0)), int(snapshot.get("charted_lands", 30)),
-			1 if bool(snapshot.get("settlement_founded", false)) else 0,
+			settlement_count,
+			"" if settlement_count == 1 else "s",
 			int(snapshot.get("stone", 0)),
+			int(snapshot.get("timber", 0)),
 			"built" if bool(snapshot.get("road_built", false)) else "not built",
 			("linked" if bool(snapshot.get("riverbend_connected", false)) else (
 				"claimed" if bool(snapshot.get("riverbend_claimed", false)) else (
@@ -610,6 +624,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	road_button.visible = false
 	supply_button.visible = false
 	survey_button.visible = false
+	hamlet_button.visible = false
 	focus_button.visible = false
 	overview_button.visible = false
 	return_button.visible = view == "village"
@@ -687,19 +702,25 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	road_button.disabled = bool(snapshot.get("road_built", false)) or int(snapshot.get("stone", 0)) < 5
 	road_button.visible = view == "village" and not bool(snapshot.get("road_built", false))
 	supply_button.text = (
-		"Receive Highmere ridge stone · +5"
-		if bool(snapshot.get("highmere_claimed", false))
-		else "Receive Riverbend stone · +5"
+		"Receive Northgate settlement timber · +5"
+		if bool(snapshot.get("northgate_inspected", false)) else (
+			"Receive Highmere ridge stone · +5"
+			if bool(snapshot.get("highmere_claimed", false))
+			else "Receive Riverbend stone · +5"
+		)
 	)
-	supply_button.disabled = (
-		bool(snapshot.get("highmere_link_supply_delivered", false))
-		if bool(snapshot.get("highmere_claimed", false)) else (
+	if bool(snapshot.get("northgate_inspected", false)):
+		supply_button.disabled = bool(snapshot.get("northgate_settlement_timber_delivered", false))
+	elif bool(snapshot.get("highmere_claimed", false)):
+		supply_button.disabled = bool(snapshot.get("highmere_link_supply_delivered", false))
+	else:
+		supply_button.disabled = (
 			not bool(snapshot.get("riverbend_connected", false))
 			or bool(snapshot.get("riverbend_supply_delivered", false))
 		)
-	)
 	supply_button.visible = view == "village" and (
-		(bool(snapshot.get("highmere_claimed", false)) and not bool(snapshot.get("highmere_link_supply_delivered", false)))
+		(bool(snapshot.get("northgate_inspected", false)) and not bool(snapshot.get("northgate_settlement_timber_delivered", false)))
+		or (bool(snapshot.get("highmere_claimed", false)) and not bool(snapshot.get("highmere_link_supply_delivered", false)))
 		or (bool(snapshot.get("riverbend_connected", false)) and not bool(snapshot.get("riverbend_supply_delivered", false)))
 	)
 	survey_button.disabled = (
@@ -708,6 +729,13 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		or int(snapshot.get("stone", 0)) < int(snapshot.get("highmere_survey_stone_cost", 5))
 	)
 	survey_button.visible = view == "village" and bool(snapshot.get("riverbend_supply_delivered", false)) and not bool(snapshot.get("highmere_survey_commissioned", false))
+	hamlet_button.disabled = (
+		selected_id != "PN-A01-002"
+		or not bool(snapshot.get("northgate_settlement_timber_delivered", false))
+		or bool(snapshot.get("riverbend_hamlet_founded", false))
+		or int(snapshot.get("timber", 0)) < int(snapshot.get("riverbend_hamlet_timber_cost", 5))
+	)
+	hamlet_button.visible = view == "world" and selected_id == "PN-A01-002" and bool(snapshot.get("northgate_settlement_timber_delivered", false)) and not bool(snapshot.get("riverbend_hamlet_founded", false))
 	if frontier_link != null:
 		frontier_link.visible = view == "world" and bool(snapshot.get("riverbend_claimed", false))
 		_set_frontier_link_connected(bool(snapshot.get("riverbend_connected", false)))
@@ -779,6 +807,9 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 		material.albedo_color = color
 	for label_value in land_labels.values():
 		(label_value as Label3D).visible = String(snapshot.get("view", "world")) == "world"
+	var riverbend_label := land_labels.get("PN-A01-002") as Label3D
+	if riverbend_label != null:
+		riverbend_label.text = "RIVERBEND\nHAMLET" if bool(snapshot.get("riverbend_hamlet_founded", false)) else "RIVERBEND"
 
 
 func _set_frontier_link_connected(connected: bool) -> void:

@@ -95,6 +95,20 @@ func connect_highmere() -> bool:
 	return _reject("connect_highmere", "Claim and select Highmere after receiving its ridge shipment with 5 stone available.")
 
 
+func receive_northgate_settlement_timber() -> bool:
+	if session.receive_northgate_settlement_timber():
+		_publish_snapshot()
+		return true
+	return _reject("receive_northgate_settlement_timber", "The settlement timber requires inspected Northgate and the Village view.")
+
+
+func found_riverbend_hamlet() -> bool:
+	if session.found_riverbend_hamlet():
+		_publish_snapshot()
+		return true
+	return _reject("found_riverbend_hamlet", "Select linked Riverbend after receiving 5 settlement timber.")
+
+
 func return_to_world() -> bool:
 	if session.return_to_world():
 		_publish_view()
