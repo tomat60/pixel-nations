@@ -340,9 +340,40 @@ func _run() -> void:
 	var hamlet_reopened: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(hamlet_reopened.get("riverbend_hamlet_founded", false)), "reopen_keeps_riverbend_hamlet")
 	_check(int(hamlet_reopened.get("settlement_count", -1)) == 2, "reopen_keeps_two_settlements")
-	_check(String(hamlet_reopened.get("next_goal", "")) == "Riverbend Hamlet founded; its first improvement is not yet playable", "hamlet_reopen_reports_honest_stop_gate")
+	_check(String(hamlet_reopened.get("next_goal", "")) == "Return to Greengate for Riverbend Storehouse stone", "hamlet_reopen_reports_storehouse_supply_goal")
 	await process_frame
 	_capture("world-riverbend-hamlet-reopened")
+	var home_screen_for_storehouse: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.0, home_world.y))
+	await _click_position(home_screen_for_storehouse)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HOME_ID, "pointer_reselects_home_for_storehouse_supply")
+	await _click_control(runtime.enter_button)
+	await process_frame
+	_check("Storehouse stone" in String(runtime.supply_button.text), "village_offers_storehouse_stone")
+	await _click_control(runtime.supply_button)
+	var storehouse_supply_village: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(storehouse_supply_village.get("riverbend_storehouse_stone_delivered", false)), "storehouse_stone_delivered")
+	_check(int(storehouse_supply_village.get("stone", -1)) == 5, "storehouse_supply_adds_five_stone")
+	_capture("village-riverbend-storehouse-stone")
+	await _click_control(runtime.return_button)
+	await process_frame
+	var riverbend_screen_for_storehouse: Vector2 = player.camera.unproject_position(Vector3(frontier_world.x, 0.0, frontier_world.y))
+	await _click_position(riverbend_screen_for_storehouse)
+	_check(runtime.storehouse_button.visible and not runtime.storehouse_button.disabled, "riverbend_storehouse_action_is_clickable")
+	await _click_control(runtime.storehouse_button)
+	var storehouse_world: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(storehouse_world.get("riverbend_storehouse_built", false)), "riverbend_storehouse_built")
+	_check(int(storehouse_world.get("stone", -1)) == 0, "riverbend_storehouse_costs_five_stone")
+	_check(String(storehouse_world.get("nation_status", "")) == "not_founded", "riverbend_storehouse_does_not_invent_nation")
+	_check("STOREHOUSE" in String((runtime.land_labels.get(FRONTIER_ID) as Label3D).text), "riverbend_label_shows_storehouse")
+	await process_frame
+	_capture("world-riverbend-storehouse")
+	runtime.controller.session.state["settlement_improvements_by_land"] = {}
+	_check(runtime.controller.load_game(), "riverbend_storehouse_reopens")
+	var storehouse_reopened: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(storehouse_reopened.get("riverbend_storehouse_built", false)), "reopen_keeps_riverbend_storehouse")
+	_check(String(storehouse_reopened.get("next_goal", "")) == "Riverbend Storehouse built; its production is not yet playable", "storehouse_reopen_reports_honest_stop_gate")
+	await process_frame
+	_capture("world-riverbend-storehouse-reopened")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")
