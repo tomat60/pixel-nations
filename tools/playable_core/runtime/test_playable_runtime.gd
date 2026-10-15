@@ -82,6 +82,8 @@ func _run() -> void:
 	_check(not (runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "overview_restores_clean_place_name_hierarchy")
 	_check(player.position.distance_to(runtime.ATLAS_OVERVIEW_POSITION) < 1.0, "atlas_overview_restores_position")
 	_check(absf(player.camera.position.z - runtime.ATLAS_OVERVIEW_ZOOM) < 1.0, "atlas_overview_restores_zoom")
+	var atlas_center_screen := player.camera.unproject_position(Vector3.ZERO)
+	_check(atlas_center_screen.distance_to(Vector2(root.size) * 0.5) < 2.0, "atlas_overview_centers_painted_basin")
 	await _click_control(runtime.claim_button)
 	_check(String(runtime.controller.current_snapshot().get("claimed_land_id", "")) == HOME_ID, "claim_button_claims_home")
 	await process_frame
