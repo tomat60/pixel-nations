@@ -1,5 +1,6 @@
 extends SceneTree
 
+const GameState = preload("res://pixel_nations/game_state.gd")
 const HOME_ID := "PN-A01-001"
 const FRONTIER_ID := "PN-A01-002"
 const HIGHMERE_ID := "PN-A01-003"
@@ -375,19 +376,38 @@ func _run() -> void:
 	_check(runtime.controller.load_game(), "riverbend_storehouse_reopens")
 	var storehouse_reopened: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(storehouse_reopened.get("riverbend_storehouse_built", false)), "reopen_keeps_riverbend_storehouse")
-	_check(String(storehouse_reopened.get("next_goal", "")) == "Riverbend Storehouse built; its production is not yet playable", "storehouse_reopen_reports_honest_stop_gate")
+	_check(String(storehouse_reopened.get("next_goal", "")) == "Collect Riverbend Storehouse's first provisions", "storehouse_reopen_reports_first_production_goal")
 	await process_frame
 	_capture("world-riverbend-storehouse-reopened")
+	_check(runtime.provisions_button.visible and not runtime.provisions_button.disabled, "riverbend_provisions_action_is_clickable")
+	await _click_control(runtime.provisions_button)
+	var provisions_world: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(provisions_world.get("riverbend_storehouse_provisions_collected", false)), "riverbend_storehouse_provisions_collected")
+	_check(int(provisions_world.get("food", -1)) == 5, "riverbend_storehouse_provisions_add_five_food")
+	_check(String(provisions_world.get("nation_status", "")) == "not_founded", "riverbend_storehouse_provisions_do_not_invent_nation")
+	_check(String(provisions_world.get("next_goal", "")) == "Riverbend Storehouse delivered 5 food; further production is not yet playable", "provisions_report_honest_stop_gate")
+	await process_frame
+	_capture("world-riverbend-storehouse-provisions")
+	runtime.controller.session.state["resources"]["food"] = 0
+	runtime.controller.session.state["settlement"]["completed_orders"].erase(GameState.RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
+	_check(runtime.controller.load_game(), "riverbend_storehouse_provisions_reopen")
+	var provisions_reopened: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(provisions_reopened.get("riverbend_storehouse_provisions_collected", false)), "reopen_keeps_storehouse_provisions")
+	_check(int(provisions_reopened.get("food", -1)) == 5, "reopen_keeps_storehouse_food")
+	_check(String(provisions_reopened.get("next_goal", "")) == "Riverbend Storehouse delivered 5 food; further production is not yet playable", "reopen_keeps_production_stop_gate")
+	await process_frame
+	_capture("world-riverbend-storehouse-provisions-reopened")
 	var home_screen_after_storehouse: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.0, home_world.y))
 	await _click_position(home_screen_after_storehouse)
 	await _click_control(runtime.enter_button)
 	await process_frame
-	_check(String(runtime.village.hud._tutorial_title.text) == "Riverbend Storehouse established", "completed_storehouse_replaces_stale_road_guidance")
+	_check(String(runtime.village.hud._tutorial_title.text) == "Riverbend provisions delivered", "completed_provisions_replace_stale_storehouse_guidance")
 	_check(String(runtime.village.hud._tutorial_intro.text) == "3/30 lands claimed · 2 settlements · Nation not founded.", "completed_storehouse_dispatch_is_truthful")
-	_check("Production is not yet playable" in String(runtime.village.hud._tutorial_more.text), "completed_storehouse_dispatch_keeps_stop_gate")
+	_check("delivered 5 food" in String(runtime.village.hud._tutorial_more.text), "completed_provisions_report_saved_reward")
+	_check("Further production is not yet playable" in String(runtime.village.hud._tutorial_more.text), "completed_provisions_keep_stop_gate")
 	_check(not runtime.village.hud._objectives_panel.is_visible_in_tree(), "donor_objectives_stay_hidden_after_reopen")
 	_check(not (runtime.village.hud._tabs["objectives"] as Button).is_visible_in_tree(), "donor_objective_tab_stays_hidden_after_reopen")
-	_capture("village-riverbend-storehouse-complete")
+	_capture("village-riverbend-storehouse-production")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")

@@ -123,6 +123,13 @@ func build_riverbend_storehouse() -> bool:
 	return _reject("build_riverbend_storehouse", "Select Riverbend after receiving 5 storehouse stone.")
 
 
+func collect_riverbend_storehouse_provisions() -> bool:
+	if session.collect_riverbend_storehouse_provisions():
+		_publish_snapshot()
+		return true
+	return _reject("collect_riverbend_storehouse_provisions", "Select Riverbend after building its Storehouse; provisions can be collected once.")
+
+
 func return_to_world() -> bool:
 	if session.return_to_world():
 		_publish_view()
