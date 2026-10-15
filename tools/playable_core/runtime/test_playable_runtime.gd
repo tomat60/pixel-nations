@@ -42,12 +42,16 @@ func _run() -> void:
 	_check(not runtime.world.get_node("Map/MeshInstance3D").visible, "natural_earth_surface_hidden")
 	_check(runtime.atlas_root != null, "fictional_a01_atlas_instantiated")
 	_check(runtime.land_materials.size() == 30, "all_canonical_lands_have_visible_surfaces")
+	_check(runtime.land_outline_materials.size() == 30, "all_canonical_lands_have_state_aware_borders")
 	_check(runtime.land_labels.size() == 4, "home_and_reachable_lands_are_named")
 	var substrate := runtime.atlas_root.get_node("FictionalAurelianSubstrate") as MeshInstance3D
 	var substrate_material := substrate.mesh.material as StandardMaterial3D
 	_check(substrate_material.albedo_texture.resource_path.ends_with("a01_atlas_substrate.png"), "painted_aurelian_substrate_installed")
 	var home_material := runtime.land_materials.get(HOME_ID) as StandardMaterial3D
 	_check(home_material.albedo_color.a > 0.25 and home_material.albedo_color.a < 0.50, "canonical_land_overlay_preserves_painted_geography")
+	var neutral_border := runtime.land_outline_materials.get(HOME_ID) as StandardMaterial3D
+	_check(neutral_border.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA, "neutral_borders_preserve_painted_atlas")
+	_check(neutral_border.albedo_color.a < 0.40, "neutral_borders_recede_below_geography")
 	_check(runtime.panel.get_theme_stylebox("panel") is StyleBoxTexture, "pixel_nations_panel_reuses_village_parchment")
 	_check(runtime.claim_button.get_theme_stylebox("normal") is StyleBoxFlat, "pixel_nations_actions_use_retained_village_button_language")
 	_check(runtime.detail_label.get_theme_color("font_color") == runtime.HUD_INK, "parchment_panel_uses_readable_dark_ink")
@@ -57,6 +61,8 @@ func _run() -> void:
 	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(home_screen), "home_projects_inside_viewport")
 	await _click_position(home_screen)
 	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HOME_ID, "pointer_raycast_selects_home")
+	var selected_home_border := runtime.land_outline_materials.get(HOME_ID) as StandardMaterial3D
+	_check(selected_home_border.albedo_color.r > selected_home_border.albedo_color.b, "selected_land_border_turns_gold")
 	_check(runtime.focus_button.visible and not runtime.overview_button.visible, "selected_land_offers_focus")
 	await _click_control(runtime.focus_button)
 	await create_timer(0.6).timeout
@@ -151,6 +157,8 @@ func _run() -> void:
 	_check(String(claimed_frontier.get("next_goal", "")) == "Connect Riverbend to Greengate", "frontier_claim_reveals_link_goal")
 	_check(runtime.frontier_link.visible, "frontier_claim_shows_world_relationship")
 	_check(String(claimed_frontier.get("frontier_link_status", "")) == "pending", "frontier_claim_link_is_pending")
+	var claimed_home_border := runtime.land_outline_materials.get(HOME_ID) as StandardMaterial3D
+	_check(claimed_home_border.albedo_color.b > claimed_home_border.albedo_color.r, "claimed_unselected_land_border_turns_cyan")
 	await process_frame
 	_capture("world-riverbend-claimed")
 	await _click_control(runtime.connect_button)
