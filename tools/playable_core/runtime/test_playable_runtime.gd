@@ -47,6 +47,7 @@ func _run() -> void:
 	_check(runtime.land_subtitles.size() == 4, "reachable_lands_have_secondary_cartographic_labels")
 	_check(String((runtime.land_labels.get(HOME_ID) as Label3D).text) == "GREENVALE", "home_place_name_stays_primary")
 	_check(String((runtime.land_subtitles.get(HOME_ID) as Label3D).text) == "HOME · GREENGATE", "home_settlement_identity_is_secondary")
+	_check(not (runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "overview_hides_secondary_land_detail")
 	var substrate := runtime.atlas_root.get_node("FictionalAurelianSubstrate") as MeshInstance3D
 	var substrate_material := substrate.mesh.material as StandardMaterial3D
 	_check(substrate_material.albedo_texture.resource_path.ends_with("a01_atlas_substrate.png"), "painted_aurelian_substrate_installed")
@@ -70,6 +71,7 @@ func _run() -> void:
 	await _click_control(runtime.focus_button)
 	await create_timer(0.6).timeout
 	_check(runtime.atlas_is_focused, "atlas_focus_mode_enabled")
+	_check((runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "focused_land_reveals_secondary_identity")
 	_check(player.position.distance_to(Vector3(home_world.x, 0.0, home_world.y)) < 1.0, "atlas_focus_centers_selected_land")
 	_check(absf(player.camera.position.z - runtime.ATLAS_FOCUS_ZOOM) < 1.0, "atlas_focus_uses_readable_zoom")
 	_check(runtime.overview_button.visible and not runtime.focus_button.visible, "focused_land_offers_overview_recovery")
@@ -77,6 +79,7 @@ func _run() -> void:
 	await _click_control(runtime.overview_button)
 	await create_timer(0.6).timeout
 	_check(not runtime.atlas_is_focused, "atlas_overview_mode_restored")
+	_check(not (runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "overview_restores_clean_place_name_hierarchy")
 	_check(player.position.distance_to(runtime.ATLAS_OVERVIEW_POSITION) < 1.0, "atlas_overview_restores_position")
 	_check(absf(player.camera.position.z - runtime.ATLAS_OVERVIEW_ZOOM) < 1.0, "atlas_overview_restores_zoom")
 	await _click_control(runtime.claim_button)

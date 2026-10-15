@@ -205,11 +205,11 @@ func _build_land_label(land_id: String, text_value: String, subtitle_value: Stri
 	label.position = Vector3(center.x, 2.0, center.y)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
-	label.font_size = 28
-	label.outline_size = 10
+	label.font_size = 32
+	label.outline_size = 12
 	label.modulate = color
 	label.outline_modulate = Color(0.02, 0.04, 0.05, 0.95)
-	label.pixel_size = 0.105
+	label.pixel_size = 0.12
 	atlas_root.add_child(label)
 	land_labels[land_id] = label
 	var subtitle := Label3D.new()
@@ -223,7 +223,7 @@ func _build_land_label(land_id: String, text_value: String, subtitle_value: Stri
 	subtitle.modulate = color.darkened(0.08)
 	subtitle.outline_modulate = Color(0.02, 0.04, 0.05, 0.95)
 	subtitle.pixel_size = 0.095
-	subtitle.visible = not subtitle_value.is_empty()
+	subtitle.visible = false
 	atlas_root.add_child(subtitle)
 	land_subtitles[land_id] = subtitle
 
@@ -1023,7 +1023,6 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 		label.visible = labels_visible
 		label.modulate = label_color
 		if subtitle != null:
-			subtitle.visible = labels_visible and not subtitle.text.is_empty()
 			subtitle.modulate = label_color.darkened(0.08)
 	var riverbend_subtitle := land_subtitles.get("PN-A01-002") as Label3D
 	if riverbend_subtitle != null:
@@ -1033,7 +1032,6 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 				"HAMLET" if bool(snapshot.get("riverbend_hamlet_founded", false)) else ""
 			)
 		)
-		riverbend_subtitle.visible = labels_visible and not riverbend_subtitle.text.is_empty()
 	var highmere_subtitle := land_subtitles.get("PN-A01-003") as Label3D
 	if highmere_subtitle != null:
 		highmere_subtitle.text = (
@@ -1043,11 +1041,18 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 				)
 			)
 		)
-		highmere_subtitle.visible = labels_visible and not highmere_subtitle.text.is_empty()
 	var northgate_subtitle := land_subtitles.get("PN-A01-024") as Label3D
 	if northgate_subtitle != null:
 		northgate_subtitle.text = "SCOUTED" if bool(snapshot.get("northgate_inspected", false)) else ""
-		northgate_subtitle.visible = labels_visible and not northgate_subtitle.text.is_empty()
+	for land_id_value in land_subtitles.keys():
+		var subtitle_land_id := String(land_id_value)
+		var subtitle := land_subtitles.get(subtitle_land_id) as Label3D
+		subtitle.visible = (
+			labels_visible
+			and atlas_is_focused
+			and subtitle_land_id == selected_id
+			and not subtitle.text.is_empty()
+		)
 
 
 func _set_frontier_link_connected(connected: bool) -> void:
