@@ -3,6 +3,7 @@ extends Node
 
 const WorldScene = preload("res://game/main_game.tscn")
 const VillageScene = preload("res://village/scenes/approved.tscn")
+const ApprovedPeople = preload("res://village/presentation/approved_people.gd")
 const Controller = preload("res://pixel_nations/core/playable_core_controller.gd")
 
 const MAP_WIDTH := 960.0
@@ -23,6 +24,7 @@ var controller: Node
 var world: Node3D
 var village: Node
 var village_paved_road: Node3D
+var village_harvest_feast: Node3D
 var frontier_link: MeshInstance3D
 var frontier_link_material: StandardMaterial3D
 var highmere_survey_link: MeshInstance3D
@@ -50,6 +52,7 @@ var survey_button: Button
 var hamlet_button: Button
 var storehouse_button: Button
 var provisions_button: Button
+var feast_button: Button
 var focus_button: Button
 var overview_button: Button
 var save_button: Button
@@ -282,11 +285,12 @@ func _build_ui() -> void:
 	hamlet_button = _button("Found Riverbend Hamlet · 5 timber", "HamletButton", _found_riverbend_hamlet)
 	storehouse_button = _button("Build Riverbend Storehouse · 5 stone", "StorehouseButton", _build_riverbend_storehouse)
 	provisions_button = _button("Collect Riverbend provisions · +5 food", "ProvisionsButton", _collect_riverbend_storehouse_provisions)
+	feast_button = _button("Hold Greengate Harvest Feast · 5 food", "FeastButton", _hold_greengate_harvest_feast)
 	focus_button = _button("Focus selected land", "FocusButton", _focus_selected_land)
 	overview_button = _button("Return to atlas overview", "OverviewButton", _show_atlas_overview)
 	save_button = _button("Save progress", "SaveButton", _save)
 	return_button = _button("Return to World", "ReturnButton", _return_world)
-	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, supply_button, survey_button, hamlet_button, storehouse_button, provisions_button, focus_button, overview_button, save_button, return_button]:
+	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, supply_button, survey_button, hamlet_button, storehouse_button, provisions_button, feast_button, focus_button, overview_button, save_button, return_button]:
 		column.add_child(button)
 
 
@@ -544,6 +548,11 @@ func _collect_riverbend_storehouse_provisions() -> void:
 		controller.save_game()
 
 
+func _hold_greengate_harvest_feast() -> void:
+	if controller.hold_greengate_harvest_feast():
+		controller.save_game()
+
+
 func _save() -> void:
 	controller.save_game()
 
@@ -594,6 +603,7 @@ func _show_world() -> void:
 		village.queue_free()
 		village = null
 	village_paved_road = null
+	village_harvest_feast = null
 	world.visible = true
 	world.process_mode = Node.PROCESS_MODE_INHERIT
 	panel.move_to_front()
@@ -620,8 +630,10 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 			goal_label.text = "NEXT · Return to World and build Riverbend Storehouse"
 		elif bool(snapshot.get("riverbend_hamlet_founded", false)) and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false)):
 			goal_label.text = "NEXT · Receive Riverbend Storehouse stone"
+		elif bool(snapshot.get("greengate_harvest_feast_held", false)):
+			goal_label.text = "Harvest Feast complete · further settlement growth locked"
 		elif bool(snapshot.get("riverbend_storehouse_provisions_collected", false)):
-			goal_label.text = "Riverbend Storehouse delivered 5 food · further production locked"
+			goal_label.text = "NEXT · Hold the Greengate Harvest Feast with 5 food"
 		elif bool(snapshot.get("riverbend_storehouse_built", false)):
 			goal_label.text = "NEXT · Select Riverbend and collect its first provisions"
 		elif bool(snapshot.get("northgate_settlement_timber_delivered", false)):
@@ -666,6 +678,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	hamlet_button.visible = false
 	storehouse_button.visible = false
 	provisions_button.visible = false
+	feast_button.visible = false
 	focus_button.visible = false
 	overview_button.visible = false
 	return_button.visible = view == "village"
@@ -796,6 +809,12 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		or bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
 	)
 	provisions_button.visible = view == "world" and selected_id == "PN-A01-002" and bool(snapshot.get("riverbend_storehouse_built", false)) and not bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
+	feast_button.disabled = (
+		not bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
+		or bool(snapshot.get("greengate_harvest_feast_held", false))
+		or int(snapshot.get("food", 0)) < int(snapshot.get("greengate_harvest_feast_food_cost", 5))
+	)
+	feast_button.visible = view == "village" and bool(snapshot.get("riverbend_storehouse_provisions_collected", false)) and not bool(snapshot.get("greengate_harvest_feast_held", false))
 	if frontier_link != null:
 		frontier_link.visible = view == "world" and bool(snapshot.get("riverbend_claimed", false))
 		_set_frontier_link_connected(bool(snapshot.get("riverbend_connected", false)))
@@ -811,6 +830,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		_set_northgate_scout_state(bool(snapshot.get("northgate_inspected", false)))
 	_refresh_land_visuals(snapshot)
 	_sync_village_road_visual(snapshot)
+	_sync_village_harvest_feast(snapshot)
 	_sync_village_guidance(snapshot)
 	panel.reset_size()
 
@@ -826,6 +846,14 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 		hud._tutorial_title.text = "Greengate's first road"
 		hud._tutorial_intro.text = "Build Greengate's road for 5 stone, then return to World to inspect Riverbend."
 		hud._tutorial_more.text = "The Pixel Nations command panel uses the canonical save and resource costs."
+	elif bool(snapshot.get("greengate_harvest_feast_held", false)):
+		hud._tutorial_title.text = "Greengate Harvest Feast"
+		hud._tutorial_intro.text = "%d/%d lands claimed · %d settlements · Nation not founded." % [
+			int(snapshot.get("claimed_lands", 0)),
+			int(snapshot.get("charted_lands", 30)),
+			int(snapshot.get("settlement_count", 0)),
+		]
+		hud._tutorial_more.text = "Five food provisioned a saved gathering in Greengate's plaza. Further settlement growth is not yet playable."
 	elif bool(snapshot.get("riverbend_storehouse_provisions_collected", false)):
 		hud._tutorial_title.text = "Riverbend provisions delivered"
 		hud._tutorial_intro.text = "%d/%d lands claimed · %d settlements · Nation not founded." % [
@@ -833,7 +861,7 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 			int(snapshot.get("charted_lands", 30)),
 			int(snapshot.get("settlement_count", 0)),
 		]
-		hud._tutorial_more.text = "The first Storehouse cycle delivered 5 food and is saved. Further production is not yet playable."
+		hud._tutorial_more.text = "The first Storehouse cycle delivered 5 food and is saved. Hold Greengate's Harvest Feast to spend it on a visible settlement gathering."
 	elif bool(snapshot.get("riverbend_storehouse_built", false)):
 		hud._tutorial_title.text = "Riverbend Storehouse established"
 		hud._tutorial_intro.text = "%d/%d lands claimed · %d settlements · Nation not founded." % [
@@ -883,6 +911,49 @@ func _sync_village_road_visual(snapshot: Dictionary) -> void:
 		donor_terrain._build_road_visual(
 			tile, {"cell": cell, "stage": "complete"}, Vector4.ONE
 		)
+
+
+# Project the saved feast onto the retained donor's authored plaza and character
+# system. These are the same articulated residents and cargo meshes used by the
+# running settlement, arranged around its existing benches rather than replaced
+# with unrelated generated art or abstract placeholder props.
+func _sync_village_harvest_feast(snapshot: Dictionary) -> void:
+	if village == null or not is_instance_valid(village):
+		return
+	if not bool(snapshot.get("greengate_harvest_feast_held", false)):
+		if village_harvest_feast != null and is_instance_valid(village_harvest_feast):
+			village_harvest_feast.queue_free()
+			village_harvest_feast = null
+		return
+	if village_harvest_feast != null and is_instance_valid(village_harvest_feast):
+		return
+	village_harvest_feast = Node3D.new()
+	village_harvest_feast.name = "PixelNationsGreengateHarvestFeast"
+	village.world.add_child(village_harvest_feast)
+	var donor_terrain: Node3D = village.world.terrain
+	var center := Vector3(20.0, 0.0, 35.0)
+	var guests := [
+		{"role": "resident", "cargo": "food", "at": Vector2(18.1, 34.0)},
+		{"role": "servant", "cargo": "loaves", "at": Vector2(21.9, 34.0)},
+		{"role": "farmer", "cargo": "food", "at": Vector2(18.1, 36.0)},
+		{"role": "vintner", "cargo": "wine", "at": Vector2(21.9, 36.0)},
+	]
+	for index in range(guests.size()):
+		var guest: Dictionary = guests[index]
+		var actor: Node3D = ApprovedPeople.create(String(guest.role), 9000 + index, 1)
+		var at: Vector2 = guest.at
+		actor.position = Vector3(at.x, donor_terrain.support_height(at.x, at.y) + 0.002, at.y)
+		actor.rotation.y = atan2(-(center.x - at.x), -(center.z - at.y))
+		ApprovedPeople.animate(actor, float(index) * 0.7, false, false, true, String(guest.cargo))
+		village_harvest_feast.add_child(actor)
+	var feast_light := OmniLight3D.new()
+	feast_light.name = "HarvestLanternGlow"
+	feast_light.position = Vector3(20.0, donor_terrain.support_height(20.0, 35.0) + 3.2, 35.0)
+	feast_light.light_color = Color("ffd28a")
+	feast_light.light_energy = 2.2
+	feast_light.omni_range = 9.0
+	feast_light.shadow_enabled = false
+	village_harvest_feast.add_child(feast_light)
 
 
 func _refresh_land_visuals(snapshot: Dictionary) -> void:

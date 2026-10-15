@@ -21,6 +21,8 @@ const RIVERBEND_STOREHOUSE_STONE_COST := 5
 const RIVERBEND_STOREHOUSE_IMPROVEMENT_ID := "storehouse"
 const RIVERBEND_STOREHOUSE_PROVISIONS_REWARD := 5
 const RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID := "riverbend_storehouse_provisions"
+const GREENGATE_HARVEST_FEAST_FOOD_COST := 5
+const GREENGATE_HARVEST_FEAST_ORDER_ID := "greengate_harvest_feast"
 const GREENVALE_LAND_ID := "PN-A01-001"
 const RIVERBEND_LAND_ID := "PN-A01-002"
 const HIGHMERE_LAND_ID := "PN-A01-003"
@@ -375,6 +377,24 @@ static func reduce(state: Dictionary, action: Dictionary) -> Dictionary:
 			next_state["resources"] = resources
 			next_state["settlement"] = settlement
 
+		"HOLD_GREENGATE_HARVEST_FEAST":
+			var settlement: Dictionary = next_state.get("settlement", {}).duplicate(true)
+			var completed_orders: Array = settlement.get("completed_orders", []).duplicate()
+			if (
+				not bool(settlement.get("founded", false))
+				or not completed_orders.has(RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
+				or completed_orders.has(GREENGATE_HARVEST_FEAST_ORDER_ID)
+			):
+				return next_state
+			var resources: Dictionary = next_state.get("resources", {}).duplicate(true)
+			if int(resources.get("food", 0)) < GREENGATE_HARVEST_FEAST_FOOD_COST:
+				return next_state
+			resources["food"] = int(resources.get("food", 0)) - GREENGATE_HARVEST_FEAST_FOOD_COST
+			completed_orders.append(GREENGATE_HARVEST_FEAST_ORDER_ID)
+			settlement["completed_orders"] = completed_orders
+			next_state["resources"] = resources
+			next_state["settlement"] = settlement
+
 		_:
 			return next_state
 
@@ -433,6 +453,9 @@ static func progress(state: Dictionary) -> Dictionary:
 	var riverbend_storehouse_provisions_collected := (
 		(settlement.get("completed_orders", []) as Array).has(RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
 	)
+	var greengate_harvest_feast_held := (
+		(settlement.get("completed_orders", []) as Array).has(GREENGATE_HARVEST_FEAST_ORDER_ID)
+	)
 	var next_goal := "Select and claim Greenvale"
 	if claimed and not founded:
 		next_goal = "Found Greengate"
@@ -468,8 +491,10 @@ static func progress(state: Dictionary) -> Dictionary:
 		next_goal = "Build Riverbend Storehouse with 5 stone"
 	elif riverbend_storehouse_built and not riverbend_storehouse_provisions_collected:
 		next_goal = "Collect Riverbend Storehouse's first provisions"
-	elif riverbend_storehouse_provisions_collected:
-		next_goal = "Riverbend Storehouse delivered 5 food; further production is not yet playable"
+	elif riverbend_storehouse_provisions_collected and not greengate_harvest_feast_held:
+		next_goal = "Return to Greengate and hold the Harvest Feast with 5 food"
+	elif greengate_harvest_feast_held:
+		next_goal = "Greengate Harvest Feast complete; further settlement growth is not yet playable"
 	return {
 		"claimed_lands": claimed_land_ids.size(),
 		"charted_lands": CHARTED_LANDS,
@@ -497,6 +522,7 @@ static func progress(state: Dictionary) -> Dictionary:
 		"riverbend_storehouse_stone_delivered": riverbend_storehouse_stone_delivered,
 		"riverbend_storehouse_built": riverbend_storehouse_built,
 		"riverbend_storehouse_provisions_collected": riverbend_storehouse_provisions_collected,
+		"greengate_harvest_feast_held": greengate_harvest_feast_held,
 		"highmere_link_status": (
 			"connected" if highmere_connected else (
 				"ready" if highmere_link_supply_delivered else ("pending" if highmere_claimed else "locked")
@@ -686,6 +712,12 @@ static func _normalize_state(saved: Dictionary) -> Dictionary:
 		)
 	):
 		normalized_completed_orders.erase(RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
+		normalized["settlement"]["completed_orders"] = normalized_completed_orders
+	if (
+		normalized_completed_orders.has(GREENGATE_HARVEST_FEAST_ORDER_ID)
+		and not normalized_completed_orders.has(RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
+	):
+		normalized_completed_orders.erase(GREENGATE_HARVEST_FEAST_ORDER_ID)
 		normalized["settlement"]["completed_orders"] = normalized_completed_orders
 
 	return normalized
