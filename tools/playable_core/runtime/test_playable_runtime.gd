@@ -1,6 +1,6 @@
 extends SceneTree
 
-const GameState = preload("res://pixel_nations/game_state.gd")
+const GameState = preload("res://pixel_nations/core/game_state.gd")
 const HOME_ID := "PN-A01-001"
 const FRONTIER_ID := "PN-A01-002"
 const HIGHMERE_ID := "PN-A01-003"
