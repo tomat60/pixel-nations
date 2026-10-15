@@ -180,6 +180,7 @@ def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -
 - Player-visible Village branding and first-run guidance are changed to Pixel Nations / Greengate; donor credits, licenses, source link and notices remain available under Credits.
 - Pixel Nations adds a namespaced integration scene, canonical A-01 hit geometry, truthful state UI, and World/Village navigation under `res://pixel_nations/`.
 - Canonical land borders are restyled into a state-aware cartographic hierarchy: neutral boundaries recede beneath the painted geography while inspected, claimed and selected lands remain explicit.
+- Reachable Atlas labels are split into primary place names and smaller truthful settlement/route-state subtitles so development remains visible without turning overview labels into dense text blocks.
 - The player-visible Natural Earth surface and labels are hidden. The repository's owner-committed Aurelian Basin prototype painting (`304d1a5aa4690cf001dc0488d7bd95433244b387`) is installed as the broad atlas substrate, with all 30 canonical land polygons rendered above it.
 - Canonical land geometry is extracted from the repository's existing `app/play/lib/map-data.ts`; donor geography is not relabeled as Pixel Nations geography.
 - The integration remains a rough gameplay candidate and does not claim final visual acceptance.

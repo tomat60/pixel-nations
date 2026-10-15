@@ -35,6 +35,7 @@ var atlas_root: Node3D
 var land_materials: Dictionary = {}
 var land_outline_materials: Dictionary = {}
 var land_labels: Dictionary = {}
+var land_subtitles: Dictionary = {}
 var lands: Array = []
 var selected_land: Dictionary = {}
 var ui_layer: CanvasLayer
@@ -131,10 +132,10 @@ func _build_a01_atlas() -> void:
 	atlas_root.add_child(substrate)
 	for land_value in lands:
 		_build_land_polygon(land_value as Dictionary)
-	_build_land_label("PN-A01-001", "GREENVALE\nHOME", Color("dbe9ff"))
-	_build_land_label("PN-A01-002", "RIVERBEND", Color("d6ffff"))
-	_build_land_label("PN-A01-003", "HIGHMERE", Color("f2ead2"))
-	_build_land_label("PN-A01-024", "NORTHGATE", Color("e3f1df"))
+	_build_land_label("PN-A01-001", "GREENVALE", "HOME · GREENGATE", Color("dbe9ff"))
+	_build_land_label("PN-A01-002", "RIVERBEND", "", Color("d6ffff"))
+	_build_land_label("PN-A01-003", "HIGHMERE", "", Color("f2ead2"))
+	_build_land_label("PN-A01-024", "NORTHGATE", "", Color("e3f1df"))
 
 
 func _build_land_polygon(land: Dictionary) -> void:
@@ -196,7 +197,7 @@ func _build_land_polygon(land: Dictionary) -> void:
 	land_outline_materials[String(land.get("id", ""))] = outline_material
 
 
-func _build_land_label(land_id: String, text_value: String, color: Color) -> void:
+func _build_land_label(land_id: String, text_value: String, subtitle_value: String, color: Color) -> void:
 	var center := canonical_center_world(land_id)
 	var label := Label3D.new()
 	label.name = "%s_Label" % land_id.replace("-", "_")
@@ -204,13 +205,27 @@ func _build_land_label(land_id: String, text_value: String, color: Color) -> voi
 	label.position = Vector3(center.x, 2.0, center.y)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
-	label.font_size = 32
-	label.outline_size = 12
+	label.font_size = 28
+	label.outline_size = 10
 	label.modulate = color
 	label.outline_modulate = Color(0.02, 0.04, 0.05, 0.95)
-	label.pixel_size = 0.12
+	label.pixel_size = 0.105
 	atlas_root.add_child(label)
 	land_labels[land_id] = label
+	var subtitle := Label3D.new()
+	subtitle.name = "%s_Subtitle" % land_id.replace("-", "_")
+	subtitle.text = subtitle_value
+	subtitle.position = Vector3(center.x, 1.9, center.y + 3.2)
+	subtitle.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	subtitle.no_depth_test = true
+	subtitle.font_size = 18
+	subtitle.outline_size = 8
+	subtitle.modulate = color.darkened(0.08)
+	subtitle.outline_modulate = Color(0.02, 0.04, 0.05, 0.95)
+	subtitle.pixel_size = 0.095
+	subtitle.visible = not subtitle_value.is_empty()
+	atlas_root.add_child(subtitle)
+	land_subtitles[land_id] = subtitle
 
 
 func _terrain_color(terrain: String) -> Color:
@@ -993,16 +1008,46 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 			if land_id == selected_id:
 				outline_color = Color(1.0, 0.82, 0.34, 1.0)
 			outline_material.albedo_color = outline_color
-	for label_value in land_labels.values():
-		(label_value as Label3D).visible = String(snapshot.get("view", "world")) == "world"
-	var riverbend_label := land_labels.get("PN-A01-002") as Label3D
-	if riverbend_label != null:
-		riverbend_label.text = (
-			"RIVERBEND\nHAMLET · STOREHOUSE"
+	var labels_visible := String(snapshot.get("view", "world")) == "world"
+	for land_id_value in land_labels.keys():
+		var label_land_id := String(land_id_value)
+		var label := land_labels.get(label_land_id) as Label3D
+		var subtitle := land_subtitles.get(label_land_id) as Label3D
+		var label_color := Color("c9c6b0")
+		if inspected_ids.has(label_land_id):
+			label_color = Color("f0be65")
+		if claimed_ids.has(label_land_id):
+			label_color = Color("bdebf0")
+		if label_land_id == selected_id:
+			label_color = Color("ffd66d")
+		label.visible = labels_visible
+		label.modulate = label_color
+		if subtitle != null:
+			subtitle.visible = labels_visible and not subtitle.text.is_empty()
+			subtitle.modulate = label_color.darkened(0.08)
+	var riverbend_subtitle := land_subtitles.get("PN-A01-002") as Label3D
+	if riverbend_subtitle != null:
+		riverbend_subtitle.text = (
+			"HAMLET · STOREHOUSE"
 			if bool(snapshot.get("riverbend_storehouse_built", false)) else (
-				"RIVERBEND\nHAMLET" if bool(snapshot.get("riverbend_hamlet_founded", false)) else "RIVERBEND"
+				"HAMLET" if bool(snapshot.get("riverbend_hamlet_founded", false)) else ""
 			)
 		)
+		riverbend_subtitle.visible = labels_visible and not riverbend_subtitle.text.is_empty()
+	var highmere_subtitle := land_subtitles.get("PN-A01-003") as Label3D
+	if highmere_subtitle != null:
+		highmere_subtitle.text = (
+			"CONNECTED" if bool(snapshot.get("highmere_connected", false)) else (
+				"CLAIMED" if bool(snapshot.get("highmere_claimed", false)) else (
+					"SURVEYED" if bool(snapshot.get("highmere_inspected", false)) else ""
+				)
+			)
+		)
+		highmere_subtitle.visible = labels_visible and not highmere_subtitle.text.is_empty()
+	var northgate_subtitle := land_subtitles.get("PN-A01-024") as Label3D
+	if northgate_subtitle != null:
+		northgate_subtitle.text = "SCOUTED" if bool(snapshot.get("northgate_inspected", false)) else ""
+		northgate_subtitle.visible = labels_visible and not northgate_subtitle.text.is_empty()
 
 
 func _set_frontier_link_connected(connected: bool) -> void:
