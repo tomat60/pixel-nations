@@ -33,6 +33,7 @@ var northgate_scout_link: MeshInstance3D
 var northgate_scout_material: StandardMaterial3D
 var atlas_root: Node3D
 var land_materials: Dictionary = {}
+var land_outline_materials: Dictionary = {}
 var land_labels: Dictionary = {}
 var lands: Array = []
 var selected_land: Dictionary = {}
@@ -167,7 +168,11 @@ func _build_land_polygon(land: Dictionary) -> void:
 	land_materials[String(land.get("id", ""))] = material
 	var outline_material := StandardMaterial3D.new()
 	outline_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	outline_material.albedo_color = Color(0.82, 0.79, 0.61, 0.92)
+	# Let the retained painting carry the overview. Canonical borders remain
+	# present for hit-area legibility, but only selected, claimed and inspected
+	# lands rise into the cartographic hierarchy.
+	outline_material.albedo_color = Color(0.16, 0.18, 0.14, 0.30)
+	outline_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	outline_material.no_depth_test = true
 	var outline_mesh := ImmediateMesh.new()
 	outline_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, outline_material)
@@ -188,6 +193,7 @@ func _build_land_polygon(land: Dictionary) -> void:
 	outline.name = "%s_Border" % polygon.name
 	outline.mesh = outline_mesh
 	atlas_root.add_child(outline)
+	land_outline_materials[String(land.get("id", ""))] = outline_material
 
 
 func _build_land_label(land_id: String, text_value: String, color: Color) -> void:
@@ -959,6 +965,7 @@ func _sync_village_harvest_feast(snapshot: Dictionary) -> void:
 func _refresh_land_visuals(snapshot: Dictionary) -> void:
 	var selected_id := String(snapshot.get("selected_land_id", ""))
 	var claimed_ids: Array = snapshot.get("claimed_land_ids", []) as Array
+	var inspected_ids: Array = snapshot.get("inspected_land_ids", []) as Array
 	for land_value in lands:
 		var land: Dictionary = land_value
 		var land_id := String(land.get("id", ""))
@@ -976,6 +983,16 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 		if land_id == selected_id:
 			color = color.lightened(0.22)
 		material.albedo_color = color
+		var outline_material := land_outline_materials.get(land_id) as StandardMaterial3D
+		if outline_material != null:
+			var outline_color := Color(0.16, 0.18, 0.14, 0.30)
+			if inspected_ids.has(land_id):
+				outline_color = Color(0.92, 0.66, 0.24, 0.94)
+			if claimed_ids.has(land_id):
+				outline_color = Color(0.58, 0.88, 0.94, 0.96)
+			if land_id == selected_id:
+				outline_color = Color(1.0, 0.82, 0.34, 1.0)
+			outline_material.albedo_color = outline_color
 	for label_value in land_labels.values():
 		(label_value as Label3D).visible = String(snapshot.get("view", "world")) == "world"
 	var riverbend_label := land_labels.get("PN-A01-002") as Label3D
