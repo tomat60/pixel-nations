@@ -49,6 +49,7 @@ var supply_button: Button
 var survey_button: Button
 var hamlet_button: Button
 var storehouse_button: Button
+var provisions_button: Button
 var focus_button: Button
 var overview_button: Button
 var save_button: Button
@@ -280,11 +281,12 @@ func _build_ui() -> void:
 	survey_button = _button("Commission Highmere survey · 5 stone", "SurveyButton", _commission_highmere_survey)
 	hamlet_button = _button("Found Riverbend Hamlet · 5 timber", "HamletButton", _found_riverbend_hamlet)
 	storehouse_button = _button("Build Riverbend Storehouse · 5 stone", "StorehouseButton", _build_riverbend_storehouse)
+	provisions_button = _button("Collect Riverbend provisions · +5 food", "ProvisionsButton", _collect_riverbend_storehouse_provisions)
 	focus_button = _button("Focus selected land", "FocusButton", _focus_selected_land)
 	overview_button = _button("Return to atlas overview", "OverviewButton", _show_atlas_overview)
 	save_button = _button("Save progress", "SaveButton", _save)
 	return_button = _button("Return to World", "ReturnButton", _return_world)
-	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, supply_button, survey_button, hamlet_button, storehouse_button, focus_button, overview_button, save_button, return_button]:
+	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, supply_button, survey_button, hamlet_button, storehouse_button, provisions_button, focus_button, overview_button, save_button, return_button]:
 		column.add_child(button)
 
 
@@ -537,6 +539,11 @@ func _build_riverbend_storehouse() -> void:
 		controller.save_game()
 
 
+func _collect_riverbend_storehouse_provisions() -> void:
+	if controller.collect_riverbend_storehouse_provisions():
+		controller.save_game()
+
+
 func _save() -> void:
 	controller.save_game()
 
@@ -599,9 +606,10 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	if view == "village":
 		title_label.text = "PIXEL NATIONS · GREENGATE"
 		identity_label.text = "Greenvale settlement"
-		detail_label.text = "Stone %d · Timber %d · Road %s\nRiverbend supply %s · Ridge stone %s" % [
+		detail_label.text = "Stone %d · Timber %d · Food %d · Road %s\nRiverbend supply %s · Ridge stone %s" % [
 			int(snapshot.get("stone", 0)),
 			int(snapshot.get("timber", 0)),
+			int(snapshot.get("food", 0)),
 			"built" if bool(snapshot.get("road_built", false)) else "not built",
 			("delivered" if bool(snapshot.get("riverbend_supply_delivered", false)) else (
 				"ready" if bool(snapshot.get("riverbend_connected", false)) else "locked"
@@ -612,8 +620,10 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 			goal_label.text = "NEXT · Return to World and build Riverbend Storehouse"
 		elif bool(snapshot.get("riverbend_hamlet_founded", false)) and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false)):
 			goal_label.text = "NEXT · Receive Riverbend Storehouse stone"
+		elif bool(snapshot.get("riverbend_storehouse_provisions_collected", false)):
+			goal_label.text = "Riverbend Storehouse delivered 5 food · further production locked"
 		elif bool(snapshot.get("riverbend_storehouse_built", false)):
-			goal_label.text = "Riverbend Storehouse built · production not yet playable"
+			goal_label.text = "NEXT · Select Riverbend and collect its first provisions"
 		elif bool(snapshot.get("northgate_settlement_timber_delivered", false)):
 			goal_label.text = "NEXT · Return to World and found Riverbend Hamlet"
 		elif bool(snapshot.get("northgate_inspected", false)):
@@ -631,12 +641,13 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	else:
 		title_label.text = "AURELIAN BASIN · A-01"
 		identity_label.text = _land_title(selected_id)
-		detail_label.text = "%d/%d lands · %d settlement%s · Stone %d · Timber %d\nRoad %s · Riverbend %s · Highmere %s · Nation not founded" % [
+		detail_label.text = "%d/%d lands · %d settlement%s · Stone %d · Timber %d · Food %d\nRoad %s · Riverbend %s · Highmere %s · Nation not founded" % [
 			int(snapshot.get("claimed_lands", 0)), int(snapshot.get("charted_lands", 30)),
 			settlement_count,
 			"" if settlement_count == 1 else "s",
 			int(snapshot.get("stone", 0)),
 			int(snapshot.get("timber", 0)),
+			int(snapshot.get("food", 0)),
 			"built" if bool(snapshot.get("road_built", false)) else "not built",
 			("linked" if bool(snapshot.get("riverbend_connected", false)) else (
 				"claimed" if bool(snapshot.get("riverbend_claimed", false)) else (
@@ -654,6 +665,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	survey_button.visible = false
 	hamlet_button.visible = false
 	storehouse_button.visible = false
+	provisions_button.visible = false
 	focus_button.visible = false
 	overview_button.visible = false
 	return_button.visible = view == "village"
@@ -778,6 +790,12 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		or int(snapshot.get("stone", 0)) < int(snapshot.get("riverbend_storehouse_stone_cost", 5))
 	)
 	storehouse_button.visible = view == "world" and selected_id == "PN-A01-002" and bool(snapshot.get("riverbend_storehouse_stone_delivered", false)) and not bool(snapshot.get("riverbend_storehouse_built", false))
+	provisions_button.disabled = (
+		selected_id != "PN-A01-002"
+		or not bool(snapshot.get("riverbend_storehouse_built", false))
+		or bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
+	)
+	provisions_button.visible = view == "world" and selected_id == "PN-A01-002" and bool(snapshot.get("riverbend_storehouse_built", false)) and not bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
 	if frontier_link != null:
 		frontier_link.visible = view == "world" and bool(snapshot.get("riverbend_claimed", false))
 		_set_frontier_link_connected(bool(snapshot.get("riverbend_connected", false)))
@@ -808,6 +826,14 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 		hud._tutorial_title.text = "Greengate's first road"
 		hud._tutorial_intro.text = "Build Greengate's road for 5 stone, then return to World to inspect Riverbend."
 		hud._tutorial_more.text = "The Pixel Nations command panel uses the canonical save and resource costs."
+	elif bool(snapshot.get("riverbend_storehouse_provisions_collected", false)):
+		hud._tutorial_title.text = "Riverbend provisions delivered"
+		hud._tutorial_intro.text = "%d/%d lands claimed · %d settlements · Nation not founded." % [
+			int(snapshot.get("claimed_lands", 0)),
+			int(snapshot.get("charted_lands", 30)),
+			int(snapshot.get("settlement_count", 0)),
+		]
+		hud._tutorial_more.text = "The first Storehouse cycle delivered 5 food and is saved. Further production is not yet playable."
 	elif bool(snapshot.get("riverbend_storehouse_built", false)):
 		hud._tutorial_title.text = "Riverbend Storehouse established"
 		hud._tutorial_intro.text = "%d/%d lands claimed · %d settlements · Nation not founded." % [
@@ -815,7 +841,7 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 			int(snapshot.get("charted_lands", 30)),
 			int(snapshot.get("settlement_count", 0)),
 		]
-		hud._tutorial_more.text = "The Storehouse is saved and visible on the atlas. Production is not yet playable."
+		hud._tutorial_more.text = "The Storehouse is saved and visible. Return to World, select Riverbend, and collect its first provisions."
 	else:
 		hud._tutorial_title.text = "Aurelian frontier dispatch"
 		hud._tutorial_intro.text = "%d/%d lands claimed · %d settlement%s · Nation not founded." % [

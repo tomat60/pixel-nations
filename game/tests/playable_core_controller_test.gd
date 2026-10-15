@@ -1,6 +1,7 @@
 extends SceneTree
 
 const PlayableCoreController = preload("res://core/playable_core_controller.gd")
+const GameState = preload("res://core/game_state.gd")
 const HOME_LAND_ID := "PN-A01-001"
 const OTHER_LAND_ID := "PN-A01-002"
 const HIGHMERE_LAND_ID := "PN-A01-003"
@@ -204,6 +205,7 @@ func _run() -> void:
 	_expect(int(hamlet.get("timber", -1)) == 0, "hamlet spends five timber")
 	_expect(String(hamlet.get("nation_status", "")) == "not_founded", "hamlet keeps nation unfounded")
 	_expect(not reopened.found_riverbend_hamlet(), "rejects duplicate Riverbend Hamlet")
+	_expect(not reopened.collect_riverbend_storehouse_provisions(), "rejects Storehouse provisions before construction")
 	_expect(reopened.save_game(), "saves Riverbend Hamlet")
 	reopened.session.state["settlement_land_ids"] = [HOME_LAND_ID]
 	_expect(reopened.load_game(), "reloads Riverbend Hamlet")
@@ -229,8 +231,22 @@ func _run() -> void:
 	_expect(reopened.load_game(), "reloads Riverbend Storehouse")
 	var storehouse_reopened := reopened.current_snapshot()
 	_expect(bool(storehouse_reopened.get("riverbend_storehouse_built", false)), "reopen preserves Riverbend Storehouse")
-	_expect(String(storehouse_reopened.get("next_goal", "")) == "Riverbend Storehouse built; its production is not yet playable", "reports honest storehouse stop gate")
-	_expect(rejection_count == 22, "emits one rejection for each invalid action")
+	_expect(String(storehouse_reopened.get("next_goal", "")) == "Collect Riverbend Storehouse's first provisions", "reports first Storehouse production goal")
+	_expect(reopened.collect_riverbend_storehouse_provisions(), "collects first Riverbend Storehouse provisions")
+	var provisions := reopened.current_snapshot()
+	_expect(bool(provisions.get("riverbend_storehouse_provisions_collected", false)), "reports first Storehouse provisions collected")
+	_expect(int(provisions.get("food", -1)) == 5, "first Storehouse provisions add five food")
+	_expect(String(provisions.get("nation_status", "")) == "not_founded", "provisions keep nation unfounded")
+	_expect(not reopened.collect_riverbend_storehouse_provisions(), "rejects duplicate Storehouse provisions")
+	_expect(reopened.save_game(), "saves Storehouse provisions")
+	reopened.session.state["resources"]["food"] = 0
+	reopened.session.state["settlement"]["completed_orders"].erase(GameState.RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
+	_expect(reopened.load_game(), "reloads Storehouse provisions")
+	var provisions_reopened := reopened.current_snapshot()
+	_expect(bool(provisions_reopened.get("riverbend_storehouse_provisions_collected", false)), "reopen preserves Storehouse provisions")
+	_expect(int(provisions_reopened.get("food", -1)) == 5, "reopen preserves Storehouse food")
+	_expect(String(provisions_reopened.get("next_goal", "")) == "Riverbend Storehouse delivered 5 food; further production is not yet playable", "reports honest production stop gate")
+	_expect(rejection_count == 24, "emits one rejection for each invalid action")
 	_expect(view_events == ["village", "world"], "emits exact observed navigation transitions")
 
 	_remove_save(save_path)
