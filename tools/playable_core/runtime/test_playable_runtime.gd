@@ -165,6 +165,8 @@ func _run() -> void:
 	_check(String(claimed_frontier.get("frontier_link_status", "")) == "pending", "frontier_claim_link_is_pending")
 	var claimed_home_border := runtime.land_outline_materials.get(HOME_ID) as StandardMaterial3D
 	_check(claimed_home_border.albedo_color.b > claimed_home_border.albedo_color.r, "claimed_unselected_land_border_turns_cyan")
+	var claimed_home_fill := runtime.land_materials.get(HOME_ID) as StandardMaterial3D
+	_check(claimed_home_fill.albedo_color.a <= 0.46, "claimed_land_wash_preserves_painted_geography")
 	await process_frame
 	_capture("world-riverbend-claimed")
 	await _click_control(runtime.connect_button)
@@ -243,6 +245,8 @@ func _run() -> void:
 	_check(String(inspected_highmere.get("next_goal", "")) == "Choose whether to claim Highmere", "highmere_inspection_reveals_claim_choice")
 	_check(runtime.highmere_survey_link.visible, "highmere_survey_shows_world_route")
 	_check(runtime.highmere_survey_material.albedo_color.b > runtime.highmere_survey_material.albedo_color.r, "inspected_highmere_route_turns_blue")
+	var inspected_highmere_fill := runtime.land_materials.get(HIGHMERE_ID) as StandardMaterial3D
+	_check(inspected_highmere_fill.albedo_color.a <= 0.40, "inspected_land_wash_preserves_painted_geography")
 	await process_frame
 	_capture("world-highmere-inspected")
 	await _click_control(runtime.claim_button)
