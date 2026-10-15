@@ -84,6 +84,7 @@ func _run() -> void:
 	_check(String(runtime.village.hud._brand.text) == "Pixel Nations", "village_brand_is_pixel_nations")
 	_check(String(runtime.village.hud._credit_label.text) == "Greengate · Aurelian Basin", "village_location_is_canonical")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate's first road", "village_onboarding_matches_product_loop")
+	_check(not runtime.village.hud._objectives_panel.visible, "unrelated_donor_objectives_are_hidden")
 	_check("Credits" in String(runtime.village.hud._code_button.text), "village_credits_remain_accessible")
 	_check(runtime.village_paved_road == null, "canonical_road_absent_before_build")
 	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 460.0, "village_context_panel_is_compact")
@@ -97,6 +98,8 @@ func _run() -> void:
 	_check(bool(runtime.controller.current_snapshot().get("road_built", false)), "road_action_built")
 	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 5, "road_costs_five_stone")
 	_check(runtime.village_paved_road != null, "canonical_road_scene_created")
+	_check(String(runtime.village.hud._tutorial_title.text) == "Aurelian frontier dispatch", "completed_road_replaces_first_road_guidance")
+	_check("Nation not founded" in String(runtime.village.hud._tutorial_intro.text), "village_dispatch_keeps_nation_truthful")
 	if runtime.village_paved_road != null:
 		_check(runtime.village_paved_road.get_child_count() == 5, "canonical_road_has_five_real_tiles")
 		for tile in runtime.village_paved_road.get_children():
@@ -374,6 +377,15 @@ func _run() -> void:
 	_check(String(storehouse_reopened.get("next_goal", "")) == "Riverbend Storehouse built; its production is not yet playable", "storehouse_reopen_reports_honest_stop_gate")
 	await process_frame
 	_capture("world-riverbend-storehouse-reopened")
+	var home_screen_after_storehouse: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.0, home_world.y))
+	await _click_position(home_screen_after_storehouse)
+	await _click_control(runtime.enter_button)
+	await process_frame
+	_check(String(runtime.village.hud._tutorial_title.text) == "Riverbend Storehouse established", "completed_storehouse_replaces_stale_road_guidance")
+	_check(String(runtime.village.hud._tutorial_intro.text) == "3/30 lands claimed · 2 settlements · Nation not founded.", "completed_storehouse_dispatch_is_truthful")
+	_check("Production is not yet playable" in String(runtime.village.hud._tutorial_more.text), "completed_storehouse_dispatch_keeps_stop_gate")
+	_check(not runtime.village.hud._objectives_panel.visible, "donor_objectives_stay_hidden_after_reopen")
+	_capture("village-riverbend-storehouse-complete")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")

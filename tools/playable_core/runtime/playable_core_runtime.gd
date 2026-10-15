@@ -566,6 +566,12 @@ func _show_village() -> void:
 	# Never display its 160-stone fixture next to the real five-stone balance.
 	for donor_button in village.hud._resource_buttons.values():
 		(donor_button as Button).visible = false
+	# Donor objectives belong to the retained village simulation, not the
+	# canonical Pixel Nations save. Keep that simulation running, but do not
+	# present its unrelated counter as the player's strategic objective.
+	village.hud._objectives_panel.hide()
+	if village.hud._tabs.has("objectives"):
+		(village.hud._tabs["objectives"] as Button).hide()
 	panel.move_to_front()
 
 
@@ -781,7 +787,42 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		_set_northgate_scout_state(bool(snapshot.get("northgate_inspected", false)))
 	_refresh_land_visuals(snapshot)
 	_sync_village_road_visual(snapshot)
+	_sync_village_guidance(snapshot)
 	panel.reset_size()
+
+
+# Reuse the donor's authored parchment tutorial card as a canonical, save-driven
+# dispatch. A new Village instance must never resurrect completed first-road
+# guidance or expose claims that belong to the donor's separate simulation.
+func _sync_village_guidance(snapshot: Dictionary) -> void:
+	if village == null or not is_instance_valid(village):
+		return
+	var hud = village.hud
+	if not bool(snapshot.get("road_built", false)):
+		hud._tutorial_title.text = "Greengate's first road"
+		hud._tutorial_intro.text = "Build Greengate's road for 5 stone, then return to World to inspect Riverbend."
+		hud._tutorial_more.text = "The Pixel Nations command panel uses the canonical save and resource costs."
+	elif bool(snapshot.get("riverbend_storehouse_built", false)):
+		hud._tutorial_title.text = "Riverbend Storehouse established"
+		hud._tutorial_intro.text = "%d/%d lands claimed · %d settlements · Nation not founded." % [
+			int(snapshot.get("claimed_lands", 0)),
+			int(snapshot.get("charted_lands", 30)),
+			int(snapshot.get("settlement_count", 0)),
+		]
+		hud._tutorial_more.text = "The Storehouse is saved and visible on the atlas. Production is not yet playable."
+	else:
+		hud._tutorial_title.text = "Aurelian frontier dispatch"
+		hud._tutorial_intro.text = "%d/%d lands claimed · %d settlement%s · Nation not founded." % [
+			int(snapshot.get("claimed_lands", 0)),
+			int(snapshot.get("charted_lands", 30)),
+			int(snapshot.get("settlement_count", 0)),
+			"" if int(snapshot.get("settlement_count", 0)) == 1 else "s",
+		]
+		hud._tutorial_more.text = "Next: %s." % String(snapshot.get("next_goal", "Return to World"))
+	hud._tutorial_button.text = "Continue in Greengate"
+	hud._objectives_panel.hide()
+	if hud._tabs.has("objectives"):
+		(hud._tabs["objectives"] as Button).hide()
 
 
 # Project only the canonical BUILD_ROAD action onto the retained donor's real
