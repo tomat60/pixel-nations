@@ -990,13 +990,16 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 		var color := _terrain_color(String(land.get("terrain", "grassland")))
 		if claimed_ids.has(land_id):
 			color = Color("2868b8") if land_id == "PN-A01-001" else Color("2b8b88")
-			color.a = 0.98
+			# Claimed land should read as player state without painting over the
+			# retained basin. The explicit cyan border and label carry ownership.
+			color.a = 0.46
 		elif land_id == "PN-A01-003" and bool(snapshot.get("highmere_inspected", false)):
-			color = Color(0.42, 0.68, 0.78, 0.98)
+			color = Color(0.42, 0.68, 0.78, 0.40)
 		elif land_id == "PN-A01-024" and bool(snapshot.get("northgate_inspected", false)):
-			color = Color(0.42, 0.72, 0.62, 0.98)
+			color = Color(0.42, 0.72, 0.62, 0.40)
 		if land_id == selected_id:
 			color = color.lightened(0.22)
+			color.a = minf(color.a + 0.10, 0.56)
 		material.albedo_color = color
 		var outline_material := land_outline_materials.get(land_id) as StandardMaterial3D
 		if outline_material != null:
