@@ -218,6 +218,21 @@ func collect_riverbend_storehouse_provisions() -> bool:
 	)
 
 
+func hold_greengate_harvest_feast() -> bool:
+	if current_view != VIEW_VILLAGE:
+		return false
+	var completed_before: Array = state.get("settlement", {}).get("completed_orders", []).duplicate()
+	var food_before := int(state.get("resources", {}).get("food", 0))
+	state = GameState.reduce(state, {"type": "HOLD_GREENGATE_HARVEST_FEAST"})
+	var completed_after: Array = state.get("settlement", {}).get("completed_orders", [])
+	var food_after := int(state.get("resources", {}).get("food", 0))
+	return (
+		completed_after.has(GameState.GREENGATE_HARVEST_FEAST_ORDER_ID)
+		and not completed_before.has(GameState.GREENGATE_HARVEST_FEAST_ORDER_ID)
+		and food_after == food_before - GameState.GREENGATE_HARVEST_FEAST_FOOD_COST
+	)
+
+
 func return_to_world() -> bool:
 	if current_view != VIEW_VILLAGE:
 		return false
@@ -279,6 +294,7 @@ func world_view_model() -> Dictionary:
 		"riverbend_storehouse_stone_delivered": bool(progress.get("riverbend_storehouse_stone_delivered", false)),
 		"riverbend_storehouse_built": bool(progress.get("riverbend_storehouse_built", false)),
 		"riverbend_storehouse_provisions_collected": bool(progress.get("riverbend_storehouse_provisions_collected", false)),
+		"greengate_harvest_feast_held": bool(progress.get("greengate_harvest_feast_held", false)),
 		"highmere_link_status": String(progress.get("highmere_link_status", "locked")),
 		"highmere_status": String(progress.get("highmere_status", "locked")),
 		"frontier_link_status": String(progress.get("frontier_link_status", "not_started")),
@@ -290,6 +306,7 @@ func world_view_model() -> Dictionary:
 		"riverbend_hamlet_timber_cost": GameState.RIVERBEND_HAMLET_TIMBER_COST,
 		"riverbend_storehouse_stone_cost": GameState.RIVERBEND_STOREHOUSE_STONE_COST,
 		"riverbend_storehouse_provisions_reward": GameState.RIVERBEND_STOREHOUSE_PROVISIONS_REWARD,
+		"greengate_harvest_feast_food_cost": GameState.GREENGATE_HARVEST_FEAST_FOOD_COST,
 		"nation_status": String(progress.get("nation_status", "not_founded")),
 		"next_goal": String(progress.get("next_goal", "")),
 	}
@@ -330,4 +347,6 @@ func village_view_model() -> Dictionary:
 		"riverbend_storehouse_built": ((state.get("settlement_improvements_by_land", {}) as Dictionary).get(GameState.RIVERBEND_LAND_ID, []) as Array).has(GameState.RIVERBEND_STOREHOUSE_IMPROVEMENT_ID),
 		"riverbend_storehouse_provisions_collected": (settlement.get("completed_orders", []) as Array).has(GameState.RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID),
 		"riverbend_storehouse_provisions_reward": GameState.RIVERBEND_STOREHOUSE_PROVISIONS_REWARD,
+		"greengate_harvest_feast_held": (settlement.get("completed_orders", []) as Array).has(GameState.GREENGATE_HARVEST_FEAST_ORDER_ID),
+		"greengate_harvest_feast_food_cost": GameState.GREENGATE_HARVEST_FEAST_FOOD_COST,
 	}

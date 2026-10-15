@@ -130,6 +130,13 @@ func collect_riverbend_storehouse_provisions() -> bool:
 	return _reject("collect_riverbend_storehouse_provisions", "Select Riverbend after building its Storehouse; provisions can be collected once.")
 
 
+func hold_greengate_harvest_feast() -> bool:
+	if session.hold_greengate_harvest_feast():
+		_publish_snapshot()
+		return true
+	return _reject("hold_greengate_harvest_feast", "The one-time Greengate Harvest Feast requires the Village view and 5 delivered food.")
+
+
 func return_to_world() -> bool:
 	if session.return_to_world():
 		_publish_view()
