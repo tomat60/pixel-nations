@@ -569,9 +569,15 @@ func _show_village() -> void:
 	# Donor objectives belong to the retained village simulation, not the
 	# canonical Pixel Nations save. Keep that simulation running, but do not
 	# present its unrelated counter as the player's strategic objective.
-	village.hud._objectives_panel.hide()
+	# Reparent both controls under an invisible holder because the donor's
+	# responsive layout may otherwise make the tab visible again later.
+	var hidden_objectives := Control.new()
+	hidden_objectives.name = "PixelNationsHiddenDonorObjectives"
+	hidden_objectives.visible = false
+	village.hud.add_child(hidden_objectives)
+	village.hud._objectives_panel.reparent(hidden_objectives)
 	if village.hud._tabs.has("objectives"):
-		(village.hud._tabs["objectives"] as Button).hide()
+		(village.hud._tabs["objectives"] as Button).reparent(hidden_objectives)
 	panel.move_to_front()
 
 
@@ -820,9 +826,6 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 		]
 		hud._tutorial_more.text = "Next: %s." % String(snapshot.get("next_goal", "Return to World"))
 	hud._tutorial_button.text = "Continue in Greengate"
-	hud._objectives_panel.hide()
-	if hud._tabs.has("objectives"):
-		(hud._tabs["objectives"] as Button).hide()
 
 
 # Project only the canonical BUILD_ROAD action onto the retained donor's real
