@@ -279,10 +279,16 @@ func world_view_model() -> Dictionary:
 
 func village_view_model() -> Dictionary:
 	var settlement: Dictionary = state.get("settlement", {})
+	var progress := GameState.progress(state)
 	return {
 		"view": VIEW_VILLAGE,
 		"land_id": String(state.get("claimed_land_id", "")),
 		"settlement_name": String(settlement.get("name", "")),
+		"claimed_lands": int(progress.get("claimed_lands", 0)),
+		"charted_lands": int(progress.get("charted_lands", 0)),
+		"settlement_count": int(progress.get("settlement_count", 0)),
+		"nation_status": String(progress.get("nation_status", "not_founded")),
+		"next_goal": String(progress.get("next_goal", "")),
 		"road_built": (settlement.get("built_improvements", []) as Array).has("road"),
 		"stone": int(state.get("resources", {}).get("stone", 0)),
 		"timber": int(state.get("resources", {}).get("timber", 0)),
