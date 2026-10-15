@@ -240,9 +240,10 @@ func _terrain_color(terrain: String) -> Color:
 		"field": Color("9e8a4e"),
 	}
 	var color: Color = colors.get(terrain, Color("718b4e"))
-	# Keep canonical land state legible while allowing the retained painted Basin
-	# to carry the physical geography instead of flattening it into opaque parcels.
-	color.a = 0.34
+	# Neutral hit areas should not recolor the authored Basin into a patchwork.
+	# Their faint wash and border preserve parcel discovery; explicit inspected,
+	# claimed and selected states rise into the hierarchy in _refresh_land_visuals.
+	color.a = 0.10
 	return color
 
 

@@ -52,7 +52,7 @@ func _run() -> void:
 	var substrate_material := substrate.mesh.material as StandardMaterial3D
 	_check(substrate_material.albedo_texture.resource_path.ends_with("a01_atlas_substrate.png"), "painted_aurelian_substrate_installed")
 	var home_material := runtime.land_materials.get(HOME_ID) as StandardMaterial3D
-	_check(home_material.albedo_color.a > 0.25 and home_material.albedo_color.a < 0.50, "canonical_land_overlay_preserves_painted_geography")
+	_check(home_material.albedo_color.a >= 0.08 and home_material.albedo_color.a <= 0.12, "neutral_land_wash_defers_to_painted_geography")
 	var neutral_border := runtime.land_outline_materials.get(HOME_ID) as StandardMaterial3D
 	_check(neutral_border.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA, "neutral_borders_preserve_painted_atlas")
 	_check(neutral_border.albedo_color.a < 0.40, "neutral_borders_recede_below_geography")
