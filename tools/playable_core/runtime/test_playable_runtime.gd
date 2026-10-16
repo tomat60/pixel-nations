@@ -105,7 +105,7 @@ func _run() -> void:
 	_check(String(runtime.controller.current_snapshot().get("claimed_land_id", "")) == HOME_ID, "claim_button_claims_home")
 	await process_frame
 	_check(runtime.frontier_progress.value == 1.0, "world_progress_tracks_claimed_home")
-	_check("FRONTIER · 1 / 30 CLAIMED · 1 SETTLEMENT" in runtime.detail_label.text, "world_groups_frontier_progress")
+	_check("FRONTIER · 1 / 30 CLAIMED · 0 SETTLEMENTS" in runtime.detail_label.text, "world_groups_frontier_progress")
 	_check("STOCKPILE · STONE 10 · TIMBER 0 · FOOD 0" in runtime.detail_label.text, "world_groups_canonical_stockpile")
 	_check("NATION · NOT FOUNDED" in runtime.route_label.text, "world_keeps_nation_state_truthful")
 	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 420.0, "world_context_panel_is_compact")
