@@ -110,6 +110,7 @@ func _run() -> void:
 	_check("NATION · NOT FOUNDED" in runtime.route_label.text, "world_keeps_nation_state_truthful")
 	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 420.0, "world_context_panel_is_compact")
 	_check(runtime.enter_button.visible and runtime.save_button.visible, "world_shows_relevant_actions")
+	_check(runtime.enter_button.text == "Found Greengate", "first_world_action_explicitly_founds_settlement")
 	_check(not runtime.claim_button.visible and not runtime.inspect_button.visible and not runtime.connect_button.visible, "world_hides_irrelevant_actions")
 	_capture("world-claimed")
 	await _click_control(runtime.enter_button)
@@ -147,6 +148,8 @@ func _run() -> void:
 	_check(not runtime.village.hud._objectives_panel.is_visible_in_tree(), "unrelated_donor_objectives_are_hidden")
 	_check(not (runtime.village.hud._tabs["objectives"] as Button).is_visible_in_tree(), "unrelated_donor_objective_tab_is_hidden")
 	_check(not runtime.village.hud._status_panel.is_visible_in_tree(), "unrelated_donor_status_sidebar_is_hidden")
+	_check(not runtime.village.hud._dock.is_visible_in_tree(), "deceptive_donor_build_trade_guard_dock_is_hidden")
+	_check(runtime.road_button.visible, "canonical_road_action_remains_available_without_donor_dock")
 	_check("Credits" in String(runtime.village.hud._code_button.text), "village_credits_remain_accessible")
 	_check(runtime.village_paved_road == null, "canonical_road_absent_before_build")
 	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 240.0, "village_navigation_panel_is_compact")
@@ -171,6 +174,7 @@ func _run() -> void:
 	await process_frame
 	var world_snapshot: Dictionary = runtime.controller.current_snapshot()
 	_check(String(world_snapshot.get("view", "")) == "world", "return_button_opens_world")
+	_check(runtime.enter_button.text == "Enter Greengate", "founded_settlement_is_now_entered_not_refounded")
 	_check(
 		runtime.title_label.visible
 		and runtime.identity_label.visible
@@ -486,6 +490,7 @@ func _run() -> void:
 	await _click_control(runtime.feast_button)
 	var feast_village: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(feast_village.get("greengate_harvest_feast_held", false)), "harvest_feast_completed")
+	_check("Return to World" in String(runtime.village.hud._tutorial_more.text), "post_feast_dispatch_points_to_real_next_view")
 	_check(int(feast_village.get("food", -1)) == 0, "harvest_feast_spends_five_food")
 	_check(int(feast_village.get("claimed_lands", -1)) == 3, "harvest_feast_does_not_claim_fourth_land")
 	_check(int(feast_village.get("settlement_count", -1)) == 2, "harvest_feast_preserves_two_settlements")
