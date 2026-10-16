@@ -153,7 +153,8 @@ jobs:
           application/short_version="0.1.0"
           application/version="0.1.0"
           application/copyright="Pixel Nations — third party notices are included"
-          codesign/codesign=0
+          # Godot built-in ad-hoc signature: no Apple certificate, no notarization.
+          codesign/codesign=1
           CFG
           # Universal macOS exports require ARM texture compression support.
           # Enable it before importing donor assets (not merely in preset metadata).
@@ -183,6 +184,15 @@ jobs:
           cp "$PN_GAME/build/Pixel-Nations-Linux.x86_64" dist/
           cp "$PN_GAME/build/Pixel-Nations-Linux.pck" dist/
           cp "$PN_GAME/build/Pixel-Nations-macOS.zip" dist/
+          cat > dist/macOS-FIRST-RUN.txt <<'TXT'
+          Pixel Nations - development preview (macOS)
+          This macOS Universal application is ad-hoc signed, NOT Apple-notarized.
+          macOS may require Finder > Control-click > Open or System Settings > Privacy & Security > Open Anyway.
+          Verify the source before overriding a macOS security warning.
+          Godot export minimum: Intel macOS 11.0 / Apple Silicon macOS 13.0.
+          Mac CI verifies the signed app and binary startup; owner's own hardware test remains necessary.
+          Never disable Gatekeeper globally.
+          TXT
           chmod +x dist/Pixel-Nations-Linux.x86_64
           file dist/Pixel-Nations-Linux.x86_64
           sha256sum dist/Pixel-Nations-* > dist/SHA256SUMS
@@ -228,5 +238,75 @@ jobs:
         with:
           name: pn-playable-desktop-${{ github.sha }}-${{ github.run_id }}
           path: dist/**
+          if-no-files-found: warn
+          retention-days: 7
+
+  macos-signed-app-smoke:
+    name: Verify signed macOS bundle and start actual app
+    needs: playable-exports
+    runs-on: macos-15
+    timeout-minutes: 10
+    steps:
+      - name: Download exact-run Godot distribution
+        uses: actions/download-artifact@v4
+        with:
+          name: pn-playable-desktop-${{ github.sha }}-${{ github.run_id }}
+          path: dist
+
+      - name: Verify signature and Universal architectures
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p macos-qa
+          unzip -q dist/Pixel-Nations-macOS.zip -d macos-qa
+          test -s "macos-qa/Pixel Nations.app/Contents/MacOS/Pixel Nations"
+          test -s "macos-qa/Pixel Nations.app/Contents/Resources/Pixel Nations.pck"
+          plutil -lint "macos-qa/Pixel Nations.app/Contents/Info.plist" | tee dist/macos-plist-verify.log
+          file "macos-qa/Pixel Nations.app/Contents/MacOS/Pixel Nations" | tee dist/macos-arch-verify.log
+          lipo -archs "macos-qa/Pixel Nations.app/Contents/MacOS/Pixel Nations" | tee -a dist/macos-arch-verify.log
+          grep -q arm64 dist/macos-arch-verify.log
+          grep -q x86_64 dist/macos-arch-verify.log
+          codesign --verify --deep --strict --verbose=2 "macos-qa/Pixel Nations.app" 2>&1 | tee dist/macos-codesign-verify.log
+          codesign -dv --verbose=4 "macos-qa/Pixel Nations.app" 2>&1 | tee -a dist/macos-codesign-verify.log
+          grep -qi 'Signature=adhoc' dist/macos-codesign-verify.log
+          echo "PN_MACOS_BUNDLE_SIGNATURE=PASS" | tee dist/macos-signature-status.txt
+
+      - name: Boot packaged game on macOS runner
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          /usr/bin/python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          import sys
+
+          exe = Path("macos-qa/Pixel Nations.app/Contents/MacOS/Pixel Nations")
+          args = [str(exe.resolve()), "--headless", "--audio-driver", "Dummy", "--quit-after", "15"]
+          try:
+              run = subprocess.run(args, capture_output=True, text=True, timeout=75)
+          except subprocess.TimeoutExpired as exc:
+              Path("dist/macos-launch-smoke.log").write_text(str(exc))
+              raise SystemExit("PN_MACOS_APP_START=TIMEOUT")
+          log = (run.stdout or "") + "\n" + (run.stderr or "")
+          Path("dist/macos-launch-smoke.log").write_text(log)
+          print(log[:9000])
+          # Short forced quit may emit the engine's known resource cleanup warning.
+          fatal = [
+              line for line in log.splitlines()
+              if ("SCRIPT ERROR" in line or "Parse Error" in line
+                  or ("ERROR:" in line and "resources still in use at exit" not in line))
+          ]
+          if run.returncode != 0 or fatal or "PN_PLAYABLE_RUNTIME_READY=PASS" not in log:
+              print(f"exit={run.returncode}; errors={fatal[:6]}", file=sys.stderr)
+              raise SystemExit("PN_MACOS_APP_START=FAIL")
+          print("PN_MACOS_APP_START=PASS")
+          PY
+
+      - name: Preserve macOS proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pn-macos-runtime-qa-${{ github.sha }}-${{ github.run_id }}
+          path: dist/macos-*
           if-no-files-found: warn
           retention-days: 7
