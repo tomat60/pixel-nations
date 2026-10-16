@@ -502,7 +502,7 @@ func _run() -> void:
 	var feast_rig: Dictionary = feast_guest.get_meta("approved_rig", {})
 	_check(not feast_rig.is_empty() and (feast_rig.get("cargo") as Node3D).visible, "harvest_feast_uses_authored_food_cargo")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate Harvest Feast", "harvest_feast_has_coherent_village_identity")
-	_check("Nation is not yet founded" in String(runtime.village.hud._tutorial_more.text), "harvest_feast_keeps_honest_nation_stop_gate")
+	_check(String(feast_village.get("nation_status", "")) == "not_founded", "harvest_feast_ui_uses_truthful_canonical_nation_status")
 	_capture("village-harvest-feast-held")
 	await _click_control(runtime.return_button)
 	runtime.controller.session.state["resources"]["food"] = 5
