@@ -635,6 +635,11 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	var view := String(snapshot.get("view", "world"))
 	var selected_id := String(snapshot.get("selected_land_id", ""))
 	var settlement_count := int(snapshot.get("settlement_count", 0))
+	# The retained Village already owns the narrative/status hierarchy through
+	# its parchment dispatch card. In that view this panel is navigation and
+	# action chrome only; repeating the same progression copy obscures the scene.
+	for label in [title_label, identity_label, detail_label, goal_label]:
+		label.visible = view == "world"
 	if view == "village":
 		title_label.text = "PIXEL NATIONS · GREENGATE"
 		identity_label.text = "Greenvale settlement"

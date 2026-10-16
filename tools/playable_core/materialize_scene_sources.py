@@ -184,6 +184,7 @@ def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -
 - Claimed and inspected land fills are reduced to translucent cartographic washes; ownership and selection remain explicit through cyan, amber and gold borders and labels while the painted basin stays visible.
 - The retained OpenGS overview camera is centered on the painted basin so the strategic surface uses the viewport deliberately instead of leaving a large dead band above it.
 - Neutral canonical hit areas use only a faint wash so their terrain categories do not recolor the authored basin into a competing patchwork; state borders, labels and stronger inspected/claimed fills remain explicit.
+- In Village view, the retained parchment dispatch is the single progression narrative; the separate Pixel Nations panel collapses to contextual actions and World/save navigation instead of duplicating status copy over the scene.
 - The player-visible Natural Earth surface and labels are hidden. The repository's owner-committed Aurelian Basin prototype painting (`304d1a5aa4690cf001dc0488d7bd95433244b387`) is installed as the broad atlas substrate, with all 30 canonical land polygons rendered above it.
 - Canonical land geometry is extracted from the repository's existing `app/play/lib/map-data.ts`; donor geography is not relabeled as Pixel Nations geography.
 - The integration remains a rough gameplay candidate and does not claim final visual acceptance.
