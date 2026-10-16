@@ -87,6 +87,7 @@ jobs:
           assert manifest["playable_scene"] == "res://pixel_nations/playable_core.tscn"
           assert 'config/name="Pixel Nations"' in (p / "project.godot").read_text()
           assert 'config/name="Open Grand Strategy"' not in (p / "project.godot").read_text()
+          assert 'renderer/rendering_method="gl_compatibility"' in (p / "project.godot").read_text()
           PY
 
       - name: Add minimal export presets to transformed project
@@ -162,6 +163,10 @@ jobs:
           
           [rendering]
           
+          # Prefer wide-compatibility OpenGL on Intel Macs that crash at window startup.
+          renderer/rendering_method="gl_compatibility"
+          renderer/rendering_method.mobile="gl_compatibility"
+          renderer/rendering_method.web="gl_compatibility"
           textures/vram_compression/import_etc2_astc=true
           CFG
           mkdir -p "$PN_GAME/build"
@@ -310,3 +315,62 @@ jobs:
           path: dist/macos-*
           if-no-files-found: warn
           retention-days: 7
+
+  macos-intel-26-gui-start:
+    name: Intel macOS 26 GUI start (never headless)
+    needs: playable-exports
+    runs-on: macos-26-intel
+    timeout-minutes: 9
+    steps:
+      - name: Fetch exact build output
+        uses: actions/download-artifact@v4
+        with:
+          name: pn-playable-desktop-${{ github.sha }}-${{ github.run_id }}
+          path: dist
+
+      - name: Start actual windowed Intel app under macOS 26
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          uname -m | tee dist/intel-macos26-platform.txt
+          sw_vers | tee -a dist/intel-macos26-platform.txt
+          test "$(uname -m)" = "x86_64"
+          mkdir -p mac-intel-app
+          unzip -q dist/Pixel-Nations-macOS.zip -d mac-intel-app
+          APP="mac-intel-app/Pixel Nations.app"
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          /usr/bin/python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          import time
+
+          exe = Path("mac-intel-app/Pixel Nations.app/Contents/MacOS/Pixel Nations")
+          cmd = [str(exe.resolve()), "--rendering-method", "gl_compatibility",
+                 "--rendering-driver", "opengl3", "--audio-driver", "Dummy",
+                 "--resolution", "1280x720", "--quit-after", "90"]
+          t0 = time.monotonic()
+          try:
+              proc = subprocess.run(cmd, capture_output=True, text=True, timeout=85)
+          except subprocess.TimeoutExpired as e:
+              Path("dist/intel-macos26-gui.log").write_text("TIMEOUT\n" + str(e))
+              raise SystemExit("PN_INTEL_MACOS26_GUI=TIMEOUT")
+          duration = time.monotonic() - t0
+          log = "ARGS=" + repr(cmd[1:]) + "\nDURATION=%.2f\n" % duration + \
+                (proc.stdout or "") + "\n" + (proc.stderr or "")
+          Path("dist/intel-macos26-gui.log").write_text(log)
+          print(log[-12000:])
+          assert proc.returncode == 0, "Windowed app crashed, exit=%s" % proc.returncode
+          assert "PN_PLAYABLE_RUNTIME_READY=PASS" in log, "Runtime did not start"
+          assert not any(x in log for x in ("SCRIPT ERROR", "Parse Error", "SIGFPE", "Floating point exception")), "Runtime error"
+          assert duration > 0.15, "App exited too quickly for windowed initialization"
+          print("PN_INTEL_MACOS26_GUI=PASS")
+          PY
+
+      - name: Preserve Intel GUI diagnosis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pn-intel-macos26-gui-${{ github.sha }}-${{ github.run_id }}
+          path: dist/intel-macos26-*
+          retention-days: 7
+          if-no-files-found: warn
