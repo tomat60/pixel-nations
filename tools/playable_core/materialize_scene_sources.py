@@ -153,6 +153,65 @@ def apply_pixel_nations_village_identity(village: Path) -> int:
         if rewritten != text:
             path.write_text(rewritten, encoding="utf-8")
             changed += 1
+    hud_path = targets[0]
+    hud_text = hud_path.read_text(encoding="utf-8")
+    resource_field = "var _resource_values: Dictionary = {}"
+    if hud_text.count(resource_field) != 1:
+        raise SourceError("Village resource field changed; refuse unsafe canonical stock bridge")
+    hud_text = hud_text.replace(
+        resource_field,
+        resource_field + "\nvar _pixel_nations_resources: Dictionary = {}",
+        1,
+    )
+    refresh_anchor = "func refresh() -> void:\n"
+    if hud_text.count(refresh_anchor) != 1:
+        raise SourceError("Village HUD refresh changed; refuse unsafe canonical stock bridge")
+    resource_setter = '''func set_pixel_nations_resources(resources: Dictionary) -> void:
+\t_pixel_nations_resources = resources.duplicate(true)
+\tvar visible_items := ["wood", "stone", "food"]
+\tfor item in _resource_buttons:
+\t\t(_resource_buttons[item] as Button).visible = item in visible_items
+\t_resource_captions["wood"].text = "Timber"
+\t_resource_captions["stone"].text = "Stone"
+\t_resource_captions["food"].text = "Food"
+\t_resource_buttons["wood"].tooltip_text = "Pixel Nations timber stock"
+\t_resource_buttons["stone"].tooltip_text = "Pixel Nations stone stock"
+\t_resource_buttons["food"].tooltip_text = "Pixel Nations food stock"
+\trefresh()
+
+
+'''
+    hud_text = hud_text.replace(refresh_anchor, resource_setter + refresh_anchor, 1)
+    resource_refresh = '''\tfor item in _resource_values:
+\t\tvar label: Label = _resource_values[item]
+\t\tif item == "population":
+'''
+    if hud_text.count(resource_refresh) != 1:
+        raise SourceError("Village resource refresh changed; refuse unsafe canonical stock bridge")
+    canonical_refresh = '''\tfor item in _resource_values:
+\t\tvar label: Label = _resource_values[item]
+\t\tif not _pixel_nations_resources.is_empty() and item in ["wood", "stone", "food"]:
+\t\t\tvar canonical_item: String = "timber" if item == "wood" else item
+\t\t\tlabel.text = str(int(_pixel_nations_resources.get(canonical_item, 0)))
+\t\t\tlabel.add_theme_color_override("font_color", INK)
+\t\telif item == "population":
+'''
+    hud_text = hud_text.replace(resource_refresh, canonical_refresh, 1)
+    resource_info = '''func _resource_info(item: String) -> void:
+\tif item == "population":
+'''
+    if hud_text.count(resource_info) != 1:
+        raise SourceError("Village resource help changed; refuse unsafe canonical stock bridge")
+    canonical_info = '''func _resource_info(item: String) -> void:
+\tif not _pixel_nations_resources.is_empty() and item in ["wood", "stone", "food"]:
+\t\tvar canonical_item: String = "timber" if item == "wood" else item
+\t\tvar canonical_name: String = "Timber" if item == "wood" else item.capitalize()
+\t\tshow_message("%s · %d available in Pixel Nations strategic stock." % [canonical_name, int(_pixel_nations_resources.get(canonical_item, 0))])
+\t\treturn
+\tif item == "population":
+'''
+    hud_text = hud_text.replace(resource_info, canonical_info, 1)
+    hud_path.write_text(hud_text, encoding="utf-8")
     hud_text = targets[0].read_text(encoding="utf-8")
     required = (
         "Pixel Nations",
@@ -161,6 +220,8 @@ def apply_pixel_nations_village_identity(village: Path) -> int:
         "Credits, licenses and source ↗",
         'tr("Guard")',
         'tr("Greengate")',
+        "set_pixel_nations_resources",
+        "Pixel Nations timber stock",
     )
     if any(value not in hud_text for value in required):
         raise SourceError("Pixel Nations Village identity transform is incomplete")
@@ -191,7 +252,7 @@ def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -
 - OpenGS `ne2.png` is a Thomas Holtvedt QGIS derivative of the public-domain Natural Earth 2 raster; its exact hash and source URL are pinned in the integration spec.
 - Village source: Lucas Marques, from Shiva — The Free Game, `{village_commit}`.
 - Village files are moved below `res://village/`; textual `res://` references are rewritten to that namespace.
-- Player-visible Village branding, first-run guidance and command dock are changed to Pixel Nations / Greengate English; donor credits, licenses, source link and notices remain available under Credits.
+- Player-visible Village branding, first-run guidance and command dock are changed to Pixel Nations / Greengate English; the retained resource bar shows canonical timber, stone and food instead of donor stock; donor credits, licenses, source link and notices remain available under Credits.
 - Pixel Nations adds a namespaced integration scene, canonical A-01 hit geometry, truthful state UI, and World/Village navigation under `res://pixel_nations/`.
 - Canonical land borders are restyled into a state-aware cartographic hierarchy: neutral boundaries recede beneath the painted geography while inspected, claimed and selected lands remain explicit.
 - Reachable Atlas labels are split into primary place names and smaller truthful settlement/route-state subtitles so development remains visible without turning overview labels into dense text blocks.

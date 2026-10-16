@@ -602,10 +602,8 @@ func _show_village() -> void:
 		village.name = "GreengateVillage"
 		add_child(village)
 	village.process_mode = Node.PROCESS_MODE_INHERIT
-	# The donor's economy is separate from the canonical Pixel Nations save.
-	# Never display its 160-stone fixture next to the real five-stone balance.
-	for donor_button in village.hud._resource_buttons.values():
-		(donor_button as Button).visible = false
+	# The retained top bar is useful Village chrome, but its economy is separate.
+	# _render_snapshot feeds it only the canonical Pixel Nations stock.
 	# Donor objectives belong to the retained village simulation, not the
 	# canonical Pixel Nations save. Keep that simulation running, but do not
 	# present its unrelated counter as the player's strategic objective.
@@ -647,6 +645,12 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	for label in [title_label, identity_label, detail_label, goal_label]:
 		label.visible = view == "world"
 	if view == "village":
+		if village != null:
+			village.hud.set_pixel_nations_resources({
+				"stone": int(snapshot.get("stone", 0)),
+				"timber": int(snapshot.get("timber", 0)),
+				"food": int(snapshot.get("food", 0)),
+			})
 		title_label.text = "PIXEL NATIONS · GREENGATE"
 		identity_label.text = "Greenvale settlement"
 		detail_label.text = "Stone %d · Timber %d · Food %d · Road %s\nRiverbend supply %s · Ridge stone %s" % [

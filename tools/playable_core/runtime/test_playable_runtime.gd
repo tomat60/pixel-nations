@@ -120,6 +120,14 @@ func _run() -> void:
 	_check(String(runtime.village.hud._village_focus.text) == "Greengate", "village_camera_command_uses_canonical_place_name")
 	_check(String(runtime.village.hud._pause.text) == "Pause", "village_pause_command_uses_product_language")
 	_check("Greengate" in String(runtime.village.hud._village_focus.tooltip_text), "village_camera_help_uses_canonical_place_name")
+	var village_entry: Dictionary = runtime.controller.current_snapshot()
+	_check((runtime.village.hud._resource_buttons["wood"] as Button).visible, "canonical_timber_stock_is_visible")
+	_check((runtime.village.hud._resource_buttons["stone"] as Button).visible, "canonical_stone_stock_is_visible")
+	_check((runtime.village.hud._resource_buttons["food"] as Button).visible, "canonical_food_stock_is_visible")
+	_check(String(runtime.village.hud._resource_captions["wood"].text) == "Timber", "donor_wood_caption_becomes_canonical_timber")
+	_check(String(runtime.village.hud._resource_values["wood"].text) == str(int(village_entry.get("timber", -1))), "village_timber_matches_canonical_save")
+	_check(String(runtime.village.hud._resource_values["stone"].text) == str(int(village_entry.get("stone", -1))), "village_stone_matches_canonical_save")
+	_check(String(runtime.village.hud._resource_values["food"].text) == str(int(village_entry.get("food", -1))), "village_food_matches_canonical_save")
 	_check(
 		not runtime.title_label.visible
 		and not runtime.identity_label.visible
@@ -135,13 +143,12 @@ func _run() -> void:
 	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 240.0, "village_navigation_panel_is_compact")
 	_check(runtime.road_button.visible and runtime.return_button.visible and runtime.save_button.visible, "village_shows_relevant_actions")
 	_check(not runtime.claim_button.visible and not runtime.inspect_button.visible and not runtime.connect_button.visible, "village_hides_world_actions")
-	var donor_stock_hidden := true
-	for stock_button in runtime.village.hud._resource_buttons.values():
-		donor_stock_hidden = donor_stock_hidden and not (stock_button as Button).visible
-	_check(donor_stock_hidden, "misleading_donor_stock_not_visible")
+	for donor_item in ["gold", "trunks", "loaves", "population"]:
+		_check(not (runtime.village.hud._resource_buttons[donor_item] as Button).visible, "noncanonical_%s_stock_is_hidden" % donor_item)
 	await _click_control(runtime.road_button)
 	_check(bool(runtime.controller.current_snapshot().get("road_built", false)), "road_action_built")
 	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 5, "road_costs_five_stone")
+	_check(String(runtime.village.hud._resource_values["stone"].text) == "5", "village_stock_updates_after_road_cost")
 	_check(runtime.village_paved_road != null, "canonical_road_scene_created")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Aurelian frontier dispatch", "completed_road_replaces_first_road_guidance")
 	_check("Nation not founded" in String(runtime.village.hud._tutorial_intro.text), "village_dispatch_keeps_nation_truthful")
