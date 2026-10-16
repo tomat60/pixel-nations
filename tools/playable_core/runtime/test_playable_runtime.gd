@@ -113,6 +113,13 @@ func _run() -> void:
 	_check(String(runtime.village.hud._brand.text) == "Pixel Nations", "village_brand_is_pixel_nations")
 	_check(String(runtime.village.hud._credit_label.text) == "Greengate · Aurelian Basin", "village_location_is_canonical")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate's first road", "village_onboarding_matches_product_loop")
+	_check(String(runtime.village.hud._tabs["build"].text) == "Build", "village_build_command_uses_product_language")
+	_check(String(runtime.village.hud._tabs["road"].text) == "Roads", "village_road_command_uses_product_language")
+	_check(String(runtime.village.hud._tabs["training"].text) == "Trades", "village_trade_command_uses_product_language")
+	_check(String(runtime.village.hud._tabs["army"].text) == "Guard", "village_guard_command_replaces_donor_army_label")
+	_check(String(runtime.village.hud._village_focus.text) == "Greengate", "village_camera_command_uses_canonical_place_name")
+	_check(String(runtime.village.hud._pause.text) == "Pause", "village_pause_command_uses_product_language")
+	_check("Greengate" in String(runtime.village.hud._village_focus.tooltip_text), "village_camera_help_uses_canonical_place_name")
 	_check(
 		not runtime.title_label.visible
 		and not runtime.identity_label.visible
