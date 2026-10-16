@@ -87,7 +87,6 @@ jobs:
           assert manifest["playable_scene"] == "res://pixel_nations/playable_core.tscn"
           assert 'config/name="Pixel Nations"' in (p / "project.godot").read_text()
           assert 'config/name="Open Grand Strategy"' not in (p / "project.godot").read_text()
-          assert 'renderer/rendering_method="gl_compatibility"' in (p / "project.godot").read_text()
           PY
 
       - name: Add minimal export presets to transformed project
@@ -169,6 +168,7 @@ jobs:
           renderer/rendering_method.web="gl_compatibility"
           textures/vram_compression/import_etc2_astc=true
           CFG
+          grep -F 'renderer/rendering_method="gl_compatibility"' "$PN_GAME/project.godot"
           mkdir -p "$PN_GAME/build"
 
       - name: Import exact transformed project and export runnable binaries
