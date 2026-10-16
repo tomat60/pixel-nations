@@ -45,6 +45,8 @@ var panel: PanelContainer
 var title_label: Label
 var identity_label: Label
 var detail_label: Label
+var frontier_progress: ProgressBar
+var route_label: Label
 var goal_label: Label
 var claim_button: Button
 var enter_button: Button
@@ -289,16 +291,32 @@ func _build_ui() -> void:
 	title_label = _label("AURELIAN BASIN · A-01", 16)
 	identity_label = _label("Select a canonical land on the map", 18)
 	detail_label = _label("0/30 lands · 0 settlements · Stone 10", 14)
+	frontier_progress = ProgressBar.new()
+	frontier_progress.name = "FrontierProgress"
+	frontier_progress.min_value = 0
+	frontier_progress.max_value = 30
+	frontier_progress.value = 0
+	frontier_progress.show_percentage = false
+	frontier_progress.custom_minimum_size = Vector2(0, 8)
+	frontier_progress.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frontier_progress.add_theme_stylebox_override("background", _progress_style(Color("6a543b80")))
+	frontier_progress.add_theme_stylebox_override("fill", _progress_style(HUD_BRONZE))
+	route_label = _label("ROUTES · No links established\nNATION · Not founded", 13)
 	goal_label = _label("NEXT · Select Greenvale", 14)
 	title_label.add_theme_color_override("font_color", HUD_WINE)
 	identity_label.add_theme_color_override("font_color", HUD_INK)
 	detail_label.add_theme_color_override("font_color", HUD_INK)
+	route_label.add_theme_color_override("font_color", HUD_INK)
 	goal_label.add_theme_color_override("font_color", HUD_WINE)
 	identity_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	route_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	for label in [title_label, identity_label, detail_label, goal_label]:
+	for label in [title_label, identity_label, detail_label]:
 		column.add_child(label)
+	column.add_child(frontier_progress)
+	column.add_child(route_label)
+	column.add_child(goal_label)
 	claim_button = _button("Claim selected land", "ClaimButton", _claim)
 	enter_button = _button("Enter Greengate", "EnterButton", _enter)
 	inspect_button = _button("Inspect Riverbend frontier", "InspectButton", _inspect_frontier)
@@ -323,6 +341,13 @@ func _label(text_value: String, font_size: int) -> Label:
 	label.text = text_value
 	label.add_theme_font_size_override("font_size", font_size)
 	return label
+
+
+func _progress_style(color: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = color
+	style.set_corner_radius_all(3)
+	return style
 
 
 func _button(text_value: String, node_name: String, handler: Callable) -> Button:
@@ -642,8 +667,9 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	# The retained Village already owns the narrative/status hierarchy through
 	# its parchment dispatch card. In that view this panel is navigation and
 	# action chrome only; repeating the same progression copy obscures the scene.
-	for label in [title_label, identity_label, detail_label, goal_label]:
+	for label in [title_label, identity_label, detail_label, route_label, goal_label]:
 		label.visible = view == "world"
+	frontier_progress.visible = view == "world"
 	if view == "village":
 		if village != null:
 			village.hud.set_pixel_nations_resources({
@@ -690,19 +716,23 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	else:
 		title_label.text = "AURELIAN BASIN · A-01"
 		identity_label.text = _land_title(selected_id)
-		detail_label.text = "%d/%d lands · %d settlement%s · Stone %d · Timber %d · Food %d\nRoad %s · Riverbend %s · Highmere %s · Nation not founded" % [
+		detail_label.text = "FRONTIER · %d / %d CLAIMED · %d SETTLEMENT%s\nSTOCKPILE · STONE %d · TIMBER %d · FOOD %d" % [
 			int(snapshot.get("claimed_lands", 0)), int(snapshot.get("charted_lands", 30)),
 			settlement_count,
-			"" if settlement_count == 1 else "s",
+			"" if settlement_count == 1 else "S",
 			int(snapshot.get("stone", 0)),
 			int(snapshot.get("timber", 0)),
 			int(snapshot.get("food", 0)),
-			"built" if bool(snapshot.get("road_built", false)) else "not built",
-			("linked" if bool(snapshot.get("riverbend_connected", false)) else (
-				"claimed" if bool(snapshot.get("riverbend_claimed", false)) else (
-				"inspected" if bool(snapshot.get("riverbend_inspected", false)) else "not inspected"
+		]
+		frontier_progress.max_value = max(1, int(snapshot.get("charted_lands", 30)))
+		frontier_progress.value = int(snapshot.get("claimed_lands", 0))
+		route_label.text = "ROUTES · ROAD %s · RIVERBEND %s · HIGHMERE %s\nNATION · NOT FOUNDED" % [
+			"BUILT" if bool(snapshot.get("road_built", false)) else "NOT BUILT",
+			("LINKED" if bool(snapshot.get("riverbend_connected", false)) else (
+				"CLAIMED" if bool(snapshot.get("riverbend_claimed", false)) else (
+					"INSPECTED" if bool(snapshot.get("riverbend_inspected", false)) else "NOT INSPECTED"
 			))),
-			String(snapshot.get("highmere_status", "locked")).replace("_", " "),
+			String(snapshot.get("highmere_status", "locked")).replace("_", " ").to_upper(),
 		]
 		goal_label.text = "NEXT · %s" % String(snapshot.get("next_goal", ""))
 	claim_button.visible = false
