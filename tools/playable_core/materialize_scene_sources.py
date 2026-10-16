@@ -127,6 +127,18 @@ def apply_pixel_nations_village_identity(village: Path) -> int:
         ),
         "Entendi, vamos começar": "Continue in Greengate",
         "Código e artes do jogo ↗": "Credits, licenses and source ↗",
+        'tr("Construir")': 'tr("Build")',
+        'tr("Estradas")': 'tr("Roads")',
+        "Traçar ou apagar estradas · R · 1 pedra por trecho novo": "Draw or erase roads · R · 1 stone per new segment",
+        'tr("Ofícios")': 'tr("Trades")',
+        "Formar profissionais · também disponível ao clicar em uma escola concluída": "Train village specialists · also available from a completed school",
+        'tr("Exército")': 'tr("Guard")',
+        "Clique no mapa para dar um objetivo à companhia": "Click the village to direct the guard company",
+        'tr("Vila")': 'tr("Greengate")',
+        "Voltar ao centro da vila": "Center the camera on Greengate",
+        'tr("Pausar")': 'tr("Pause")',
+        "Alternar velocidade: 1×, 2×, 4×": "Change speed: 1×, 2×, 4×",
+        "Como jogar": "How to play",
     }
     targets = [
         village / "ui" / "approved_hud.gd",
@@ -147,10 +159,12 @@ def apply_pixel_nations_village_identity(village: Path) -> int:
         "Greengate · Aurelian Basin",
         "Greengate's first road",
         "Credits, licenses and source ↗",
+        'tr("Guard")',
+        'tr("Greengate")',
     )
     if any(value not in hud_text for value in required):
         raise SourceError("Pixel Nations Village identity transform is incomplete")
-    if "The Free Game" in hud_text or "Primeiro, ligue a escola" in hud_text:
+    if any(value in hud_text for value in ("The Free Game", "Primeiro, ligue a escola", 'tr("Exército")', 'tr("Vila")')):
         raise SourceError("player-visible donor identity remains after Village transform")
     return changed
 
@@ -177,7 +191,7 @@ def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -
 - OpenGS `ne2.png` is a Thomas Holtvedt QGIS derivative of the public-domain Natural Earth 2 raster; its exact hash and source URL are pinned in the integration spec.
 - Village source: Lucas Marques, from Shiva — The Free Game, `{village_commit}`.
 - Village files are moved below `res://village/`; textual `res://` references are rewritten to that namespace.
-- Player-visible Village branding and first-run guidance are changed to Pixel Nations / Greengate; donor credits, licenses, source link and notices remain available under Credits.
+- Player-visible Village branding, first-run guidance and command dock are changed to Pixel Nations / Greengate English; donor credits, licenses, source link and notices remain available under Credits.
 - Pixel Nations adds a namespaced integration scene, canonical A-01 hit geometry, truthful state UI, and World/Village navigation under `res://pixel_nations/`.
 - Canonical land borders are restyled into a state-aware cartographic hierarchy: neutral boundaries recede beneath the painted geography while inspected, claimed and selected lands remain explicit.
 - Reachable Atlas labels are split into primary place names and smaller truthful settlement/route-state subtitles so development remains visible without turning overview labels into dense text blocks.
