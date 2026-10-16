@@ -162,8 +162,30 @@ jobs:
           
           [rendering]
           
+          # Prefer wide-compatibility OpenGL on Intel Macs that crash at window startup.
+          renderer/rendering_method="gl_compatibility"
+          renderer/rendering_method.mobile="gl_compatibility"
+          renderer/rendering_method.web="gl_compatibility"
           textures/vram_compression/import_etc2_astc=true
+
+          [display]
+
+          # Open the map at usable desktop scale, not donor's tiny HiDPI window.
+          # Maximized is a normal resizable window (not exclusive fullscreen).
+          window/size/mode=2
+          window/size/viewport_width=1280
+          window/size/viewport_height=800
+          window/size/window_width_override=1280
+          window/size/window_height_override=800
+          window/size/initial_position_type=1
+          window/dpi/allow_hidpi=true
+          window/stretch/mode="canvas_items"
+          window/stretch/aspect="expand"
           CFG
+          grep -F 'renderer/rendering_method="gl_compatibility"' "$PN_GAME/project.godot"
+          grep -F 'window/size/mode=2' "$PN_GAME/project.godot"
+          grep -F 'window/stretch/mode="canvas_items"' "$PN_GAME/project.godot"
+          grep -F 'window/dpi/allow_hidpi=true' "$PN_GAME/project.godot"
           mkdir -p "$PN_GAME/build"
 
       - name: Import exact transformed project and export runnable binaries
@@ -190,7 +212,12 @@ jobs:
           macOS may require Finder > Control-click > Open or System Settings > Privacy & Security > Open Anyway.
           Verify the source before overriding a macOS security warning.
           Godot export minimum: Intel macOS 11.0 / Apple Silicon macOS 13.0.
-          Mac CI verifies the signed app and binary startup; owner's own hardware test remains necessary.
+          Intel Mac GUI startup was confirmed by the owner only when launching with
+          --rendering-method gl_compatibility --rendering-driver opengl3.
+          This build uses Compatibility as the DEFAULT renderer and opens in a
+          maximized, resizable window with HiDPI-aware UI scaling.
+          Native double-click startup is still an owner acceptance gate.
+          Mac CI verifies signing and headless startup, NOT the GUI renderer.
           Never disable Gatekeeper globally.
           TXT
           chmod +x dist/Pixel-Nations-Linux.x86_64
