@@ -99,11 +99,19 @@ func _run() -> void:
 	_check(String(runtime.village.hud._brand.text) == "Pixel Nations", "village_brand_is_pixel_nations")
 	_check(String(runtime.village.hud._credit_label.text) == "Greengate · Aurelian Basin", "village_location_is_canonical")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate's first road", "village_onboarding_matches_product_loop")
+	_check(
+		not runtime.title_label.visible
+		and not runtime.identity_label.visible
+		and not runtime.detail_label.visible
+		and not runtime.goal_label.visible,
+		"village_dispatch_is_single_progression_hierarchy"
+	)
 	_check(not runtime.village.hud._objectives_panel.is_visible_in_tree(), "unrelated_donor_objectives_are_hidden")
 	_check(not (runtime.village.hud._tabs["objectives"] as Button).is_visible_in_tree(), "unrelated_donor_objective_tab_is_hidden")
+	_check(not runtime.village.hud._status_panel.is_visible_in_tree(), "unrelated_donor_status_sidebar_is_hidden")
 	_check("Credits" in String(runtime.village.hud._code_button.text), "village_credits_remain_accessible")
 	_check(runtime.village_paved_road == null, "canonical_road_absent_before_build")
-	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 460.0, "village_context_panel_is_compact")
+	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 240.0, "village_navigation_panel_is_compact")
 	_check(runtime.road_button.visible and runtime.return_button.visible and runtime.save_button.visible, "village_shows_relevant_actions")
 	_check(not runtime.claim_button.visible and not runtime.inspect_button.visible and not runtime.connect_button.visible, "village_hides_world_actions")
 	var donor_stock_hidden := true
@@ -126,6 +134,13 @@ func _run() -> void:
 	await process_frame
 	var world_snapshot: Dictionary = runtime.controller.current_snapshot()
 	_check(String(world_snapshot.get("view", "")) == "world", "return_button_opens_world")
+	_check(
+		runtime.title_label.visible
+		and runtime.identity_label.visible
+		and runtime.detail_label.visible
+		and runtime.goal_label.visible,
+		"world_restores_atlas_progression_hierarchy"
+	)
 	_check(bool(world_snapshot.get("road_built", false)), "world_reports_road")
 	_check(String(world_snapshot.get("nation_status", "")) == "not_founded", "nation_status_truthful")
 	runtime.controller.session.state = runtime.controller.session.state.duplicate(true)

@@ -616,6 +616,10 @@ func _show_village() -> void:
 	village.hud._objectives_panel.reparent(hidden_objectives)
 	if village.hud._tabs.has("objectives"):
 		(village.hud._tabs["objectives"] as Button).reparent(hidden_objectives)
+	# The donor status sidebar reports its separate simulation in Portuguese and
+	# competes with the canonical dispatch. Preserve its refresh logic under the
+	# same hidden holder rather than relying on our panel to cover it visually.
+	village.hud._status_panel.reparent(hidden_objectives)
 	panel.move_to_front()
 
 
@@ -635,6 +639,11 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	var view := String(snapshot.get("view", "world"))
 	var selected_id := String(snapshot.get("selected_land_id", ""))
 	var settlement_count := int(snapshot.get("settlement_count", 0))
+	# The retained Village already owns the narrative/status hierarchy through
+	# its parchment dispatch card. In that view this panel is navigation and
+	# action chrome only; repeating the same progression copy obscures the scene.
+	for label in [title_label, identity_label, detail_label, goal_label]:
+		label.visible = view == "world"
 	if view == "village":
 		title_label.text = "PIXEL NATIONS · GREENGATE"
 		identity_label.text = "Greenvale settlement"
