@@ -73,6 +73,9 @@ func _run() -> void:
 	_check(runtime.panel.get_theme_stylebox("panel") is StyleBoxTexture, "pixel_nations_panel_reuses_village_parchment")
 	_check(runtime.claim_button.get_theme_stylebox("normal") is StyleBoxFlat, "pixel_nations_actions_use_retained_village_button_language")
 	_check(runtime.detail_label.get_theme_color("font_color") == runtime.HUD_INK, "parchment_panel_uses_readable_dark_ink")
+	_check(runtime.frontier_progress.visible, "world_shows_claimed_land_progress")
+	_check(runtime.frontier_progress.max_value == 30.0, "world_progress_uses_canonical_land_total")
+	_check(runtime.frontier_progress.value == 0.0, "world_progress_starts_unclaimed")
 	var home_screen: Vector2 = player.camera.unproject_position(
 		Vector3(home_world.x, 0.0, home_world.y)
 	)
@@ -101,6 +104,10 @@ func _run() -> void:
 	await _click_control(runtime.claim_button)
 	_check(String(runtime.controller.current_snapshot().get("claimed_land_id", "")) == HOME_ID, "claim_button_claims_home")
 	await process_frame
+	_check(runtime.frontier_progress.value == 1.0, "world_progress_tracks_claimed_home")
+	_check("FRONTIER · 1 / 30 CLAIMED · 0 SETTLEMENTS" in runtime.detail_label.text, "world_groups_frontier_progress")
+	_check("STOCKPILE · STONE 10 · TIMBER 0 · FOOD 0" in runtime.detail_label.text, "world_groups_canonical_stockpile")
+	_check("NATION · NOT FOUNDED" in runtime.route_label.text, "world_keeps_nation_state_truthful")
 	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 420.0, "world_context_panel_is_compact")
 	_check(runtime.enter_button.visible and runtime.save_button.visible, "world_shows_relevant_actions")
 	_check(not runtime.claim_button.visible and not runtime.inspect_button.visible and not runtime.connect_button.visible, "world_hides_irrelevant_actions")
@@ -132,6 +139,8 @@ func _run() -> void:
 		not runtime.title_label.visible
 		and not runtime.identity_label.visible
 		and not runtime.detail_label.visible
+		and not runtime.frontier_progress.visible
+		and not runtime.route_label.visible
 		and not runtime.goal_label.visible,
 		"village_dispatch_is_single_progression_hierarchy"
 	)
@@ -166,6 +175,8 @@ func _run() -> void:
 		runtime.title_label.visible
 		and runtime.identity_label.visible
 		and runtime.detail_label.visible
+		and runtime.frontier_progress.visible
+		and runtime.route_label.visible
 		and runtime.goal_label.visible,
 		"world_restores_atlas_progression_hierarchy"
 	)
