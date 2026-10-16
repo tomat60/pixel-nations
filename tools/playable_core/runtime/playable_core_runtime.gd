@@ -616,6 +616,10 @@ func _show_village() -> void:
 	village.hud._objectives_panel.reparent(hidden_objectives)
 	if village.hud._tabs.has("objectives"):
 		(village.hud._tabs["objectives"] as Button).reparent(hidden_objectives)
+	# The donor status sidebar reports its separate simulation in Portuguese and
+	# competes with the canonical dispatch. Preserve its refresh logic under the
+	# same hidden holder rather than relying on our panel to cover it visually.
+	village.hud._status_panel.reparent(hidden_objectives)
 	panel.move_to_front()
 
 

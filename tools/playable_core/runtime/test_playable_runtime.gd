@@ -108,6 +108,7 @@ func _run() -> void:
 	)
 	_check(not runtime.village.hud._objectives_panel.is_visible_in_tree(), "unrelated_donor_objectives_are_hidden")
 	_check(not (runtime.village.hud._tabs["objectives"] as Button).is_visible_in_tree(), "unrelated_donor_objective_tab_is_hidden")
+	_check(not runtime.village.hud._status_panel.is_visible_in_tree(), "unrelated_donor_status_sidebar_is_hidden")
 	_check("Credits" in String(runtime.village.hud._code_button.text), "village_credits_remain_accessible")
 	_check(runtime.village_paved_road == null, "canonical_road_absent_before_build")
 	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 240.0, "village_navigation_panel_is_compact")
