@@ -51,6 +51,20 @@ func _run() -> void:
 	var substrate := runtime.atlas_root.get_node("FictionalAurelianSubstrate") as MeshInstance3D
 	var substrate_material := substrate.mesh.material as StandardMaterial3D
 	_check(substrate_material.albedo_texture.resource_path.ends_with("a01_atlas_substrate.png"), "painted_aurelian_substrate_installed")
+	var atlas_min := Vector2(INF, INF)
+	var atlas_max := Vector2(-INF, -INF)
+	for corner in [
+		Vector3(-250.0, 0.0, -125.0),
+		Vector3(250.0, 0.0, -125.0),
+		Vector3(-250.0, 0.0, 125.0),
+		Vector3(250.0, 0.0, 125.0),
+	]:
+		var corner_screen: Vector2 = player.camera.unproject_position(corner)
+		atlas_min = atlas_min.min(corner_screen)
+		atlas_max = atlas_max.max(corner_screen)
+	var atlas_coverage := (atlas_max - atlas_min) / Vector2(root.size)
+	_check(atlas_coverage.x >= 0.92 and atlas_coverage.y >= 0.70, "atlas_overview_uses_strategic_viewport")
+	_check(atlas_min.x >= 0.0 and atlas_max.x <= float(root.size.x), "atlas_overview_keeps_complete_painted_basin")
 	var home_material := runtime.land_materials.get(HOME_ID) as StandardMaterial3D
 	_check(home_material.albedo_color.a >= 0.08 and home_material.albedo_color.a <= 0.12, "neutral_land_wash_defers_to_painted_geography")
 	var neutral_border := runtime.land_outline_materials.get(HOME_ID) as StandardMaterial3D

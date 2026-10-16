@@ -13,7 +13,9 @@ const WORLD_TOP := -125.0
 const WORLD_WIDTH := 266.666666
 const WORLD_HEIGHT := 250.0
 const ATLAS_OVERVIEW_POSITION := Vector3(0.0, 0.0, 0.0)
-const ATLAS_OVERVIEW_ZOOM := 250.0
+# Keep the complete retained painting visible, but let it occupy the strategic
+# viewport instead of floating inside a wide band of empty donor background.
+const ATLAS_OVERVIEW_ZOOM := 225.0
 const ATLAS_FOCUS_ZOOM := 82.0
 const HUD_PAPER := Color("f5e4bd")
 const HUD_INK := Color("3a2a18")
