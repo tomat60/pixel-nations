@@ -255,6 +255,7 @@ func _run() -> void:
 	await create_timer(0.6).timeout
 	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "supply_path_enters_village")
 	_check(runtime.village_paved_road != null and runtime.village_paved_road.get_child_count() == 5, "saved_road_reappears_on_village_reentry")
+	_check(not runtime.village.hud._dock.is_visible_in_tree(), "saved_reentry_never_restores_noncanonical_donor_dock")
 	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 0, "village_reentry_still_uses_canonical_stock")
 	await _click_control(runtime.supply_button)
 	var supplied_village: Dictionary = runtime.controller.current_snapshot()
