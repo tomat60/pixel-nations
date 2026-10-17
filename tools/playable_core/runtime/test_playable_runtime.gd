@@ -154,6 +154,7 @@ func _run() -> void:
 	_check(runtime.village_paved_road == null, "canonical_road_absent_before_build")
 	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 240.0, "village_navigation_panel_is_compact")
 	_check(runtime.road_button.visible and runtime.return_button.visible and runtime.save_button.visible, "village_shows_relevant_actions")
+	_check(String(runtime.village.hud._tutorial_button.text) == "Continue in Greengate", "village_local_guidance_stays_in_greengate")
 	_check(not runtime.claim_button.visible and not runtime.inspect_button.visible and not runtime.connect_button.visible, "village_hides_world_actions")
 	for donor_item in ["gold", "trunks", "loaves", "population"]:
 		_check(not (runtime.village.hud._resource_buttons[donor_item] as Button).visible, "noncanonical_%s_stock_is_hidden" % donor_item)
@@ -164,16 +165,17 @@ func _run() -> void:
 	_check(runtime.village_paved_road != null, "canonical_road_scene_created")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Aurelian frontier dispatch", "completed_road_replaces_first_road_guidance")
 	_check("Nation not founded" in String(runtime.village.hud._tutorial_intro.text), "village_dispatch_keeps_nation_truthful")
+	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "completed_road_dispatch_offers_truthful_world_navigation")
 	if runtime.village_paved_road != null:
 		_check(runtime.village_paved_road.get_child_count() == 5, "canonical_road_has_five_real_tiles")
 		for tile in runtime.village_paved_road.get_children():
 			_check((tile as Node3D).get_node_or_null("StoneSurface") is MeshInstance3D, "canonical_tile_uses_retained_paving_mesh")
 	await process_frame
 	_capture("village-road-built")
-	await _click_control(runtime.return_button)
+	await _click_control(runtime.village.hud._tutorial_button)
 	await process_frame
 	var world_snapshot: Dictionary = runtime.controller.current_snapshot()
-	_check(String(world_snapshot.get("view", "")) == "world", "return_button_opens_world")
+	_check(String(world_snapshot.get("view", "")) == "world", "tutorial_dispatch_opens_world")
 	_check(runtime.enter_button.text == "Enter Greengate", "founded_settlement_is_now_entered_not_refounded")
 	_check(
 		runtime.title_label.visible
@@ -503,8 +505,10 @@ func _run() -> void:
 	_check(not feast_rig.is_empty() and (feast_rig.get("cargo") as Node3D).visible, "harvest_feast_uses_authored_food_cargo")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate Harvest Feast", "harvest_feast_has_coherent_village_identity")
 	_check(String(feast_village.get("nation_status", "")) == "not_founded", "harvest_feast_ui_uses_truthful_canonical_nation_status")
+	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "post_feast_dispatch_offers_truthful_world_navigation")
 	_capture("village-harvest-feast-held")
-	await _click_control(runtime.return_button)
+	await _click_control(runtime.village.hud._tutorial_button)
+	_check(String(runtime.controller.current_snapshot().get("view", "")) == "world", "post_feast_dispatch_opens_world")
 	runtime.controller.session.state["resources"]["food"] = 5
 	runtime.controller.session.state["settlement"]["completed_orders"].erase(GameState.GREENGATE_HARVEST_FEAST_ORDER_ID)
 	_check(runtime.controller.load_game(), "harvest_feast_reopens")
@@ -517,6 +521,7 @@ func _run() -> void:
 	await process_frame
 	_check(runtime.village_harvest_feast != null and runtime.village_harvest_feast.get_child_count() == 5, "reopen_recreates_harvest_feast_gathering")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate Harvest Feast", "reopen_keeps_harvest_feast_guidance")
+	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "reopen_keeps_truthful_world_navigation")
 	_capture("village-harvest-feast-reopened")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
