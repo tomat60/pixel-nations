@@ -4,6 +4,10 @@ extends Node
 const WorldScene = preload("res://game/main_game.tscn")
 const VillageScene = preload("res://village/scenes/approved.tscn")
 const ApprovedPeople = preload("res://village/presentation/approved_people.gd")
+# Reuse the LEGAL, already authored village architecture for actual saved atlas
+# settlement states. No blocks, fake cities or foreign style assets.
+const ApprovedBuildings = preload("res://village/presentation/approved_buildings.gd")
+const ApprovedCivil = preload("res://village/presentation/approved_civil_buildings.gd")
 const Controller = preload("res://pixel_nations/core/playable_core_controller.gd")
 
 const MAP_WIDTH := 960.0
@@ -34,6 +38,7 @@ var highmere_survey_material: StandardMaterial3D
 var northgate_scout_link: MeshInstance3D
 var northgate_scout_material: StandardMaterial3D
 var atlas_root: Node3D
+var atlas_settlement_sites: Dictionary = {}
 var land_materials: Dictionary = {}
 var land_outline_materials: Dictionary = {}
 var land_labels: Dictionary = {}
@@ -1055,7 +1060,63 @@ func _sync_village_harvest_feast(snapshot: Dictionary) -> void:
 	village_harvest_feast.add_child(feast_light)
 
 
+# Atlas villages are small *physical* versions of the existing donor's authored
+# buildings, not HUD pins. State always comes from the canonical save. Never
+# invent a hamlet or storehouse before the matching paid/founded action.
+func _sync_atlas_settlements(snapshot: Dictionary) -> void:
+	if atlas_root == null:
+		return
+	var greenvale_founded := bool(snapshot.get("settlement_founded", false))
+	var riverbend_founded := bool(snapshot.get("riverbend_hamlet_founded", false))
+	var riverbend_storehouse := bool(snapshot.get("riverbend_storehouse_built", false))
+	if greenvale_founded and not atlas_settlement_sites.has("greenvale"):
+		var greenvale := Node3D.new()
+		greenvale.name = "GreenvaleGreengateAtlasSettlement"
+		var center := canonical_center_world("PN-A01-001")
+		greenvale.position = Vector3(center.x, 0.6, center.y)
+		var town_hall: Node3D = ApprovedBuildings.building("hall")
+		town_hall.name = "RetainedGreengateTownHall"
+		town_hall.scale = Vector3.ONE * 2.0
+		town_hall.rotation.y = -0.32
+		greenvale.add_child(town_hall)
+		atlas_root.add_child(greenvale)
+		atlas_settlement_sites["greenvale"] = greenvale
+	if riverbend_founded and not atlas_settlement_sites.has("riverbend"):
+		var riverbend := Node3D.new()
+		riverbend.name = "RiverbendHamletAtlasSettlement"
+		var center := canonical_center_world("PN-A01-002")
+		riverbend.position = Vector3(center.x, 0.6, center.y)
+		var hamlet_house: Node3D = ApprovedCivil.building("house")
+		hamlet_house.name = "RetainedRiverbendHamletHouse"
+		hamlet_house.position = Vector3(-3.0, 0.0, -1.6)
+		hamlet_house.scale = Vector3.ONE * 1.65
+		hamlet_house.rotation.y = 0.4
+		riverbend.add_child(hamlet_house)
+		atlas_root.add_child(riverbend)
+		atlas_settlement_sites["riverbend"] = riverbend
+	if riverbend_storehouse and atlas_settlement_sites.has("riverbend"):
+		var riverbend: Node3D = atlas_settlement_sites["riverbend"]
+		if riverbend.get_node_or_null("RetainedRiverbendStorehouse") == null:
+			var store: Node3D = ApprovedCivil.building("store")
+			store.name = "RetainedRiverbendStorehouse"
+			store.position = Vector3(5.0, 0.0, 1.8)
+			store.scale = Vector3.ONE * 1.45
+			store.rotation.y = -0.18
+			riverbend.add_child(store)
+	# Hide if the canonical state was reloaded/rolled back; the next valid
+	# founding event restores it without duplicating architecture.
+	if atlas_settlement_sites.has("greenvale"):
+		(atlas_settlement_sites["greenvale"] as Node3D).visible = greenvale_founded
+	if atlas_settlement_sites.has("riverbend"):
+		var riverbend: Node3D = atlas_settlement_sites["riverbend"]
+		riverbend.visible = riverbend_founded
+		var storehouse := riverbend.get_node_or_null("RetainedRiverbendStorehouse")
+		if storehouse != null:
+			(storehouse as Node3D).visible = riverbend_storehouse
+
+
 func _refresh_land_visuals(snapshot: Dictionary) -> void:
+	_sync_atlas_settlements(snapshot)
 	var selected_id := String(snapshot.get("selected_land_id", ""))
 	var claimed_ids: Array = snapshot.get("claimed_land_ids", []) as Array
 	var inspected_ids: Array = snapshot.get("inspected_land_ids", []) as Array
