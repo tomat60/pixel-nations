@@ -488,7 +488,7 @@ func _run() -> void:
 	_check("delivered 5 food" in String(runtime.village.hud._tutorial_more.text), "completed_provisions_report_saved_reward")
 	_check("Harvest Feast" in String(runtime.village.hud._tutorial_more.text), "completed_provisions_offer_visible_feast")
 	_check(runtime.feast_button.visible and not runtime.feast_button.disabled, "harvest_feast_action_is_clickable")
-	_check(runtime.village_frontier_exchange != null and runtime.village_frontier_exchange.get_child_count() == 3, "saved_storehouse_builds_authored_frontier_exchange")
+	_check(runtime.village_frontier_exchange != null and runtime.village_frontier_exchange.get_child_count() == 4, "saved_storehouse_builds_authored_frontier_exchange")
 	var exchange_storehouse: Node3D = runtime.village_frontier_exchange.get_node("RiverbendExchangeStorehouse") as Node3D
 	_check(String(exchange_storehouse.get_meta("catalog_id", "")) == "bld_03_armazem", "frontier_exchange_uses_approved_storehouse_catalog")
 	_check(exchange_storehouse.get_meta("footprint_m", Vector2.ZERO) == Vector2(7.1, 7.1), "frontier_exchange_uses_full_scale_storehouse")

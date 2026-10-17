@@ -1036,12 +1036,11 @@ func _sync_village_frontier_exchange(snapshot: Dictionary) -> void:
 	village.world.add_child(village_frontier_exchange)
 	var storehouse: Node3D = ApprovedBuildings.building("store")
 	storehouse.name = "RiverbendExchangeStorehouse"
-	storehouse.position = Vector3(35.0, donor_terrain.support_height(35.0, 33.0), 33.0)
-	# The donor storehouse presents its loading bay toward +Z; turn it toward the
-	# east-west merchant road immediately north of this yard.
-	storehouse.rotation.y = PI
+	storehouse.position = Vector3(37.0, donor_terrain.support_height(37.0, 21.0), 21.0)
+	# The donor storehouse presents its loading bay toward +Z, directly onto the
+	# merchant-road spur. The open east frontage keeps the school silhouette clear.
 	village_frontier_exchange.add_child(storehouse)
-	for cell in [Vector2i(17, 14), Vector2i(17, 15)]:
+	for cell in [Vector2i(18, 14), Vector2i(18, 13), Vector2i(18, 12)]:
 		var tile := Node3D.new()
 		tile.name = "FrontierExchangeRoadTile_%d_%d" % [cell.x, cell.y]
 		village_frontier_exchange.add_child(tile)
