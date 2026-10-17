@@ -976,7 +976,7 @@ func _village_guidance_requires_world(snapshot: Dictionary) -> bool:
 
 
 func _on_village_tutorial_pressed() -> void:
-	var snapshot := controller.current_snapshot()
+	var snapshot: Dictionary = controller.current_snapshot()
 	if _village_guidance_requires_world(snapshot):
 		_return_world()
 
