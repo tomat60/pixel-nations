@@ -626,6 +626,7 @@ func _show_village() -> void:
 		village = VillageScene.instantiate()
 		village.name = "GreengateVillage"
 		add_child(village)
+		village.hud._tutorial_button.pressed.connect(_on_village_tutorial_pressed)
 	village.process_mode = Node.PROCESS_MODE_INHERIT
 	# The retained top bar is useful Village chrome, but its economy is separate.
 	# _render_snapshot feeds it only the canonical Pixel Nations stock.
@@ -956,7 +957,28 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 			"" if int(snapshot.get("settlement_count", 0)) == 1 else "s",
 		]
 		hud._tutorial_more.text = "Next: %s." % String(snapshot.get("next_goal", "Return to World"))
-	hud._tutorial_button.text = "Continue in Greengate"
+	hud._tutorial_button.text = "Return to World" if _village_guidance_requires_world(snapshot) else "Continue in Greengate"
+
+
+# The parchment dispatch must point at the same place as its copy. Keep the
+# decision state-driven so copy edits cannot silently break the navigation.
+func _village_guidance_requires_world(snapshot: Dictionary) -> bool:
+	return (
+		(bool(snapshot.get("road_built", false)) and not bool(snapshot.get("riverbend_inspected", false)))
+		or (bool(snapshot.get("highmere_survey_commissioned", false)) and not bool(snapshot.get("highmere_inspected", false)))
+		or (bool(snapshot.get("highmere_link_supply_delivered", false)) and not bool(snapshot.get("highmere_connected", false)))
+		or (bool(snapshot.get("highmere_connected", false)) and not bool(snapshot.get("northgate_inspected", false)))
+		or (bool(snapshot.get("northgate_settlement_timber_delivered", false)) and not bool(snapshot.get("riverbend_hamlet_founded", false)))
+		or (bool(snapshot.get("riverbend_storehouse_stone_delivered", false)) and not bool(snapshot.get("riverbend_storehouse_built", false)))
+		or (bool(snapshot.get("riverbend_storehouse_built", false)) and not bool(snapshot.get("riverbend_storehouse_provisions_collected", false)))
+		or bool(snapshot.get("greengate_harvest_feast_held", false))
+	)
+
+
+func _on_village_tutorial_pressed() -> void:
+	var snapshot := controller.current_snapshot()
+	if _village_guidance_requires_world(snapshot):
+		_return_world()
 
 
 # Project only the canonical BUILD_ROAD action onto the retained donor's real
