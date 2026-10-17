@@ -645,6 +645,13 @@ func _show_village() -> void:
 	# competes with the canonical dispatch. Preserve its refresh logic under the
 	# same hidden holder rather than relying on our panel to cover it visually.
 	village.hud._status_panel.reparent(hidden_objectives)
+	# The retained donor's Build/Roads/Trades/Guard dock issues commands to a
+	# different simulation that is NOT part of the Pixel Nations save. Its
+	# buttons look like real construction choices but create no canonical land
+	# progress. Hide that whole dock instead of exposing deceptive actions.
+	# Keep the donor scene/simulation intact; canonical context actions remain
+	# in our panel, with village resources in the retained top bar.
+	village.hud._dock.reparent(hidden_objectives)
 	panel.move_to_front()
 
 
@@ -773,6 +780,9 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		and not (riverbend_claim_ready or highmere_claim_ready)
 	)
 	enter_button.visible = view == "world" and selected_id == "PN-A01-001" and String(snapshot.get("claimed_land_id", "")) == "PN-A01-001"
+	# The first entrance actually creates a settlement in the canonical state.
+	# Never label that founding action as merely visiting an existing village.
+	enter_button.text = "Found Greengate" if settlement_count == 0 else "Enter Greengate"
 	enter_button.disabled = not enter_button.visible
 	var riverbend_inspection_ready := (
 		selected_id == "PN-A01-002"
@@ -920,7 +930,7 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 			int(snapshot.get("charted_lands", 30)),
 			int(snapshot.get("settlement_count", 0)),
 		]
-		hud._tutorial_more.text = "Five food provisioned a saved gathering in Greengate's plaza. Further settlement growth is not yet playable."
+		hud._tutorial_more.text = "The feast is saved and its gathering remains in the plaza. Return to World to choose your next frontier direction; Nation is not yet founded."
 	elif bool(snapshot.get("riverbend_storehouse_provisions_collected", false)):
 		hud._tutorial_title.text = "Riverbend provisions delivered"
 		hud._tutorial_intro.text = "%d/%d lands claimed · %d settlements · Nation not founded." % [
