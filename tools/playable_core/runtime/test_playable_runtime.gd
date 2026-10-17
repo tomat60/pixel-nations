@@ -112,11 +112,15 @@ func _run() -> void:
 	_check(runtime.enter_button.visible and runtime.save_button.visible, "world_shows_relevant_actions")
 	_check(runtime.enter_button.text == "Found Greengate", "first_world_action_explicitly_founds_settlement")
 	_check(not runtime.claim_button.visible and not runtime.inspect_button.visible and not runtime.connect_button.visible, "world_hides_irrelevant_actions")
+	_check(not runtime.atlas_settlement_sites.has("greenvale"), "unfounded_land_has_no_fake_town")
 	_capture("world-claimed")
 	await _click_control(runtime.enter_button)
 	await process_frame
 	await create_timer(0.6).timeout
 	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "enter_button_opens_village")
+	_check(runtime.atlas_settlement_sites.has("greenvale"), "found_greengate_projects_authored_town_to_atlas")
+	var greenvale_site := runtime.atlas_settlement_sites.get("greenvale") as Node3D
+	_check(greenvale_site != null and greenvale_site.get_node_or_null("RetainedGreengateTownHall") != null, "greengate_uses_retained_village_architecture")
 	_check(runtime.village != null, "real_village_scene_instantiated")
 	_check(String(runtime.village.hud._brand.text) == "Pixel Nations", "village_brand_is_pixel_nations")
 	_check(String(runtime.village.hud._credit_label.text) == "Greengate · Aurelian Basin", "village_location_is_canonical")
@@ -415,6 +419,10 @@ func _run() -> void:
 	await _click_control(runtime.hamlet_button)
 	var hamlet_world: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(hamlet_world.get("riverbend_hamlet_founded", false)), "riverbend_hamlet_founded")
+	_check(runtime.atlas_settlement_sites.has("riverbend"), "hamlet_founding_adds_authored_riverbend_map_housing")
+	var riverbend_site := runtime.atlas_settlement_sites.get("riverbend") as Node3D
+	_check(riverbend_site != null and riverbend_site.get_node_or_null("RetainedRiverbendHamletHouse") != null, "riverbend_has_real_retained_house_model")
+	_check(riverbend_site.get_node_or_null("RetainedRiverbendStorehouse") == null, "unbuilt_storehouse_not_shown_on_atlas")
 	_check(int(hamlet_world.get("settlement_count", -1)) == 2, "world_reports_two_settlements")
 	_check(int(hamlet_world.get("timber", -1)) == 0, "riverbend_hamlet_costs_five_timber")
 	_check(String(hamlet_world.get("nation_status", "")) == "not_founded", "riverbend_hamlet_does_not_invent_nation")
@@ -448,6 +456,7 @@ func _run() -> void:
 	await _click_control(runtime.storehouse_button)
 	var storehouse_world: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(storehouse_world.get("riverbend_storehouse_built", false)), "riverbend_storehouse_built")
+	_check(riverbend_site.get_node_or_null("RetainedRiverbendStorehouse") != null, "storehouse_appears_as_authored_building_only_after_build")
 	_check(int(storehouse_world.get("stone", -1)) == 0, "riverbend_storehouse_costs_five_stone")
 	_check(String(storehouse_world.get("nation_status", "")) == "not_founded", "riverbend_storehouse_does_not_invent_nation")
 	_check("STOREHOUSE" in String((runtime.land_subtitles.get(FRONTIER_ID) as Label3D).text), "riverbend_subtitle_shows_storehouse")
@@ -457,6 +466,7 @@ func _run() -> void:
 	_check(runtime.controller.load_game(), "riverbend_storehouse_reopens")
 	var storehouse_reopened: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(storehouse_reopened.get("riverbend_storehouse_built", false)), "reopen_keeps_riverbend_storehouse")
+	_check((riverbend_site.get_node("RetainedRiverbendStorehouse") as Node3D).visible, "storehouse_architecture_persists_after_reopen")
 	_check(String(storehouse_reopened.get("next_goal", "")) == "Collect Riverbend Storehouse's first provisions", "storehouse_reopen_reports_first_production_goal")
 	await process_frame
 	_capture("world-riverbend-storehouse-reopened")
