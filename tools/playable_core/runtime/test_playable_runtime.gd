@@ -439,6 +439,7 @@ func _run() -> void:
 	var storehouse_supply_village: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(storehouse_supply_village.get("riverbend_storehouse_stone_delivered", false)), "storehouse_stone_delivered")
 	_check(int(storehouse_supply_village.get("stone", -1)) == 5, "storehouse_supply_adds_five_stone")
+	_check(runtime.village_frontier_exchange == null, "frontier_exchange_waits_for_saved_storehouse")
 	_capture("village-riverbend-storehouse-stone")
 	await _click_control(runtime.return_button)
 	await process_frame
@@ -487,6 +488,10 @@ func _run() -> void:
 	_check("delivered 5 food" in String(runtime.village.hud._tutorial_more.text), "completed_provisions_report_saved_reward")
 	_check("Harvest Feast" in String(runtime.village.hud._tutorial_more.text), "completed_provisions_offer_visible_feast")
 	_check(runtime.feast_button.visible and not runtime.feast_button.disabled, "harvest_feast_action_is_clickable")
+	_check(runtime.village_frontier_exchange != null and runtime.village_frontier_exchange.get_child_count() == 3, "saved_storehouse_builds_authored_frontier_exchange")
+	var exchange_storehouse: Node3D = runtime.village_frontier_exchange.get_node("RiverbendExchangeStorehouse") as Node3D
+	_check(String(exchange_storehouse.get_meta("catalog_id", "")) == "bld_03_armazem", "frontier_exchange_uses_approved_storehouse_catalog")
+	_check(exchange_storehouse.get_meta("footprint_m", Vector2.ZERO) == Vector2(7.1, 7.1), "frontier_exchange_uses_full_scale_storehouse")
 	_check(not runtime.village.hud._objectives_panel.is_visible_in_tree(), "donor_objectives_stay_hidden_after_reopen")
 	_check(not (runtime.village.hud._tabs["objectives"] as Button).is_visible_in_tree(), "donor_objective_tab_stays_hidden_after_reopen")
 	_capture("village-harvest-feast-ready")
