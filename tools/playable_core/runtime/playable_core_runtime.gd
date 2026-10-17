@@ -1066,7 +1066,7 @@ func _sync_village_harvest_feast(snapshot: Dictionary) -> void:
 func _sync_atlas_settlements(snapshot: Dictionary) -> void:
 	if atlas_root == null:
 		return
-	var greenvale_founded := bool(snapshot.get("settlement_founded", false))
+	var greenvale_founded := int(snapshot.get("settlement_count", 0)) >= 1
 	var riverbend_founded := bool(snapshot.get("riverbend_hamlet_founded", false))
 	var riverbend_storehouse := bool(snapshot.get("riverbend_storehouse_built", false))
 	if greenvale_founded and not atlas_settlement_sites.has("greenvale"):
