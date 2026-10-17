@@ -3,6 +3,7 @@ extends Node
 
 const WorldScene = preload("res://game/main_game.tscn")
 const VillageScene = preload("res://village/scenes/approved.tscn")
+const ApprovedBuildings = preload("res://village/presentation/approved_buildings.gd")
 const ApprovedPeople = preload("res://village/presentation/approved_people.gd")
 const Controller = preload("res://pixel_nations/core/playable_core_controller.gd")
 
@@ -26,6 +27,7 @@ var controller: Node
 var world: Node3D
 var village: Node
 var village_paved_road: Node3D
+var village_frontier_exchange: Node3D
 var village_harvest_feast: Node3D
 var frontier_link: MeshInstance3D
 var frontier_link_material: StandardMaterial3D
@@ -662,6 +664,7 @@ func _show_world() -> void:
 		village.queue_free()
 		village = null
 	village_paved_road = null
+	village_frontier_exchange = null
 	village_harvest_feast = null
 	world.visible = true
 	world.process_mode = Node.PROCESS_MODE_INHERIT
@@ -908,6 +911,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		_set_northgate_scout_state(bool(snapshot.get("northgate_inspected", false)))
 	_refresh_land_visuals(snapshot)
 	_sync_village_road_visual(snapshot)
+	_sync_village_frontier_exchange(snapshot)
 	_sync_village_harvest_feast(snapshot)
 	_sync_village_guidance(snapshot)
 	panel.reset_size()
@@ -1007,6 +1011,40 @@ func _sync_village_road_visual(snapshot: Dictionary) -> void:
 		tile.name = "CanonicalRoadTile_%d_%d" % [cell.x, cell.y]
 		village_paved_road.add_child(tile)
 		# Uses the existing authored, terrain-conforming stone mesh/material.
+		donor_terrain._build_road_visual(
+			tile, {"cell": cell, "stage": "complete"}, Vector4.ONE
+		)
+
+
+# Riverbend's saved storehouse creates a real receiving quarter in Greengate:
+# the approved full-scale warehouse, loading yard and a short paved connection
+# to the retained merchant road. This is a physical consequence of the regional
+# settlement link, not a second simulation building or a map-scale figurine.
+func _sync_village_frontier_exchange(snapshot: Dictionary) -> void:
+	if village == null or not is_instance_valid(village):
+		return
+	if not bool(snapshot.get("riverbend_storehouse_built", false)):
+		if village_frontier_exchange != null and is_instance_valid(village_frontier_exchange):
+			village_frontier_exchange.queue_free()
+			village_frontier_exchange = null
+		return
+	if village_frontier_exchange != null and is_instance_valid(village_frontier_exchange):
+		return
+	var donor_terrain: Node3D = village.world.terrain
+	village_frontier_exchange = Node3D.new()
+	village_frontier_exchange.name = "PixelNationsGreengateFrontierExchange"
+	village.world.add_child(village_frontier_exchange)
+	var storehouse: Node3D = ApprovedBuildings.building("store")
+	storehouse.name = "RiverbendExchangeStorehouse"
+	storehouse.position = Vector3(35.0, donor_terrain.support_height(35.0, 33.0), 33.0)
+	# The donor storehouse presents its loading bay toward +Z; turn it toward the
+	# east-west merchant road immediately north of this yard.
+	storehouse.rotation.y = PI
+	village_frontier_exchange.add_child(storehouse)
+	for cell in [Vector2i(17, 14), Vector2i(17, 15)]:
+		var tile := Node3D.new()
+		tile.name = "FrontierExchangeRoadTile_%d_%d" % [cell.x, cell.y]
+		village_frontier_exchange.add_child(tile)
 		donor_terrain._build_road_visual(
 			tile, {"cell": cell, "stage": "complete"}, Vector4.ONE
 		)
