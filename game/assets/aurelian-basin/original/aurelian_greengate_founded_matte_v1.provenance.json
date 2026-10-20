@@ -1,0 +1,13 @@
+{
+  "asset": "aurelian_greengate_founded_matte_v1.png",
+  "role": "editable transparent World progression matte",
+  "created_for": "Pixel Nations Greengate selected and founded states",
+  "creation_mode": "OpenAI built-in first-party image generation, transparent-background edit",
+  "created_on": "2026-10-20",
+  "rights": "Original project-directed asset; no third-party donor material or named-artist imitation requested",
+  "additional_spend_usd": 0,
+  "source_plate": "aurelian_living_atlas_world_v1.webp",
+  "runtime_use": "Alpha-composited worked fields, eastbound road surface, settlement light, smoke and restrained ownership wash; 38% opacity when selected and full opacity after founding",
+  "prompt_summary": "Sparse transparent matte aligned to the lower-center Greengate valley: ochre field furrows, orchard rows, earth-and-stone road, amber hearth light and faint smoke; no UI, text, boundaries, icons, new buildings, bridge, water, trees or props.",
+  "donor_notice_required": false
+}

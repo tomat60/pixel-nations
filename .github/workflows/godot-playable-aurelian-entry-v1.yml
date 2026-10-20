@@ -342,6 +342,7 @@ jobs:
               > "${EVIDENCE_DIR}/${output}.log" 2>&1
             grep -F "PLAYABLE_AURELIAN_ENTRY_READY=$state" "${EVIDENCE_DIR}/${output}.log"
             mv "${EVIDENCE_DIR}/playable-1440x900.png" "${EVIDENCE_DIR}/${output}-1440x900.png"
+            mv "${EVIDENCE_DIR}/playable-360x225.png" "${EVIDENCE_DIR}/${output}-360x225.png"
           done
 
       - name: Capture input-driven development sequence
@@ -358,6 +359,7 @@ jobs:
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=$state" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           done
           grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "AURELIAN_LIVING_ATLAS_CLICK=world_neutral" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_SETTLEMENT_FOUNDING=GREENVALE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT=GREENVALE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_TRADE_ROUTE_CONNECTION=EAST_ROUTE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
@@ -413,7 +415,7 @@ jobs:
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_logistics_line_open" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_north_ridge_logistics_line_greenvale_acknowledges" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_logistics_line_active_frontier_role" "${EVIDENCE_DIR}/playable-entry-sequence.log"
-          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=8190" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=8430" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test -s "${EVIDENCE_DIR}/playable-entry-sequence.avi"
           mediainfo --Output=JSON "${EVIDENCE_DIR}/playable-entry-sequence.avi" > "${EVIDENCE_DIR}/video-metadata.json"
           for direction in trade expand frontier; do
@@ -504,7 +506,7 @@ jobs:
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_coordination_map_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_coordination_village_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_coordination_world_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=8190" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=8430" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
           done
 
       - name: Validate evidence
@@ -540,7 +542,7 @@ jobs:
           if not match: raise SystemExit("duration missing")
           duration=float(match.group(0))
           if duration>1000: duration/=1000
-          if not 272.0<=duration<=274.0: raise SystemExit(f"duration {duration}")
+          if not 280.0<=duration<=282.0: raise SystemExit(f"duration {duration}")
           qa={"status":"PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_REVIEW","exact_head":(root/"exact-head.txt").read_text().strip(),"stills":report,"video_seconds":duration,"claim":"east_route","settlement":"greenvale","founded":True,"developed":True,"route_connected":True,"world_trade_active":True,"caravan_dispatched":True,"world_first_trade_underway":True,"city_chartered":True,"city_marker_topology":[354,285],"national_direction":"expand","direction_commitment":True,"national_mandate_started":True,"empire_proclaimed":True,"imperial_crisis":"river_surge","imperial_crisis_responses":["shield_greenvale","keep_east_bridge_open"],"first_rival_countermove":"obsidian_march","first_rival_responses":["stand_firm","negotiate_passage"],"first_frontier_payoffs":["secure_gilded_crossing","ratify_east_bridge_passage"],"frontier_payoff_loci":{"secure_gilded_crossing":[515,340],"ratify_east_bridge_passage":[515,340]},"imperial_capital":"greenvale","imperial_heartland":"aurelian","mandate_direction_actions":["trade","expand","frontier"],"mandate_loci":{"trade":[435,313],"expand":[700,205],"frontier":[515,340]},"imperial_expansion_target":"north_ridge","claimed_lands":["east_route","north_ridge"],"first_imperial_expansion":"north_ridge_claimed","imperial_expansion_event_count":1,"north_ridge_outpost":"established","north_ridge_outpost_event_count":1,"north_ridge_specializations":["trade_post","watch_post"],"north_ridge_specialization_event_count_per_run":1,"north_ridge_specialization_payoffs":["ridge_logistics_line_open","ridge_signal_lit"],"north_ridge_specialization_payoff_event_count_per_run":1,"first_inter_land_coordinations":["ridge_convoy_dispatched","basin_alert_raised"],"first_inter_land_coordination_event_count_per_run":1}
           (root/"evidence-qa.json").write_text(json.dumps(qa,indent=2)+"\n")
           rows=math.ceil(len(names)/3)
@@ -558,5 +560,22 @@ jobs:
         with:
           name: godot-playable-aurelian-entry-v1-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/godot-playable-aurelian-entry-v1
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload compact visual review artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-playable-aurelian-visual-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/godot-playable-aurelian-entry-v1/exact-head.txt
+            evidence/godot-playable-aurelian-entry-v1/normal-launch-1440x900.png
+            evidence/godot-playable-aurelian-entry-v1/normal-launch-360x225.png
+            evidence/godot-playable-aurelian-entry-v1/world-trade-selected-1440x900.png
+            evidence/godot-playable-aurelian-entry-v1/world-trade-selected-360x225.png
+            evidence/godot-playable-aurelian-entry-v1/world-trade-route-active-1440x900.png
+            evidence/godot-playable-aurelian-entry-v1/world-trade-route-active-360x225.png
+            evidence/godot-playable-aurelian-entry-v1/evidence-qa.json
           if-no-files-found: error
           retention-days: 7

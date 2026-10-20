@@ -168,7 +168,7 @@ func _initialize() -> void:
 		"Claim North Ridge",
 		"AURELIAN_FIRST_IMPERIAL_EXPANSION_INSPECT=NORTH_RIDGE",
 		"AURELIAN_FIRST_IMPERIAL_EXPANSION=NORTH_RIDGE",
-		"PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=8190",
+		"PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=8430",
 	]:
 		_check(controller.contains(token), "controller_token_%s" % token)
 
