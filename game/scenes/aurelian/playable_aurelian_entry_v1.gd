@@ -4,6 +4,7 @@ extends "res://scenes/aurelian/aurelian_decision_loop_v1.gd"
 const SESSION := preload("res://scenes/aurelian/aurelian_session_persistence_v2.gd")
 
 const PLAYABLE_MANIFEST_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
+const LIVING_ATLAS_WORLD_PLATE := preload("res://assets/aurelian-basin/original/aurelian_living_atlas_world_v1.webp")
 const NATIONAL_DIRECTIONS := ["trade", "expand", "frontier"]
 const CRISIS_RESPONSES := ["shield_greenvale", "keep_east_bridge_open"]
 const RIVAL_RESPONSES := ["stand_firm", "negotiate_passage"]
@@ -237,6 +238,14 @@ var north_ridge_specialization_payoff := "none"
 var first_inter_land_coordination := "none"
 var north_ridge_specialization_cursor := 0
 var rival_response_cursor := 0
+var atlas_layer: CanvasLayer
+var atlas_state_root: Node2D
+var atlas_selected_land: Polygon2D
+var atlas_selected_outline: Line2D
+var atlas_route_line: Line2D
+var atlas_hearth_ring: Line2D
+var atlas_place_label: Label
+var atlas_hotspot: Button
 var river_surge_presentation: Node3D
 var mandate_marker: Node3D
 var dispatch_token: Node3D
@@ -462,6 +471,7 @@ func _ready() -> void:
 	super()
 	if cameras.is_empty():
 		return
+	_build_living_atlas_surface()
 	dispatch_token = _build_dispatch_token()
 	main_decision_overlay_root.add_child(dispatch_token)
 	city_marker = _build_city_marker()
@@ -581,7 +591,15 @@ func _capture_playable_still() -> void:
 		push_error("PLAYABLE_AURELIAN_CAPTURE_SAVE_FAILED=%s" % output_path)
 		get_tree().quit(94)
 		return
+	var mobile := image.duplicate()
+	mobile.resize(360, 225, Image.INTERPOLATE_LANCZOS)
+	var mobile_output_path := evidence_dir.path_join("playable-360x225.png")
+	if mobile.save_png(mobile_output_path) != OK:
+		push_error("PLAYABLE_AURELIAN_MOBILE_CAPTURE_SAVE_FAILED=%s" % mobile_output_path)
+		get_tree().quit(95)
+		return
 	print("PLAYABLE_AURELIAN_STILL=%s:%s" % [entry_state, output_path])
+	print("PLAYABLE_AURELIAN_MOBILE_STILL=%s:%s" % [entry_state, mobile_output_path])
 	get_tree().quit(0)
 
 func _complete_headless_smoke() -> void:
@@ -607,6 +625,7 @@ func _load_playable_contract() -> Dictionary:
 func _build_runtime_hud() -> void:
 	hud_layer = CanvasLayer.new()
 	hud_layer.name = "PlayableEntryHUD"
+	hud_layer.layer = 10
 	add_child(hud_layer)
 	var panel := ColorRect.new()
 	panel.name = "DecisionLayerPanel"
@@ -629,6 +648,134 @@ func _build_runtime_hud() -> void:
 	controls_label.add_theme_font_size_override("font_size", 15)
 	controls_label.modulate = Color("#d8e4d6")
 	content.add_child(controls_label)
+
+func _build_living_atlas_surface() -> void:
+	atlas_layer = CanvasLayer.new()
+	atlas_layer.name = "InteractiveLivingAtlasSurface"
+	atlas_layer.layer = 1
+	add_child(atlas_layer)
+
+	var surface := TextureRect.new()
+	surface.name = "AurelianBasinAuthoredSurface"
+	surface.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	surface.texture = LIVING_ATLAS_WORLD_PLATE
+	surface.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	surface.stretch_mode = TextureRect.STRETCH_SCALE
+	surface.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	atlas_layer.add_child(surface)
+
+	atlas_state_root = Node2D.new()
+	atlas_state_root.name = "AtlasStateTreatment"
+	atlas_layer.add_child(atlas_state_root)
+
+	var glow := Line2D.new()
+	glow.name = "SelectedLandGlow"
+	glow.points = PackedVector2Array([Vector2(690, 548), Vector2(720, 505), Vector2(784, 488), Vector2(850, 518), Vector2(879, 573), Vector2(838, 622), Vector2(766, 630), Vector2(706, 598), Vector2(690, 548)])
+	glow.width = 13.0
+	glow.default_color = Color("#efbf5a40")
+	glow.antialiased = true
+	atlas_state_root.add_child(glow)
+
+	atlas_selected_land = Polygon2D.new()
+	atlas_selected_land.name = "SelectedLandWash"
+	atlas_selected_land.polygon = PackedVector2Array([Vector2(690, 548), Vector2(720, 505), Vector2(784, 488), Vector2(850, 518), Vector2(879, 573), Vector2(838, 622), Vector2(766, 630), Vector2(706, 598)])
+	atlas_selected_land.color = Color("#d89b2c22")
+	atlas_state_root.add_child(atlas_selected_land)
+
+	atlas_selected_outline = Line2D.new()
+	atlas_selected_outline.name = "SelectedLandOutline"
+	atlas_selected_outline.points = glow.points
+	atlas_selected_outline.width = 2.5
+	atlas_selected_outline.default_color = Color("#ffd887d9")
+	atlas_selected_outline.antialiased = true
+	atlas_state_root.add_child(atlas_selected_outline)
+
+	atlas_route_line = Line2D.new()
+	atlas_route_line.name = "EastRouteIntegrated"
+	atlas_route_line.points = PackedVector2Array([Vector2(799, 566), Vector2(851, 602), Vector2(917, 633), Vector2(1000, 649), Vector2(1081, 626), Vector2(1140, 589)])
+	atlas_route_line.width = 4.0
+	atlas_route_line.default_color = Color("#8ed5d4c4")
+	atlas_route_line.antialiased = true
+	atlas_state_root.add_child(atlas_route_line)
+
+	atlas_hearth_ring = Line2D.new()
+	atlas_hearth_ring.name = "GreengateHearthRing"
+	var ring_points := PackedVector2Array()
+	for index in range(41):
+		var angle := TAU * float(index) / 40.0
+		ring_points.append(Vector2(794, 566) + Vector2(cos(angle) * 34.0, sin(angle) * 20.0))
+	atlas_hearth_ring.points = ring_points
+	atlas_hearth_ring.width = 3.0
+	atlas_hearth_ring.default_color = Color("#ffcf70e8")
+	atlas_hearth_ring.antialiased = true
+	atlas_state_root.add_child(atlas_hearth_ring)
+
+	atlas_place_label = Label.new()
+	atlas_place_label.name = "GreengatePlaceLabel"
+	atlas_place_label.position = Vector2(715, 455)
+	atlas_place_label.size = Vector2(250, 54)
+	atlas_place_label.text = "GREENGATE  •  LAND AVAILABLE"
+	atlas_place_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	atlas_place_label.add_theme_font_size_override("font_size", 26)
+	atlas_place_label.add_theme_color_override("font_color", Color("#fff0c9"))
+	atlas_place_label.add_theme_color_override("font_outline_color", Color("#17231ee6"))
+	atlas_place_label.add_theme_constant_override("outline_size", 7)
+	atlas_state_root.add_child(atlas_place_label)
+
+	atlas_hotspot = Button.new()
+	atlas_hotspot.name = "GreengateInteractiveLand"
+	atlas_hotspot.position = Vector2(674, 472)
+	atlas_hotspot.size = Vector2(240, 178)
+	atlas_hotspot.flat = true
+	atlas_hotspot.text = ""
+	atlas_hotspot.tooltip_text = "Select Greengate land"
+	atlas_hotspot.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	atlas_hotspot.modulate = Color(1, 1, 1, 0.01)
+	atlas_hotspot.pressed.connect(_on_atlas_land_pressed)
+	atlas_state_root.add_child(atlas_hotspot)
+
+	get_viewport().size_changed.connect(_layout_living_atlas_surface)
+	_layout_living_atlas_surface()
+
+func _layout_living_atlas_surface() -> void:
+	if atlas_state_root == null:
+		return
+	var viewport_size := get_viewport().get_visible_rect().size
+	atlas_state_root.scale = Vector2(viewport_size.x / 1440.0, viewport_size.y / 900.0)
+
+func _on_atlas_land_pressed() -> void:
+	print("AURELIAN_LIVING_ATLAS_CLICK=%s" % entry_state)
+	if entry_state == "world_neutral":
+		_accept_entry()
+	else:
+		_right_entry()
+
+func _refresh_living_atlas_surface(state_name: String) -> void:
+	if atlas_layer == null:
+		return
+	var is_world := state_name.begins_with("world_")
+	atlas_layer.visible = is_world
+	if not is_world:
+		return
+	var selected := state_name != "world_neutral"
+	atlas_selected_land.visible = selected
+	atlas_selected_outline.visible = selected
+	var glow := atlas_state_root.get_node_or_null("SelectedLandGlow") as Line2D
+	if glow != null:
+		glow.visible = selected
+	atlas_hearth_ring.visible = selected
+	atlas_route_line.visible = selected and (settlement_founded or route_connected or caravan_dispatched)
+	atlas_place_label.visible = selected
+	if selected:
+		if settlement_founded:
+			atlas_place_label.text = "GREENGATE  •  SETTLEMENT FOUNDED"
+			atlas_selected_land.color = Color("#65a98b26")
+			atlas_selected_outline.default_color = Color("#b9e7c7d9")
+		else:
+			atlas_place_label.text = "GREENGATE  •  LAND AVAILABLE"
+			atlas_selected_land.color = Color("#d89b2c22")
+			atlas_selected_outline.default_color = Color("#ffd887d9")
+	atlas_hotspot.tooltip_text = "Open Greengate land" if selected else "Select Greengate land"
 
 func _pressed_public_input_action(event: InputEvent) -> String:
 	if event.is_action_pressed("ui_accept"):
@@ -2399,6 +2546,7 @@ func _apply_entry_state(state_name: String) -> void:
 			_activate_camera("village")
 		"village_route_context":
 			_activate_camera("village")
+	_refresh_living_atlas_surface(state_name)
 	_update_runtime_hud()
 	if persistence_enabled:
 		restored_intent = "none" if entry_state == "world_neutral" else "east_trade"
@@ -2416,11 +2564,11 @@ func _update_runtime_hud() -> void:
 		"world_neutral":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "Choose Aurelian's strategic direction"
-			controls_label.text = "[ENTER] Select eastern Trade"
+			controls_label.text = "[CLICK GREENGATE / ENTER] Select first land"
 		"world_trade_selected":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "Trade selected: eastern route opportunity"
-			controls_label.text = "[RIGHT] Open claimed Map    [LEFT] Clear" if settlement_founded else "[RIGHT] Open Map    [LEFT] Clear"
+			controls_label.text = "[CLICK GREENGATE / RIGHT] Open claimed Map    [LEFT] Clear" if settlement_founded else "[CLICK GREENGATE / RIGHT] Open Map    [LEFT] Clear"
 		"world_trade_route_active":
 			layer_label.text = "WORLD  |  WHY"
 			intent_label.text = "Eastern Trade active through connected East Route"
@@ -2835,6 +2983,22 @@ func _emit_action(action_name: String) -> void:
 	event.pressed = false
 	Input.parse_input_event(event)
 
+func _emit_atlas_click() -> void:
+	var viewport_size := get_viewport().get_visible_rect().size
+	var click_position := Vector2(viewport_size.x * 794.0 / 1440.0, viewport_size.y * 566.0 / 900.0)
+	var event := InputEventMouseButton.new()
+	event.button_index = MOUSE_BUTTON_LEFT
+	event.position = click_position
+	event.global_position = click_position
+	event.pressed = true
+	Input.parse_input_event(event)
+	event = InputEventMouseButton.new()
+	event.button_index = MOUSE_BUTTON_LEFT
+	event.position = click_position
+	event.global_position = click_position
+	event.pressed = false
+	Input.parse_input_event(event)
+
 func _process(_delta: float) -> void:
 	_animate_living_capital_presentation(_delta)
 	if not automated_input_mode:
@@ -2842,7 +3006,7 @@ func _process(_delta: float) -> void:
 		return
 	automated_frame += 1
 	if automated_frame == 120:
-		_emit_action("ui_accept")
+		_emit_atlas_click()
 	elif automated_frame == 270:
 		_emit_action("ui_right")
 	elif automated_frame == 420:

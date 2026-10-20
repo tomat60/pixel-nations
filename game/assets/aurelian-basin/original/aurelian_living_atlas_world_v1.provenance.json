@@ -1,0 +1,12 @@
+{
+  "asset": "aurelian_living_atlas_world_v1.webp",
+  "role": "original production World background plate",
+  "created_for": "Pixel Nations Aurelian Basin / Sector A-01",
+  "creation_mode": "OpenAI built-in first-party image generation",
+  "created_on": "2026-10-20",
+  "rights": "Original project-directed asset; no third-party donor material or named-artist imitation requested",
+  "additional_spend_usd": 0,
+  "prompt_summary": "Painterly 2.5D Living Atlas river basin with dominant geography, a physically integrated Greengate river-crossing settlement, restrained roads and no UI, text, borders, icons, grid, logos or franchise-derived elements.",
+  "runtime_use": "Full-frame interactive World surface with deterministic Greengate click region and state-integrated selection/route layers; Map and Village spatial scenes remain unchanged.",
+  "donor_notice_required": false
+}

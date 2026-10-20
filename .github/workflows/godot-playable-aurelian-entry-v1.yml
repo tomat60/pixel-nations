@@ -358,6 +358,7 @@ jobs:
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=$state" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           done
           grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "AURELIAN_LIVING_ATLAS_CLICK=world_neutral" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_SETTLEMENT_FOUNDING=GREENVALE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT=GREENVALE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_TRADE_ROUTE_CONNECTION=EAST_ROUTE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
