@@ -352,7 +352,7 @@ jobs:
           timeout 840s xvfb-run -a -s "-screen 0 1280x720x24" env \
             AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
             "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
-            --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 30 \
+            --resolution 960x540 --position 0,0 --disable-vsync --fixed-fps 30 \
             --write-movie "$PWD/${EVIDENCE_DIR}/playable-entry-sequence.avi" \
             > "${EVIDENCE_DIR}/playable-entry-sequence.log" 2>&1
           for state in world_trade_selected map_east_route_selected map_east_route_claimed village_claimed village_founded village_developed map_east_route_connected world_trade_route_active village_trade_dispatched map_east_route_in_use world_first_trade_underway village_city_chartered map_greenvale_city world_first_city_recognized world_first_nation_founded map_aurelian_homeland village_greenvale_capital village_national_mandate_started map_national_mandate_active world_national_mandate_underway village_aurelian_imperial_capital map_aurelian_imperial_heartland world_first_empire_proclaimed world_river_surge_crisis map_river_surge_response_loci village_river_surge_response_pending village_aurelian_imperial_capital_greenvale_shielded map_aurelian_imperial_heartland_greenvale_response world_aurelian_river_surge_greenvale_response world_first_rival_countermove map_first_rival_countermove_east_bridge village_first_rival_response_pending village_first_rival_response_stand_firm map_first_rival_response_stand_firm world_first_rival_response_stand_firm; do
