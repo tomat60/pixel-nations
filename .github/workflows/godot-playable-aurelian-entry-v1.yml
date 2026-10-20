@@ -554,6 +554,23 @@ jobs:
           print("GODOT_PLAYABLE_AURELIAN_ENTRY_EVIDENCE_QA=PASS")
           PY
 
+      - name: Upload focused Living Atlas visual review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: living-atlas-visual-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/godot-playable-aurelian-entry-v1/exact-head.txt
+            evidence/godot-playable-aurelian-entry-v1/normal-launch-1440x900.png
+            evidence/godot-playable-aurelian-entry-v1/normal-launch-360x225.png
+            evidence/godot-playable-aurelian-entry-v1/world-trade-selected-1440x900.png
+            evidence/godot-playable-aurelian-entry-v1/world-trade-selected-360x225.png
+            evidence/godot-playable-aurelian-entry-v1/map-east-route-claimed-1440x900.png
+            evidence/godot-playable-aurelian-entry-v1/village-founded-1440x900.png
+            evidence/godot-playable-aurelian-entry-v1/evidence-qa.json
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Upload playable entry artifact
         if: always()
         uses: actions/upload-artifact@v4
