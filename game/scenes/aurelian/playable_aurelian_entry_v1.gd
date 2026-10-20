@@ -672,10 +672,10 @@ func _build_living_atlas_surface() -> void:
 	atlas_hotspot = Button.new()
 	atlas_hotspot.name = "GreengateInteractiveLand"
 	atlas_hotspot.set_anchors_preset(Control.PRESET_FULL_RECT)
-	atlas_hotspot.anchor_left = 0.43
-	atlas_hotspot.anchor_top = 0.48
-	atlas_hotspot.anchor_right = 0.69
-	atlas_hotspot.anchor_bottom = 0.80
+	atlas_hotspot.anchor_left = 0.468
+	atlas_hotspot.anchor_top = 0.524
+	atlas_hotspot.anchor_right = 0.635
+	atlas_hotspot.anchor_bottom = 0.722
 	atlas_hotspot.offset_left = 0.0
 	atlas_hotspot.offset_top = 0.0
 	atlas_hotspot.offset_right = 0.0
