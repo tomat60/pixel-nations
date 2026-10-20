@@ -6,6 +6,7 @@ on:
     paths:
       - "game/project.godot"
       - "game/scenes/aurelian/playable_aurelian_entry_v1.gd"
+      - "game/assets/aurelian-basin/original/**"
       - "game/scenes/aurelian/playable_aurelian_first_session_v6.gd"
       - "game/scenes/aurelian/playable_aurelian_entry_v1.tscn"
       - "game/scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
@@ -342,6 +343,7 @@ jobs:
               > "${EVIDENCE_DIR}/${output}.log" 2>&1
             grep -F "PLAYABLE_AURELIAN_ENTRY_READY=$state" "${EVIDENCE_DIR}/${output}.log"
             mv "${EVIDENCE_DIR}/playable-1440x900.png" "${EVIDENCE_DIR}/${output}-1440x900.png"
+            mv "${EVIDENCE_DIR}/playable-360x225.png" "${EVIDENCE_DIR}/${output}-360x225.png"
           done
 
       - name: Capture input-driven development sequence

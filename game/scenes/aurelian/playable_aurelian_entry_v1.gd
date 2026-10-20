@@ -4,6 +4,7 @@ extends "res://scenes/aurelian/aurelian_decision_loop_v1.gd"
 const SESSION := preload("res://scenes/aurelian/aurelian_session_persistence_v2.gd")
 
 const PLAYABLE_MANIFEST_PATH := "res://scenes/aurelian/playable_aurelian_entry_v1_manifest.json"
+const LIVING_ATLAS_WORLD_PLATE := preload("res://assets/aurelian-basin/original/aurelian_living_atlas_world_v1.webp")
 const NATIONAL_DIRECTIONS := ["trade", "expand", "frontier"]
 const CRISIS_RESPONSES := ["shield_greenvale", "keep_east_bridge_open"]
 const RIVAL_RESPONSES := ["stand_firm", "negotiate_passage"]
@@ -237,6 +238,31 @@ var north_ridge_specialization_payoff := "none"
 var first_inter_land_coordination := "none"
 var north_ridge_specialization_cursor := 0
 var rival_response_cursor := 0
+
+func _make_camera(preset: String, parent: Node) -> Camera3D:
+	var camera := super(preset, parent)
+	if preset != "world":
+		return camera
+
+	# The plate is camera-bound so it remains a coherent authored environment,
+	# while the existing 3D state glyphs and gameplay presentation render in
+	# front of it. Map and Village retain their real spatial scenes.
+	var plate := MeshInstance3D.new()
+	plate.name = "OriginalLivingAtlasWorldPlate"
+	var quad := QuadMesh.new()
+	var world_height := float(CAMERA_CONTRACT["world"]["size"])
+	quad.size = Vector2(world_height * 1.6, world_height)
+	quad.orientation = PlaneMesh.FACE_Z
+	plate.mesh = quad
+	plate.position = Vector3(0.0, 0.0, -80.0)
+	var material := StandardMaterial3D.new()
+	material.albedo_texture = LIVING_ATLAS_WORLD_PLATE
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	plate.material_override = material
+	camera.add_child(plate)
+	return camera
 var river_surge_presentation: Node3D
 var mandate_marker: Node3D
 var dispatch_token: Node3D
@@ -581,7 +607,15 @@ func _capture_playable_still() -> void:
 		push_error("PLAYABLE_AURELIAN_CAPTURE_SAVE_FAILED=%s" % output_path)
 		get_tree().quit(94)
 		return
+	var mobile := image.duplicate()
+	mobile.resize(360, 225, Image.INTERPOLATE_LANCZOS)
+	var mobile_output_path := evidence_dir.path_join("playable-360x225.png")
+	if mobile.save_png(mobile_output_path) != OK:
+		push_error("PLAYABLE_AURELIAN_MOBILE_CAPTURE_SAVE_FAILED=%s" % mobile_output_path)
+		get_tree().quit(95)
+		return
 	print("PLAYABLE_AURELIAN_STILL=%s:%s" % [entry_state, output_path])
+	print("PLAYABLE_AURELIAN_MOBILE_STILL=%s:%s" % [entry_state, mobile_output_path])
 	get_tree().quit(0)
 
 func _complete_headless_smoke() -> void:
