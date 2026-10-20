@@ -55,6 +55,7 @@ on:
       - "game/tests/aurelian_north_ridge_specialization_v1_test.gd"
       - "game/tests/aurelian_north_ridge_specialization_payoff_v1_test.gd"
       - "game/tests/aurelian_first_inter_land_coordination_v1_test.gd"
+      - "scripts/qa-aurelian-direction-variant.sh"
       - ".github/workflows/godot-playable-aurelian-entry-v1.yml"
   workflow_dispatch:
 
@@ -439,96 +440,42 @@ jobs:
             "total_frames": total_frames,
           }, indent=2) + "\n")
           PY
-          for direction in trade expand frontier; do
-            response="shield_greenvale"
-            rival_response="stand_firm"
-            specialization="trade_post"
-            if [ "$direction" = "expand" ]; then rival_response="negotiate_passage"; specialization="watch_post"; fi
-            if [ "$direction" = "frontier" ]; then response="keep_east_bridge_open"; rival_response="negotiate_passage"; fi
-            timeout 90s env \
-              AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
-              AURELIAN_AUTOMATED_DIRECTION="${direction}" \
-              AURELIAN_AUTOMATED_CRISIS_RESPONSE="${response}" \
-              AURELIAN_AUTOMATED_RIVAL_RESPONSE="${rival_response}" \
-              AURELIAN_AUTOMATED_NORTH_RIDGE_SPECIALIZATION="${specialization}" \
-              "${GODOT_BIN}" --headless --path game --audio-driver Dummy --fixed-fps 480 \
-              > "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log" 2>&1
-            grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=${direction^^}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_NATIONAL_MANDATE=${direction^^}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_EMPIRE_PROCLAMATION=AURELIAN" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_FIRST_EMPIRE_PROCLAMATION=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_aurelian_imperial_capital" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_imperial_heartland" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_empire_proclaimed" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_river_surge_crisis" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_river_surge_response_loci" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_river_surge_response_pending" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_IMPERIAL_CRISIS=RIVER_SURGE" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            expected_response="${response^^}"
-            grep -F "AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=${expected_response}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            if [ "$response" = "shield_greenvale" ]; then
-              grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_aurelian_river_surge_greenvale_response" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            else
-              grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_aurelian_river_surge_bridge_response" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            fi
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_rival_countermove" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            expected_rival_response="${rival_response^^}"
-            grep -F "AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=${expected_rival_response}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            if [ "$rival_response" = "stand_firm" ]; then
-              expected_payoff="SECURE_GILDED_CROSSING"
-              expected_legacy_state="world_first_frontier_legacy_gilded_crossing_complete"
-            else
-              expected_payoff="RATIFY_EAST_BRIDGE_PASSAGE"
-              expected_legacy_state="world_first_frontier_legacy_east_bridge_complete"
-            fi
-            grep -F "AURELIAN_FIRST_FRONTIER_PAYOFF_REVEAL=${expected_payoff}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_FRONTIER_PAYOFF=${expected_payoff}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_FIRST_FRONTIER_PAYOFF=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_legacy_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_IMPERIAL_EXPANSION_DIRECTION=NORTH_RIDGE" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_IMPERIAL_EXPANSION_INSPECT=NORTH_RIDGE" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_IMPERIAL_EXPANSION=NORTH_RIDGE" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_FIRST_IMPERIAL_EXPANSION=NORTH_RIDGE" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_imperial_expansion_two_land_footprint" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_outpost_held_two_land_frontier" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            expected_specialization="${specialization^^}"
-            grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION=${expected_specialization}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_NORTH_RIDGE_SPECIALIZATION=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_${specialization}_committed" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            if [ "$specialization" = "trade_post" ]; then
-              grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_trade_post_logistics_posture" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-              expected_specialization_payoff="RIDGE_LOGISTICS_LINE_OPEN"
-              expected_specialization_payoff_state="world_north_ridge_logistics_line_active_frontier_role"
-              expected_coordination="RIDGE_CONVOY_DISPATCHED"
-              expected_coordination_map_state="map_ridge_convoy_dispatched"
-              expected_coordination_village_state="village_ridge_convoy_greenvale_acknowledges"
-              expected_coordination_world_state="world_coordinated_logistics_network"
-            else
-              grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_watch_post_vigilance_posture" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-              expected_specialization_payoff="RIDGE_SIGNAL_LIT"
-              expected_specialization_payoff_state="world_north_ridge_signal_active_frontier_role"
-              expected_coordination="BASIN_ALERT_RAISED"
-              expected_coordination_map_state="map_basin_alert_raised"
-              expected_coordination_village_state="village_basin_alert_greenvale_acknowledges"
-              expected_coordination_world_state="world_coordinated_vigilance_network"
-            fi
-            grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=${expected_specialization_payoff}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_specialization_payoff_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_inter_land_coordination_revealed" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_greenvale_north_ridge_link_inspection" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_first_inter_land_coordination_action" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_INTER_LAND_COORDINATION=${expected_coordination}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_FIRST_INTER_LAND_COORDINATION=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_coordination_map_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_coordination_village_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_coordination_world_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=8430" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-          done
+
+      - name: Validate full headless direction — trade
+        timeout-minutes: 4
+        env:
+          AURELIAN_DIRECTION: trade
+          AURELIAN_CRISIS_RESPONSE: shield_greenvale
+          AURELIAN_RIVAL_RESPONSE: stand_firm
+          AURELIAN_SPECIALIZATION: trade_post
+          AURELIAN_EXPECTED_PAYOFF: SECURE_GILDED_CROSSING
+          AURELIAN_EXPECTED_SPECIALIZATION_PAYOFF: RIDGE_LOGISTICS_LINE_OPEN
+          AURELIAN_EXPECTED_COORDINATION: RIDGE_CONVOY_DISPATCHED
+        run: bash scripts/qa-aurelian-direction-variant.sh
+
+      - name: Validate full headless direction — expand
+        timeout-minutes: 4
+        env:
+          AURELIAN_DIRECTION: expand
+          AURELIAN_CRISIS_RESPONSE: shield_greenvale
+          AURELIAN_RIVAL_RESPONSE: negotiate_passage
+          AURELIAN_SPECIALIZATION: watch_post
+          AURELIAN_EXPECTED_PAYOFF: RATIFY_EAST_BRIDGE_PASSAGE
+          AURELIAN_EXPECTED_SPECIALIZATION_PAYOFF: RIDGE_SIGNAL_LIT
+          AURELIAN_EXPECTED_COORDINATION: BASIN_ALERT_RAISED
+        run: bash scripts/qa-aurelian-direction-variant.sh
+
+      - name: Validate full headless direction — frontier
+        timeout-minutes: 4
+        env:
+          AURELIAN_DIRECTION: frontier
+          AURELIAN_CRISIS_RESPONSE: keep_east_bridge_open
+          AURELIAN_RIVAL_RESPONSE: negotiate_passage
+          AURELIAN_SPECIALIZATION: trade_post
+          AURELIAN_EXPECTED_PAYOFF: RATIFY_EAST_BRIDGE_PASSAGE
+          AURELIAN_EXPECTED_SPECIALIZATION_PAYOFF: RIDGE_LOGISTICS_LINE_OPEN
+          AURELIAN_EXPECTED_COORDINATION: RIDGE_CONVOY_DISPATCHED
+        run: bash scripts/qa-aurelian-direction-variant.sh
 
       - name: Validate evidence
         run: |
