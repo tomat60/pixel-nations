@@ -15,14 +15,17 @@ set -euo pipefail
 direction="${AURELIAN_DIRECTION}"
 log="${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
 
-env \
+if ! env \
   AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
   AURELIAN_AUTOMATED_DIRECTION="${direction}" \
   AURELIAN_AUTOMATED_CRISIS_RESPONSE="${AURELIAN_CRISIS_RESPONSE}" \
   AURELIAN_AUTOMATED_RIVAL_RESPONSE="${AURELIAN_RIVAL_RESPONSE}" \
   AURELIAN_AUTOMATED_NORTH_RIDGE_SPECIALIZATION="${AURELIAN_SPECIALIZATION}" \
   "${GODOT_BIN}" --headless --path game --audio-driver Dummy --fixed-fps 480 \
-  > "${log}" 2>&1
+  > "${log}" 2>&1; then
+  cat "${log}"
+  exit 1
+fi
 
 grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=${direction^^}" "${log}"
 grep -F "AURELIAN_FIRST_NATIONAL_MANDATE=${direction^^}" "${log}"
