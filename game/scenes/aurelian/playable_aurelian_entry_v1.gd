@@ -3132,6 +3132,9 @@ func _process(_delta: float) -> void:
 		_emit_action("ui_accept")
 	elif automated_frame == 8130:
 		_emit_action("ui_right")
+	elif automated_frame >= 8190 and OS.get_environment("AURELIAN_AUTOMATED_MOVIE_STOP") == "1":
+		print("PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=8190")
+		get_tree().quit(0)
 	elif automated_frame == 8190:
 		_emit_action("ui_right")
 	elif automated_frame == 8250:
