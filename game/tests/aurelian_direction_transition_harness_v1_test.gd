@@ -11,9 +11,12 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	await _exercise_variant("trade", "shield_greenvale", "stand_firm", "trade_post")
-	await _exercise_variant("expand", "shield_greenvale", "negotiate_passage", "watch_post")
-	await _exercise_variant("frontier", "keep_east_bridge_open", "negotiate_passage", "trade_post")
+	# Run all variants in the same frame. The production scene schedules its normal
+	# one-frame headless smoke exit from _ready(); yielding here would let that
+	# unrelated smoke path terminate this test after only the first variant.
+	_exercise_variant("trade", "shield_greenvale", "stand_firm", "trade_post")
+	_exercise_variant("expand", "shield_greenvale", "negotiate_passage", "watch_post")
+	_exercise_variant("frontier", "keep_east_bridge_open", "negotiate_passage", "trade_post")
 	if failures.is_empty():
 		print("AURELIAN_DIRECTION_TRANSITION_HARNESS_V1_TEST: PASS")
 		quit(0)
@@ -27,7 +30,6 @@ func _run() -> void:
 func _exercise_variant(direction: String, crisis_response: String, rival_response: String, specialization: String) -> void:
 	var runtime = ENTRY_SCENE.instantiate()
 	root.add_child(runtime)
-	await process_frame
 
 	# The renderer movie separately proves the real click/claim/Greengate/road/World
 	# input path. Start this deep-branch contract at the first Nation decision and
@@ -120,8 +122,7 @@ func _exercise_variant(direction: String, crisis_response: String, rival_respons
 	_expect(runtime.get("entry_state") == expected_final_state, direction, "final_state")
 	print("AURELIAN_DIRECTION_TRANSITION_VARIANT_PASS=%s" % direction.to_upper())
 
-	runtime.queue_free()
-	await process_frame
+	runtime.free()
 
 
 func _expect(condition: bool, direction: String, label: String) -> void:
