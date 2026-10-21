@@ -4,6 +4,8 @@ extends RefCounted
 const SCHEMA_VERSION := 12
 const CHARTED_LANDS := 30
 const ROAD_STONE_COST := 5
+const GREENGATE_GRANARY_STONE_COST := 3
+const GREENGATE_GRANARY_IMPROVEMENT_ID := "granary"
 const FRONTIER_LINK_STONE_COST := 5
 const RIVERBEND_SUPPLY_STONE_REWARD := 5
 const RIVERBEND_SUPPLY_ORDER_ID := "riverbend_stone_shipment"
@@ -148,6 +150,22 @@ static func reduce(state: Dictionary, action: Dictionary) -> Dictionary:
 				return next_state
 			resources["stone"] = int(resources.get("stone", 0)) - ROAD_STONE_COST
 			improvements.append("road")
+			settlement["built_improvements"] = improvements
+			next_state["resources"] = resources
+			next_state["settlement"] = settlement
+
+		"BUILD_GREENGATE_GRANARY":
+			# Physical Greenvale granary is optional after the real 5-stone road.
+			# Paid once, recorded in the same canonical settlement save.
+			var settlement: Dictionary = next_state.get("settlement", {}).duplicate(true)
+			var improvements: Array = settlement.get("built_improvements", []).duplicate()
+			if not bool(settlement.get("founded", false)) or not improvements.has("road") or improvements.has(GREENGATE_GRANARY_IMPROVEMENT_ID):
+				return next_state
+			var resources: Dictionary = next_state.get("resources", {}).duplicate(true)
+			if int(resources.get("stone", 0)) < GREENGATE_GRANARY_STONE_COST:
+				return next_state
+			resources["stone"] = int(resources.get("stone", 0)) - GREENGATE_GRANARY_STONE_COST
+			improvements.append(GREENGATE_GRANARY_IMPROVEMENT_ID)
 			settlement["built_improvements"] = improvements
 			next_state["resources"] = resources
 			next_state["settlement"] = settlement
@@ -422,6 +440,7 @@ static func progress(state: Dictionary) -> Dictionary:
 	var settlement: Dictionary = state.get("settlement", {})
 	var founded := bool(settlement.get("founded", false))
 	var road_built := (settlement.get("built_improvements", []) as Array).has("road")
+	var greengate_granary_built := (settlement.get("built_improvements", []) as Array).has(GREENGATE_GRANARY_IMPROVEMENT_ID)
 	var riverbend_inspected := (state.get("inspected_land_ids", []) as Array).has(RIVERBEND_LAND_ID)
 	var riverbend_claimed := claimed_land_ids.has(RIVERBEND_LAND_ID)
 	var riverbend_connected := (state.get("connected_land_ids", []) as Array).has(RIVERBEND_LAND_ID)
@@ -502,6 +521,7 @@ static func progress(state: Dictionary) -> Dictionary:
 		"settlement_count": settlement_land_ids.size(),
 		"settlement_land_ids": settlement_land_ids.duplicate(),
 		"road_built": road_built,
+		"greengate_granary_built": greengate_granary_built,
 		"inspected_frontiers": (1 if riverbend_inspected else 0) + (1 if highmere_inspected else 0) + (1 if northgate_inspected else 0),
 		"riverbend_inspected": riverbend_inspected,
 		"riverbend_claimed": riverbend_claimed,
@@ -577,6 +597,8 @@ static func _normalize_state(saved: Dictionary) -> Dictionary:
 		var built_improvements = saved_settlement.get("built_improvements", [])
 		if founded and built_improvements is Array and built_improvements.has("road"):
 			settlement["built_improvements"] = ["road"]
+			if built_improvements.has(GREENGATE_GRANARY_IMPROVEMENT_ID):
+				settlement["built_improvements"].append(GREENGATE_GRANARY_IMPROVEMENT_ID)
 		normalized["settlement"] = settlement
 		if founded:
 			normalized["settlement_land_ids"] = [claimed_land_id]
