@@ -441,41 +441,17 @@ jobs:
           }, indent=2) + "\n")
           PY
 
-      - name: Validate full headless direction — trade
-        timeout-minutes: 4
-        env:
-          AURELIAN_DIRECTION: trade
-          AURELIAN_CRISIS_RESPONSE: shield_greenvale
-          AURELIAN_RIVAL_RESPONSE: stand_firm
-          AURELIAN_SPECIALIZATION: trade_post
-          AURELIAN_EXPECTED_PAYOFF: SECURE_GILDED_CROSSING
-          AURELIAN_EXPECTED_SPECIALIZATION_PAYOFF: RIDGE_LOGISTICS_LINE_OPEN
-          AURELIAN_EXPECTED_COORDINATION: RIDGE_CONVOY_DISPATCHED
-        run: bash scripts/qa-aurelian-direction-variant.sh
-
-      - name: Validate full headless direction — expand
-        timeout-minutes: 4
-        env:
-          AURELIAN_DIRECTION: expand
-          AURELIAN_CRISIS_RESPONSE: shield_greenvale
-          AURELIAN_RIVAL_RESPONSE: negotiate_passage
-          AURELIAN_SPECIALIZATION: watch_post
-          AURELIAN_EXPECTED_PAYOFF: RATIFY_EAST_BRIDGE_PASSAGE
-          AURELIAN_EXPECTED_SPECIALIZATION_PAYOFF: RIDGE_SIGNAL_LIT
-          AURELIAN_EXPECTED_COORDINATION: BASIN_ALERT_RAISED
-        run: bash scripts/qa-aurelian-direction-variant.sh
-
-      - name: Validate full headless direction — frontier
-        timeout-minutes: 4
-        env:
-          AURELIAN_DIRECTION: frontier
-          AURELIAN_CRISIS_RESPONSE: keep_east_bridge_open
-          AURELIAN_RIVAL_RESPONSE: negotiate_passage
-          AURELIAN_SPECIALIZATION: trade_post
-          AURELIAN_EXPECTED_PAYOFF: RATIFY_EAST_BRIDGE_PASSAGE
-          AURELIAN_EXPECTED_SPECIALIZATION_PAYOFF: RIDGE_LOGISTICS_LINE_OPEN
-          AURELIAN_EXPECTED_COORDINATION: RIDGE_CONVOY_DISPATCHED
-        run: bash scripts/qa-aurelian-direction-variant.sh
+      - name: Validate deterministic production transitions
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --path game \
+            --script res://tests/aurelian_direction_transition_harness_v1_test.gd \
+            2>&1 | tee "${EVIDENCE_DIR}/direction-transition-harness.log"
+          grep -F "AURELIAN_DIRECTION_TRANSITION_VARIANT_PASS=TRADE" "${EVIDENCE_DIR}/direction-transition-harness.log"
+          grep -F "AURELIAN_DIRECTION_TRANSITION_VARIANT_PASS=EXPAND" "${EVIDENCE_DIR}/direction-transition-harness.log"
+          grep -F "AURELIAN_DIRECTION_TRANSITION_VARIANT_PASS=FRONTIER" "${EVIDENCE_DIR}/direction-transition-harness.log"
+          grep -F "AURELIAN_DIRECTION_TRANSITION_HARNESS_V1_TEST: PASS" "${EVIDENCE_DIR}/direction-transition-harness.log"
 
       - name: Validate evidence
         run: |
