@@ -152,6 +152,7 @@ func _run() -> void:
 	_check(runtime.road_button.visible, "canonical_road_action_remains_available_without_donor_dock")
 	_check("Credits" in String(runtime.village.hud._code_button.text), "village_credits_remain_accessible")
 	_check(runtime.village_paved_road == null, "canonical_road_absent_before_build")
+	_check(runtime.village_granary == null and not runtime.granary_button.visible, "granary_cannot_be_built_before_road")
 	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 240.0, "village_navigation_panel_is_compact")
 	_check(runtime.road_button.visible and runtime.return_button.visible and runtime.save_button.visible, "village_shows_relevant_actions")
 	_check(String(runtime.village.hud._tutorial_button.text) == "Continue in Greengate", "village_local_guidance_stays_in_greengate")
@@ -163,6 +164,8 @@ func _run() -> void:
 	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 5, "road_costs_five_stone")
 	_check(String(runtime.village.hud._resource_values["stone"].text) == "5", "village_stock_updates_after_road_cost")
 	_check(runtime.village_paved_road != null, "canonical_road_scene_created")
+	_check(runtime.granary_button.visible and not runtime.granary_button.disabled, "granary_is_available_after_road_with_five_stone")
+	_check(runtime.village_granary == null, "unpaid_granary_is_not_decoratively_prespawned")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Aurelian frontier dispatch", "completed_road_replaces_first_road_guidance")
 	_check("Nation not founded" in String(runtime.village.hud._tutorial_intro.text), "village_dispatch_keeps_nation_truthful")
 	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "completed_road_dispatch_offers_truthful_world_navigation")
@@ -523,6 +526,36 @@ func _run() -> void:
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate Harvest Feast", "reopen_keeps_harvest_feast_guidance")
 	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "reopen_keeps_truthful_world_navigation")
 	_capture("village-harvest-feast-reopened")
+	# Exercise optional Greengate granary through real player input on an
+	# isolated late-game QA stock grant. Ordinary play can buy it immediately
+	# after the first road using the five starting stones still available.
+	_check(not runtime.granary_button.visible or runtime.granary_button.disabled, "insufficient_stone_blocks_late_granary")
+	runtime.controller.session.state["resources"]["stone"] = 3
+	runtime._render_snapshot(runtime.controller.current_snapshot())
+	_check(runtime.granary_button.visible and not runtime.granary_button.disabled, "saved_road_unlocks_paid_granary")
+	_capture("village-granary-before")
+	await _click_control(runtime.granary_button)
+	var granary_village: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(granary_village.get("greengate_granary_built", false)), "granary_is_canonical_state_not_a_picture")
+	_check(int(granary_village.get("stone", -1)) == 0, "granary_consumes_exactly_three_stone")
+	_check(runtime.village_granary != null and is_instance_valid(runtime.village_granary), "granary_adds_real_3d_scene_geometry")
+	if runtime.village_granary != null:
+		_check(runtime.village_granary.name == "PixelNationsGreengateGranary", "granary_3d_model_has_canonical_identity")
+		_check(runtime.village_granary.get_meta("catalog_id", "") == "bld_03_armazem", "granary_uses_authored_licensed_storehouse_model")
+	_check(not runtime.controller.build_greengate_granary(), "cannot_double_buy_granary")
+	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 0, "duplicate_granary_purchase_never_charges_again")
+	_check(not runtime.granary_button.visible, "built_granary_action_removed")
+	await process_frame
+	_capture("village-granary-built")
+	_check(runtime.controller.save_game(), "granary_saves_canonical_progress")
+	await _click_control(runtime.return_button)
+	runtime.controller.session.state["settlement"]["built_improvements"].erase("granary")
+	_check(runtime.controller.load_game(), "granary_reloads_from_real_save")
+	_check(bool(runtime.controller.current_snapshot().get("greengate_granary_built", false)), "granary_survives_disk_load")
+	await _click_control(runtime.enter_button)
+	await process_frame
+	_check(runtime.village_granary != null and is_instance_valid(runtime.village_granary), "granary_reappears_as_3d_geometry_on_village_reentry")
+	_capture("village-granary-reopened")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")
