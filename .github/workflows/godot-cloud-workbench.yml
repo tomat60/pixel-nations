@@ -1,6 +1,15 @@
 name: Godot Cloud Workbench — playable core
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "game/core/**"
+      - "game/assets/aurelian-basin/original/**"
+      - "game/integration/**"
+      - "game/tests/**"
+      - "tools/playable_core/**"
+      - ".github/workflows/godot-cloud-workbench.yml"
   push:
     branches:
       - "steward/playable-core-*"
