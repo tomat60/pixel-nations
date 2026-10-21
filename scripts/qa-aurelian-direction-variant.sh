@@ -26,13 +26,14 @@ on_error() {
 }
 trap on_error ERR
 
-if ! env \
+if ! timeout 90s xvfb-run -a -s "-screen 0 1280x720x24" env \
   AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
   AURELIAN_AUTOMATED_DIRECTION="${direction}" \
   AURELIAN_AUTOMATED_CRISIS_RESPONSE="${AURELIAN_CRISIS_RESPONSE}" \
   AURELIAN_AUTOMATED_RIVAL_RESPONSE="${AURELIAN_RIVAL_RESPONSE}" \
   AURELIAN_AUTOMATED_NORTH_RIDGE_SPECIALIZATION="${AURELIAN_SPECIALIZATION}" \
-  "${GODOT_BIN}" --headless --path game --audio-driver Dummy --fixed-fps 480 \
+  "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
+  --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 480 \
   > "${log}" 2>&1; then
   cat "${log}"
   exit 1
