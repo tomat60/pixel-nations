@@ -490,7 +490,7 @@ func _run() -> void:
 	_check(runtime.feast_button.visible and not runtime.feast_button.disabled, "harvest_feast_action_is_clickable")
 	_check(runtime.village_living_settlement_layer.visible, "late_settlement_plate_visible_after_storehouse")
 	_check(runtime.village_living_settlement_plate.texture != null, "late_settlement_plate_texture_loaded")
-	_check(runtime.village_living_settlement_plate.texture.get_size() == Vector2i(1440, 900), "late_settlement_plate_has_exact_production_dimensions")
+	_check(runtime.village_living_settlement_plate.texture.get_size() == Vector2(1440.0, 900.0), "late_settlement_plate_has_exact_production_dimensions")
 	_check(not runtime.village.hud._objectives_panel.is_visible_in_tree(), "donor_objectives_stay_hidden_after_reopen")
 	_check(not (runtime.village.hud._tabs["objectives"] as Button).is_visible_in_tree(), "donor_objective_tab_stays_hidden_after_reopen")
 	_capture("village-harvest-feast-ready")
