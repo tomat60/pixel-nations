@@ -1,0 +1,12 @@
+{
+  "asset": "greengate_riverbend_living_settlement_v1.webp",
+  "classification": "original_first_party_production_asset",
+  "created_utc": "2026-10-21",
+  "generator": "OpenAI first-party image generation",
+  "cost_usd": 0,
+  "license_basis": "Original asset generated for Pixel Nations; no third-party donor material or named-artist imitation used.",
+  "production_role": "Late-stage Greengate/Riverbend environment plate shown only after Riverbend Storehouse construction.",
+  "source_prompt_summary": "Painterly 2.5D living settlement valley with Greengate civic center, physical road, river crossing, Riverbend Hamlet and integrated Storehouse; no UI or text.",
+  "dimensions": [1440, 900],
+  "sha256": "58df9bf658b0bd3afb87e250aee86ca4b183625abe506307d21962acf330c274"
+}

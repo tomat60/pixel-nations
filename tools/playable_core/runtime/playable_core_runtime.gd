@@ -25,6 +25,8 @@ const HUD_WINE := Color("5c1710")
 var controller: Node
 var world: Node3D
 var village: Node
+var village_living_settlement_layer: CanvasLayer
+var village_living_settlement_plate: TextureRect
 var village_paved_road: Node3D
 var village_harvest_feast: Node3D
 var frontier_link: MeshInstance3D
@@ -627,6 +629,7 @@ func _show_village() -> void:
 		village.name = "GreengateVillage"
 		add_child(village)
 		village.hud._tutorial_button.pressed.connect(_on_village_tutorial_pressed)
+		_build_village_living_settlement_plate()
 	village.process_mode = Node.PROCESS_MODE_INHERIT
 	# The retained top bar is useful Village chrome, but its economy is separate.
 	# _render_snapshot feeds it only the canonical Pixel Nations stock.
@@ -661,6 +664,8 @@ func _show_world() -> void:
 		village.process_mode = Node.PROCESS_MODE_DISABLED
 		village.queue_free()
 		village = null
+	village_living_settlement_layer = null
+	village_living_settlement_plate = null
 	village_paved_road = null
 	village_harvest_feast = null
 	world.visible = true
@@ -909,8 +914,38 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	_refresh_land_visuals(snapshot)
 	_sync_village_road_visual(snapshot)
 	_sync_village_harvest_feast(snapshot)
+	_sync_village_living_settlement_plate(snapshot)
 	_sync_village_guidance(snapshot)
 	panel.reset_size()
+
+
+func _build_village_living_settlement_plate() -> void:
+	village_living_settlement_layer = CanvasLayer.new()
+	village_living_settlement_layer.name = "PixelNationsLivingSettlementLayer"
+	# Keep the authored donor HUD and canonical action panel interactive above the
+	# plate while replacing the late-stage environment as one coherent landscape.
+	village_living_settlement_layer.layer = -100
+	village.add_child(village_living_settlement_layer)
+	village_living_settlement_plate = TextureRect.new()
+	village_living_settlement_plate.name = "GreengateRiverbendLivingSettlementPlate"
+	village_living_settlement_plate.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	village_living_settlement_plate.texture = load("res://pixel_nations/greengate_riverbend_living_settlement_v1.webp")
+	village_living_settlement_plate.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	village_living_settlement_plate.stretch_mode = TextureRect.STRETCH_SCALE
+	village_living_settlement_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	village_living_settlement_layer.add_child(village_living_settlement_plate)
+
+
+func _sync_village_living_settlement_plate(snapshot: Dictionary) -> void:
+	if village_living_settlement_layer == null or not is_instance_valid(village_living_settlement_layer):
+		return
+	# This full-scene progression state appears only after the real Riverbend
+	# Storehouse action has succeeded. Earlier road/supply stages retain the
+	# interactive donor scene, so the art never claims progress before gameplay.
+	village_living_settlement_layer.visible = (
+		String(snapshot.get("view", "world")) == "village"
+		and bool(snapshot.get("riverbend_storehouse_built", false))
+	)
 
 
 # Reuse the donor's authored parchment tutorial card as a canonical, save-driven

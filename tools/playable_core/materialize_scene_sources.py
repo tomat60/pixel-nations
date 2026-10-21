@@ -24,6 +24,10 @@ DEFAULT_SPEC = ROOT / "game" / "integration" / "playable_scene_sources.json"
 CANONICAL_MAP_DATA = ROOT / "app" / "play" / "lib" / "map-data.ts"
 RUNTIME_SOURCE = ROOT / "tools" / "playable_core" / "runtime"
 ATLAS_SOURCE = ROOT / "public" / "assets" / "world-map" / "aurelian-basin-v1.png"
+GREENGATE_LIVING_SETTLEMENT_SOURCE = (
+    ROOT / "game" / "assets" / "aurelian-basin" / "original"
+    / "greengate_riverbend_living_settlement_v1.webp"
+)
 TEXT_SUFFIXES = {
     ".cfg", ".css", ".gd", ".gdshader", ".glsl", ".godot", ".html",
     ".import", ".js", ".json", ".md", ".py", ".shader", ".svg",
@@ -243,6 +247,21 @@ def install_a01_atlas_substrate(output: Path) -> dict[str, str]:
     }
 
 
+def install_greengate_living_settlement(output: Path) -> dict[str, str]:
+    """Install the original late-stage Greengate/Riverbend environment plate."""
+    if not GREENGATE_LIVING_SETTLEMENT_SOURCE.is_file():
+        raise SourceError(
+            f"missing Greengate settlement plate: {GREENGATE_LIVING_SETTLEMENT_SOURCE}"
+        )
+    destination = output / "pixel_nations" / "greengate_riverbend_living_settlement_v1.webp"
+    shutil.copy2(GREENGATE_LIVING_SETTLEMENT_SOURCE, destination)
+    return {
+        "source": str(GREENGATE_LIVING_SETTLEMENT_SOURCE.relative_to(ROOT)),
+        "source_sha256": sha256(GREENGATE_LIVING_SETTLEMENT_SOURCE),
+        "generated_sha256": sha256(destination),
+    }
+
+
 def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -> None:
     notice = f"""# Third-party source changes
 
@@ -422,6 +441,7 @@ def materialize(spec_path: Path, output: Path) -> dict[str, object]:
 
         runtime_files = install_pixel_nations_runtime(output)
         atlas_substrate = install_a01_atlas_substrate(output)
+        greengate_living_settlement = install_greengate_living_settlement(output)
 
     manifest = {
         "schema_version": 1,
@@ -437,6 +457,7 @@ def materialize(spec_path: Path, output: Path) -> dict[str, object]:
         "playable_scene": "res://pixel_nations/playable_core.tscn",
         "pixel_nations_runtime_files": runtime_files,
         "a01_atlas_substrate": atlas_substrate,
+        "greengate_living_settlement": greengate_living_settlement,
         "unresolved_release_assets": opengs["unresolved_release_assets"],
         "missing_pixel_nations_transform": False,
     }
