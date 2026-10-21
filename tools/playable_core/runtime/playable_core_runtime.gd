@@ -4,6 +4,8 @@ extends Node
 const WorldScene = preload("res://game/main_game.tscn")
 const VillageScene = preload("res://village/scenes/approved.tscn")
 const ApprovedPeople = preload("res://village/presentation/approved_people.gd")
+const ApprovedBuildings = preload("res://village/presentation/approved_buildings.gd")
+const ApprovedMaterials = preload("res://village/presentation/approved_materials.gd")
 const Controller = preload("res://pixel_nations/core/playable_core_controller.gd")
 
 const MAP_WIDTH := 960.0
@@ -26,6 +28,7 @@ var controller: Node
 var world: Node3D
 var village: Node
 var village_paved_road: Node3D
+var village_riverbend_supply_yard: Node3D
 var village_harvest_feast: Node3D
 var frontier_link: MeshInstance3D
 var frontier_link_material: StandardMaterial3D
@@ -662,6 +665,7 @@ func _show_world() -> void:
 		village.queue_free()
 		village = null
 	village_paved_road = null
+	village_riverbend_supply_yard = null
 	village_harvest_feast = null
 	world.visible = true
 	world.process_mode = Node.PROCESS_MODE_INHERIT
@@ -908,6 +912,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		_set_northgate_scout_state(bool(snapshot.get("northgate_inspected", false)))
 	_refresh_land_visuals(snapshot)
 	_sync_village_road_visual(snapshot)
+	_sync_village_riverbend_supply_yard(snapshot)
 	_sync_village_harvest_feast(snapshot)
 	_sync_village_guidance(snapshot)
 	panel.reset_size()
@@ -1007,6 +1012,45 @@ func _sync_village_road_visual(snapshot: Dictionary) -> void:
 		tile.name = "CanonicalRoadTile_%d_%d" % [cell.x, cell.y]
 		village_paved_road.add_child(tile)
 		# Uses the existing authored, terrain-conforming stone mesh/material.
+		donor_terrain._build_road_visual(
+			tile, {"cell": cell, "stage": "complete"}, Vector4.ONE
+		)
+
+
+# Riverbend's Storehouse remains physically located on Riverbend in strategic
+# state. Once it is built, Greengate gains a real receiving yard beside the
+# existing school road: an authored storehouse/depot prefab, paved loading bay,
+# cart, crates and sacks. This is the visible Greengate endpoint for that saved
+# supply route, not a second claim that the Riverbend building moved here.
+func _sync_village_riverbend_supply_yard(snapshot: Dictionary) -> void:
+	if village == null or not is_instance_valid(village):
+		return
+	if not bool(snapshot.get("riverbend_storehouse_built", false)):
+		if village_riverbend_supply_yard != null and is_instance_valid(village_riverbend_supply_yard):
+			village_riverbend_supply_yard.queue_free()
+			village_riverbend_supply_yard = null
+		return
+	if village_riverbend_supply_yard != null and is_instance_valid(village_riverbend_supply_yard):
+		return
+	var donor_terrain: Node3D = village.world.terrain
+	village_riverbend_supply_yard = Node3D.new()
+	village_riverbend_supply_yard.name = "PixelNationsGreengateRiverbendSupplyYard"
+	village.world.add_child(village_riverbend_supply_yard)
+	var store := ApprovedBuildings.building("store") as Node3D
+	store.name = "RiverbendReceivingDepot"
+	ApprovedMaterials.apply(store)
+	var center := Vector3(37.5, 0.0, 35.0)
+	center.y = donor_terrain.support_height(center.x, center.z) + 0.002
+	store.position = center
+	store.set_meta("canonical_state", "riverbend_storehouse_built")
+	store.set_meta("gameplay_role", "greengate_receiving_yard")
+	village_riverbend_supply_yard.add_child(store)
+	# A short terrain-conforming spur joins the existing five-tile road to the
+	# depot's south-facing loading entrance instead of leaving an isolated prop.
+	for cell in [Vector2i(13, 15), Vector2i(13, 16), Vector2i(14, 16), Vector2i(15, 16)]:
+		var tile := Node3D.new()
+		tile.name = "SupplyYardRoadTile_%d_%d" % [cell.x, cell.y]
+		village_riverbend_supply_yard.add_child(tile)
 		donor_terrain._build_road_visual(
 			tile, {"cell": cell, "stage": "complete"}, Vector4.ONE
 		)
