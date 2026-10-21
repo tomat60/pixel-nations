@@ -55,6 +55,7 @@ on:
       - "game/tests/aurelian_north_ridge_specialization_v1_test.gd"
       - "game/tests/aurelian_north_ridge_specialization_payoff_v1_test.gd"
       - "game/tests/aurelian_first_inter_land_coordination_v1_test.gd"
+      - "game/tests/aurelian_direction_transition_harness_v1_test.gd"
       - ".github/workflows/godot-playable-aurelian-entry-v1.yml"
   workflow_dispatch:
 
@@ -342,6 +343,7 @@ jobs:
               > "${EVIDENCE_DIR}/${output}.log" 2>&1
             grep -F "PLAYABLE_AURELIAN_ENTRY_READY=$state" "${EVIDENCE_DIR}/${output}.log"
             mv "${EVIDENCE_DIR}/playable-1440x900.png" "${EVIDENCE_DIR}/${output}-1440x900.png"
+            mv "${EVIDENCE_DIR}/playable-360x225.png" "${EVIDENCE_DIR}/${output}-360x225.png"
           done
 
       - name: Capture input-driven development sequence
@@ -350,6 +352,7 @@ jobs:
           set -euo pipefail
           timeout 840s xvfb-run -a -s "-screen 0 1280x720x24" env \
             AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
+            AURELIAN_AUTOMATED_MOVIE_STOP=1 \
             "${GODOT_BIN}" --path game --audio-driver Dummy --rendering-method gl_compatibility \
             --resolution 1280x720 --position 0,0 --disable-vsync --fixed-fps 30 \
             --write-movie "$PWD/${EVIDENCE_DIR}/playable-entry-sequence.avi" \
@@ -358,6 +361,7 @@ jobs:
             grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=$state" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           done
           grep -F "AURELIAN_FIRST_LAND_CLAIM=EAST_ROUTE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
+          grep -F "AURELIAN_LIVING_ATLAS_CLICK=world_neutral" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_SETTLEMENT_FOUNDING=GREENVALE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_SETTLEMENT_DEVELOPMENT=GREENVALE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "AURELIAN_FIRST_TRADE_ROUTE_CONNECTION=EAST_ROUTE" "${EVIDENCE_DIR}/playable-entry-sequence.log"
@@ -415,103 +419,53 @@ jobs:
           grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_logistics_line_active_frontier_role" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=8190" "${EVIDENCE_DIR}/playable-entry-sequence.log"
           test -s "${EVIDENCE_DIR}/playable-entry-sequence.avi"
-          mediainfo --Output=JSON "${EVIDENCE_DIR}/playable-entry-sequence.avi" > "${EVIDENCE_DIR}/video-metadata.json"
+          python3 - <<'PY'
+          import json, os, struct
+          from pathlib import Path
+
+          movie = Path(os.environ["EVIDENCE_DIR"]) / "playable-entry-sequence.avi"
+          with movie.open("rb") as handle:
+            header = handle.read(1024 * 1024)
+          marker = header.find(b"avih")
+          if marker < 0 or marker + 28 > len(header):
+            raise SystemExit("AVI main header missing")
+          microseconds_per_frame = struct.unpack_from("<I", header, marker + 8)[0]
+          total_frames = struct.unpack_from("<I", header, marker + 24)[0]
+          if microseconds_per_frame <= 0 or total_frames <= 0:
+            raise SystemExit("AVI timing fields missing")
+          duration = microseconds_per_frame * total_frames / 1_000_000
+          (movie.parent / "video-metadata.json").write_text(json.dumps({
+            "duration": duration,
+            "microseconds_per_frame": microseconds_per_frame,
+            "total_frames": total_frames,
+          }, indent=2) + "\n")
+          PY
+
+      - name: Validate deterministic production transitions
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
           for direction in trade expand frontier; do
-            response="shield_greenvale"
-            rival_response="stand_firm"
-            specialization="trade_post"
-            if [ "$direction" = "expand" ]; then rival_response="negotiate_passage"; specialization="watch_post"; fi
-            if [ "$direction" = "frontier" ]; then response="keep_east_bridge_open"; rival_response="negotiate_passage"; fi
-            timeout 90s env \
-              AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
-              AURELIAN_AUTOMATED_DIRECTION="${direction}" \
-              AURELIAN_AUTOMATED_CRISIS_RESPONSE="${response}" \
-              AURELIAN_AUTOMATED_RIVAL_RESPONSE="${rival_response}" \
-              AURELIAN_AUTOMATED_NORTH_RIDGE_SPECIALIZATION="${specialization}" \
-              "${GODOT_BIN}" --headless --path game --audio-driver Dummy --fixed-fps 480 \
-              > "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log" 2>&1
-            grep -F "AURELIAN_FIRST_NATIONAL_DIRECTION_COMMITMENT=${direction^^}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_NATIONAL_MANDATE=${direction^^}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_EMPIRE_PROCLAMATION=AURELIAN" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_FIRST_EMPIRE_PROCLAMATION=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_aurelian_imperial_capital" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_aurelian_imperial_heartland" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_empire_proclaimed" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_river_surge_crisis" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_river_surge_response_loci" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_river_surge_response_pending" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_IMPERIAL_CRISIS=RIVER_SURGE" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            expected_response="${response^^}"
-            grep -F "AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=${expected_response}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_FIRST_IMPERIAL_CRISIS_RESPONSE=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            if [ "$response" = "shield_greenvale" ]; then
-              grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_aurelian_river_surge_greenvale_response" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            else
-              grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_aurelian_river_surge_bridge_response" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            fi
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_rival_countermove" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            expected_rival_response="${rival_response^^}"
-            grep -F "AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=${expected_rival_response}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_FIRST_RIVAL_COUNTERMOVE_RESPONSE=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            if [ "$rival_response" = "stand_firm" ]; then
-              expected_payoff="SECURE_GILDED_CROSSING"
-              expected_legacy_state="world_first_frontier_legacy_gilded_crossing_complete"
-            else
-              expected_payoff="RATIFY_EAST_BRIDGE_PASSAGE"
-              expected_legacy_state="world_first_frontier_legacy_east_bridge_complete"
-            fi
-            grep -F "AURELIAN_FIRST_FRONTIER_PAYOFF_REVEAL=${expected_payoff}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_FRONTIER_PAYOFF=${expected_payoff}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_FIRST_FRONTIER_PAYOFF=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_legacy_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_IMPERIAL_EXPANSION_DIRECTION=NORTH_RIDGE" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_IMPERIAL_EXPANSION_INSPECT=NORTH_RIDGE" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_IMPERIAL_EXPANSION=NORTH_RIDGE" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_FIRST_IMPERIAL_EXPANSION=NORTH_RIDGE" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_imperial_expansion_two_land_footprint" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_NORTH_RIDGE_OUTPOST=ESTABLISHED" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_outpost_held_two_land_frontier" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            expected_specialization="${specialization^^}"
-            grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION=${expected_specialization}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_NORTH_RIDGE_SPECIALIZATION=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_north_ridge_${specialization}_committed" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            if [ "$specialization" = "trade_post" ]; then
-              grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_trade_post_logistics_posture" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-              expected_specialization_payoff="RIDGE_LOGISTICS_LINE_OPEN"
-              expected_specialization_payoff_state="world_north_ridge_logistics_line_active_frontier_role"
-              expected_coordination="RIDGE_CONVOY_DISPATCHED"
-              expected_coordination_map_state="map_ridge_convoy_dispatched"
-              expected_coordination_village_state="village_ridge_convoy_greenvale_acknowledges"
-              expected_coordination_world_state="world_coordinated_logistics_network"
-            else
-              grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_north_ridge_watch_post_vigilance_posture" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-              expected_specialization_payoff="RIDGE_SIGNAL_LIT"
-              expected_specialization_payoff_state="world_north_ridge_signal_active_frontier_role"
-              expected_coordination="BASIN_ALERT_RAISED"
-              expected_coordination_map_state="map_basin_alert_raised"
-              expected_coordination_village_state="village_basin_alert_greenvale_acknowledges"
-              expected_coordination_world_state="world_coordinated_vigilance_network"
-            fi
-            grep -F "AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=${expected_specialization_payoff}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_NORTH_RIDGE_SPECIALIZATION_PAYOFF=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_specialization_payoff_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=world_first_inter_land_coordination_revealed" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=map_greenvale_north_ridge_link_inspection" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=village_first_inter_land_coordination_action" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "AURELIAN_FIRST_INTER_LAND_COORDINATION=${expected_coordination}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            test "$(grep -Fc "AURELIAN_FIRST_INTER_LAND_COORDINATION=" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log")" = "1"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_coordination_map_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_coordination_village_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_ENTRY_STATE=${expected_coordination_world_state}" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
-            grep -F "PLAYABLE_AURELIAN_INPUT_SEQUENCE_COMPLETE=8190" "${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
+            profile_root="${RUNNER_TEMP}/aurelian-direction-${direction}"
+            rm -rf "$profile_root"
+            mkdir -p "$profile_root/home" "$profile_root/data"
+            HOME="$profile_root/home" \
+              XDG_DATA_HOME="$profile_root/data" \
+              AURELIAN_DIRECTION_VARIANT="$direction" \
+              "${GODOT_BIN}" --headless --path game \
+                --script res://tests/aurelian_direction_transition_harness_v1_test.gd \
+                2>&1 | tee "${EVIDENCE_DIR}/direction-transition-${direction}.log"
+            grep -F "AURELIAN_DIRECTION_TRANSITION_VARIANT_PASS=${direction^^}" \
+              "${EVIDENCE_DIR}/direction-transition-${direction}.log"
+            grep -F "AURELIAN_DIRECTION_TRANSITION_HARNESS_V1_TEST: PASS" \
+              "${EVIDENCE_DIR}/direction-transition-${direction}.log"
           done
 
       - name: Validate evidence
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import hashlib, json, math, os, re
+          import hashlib, json, math, os
           from pathlib import Path
           from PIL import Image, ImageStat
           root=Path(os.environ["EVIDENCE_DIR"])
@@ -533,13 +487,7 @@ jobs:
           expected_path=["world_neutral","world_trade_selected","map_east_route_selected","map_east_route_claimed","village_claimed","village_founded","village_developed","map_east_route_claimed","map_east_route_connected","world_trade_route_active","map_east_route_connected","village_developed","village_trade_dispatched","map_east_route_in_use","world_first_trade_underway","map_east_route_in_use","village_trade_dispatched","village_city_chartered","map_greenvale_city","world_first_city_recognized","map_greenvale_city","village_city_chartered","map_greenvale_city","world_first_city_recognized","world_first_nation_founded","map_aurelian_homeland","village_greenvale_capital"]
           if manifest["forward_path"]!=expected_path: raise SystemExit("development path drift")
           video=json.loads((root/"video-metadata.json").read_text())
-          tracks=video.get("media",{}).get("track",[])
-          general=next((x for x in tracks if x.get("@type")=="General"),{})
-          raw=str(general.get("Duration",""))
-          match=re.search(r"\d+(?:\.\d+)?",raw)
-          if not match: raise SystemExit("duration missing")
-          duration=float(match.group(0))
-          if duration>1000: duration/=1000
+          duration=float(video.get("duration",0))
           if not 272.0<=duration<=274.0: raise SystemExit(f"duration {duration}")
           qa={"status":"PASS_DETERMINISTIC_ONLY_PENDING_DIRECT_REVIEW","exact_head":(root/"exact-head.txt").read_text().strip(),"stills":report,"video_seconds":duration,"claim":"east_route","settlement":"greenvale","founded":True,"developed":True,"route_connected":True,"world_trade_active":True,"caravan_dispatched":True,"world_first_trade_underway":True,"city_chartered":True,"city_marker_topology":[354,285],"national_direction":"expand","direction_commitment":True,"national_mandate_started":True,"empire_proclaimed":True,"imperial_crisis":"river_surge","imperial_crisis_responses":["shield_greenvale","keep_east_bridge_open"],"first_rival_countermove":"obsidian_march","first_rival_responses":["stand_firm","negotiate_passage"],"first_frontier_payoffs":["secure_gilded_crossing","ratify_east_bridge_passage"],"frontier_payoff_loci":{"secure_gilded_crossing":[515,340],"ratify_east_bridge_passage":[515,340]},"imperial_capital":"greenvale","imperial_heartland":"aurelian","mandate_direction_actions":["trade","expand","frontier"],"mandate_loci":{"trade":[435,313],"expand":[700,205],"frontier":[515,340]},"imperial_expansion_target":"north_ridge","claimed_lands":["east_route","north_ridge"],"first_imperial_expansion":"north_ridge_claimed","imperial_expansion_event_count":1,"north_ridge_outpost":"established","north_ridge_outpost_event_count":1,"north_ridge_specializations":["trade_post","watch_post"],"north_ridge_specialization_event_count_per_run":1,"north_ridge_specialization_payoffs":["ridge_logistics_line_open","ridge_signal_lit"],"north_ridge_specialization_payoff_event_count_per_run":1,"first_inter_land_coordinations":["ridge_convoy_dispatched","basin_alert_raised"],"first_inter_land_coordination_event_count_per_run":1}
           (root/"evidence-qa.json").write_text(json.dumps(qa,indent=2)+"\n")
@@ -558,5 +506,22 @@ jobs:
         with:
           name: godot-playable-aurelian-entry-v1-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/godot-playable-aurelian-entry-v1
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload compact visual review artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-playable-aurelian-visual-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/godot-playable-aurelian-entry-v1/exact-head.txt
+            evidence/godot-playable-aurelian-entry-v1/normal-launch-1440x900.png
+            evidence/godot-playable-aurelian-entry-v1/normal-launch-360x225.png
+            evidence/godot-playable-aurelian-entry-v1/world-trade-selected-1440x900.png
+            evidence/godot-playable-aurelian-entry-v1/world-trade-selected-360x225.png
+            evidence/godot-playable-aurelian-entry-v1/world-trade-route-active-1440x900.png
+            evidence/godot-playable-aurelian-entry-v1/world-trade-route-active-360x225.png
+            evidence/godot-playable-aurelian-entry-v1/evidence-qa.json
           if-no-files-found: error
           retention-days: 7
