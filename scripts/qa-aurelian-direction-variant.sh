@@ -15,6 +15,17 @@ set -euo pipefail
 direction="${AURELIAN_DIRECTION}"
 log="${EVIDENCE_DIR}/playable-entry-sequence-${direction}.log"
 
+on_error() {
+  status=$?
+  trap - ERR
+  echo "AURELIAN_DIRECTION_VARIANT_FAIL=${direction^^}" >&2
+  if [ -f "${log}" ]; then
+    cat "${log}" >&2
+  fi
+  exit "${status}"
+}
+trap on_error ERR
+
 if ! env \
   AURELIAN_CAPTURE_PLAYABLE_ENTRY=1 \
   AURELIAN_AUTOMATED_DIRECTION="${direction}" \
