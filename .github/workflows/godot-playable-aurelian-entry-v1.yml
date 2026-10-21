@@ -55,7 +55,7 @@ on:
       - "game/tests/aurelian_north_ridge_specialization_v1_test.gd"
       - "game/tests/aurelian_north_ridge_specialization_payoff_v1_test.gd"
       - "game/tests/aurelian_first_inter_land_coordination_v1_test.gd"
-      - "scripts/qa-aurelian-direction-variant.sh"
+      - "game/tests/aurelian_direction_transition_harness_v1_test.gd"
       - ".github/workflows/godot-playable-aurelian-entry-v1.yml"
   workflow_dispatch:
 
@@ -445,13 +445,21 @@ jobs:
         timeout-minutes: 2
         run: |
           set -euo pipefail
-          "${GODOT_BIN}" --headless --path game \
-            --script res://tests/aurelian_direction_transition_harness_v1_test.gd \
-            2>&1 | tee "${EVIDENCE_DIR}/direction-transition-harness.log"
-          grep -F "AURELIAN_DIRECTION_TRANSITION_VARIANT_PASS=TRADE" "${EVIDENCE_DIR}/direction-transition-harness.log"
-          grep -F "AURELIAN_DIRECTION_TRANSITION_VARIANT_PASS=EXPAND" "${EVIDENCE_DIR}/direction-transition-harness.log"
-          grep -F "AURELIAN_DIRECTION_TRANSITION_VARIANT_PASS=FRONTIER" "${EVIDENCE_DIR}/direction-transition-harness.log"
-          grep -F "AURELIAN_DIRECTION_TRANSITION_HARNESS_V1_TEST: PASS" "${EVIDENCE_DIR}/direction-transition-harness.log"
+          for direction in trade expand frontier; do
+            profile_root="${RUNNER_TEMP}/aurelian-direction-${direction}"
+            rm -rf "$profile_root"
+            mkdir -p "$profile_root/home" "$profile_root/data"
+            HOME="$profile_root/home" \
+              XDG_DATA_HOME="$profile_root/data" \
+              AURELIAN_DIRECTION_VARIANT="$direction" \
+              "${GODOT_BIN}" --headless --path game \
+                --script res://tests/aurelian_direction_transition_harness_v1_test.gd \
+                2>&1 | tee "${EVIDENCE_DIR}/direction-transition-${direction}.log"
+            grep -F "AURELIAN_DIRECTION_TRANSITION_VARIANT_PASS=${direction^^}" \
+              "${EVIDENCE_DIR}/direction-transition-${direction}.log"
+            grep -F "AURELIAN_DIRECTION_TRANSITION_HARNESS_V1_TEST: PASS" \
+              "${EVIDENCE_DIR}/direction-transition-${direction}.log"
+          done
 
       - name: Validate evidence
         run: |

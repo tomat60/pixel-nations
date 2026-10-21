@@ -11,12 +11,19 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	# Run all variants in the same frame. The production scene schedules its normal
-	# one-frame headless smoke exit from _ready(); yielding here would let that
-	# unrelated smoke path terminate this test after only the first variant.
-	_exercise_variant("trade", "shield_greenvale", "stand_firm", "trade_post")
-	_exercise_variant("expand", "shield_greenvale", "negotiate_passage", "watch_post")
-	_exercise_variant("frontier", "keep_east_bridge_open", "negotiate_passage", "trade_post")
+	# Each direction runs in its own Godot process and isolated user profile. This
+	# keeps the production persistence layer enabled without allowing one variant's
+	# saved final state to contaminate the next variant.
+	var direction := OS.get_environment("AURELIAN_DIRECTION_VARIANT").to_lower()
+	match direction:
+		"trade":
+			_exercise_variant("trade", "shield_greenvale", "stand_firm", "trade_post")
+		"expand":
+			_exercise_variant("expand", "shield_greenvale", "negotiate_passage", "watch_post")
+		"frontier":
+			_exercise_variant("frontier", "keep_east_bridge_open", "negotiate_passage", "trade_post")
+		_:
+			failures.append("unknown_or_missing_direction_%s" % direction)
 	if failures.is_empty():
 		print("AURELIAN_DIRECTION_TRANSITION_HARNESS_V1_TEST: PASS")
 		quit(0)
