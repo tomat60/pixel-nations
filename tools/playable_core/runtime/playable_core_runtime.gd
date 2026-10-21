@@ -4,6 +4,7 @@ extends Node
 const WorldScene = preload("res://game/main_game.tscn")
 const VillageScene = preload("res://village/scenes/approved.tscn")
 const ApprovedPeople = preload("res://village/presentation/approved_people.gd")
+const ApprovedCivil = preload("res://village/presentation/approved_civil_buildings.gd")
 const Controller = preload("res://pixel_nations/core/playable_core_controller.gd")
 
 const MAP_WIDTH := 960.0
@@ -26,6 +27,7 @@ var controller: Node
 var world: Node3D
 var village: Node
 var village_paved_road: Node3D
+var village_granary: Node3D
 var village_harvest_feast: Node3D
 var frontier_link: MeshInstance3D
 var frontier_link_material: StandardMaterial3D
@@ -53,6 +55,7 @@ var enter_button: Button
 var inspect_button: Button
 var connect_button: Button
 var road_button: Button
+var granary_button: Button
 var supply_button: Button
 var survey_button: Button
 var hamlet_button: Button
@@ -322,6 +325,7 @@ func _build_ui() -> void:
 	inspect_button = _button("Inspect Riverbend frontier", "InspectButton", _inspect_frontier)
 	connect_button = _button("Connect Riverbend · 5 stone", "ConnectButton", _connect_selected_link)
 	road_button = _button("Build village road · 5 stone", "RoadButton", _road)
+	granary_button = _button("Build Greengate Granary · 3 stone", "GranaryButton", _granary)
 	supply_button = _button("Receive Riverbend stone · +5", "SupplyButton", _receive_next_supply)
 	survey_button = _button("Commission Highmere survey · 5 stone", "SurveyButton", _commission_highmere_survey)
 	hamlet_button = _button("Found Riverbend Hamlet · 5 timber", "HamletButton", _found_riverbend_hamlet)
@@ -332,7 +336,7 @@ func _build_ui() -> void:
 	overview_button = _button("Return to atlas overview", "OverviewButton", _show_atlas_overview)
 	save_button = _button("Save progress", "SaveButton", _save)
 	return_button = _button("Return to World", "ReturnButton", _return_world)
-	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, supply_button, survey_button, hamlet_button, storehouse_button, provisions_button, feast_button, focus_button, overview_button, save_button, return_button]:
+	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, granary_button, supply_button, survey_button, hamlet_button, storehouse_button, provisions_button, feast_button, focus_button, overview_button, save_button, return_button]:
 		column.add_child(button)
 
 
@@ -548,6 +552,10 @@ func _road() -> void:
 		controller.save_game()
 
 
+func _granary() -> void:
+	controller.build_greengate_granary()
+
+
 func _inspect_frontier() -> void:
 	if controller.inspect_selected_frontier():
 		controller.save_game()
@@ -662,6 +670,7 @@ func _show_world() -> void:
 		village.queue_free()
 		village = null
 	village_paved_road = null
+	village_granary = null
 	village_harvest_feast = null
 	world.visible = true
 	world.process_mode = Node.PROCESS_MODE_INHERIT
@@ -748,6 +757,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	inspect_button.visible = false
 	connect_button.visible = false
 	road_button.visible = false
+	granary_button.visible = false
 	supply_button.visible = false
 	survey_button.visible = false
 	hamlet_button.visible = false
@@ -833,6 +843,12 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	)
 	road_button.disabled = bool(snapshot.get("road_built", false)) or int(snapshot.get("stone", 0)) < 5
 	road_button.visible = view == "village" and not bool(snapshot.get("road_built", false))
+	granary_button.visible = (
+		view == "village"
+		and bool(snapshot.get("road_built", false))
+		and not bool(snapshot.get("greengate_granary_built", false))
+	)
+	granary_button.disabled = int(snapshot.get("stone", 0)) < int(snapshot.get("greengate_granary_stone_cost", 3))
 	supply_button.text = (
 		"Receive Riverbend Storehouse stone · +5"
 		if bool(snapshot.get("riverbend_hamlet_founded", false)) and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false)) else (
@@ -908,6 +924,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		_set_northgate_scout_state(bool(snapshot.get("northgate_inspected", false)))
 	_refresh_land_visuals(snapshot)
 	_sync_village_road_visual(snapshot)
+	_sync_village_granary(snapshot)
 	_sync_village_harvest_feast(snapshot)
 	_sync_village_guidance(snapshot)
 	panel.reset_size()
@@ -1010,6 +1027,32 @@ func _sync_village_road_visual(snapshot: Dictionary) -> void:
 		donor_terrain._build_road_visual(
 			tile, {"cell": cell, "stage": "complete"}, Vector4.ONE
 		)
+
+
+# A paid Greengate improvement must have a PHYSICAL result in the retained
+# interactive Godot scene. Use the donor's authored storehouse architecture,
+# on a free plot south of the central plaza, not a full-screen painting.
+# The canonical saved improvement (not the donor simulation) owns its lifecycle.
+func _sync_village_granary(snapshot: Dictionary) -> void:
+	if village == null or not is_instance_valid(village):
+		return
+	if not bool(snapshot.get("greengate_granary_built", false)):
+		if village_granary != null and is_instance_valid(village_granary):
+			village_granary.queue_free()
+			village_granary = null
+		return
+	if village_granary != null and is_instance_valid(village_granary):
+		return
+	var terrain: Node3D = village.world.terrain
+	village_granary = ApprovedCivil.building("store")
+	village_granary.name = "PixelNationsGreengateGranary"
+	# Village geometry is 1:1 donor world metres. Avoid plaza and both original
+	# buildings while keeping the new building in the existing camera sightline.
+	var x := 27.0
+	var z := 44.0
+	village_granary.position = Vector3(x, terrain.support_height(x, z) + 0.06, z)
+	village_granary.rotation.y = -0.12
+	village.world.add_child(village_granary)
 
 
 # Project the saved feast onto the retained donor's authored plaza and character
