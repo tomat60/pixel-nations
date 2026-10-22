@@ -19,7 +19,7 @@ func _ready() -> void:
 		and String(state.get("claimed_land_id", "")) == "PN-A01-001"
 		and bool(settlement.get("founded", false))
 		and (settlement.get("built_improvements", []) as Array).has("road")
-		and int(state.get("resources", {}).get("stone", 0)) == 5
+		and int(state.get("resources", {}).get("stone", 0)) == 8
 	)
 
 	status_label.text = "FOUNDATION TEST: %s" % ("PASS" if passed else "FAIL")

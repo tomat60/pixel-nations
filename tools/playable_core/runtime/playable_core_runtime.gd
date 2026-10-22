@@ -944,6 +944,13 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 		hud._tutorial_title.text = "Greengate's first road"
 		hud._tutorial_intro.text = "Build Greengate's road for 5 stone, then return to World to inspect Riverbend."
 		hud._tutorial_more.text = "The Pixel Nations command panel uses the canonical save and resource costs."
+	elif (
+		not bool(snapshot.get("greengate_granary_built", false))
+		and int(snapshot.get("stone", 0)) >= int(snapshot.get("greengate_granary_stone_cost", 3))
+	):
+		hud._tutorial_title.text = "Greengate's first granary"
+		hud._tutorial_intro.text = "The road is open. Build a Granary for 3 stone before returning to World."
+		hud._tutorial_more.text = "Five stone will remain for the Riverbend connection, so this upgrade cannot block expansion."
 	elif bool(snapshot.get("greengate_harvest_feast_held", false)):
 		hud._tutorial_title.text = "Greengate Harvest Feast"
 		hud._tutorial_intro.text = "%d/%d lands claimed · %d settlements · Nation not founded." % [
@@ -983,6 +990,12 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 # The parchment dispatch must point at the same place as its copy. Keep the
 # decision state-driven so copy edits cannot silently break the navigation.
 func _village_guidance_requires_world(snapshot: Dictionary) -> bool:
+	if (
+		bool(snapshot.get("road_built", false))
+		and not bool(snapshot.get("greengate_granary_built", false))
+		and int(snapshot.get("stone", 0)) >= int(snapshot.get("greengate_granary_stone_cost", 3))
+	):
+		return false
 	return (
 		(bool(snapshot.get("road_built", false)) and not bool(snapshot.get("riverbend_inspected", false)))
 		or (bool(snapshot.get("highmere_survey_commissioned", false)) and not bool(snapshot.get("highmere_inspected", false)))
