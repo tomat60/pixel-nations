@@ -106,7 +106,7 @@ func _run() -> void:
 	await process_frame
 	_check(runtime.frontier_progress.value == 1.0, "world_progress_tracks_claimed_home")
 	_check("FRONTIER · 1 / 30 CLAIMED · 0 SETTLEMENTS" in runtime.detail_label.text, "world_groups_frontier_progress")
-	_check("STOCKPILE · STONE 10 · TIMBER 0 · FOOD 0" in runtime.detail_label.text, "world_groups_canonical_stockpile")
+	_check("STOCKPILE · STONE 13 · TIMBER 0 · FOOD 0" in runtime.detail_label.text, "world_groups_canonical_stockpile")
 	_check("NATION · NOT FOUNDED" in runtime.route_label.text, "world_keeps_nation_state_truthful")
 	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 420.0, "world_context_panel_is_compact")
 	_check(runtime.enter_button.visible and runtime.save_button.visible, "world_shows_relevant_actions")
@@ -161,20 +161,34 @@ func _run() -> void:
 		_check(not (runtime.village.hud._resource_buttons[donor_item] as Button).visible, "noncanonical_%s_stock_is_hidden" % donor_item)
 	await _click_control(runtime.road_button)
 	_check(bool(runtime.controller.current_snapshot().get("road_built", false)), "road_action_built")
-	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 5, "road_costs_five_stone")
-	_check(String(runtime.village.hud._resource_values["stone"].text) == "5", "village_stock_updates_after_road_cost")
+	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 8, "road_costs_five_stone")
+	_check(String(runtime.village.hud._resource_values["stone"].text) == "8", "village_stock_updates_after_road_cost")
 	_check(runtime.village_paved_road != null, "canonical_road_scene_created")
-	_check(runtime.granary_button.visible and not runtime.granary_button.disabled, "granary_is_available_after_road_with_five_stone")
+	_check(runtime.granary_button.visible and not runtime.granary_button.disabled, "granary_is_available_after_road_with_eight_stone")
 	_check(runtime.village_granary == null, "unpaid_granary_is_not_decoratively_prespawned")
-	_check(String(runtime.village.hud._tutorial_title.text) == "Aurelian frontier dispatch", "completed_road_replaces_first_road_guidance")
-	_check("Nation not founded" in String(runtime.village.hud._tutorial_intro.text), "village_dispatch_keeps_nation_truthful")
-	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "completed_road_dispatch_offers_truthful_world_navigation")
+	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate's first granary", "completed_road_reveals_first_granary")
+	_check("Build a Granary for 3 stone" in String(runtime.village.hud._tutorial_intro.text), "first_granary_guidance_names_true_cost")
+	_check("Five stone will remain for the Riverbend connection" in String(runtime.village.hud._tutorial_more.text), "first_granary_guidance_protects_expansion_stock")
+	_check(String(runtime.village.hud._tutorial_button.text) == "Continue in Greengate", "first_granary_guidance_stays_in_village")
 	if runtime.village_paved_road != null:
 		_check(runtime.village_paved_road.get_child_count() == 5, "canonical_road_has_five_real_tiles")
 		for tile in runtime.village_paved_road.get_children():
 			_check((tile as Node3D).get_node_or_null("StoneSurface") is MeshInstance3D, "canonical_tile_uses_retained_paving_mesh")
 	await process_frame
 	_capture("village-road-built")
+	await _click_control(runtime.granary_button)
+	var first_granary: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(first_granary.get("greengate_granary_built", false)), "first_journey_granary_changes_canonical_state")
+	_check(int(first_granary.get("stone", -1)) == 5, "first_journey_granary_preserves_riverbend_connection_stone")
+	_check(runtime.village_granary != null and is_instance_valid(runtime.village_granary), "first_journey_granary_adds_real_3d_scene_geometry")
+	if runtime.village_granary != null:
+		_check(runtime.village_granary.name == "PixelNationsGreengateGranary", "first_journey_granary_has_canonical_identity")
+		_check(runtime.village_granary.get_meta("catalog_id", "") == "bld_03_armazem", "first_journey_granary_uses_authored_licensed_model")
+	_check(not runtime.granary_button.visible, "first_journey_granary_action_removed_after_purchase")
+	_check(String(runtime.village.hud._tutorial_title.text) == "Aurelian frontier dispatch", "built_granary_advances_to_frontier_dispatch")
+	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "built_granary_dispatch_offers_world_navigation")
+	await process_frame
+	_capture("village-granary-first-ten-minutes-built")
 	await _click_control(runtime.village.hud._tutorial_button)
 	await process_frame
 	var world_snapshot: Dictionary = runtime.controller.current_snapshot()
@@ -543,27 +557,17 @@ func _run() -> void:
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate Harvest Feast", "reopen_keeps_harvest_feast_guidance")
 	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "reopen_keeps_truthful_world_navigation")
 	_capture("village-harvest-feast-reopened")
-	# Exercise optional Greengate granary through real player input on an
-	# isolated late-game QA stock grant. Ordinary play can buy it immediately
-	# after the first road using the five starting stones still available.
-	_check(not runtime.granary_button.visible or runtime.granary_button.disabled, "insufficient_stone_blocks_late_granary")
-	runtime.controller.session.state["resources"]["stone"] = 3
-	runtime._render_snapshot(runtime.controller.current_snapshot())
-	_check(runtime.granary_button.visible and not runtime.granary_button.disabled, "saved_road_unlocks_paid_granary")
-	_capture("village-granary-before")
-	await _click_control(runtime.granary_button)
+	# The granary was purchased through real player input in the first journey;
+	# verify it remains physical through the complete campaign and disk reload.
 	var granary_village: Dictionary = runtime.controller.current_snapshot()
-	_check(bool(granary_village.get("greengate_granary_built", false)), "granary_is_canonical_state_not_a_picture")
-	_check(int(granary_village.get("stone", -1)) == 0, "granary_consumes_exactly_three_stone")
-	_check(runtime.village_granary != null and is_instance_valid(runtime.village_granary), "granary_adds_real_3d_scene_geometry")
+	_check(bool(granary_village.get("greengate_granary_built", false)), "first_journey_granary_stays_built_through_campaign")
+	_check(not runtime.granary_button.visible, "built_first_journey_granary_action_stays_removed")
+	_check(runtime.village_granary != null and is_instance_valid(runtime.village_granary), "first_journey_granary_remains_physical")
 	if runtime.village_granary != null:
-		_check(runtime.village_granary.name == "PixelNationsGreengateGranary", "granary_3d_model_has_canonical_identity")
-		_check(runtime.village_granary.get_meta("catalog_id", "") == "bld_03_armazem", "granary_uses_authored_licensed_storehouse_model")
-	_check(not runtime.controller.build_greengate_granary(), "cannot_double_buy_granary")
-	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 0, "duplicate_granary_purchase_never_charges_again")
-	_check(not runtime.granary_button.visible, "built_granary_action_removed")
+		_check(runtime.village_granary.name == "PixelNationsGreengateGranary", "persistent_granary_keeps_canonical_identity")
+		_check(runtime.village_granary.get_meta("catalog_id", "") == "bld_03_armazem", "persistent_granary_keeps_authored_licensed_model")
 	await process_frame
-	_capture("village-granary-built")
+	_capture("village-granary-late-state")
 	_check(runtime.controller.save_game(), "granary_saves_canonical_progress")
 	await _click_control(runtime.return_button)
 	runtime.controller.session.state["settlement"]["built_improvements"].erase("granary")
