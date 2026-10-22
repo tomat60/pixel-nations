@@ -58,7 +58,7 @@ static func initial_state() -> Dictionary:
 		"resources": {
 			"food": 0,
 			"timber": 0,
-			"stone": 10,
+			"stone": 13,
 		},
 	}
 
