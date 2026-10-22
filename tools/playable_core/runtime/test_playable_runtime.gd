@@ -442,6 +442,7 @@ func _run() -> void:
 	var storehouse_supply_village: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(storehouse_supply_village.get("riverbend_storehouse_stone_delivered", false)), "storehouse_stone_delivered")
 	_check(int(storehouse_supply_village.get("stone", -1)) == 5, "storehouse_supply_adds_five_stone")
+	_check(runtime.village_riverbend_supply_yard == null, "supply_yard_absent_before_storehouse_build")
 	_capture("village-riverbend-storehouse-stone")
 	await _click_control(runtime.return_button)
 	await process_frame
@@ -456,12 +457,26 @@ func _run() -> void:
 	_check("STOREHOUSE" in String((runtime.land_subtitles.get(FRONTIER_ID) as Label3D).text), "riverbend_subtitle_shows_storehouse")
 	await process_frame
 	_capture("world-riverbend-storehouse")
+	var home_screen_for_built_yard: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.0, home_world.y))
+	await _click_position(home_screen_for_built_yard)
+	await _click_control(runtime.enter_button)
+	await process_frame
+	_check(runtime.village_riverbend_supply_yard != null, "built_storehouse_creates_physical_greengate_supply_yard")
+	_check(runtime.village_riverbend_supply_yard.get_node_or_null("RiverbendReceivingDepot") != null, "supply_yard_uses_authored_storehouse_prefab")
+	_check(runtime.village_riverbend_supply_yard.get_child_count() == 5, "supply_yard_has_depot_and_four_physical_road_tiles")
+	_capture("village-riverbend-storehouse-built")
+	await _click_control(runtime.return_button)
+	await process_frame
 	runtime.controller.session.state["settlement_improvements_by_land"] = {}
 	_check(runtime.controller.load_game(), "riverbend_storehouse_reopens")
 	var storehouse_reopened: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(storehouse_reopened.get("riverbend_storehouse_built", false)), "reopen_keeps_riverbend_storehouse")
 	_check(String(storehouse_reopened.get("next_goal", "")) == "Collect Riverbend Storehouse's first provisions", "storehouse_reopen_reports_first_production_goal")
+	_check(runtime.village_riverbend_supply_yard == null, "world_reentry_releases_village_supply_yard")
 	await process_frame
+	var riverbend_screen_after_reopen: Vector2 = player.camera.unproject_position(Vector3(frontier_world.x, 0.0, frontier_world.y))
+	await _click_position(riverbend_screen_after_reopen)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == FRONTIER_ID, "pointer_reselects_riverbend_after_storehouse_reopen")
 	_capture("world-riverbend-storehouse-reopened")
 	_check(runtime.provisions_button.visible and not runtime.provisions_button.disabled, "riverbend_provisions_action_is_clickable")
 	await _click_control(runtime.provisions_button)
@@ -490,6 +505,8 @@ func _run() -> void:
 	_check("delivered 5 food" in String(runtime.village.hud._tutorial_more.text), "completed_provisions_report_saved_reward")
 	_check("Harvest Feast" in String(runtime.village.hud._tutorial_more.text), "completed_provisions_offer_visible_feast")
 	_check(runtime.feast_button.visible and not runtime.feast_button.disabled, "harvest_feast_action_is_clickable")
+	_check(runtime.village_riverbend_supply_yard != null, "saved_storehouse_restores_physical_supply_yard")
+	_check(runtime.village_riverbend_supply_yard.get_node_or_null("RiverbendReceivingDepot") != null, "restored_supply_yard_keeps_authored_depot")
 	_check(not runtime.village.hud._objectives_panel.is_visible_in_tree(), "donor_objectives_stay_hidden_after_reopen")
 	_check(not (runtime.village.hud._tabs["objectives"] as Button).is_visible_in_tree(), "donor_objective_tab_stays_hidden_after_reopen")
 	_capture("village-harvest-feast-ready")

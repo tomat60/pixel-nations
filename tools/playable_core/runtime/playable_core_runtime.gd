@@ -28,6 +28,7 @@ var world: Node3D
 var village: Node
 var village_paved_road: Node3D
 var village_granary: Node3D
+var village_riverbend_supply_yard: Node3D
 var village_harvest_feast: Node3D
 var frontier_link: MeshInstance3D
 var frontier_link_material: StandardMaterial3D
@@ -671,6 +672,7 @@ func _show_world() -> void:
 		village = null
 	village_paved_road = null
 	village_granary = null
+	village_riverbend_supply_yard = null
 	village_harvest_feast = null
 	world.visible = true
 	world.process_mode = Node.PROCESS_MODE_INHERIT
@@ -925,6 +927,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	_refresh_land_visuals(snapshot)
 	_sync_village_road_visual(snapshot)
 	_sync_village_granary(snapshot)
+	_sync_village_riverbend_supply_yard(snapshot)
 	_sync_village_harvest_feast(snapshot)
 	_sync_village_guidance(snapshot)
 	panel.reset_size()
@@ -1053,6 +1056,57 @@ func _sync_village_granary(snapshot: Dictionary) -> void:
 	village_granary.position = Vector3(x, terrain.support_height(x, z) + 0.06, z)
 	village_granary.rotation.y = -0.12
 	village.world.add_child(village_granary)
+
+
+# Riverbend's Storehouse remains physically located on Riverbend in strategic
+# state. Once it is built, Greengate gains a real receiving yard beside the
+# existing school road. This is the visible Greengate endpoint for that saved
+# supply route, not a claim that the Riverbend building moved here.
+func _sync_village_riverbend_supply_yard(snapshot: Dictionary) -> void:
+	if village == null or not is_instance_valid(village):
+		return
+	if not bool(snapshot.get("riverbend_storehouse_built", false)):
+		if village_riverbend_supply_yard != null and is_instance_valid(village_riverbend_supply_yard):
+			village_riverbend_supply_yard.queue_free()
+			village_riverbend_supply_yard = null
+		return
+	if village_riverbend_supply_yard != null and is_instance_valid(village_riverbend_supply_yard):
+		return
+	var donor_terrain: Node3D = village.world.terrain
+	village_riverbend_supply_yard = Node3D.new()
+	village_riverbend_supply_yard.name = "PixelNationsGreengateRiverbendSupplyYard"
+	village.world.add_child(village_riverbend_supply_yard)
+	var store := ApprovedCivil.building("store") as Node3D
+	store.name = "RiverbendReceivingDepot"
+	var center := Vector3(37.5, 0.0, 35.0)
+	center.y = donor_terrain.support_height(center.x, center.z) + 0.002
+	store.position = center
+	store.set_meta("canonical_state", "riverbend_storehouse_built")
+	store.set_meta("gameplay_role", "greengate_receiving_yard")
+	village_riverbend_supply_yard.add_child(store)
+	# Extend the accepted five-tile road with its already-rendered authored stone
+	# surface. Sharing this proven ArrayMesh avoids the donor's private empty
+	# MultiMesh marker path while keeping real geometry and road material.
+	var road_template: Node3D = null
+	if village_paved_road != null and village_paved_road.get_child_count() > 0:
+		road_template = village_paved_road.get_child(0) as Node3D
+	var surface_template: MeshInstance3D = null
+	if road_template != null:
+		surface_template = road_template.get_node_or_null("StoneSurface") as MeshInstance3D
+	if surface_template == null or surface_template.mesh == null:
+		push_error("PN_SUPPLY_YARD_ROAD_TEMPLATE_MISSING")
+		return
+	var source_ground: float = donor_terrain.ground_surface_height(road_template.position.x, road_template.position.z)
+	for cell in [Vector2i(13, 15), Vector2i(13, 16), Vector2i(14, 16), Vector2i(15, 16)]:
+		var tile := MeshInstance3D.new()
+		tile.name = "SupplyYardRoadTile_%d_%d" % [cell.x, cell.y]
+		tile.mesh = surface_template.mesh
+		tile.material_override = surface_template.material_override
+		tile.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var target := Vector3(float(cell.x) * 2.5, 0.0, float(cell.y) * 2.5)
+		target.y = donor_terrain.ground_surface_height(target.x, target.z) - source_ground
+		tile.position = target
+		village_riverbend_supply_yard.add_child(tile)
 
 
 # Project the saved feast onto the retained donor's authored plaza and character
