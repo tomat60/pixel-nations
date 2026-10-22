@@ -31,13 +31,13 @@ func _init() -> void:
 	_check(bool(settlement.get("founded", false)), "settlement_founded")
 	_check(String(settlement.get("name", "")) == "Greengate", "settlement_name")
 	_check(settlement.get("built_improvements", []).has("road"), "road_built")
-	_check(int(state.get("resources", {}).get("stone", 0)) == 5, "road_cost")
+	_check(int(state.get("resources", {}).get("stone", 0)) == 8, "road_cost")
 
 	var duplicate_actions = actions.duplicate(true)
 	duplicate_actions.append({"type": "BUILD_ROAD"})
 	var duplicate_state = STATE.replay(duplicate_actions)
 	_check(duplicate_state.get("settlement", {}).get("built_improvements", []).size() == 1, "road_idempotence")
-	_check(int(duplicate_state.get("resources", {}).get("stone", 0)) == 5, "road_cost_idempotence")
+	_check(int(duplicate_state.get("resources", {}).get("stone", 0)) == 8, "road_cost_idempotence")
 
 	var invalid_state = STATE.replay([
 		{"type": "SELECT_LAND", "land_id": "PN-A01-999"},
@@ -65,7 +65,12 @@ func _init() -> void:
 	_check(String(restored.get("claimed_land_id", "")) == "PN-A01-001", "save_claim")
 	_check(bool(restored.get("settlement", {}).get("founded", false)), "save_settlement")
 	_check(restored.get("settlement", {}).get("built_improvements", []).has("road"), "save_road")
-	_check(int(restored.get("resources", {}).get("stone", 0)) == 5, "save_road_cost")
+	_check(int(restored.get("resources", {}).get("stone", 0)) == 8, "save_road_cost")
+	restored = STATE.reduce(restored, {"type": "BUILD_GREENGATE_GRANARY"})
+	_check(restored.get("settlement", {}).get("built_improvements", []).has("granary"), "first_journey_granary_built")
+	_check(int(restored.get("resources", {}).get("stone", 0)) == 5, "first_journey_granary_costs_three_stone")
+	var duplicate_granary := STATE.reduce(restored, {"type": "BUILD_GREENGATE_GRANARY"})
+	_check(int(duplicate_granary.get("resources", {}).get("stone", 0)) == 5, "first_journey_granary_cost_idempotence")
 
 	var progress: Dictionary = STATE.progress(restored)
 	_check(int(progress.get("claimed_lands", 0)) == 1, "progress_claimed_land")
@@ -267,7 +272,7 @@ func _init() -> void:
 	_check(migrated.get("settlement", {}).get("built_improvements", []).is_empty(), "legacy_improvements_defaulted")
 	_check(int(migrated.get("resources", {}).get("food", 0)) == 2, "legacy_food_preserved")
 	_check(int(migrated.get("resources", {}).get("timber", 0)) == 5, "legacy_timber_preserved")
-	_check(int(migrated.get("resources", {}).get("stone", 0)) == 10, "legacy_stone_defaulted")
+	_check(int(migrated.get("resources", {}).get("stone", 0)) == 13, "legacy_stone_defaulted")
 
 	var malformed_save := JSON.stringify({
 		"schema_version": 1,
@@ -356,10 +361,13 @@ func _test_playable_session_round_trip() -> void:
 
 	var village_before: Dictionary = session.village_view_model()
 	_check(String(village_before.get("settlement_name", "")) == "Greengate", "session_village_name")
-	_check(int(village_before.get("stone", 0)) == 10, "session_village_starting_stone")
+	_check(int(village_before.get("stone", 0)) == 13, "session_village_starting_stone")
 	_check(int(village_before.get("road_stone_cost", 0)) == 5, "session_village_road_cost_visible")
 	_check(session.build_greengate_road(), "session_builds_road")
 	_check(not session.build_greengate_road(), "session_blocks_duplicate_road")
+	_check(session.build_greengate_granary(), "session_builds_first_journey_granary")
+	_check(not session.build_greengate_granary(), "session_blocks_duplicate_first_journey_granary")
+	_check(int(session.village_view_model().get("stone", -1)) == 5, "session_first_journey_granary_preserves_connection_stone")
 	_check(not session.connect_riverbend(), "session_blocks_frontier_connection_from_village")
 	_check(session.return_to_world(), "session_returns_to_world")
 
