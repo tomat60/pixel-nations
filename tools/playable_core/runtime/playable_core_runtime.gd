@@ -635,6 +635,12 @@ func _show_village() -> void:
 		village = VillageScene.instantiate()
 		village.name = "GreengateVillage"
 		add_child(village)
+		# This button is canonical Pixel Nations progression, not the donor's
+		# one-shot tutorial dismiss control. Keep the dispatch visible as its
+		# action changes from Granary purchase to World navigation.
+		var donor_tutorial_handler := Callable(village.hud, "_dismiss_tutorial")
+		if village.hud._tutorial_button.pressed.is_connected(donor_tutorial_handler):
+			village.hud._tutorial_button.pressed.disconnect(donor_tutorial_handler)
 		village.hud._tutorial_button.pressed.connect(_on_village_tutorial_pressed)
 	village.process_mode = Node.PROCESS_MODE_INHERIT
 	# The retained top bar is useful Village chrome, but its economy is separate.
