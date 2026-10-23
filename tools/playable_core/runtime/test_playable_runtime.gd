@@ -169,14 +169,16 @@ func _run() -> void:
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate's first granary", "completed_road_reveals_first_granary")
 	_check("Build a Granary for 3 stone" in String(runtime.village.hud._tutorial_intro.text), "first_granary_guidance_names_true_cost")
 	_check("Five stone will remain for the Riverbend connection" in String(runtime.village.hud._tutorial_more.text), "first_granary_guidance_protects_expansion_stock")
-	_check(String(runtime.village.hud._tutorial_button.text) == "Continue in Greengate", "first_granary_guidance_stays_in_village")
+	_check(String(runtime.village.hud._tutorial_button.text) == "Build Greengate Granary · 3 stone", "first_granary_guidance_offers_the_real_purchase")
 	if runtime.village_paved_road != null:
 		_check(runtime.village_paved_road.get_child_count() == 5, "canonical_road_has_five_real_tiles")
 		for tile in runtime.village_paved_road.get_children():
 			_check((tile as Node3D).get_node_or_null("StoneSurface") is MeshInstance3D, "canonical_tile_uses_retained_paving_mesh")
 	await process_frame
 	_capture("village-road-built")
-	await _click_control(runtime.granary_button)
+	# Follow the dominant dispatch-card CTA exactly as an unaided player would.
+	# It must perform the named physical upgrade rather than silently doing nothing.
+	await _click_control(runtime.village.hud._tutorial_button)
 	var first_granary: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(first_granary.get("greengate_granary_built", false)), "first_journey_granary_changes_canonical_state")
 	_check(int(first_granary.get("stone", -1)) == 5, "first_journey_granary_preserves_riverbend_connection_stone")
