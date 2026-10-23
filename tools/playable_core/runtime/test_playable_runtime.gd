@@ -191,6 +191,9 @@ func _run() -> void:
 	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "built_granary_dispatch_offers_world_navigation")
 	await process_frame
 	_capture("village-granary-first-ten-minutes-built")
+	# The same physical button has just changed role from purchase to navigation.
+	# Give the completed press/release cycle one human-scale beat before reusing it.
+	await create_timer(0.2).timeout
 	await _click_control(runtime.village.hud._tutorial_button)
 	await process_frame
 	var world_snapshot: Dictionary = runtime.controller.current_snapshot()
