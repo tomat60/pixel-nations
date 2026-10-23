@@ -106,7 +106,7 @@ jobs:
               exit 1
             }
           grep -F "PN_PLAYABLE_SOURCE_BRIDGE=PASS" "$EVIDENCE_DIR/source-bridge.log"
-          "$GODOT_BIN" --headless --editor \
+          "$GODOT_BIN" --headless --single-threaded-scene --editor \
             --path /tmp/pn-playable-scene-sources --quit \
             > "$EVIDENCE_DIR/source-bridge-import.log" 2>&1 || {
               cat "$EVIDENCE_DIR/source-bridge-import.log"
@@ -161,7 +161,7 @@ jobs:
           from pathlib import Path
           import hashlib, struct
           evidence = Path("evidence/godot-cloud-workbench")
-          for stem in ("world-claimed", "village-road-built", "world-riverbend-claimed", "world-riverbend-connected", "village-riverbend-supply", "world-riverbend-supplied", "village-highmere-survey", "world-highmere-inspected", "world-highmere-claimed", "world-highmere-claimed-reopened", "village-highmere-link-supply", "world-highmere-connected", "world-highmere-connected-reopened", "world-northgate-inspected", "world-northgate-inspected-reopened", "village-northgate-settlement-timber", "world-riverbend-hamlet", "world-riverbend-hamlet-reopened", "village-riverbend-storehouse-stone", "world-riverbend-storehouse", "world-riverbend-storehouse-reopened", "world-riverbend-storehouse-provisions", "world-riverbend-storehouse-provisions-reopened", "village-harvest-feast-ready", "village-harvest-feast-held", "world-harvest-feast-reopened", "village-harvest-feast-reopened"):
+          for stem in ("world-claimed", "village-before-road", "village-road-built", "world-riverbend-claimed", "world-riverbend-connected", "village-riverbend-supply", "world-riverbend-supplied", "village-highmere-survey", "world-highmere-inspected", "world-highmere-claimed", "world-highmere-claimed-reopened", "village-highmere-link-supply", "world-highmere-connected", "world-highmere-connected-reopened", "world-northgate-inspected", "world-northgate-inspected-reopened", "village-northgate-settlement-timber", "world-riverbend-hamlet", "world-riverbend-hamlet-reopened", "village-riverbend-storehouse-stone", "world-riverbend-storehouse", "world-riverbend-storehouse-reopened", "world-riverbend-storehouse-provisions", "world-riverbend-storehouse-provisions-reopened", "village-harvest-feast-ready", "village-harvest-feast-held", "world-harvest-feast-reopened", "village-harvest-feast-reopened"):
               for suffix, expected in (("1440x900", (1440, 900)), ("360x225", (360, 225))):
                   path = evidence / f"{stem}-{suffix}.png"
                   data = path.read_bytes()
