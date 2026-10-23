@@ -333,6 +333,8 @@ func _run() -> void:
 	await process_frame
 	_check(String(runtime.controller.current_snapshot().get("view", "")) == "world", "post_survey_dispatch_opens_world")
 	_check(runtime.highmere_survey_link.visible, "commissioned_survey_creates_world_route")
+	await process_frame
+	_capture("world-highmere-survey-route")
 	var highmere_world: Vector2 = runtime.canonical_center_world(HIGHMERE_ID)
 	_check(is_finite(highmere_world.x), "highmere_geometry_available")
 	var highmere_screen: Vector2 = player.camera.unproject_position(
