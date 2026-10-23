@@ -589,13 +589,22 @@ func _claim() -> void:
 
 func _enter() -> void:
 	var snapshot: Dictionary = controller.current_snapshot()
-	# When Highmere explicitly sends the player back for its shipment, make the
-	# visible CTA complete that navigation instead of requiring map knowledge.
+	# When a frontier explicitly sends the player back for its shipment, make
+	# the visible CTA complete that navigation instead of requiring map knowledge.
 	if (
 		String(snapshot.get("view", "")) == "world"
-		and String(snapshot.get("selected_land_id", "")) == "PN-A01-003"
-		and bool(snapshot.get("highmere_claimed", false))
-		and not bool(snapshot.get("highmere_link_supply_delivered", false))
+		and (
+			(
+				String(snapshot.get("selected_land_id", "")) == "PN-A01-003"
+				and bool(snapshot.get("highmere_claimed", false))
+				and not bool(snapshot.get("highmere_link_supply_delivered", false))
+			)
+			or (
+				String(snapshot.get("selected_land_id", "")) == "PN-A01-004"
+				and bool(snapshot.get("northgate_inspected", false))
+				and not bool(snapshot.get("northgate_settlement_timber_delivered", false))
+			)
+		)
 	):
 		controller.select_land_from_map("PN-A01-001")
 	controller.enter_selected_land()
