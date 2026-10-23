@@ -406,6 +406,16 @@ func _hud_button_style(state: String) -> StyleBoxFlat:
 func _on_world_position_selected(world_position: Vector2) -> void:
 	if not world.visible:
 		return
+	# A commissioned survey route is player-facing navigation, not decoration.
+	# Give the thin rendered line a forgiving world-space hit area and select
+	# its destination before the underlying land polygon consumes the click.
+	if highmere_survey_link != null and highmere_survey_link.visible:
+		var riverbend := canonical_center_world("PN-A01-002")
+		var highmere := canonical_center_world("PN-A01-003")
+		var closest := Geometry2D.get_closest_point_to_segment(world_position, riverbend, highmere)
+		if world_position.distance_to(closest) <= 6.0:
+			_select_land_by_id("PN-A01-003")
+			return
 	var point := Vector2(
 		(world_position.x - WORLD_LEFT) / WORLD_WIDTH * MAP_WIDTH,
 		(world_position.y - WORLD_TOP) / WORLD_HEIGHT * MAP_HEIGHT
@@ -416,11 +426,20 @@ func _on_world_position_selected(world_position: Vector2) -> void:
 		for raw_point in land.get("points", []):
 			polygon.append(Vector2(float(raw_point[0]), float(raw_point[1])))
 		if Geometry2D.is_point_in_polygon(point, polygon):
-			selected_land = land
-			controller.select_land_from_map(String(land.get("id", "")))
-			if atlas_is_focused:
-				_move_camera_to_land(String(land.get("id", "")))
+			_select_land_by_id(String(land.get("id", "")))
 			return
+
+
+func _select_land_by_id(land_id: String) -> void:
+	for land_value in lands:
+		var land: Dictionary = land_value
+		if String(land.get("id", "")) != land_id:
+			continue
+		selected_land = land
+		controller.select_land_from_map(land_id)
+		if atlas_is_focused:
+			_move_camera_to_land(land_id)
+		return
 
 
 func _focus_selected_land() -> void:
