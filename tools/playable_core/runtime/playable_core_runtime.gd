@@ -880,7 +880,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	# The first entrance actually creates a settlement in the canonical state.
 	# Never label that founding action as merely visiting an existing village.
 	enter_button.text = (
-		"Return to Greengate for Northgate timber"
+		"Return to Greengate · timber"
 		if northgate_return_ready else (
 			"Return to Greengate for ridge stone"
 			if highmere_return_ready else (
