@@ -422,13 +422,16 @@ func _run() -> void:
 	_check(int(highmere_link_reopened.get("stone", -1)) == 0, "reopen_keeps_highmere_link_cost")
 	await process_frame
 	_capture("world-highmere-connected-reopened")
-	var northgate_world: Vector2 = runtime.canonical_center_world(NORTHGATE_ID)
-	_check(is_finite(northgate_world.x), "northgate_geometry_available")
-	var northgate_screen: Vector2 = player.camera.unproject_position(Vector3(northgate_world.x, 0.0, northgate_world.y))
-	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(northgate_screen), "northgate_projects_inside_viewport")
-	await _click_position(northgate_screen)
-	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == NORTHGATE_ID, "pointer_raycast_selects_northgate")
 	_check(runtime.northgate_scout_link.visible, "highmere_link_shows_northgate_scout_route")
+	var northgate_route_screen: Vector2 = player.camera.unproject_position(runtime.northgate_scout_link.position)
+	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(northgate_route_screen), "northgate_scout_route_projects_inside_viewport")
+	# Follow the visible route rather than bypassing it with Northgate's hidden
+	# canonical coordinates known only to the test harness.
+	await _click_position(northgate_route_screen)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == NORTHGATE_ID, "pointer_click_on_scout_route_selects_northgate")
+	_check(runtime.inspect_button.visible and not runtime.inspect_button.disabled, "selected_scout_destination_offers_northgate_inspection")
+	await process_frame
+	_capture("world-northgate-route-selected")
 	await _click_control(runtime.inspect_button)
 	var northgate_inspected: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(northgate_inspected.get("northgate_inspected", false)), "northgate_inspection_recorded")
