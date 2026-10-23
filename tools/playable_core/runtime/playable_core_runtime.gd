@@ -999,10 +999,16 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 		and not bool(snapshot.get("greengate_granary_built", false))
 		and int(snapshot.get("stone", 0)) >= int(snapshot.get("greengate_granary_stone_cost", 3))
 	)
+	var riverbend_supply_ready := (
+		bool(snapshot.get("riverbend_connected", false))
+		and not bool(snapshot.get("riverbend_supply_delivered", false))
+	)
 	if road_action_ready:
 		hud._tutorial_button.text = "Build Greengate Road · 5 stone"
 	elif granary_action_ready:
 		hud._tutorial_button.text = "Build Greengate Granary · 3 stone"
+	elif riverbend_supply_ready:
+		hud._tutorial_button.text = "Receive Riverbend stone · +5"
 	elif _village_guidance_requires_world(snapshot):
 		hud._tutorial_button.text = "Return to World"
 	else:
@@ -1043,6 +1049,11 @@ func _on_village_tutorial_pressed() -> void:
 		and int(snapshot.get("stone", 0)) >= int(snapshot.get("greengate_granary_stone_cost", 3))
 	):
 		_granary()
+	elif (
+		bool(snapshot.get("riverbend_connected", false))
+		and not bool(snapshot.get("riverbend_supply_delivered", false))
+	):
+		_receive_next_supply()
 	elif _village_guidance_requires_world(snapshot):
 		_return_world()
 
