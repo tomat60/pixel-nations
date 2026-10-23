@@ -447,14 +447,13 @@ func _run() -> void:
 	var northgate_reopened: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(northgate_reopened.get("northgate_inspected", false)), "reopen_keeps_northgate_inspection")
 	_check(int(northgate_reopened.get("claimed_lands", -1)) == 3, "reopen_keeps_three_claims_after_northgate")
+	_check(runtime.enter_button.visible and not runtime.enter_button.disabled, "inspected_northgate_offers_visible_greengate_return")
+	_check(runtime.enter_button.text == "Return to Greengate for Northgate timber", "northgate_return_cta_names_the_timber_destination")
 	await process_frame
 	_capture("world-northgate-inspected-reopened")
-	var home_screen_after_northgate: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.0, home_world.y))
-	await _click_position(home_screen_after_northgate)
-	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HOME_ID, "pointer_reselects_home_for_settlement_timber")
 	await _click_control(runtime.enter_button)
 	await process_frame
-	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "settlement_timber_path_enters_village")
+	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "northgate_return_cta_enters_village")
 	_check("Northgate settlement timber" in String(runtime.supply_button.text), "village_offers_settlement_timber")
 	await _click_control(runtime.supply_button)
 	var timber_village: Dictionary = runtime.controller.current_snapshot()

@@ -857,17 +857,26 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		and bool(snapshot.get("highmere_claimed", false))
 		and not bool(snapshot.get("highmere_link_supply_delivered", false))
 	)
+	var northgate_return_ready := (
+		view == "world"
+		and selected_id == "PN-A01-024"
+		and bool(snapshot.get("northgate_inspected", false))
+		and not bool(snapshot.get("northgate_settlement_timber_delivered", false))
+	)
 	enter_button.visible = (
 		view == "world"
 		and String(snapshot.get("claimed_land_id", "")) == "PN-A01-001"
-		and (selected_id == "PN-A01-001" or highmere_return_ready)
+		and (selected_id == "PN-A01-001" or highmere_return_ready or northgate_return_ready)
 	)
 	# The first entrance actually creates a settlement in the canonical state.
 	# Never label that founding action as merely visiting an existing village.
 	enter_button.text = (
-		"Return to Greengate for ridge stone"
-		if highmere_return_ready else (
-			"Found Greengate" if settlement_count == 0 else "Enter Greengate"
+		"Return to Greengate for Northgate timber"
+		if northgate_return_ready else (
+			"Return to Greengate for ridge stone"
+			if highmere_return_ready else (
+				"Found Greengate" if settlement_count == 0 else "Enter Greengate"
+			)
 		)
 	)
 	enter_button.disabled = not enter_button.visible
