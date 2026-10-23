@@ -449,7 +449,7 @@ func _run() -> void:
 	_check(int(northgate_reopened.get("claimed_lands", -1)) == 3, "reopen_keeps_three_claims_after_northgate")
 	# Continue through visible player guidance; never project hidden home coordinates.
 	_check(runtime.enter_button.visible and not runtime.enter_button.disabled, "inspected_northgate_offers_visible_greengate_return")
-	_check(runtime.enter_button.text == "Return to Greengate for Northgate timber", "northgate_return_cta_names_the_timber_destination")
+	_check(runtime.enter_button.text == "Return to Greengate · timber", "northgate_return_cta_names_the_timber_destination")
 	await process_frame
 	_capture("world-northgate-inspected-reopened")
 	await _click_control(runtime.enter_button)
