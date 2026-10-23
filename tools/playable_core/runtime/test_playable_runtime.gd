@@ -285,9 +285,14 @@ func _run() -> void:
 	_check(runtime.village_paved_road != null and runtime.village_paved_road.get_child_count() == 5, "saved_road_reappears_on_village_reentry")
 	_check(not runtime.village.hud._dock.is_visible_in_tree(), "saved_reentry_never_restores_noncanonical_donor_dock")
 	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 0, "village_reentry_still_uses_canonical_stock")
-	await _click_control(runtime.supply_button)
+	_check(String(runtime.village.hud._tutorial_button.text) == "Receive Riverbend stone · +5", "riverbend_delivery_guidance_offers_the_real_reward")
+	_check(runtime.village.hud._tutorial.is_visible_in_tree(), "riverbend_delivery_dispatch_is_visible")
+	await process_frame
+	_capture("village-riverbend-supply-ready")
+	# Follow the dominant dispatch exactly as an unaided player would.
+	await _click_control(runtime.village.hud._tutorial_button)
 	var supplied_village: Dictionary = runtime.controller.current_snapshot()
-	_check(bool(supplied_village.get("riverbend_supply_delivered", false)), "supply_button_delivers_riverbend_stone")
+	_check(bool(supplied_village.get("riverbend_supply_delivered", false)), "dispatch_delivers_riverbend_stone")
 	_check(int(supplied_village.get("stone", -1)) == 5, "riverbend_supply_restores_five_stone")
 	_check(runtime.supply_button.disabled, "riverbend_supply_is_one_time")
 	await process_frame
