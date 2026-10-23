@@ -406,6 +406,26 @@ func _hud_button_style(state: String) -> StyleBoxFlat:
 func _on_world_position_selected(world_position: Vector2) -> void:
 	if not world.visible:
 		return
+	# Once Highmere is connected, the newly revealed route to Northgate is the
+	# player's visible navigation affordance. Give its interior the same
+	# forgiving destination hit area as the commissioned Highmere survey route.
+	if northgate_scout_link != null and northgate_scout_link.visible:
+		var highmere := canonical_center_world("PN-A01-003")
+		var northgate := canonical_center_world("PN-A01-024")
+		var northgate_route := northgate - highmere
+		var northgate_progress := clampf(
+			(world_position - highmere).dot(northgate_route) / northgate_route.length_squared(),
+			0.0,
+			1.0
+		)
+		var northgate_closest := highmere + northgate_route * northgate_progress
+		if (
+			northgate_progress >= 0.15
+			and northgate_progress <= 0.85
+			and world_position.distance_to(northgate_closest) <= 6.0
+		):
+			_select_land_by_id("PN-A01-024")
+			return
 	# A commissioned survey route is player-facing navigation, not decoration.
 	# Give the thin rendered line a forgiving world-space hit area and select
 	# its destination before the underlying land polygon consumes the click.
