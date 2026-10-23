@@ -295,6 +295,8 @@ func _run() -> void:
 	_check(bool(supplied_village.get("riverbend_supply_delivered", false)), "dispatch_delivers_riverbend_stone")
 	_check(int(supplied_village.get("stone", -1)) == 5, "riverbend_supply_restores_five_stone")
 	_check(runtime.supply_button.disabled, "riverbend_supply_is_one_time")
+	_check(String(runtime.village.hud._tutorial_button.text) == "Commission Highmere survey · 5 stone", "riverbend_delivery_advances_to_the_real_next_greengate_action")
+	_check(runtime.village.hud._tutorial.is_visible_in_tree(), "post_delivery_dispatch_remains_visible")
 	await process_frame
 	_capture("village-riverbend-supply")
 	await _click_control(runtime.return_button)
