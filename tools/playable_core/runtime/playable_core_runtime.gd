@@ -1003,12 +1003,19 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 		bool(snapshot.get("riverbend_connected", false))
 		and not bool(snapshot.get("riverbend_supply_delivered", false))
 	)
+	var highmere_survey_ready := (
+		bool(snapshot.get("riverbend_supply_delivered", false))
+		and not bool(snapshot.get("highmere_survey_commissioned", false))
+		and int(snapshot.get("stone", 0)) >= int(snapshot.get("highmere_survey_stone_cost", 5))
+	)
 	if road_action_ready:
 		hud._tutorial_button.text = "Build Greengate Road · 5 stone"
 	elif granary_action_ready:
 		hud._tutorial_button.text = "Build Greengate Granary · 3 stone"
 	elif riverbend_supply_ready:
 		hud._tutorial_button.text = "Receive Riverbend stone · +5"
+	elif highmere_survey_ready:
+		hud._tutorial_button.text = "Commission Highmere survey · 5 stone"
 	elif _village_guidance_requires_world(snapshot):
 		hud._tutorial_button.text = "Return to World"
 	else:
@@ -1054,6 +1061,12 @@ func _on_village_tutorial_pressed() -> void:
 		and not bool(snapshot.get("riverbend_supply_delivered", false))
 	):
 		_receive_next_supply()
+	elif (
+		bool(snapshot.get("riverbend_supply_delivered", false))
+		and not bool(snapshot.get("highmere_survey_commissioned", false))
+		and int(snapshot.get("stone", 0)) >= int(snapshot.get("highmere_survey_stone_cost", 5))
+	):
+		_commission_highmere_survey()
 	elif _village_guidance_requires_world(snapshot):
 		_return_world()
 
