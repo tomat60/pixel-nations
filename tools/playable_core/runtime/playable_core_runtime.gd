@@ -600,7 +600,7 @@ func _enter() -> void:
 				and not bool(snapshot.get("highmere_link_supply_delivered", false))
 			)
 			or (
-				String(snapshot.get("selected_land_id", "")) == "PN-A01-004"
+				String(snapshot.get("selected_land_id", "")) == "PN-A01-024"
 				and bool(snapshot.get("northgate_inspected", false))
 				and not bool(snapshot.get("northgate_settlement_timber_delivered", false))
 			)
