@@ -337,6 +337,9 @@ func _run() -> void:
 	_capture("world-highmere-survey-route")
 	var highmere_world: Vector2 = runtime.canonical_center_world(HIGHMERE_ID)
 	_check(is_finite(highmere_world.x), "highmere_geometry_available")
+	var highmere_screen: Vector2 = player.camera.unproject_position(
+		Vector3(highmere_world.x, 0.0, highmere_world.y)
+	)
 	var survey_route_screen: Vector2 = player.camera.unproject_position(runtime.highmere_survey_link.position)
 	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(survey_route_screen), "highmere_survey_route_projects_inside_viewport")
 	# Follow the visible commissioned route instead of bypassing guidance with
@@ -344,7 +347,7 @@ func _run() -> void:
 	await _click_position(survey_route_screen)
 	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HIGHMERE_ID, "pointer_click_on_survey_route_selects_highmere")
 	_check(runtime.inspect_button.visible and not runtime.inspect_button.disabled, "selected_survey_destination_offers_highmere_inspection")
-	await get_tree().process_frame
+	await process_frame
 	_capture("world-highmere-route-selected")
 	await _click_control(runtime.inspect_button)
 	var inspected_highmere: Dictionary = runtime.controller.current_snapshot()
