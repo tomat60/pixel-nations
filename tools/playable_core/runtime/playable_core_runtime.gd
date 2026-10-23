@@ -990,12 +990,18 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 			"" if int(snapshot.get("settlement_count", 0)) == 1 else "s",
 		]
 		hud._tutorial_more.text = "Next: %s." % String(snapshot.get("next_goal", "Return to World"))
+	var road_action_ready := (
+		not bool(snapshot.get("road_built", false))
+		and int(snapshot.get("stone", 0)) >= int(snapshot.get("road_stone_cost", 5))
+	)
 	var granary_action_ready := (
 		bool(snapshot.get("road_built", false))
 		and not bool(snapshot.get("greengate_granary_built", false))
 		and int(snapshot.get("stone", 0)) >= int(snapshot.get("greengate_granary_stone_cost", 3))
 	)
-	if granary_action_ready:
+	if road_action_ready:
+		hud._tutorial_button.text = "Build Greengate Road · 5 stone"
+	elif granary_action_ready:
 		hud._tutorial_button.text = "Build Greengate Granary · 3 stone"
 	elif _village_guidance_requires_world(snapshot):
 		hud._tutorial_button.text = "Return to World"
@@ -1027,6 +1033,11 @@ func _village_guidance_requires_world(snapshot: Dictionary) -> bool:
 func _on_village_tutorial_pressed() -> void:
 	var snapshot: Dictionary = controller.current_snapshot()
 	if (
+		not bool(snapshot.get("road_built", false))
+		and int(snapshot.get("stone", 0)) >= int(snapshot.get("road_stone_cost", 5))
+	):
+		_road()
+	elif (
 		bool(snapshot.get("road_built", false))
 		and not bool(snapshot.get("greengate_granary_built", false))
 		and int(snapshot.get("stone", 0)) >= int(snapshot.get("greengate_granary_stone_cost", 3))
