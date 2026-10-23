@@ -890,7 +890,11 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		or bool(snapshot.get("highmere_survey_commissioned", false))
 		or int(snapshot.get("stone", 0)) < int(snapshot.get("highmere_survey_stone_cost", 5))
 	)
-	survey_button.visible = view == "village" and bool(snapshot.get("riverbend_supply_delivered", false)) and not bool(snapshot.get("highmere_survey_commissioned", false))
+	# The retained parchment dispatch is the single player-facing Highmere action.
+	# Keep the command-panel control wired for compatibility, but hide the
+	# duplicate so an unaided player has one clear action and the runtime test
+	# cannot silently bypass the dominant journey guidance.
+	survey_button.visible = false
 	hamlet_button.disabled = (
 		selected_id != "PN-A01-002"
 		or not bool(snapshot.get("northgate_settlement_timber_delivered", false))
