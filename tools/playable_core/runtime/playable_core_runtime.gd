@@ -589,13 +589,22 @@ func _claim() -> void:
 
 func _enter() -> void:
 	var snapshot: Dictionary = controller.current_snapshot()
-	# When Highmere explicitly sends the player back for its shipment, make the
-	# visible CTA complete that navigation instead of requiring map knowledge.
+	# When a frontier explicitly sends the player back for its shipment, make
+	# the visible CTA complete that navigation instead of requiring map knowledge.
 	if (
 		String(snapshot.get("view", "")) == "world"
-		and String(snapshot.get("selected_land_id", "")) == "PN-A01-003"
-		and bool(snapshot.get("highmere_claimed", false))
-		and not bool(snapshot.get("highmere_link_supply_delivered", false))
+		and (
+			(
+				String(snapshot.get("selected_land_id", "")) == "PN-A01-003"
+				and bool(snapshot.get("highmere_claimed", false))
+				and not bool(snapshot.get("highmere_link_supply_delivered", false))
+			)
+			or (
+				String(snapshot.get("selected_land_id", "")) == "PN-A01-024"
+				and bool(snapshot.get("northgate_inspected", false))
+				and not bool(snapshot.get("northgate_settlement_timber_delivered", false))
+			)
+		)
 	):
 		controller.select_land_from_map("PN-A01-001")
 	controller.enter_selected_land()
@@ -857,17 +866,26 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		and bool(snapshot.get("highmere_claimed", false))
 		and not bool(snapshot.get("highmere_link_supply_delivered", false))
 	)
+	var northgate_return_ready := (
+		view == "world"
+		and selected_id == "PN-A01-024"
+		and bool(snapshot.get("northgate_inspected", false))
+		and not bool(snapshot.get("northgate_settlement_timber_delivered", false))
+	)
 	enter_button.visible = (
 		view == "world"
 		and String(snapshot.get("claimed_land_id", "")) == "PN-A01-001"
-		and (selected_id == "PN-A01-001" or highmere_return_ready)
+		and (selected_id == "PN-A01-001" or highmere_return_ready or northgate_return_ready)
 	)
 	# The first entrance actually creates a settlement in the canonical state.
 	# Never label that founding action as merely visiting an existing village.
 	enter_button.text = (
-		"Return to Greengate for ridge stone"
-		if highmere_return_ready else (
-			"Found Greengate" if settlement_count == 0 else "Enter Greengate"
+		"Return to Greengate · timber"
+		if northgate_return_ready else (
+			"Return to Greengate for ridge stone"
+			if highmere_return_ready else (
+				"Found Greengate" if settlement_count == 0 else "Enter Greengate"
+			)
 		)
 	)
 	enter_button.disabled = not enter_button.visible
