@@ -412,8 +412,12 @@ func _on_world_position_selected(world_position: Vector2) -> void:
 	if highmere_survey_link != null and highmere_survey_link.visible:
 		var riverbend := canonical_center_world("PN-A01-002")
 		var highmere := canonical_center_world("PN-A01-003")
-		var closest := Geometry2D.get_closest_point_to_segment(world_position, riverbend, highmere)
-		if world_position.distance_to(closest) <= 6.0:
+		var route := highmere - riverbend
+		var route_progress := clampf((world_position - riverbend).dot(route) / route.length_squared(), 0.0, 1.0)
+		var closest := riverbend + route * route_progress
+		# Keep the settlement and destination endpoints owned by their land
+		# polygons; only the visible interior of the route acts as a shortcut.
+		if route_progress >= 0.15 and route_progress <= 0.85 and world_position.distance_to(closest) <= 6.0:
 			_select_land_by_id("PN-A01-003")
 			return
 	var point := Vector2(
