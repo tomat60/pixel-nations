@@ -335,11 +335,6 @@ func _run() -> void:
 	_check(runtime.highmere_survey_link.visible, "commissioned_survey_creates_world_route")
 	await process_frame
 	_capture("world-highmere-survey-route")
-	var highmere_world: Vector2 = runtime.canonical_center_world(HIGHMERE_ID)
-	_check(is_finite(highmere_world.x), "highmere_geometry_available")
-	var highmere_screen: Vector2 = player.camera.unproject_position(
-		Vector3(highmere_world.x, 0.0, highmere_world.y)
-	)
 	var survey_route_screen: Vector2 = player.camera.unproject_position(runtime.highmere_survey_link.position)
 	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(survey_route_screen), "highmere_survey_route_projects_inside_viewport")
 	# Follow the visible commissioned route instead of bypassing guidance with
@@ -382,12 +377,17 @@ func _run() -> void:
 	_check(bool(highmere_reopened.get("highmere_claimed", false)), "reopen_keeps_highmere_claim")
 	_check(int(highmere_reopened.get("claimed_lands", -1)) == 3, "reopen_keeps_three_claimed_lands")
 	_check(int(highmere_reopened.get("stone", -1)) == 0, "reopen_keeps_highmere_survey_cost")
+	_check(runtime.enter_button.visible and not runtime.enter_button.disabled, "claimed_highmere_offers_visible_greengate_return")
+	_check(runtime.enter_button.text == "Return to Greengate for ridge stone", "highmere_return_cta_names_the_shipment_destination")
+	_check(not runtime.connect_button.visible, "unfunded_highmere_hides_premature_connect_action")
 	await process_frame
 	_capture("world-highmere-claimed-reopened")
-	await _click_position(home_screen)
+	_capture("world-highmere-return-ready")
 	await _click_control(runtime.enter_button)
 	await process_frame
 	await create_timer(0.6).timeout
+	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "highmere_return_cta_opens_greengate")
+	_check(runtime.supply_button.visible and not runtime.supply_button.disabled, "greengate_offers_highmere_ridge_shipment")
 	await _click_control(runtime.supply_button)
 	var highmere_link_supplied: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(highmere_link_supplied.get("highmere_link_supply_delivered", false)), "highmere_ridge_supply_delivered")
@@ -397,7 +397,10 @@ func _run() -> void:
 	_capture("village-highmere-link-supply")
 	await _click_control(runtime.return_button)
 	await process_frame
-	await _click_position(highmere_screen)
+	var return_route_screen: Vector2 = player.camera.unproject_position(runtime.highmere_survey_link.position)
+	await _click_position(return_route_screen)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HIGHMERE_ID, "visible_route_reselects_highmere_after_shipment")
+	_check(runtime.connect_button.visible and not runtime.connect_button.disabled, "delivered_shipment_enables_highmere_connection")
 	await _click_control(runtime.connect_button)
 	var highmere_connected: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(highmere_connected.get("highmere_connected", false)), "highmere_link_completed")
