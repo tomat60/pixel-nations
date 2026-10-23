@@ -189,14 +189,14 @@ func _run() -> void:
 	_check(not runtime.granary_button.visible, "first_journey_granary_action_removed_after_purchase")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Aurelian frontier dispatch", "built_granary_advances_to_frontier_dispatch")
 	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "built_granary_dispatch_offers_world_navigation")
+	_check(runtime.village.hud._tutorial.is_visible_in_tree(), "built_granary_dispatch_remains_visible_after_purchase")
 	await process_frame
 	_capture("village-granary-first-ten-minutes-built")
-	# The purchase itself is exercised through the dominant dispatch-card CTA.
-	# Use the separate visible navigation control for the next distinct action.
-	await _click_control(runtime.return_button)
+	# Reuse the still-visible dispatch CTA after it has advanced to navigation.
+	await _click_control(runtime.village.hud._tutorial_button)
 	await process_frame
 	var world_snapshot: Dictionary = runtime.controller.current_snapshot()
-	_check(String(world_snapshot.get("view", "")) == "world", "visible_return_control_opens_world")
+	_check(String(world_snapshot.get("view", "")) == "world", "tutorial_dispatch_opens_world")
 	_check(runtime.enter_button.text == "Enter Greengate", "founded_settlement_is_now_entered_not_refounded")
 	_check(
 		runtime.title_label.visible
