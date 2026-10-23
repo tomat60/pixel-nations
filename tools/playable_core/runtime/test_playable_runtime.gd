@@ -155,11 +155,13 @@ func _run() -> void:
 	_check(runtime.village_granary == null and not runtime.granary_button.visible, "granary_cannot_be_built_before_road")
 	_check(runtime.panel.size.x <= 340.0 and runtime.panel.size.y < 240.0, "village_navigation_panel_is_compact")
 	_check(runtime.road_button.visible and runtime.return_button.visible and runtime.save_button.visible, "village_shows_relevant_actions")
-	_check(String(runtime.village.hud._tutorial_button.text) == "Continue in Greengate", "village_local_guidance_stays_in_greengate")
+	_check(String(runtime.village.hud._tutorial_button.text) == "Build Greengate Road · 5 stone", "first_road_guidance_offers_the_real_purchase")
 	_check(not runtime.claim_button.visible and not runtime.inspect_button.visible and not runtime.connect_button.visible, "village_hides_world_actions")
 	for donor_item in ["gold", "trunks", "loaves", "population"]:
 		_check(not (runtime.village.hud._resource_buttons[donor_item] as Button).visible, "noncanonical_%s_stock_is_hidden" % donor_item)
-	await _click_control(runtime.road_button)
+	# Follow the dominant dispatch-card CTA exactly as an unaided player would.
+	# It must build the named physical road rather than silently doing nothing.
+	await _click_control(runtime.village.hud._tutorial_button)
 	_check(bool(runtime.controller.current_snapshot().get("road_built", false)), "road_action_built")
 	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 8, "road_costs_five_stone")
 	_check(String(runtime.village.hud._resource_values["stone"].text) == "8", "village_stock_updates_after_road_cost")
@@ -170,6 +172,7 @@ func _run() -> void:
 	_check("Build a Granary for 3 stone" in String(runtime.village.hud._tutorial_intro.text), "first_granary_guidance_names_true_cost")
 	_check("Five stone will remain for the Riverbend connection" in String(runtime.village.hud._tutorial_more.text), "first_granary_guidance_protects_expansion_stock")
 	_check(String(runtime.village.hud._tutorial_button.text) == "Build Greengate Granary · 3 stone", "first_granary_guidance_offers_the_real_purchase")
+	_check(runtime.village.hud._tutorial.is_visible_in_tree(), "first_road_dispatch_remains_visible_after_purchase")
 	if runtime.village_paved_road != null:
 		_check(runtime.village_paved_road.get_child_count() == 5, "canonical_road_has_five_real_tiles")
 		for tile in runtime.village_paved_road.get_children():
