@@ -316,15 +316,25 @@ func _run() -> void:
 	await _click_control(runtime.enter_button)
 	await process_frame
 	await create_timer(0.6).timeout
-	await _click_control(runtime.survey_button)
+	_check(String(runtime.village.hud._tutorial_button.text) == "Commission Highmere survey · 5 stone", "highmere_survey_guidance_offers_the_real_action")
+	_check(runtime.village.hud._tutorial.is_visible_in_tree(), "highmere_survey_dispatch_is_visible")
+	_check(not runtime.survey_button.visible, "highmere_survey_has_no_competing_panel_action")
+	_capture("village-highmere-survey-ready")
+	# Continue the unaided journey through the same dominant dispatch.
+	await _click_control(runtime.village.hud._tutorial_button)
 	var survey_village: Dictionary = runtime.controller.current_snapshot()
-	_check(bool(survey_village.get("highmere_survey_commissioned", false)), "survey_button_commissions_highmere")
+	_check(bool(survey_village.get("highmere_survey_commissioned", false)), "dispatch_commissions_highmere")
 	_check(int(survey_village.get("stone", -1)) == 0, "highmere_survey_spends_delivered_stone")
 	_check(runtime.survey_button.disabled, "highmere_survey_is_one_time")
+	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "highmere_survey_dispatch_advances_to_world")
 	await process_frame
 	_capture("village-highmere-survey")
-	await _click_control(runtime.return_button)
+	await _click_control(runtime.village.hud._tutorial_button)
 	await process_frame
+	_check(String(runtime.controller.current_snapshot().get("view", "")) == "world", "post_survey_dispatch_opens_world")
+	_check(runtime.highmere_survey_link.visible, "commissioned_survey_creates_world_route")
+	await process_frame
+	_capture("world-highmere-survey-route")
 	var highmere_world: Vector2 = runtime.canonical_center_world(HIGHMERE_ID)
 	_check(is_finite(highmere_world.x), "highmere_geometry_available")
 	var highmere_screen: Vector2 = player.camera.unproject_position(
