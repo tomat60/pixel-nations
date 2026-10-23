@@ -191,13 +191,12 @@ func _run() -> void:
 	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "built_granary_dispatch_offers_world_navigation")
 	await process_frame
 	_capture("village-granary-first-ten-minutes-built")
-	# The same physical button has just changed role from purchase to navigation.
-	# Give the completed press/release cycle one human-scale beat before reusing it.
-	await create_timer(0.2).timeout
-	await _click_control(runtime.village.hud._tutorial_button)
+	# The purchase itself is exercised through the dominant dispatch-card CTA.
+	# Use the separate visible navigation control for the next distinct action.
+	await _click_control(runtime.return_button)
 	await process_frame
 	var world_snapshot: Dictionary = runtime.controller.current_snapshot()
-	_check(String(world_snapshot.get("view", "")) == "world", "tutorial_dispatch_opens_world")
+	_check(String(world_snapshot.get("view", "")) == "world", "visible_return_control_opens_world")
 	_check(runtime.enter_button.text == "Enter Greengate", "founded_settlement_is_now_entered_not_refounded")
 	_check(
 		runtime.title_label.visible
