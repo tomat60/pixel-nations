@@ -635,6 +635,12 @@ func _show_village() -> void:
 		village = VillageScene.instantiate()
 		village.name = "GreengateVillage"
 		add_child(village)
+		# This button is canonical Pixel Nations progression, not the donor's
+		# one-shot tutorial dismiss control. Keep the dispatch visible as its
+		# action changes from Granary purchase to World navigation.
+		var donor_tutorial_handler := Callable(village.hud, "_dismiss_tutorial")
+		if village.hud._tutorial_button.pressed.is_connected(donor_tutorial_handler):
+			village.hud._tutorial_button.pressed.disconnect(donor_tutorial_handler)
 		village.hud._tutorial_button.pressed.connect(_on_village_tutorial_pressed)
 	village.process_mode = Node.PROCESS_MODE_INHERIT
 	# The retained top bar is useful Village chrome, but its economy is separate.
@@ -984,7 +990,17 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 			"" if int(snapshot.get("settlement_count", 0)) == 1 else "s",
 		]
 		hud._tutorial_more.text = "Next: %s." % String(snapshot.get("next_goal", "Return to World"))
-	hud._tutorial_button.text = "Return to World" if _village_guidance_requires_world(snapshot) else "Continue in Greengate"
+	var granary_action_ready := (
+		bool(snapshot.get("road_built", false))
+		and not bool(snapshot.get("greengate_granary_built", false))
+		and int(snapshot.get("stone", 0)) >= int(snapshot.get("greengate_granary_stone_cost", 3))
+	)
+	if granary_action_ready:
+		hud._tutorial_button.text = "Build Greengate Granary · 3 stone"
+	elif _village_guidance_requires_world(snapshot):
+		hud._tutorial_button.text = "Return to World"
+	else:
+		hud._tutorial_button.text = "Continue in Greengate"
 
 
 # The parchment dispatch must point at the same place as its copy. Keep the
@@ -1010,7 +1026,13 @@ func _village_guidance_requires_world(snapshot: Dictionary) -> bool:
 
 func _on_village_tutorial_pressed() -> void:
 	var snapshot: Dictionary = controller.current_snapshot()
-	if _village_guidance_requires_world(snapshot):
+	if (
+		bool(snapshot.get("road_built", false))
+		and not bool(snapshot.get("greengate_granary_built", false))
+		and int(snapshot.get("stone", 0)) >= int(snapshot.get("greengate_granary_stone_cost", 3))
+	):
+		_granary()
+	elif _village_guidance_requires_world(snapshot):
 		_return_world()
 
 
