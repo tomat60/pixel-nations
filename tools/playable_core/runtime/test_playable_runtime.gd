@@ -159,6 +159,8 @@ func _run() -> void:
 	_check(not runtime.claim_button.visible and not runtime.inspect_button.visible and not runtime.connect_button.visible, "village_hides_world_actions")
 	for donor_item in ["gold", "trunks", "loaves", "population"]:
 		_check(not (runtime.village.hud._resource_buttons[donor_item] as Button).visible, "noncanonical_%s_stock_is_hidden" % donor_item)
+	await process_frame
+	_capture("village-before-road")
 	# Follow the dominant dispatch-card CTA exactly as an unaided player would.
 	# It must build the named physical road rather than silently doing nothing.
 	await _click_control(runtime.village.hud._tutorial_button)
