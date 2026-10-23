@@ -463,9 +463,16 @@ func _run() -> void:
 	_capture("village-northgate-settlement-timber")
 	await _click_control(runtime.return_button)
 	await process_frame
-	var riverbend_screen_for_hamlet: Vector2 = player.camera.unproject_position(Vector3(frontier_world.x, 0.0, frontier_world.y))
+	# Continue from the visible map itself. Clicking the rendered RIVERBEND
+	# place name proves the hamlet journey does not depend on a hidden canonical
+	# coordinate after the player returns from the Northgate timber shipment.
+	var riverbend_hamlet_label := runtime.land_labels.get(FRONTIER_ID) as Label3D
+	_check(riverbend_hamlet_label != null and riverbend_hamlet_label.visible, "riverbend_label_is_visible_for_hamlet_journey")
+	_check(String(riverbend_hamlet_label.text) == "RIVERBEND", "riverbend_label_names_hamlet_destination")
+	var riverbend_screen_for_hamlet: Vector2 = player.camera.unproject_position(riverbend_hamlet_label.global_position)
+	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(riverbend_screen_for_hamlet), "riverbend_label_projects_inside_viewport")
 	await _click_position(riverbend_screen_for_hamlet)
-	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == FRONTIER_ID, "pointer_selects_riverbend_for_hamlet")
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == FRONTIER_ID, "visible_riverbend_label_selects_hamlet_destination")
 	_check(runtime.hamlet_button.visible and not runtime.hamlet_button.disabled, "riverbend_hamlet_action_is_clickable")
 	await _click_control(runtime.hamlet_button)
 	var hamlet_world: Dictionary = runtime.controller.current_snapshot()
