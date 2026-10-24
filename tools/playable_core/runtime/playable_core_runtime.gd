@@ -599,6 +599,11 @@ func _enter() -> void:
 				and bool(snapshot.get("riverbend_hamlet_founded", false))
 				and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false))
 			)
+			or (
+				String(snapshot.get("selected_land_id", "")) == "PN-A01-002"
+				and bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
+				and not bool(snapshot.get("greengate_harvest_feast_held", false))
+			)
 			or
 			(
 				String(snapshot.get("selected_land_id", "")) == "PN-A01-003"
@@ -878,6 +883,12 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		and bool(snapshot.get("riverbend_hamlet_founded", false))
 		and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false))
 	)
+	var riverbend_feast_return_ready := (
+		view == "world"
+		and selected_id == "PN-A01-002"
+		and bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
+		and not bool(snapshot.get("greengate_harvest_feast_held", false))
+	)
 	var northgate_return_ready := (
 		view == "world"
 		and selected_id == "PN-A01-024"
@@ -887,18 +898,21 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	enter_button.visible = (
 		view == "world"
 		and String(snapshot.get("claimed_land_id", "")) == "PN-A01-001"
-		and (selected_id == "PN-A01-001" or riverbend_storehouse_return_ready or highmere_return_ready or northgate_return_ready)
+		and (selected_id == "PN-A01-001" or riverbend_storehouse_return_ready or riverbend_feast_return_ready or highmere_return_ready or northgate_return_ready)
 	)
 	# The first entrance actually creates a settlement in the canonical state.
 	# Never label that founding action as merely visiting an existing village.
 	enter_button.text = (
-		"Return to Greengate · stone"
-		if riverbend_storehouse_return_ready else (
-			"Return to Greengate · timber"
-			if northgate_return_ready else (
-				"Return to Greengate for ridge stone"
-				if highmere_return_ready else (
-					"Found Greengate" if settlement_count == 0 else "Enter Greengate"
+		"Return to Greengate · feast"
+		if riverbend_feast_return_ready else (
+			"Return to Greengate · stone"
+			if riverbend_storehouse_return_ready else (
+				"Return to Greengate · timber"
+				if northgate_return_ready else (
+					"Return to Greengate for ridge stone"
+					if highmere_return_ready else (
+						"Found Greengate" if settlement_count == 0 else "Enter Greengate"
+					)
 				)
 			)
 		)

@@ -563,10 +563,11 @@ func _run() -> void:
 	_check(String(provisions_reopened.get("next_goal", "")) == "Return to Greengate and hold the Harvest Feast with 5 food", "reopen_keeps_feast_goal")
 	await process_frame
 	_capture("world-riverbend-storehouse-provisions-reopened")
-	var home_screen_after_storehouse: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.0, home_world.y))
-	await _click_position(home_screen_after_storehouse)
+	_check(runtime.enter_button.visible and not runtime.enter_button.disabled, "saved_provisions_offer_visible_feast_return")
+	_check(runtime.enter_button.text == "Return to Greengate · feast", "feast_return_cta_names_destination")
 	await _click_control(runtime.enter_button)
 	await process_frame
+	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "feast_return_cta_enters_village")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Riverbend provisions delivered", "completed_provisions_replace_stale_storehouse_guidance")
 	_check(String(runtime.village.hud._tutorial_intro.text) == "3/30 lands claimed · 2 settlements · Nation not founded.", "completed_storehouse_dispatch_is_truthful")
 	_check("delivered 5 food" in String(runtime.village.hud._tutorial_more.text), "completed_provisions_report_saved_reward")
