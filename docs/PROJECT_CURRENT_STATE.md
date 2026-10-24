@@ -2,16 +2,24 @@
 
 Status: ACTIVE
 Updated: 2026-10-24
-Current state revision: 48.0
-Authority baseline SHA: `41018a26f41d18f897cd2b1610b49bc4dddb20d7`
-Product baseline SHA: `41018a26f41d18f897cd2b1610b49bc4dddb20d7`
-Runtime baseline SHA: `41018a26f41d18f897cd2b1610b49bc4dddb20d7`
+Current state revision: 49.0
+Authority baseline SHA: `6cc21057f185aa6d225a6c2543675ee0c7e6a095`
+Product baseline SHA: `6cc21057f185aa6d225a6c2543675ee0c7e6a095`
+Runtime baseline SHA: `6cc21057f185aa6d225a6c2543675ee0c7e6a095`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: First Playable Vertical Slice. Godot production remains locked; the active visible front is the integrated Aurelian World/Region map and separate camera-controllable Greengate Village journey.
 Current milestone: complete the unaided first-10-minutes path using visible player input and canonical saved resources, with physical 3D Village changes for purchased improvements while preserving the `land -> settlement/city -> nation -> empire` product model.
 Active execution issue: #721
-Next allowed action: perform an end-to-end first-10-minutes player-journey review against the current `main@41018a26f41d18f897cd2b1610b49bc4dddb20d7` from new game through Greenvale claim, Greengate foundation, physical road, Riverbend/Highmere/Northgate frontier, Riverbend Hamlet and Storehouse, provisions, Harvest Feast, return to World and save/reopen. Identify the SINGLE largest demonstrated confusion or missing physical payoff after Harvest Feast, then implement ONE bounded gameplay/scene improvement; do not add unrelated systems or speculative economy. Reuse the legal live Godot 3D scene and authored assets, never substitute static whole-scene art. Require real pointer/runtime input, actual scene-node/persistence proof and directly reviewed 1440x900 and 360x225 PRE/POST frames before PR merge. Cursor/MAX/Unity/additional paid services remain blocked. Unity, Cursor/MAX and generic image generation remain blocked; extra spend remains $0.
+Next allowed action: perform one complete unaided first-10-minutes player-journey review against the current `main@6cc21057f185aa6d225a6c2543675ee0c7e6a095`, including the real Greengate Granary site choice, from new game through Greenvale claim, Greengate foundation, physical road and Granary placement, Riverbend/Highmere/Northgate frontier, Riverbend Hamlet and Storehouse, provisions, Harvest Feast, return to World and save/reopen. Identify the SINGLE largest demonstrated fun, clarity or visual-payoff bottleneck, then implement at most ONE bounded gameplay/scene improvement; do not automatically add a second construction option, hidden routing action, unrelated system or speculative economy. Reuse the legal live Godot 3D scene and authored assets, never substitute static whole-scene art. Require real pointer/runtime input, actual scene-node/persistence proof and directly reviewed 1440x900 and 360x225 PRE/POST frames before PR merge. Cursor/MAX/Unity/additional paid services remain blocked. Generic image generation remains blocked; extra spend remains $0.
+
+## 2026-10-24 interactive Granary placement checkpoint
+
+- PR #824 merged as `main@6cc21057f185aa6d225a6c2543675ee0c7e6a095`: after the physical Greengate road, the player chooses **Plaza edge** or **Orchard lane** through named HUD actions and two clickable authored-stone terrain footprints in the retained, camera-controllable 3D Village.
+- The canonical Granary still costs 3 stone (8 -> 5), uses the licensed `bld_03_armazem` donor prefab, records its selected site in schema 13, and preserves the physical placement through World <-> Village, save, reload and re-entry. Older Granary saves migrate to the original Plaza site.
+- Exact-head Godot Cloud Workbench run `40104756925` PASS, artifact `12563964063`; `PN_PLAYABLE_POINTER_PATH=PASS` and `PN_PLAYABLE_RUNTIME_CONTRACT=PASS`. Directly reviewed 1440x900 and 360x225 frames show readable HUD choices, restrained terrain markers, a perceptible physical before/after and no world-space label collision or full-screen scene replacement.
+- All required exact-head checks and exact-main CI, RC1, Play Visual QA, Stall Guard and macOS/Linux export/start smoke passed. Native owner-Mac Gatekeeper double-click acceptance remains separate and unclaimed.
+- The next gate is a whole first-10-minutes journey review. Do not infer another micro-route or automatic building from the last reducer transition.
 
 ## 2026-10-24 post-Harvest Feast product checkpoint
 
