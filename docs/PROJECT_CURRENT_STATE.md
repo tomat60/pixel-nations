@@ -2,16 +2,23 @@
 
 Status: ACTIVE
 Updated: 2026-10-24
-Current state revision: 47.0
-Authority baseline SHA: `c5e971e2ef2db95ee67055d1170b1951af396a8c`
-Product baseline SHA: `c5e971e2ef2db95ee67055d1170b1951af396a8c`
-Runtime baseline SHA: `c5e971e2ef2db95ee67055d1170b1951af396a8c`
+Current state revision: 48.0
+Authority baseline SHA: `41018a26f41d18f897cd2b1610b49bc4dddb20d7`
+Product baseline SHA: `41018a26f41d18f897cd2b1610b49bc4dddb20d7`
+Runtime baseline SHA: `41018a26f41d18f897cd2b1610b49bc4dddb20d7`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: First Playable Vertical Slice. Godot production remains locked; the active visible front is the integrated Aurelian World/Region map and separate camera-controllable Greengate Village journey.
 Current milestone: complete the unaided first-10-minutes path using visible player input and canonical saved resources, with physical 3D Village changes for purchased improvements while preserving the `land -> settlement/city -> nation -> empire` product model.
 Active execution issue: #721
-Next allowed action: from the saved Riverbend Storehouse state accepted on `main@c5e971e2ef2db95ee67055d1170b1951af396a8c`, complete the existing visible `Collect Riverbend Storehouse's first provisions` action and its existing Harvest Feast transition through real player input. Change only the first demonstrated input or clarity blocker. Preserve costs, rewards, geography, save schema, authored Village scene graph, donor licenses and camera control; no new system, asset family, full-screen picture or speculative building. Exact-head Godot pointer/runtime assertions plus directly reviewed 1440×900 and 360×225 journey frames are mandatory before merge. Unity, Cursor/MAX and generic image generation remain blocked; extra spend remains $0.
+Next allowed action: perform an end-to-end first-10-minutes player-journey review against the current `main@41018a26f41d18f897cd2b1610b49bc4dddb20d7` from new game through Greenvale claim, Greengate foundation, physical road, Riverbend/Highmere/Northgate frontier, Riverbend Hamlet and Storehouse, provisions, Harvest Feast, return to World and save/reopen. Identify the SINGLE largest demonstrated confusion or missing physical payoff after Harvest Feast, then implement ONE bounded gameplay/scene improvement; do not add unrelated systems or speculative economy. Reuse the legal live Godot 3D scene and authored assets, never substitute static whole-scene art. Require real pointer/runtime input, actual scene-node/persistence proof and directly reviewed 1440x900 and 360x225 PRE/POST frames before PR merge. Cursor/MAX/Unity/additional paid services remain blocked. Unity, Cursor/MAX and generic image generation remain blocked; extra spend remains $0.
+
+## 2026-10-24 post-Harvest Feast product checkpoint
+
+- PR #820 merged as `main@41018a26f41d18f897cd2b1610b49bc4dddb20d7`: the World visibly offers `Return to Greengate · feast` after collecting Riverbend Storehouse provisions, its action leads to the retained interactive 3D Village, the canonical feast spends 5 food, and five authored plaza gathering nodes remain on save/reentry.
+- Exact-head Godot Cloud Workbench run `40071691740` PASS, artifact `12551482376`; 1440×900 and 360×225 runtime frames inspected. All five required main workflows after merge PASS. Do not mistake this for premium visual acceptance or completed Nation/Empire.
+- The previous section below is a historical checkpoint. The Storehouse→provisions→feast work it named is COMPLETE, so do not repeat it or advance only text-based progress counters.
+- Next bounded product gate is a real first-10-minutes player-journey review and a single highest-value post-feast payoff/UX defect repair. No new original-image plate, unrelated infrastructure, or generic new subsystem.
 
 ## 2026-10-24 playable-journey reconciliation
 
