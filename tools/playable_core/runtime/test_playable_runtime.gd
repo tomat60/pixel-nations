@@ -189,6 +189,7 @@ func _run() -> void:
 	_check(String(runtime.village.hud._tutorial_title.text) == "Choose the Granary footprint", "site_choice_explains_player_decision")
 	_check(runtime.village.hud._tutorial_button.disabled, "site_choice_cannot_auto_build_from_dispatch")
 	_check(runtime.granary_site_row.visible, "named_granary_site_choices_are_visible_in_hud")
+	_check(runtime.granary_site_row.get_child_count() == 2, "hud_exposes_exactly_two_granary_site_choices")
 	_check(String(runtime.granary_plaza_button.text) == "Plaza edge · civic", "hud_names_plaza_edge_choice")
 	_check(String(runtime.granary_orchard_button.text) == "Orchard lane · work", "hud_names_orchard_lane_choice")
 	var orchard_site := runtime.village_granary_sites.get_node("GranarySite_orchard_lane") as Area3D
