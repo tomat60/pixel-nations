@@ -491,11 +491,11 @@ func _run() -> void:
 	_check(String(hamlet_reopened.get("next_goal", "")) == "Return to Greengate for Riverbend Storehouse stone", "hamlet_reopen_reports_storehouse_supply_goal")
 	await process_frame
 	_capture("world-riverbend-hamlet-reopened")
-	var home_screen_for_storehouse: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.0, home_world.y))
-	await _click_position(home_screen_for_storehouse)
-	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HOME_ID, "pointer_reselects_home_for_storehouse_supply")
+	_check(runtime.enter_button.visible and not runtime.enter_button.disabled, "riverbend_hamlet_offers_visible_storehouse_return")
+	_check(runtime.enter_button.text == "Return to Greengate · stone", "storehouse_return_cta_names_stone_destination")
 	await _click_control(runtime.enter_button)
 	await process_frame
+	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "storehouse_return_cta_enters_village")
 	_check("Storehouse stone" in String(runtime.supply_button.text), "village_offers_storehouse_stone")
 	await _click_control(runtime.supply_button)
 	var storehouse_supply_village: Dictionary = runtime.controller.current_snapshot()
@@ -505,8 +505,11 @@ func _run() -> void:
 	_capture("village-riverbend-storehouse-stone")
 	await _click_control(runtime.return_button)
 	await process_frame
-	var riverbend_screen_for_storehouse: Vector2 = player.camera.unproject_position(Vector3(frontier_world.x, 0.0, frontier_world.y))
+	var riverbend_storehouse_label := runtime.land_labels.get(FRONTIER_ID) as Label3D
+	_check(riverbend_storehouse_label != null and riverbend_storehouse_label.visible, "riverbend_label_is_visible_for_storehouse_build")
+	var riverbend_screen_for_storehouse: Vector2 = player.camera.unproject_position(riverbend_storehouse_label.global_position)
 	await _click_position(riverbend_screen_for_storehouse)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == FRONTIER_ID, "visible_riverbend_label_selects_storehouse_destination")
 	_check(runtime.storehouse_button.visible and not runtime.storehouse_button.disabled, "riverbend_storehouse_action_is_clickable")
 	await _click_control(runtime.storehouse_button)
 	var storehouse_world: Dictionary = runtime.controller.current_snapshot()
@@ -516,8 +519,11 @@ func _run() -> void:
 	_check("STOREHOUSE" in String((runtime.land_subtitles.get(FRONTIER_ID) as Label3D).text), "riverbend_subtitle_shows_storehouse")
 	await process_frame
 	_capture("world-riverbend-storehouse")
-	var home_screen_for_built_yard: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.0, home_world.y))
+	var greenvale_storehouse_label := runtime.land_labels.get(HOME_ID) as Label3D
+	_check(greenvale_storehouse_label != null and greenvale_storehouse_label.visible, "greenvale_label_is_visible_for_built_yard_visit")
+	var home_screen_for_built_yard: Vector2 = player.camera.unproject_position(greenvale_storehouse_label.global_position)
 	await _click_position(home_screen_for_built_yard)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HOME_ID, "visible_greenvale_label_selects_built_yard_visit")
 	await _click_control(runtime.enter_button)
 	await process_frame
 	_check(runtime.village_riverbend_supply_yard != null, "built_storehouse_creates_physical_greengate_supply_yard")
@@ -533,7 +539,9 @@ func _run() -> void:
 	_check(String(storehouse_reopened.get("next_goal", "")) == "Collect Riverbend Storehouse's first provisions", "storehouse_reopen_reports_first_production_goal")
 	_check(runtime.village_riverbend_supply_yard == null, "world_reentry_releases_village_supply_yard")
 	await process_frame
-	var riverbend_screen_after_reopen: Vector2 = player.camera.unproject_position(Vector3(frontier_world.x, 0.0, frontier_world.y))
+	var riverbend_reopened_label := runtime.land_labels.get(FRONTIER_ID) as Label3D
+	_check(riverbend_reopened_label != null and riverbend_reopened_label.visible, "riverbend_label_is_visible_after_storehouse_reopen")
+	var riverbend_screen_after_reopen: Vector2 = player.camera.unproject_position(riverbend_reopened_label.global_position)
 	await _click_position(riverbend_screen_after_reopen)
 	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == FRONTIER_ID, "pointer_reselects_riverbend_after_storehouse_reopen")
 	_capture("world-riverbend-storehouse-reopened")
