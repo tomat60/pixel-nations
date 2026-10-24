@@ -1,17 +1,25 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-10-09
-Current state revision: 45.2
-Authority baseline SHA: `64e2a0265bef8edf99747cf9cbf01f02c2250b6b`
-Product baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
-Runtime baseline SHA: `80d6eb079e7f7b801b988ba5a7a69da055ccaf4e`
+Updated: 2026-10-24
+Current state revision: 46.0
+Authority baseline SHA: `7dbe582d229e53f0bb941a89885345159e0dfe3d`
+Product baseline SHA: `7dbe582d229e53f0bb941a89885345159e0dfe3d`
+Runtime baseline SHA: `7dbe582d229e53f0bb941a89885345159e0dfe3d`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
-Current product phase: Empire Seed Strategic Breadth Prototype. Godot production remains locked; the active visible front is one large template-derived Aurelian World/Region map, with Greengate retained as a separate downstream Village scene.
-Current milestone: transform a complete proven Godot map scene into a strategic Aurelian Basin atlas with truthful surrounding regions, selection, routes, and a working route into and back from the separate Greengate village while preserving the `land -> settlement/city -> nation -> empire` product model.
+Current product phase: First Playable Vertical Slice. Godot production remains locked; the active visible front is the integrated Aurelian World/Region map and separate camera-controllable Greengate Village journey.
+Current milestone: complete the unaided first-10-minutes path using visible player input and canonical saved resources, with physical 3D Village changes for purchased improvements while preserving the `land -> settlement/city -> nation -> empire` product model.
 Active execution issue: #721
-Next allowed action: retain the complete OpenGS Godot map scene/camera/province-selection system as the working template base, replace draft geography and hit areas with continuity-correct Aurelian Sector A-01 World/Region representation, and keep the real World -> Greengate Village -> World path green under normal pointer pan/zoom/selection input. The 2026-10-09 scratch proof is a rough playable/technical pass, not an accepted product frame; after two focused passes its current flat relief and small-frame information hierarchy remain below `docs/visual-targets/world-map-v8/`, so re-evaluate the retained map art treatment instead of micro-tuning it. Before any product PR, carry complete OpenGS MIT and village MIT/CC BY 4.0 attribution, third-party notices, Godot notices and an explicit change notice, then review real 1440×900 and 360×225 frames directly. Do NOT use The Free Game village as the map, and do not use `world_scale_sector_generator_v4`, the old Aurelian Sector GLB, old procedural terrain, Kenney scaffold, old bridge/river layout, legacy markers or generator output as the active map base. Unity, Cursor/MAX and generic image generation remain blocked; extra spend remains $0.
+Next allowed action: from the saved Riverbend Hamlet state accepted on `main@7dbe582d229e53f0bb941a89885345159e0dfe3d`, expose and verify the existing visible return to Greengate for Riverbend Storehouse stone, then return through visible World input to build the existing 5-stone Storehouse. Require the authored 3D depot and road tiles to appear in the interactive Village and persist after save/reopen. Change only the first demonstrated input, clarity or physical-state blocker. Preserve costs, rewards, geography, save schema, donor licenses and camera control; no new system, asset family, full-screen picture or speculative building. Exact-head Godot node assertions plus directly reviewed 1440×900 and 360×225 PRE/POST frames are mandatory before merge. Unity, Cursor/MAX and generic image generation remain blocked; extra spend remains $0.
+
+## 2026-10-24 playable-journey reconciliation
+
+- Production is `main@7dbe582d229e53f0bb941a89885345159e0dfe3d`; no product PR is open at reconciliation time.
+- PRs #807–#815 made the existing road, Greengate Granary, Riverbend/Highmere/Northgate routes and resource deliveries actionable through visible input without changing their canonical costs or save model.
+- PR #816 proved the rendered `RIVERBEND` label itself selects the hamlet destination; the existing 5-timber Hamlet action changes timber 5→0, settlements 1→2 and survives save/reopen.
+- Exact-head #816 Godot run `40041707234` passed pointer and runtime contracts; artifact `12539318840` contains reviewed 1440×900 and 360×225 Hamlet/reopen frames. Postmerge CI `40042591955`, Play QA `40042591905`, RC1 `40042591926`, exports and signed macOS launch `40042591898` passed.
+- The next demonstrated input gap is the Storehouse-stone return: after Hamlet reopen, guidance names Greengate but the runtime contract still reselects Greenvale through a canonical coordinate before entering the Village. Repair that visible journey only, then prove the existing physical Storehouse result and persistence.
 
 ## Binding product strategy
 
