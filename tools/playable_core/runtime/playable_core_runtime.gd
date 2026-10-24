@@ -28,6 +28,7 @@ var world: Node3D
 var village: Node
 var village_paved_road: Node3D
 var village_granary: Node3D
+var village_granary_access: Node3D
 var village_granary_sites: Node3D
 var village_riverbend_supply_yard: Node3D
 var village_harvest_feast: Node3D
@@ -78,6 +79,12 @@ var granary_site_choice_active := false
 const GRANARY_SITE_TRANSFORMS := {
 	"plaza_edge": {"position": Vector3(27.0, 0.0, 44.0), "rotation": -0.12},
 	"orchard_lane": {"position": Vector3(43.0, 0.0, 22.5), "rotation": 0.18},
+}
+const GRANARY_ACCESS_CELLS := {
+	# Extend the plaza's west approach into the compact civic footprint.
+	"plaza_edge": [Vector2i(10, 15), Vector2i(10, 16), Vector2i(11, 17)],
+	# Continue the school's north-east road as a distinct orchard lane.
+	"orchard_lane": [Vector2i(14, 12), Vector2i(15, 11), Vector2i(16, 10), Vector2i(17, 9)],
 }
 
 
@@ -808,6 +815,7 @@ func _show_world() -> void:
 		village = null
 	village_paved_road = null
 	village_granary = null
+	village_granary_access = null
 	village_granary_sites = null
 	granary_site_choice_active = false
 	village_riverbend_supply_yard = null
@@ -1383,23 +1391,39 @@ func _sync_village_granary(snapshot: Dictionary) -> void:
 		if village_granary != null and is_instance_valid(village_granary):
 			village_granary.queue_free()
 			village_granary = null
-		return
-	if village_granary != null and is_instance_valid(village_granary):
+		if village_granary_access != null and is_instance_valid(village_granary_access):
+			village_granary_access.queue_free()
+			village_granary_access = null
 		return
 	var terrain: Node3D = village.world.terrain
-	village_granary = ApprovedCivil.building("store")
-	village_granary.name = "PixelNationsGreengateGranary"
-	# Village geometry is 1:1 donor world metres. Avoid plaza and both original
-	# buildings while keeping the new building in the existing camera sightline.
 	var site_id := String(snapshot.get("greengate_granary_site", "plaza_edge"))
 	var site: Dictionary = GRANARY_SITE_TRANSFORMS.get(site_id, GRANARY_SITE_TRANSFORMS["plaza_edge"])
-	var site_position: Vector3 = site["position"]
-	var x := site_position.x
-	var z := site_position.z
-	village_granary.position = Vector3(x, terrain.support_height(x, z) + 0.06, z)
-	village_granary.rotation.y = float(site["rotation"])
-	village_granary.set_meta("granary_site", site_id)
-	village.world.add_child(village_granary)
+	if village_granary == null or not is_instance_valid(village_granary):
+		village_granary = ApprovedCivil.building("store")
+		village_granary.name = "PixelNationsGreengateGranary"
+		# Village geometry is 1:1 donor world metres. Avoid plaza and both original
+		# buildings while keeping the new building in the existing camera sightline.
+		var site_position: Vector3 = site["position"]
+		var x := site_position.x
+		var z := site_position.z
+		village_granary.position = Vector3(x, terrain.support_height(x, z) + 0.06, z)
+		village_granary.rotation.y = float(site["rotation"])
+		village_granary.set_meta("granary_site", site_id)
+		village.world.add_child(village_granary)
+	if village_granary_access == null or not is_instance_valid(village_granary_access):
+		village_granary_access = Node3D.new()
+		village_granary_access.name = "PixelNationsGreengateGranaryAccess"
+		village_granary_access.set_meta("granary_site", site_id)
+		terrain.roads.add_child(village_granary_access)
+		for cell: Vector2i in GRANARY_ACCESS_CELLS.get(site_id, GRANARY_ACCESS_CELLS["plaza_edge"]):
+			var tile := Node3D.new()
+			tile.name = "GranaryAccessTile_%d_%d" % [cell.x, cell.y]
+			village_granary_access.add_child(tile)
+			# The same terrain-conforming authored stone used by the paid first road
+			# makes the saved site decision legible as settlement layout, not a prop.
+			terrain._build_road_visual(
+				tile, {"cell": cell, "stage": "complete"}, Vector4.ONE
+			)
 
 
 # Riverbend's Storehouse remains physically located on Riverbend in strategic

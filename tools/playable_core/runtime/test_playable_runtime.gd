@@ -212,6 +212,12 @@ func _run() -> void:
 		_check(runtime.village_granary.get_meta("catalog_id", "") == "bld_03_armazem", "first_journey_granary_uses_authored_licensed_model")
 		_check(runtime.village_granary.get_meta("granary_site", "") == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "physical_granary_keeps_selected_site_identity")
 		_check(runtime.village_granary.position.distance_to(Vector3(43.0, runtime.village_granary.position.y, 22.5)) < 0.1, "physical_granary_uses_orchard_lane_footprint")
+	_check(runtime.village_granary_access != null and is_instance_valid(runtime.village_granary_access), "selected_granary_site_adds_physical_access_lane")
+	if runtime.village_granary_access != null:
+		_check(runtime.village_granary_access.get_meta("granary_site", "") == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "access_lane_keeps_selected_site_identity")
+		_check(runtime.village_granary_access.get_child_count() == 4, "orchard_lane_has_four_authored_stone_tiles")
+		for tile in runtime.village_granary_access.get_children():
+			_check(tile.get_node_or_null("StoneSurface") is MeshInstance3D, "orchard_lane_tile_is_real_authored_geometry")
 	_check(runtime.village_granary_sites == null, "site_footprints_clear_after_construction")
 	_check(not runtime.granary_button.visible, "first_journey_granary_action_removed_after_purchase")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Aurelian frontier dispatch", "built_granary_advances_to_frontier_dispatch")
@@ -640,6 +646,7 @@ func _run() -> void:
 	_check(bool(granary_village.get("greengate_granary_built", false)), "first_journey_granary_stays_built_through_campaign")
 	_check(not runtime.granary_button.visible, "built_first_journey_granary_action_stays_removed")
 	_check(runtime.village_granary != null and is_instance_valid(runtime.village_granary), "first_journey_granary_remains_physical")
+	_check(runtime.village_granary_access != null and runtime.village_granary_access.get_child_count() == 4, "first_journey_granary_access_remains_physical")
 	if runtime.village_granary != null:
 		_check(runtime.village_granary.name == "PixelNationsGreengateGranary", "persistent_granary_keeps_canonical_identity")
 		_check(runtime.village_granary.get_meta("catalog_id", "") == "bld_03_armazem", "persistent_granary_keeps_authored_licensed_model")
@@ -656,6 +663,8 @@ func _run() -> void:
 	await process_frame
 	_check(runtime.village_granary != null and is_instance_valid(runtime.village_granary), "granary_reappears_as_3d_geometry_on_village_reentry")
 	_check(runtime.village_granary.get_meta("granary_site", "") == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "reopened_granary_reappears_at_selected_site")
+	_check(runtime.village_granary_access != null and runtime.village_granary_access.get_meta("granary_site", "") == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "reopened_granary_restores_selected_access_lane")
+	_check(runtime.village_granary_access.get_child_count() == 4, "reopened_orchard_lane_restores_four_physical_tiles")
 	_capture("village-granary-reopened")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
