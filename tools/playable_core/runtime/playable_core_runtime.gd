@@ -28,6 +28,7 @@ var world: Node3D
 var village: Node
 var village_paved_road: Node3D
 var village_granary: Node3D
+var village_granary_sites: Node3D
 var village_riverbend_supply_yard: Node3D
 var village_harvest_feast: Node3D
 var frontier_link: MeshInstance3D
@@ -69,6 +70,12 @@ var save_button: Button
 var return_button: Button
 var atlas_is_focused := false
 var camera_zoom_tween: Tween
+var granary_site_choice_active := false
+
+const GRANARY_SITE_TRANSFORMS := {
+	"plaza_edge": {"position": Vector3(27.0, 0.0, 44.0), "rotation": -0.12, "label": "PLAZA EDGE"},
+	"orchard_lane": {"position": Vector3(43.0, 0.0, 22.5), "rotation": 0.18, "label": "ORCHARD LANE"},
+}
 
 
 func _ready() -> void:
@@ -326,7 +333,7 @@ func _build_ui() -> void:
 	inspect_button = _button("Inspect Riverbend frontier", "InspectButton", _inspect_frontier)
 	connect_button = _button("Connect Riverbend · 5 stone", "ConnectButton", _connect_selected_link)
 	road_button = _button("Build village road · 5 stone", "RoadButton", _road)
-	granary_button = _button("Build Greengate Granary · 3 stone", "GranaryButton", _granary)
+	granary_button = _button("Choose Granary site · 3 stone", "GranaryButton", _open_granary_site_choice)
 	supply_button = _button("Receive Riverbend stone · +5", "SupplyButton", _receive_next_supply)
 	survey_button = _button("Commission Highmere survey · 5 stone", "SurveyButton", _commission_highmere_survey)
 	hamlet_button = _button("Found Riverbend Hamlet · 5 timber", "HamletButton", _found_riverbend_hamlet)
@@ -626,8 +633,44 @@ func _road() -> void:
 		controller.save_game()
 
 
-func _granary() -> void:
-	controller.build_greengate_granary()
+func _open_granary_site_choice() -> void:
+	var snapshot: Dictionary = controller.current_snapshot()
+	if (
+		String(snapshot.get("view", "")) == "village"
+		and bool(snapshot.get("road_built", false))
+		and not bool(snapshot.get("greengate_granary_built", false))
+		and int(snapshot.get("stone", 0)) >= int(snapshot.get("greengate_granary_stone_cost", 3))
+	):
+		granary_site_choice_active = true
+		_render_snapshot(snapshot)
+
+
+func _choose_granary_site(site_id: String) -> void:
+	if not GRANARY_SITE_TRANSFORMS.has(site_id):
+		return
+	granary_site_choice_active = false
+	if controller.build_greengate_granary(site_id):
+		controller.save_game()
+	else:
+		granary_site_choice_active = true
+		_render_snapshot(controller.current_snapshot())
+
+
+func _on_granary_site_input(
+	_camera: Node,
+	event: InputEvent,
+	_event_position: Vector3,
+	_normal: Vector3,
+	_shape_idx: int,
+	site_id: String
+) -> void:
+	if (
+		granary_site_choice_active
+		and event is InputEventMouseButton
+		and event.button_index == MOUSE_BUTTON_LEFT
+		and event.pressed
+	):
+		_choose_granary_site(site_id)
 
 
 func _inspect_frontier() -> void:
@@ -751,6 +794,8 @@ func _show_world() -> void:
 		village = null
 	village_paved_road = null
 	village_granary = null
+	village_granary_sites = null
+	granary_site_choice_active = false
 	village_riverbend_supply_yard = null
 	village_harvest_feast = null
 	world.visible = true
@@ -976,6 +1021,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		and bool(snapshot.get("road_built", false))
 		and not bool(snapshot.get("greengate_granary_built", false))
 	)
+	granary_button.text = "Select a highlighted build site" if granary_site_choice_active else "Choose Granary site · 3 stone"
 	granary_button.disabled = int(snapshot.get("stone", 0)) < int(snapshot.get("greengate_granary_stone_cost", 3))
 	supply_button.text = (
 		"Receive Riverbend Storehouse stone · +5"
@@ -1056,6 +1102,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		_set_northgate_scout_state(bool(snapshot.get("northgate_inspected", false)))
 	_refresh_land_visuals(snapshot)
 	_sync_village_road_visual(snapshot)
+	_sync_village_granary_sites(snapshot)
 	_sync_village_granary(snapshot)
 	_sync_village_riverbend_supply_yard(snapshot)
 	_sync_village_harvest_feast(snapshot)
@@ -1074,6 +1121,10 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 		hud._tutorial_title.text = "Greengate's first road"
 		hud._tutorial_intro.text = "Build Greengate's road for 5 stone, then return to World to inspect Riverbend."
 		hud._tutorial_more.text = "The Pixel Nations command panel uses the canonical save and resource costs."
+	elif granary_site_choice_active:
+		hud._tutorial_title.text = "Choose the Granary footprint"
+		hud._tutorial_intro.text = "Select PLAZA EDGE for a compact civic core or ORCHARD LANE for an eastern work quarter."
+		hud._tutorial_more.text = "Both use the same authored Granary and cost 3 stone. Your location choice is saved."
 	elif (
 		not bool(snapshot.get("greengate_granary_built", false))
 		and int(snapshot.get("stone", 0)) >= int(snapshot.get("greengate_granary_stone_cost", 3))
@@ -1135,7 +1186,7 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 	if road_action_ready:
 		hud._tutorial_button.text = "Build Greengate Road · 5 stone"
 	elif granary_action_ready:
-		hud._tutorial_button.text = "Build Greengate Granary · 3 stone"
+		hud._tutorial_button.text = "Select a highlighted build site" if granary_site_choice_active else "Choose Granary site · 3 stone"
 	elif riverbend_supply_ready:
 		hud._tutorial_button.text = "Receive Riverbend stone · +5"
 	elif highmere_survey_ready:
@@ -1144,6 +1195,7 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 		hud._tutorial_button.text = "Return to World"
 	else:
 		hud._tutorial_button.text = "Continue in Greengate"
+	hud._tutorial_button.disabled = granary_site_choice_active
 
 
 # The parchment dispatch must point at the same place as its copy. Keep the
@@ -1179,7 +1231,7 @@ func _on_village_tutorial_pressed() -> void:
 		and not bool(snapshot.get("greengate_granary_built", false))
 		and int(snapshot.get("stone", 0)) >= int(snapshot.get("greengate_granary_stone_cost", 3))
 	):
-		_granary()
+		_open_granary_site_choice()
 	elif (
 		bool(snapshot.get("riverbend_connected", false))
 		and not bool(snapshot.get("riverbend_supply_delivered", false))
@@ -1226,6 +1278,75 @@ func _sync_village_road_visual(snapshot: Dictionary) -> void:
 		)
 
 
+# Site selection happens on the live terrain, not in an abstract menu. Each
+# footprint reuses the accepted authored paving mesh and owns a real Area3D hit
+# target. The temporary pads disappear as soon as the saved choice is built.
+func _sync_village_granary_sites(snapshot: Dictionary) -> void:
+	if village == null or not is_instance_valid(village):
+		return
+	var should_show := (
+		granary_site_choice_active
+		and bool(snapshot.get("road_built", false))
+		and not bool(snapshot.get("greengate_granary_built", false))
+	)
+	if not should_show:
+		if village_granary_sites != null and is_instance_valid(village_granary_sites):
+			village_granary_sites.queue_free()
+			village_granary_sites = null
+		return
+	if village_granary_sites != null and is_instance_valid(village_granary_sites):
+		return
+	if village_paved_road == null or village_paved_road.get_child_count() == 0:
+		push_error("PN_GRANARY_SITE_ROAD_TEMPLATE_MISSING")
+		return
+	var road_template := village_paved_road.get_child(0) as Node3D
+	var surface_template := road_template.get_node_or_null("StoneSurface") as MeshInstance3D
+	if surface_template == null or surface_template.mesh == null:
+		push_error("PN_GRANARY_SITE_SURFACE_TEMPLATE_MISSING")
+		return
+	var terrain: Node3D = village.world.terrain
+	village_granary_sites = Node3D.new()
+	village_granary_sites.name = "PixelNationsGranaryBuildSites"
+	village.world.add_child(village_granary_sites)
+	for site_id in ["plaza_edge", "orchard_lane"]:
+		var site: Dictionary = GRANARY_SITE_TRANSFORMS[site_id]
+		var center: Vector3 = site["position"]
+		center.y = terrain.ground_surface_height(center.x, center.z) + 0.03
+		var pad := Area3D.new()
+		pad.name = "GranarySite_%s" % site_id
+		pad.position = center
+		pad.input_ray_pickable = true
+		pad.set_meta("granary_site", site_id)
+		pad.input_event.connect(_on_granary_site_input.bind(site_id))
+		village_granary_sites.add_child(pad)
+		var collision := CollisionShape3D.new()
+		var footprint := BoxShape3D.new()
+		footprint.size = Vector3(8.0, 1.0, 8.0)
+		collision.shape = footprint
+		collision.position.y = 0.45
+		pad.add_child(collision)
+		for dx in [-2.5, 0.0, 2.5]:
+			for dz in [-2.5, 0.0, 2.5]:
+				var stone := MeshInstance3D.new()
+				stone.name = "Footprint_%s_%s" % [str(dx), str(dz)]
+				stone.mesh = surface_template.mesh
+				stone.material_override = surface_template.material_override
+				stone.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				stone.position = Vector3(dx, 0.01, dz)
+				pad.add_child(stone)
+		var label := Label3D.new()
+		label.name = "SiteLabel"
+		label.text = String(site["label"])
+		label.font_size = 34
+		label.outline_size = 8
+		label.modulate = Color("f5e4bd")
+		label.outline_modulate = Color("3a2a18")
+		label.position = Vector3(0.0, 1.0, 0.0)
+		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		label.no_depth_test = true
+		pad.add_child(label)
+
+
 # A paid Greengate improvement must have a PHYSICAL result in the retained
 # interactive Godot scene. Use the donor's authored storehouse architecture,
 # on a free plot south of the central plaza, not a full-screen painting.
@@ -1245,10 +1366,14 @@ func _sync_village_granary(snapshot: Dictionary) -> void:
 	village_granary.name = "PixelNationsGreengateGranary"
 	# Village geometry is 1:1 donor world metres. Avoid plaza and both original
 	# buildings while keeping the new building in the existing camera sightline.
-	var x := 27.0
-	var z := 44.0
+	var site_id := String(snapshot.get("greengate_granary_site", "plaza_edge"))
+	var site: Dictionary = GRANARY_SITE_TRANSFORMS.get(site_id, GRANARY_SITE_TRANSFORMS["plaza_edge"])
+	var site_position: Vector3 = site["position"]
+	var x := site_position.x
+	var z := site_position.z
 	village_granary.position = Vector3(x, terrain.support_height(x, z) + 0.06, z)
-	village_granary.rotation.y = -0.12
+	village_granary.rotation.y = float(site["rotation"])
+	village_granary.set_meta("granary_site", site_id)
 	village.world.add_child(village_granary)
 
 

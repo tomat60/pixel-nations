@@ -60,16 +60,17 @@ func _init() -> void:
 	_check(int(low_resource_state.get("resources", {}).get("stone", 0)) == STATE.ROAD_STONE_COST - 1, "road_cost_guard_preserves_resources")
 
 	var restored = STATE.from_json(STATE.to_json(state))
-	_check(int(restored.get("schema_version", 0)) == 12, "save_schema")
+	_check(int(restored.get("schema_version", 0)) == 13, "save_schema")
 	_check(String(restored.get("selected_land_id", "")) == "PN-A01-001", "save_selection")
 	_check(String(restored.get("claimed_land_id", "")) == "PN-A01-001", "save_claim")
 	_check(bool(restored.get("settlement", {}).get("founded", false)), "save_settlement")
 	_check(restored.get("settlement", {}).get("built_improvements", []).has("road"), "save_road")
 	_check(int(restored.get("resources", {}).get("stone", 0)) == 8, "save_road_cost")
-	restored = STATE.reduce(restored, {"type": "BUILD_GREENGATE_GRANARY"})
+	restored = STATE.reduce(restored, {"type": "BUILD_GREENGATE_GRANARY", "site_id": STATE.GREENGATE_GRANARY_SITE_ORCHARD})
 	_check(restored.get("settlement", {}).get("built_improvements", []).has("granary"), "first_journey_granary_built")
 	_check(int(restored.get("resources", {}).get("stone", 0)) == 5, "first_journey_granary_costs_three_stone")
-	var duplicate_granary := STATE.reduce(restored, {"type": "BUILD_GREENGATE_GRANARY"})
+	_check(String(restored.get("greengate_granary_site", "")) == STATE.GREENGATE_GRANARY_SITE_ORCHARD, "first_journey_granary_records_site")
+	var duplicate_granary := STATE.reduce(restored, {"type": "BUILD_GREENGATE_GRANARY", "site_id": STATE.GREENGATE_GRANARY_SITE_PLAZA})
 	_check(int(duplicate_granary.get("resources", {}).get("stone", 0)) == 5, "first_journey_granary_cost_idempotence")
 
 	var progress: Dictionary = STATE.progress(restored)
@@ -263,7 +264,7 @@ func _init() -> void:
 		},
 	})
 	var migrated: Dictionary = STATE.from_json(legacy_payload)
-	_check(int(migrated.get("schema_version", 0)) == 12, "legacy_schema_migrated")
+	_check(int(migrated.get("schema_version", 0)) == 13, "legacy_schema_migrated")
 	_check(String(migrated.get("selected_land_id", "")) == "PN-A01-001", "legacy_selection_recovered")
 	_check(String(migrated.get("claimed_land_id", "")) == "PN-A01-001", "legacy_claim_preserved")
 	_check(migrated.get("claimed_land_ids", []) == ["PN-A01-001"], "legacy_claim_collection_recovered")
@@ -273,6 +274,21 @@ func _init() -> void:
 	_check(int(migrated.get("resources", {}).get("food", 0)) == 2, "legacy_food_preserved")
 	_check(int(migrated.get("resources", {}).get("timber", 0)) == 5, "legacy_timber_preserved")
 	_check(int(migrated.get("resources", {}).get("stone", 0)) == 13, "legacy_stone_defaulted")
+	var legacy_granary_payload := JSON.stringify({
+		"schema_version": 12,
+		"claimed_land_id": STATE.GREENVALE_LAND_ID,
+		"claimed_land_ids": [STATE.GREENVALE_LAND_ID],
+		"settlement": {
+			"founded": true,
+			"name": "Greengate",
+			"built_improvements": ["road", STATE.GREENGATE_GRANARY_IMPROVEMENT_ID],
+		},
+	})
+	var migrated_legacy_granary: Dictionary = STATE.from_json(legacy_granary_payload)
+	_check(
+		String(migrated_legacy_granary.get("greengate_granary_site", "")) == STATE.GREENGATE_GRANARY_SITE_PLAZA,
+		"legacy_granary_uses_original_plaza_site",
+	)
 
 	var malformed_save := JSON.stringify({
 		"schema_version": 1,
@@ -365,8 +381,10 @@ func _test_playable_session_round_trip() -> void:
 	_check(int(village_before.get("road_stone_cost", 0)) == 5, "session_village_road_cost_visible")
 	_check(session.build_greengate_road(), "session_builds_road")
 	_check(not session.build_greengate_road(), "session_blocks_duplicate_road")
-	_check(session.build_greengate_granary(), "session_builds_first_journey_granary")
-	_check(not session.build_greengate_granary(), "session_blocks_duplicate_first_journey_granary")
+	_check(not session.build_greengate_granary("unknown_site"), "session_blocks_invalid_granary_site")
+	_check(session.build_greengate_granary(STATE.GREENGATE_GRANARY_SITE_ORCHARD), "session_builds_first_journey_granary")
+	_check(String(session.village_view_model().get("greengate_granary_site", "")) == STATE.GREENGATE_GRANARY_SITE_ORCHARD, "session_records_granary_site_choice")
+	_check(not session.build_greengate_granary(STATE.GREENGATE_GRANARY_SITE_PLAZA), "session_blocks_duplicate_first_journey_granary")
 	_check(int(session.village_view_model().get("stone", -1)) == 5, "session_first_journey_granary_preserves_connection_stone")
 	_check(not session.connect_riverbend(), "session_blocks_frontier_connection_from_village")
 	_check(session.return_to_world(), "session_returns_to_world")

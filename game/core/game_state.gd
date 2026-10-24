@@ -1,11 +1,14 @@
 class_name GameState
 extends RefCounted
 
-const SCHEMA_VERSION := 12
+const SCHEMA_VERSION := 13
 const CHARTED_LANDS := 30
 const ROAD_STONE_COST := 5
 const GREENGATE_GRANARY_STONE_COST := 3
 const GREENGATE_GRANARY_IMPROVEMENT_ID := "granary"
+const GREENGATE_GRANARY_SITE_PLAZA := "plaza_edge"
+const GREENGATE_GRANARY_SITE_ORCHARD := "orchard_lane"
+const GREENGATE_GRANARY_SITES := [GREENGATE_GRANARY_SITE_PLAZA, GREENGATE_GRANARY_SITE_ORCHARD]
 const FRONTIER_LINK_STONE_COST := 5
 const RIVERBEND_SUPPLY_STONE_REWARD := 5
 const RIVERBEND_SUPPLY_ORDER_ID := "riverbend_stone_shipment"
@@ -49,6 +52,7 @@ static func initial_state() -> Dictionary:
 		"connected_land_ids": [],
 		"settlement_land_ids": [],
 		"settlement_improvements_by_land": {},
+		"greengate_granary_site": "",
 		"settlement": {
 			"founded": false,
 			"name": "",
@@ -162,6 +166,9 @@ static func reduce(state: Dictionary, action: Dictionary) -> Dictionary:
 			if not bool(settlement.get("founded", false)) or not improvements.has("road") or improvements.has(GREENGATE_GRANARY_IMPROVEMENT_ID):
 				return next_state
 			var resources: Dictionary = next_state.get("resources", {}).duplicate(true)
+			var site_id := String(action.get("site_id", ""))
+			if not GREENGATE_GRANARY_SITES.has(site_id):
+				return next_state
 			if int(resources.get("stone", 0)) < GREENGATE_GRANARY_STONE_COST:
 				return next_state
 			resources["stone"] = int(resources.get("stone", 0)) - GREENGATE_GRANARY_STONE_COST
@@ -169,6 +176,7 @@ static func reduce(state: Dictionary, action: Dictionary) -> Dictionary:
 			settlement["built_improvements"] = improvements
 			next_state["resources"] = resources
 			next_state["settlement"] = settlement
+			next_state["greengate_granary_site"] = site_id
 
 		"INSPECT_LAND":
 			var land_id := String(action.get("land_id", ""))
@@ -441,6 +449,7 @@ static func progress(state: Dictionary) -> Dictionary:
 	var founded := bool(settlement.get("founded", false))
 	var road_built := (settlement.get("built_improvements", []) as Array).has("road")
 	var greengate_granary_built := (settlement.get("built_improvements", []) as Array).has(GREENGATE_GRANARY_IMPROVEMENT_ID)
+	var greengate_granary_site := String(state.get("greengate_granary_site", ""))
 	var riverbend_inspected := (state.get("inspected_land_ids", []) as Array).has(RIVERBEND_LAND_ID)
 	var riverbend_claimed := claimed_land_ids.has(RIVERBEND_LAND_ID)
 	var riverbend_connected := (state.get("connected_land_ids", []) as Array).has(RIVERBEND_LAND_ID)
@@ -522,6 +531,7 @@ static func progress(state: Dictionary) -> Dictionary:
 		"settlement_land_ids": settlement_land_ids.duplicate(),
 		"road_built": road_built,
 		"greengate_granary_built": greengate_granary_built,
+		"greengate_granary_site": greengate_granary_site,
 		"inspected_frontiers": (1 if riverbend_inspected else 0) + (1 if highmere_inspected else 0) + (1 if northgate_inspected else 0),
 		"riverbend_inspected": riverbend_inspected,
 		"riverbend_claimed": riverbend_claimed,
@@ -602,6 +612,11 @@ static func _normalize_state(saved: Dictionary) -> Dictionary:
 		normalized["settlement"] = settlement
 		if founded:
 			normalized["settlement_land_ids"] = [claimed_land_id]
+		if (settlement.get("built_improvements", []) as Array).has(GREENGATE_GRANARY_IMPROVEMENT_ID):
+			var saved_site := String(saved.get("greengate_granary_site", GREENGATE_GRANARY_SITE_PLAZA))
+			normalized["greengate_granary_site"] = (
+				saved_site if GREENGATE_GRANARY_SITES.has(saved_site) else GREENGATE_GRANARY_SITE_PLAZA
+			)
 
 	var saved_inspected = saved.get("inspected_land_ids", [])
 	var normalized_settlement: Dictionary = normalized.get("settlement", {})

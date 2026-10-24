@@ -53,11 +53,11 @@ func build_road() -> bool:
 	return _reject("build_road", "The Greengate road requires the Village view and 5 stone.")
 
 
-func build_greengate_granary() -> bool:
-	if session.build_greengate_granary():
+func build_greengate_granary(site_id: String) -> bool:
+	if session.build_greengate_granary(site_id):
 		_publish_snapshot()
 		return true
-	return _reject("build_greengate_granary", "A Greengate granary needs the existing road and 3 stone. It can only be built once.")
+	return _reject("build_greengate_granary", "Choose a valid Greengate build site after the road is complete, with 3 stone available.")
 
 
 func inspect_selected_frontier() -> bool:

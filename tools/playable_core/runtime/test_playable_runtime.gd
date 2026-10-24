@@ -173,7 +173,7 @@ func _run() -> void:
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate's first granary", "completed_road_reveals_first_granary")
 	_check("Build a Granary for 3 stone" in String(runtime.village.hud._tutorial_intro.text), "first_granary_guidance_names_true_cost")
 	_check("Five stone will remain for the Riverbend connection" in String(runtime.village.hud._tutorial_more.text), "first_granary_guidance_protects_expansion_stock")
-	_check(String(runtime.village.hud._tutorial_button.text) == "Build Greengate Granary · 3 stone", "first_granary_guidance_offers_the_real_purchase")
+	_check(String(runtime.village.hud._tutorial_button.text) == "Choose Granary site · 3 stone", "first_granary_guidance_offers_a_real_site_choice")
 	_check(runtime.village.hud._tutorial.is_visible_in_tree(), "first_road_dispatch_remains_visible_after_purchase")
 	if runtime.village_paved_road != null:
 		_check(runtime.village_paved_road.get_child_count() == 5, "canonical_road_has_five_real_tiles")
@@ -181,16 +181,32 @@ func _run() -> void:
 			_check((tile as Node3D).get_node_or_null("StoneSurface") is MeshInstance3D, "canonical_tile_uses_retained_paving_mesh")
 	await process_frame
 	_capture("village-road-built")
-	# Follow the dominant dispatch-card CTA exactly as an unaided player would.
-	# It must perform the named physical upgrade rather than silently doing nothing.
+	# The dominant dispatch opens two real terrain footprints. Select the eastern
+	# Orchard Lane pad through the running 3D scene, not a hidden test shortcut.
 	await _click_control(runtime.village.hud._tutorial_button)
+	_check(runtime.granary_site_choice_active, "granary_site_choice_mode_opens")
+	_check(runtime.village_granary_sites != null and runtime.village_granary_sites.get_child_count() == 2, "two_physical_granary_sites_are_available")
+	_check(String(runtime.village.hud._tutorial_title.text) == "Choose the Granary footprint", "site_choice_explains_player_decision")
+	_check(runtime.village.hud._tutorial_button.disabled, "site_choice_cannot_auto_build_from_dispatch")
+	var orchard_site := runtime.village_granary_sites.get_node("GranarySite_orchard_lane") as Area3D
+	_check(orchard_site != null, "orchard_lane_site_exists_in_scene_graph")
+	_check(orchard_site.get_child_count() == 11, "orchard_lane_site_has_nine_authored_tiles_collision_and_label")
+	await process_frame
+	_capture("village-granary-sites-ready")
+	var orchard_screen: Vector2 = runtime.village.world.camera.unproject_position(orchard_site.global_position)
+	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(orchard_screen), "orchard_lane_site_projects_inside_viewport")
+	await _click_position(orchard_screen)
 	var first_granary: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(first_granary.get("greengate_granary_built", false)), "first_journey_granary_changes_canonical_state")
+	_check(String(first_granary.get("greengate_granary_site", "")) == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "first_journey_granary_records_orchard_lane_choice")
 	_check(int(first_granary.get("stone", -1)) == 5, "first_journey_granary_preserves_riverbend_connection_stone")
 	_check(runtime.village_granary != null and is_instance_valid(runtime.village_granary), "first_journey_granary_adds_real_3d_scene_geometry")
 	if runtime.village_granary != null:
 		_check(runtime.village_granary.name == "PixelNationsGreengateGranary", "first_journey_granary_has_canonical_identity")
 		_check(runtime.village_granary.get_meta("catalog_id", "") == "bld_03_armazem", "first_journey_granary_uses_authored_licensed_model")
+		_check(runtime.village_granary.get_meta("granary_site", "") == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "physical_granary_keeps_selected_site_identity")
+		_check(runtime.village_granary.position.distance_to(Vector3(43.0, runtime.village_granary.position.y, 22.5)) < 0.1, "physical_granary_uses_orchard_lane_footprint")
+	_check(runtime.village_granary_sites == null, "site_footprints_clear_after_construction")
 	_check(not runtime.granary_button.visible, "first_journey_granary_action_removed_after_purchase")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Aurelian frontier dispatch", "built_granary_advances_to_frontier_dispatch")
 	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "built_granary_dispatch_offers_world_navigation")
@@ -621,6 +637,7 @@ func _run() -> void:
 	if runtime.village_granary != null:
 		_check(runtime.village_granary.name == "PixelNationsGreengateGranary", "persistent_granary_keeps_canonical_identity")
 		_check(runtime.village_granary.get_meta("catalog_id", "") == "bld_03_armazem", "persistent_granary_keeps_authored_licensed_model")
+		_check(runtime.village_granary.get_meta("granary_site", "") == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "persistent_granary_keeps_selected_site")
 	await process_frame
 	_capture("village-granary-late-state")
 	_check(runtime.controller.save_game(), "granary_saves_canonical_progress")
@@ -628,9 +645,11 @@ func _run() -> void:
 	runtime.controller.session.state["settlement"]["built_improvements"].erase("granary")
 	_check(runtime.controller.load_game(), "granary_reloads_from_real_save")
 	_check(bool(runtime.controller.current_snapshot().get("greengate_granary_built", false)), "granary_survives_disk_load")
+	_check(String(runtime.controller.current_snapshot().get("greengate_granary_site", "")) == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "granary_site_survives_disk_load")
 	await _click_control(runtime.enter_button)
 	await process_frame
 	_check(runtime.village_granary != null and is_instance_valid(runtime.village_granary), "granary_reappears_as_3d_geometry_on_village_reentry")
+	_check(runtime.village_granary.get_meta("granary_site", "") == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "reopened_granary_reappears_at_selected_site")
 	_capture("village-granary-reopened")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
