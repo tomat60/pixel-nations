@@ -2,16 +2,25 @@
 
 Status: ACTIVE
 Updated: 2026-10-24
-Current state revision: 49.0
-Authority baseline SHA: `6cc21057f185aa6d225a6c2543675ee0c7e6a095`
-Product baseline SHA: `6cc21057f185aa6d225a6c2543675ee0c7e6a095`
-Runtime baseline SHA: `6cc21057f185aa6d225a6c2543675ee0c7e6a095`
+Current state revision: 50.0
+Authority baseline SHA: `5305f0b19c04aabed6c1ca241756cce6ce749640`
+Product baseline SHA: `b0de6fa22ca617e93dd57fbb2567e732d9913858`
+Runtime baseline SHA: `b0de6fa22ca617e93dd57fbb2567e732d9913858`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: First Playable Vertical Slice. Godot production remains locked; the active visible front is the integrated Aurelian World/Region map and separate camera-controllable Greengate Village journey.
 Current milestone: complete the unaided first-10-minutes path using visible player input and canonical saved resources, with physical 3D Village changes for purchased improvements while preserving the `land -> settlement/city -> nation -> empire` product model.
 Active execution issue: #721
-Next allowed action: perform one complete unaided first-10-minutes player-journey review against the current `main@6cc21057f185aa6d225a6c2543675ee0c7e6a095`, including the real Greengate Granary site choice, from new game through Greenvale claim, Greengate foundation, physical road and Granary placement, Riverbend/Highmere/Northgate frontier, Riverbend Hamlet and Storehouse, provisions, Harvest Feast, return to World and save/reopen. Identify the SINGLE largest demonstrated fun, clarity or visual-payoff bottleneck, then implement at most ONE bounded gameplay/scene improvement; do not automatically add a second construction option, hidden routing action, unrelated system or speculative economy. Reuse the legal live Godot 3D scene and authored assets, never substitute static whole-scene art. Require real pointer/runtime input, actual scene-node/persistence proof and directly reviewed 1440x900 and 360x225 PRE/POST frames before PR merge. Cursor/MAX/Unity/additional paid services remain blocked. Generic image generation remains blocked; extra spend remains $0.
+Next allowed action: run the mandatory whole-product portfolio gate against current `main@5305f0b19c04aabed6c1ca241756cce6ce749640`, using the accepted connected Granary choice as the first-10-minutes baseline. Compare the largest remaining bottleneck across full progression/world shape, repeatable settlement agency, UX clarity, inhabited visual density and demo value, then authorize at most ONE materially larger player-visible milestone. Do not infer another hidden route click, automatic isolated building, text/state counter, static scene plate or speculative economy from the last reducer transition. Any implementation must reuse the legal live Godot 3D scene, create a perceptible physical consequence through real input, preserve save/re-entry and World/Village continuity, and pass exact-head runtime plus directly reviewed 1440x900 and 360x225 PRE/POST evidence. Cursor/MAX/Unity/additional paid services remain blocked. Generic image generation remains blocked; extra spend remains $0.
+
+## 2026-10-24 connected Granary access checkpoint
+
+- PR #827 merged as product/runtime baseline `b0de6fa22ca617e93dd57fbb2567e732d9913858`: the existing 3-stone Plaza edge / Orchard lane placement now constructs a distinct terrain-conforming authored-stone access spur to the selected physical Granary instead of leaving it isolated on grass.
+- The accepted pointer path selects Orchard lane, spends 8 -> 5 stone, adds four real `StoneSurface` scene meshes, and restores the selected lane through the complete journey, disk save/load and World <-> Village re-entry. No economy, schema, new asset family, generated image, world-space label or framework was added.
+- Exact-head Godot 4.7.1 Workbench run `40113797594` PASS, artifact `12566889365`; `PN_PLAYABLE_POINTER_PATH=PASS` and `PN_PLAYABLE_RUNTIME_CONTRACT=PASS`. Directly reviewed 1440x900 and 360x225 road-before, built, late-state and reopened frames show a perceptible connected neighborhood without label collision or full-screen replacement.
+- All exact-head checks and all postmerge workflows attached to `b0de6fa...` passed: CI, RC1, Play Visual QA, Stall Guard and macOS/Linux export/start smoke. Vercel combined status passed. Native owner-Mac normal double-click Gatekeeper acceptance remains separate and unclaimed.
+- PR #828 then reorganized agent guidance only and is current `main@5305f0b19c04aabed6c1ca241756cce6ce749640`; it preserves the accepted #827 runtime and its current-main CI, RC1, Play Visual QA, Stall Guard and Vercel checks passed.
+- The unaided first-10-minutes review and its single demonstrated physical-layout correction are complete. Do not repeat that review as the next delivery or add another micro-progression step without the whole-product portfolio gate.
 
 ## 2026-10-24 interactive Granary placement checkpoint
 
