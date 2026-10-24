@@ -18,6 +18,10 @@ const ATLAS_OVERVIEW_POSITION := Vector3(0.0, 0.0, 0.0)
 # viewport instead of floating inside a wide band of empty donor background.
 const ATLAS_OVERVIEW_ZOOM := 225.0
 const ATLAS_FOCUS_ZOOM := 82.0
+const ATLAS_RELIEF_COLUMNS := 48
+const ATLAS_RELIEF_ROWS := 24
+const ATLAS_RELIEF_HEIGHT := 3.0
+const ATLAS_STATE_Y := 3.35
 const HUD_PAPER := Color("f5e4bd")
 const HUD_INK := Color("3a2a18")
 const HUD_BRONZE := Color("b58a48")
@@ -144,23 +148,80 @@ func _build_a01_atlas() -> void:
 	atlas_root.name = "CanonicalA01Atlas"
 	world.add_child(atlas_root)
 	var substrate := MeshInstance3D.new()
-	substrate.name = "FictionalAurelianSubstrate"
-	var substrate_mesh := PlaneMesh.new()
-	substrate_mesh.size = Vector2(500.0, 250.0)
+	substrate.name = "FictionalAurelianRelief"
+	var atlas_texture := load("res://pixel_nations/a01_atlas_substrate.png") as Texture2D
+	var substrate_mesh := _build_atlas_relief_mesh(atlas_texture)
 	var substrate_material := StandardMaterial3D.new()
-	substrate_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	substrate_material.albedo_texture = load("res://pixel_nations/a01_atlas_substrate.png")
+	# The retained painting remains the authored atlas surface. A broad, shallow
+	# mesh lets its mountains, valleys and coast catch real light so World reads
+	# as navigable command geography rather than a flat image plate.
+	substrate_material.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
+	substrate_material.albedo_texture = atlas_texture
 	substrate_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	substrate_material.roughness = 0.82
 	substrate_mesh.material = substrate_material
 	substrate.mesh = substrate_mesh
-	substrate.position.y = 0.04
+	substrate.set_meta("relief_columns", ATLAS_RELIEF_COLUMNS)
+	substrate.set_meta("relief_rows", ATLAS_RELIEF_ROWS)
 	atlas_root.add_child(substrate)
+	var relief_light := DirectionalLight3D.new()
+	relief_light.name = "AurelianReliefLight"
+	relief_light.rotation_degrees = Vector3(-58.0, -32.0, 0.0)
+	relief_light.light_color = Color("ffe5ba")
+	relief_light.light_energy = 0.78
+	relief_light.shadow_enabled = false
+	atlas_root.add_child(relief_light)
 	for land_value in lands:
 		_build_land_polygon(land_value as Dictionary)
 	_build_land_label("PN-A01-001", "GREENVALE", "HOME · GREENGATE", Color("dbe9ff"))
 	_build_land_label("PN-A01-002", "RIVERBEND", "", Color("d6ffff"))
 	_build_land_label("PN-A01-003", "HIGHMERE", "", Color("f2ead2"))
 	_build_land_label("PN-A01-024", "NORTHGATE", "", Color("e3f1df"))
+
+
+func _build_atlas_relief_mesh(texture: Texture2D) -> ArrayMesh:
+	var image := texture.get_image()
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for row in range(ATLAS_RELIEF_ROWS):
+		for column in range(ATLAS_RELIEF_COLUMNS):
+			var uv00 := Vector2(float(column) / ATLAS_RELIEF_COLUMNS, float(row) / ATLAS_RELIEF_ROWS)
+			var uv10 := Vector2(float(column + 1) / ATLAS_RELIEF_COLUMNS, uv00.y)
+			var uv01 := Vector2(uv00.x, float(row + 1) / ATLAS_RELIEF_ROWS)
+			var uv11 := Vector2(uv10.x, uv01.y)
+			for uv in [uv00, uv01, uv10, uv10, uv01, uv11]:
+				surface.set_uv(uv)
+				surface.add_vertex(_atlas_relief_vertex(uv, image))
+	surface.generate_normals()
+	return surface.commit()
+
+
+func _atlas_relief_vertex(uv: Vector2, image: Image) -> Vector3:
+	var sample_x := clampi(int(uv.x * float(image.get_width() - 1)), 0, image.get_width() - 1)
+	var sample_y := clampi(int(uv.y * float(image.get_height() - 1)), 0, image.get_height() - 1)
+	# Average a small neighborhood so painted brush detail remains texture, not
+	# noisy terrain spikes. Blue-dominant ocean stays low; brighter neutral and
+	# green land rises into one continuous atlas relief.
+	var sample := Color(0.0, 0.0, 0.0, 1.0)
+	var sample_count := 0.0
+	var radius := maxi(2, int(image.get_width() / 240))
+	for offset_y in [-radius, 0, radius]:
+		for offset_x in [-radius, 0, radius]:
+			sample += image.get_pixel(
+				clampi(sample_x + offset_x, 0, image.get_width() - 1),
+				clampi(sample_y + offset_y, 0, image.get_height() - 1)
+			)
+			sample_count += 1.0
+	sample /= sample_count
+	var brightness := sample.get_luminance()
+	var water_weight := clampf((sample.b - sample.r * 0.92) * 2.8, 0.0, 1.0)
+	var land_height := clampf(brightness * 0.82 + sample.r * 0.18, 0.0, 1.0)
+	var height := lerpf(land_height * ATLAS_RELIEF_HEIGHT, -0.20, water_weight)
+	return Vector3(
+		lerpf(-250.0, 250.0, uv.x),
+		height,
+		lerpf(-125.0, 125.0, uv.y)
+	)
 
 
 func _build_land_polygon(land: Dictionary) -> void:
@@ -177,7 +238,7 @@ func _build_land_polygon(land: Dictionary) -> void:
 		var point := points[int(index)]
 		surface.add_vertex(Vector3(
 			WORLD_LEFT + point.x / MAP_WIDTH * WORLD_WIDTH,
-			0.18,
+			ATLAS_STATE_Y,
 			WORLD_TOP + point.y / MAP_HEIGHT * WORLD_HEIGHT
 		))
 	var mesh := surface.commit()
@@ -205,13 +266,13 @@ func _build_land_polygon(land: Dictionary) -> void:
 	for point in points:
 		outline_mesh.surface_add_vertex(Vector3(
 			WORLD_LEFT + point.x / MAP_WIDTH * WORLD_WIDTH,
-			0.30,
+			ATLAS_STATE_Y + 0.12,
 			WORLD_TOP + point.y / MAP_HEIGHT * WORLD_HEIGHT
 		))
 	var first := points[0]
 	outline_mesh.surface_add_vertex(Vector3(
 		WORLD_LEFT + first.x / MAP_WIDTH * WORLD_WIDTH,
-		0.30,
+		ATLAS_STATE_Y + 0.12,
 		WORLD_TOP + first.y / MAP_HEIGHT * WORLD_HEIGHT
 	))
 	outline_mesh.surface_end()
@@ -227,7 +288,7 @@ func _build_land_label(land_id: String, text_value: String, subtitle_value: Stri
 	var label := Label3D.new()
 	label.name = "%s_Label" % land_id.replace("-", "_")
 	label.text = text_value
-	label.position = Vector3(center.x, 2.0, center.y)
+	label.position = Vector3(center.x, ATLAS_STATE_Y + 1.8, center.y)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
 	label.font_size = 32
@@ -240,7 +301,7 @@ func _build_land_label(land_id: String, text_value: String, subtitle_value: Stri
 	var subtitle := Label3D.new()
 	subtitle.name = "%s_Subtitle" % land_id.replace("-", "_")
 	subtitle.text = subtitle_value
-	subtitle.position = Vector3(center.x, 1.9, center.y + 3.2)
+	subtitle.position = Vector3(center.x, ATLAS_STATE_Y + 1.7, center.y + 3.2)
 	subtitle.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	subtitle.no_depth_test = true
 	subtitle.font_size = 18
@@ -560,7 +621,7 @@ func _build_frontier_link() -> void:
 	frontier_link = MeshInstance3D.new()
 	frontier_link.name = "GreenvaleRiverbendClaimLink"
 	frontier_link.mesh = route_mesh
-	frontier_link.position = Vector3((home.x + frontier.x) * 0.5, 1.2, (home.y + frontier.y) * 0.5)
+	frontier_link.position = Vector3((home.x + frontier.x) * 0.5, ATLAS_STATE_Y + 0.75, (home.y + frontier.y) * 0.5)
 	frontier_link.rotation.y = -atan2(delta.y, delta.x)
 	frontier_link.visible = false
 	world.add_child(frontier_link)
@@ -582,7 +643,7 @@ func _build_highmere_survey_link() -> void:
 	highmere_survey_link = MeshInstance3D.new()
 	highmere_survey_link.name = "RiverbendHighmereSurveyRoute"
 	highmere_survey_link.mesh = route_mesh
-	highmere_survey_link.position = Vector3((riverbend.x + highmere.x) * 0.5, 1.15, (riverbend.y + highmere.y) * 0.5)
+	highmere_survey_link.position = Vector3((riverbend.x + highmere.x) * 0.5, ATLAS_STATE_Y + 0.70, (riverbend.y + highmere.y) * 0.5)
 	highmere_survey_link.rotation.y = -atan2(delta.y, delta.x)
 	highmere_survey_link.visible = false
 	world.add_child(highmere_survey_link)
@@ -604,7 +665,7 @@ func _build_northgate_scout_link() -> void:
 	northgate_scout_link = MeshInstance3D.new()
 	northgate_scout_link.name = "HighmereNorthgateScoutRoute"
 	northgate_scout_link.mesh = route_mesh
-	northgate_scout_link.position = Vector3((highmere.x + northgate.x) * 0.5, 1.1, (highmere.y + northgate.y) * 0.5)
+	northgate_scout_link.position = Vector3((highmere.x + northgate.x) * 0.5, ATLAS_STATE_Y + 0.65, (highmere.y + northgate.y) * 0.5)
 	northgate_scout_link.rotation.y = -atan2(delta.y, delta.x)
 	northgate_scout_link.visible = false
 	world.add_child(northgate_scout_link)
