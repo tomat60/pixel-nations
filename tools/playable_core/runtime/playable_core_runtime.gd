@@ -1336,12 +1336,16 @@ func _sync_village_granary_sites(snapshot: Dictionary) -> void:
 				pad.add_child(stone)
 		var label := Label3D.new()
 		label.name = "SiteLabel"
-		label.text = String(site["label"])
-		label.font_size = 34
-		label.outline_size = 8
-		label.modulate = Color("f5e4bd")
+		label.text = "BUILD · %s" % String(site["label"])
+		label.font_size = 30
+		label.outline_size = 10
+		# Keep the two choices readable at both acceptance resolutions. The
+		# previous world-scaled labels collapsed to sub-pixel marks at 360p.
+		label.fixed_size = true
+		label.pixel_size = 0.035
+		label.modulate = Color("8bd5c5") if site_id == "orchard_lane" else Color("f2c96d")
 		label.outline_modulate = Color("3a2a18")
-		label.position = Vector3(0.0, 1.0, 0.0)
+		label.position = Vector3(0.0, 2.6, 0.0)
 		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		label.no_depth_test = true
 		pad.add_child(label)
