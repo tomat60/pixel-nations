@@ -340,8 +340,8 @@ func _build_ui() -> void:
 	granary_site_row = HBoxContainer.new()
 	granary_site_row.name = "GranarySiteChoices"
 	granary_site_row.add_theme_constant_override("separation", 8)
-	granary_plaza_button = _button("Plaza edge · civic", "GranaryPlazaButton", _choose_granary_site.bind("plaza_edge"))
-	granary_orchard_button = _button("Orchard lane · work", "GranaryOrchardButton", _choose_granary_site.bind("orchard_lane"))
+	granary_plaza_button = _button("Plaza edge", "GranaryPlazaButton", _choose_granary_site.bind("plaza_edge"))
+	granary_orchard_button = _button("Orchard lane", "GranaryOrchardButton", _choose_granary_site.bind("orchard_lane"))
 	granary_plaza_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	granary_orchard_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	granary_site_row.add_child(granary_plaza_button)

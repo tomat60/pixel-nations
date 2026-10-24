@@ -190,8 +190,8 @@ func _run() -> void:
 	_check(runtime.village.hud._tutorial_button.disabled, "site_choice_cannot_auto_build_from_dispatch")
 	_check(runtime.granary_site_row.visible, "named_granary_site_choices_are_visible_in_hud")
 	_check(runtime.granary_site_row.get_child_count() == 2, "hud_exposes_exactly_two_granary_site_choices")
-	_check(String(runtime.granary_plaza_button.text) == "Plaza edge · civic", "hud_names_plaza_edge_choice")
-	_check(String(runtime.granary_orchard_button.text) == "Orchard lane · work", "hud_names_orchard_lane_choice")
+	_check(String(runtime.granary_plaza_button.text) == "Plaza edge", "hud_names_plaza_edge_choice")
+	_check(String(runtime.granary_orchard_button.text) == "Orchard lane", "hud_names_orchard_lane_choice")
 	var orchard_site := runtime.village_granary_sites.get_node("GranarySite_orchard_lane") as Area3D
 	_check(orchard_site != null, "orchard_lane_site_exists_in_scene_graph")
 	_check(orchard_site.get_child_count() == 11, "orchard_lane_site_has_nine_authored_tiles_collision_and_marker")
