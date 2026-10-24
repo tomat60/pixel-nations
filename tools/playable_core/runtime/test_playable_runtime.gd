@@ -188,12 +188,14 @@ func _run() -> void:
 	_check(runtime.village_granary_sites != null and runtime.village_granary_sites.get_child_count() == 2, "two_physical_granary_sites_are_available")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Choose the Granary footprint", "site_choice_explains_player_decision")
 	_check(runtime.village.hud._tutorial_button.disabled, "site_choice_cannot_auto_build_from_dispatch")
+	_check(runtime.granary_site_row.visible, "named_granary_site_choices_are_visible_in_hud")
+	_check(String(runtime.granary_plaza_button.text) == "Plaza edge · civic", "hud_names_plaza_edge_choice")
+	_check(String(runtime.granary_orchard_button.text) == "Orchard lane · work", "hud_names_orchard_lane_choice")
 	var orchard_site := runtime.village_granary_sites.get_node("GranarySite_orchard_lane") as Area3D
 	_check(orchard_site != null, "orchard_lane_site_exists_in_scene_graph")
-	_check(orchard_site.get_child_count() == 11, "orchard_lane_site_has_nine_authored_tiles_collision_and_label")
-	var orchard_label := orchard_site.get_node("SiteLabel") as Label3D
-	_check(orchard_label.fixed_size and orchard_label.pixel_size >= 0.03, "orchard_lane_label_stays_screen_legible")
-	_check(orchard_label.position.y >= 2.5 and String(orchard_label.text).begins_with("BUILD"), "orchard_lane_label_is_raised_and_actionable")
+	_check(orchard_site.get_child_count() == 11, "orchard_lane_site_has_nine_authored_tiles_collision_and_marker")
+	_check(orchard_site.get_node_or_null("SiteMarker") is MeshInstance3D, "orchard_lane_has_restrained_terrain_marker")
+	_check(orchard_site.get_node_or_null("SiteLabel") == null, "granary_sites_never_use_world_space_text_billboards")
 	await process_frame
 	_capture("village-granary-sites-ready")
 	var orchard_screen: Vector2 = runtime.village.world.camera.unproject_position(orchard_site.global_position)

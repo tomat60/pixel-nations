@@ -58,6 +58,9 @@ var inspect_button: Button
 var connect_button: Button
 var road_button: Button
 var granary_button: Button
+var granary_site_row: HBoxContainer
+var granary_plaza_button: Button
+var granary_orchard_button: Button
 var supply_button: Button
 var survey_button: Button
 var hamlet_button: Button
@@ -334,6 +337,15 @@ func _build_ui() -> void:
 	connect_button = _button("Connect Riverbend · 5 stone", "ConnectButton", _connect_selected_link)
 	road_button = _button("Build village road · 5 stone", "RoadButton", _road)
 	granary_button = _button("Choose Granary site · 3 stone", "GranaryButton", _open_granary_site_choice)
+	granary_site_row = HBoxContainer.new()
+	granary_site_row.name = "GranarySiteChoices"
+	granary_site_row.add_theme_constant_override("separation", 8)
+	granary_plaza_button = _button("Plaza edge · civic", "GranaryPlazaButton", _choose_granary_site.bind("plaza_edge"))
+	granary_orchard_button = _button("Orchard lane · work", "GranaryOrchardButton", _choose_granary_site.bind("orchard_lane"))
+	granary_plaza_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	granary_orchard_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	granary_site_row.add_child(granary_plaza_button)
+	granary_site_row.add_child(granary_orchard_button)
 	supply_button = _button("Receive Riverbend stone · +5", "SupplyButton", _receive_next_supply)
 	survey_button = _button("Commission Highmere survey · 5 stone", "SurveyButton", _commission_highmere_survey)
 	hamlet_button = _button("Found Riverbend Hamlet · 5 timber", "HamletButton", _found_riverbend_hamlet)
@@ -346,6 +358,8 @@ func _build_ui() -> void:
 	return_button = _button("Return to World", "ReturnButton", _return_world)
 	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, granary_button, supply_button, survey_button, hamlet_button, storehouse_button, provisions_button, feast_button, focus_button, overview_button, save_button, return_button]:
 		column.add_child(button)
+	column.add_child(granary_site_row)
+	column.move_child(granary_site_row, granary_button.get_index() + 1)
 
 
 func _label(text_value: String, font_size: int) -> Label:
@@ -1023,6 +1037,9 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	)
 	granary_button.text = "Select a highlighted build site" if granary_site_choice_active else "Choose Granary site · 3 stone"
 	granary_button.disabled = int(snapshot.get("stone", 0)) < int(snapshot.get("greengate_granary_stone_cost", 3))
+	granary_site_row.visible = view == "village" and granary_site_choice_active
+	granary_plaza_button.disabled = not granary_site_choice_active
+	granary_orchard_button.disabled = not granary_site_choice_active
 	supply_button.text = (
 		"Receive Riverbend Storehouse stone · +5"
 		if bool(snapshot.get("riverbend_hamlet_founded", false)) and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false)) else (
@@ -1123,8 +1140,8 @@ func _sync_village_guidance(snapshot: Dictionary) -> void:
 		hud._tutorial_more.text = "The Pixel Nations command panel uses the canonical save and resource costs."
 	elif granary_site_choice_active:
 		hud._tutorial_title.text = "Choose the Granary footprint"
-		hud._tutorial_intro.text = "Select PLAZA EDGE for a compact civic core or ORCHARD LANE for an eastern work quarter."
-		hud._tutorial_more.text = "Both use the same authored Granary and cost 3 stone. Your location choice is saved."
+		hud._tutorial_intro.text = "Choose Plaza edge for a compact civic core or Orchard lane for an eastern work quarter."
+		hud._tutorial_more.text = "Use either named HUD choice or click its stone footprint. Both cost 3 stone and the location is saved."
 	elif (
 		not bool(snapshot.get("greengate_granary_built", false))
 		and int(snapshot.get("stone", 0)) >= int(snapshot.get("greengate_granary_stone_cost", 3))
@@ -1334,21 +1351,25 @@ func _sync_village_granary_sites(snapshot: Dictionary) -> void:
 				stone.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				stone.position = Vector3(dx, 0.01, dz)
 				pad.add_child(stone)
-		var label := Label3D.new()
-		label.name = "SiteLabel"
-		label.text = "BUILD · %s" % String(site["label"])
-		label.font_size = 30
-		label.outline_size = 10
-		# Keep the two choices readable at both acceptance resolutions. The
-		# previous world-scaled labels collapsed to sub-pixel marks at 360p.
-		label.fixed_size = true
-		label.pixel_size = 0.035
-		label.modulate = Color("8bd5c5") if site_id == "orchard_lane" else Color("f2c96d")
-		label.outline_modulate = Color("3a2a18")
-		label.position = Vector3(0.0, 2.6, 0.0)
-		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		label.no_depth_test = true
-		pad.add_child(label)
+		# A restrained colored survey disk anchors each named HUD choice to the
+		# terrain. Never put screen-facing text into the 3D scene: it obscures
+		# the retained Village at small viewports.
+		var marker := MeshInstance3D.new()
+		marker.name = "SiteMarker"
+		var disk := CylinderMesh.new()
+		disk.top_radius = 0.9
+		disk.bottom_radius = 0.9
+		disk.height = 0.08
+		marker.mesh = disk
+		var marker_material := StandardMaterial3D.new()
+		marker_material.albedo_color = Color("d9ad52") if site_id == "plaza_edge" else Color("5ea69a")
+		marker_material.emission_enabled = true
+		marker_material.emission = marker_material.albedo_color * 0.35
+		marker_material.roughness = 0.8
+		marker.material_override = marker_material
+		marker.position = Vector3(0.0, 0.08, 0.0)
+		marker.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		pad.add_child(marker)
 
 
 # A paid Greengate improvement must have a PHYSICAL result in the retained
