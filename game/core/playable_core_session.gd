@@ -56,13 +56,17 @@ func build_greengate_road() -> bool:
 	return road_built and stone_after == stone_before - GameState.ROAD_STONE_COST
 
 
-func build_greengate_granary() -> bool:
+func build_greengate_granary(site_id: String) -> bool:
 	if current_view != VIEW_VILLAGE:
 		return false
 	var stone_before := int(state.get("resources", {}).get("stone", 0))
-	state = GameState.reduce(state, {"type": "BUILD_GREENGATE_GRANARY"})
+	state = GameState.reduce(state, {"type": "BUILD_GREENGATE_GRANARY", "site_id": site_id})
 	var built := (state.get("settlement", {}).get("built_improvements", []) as Array).has(GameState.GREENGATE_GRANARY_IMPROVEMENT_ID)
-	return built and int(state.get("resources", {}).get("stone", 0)) == stone_before - GameState.GREENGATE_GRANARY_STONE_COST
+	return (
+		built
+		and String(state.get("greengate_granary_site", "")) == site_id
+		and int(state.get("resources", {}).get("stone", 0)) == stone_before - GameState.GREENGATE_GRANARY_STONE_COST
+	)
 
 
 func inspect_selected_frontier() -> bool:
@@ -285,6 +289,7 @@ func world_view_model() -> Dictionary:
 		"settlement_land_ids": (progress.get("settlement_land_ids", []) as Array).duplicate(),
 		"road_built": bool(progress.get("road_built", false)),
 		"greengate_granary_built": bool(progress.get("greengate_granary_built", false)),
+		"greengate_granary_site": String(progress.get("greengate_granary_site", "")),
 		"inspected_land_ids": (state.get("inspected_land_ids", []) as Array).duplicate(),
 		"inspected_frontiers": int(progress.get("inspected_frontiers", 0)),
 		"riverbend_inspected": bool(progress.get("riverbend_inspected", false)),
@@ -336,6 +341,7 @@ func village_view_model() -> Dictionary:
 		"next_goal": String(progress.get("next_goal", "")),
 		"road_built": (settlement.get("built_improvements", []) as Array).has("road"),
 		"greengate_granary_built": bool(progress.get("greengate_granary_built", false)),
+		"greengate_granary_site": String(progress.get("greengate_granary_site", "")),
 		"greengate_granary_stone_cost": GameState.GREENGATE_GRANARY_STONE_COST,
 		"stone": int(state.get("resources", {}).get("stone", 0)),
 		"timber": int(state.get("resources", {}).get("timber", 0)),
