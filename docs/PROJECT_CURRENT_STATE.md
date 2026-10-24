@@ -2,16 +2,31 @@
 
 Status: ACTIVE
 Updated: 2026-10-24
-Current state revision: 48.0
-Authority baseline SHA: `41018a26f41d18f897cd2b1610b49bc4dddb20d7`
-Product baseline SHA: `41018a26f41d18f897cd2b1610b49bc4dddb20d7`
-Runtime baseline SHA: `41018a26f41d18f897cd2b1610b49bc4dddb20d7`
+Current state revision: 49.0
+Authority baseline SHA: `6cc21057f185aa6d225a6c2543675ee0c7e6a095`
+Product baseline SHA: `6cc21057f185aa6d225a6c2543675ee0c7e6a095`
+Runtime baseline SHA: `6cc21057f185aa6d225a6c2543675ee0c7e6a095`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: First Playable Vertical Slice. Godot production remains locked; the active visible front is the integrated Aurelian World/Region map and separate camera-controllable Greengate Village journey.
 Current milestone: complete the unaided first-10-minutes path using visible player input and canonical saved resources, with physical 3D Village changes for purchased improvements while preserving the `land -> settlement/city -> nation -> empire` product model.
 Active execution issue: #721
-Next allowed action: perform an end-to-end first-10-minutes player-journey review against the current `main@41018a26f41d18f897cd2b1610b49bc4dddb20d7` from new game through Greenvale claim, Greengate foundation, physical road, Riverbend/Highmere/Northgate frontier, Riverbend Hamlet and Storehouse, provisions, Harvest Feast, return to World and save/reopen. Identify the SINGLE largest demonstrated confusion or missing physical payoff after Harvest Feast, then implement ONE bounded gameplay/scene improvement; do not add unrelated systems or speculative economy. Reuse the legal live Godot 3D scene and authored assets, never substitute static whole-scene art. Require real pointer/runtime input, actual scene-node/persistence proof and directly reviewed 1440x900 and 360x225 PRE/POST frames before PR merge. Cursor/MAX/Unity/additional paid services remain blocked. Unity, Cursor/MAX and generic image generation remain blocked; extra spend remains $0.
+Next allowed action: on the accepted **main@6cc21057f185aa6d225a6c2543675ee0c7e6a095**, exercise the complete first-time player journey from Greenvale claim through road, **choice of Greengate Granary site (Plaza edge / Orchard lane)**, Riverbend/Highmere/Northgate, Riverbend Hamlet and physical Storehouse, provisions, Harvest Feast, World return, save and re-entry. Identify the **single largest first-time player confusion or visual/gameplay bottleneck** supported by actual 1440×900 and 360×225 Godot runtime frames and player input, then improve ONE real interactive scene/mechanic. Do not rework completed steps, open a cosmetic-only PR, replace the live 3D Village with a static image, invent Nation/Empire implementation, or switch engines. Godot/cloud, existing licensed assets and tests ON; Cursor/MAX/Unity/new paid services OFF; extra cost $0. Stop on authority failure, unverified rights, red exact-head required CI, missing actual before/after scene-node/saved-state evidence, or visual regression.
+
+
+## 2026-10-24 new-chat production handoff — latest ACCEPTED #824
+
+**Source of truth:** this top checkpoint, latest `main`, `AGENTS.md`, accepted Godot ADR, strategy master plan and issue #721. Older dated sections below are historical evidence and MUST NOT override the current action.
+
+- **Current main**: `6cc21057f185aa6d225a6c2543675ee0c7e6a095`, accepted PR [#824](https://github.com/tomat60/pixel-nations/pull/824) (player chooses real Greengate Granary footprint); exact product PR head `7dbbed546865d48b26530f06d99f33d168022352`. No open PR at this checkpoint. Re-fetch all SHAs/PRs/CI when resuming.
+- **Gameplay in native Godot:** the World Living Atlas for 30 canonical A-01 lands, real Greenvale claim → Greengate founding → stone-costed physical paved road → 3-stone **site-selectable** Granary (Plaza edge or Orchard lane, 3D building), Riverbend/Highmere/Northgate frontier actions, saved Riverbend Hamlet, one-time physical Riverbend Storehouse plus connecting road, first provisions and real-food-cost Harvest Feast with a physical resident gathering. World ↔ Village and saved construction re-entry verified. Nation/Empire depth **NOT** implemented in this native slice; 10,000 world lands remain a long-term scope, not a playable claim.
+- **Most recent visible delta:** HUD offers the two named Granary choices; 3×3 authored-stone terrain foundations are clickable; choosing Orchard lane debits 3 stone and builds real `bld_03_armazem` geometry at that site, removes placeholder foundations and saves exact location. Migration brings earlier Granary saves to the original Plaza site. No full-screen image swap. First ~10-minute path now contains a consequential visible construction placement choice.
+- **Exact-head evidence:** [Godot Cloud Workbench run 40104756925](https://github.com/tomat60/pixel-nations/actions/runs/40104756925), artifact `12563964063`, PRE/site-choice/built/reopened/later-state **1440×900 and 360×225** screenshots, input tests `PN_PLAYABLE_POINTER_PATH=PASS` and `PN_PLAYABLE_RUNTIME_CONTRACT=PASS`. Reviewed stage frames display distinct physical 3D buildings and road with readable HUD but a sparse green environment — **scoped construction UX accepted; visual polish remains ROUGH**.
+- **Postmerge verification:** same main SHA has [CI 40105479017](https://github.com/tomat60/pixel-nations/actions/runs/40105479017), [RC1 Public Entry 40105478980](https://github.com/tomat60/pixel-nations/actions/runs/40105478980), [Play Visual QA 40105478958](https://github.com/tomat60/pixel-nations/actions/runs/40105478958), [macOS/Linux export 40105478944](https://github.com/tomat60/pixel-nations/actions/runs/40105478944), [Stall Guard 40105478962](https://github.com/tomat60/pixel-nations/actions/runs/40105478962): all terminal SUCCESS. CI and export success do NOT certify normal double-click on owner's physical Intel Mac; old Gatekeeper notarization issue remains deferred. Physical Intel GUI has run with Godot OpenGL Compatibility launch override.
+- **Past experiment verdicts:** PR #822 world-space billboards rejected; #824 solved overlap by replacing them with HUD choice. PR #804 static Village picture swap closed REJECTED; prior tiny painted-world 3D figurines REJECTED. Do not restart another AI visualization, another donor hunt or framework. Use lawful existing scene assets in the LIVE Godot world.
+- **Work mode/cost:** ONE existing hourly Production Steward, no duplicate agent. A scheduled run is bounded, not continuous background work. Godot 4.7.1 and GitHub Actions cloud-first; no owner Mac required for routine production. Cursor OFF, MAX OFF, Unity OFF, new paid services OFF. Test branch → exact-head Godot user input/scene/screenshots → review → single scoped PR → required CI → merge → postmerge verify; never equate QA green with visual product acceptance.
+- **Immediate next action:** run a fully input-driven first-time player journey from scratch including both Granary-site choices; pinpoint one concrete broken/unclear experience or insufficient visible payoff, then implement that ONE fix on the existing 3D scene. Do not produce a new handoff-only PR again unless authority materially drifts. Stop if evidence is missing or quality does not improve.
+
 
 ## 2026-10-24 post-Harvest Feast product checkpoint
 
