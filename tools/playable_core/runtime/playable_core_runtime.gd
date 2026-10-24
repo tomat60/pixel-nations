@@ -76,8 +76,8 @@ var camera_zoom_tween: Tween
 var granary_site_choice_active := false
 
 const GRANARY_SITE_TRANSFORMS := {
-	"plaza_edge": {"position": Vector3(27.0, 0.0, 44.0), "rotation": -0.12, "label": "PLAZA EDGE"},
-	"orchard_lane": {"position": Vector3(43.0, 0.0, 22.5), "rotation": 0.18, "label": "ORCHARD LANE"},
+	"plaza_edge": {"position": Vector3(27.0, 0.0, 44.0), "rotation": -0.12},
+	"orchard_lane": {"position": Vector3(43.0, 0.0, 22.5), "rotation": 0.18},
 }
 
 
