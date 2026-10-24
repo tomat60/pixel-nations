@@ -563,6 +563,7 @@ func _run() -> void:
 	_check(String(provisions_reopened.get("next_goal", "")) == "Return to Greengate and hold the Harvest Feast with 5 food", "reopen_keeps_feast_goal")
 	await process_frame
 	_capture("world-riverbend-storehouse-provisions-reopened")
+	# Follow the rendered objective through its visible CTA; do not teleport home.
 	_check(runtime.enter_button.visible and not runtime.enter_button.disabled, "saved_provisions_offer_visible_feast_return")
 	_check(runtime.enter_button.text == "Return to Greengate · feast", "feast_return_cta_names_destination")
 	await _click_control(runtime.enter_button)
