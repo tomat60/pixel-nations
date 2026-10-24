@@ -48,9 +48,13 @@ func _run() -> void:
 	_check(String((runtime.land_labels.get(HOME_ID) as Label3D).text) == "GREENVALE", "home_place_name_stays_primary")
 	_check(String((runtime.land_subtitles.get(HOME_ID) as Label3D).text) == "HOME · GREENGATE", "home_settlement_identity_is_secondary")
 	_check(not (runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "overview_hides_secondary_land_detail")
-	var substrate := runtime.atlas_root.get_node("FictionalAurelianSubstrate") as MeshInstance3D
+	var substrate := runtime.atlas_root.get_node("FictionalAurelianRelief") as MeshInstance3D
 	var substrate_material := substrate.mesh.material as StandardMaterial3D
 	_check(substrate_material.albedo_texture.resource_path.ends_with("a01_atlas_substrate.png"), "painted_aurelian_substrate_installed")
+	_check(substrate_material.shading_mode == BaseMaterial3D.SHADING_MODE_PER_PIXEL, "painted_atlas_uses_lit_relief_surface")
+	_check(int(substrate.get_meta("relief_columns", 0)) == 48 and int(substrate.get_meta("relief_rows", 0)) == 24, "atlas_relief_has_broad_non_noisy_grid")
+	_check(substrate.mesh.get_aabb().size.y >= 1.0, "atlas_relief_has_physical_height")
+	_check(runtime.atlas_root.get_node_or_null("AurelianReliefLight") is DirectionalLight3D, "atlas_relief_has_authored_directional_light")
 	var atlas_min := Vector2(INF, INF)
 	var atlas_max := Vector2(-INF, -INF)
 	for corner in [
