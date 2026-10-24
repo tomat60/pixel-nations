@@ -2,24 +2,25 @@
 
 Status: ACTIVE
 Updated: 2026-10-24
-Current state revision: 46.0
-Authority baseline SHA: `7dbe582d229e53f0bb941a89885345159e0dfe3d`
-Product baseline SHA: `7dbe582d229e53f0bb941a89885345159e0dfe3d`
-Runtime baseline SHA: `7dbe582d229e53f0bb941a89885345159e0dfe3d`
+Current state revision: 47.0
+Authority baseline SHA: `c5e971e2ef2db95ee67055d1170b1951af396a8c`
+Product baseline SHA: `c5e971e2ef2db95ee67055d1170b1951af396a8c`
+Runtime baseline SHA: `c5e971e2ef2db95ee67055d1170b1951af396a8c`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: First Playable Vertical Slice. Godot production remains locked; the active visible front is the integrated Aurelian World/Region map and separate camera-controllable Greengate Village journey.
 Current milestone: complete the unaided first-10-minutes path using visible player input and canonical saved resources, with physical 3D Village changes for purchased improvements while preserving the `land -> settlement/city -> nation -> empire` product model.
 Active execution issue: #721
-Next allowed action: from the saved Riverbend Hamlet state accepted on `main@7dbe582d229e53f0bb941a89885345159e0dfe3d`, expose and verify the existing visible return to Greengate for Riverbend Storehouse stone, then return through visible World input to build the existing 5-stone Storehouse. Require the authored 3D depot and road tiles to appear in the interactive Village and persist after save/reopen. Change only the first demonstrated input, clarity or physical-state blocker. Preserve costs, rewards, geography, save schema, donor licenses and camera control; no new system, asset family, full-screen picture or speculative building. Exact-head Godot node assertions plus directly reviewed 1440×900 and 360×225 PRE/POST frames are mandatory before merge. Unity, Cursor/MAX and generic image generation remain blocked; extra spend remains $0.
+Next allowed action: from the saved Riverbend Storehouse state accepted on `main@c5e971e2ef2db95ee67055d1170b1951af396a8c`, complete the existing visible `Collect Riverbend Storehouse's first provisions` action and its existing Harvest Feast transition through real player input. Change only the first demonstrated input or clarity blocker. Preserve costs, rewards, geography, save schema, authored Village scene graph, donor licenses and camera control; no new system, asset family, full-screen picture or speculative building. Exact-head Godot pointer/runtime assertions plus directly reviewed 1440×900 and 360×225 journey frames are mandatory before merge. Unity, Cursor/MAX and generic image generation remain blocked; extra spend remains $0.
 
 ## 2026-10-24 playable-journey reconciliation
 
-- Production is `main@7dbe582d229e53f0bb941a89885345159e0dfe3d`; no product PR is open at reconciliation time.
-- PRs #807–#815 made the existing road, Greengate Granary, Riverbend/Highmere/Northgate routes and resource deliveries actionable through visible input without changing their canonical costs or save model.
-- PR #816 proved the rendered `RIVERBEND` label itself selects the hamlet destination; the existing 5-timber Hamlet action changes timber 5→0, settlements 1→2 and survives save/reopen.
-- Exact-head #816 Godot run `40041707234` passed pointer and runtime contracts; artifact `12539318840` contains reviewed 1440×900 and 360×225 Hamlet/reopen frames. Postmerge CI `40042591955`, Play QA `40042591905`, RC1 `40042591926`, exports and signed macOS launch `40042591898` passed.
-- The next demonstrated input gap is the Storehouse-stone return: after Hamlet reopen, guidance names Greengate but the runtime contract still reselects Greenvale through a canonical coordinate before entering the Village. Repair that visible journey only, then prove the existing physical Storehouse result and persistence.
+- Production is `main@c5e971e2ef2db95ee67055d1170b1951af396a8c`; no product PR is open at reconciliation time.
+- PRs #807–#816 made the existing road, Granary, Riverbend/Highmere/Northgate routes, resource deliveries and 5-timber Riverbend Hamlet action playable through visible input without changing canonical costs or the save model.
+- PR #817 reconciled this authority source after the Hamlet journey; clean `main@207beacfcf9fc5881a75068a011708e2085f1818` returned `AUTHORITY_STATUS=PASS`.
+- PR #818 exposes `Return to Greengate · stone`, preserves the existing one-time Storehouse shipment and 5-stone cost, and makes the authored fourth depot prefab plus four physical road tiles visible in the live Village. Storehouse World state, next goal and physical Village yard survive save/reopen and re-entry.
+- Exact-head #818 Godot run `40051544891` passed pointer/runtime contracts; artifact `12543517928` contains directly reviewed 1440×900 and 360×225 PRE/POST frames. PR-head CI `40063568770`, Play QA `40063568779`, RC1 `40063568771`, Stall Guard and progression evidence gates passed.
+- The next bounded journey is the already implemented first Storehouse provisions action and Harvest Feast transition. Exercise it through visible input and change only the first demonstrated input or clarity blocker.
 
 ## Binding product strategy
 
