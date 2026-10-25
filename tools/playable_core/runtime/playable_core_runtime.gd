@@ -633,7 +633,58 @@ func _rebuild_focus_land(land: Dictionary) -> void:
 	rim.name = "SelectedLandRim"
 	rim.mesh = rim_mesh
 	atlas_focus_land.add_child(rim)
+	if (
+		String(land.get("id", "")) == "PN-A01-001"
+		and bool(controller.current_snapshot().get("greengate_harvest_feast_held", false))
+	):
+		_build_greenvale_harvest_terraces(land)
 	atlas_focus_land.visible = true
+
+
+func _build_greenvale_harvest_terraces(land: Dictionary) -> void:
+	var center_data: Array = land.get("center", [0.0, 0.0])
+	var center := Vector2(
+		WORLD_LEFT + float(center_data[0]) / MAP_WIDTH * WORLD_WIDTH,
+		WORLD_TOP + float(center_data[1]) / MAP_HEIGHT * WORLD_HEIGHT
+	)
+	var terraces := Node3D.new()
+	terraces.name = "GreenvaleHarvestTerraces"
+	terraces.set_meta("canonical_action", "greengate_harvest_feast")
+	terraces.set_meta("food_cost", 5)
+	var field_colors := [Color("c89a36"), Color("7a9b45"), Color("d7b75a"), Color("6f8c3d")]
+	for index in range(4):
+		var strip := MeshInstance3D.new()
+		strip.name = "Terrace_%02d" % (index + 1)
+		var strip_mesh := BoxMesh.new()
+		strip_mesh.size = Vector3(12.0 - float(index) * 0.8, 0.42, 1.55)
+		var strip_material := StandardMaterial3D.new()
+		strip_material.albedo_color = field_colors[index]
+		strip_material.roughness = 0.9
+		strip_mesh.material = strip_material
+		strip.mesh = strip_mesh
+		strip.position = Vector3(
+			center.x - 1.0 + float(index) * 0.55,
+			ATLAS_FOCUS_ELEVATION + 0.28,
+			center.y - 3.4 + float(index) * 2.15
+		)
+		strip.rotation.y = -0.18
+		terraces.add_child(strip)
+	var hearth := MeshInstance3D.new()
+	hearth.name = "FeastHearth"
+	var hearth_mesh := CylinderMesh.new()
+	hearth_mesh.top_radius = 1.15
+	hearth_mesh.bottom_radius = 1.35
+	hearth_mesh.height = 0.7
+	var hearth_material := StandardMaterial3D.new()
+	hearth_material.albedo_color = Color("7b3f24")
+	hearth_material.emission_enabled = true
+	hearth_material.emission = Color("d97a32")
+	hearth_material.emission_energy_multiplier = 1.25
+	hearth_mesh.material = hearth_material
+	hearth.mesh = hearth_mesh
+	hearth.position = Vector3(center.x + 5.7, ATLAS_FOCUS_ELEVATION + 0.42, center.y + 1.0)
+	terraces.add_child(hearth)
+	atlas_focus_land.add_child(terraces)
 
 
 func canonical_center_world(land_id: String) -> Vector2:
@@ -850,6 +901,12 @@ func _collect_riverbend_storehouse_provisions() -> void:
 func _hold_greengate_harvest_feast() -> void:
 	if controller.hold_greengate_harvest_feast():
 		controller.save_game()
+		if atlas_is_focused:
+			for land_value in lands:
+				var land := land_value as Dictionary
+				if String(land.get("id", "")) == "PN-A01-001":
+					_rebuild_focus_land(land)
+					break
 
 
 func _save() -> void:
@@ -1215,7 +1272,16 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		or bool(snapshot.get("greengate_harvest_feast_held", false))
 		or int(snapshot.get("food", 0)) < int(snapshot.get("greengate_harvest_feast_food_cost", 5))
 	)
-	feast_button.visible = view == "village" and bool(snapshot.get("riverbend_storehouse_provisions_collected", false)) and not bool(snapshot.get("greengate_harvest_feast_held", false))
+	var focused_greenvale_feast := (
+		view == "world"
+		and atlas_is_focused
+		and selected_id == "PN-A01-001"
+	)
+	feast_button.visible = (
+		(view == "village" or focused_greenvale_feast)
+		and bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
+		and not bool(snapshot.get("greengate_harvest_feast_held", false))
+	)
 	if frontier_link != null:
 		frontier_link.visible = view == "world" and bool(snapshot.get("riverbend_claimed", false))
 		_set_frontier_link_connected(bool(snapshot.get("riverbend_connected", false)))

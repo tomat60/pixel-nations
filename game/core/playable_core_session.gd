@@ -232,7 +232,15 @@ func collect_riverbend_storehouse_provisions() -> bool:
 
 
 func hold_greengate_harvest_feast() -> bool:
-	if current_view != VIEW_VILLAGE:
+	# The same canonical paid event can be hosted from the Village or from a
+	# selected Greenvale parcel in the retained World atlas.
+	if (
+		current_view != VIEW_VILLAGE
+		and not (
+			current_view == VIEW_WORLD
+			and String(state.get("selected_land_id", "")) == GREENGATE_LAND_ID
+		)
+	):
 		return false
 	var completed_before: Array = state.get("settlement", {}).get("completed_orders", []).duplicate()
 	var food_before := int(state.get("resources", {}).get("food", 0))
