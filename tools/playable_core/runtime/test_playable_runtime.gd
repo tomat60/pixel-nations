@@ -626,6 +626,9 @@ func _run() -> void:
 	_check(terraces != null and terraces.get_child_count() == 5, "harvest_feast_adds_four_terraces_and_hearth")
 	_check(String(terraces.get_meta("canonical_action", "")) == "greengate_harvest_feast", "terraces_track_canonical_action")
 	_check(int(terraces.get_meta("food_cost", -1)) == 5, "terraces_track_true_food_cost")
+	var first_terrace_screen: Vector2 = player.camera.unproject_position((terraces.get_child(0) as Node3D).global_position)
+	var last_terrace_screen: Vector2 = player.camera.unproject_position((terraces.get_child(3) as Node3D).global_position)
+	_check(first_terrace_screen.distance_to(last_terrace_screen) >= 16.0, "harvest_terraces_are_screen_readable")
 	_capture("world-greenvale-harvest-feast-held")
 	await _click_control(runtime.overview_button)
 	runtime.controller.session.state["resources"]["food"] = 5
