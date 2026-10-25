@@ -563,6 +563,7 @@ func _tween_atlas_pose(target_zoom: float, target_pitch_degrees: float) -> void:
 
 func _rebuild_focus_land(land: Dictionary) -> void:
 	for child in atlas_focus_land.get_children():
+		atlas_focus_land.remove_child(child)
 		child.queue_free()
 	atlas_focus_land.set_meta("land_id", String(land.get("id", "")))
 	var points := PackedVector2Array()
