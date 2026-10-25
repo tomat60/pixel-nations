@@ -52,6 +52,7 @@ func _run() -> void:
 	var substrate_material := substrate.mesh.surface_get_material(0) as StandardMaterial3D
 	_check(substrate_material.albedo_texture.resource_path.ends_with("a01_atlas_substrate.png"), "painted_aurelian_substrate_installed")
 	_check(substrate_material.shading_mode == BaseMaterial3D.SHADING_MODE_PER_PIXEL, "painted_atlas_uses_lit_relief_surface")
+	_check(substrate_material.cull_mode == BaseMaterial3D.CULL_DISABLED, "painted_atlas_is_visible_from_overhead_camera")
 	_check(int(substrate.get_meta("relief_columns", 0)) == 48 and int(substrate.get_meta("relief_rows", 0)) == 24, "atlas_relief_has_broad_non_noisy_grid")
 	_check(substrate.mesh.get_aabb().size.y >= 1.0, "atlas_relief_has_physical_height")
 	_check(runtime.atlas_root.get_node_or_null("AurelianReliefLight") is DirectionalLight3D, "atlas_relief_has_authored_directional_light")
