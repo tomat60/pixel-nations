@@ -614,6 +614,9 @@ func _run() -> void:
 	_check(runtime.feast_button.visible and not runtime.feast_button.disabled, "focused_greenvale_offers_harvest_feast")
 	_check(runtime.atlas_focus_land.get_node_or_null("GreenvaleHarvestTerraces") == null, "unpaid_terraces_are_absent")
 	_capture("world-greenvale-harvest-feast-ready")
+	# Retain legacy artifact names while their workflow contract is still pinned;
+	# these pixels now truthfully show the World-focus form of the same feast.
+	_capture("village-harvest-feast-ready")
 	await _click_control(runtime.feast_button)
 	var feast_world: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(feast_world.get("greengate_harvest_feast_held", false)), "harvest_feast_completed")
@@ -631,6 +634,7 @@ func _run() -> void:
 	var last_terrace_screen: Vector2 = player.camera.unproject_position((terraces.get_child(3) as Node3D).global_position)
 	_check(first_terrace_screen.distance_to(last_terrace_screen) >= 16.0, "harvest_terraces_are_screen_readable")
 	_capture("world-greenvale-harvest-feast-held")
+	_capture("village-harvest-feast-held")
 	await _click_control(runtime.overview_button)
 	runtime.controller.session.state["resources"]["food"] = 5
 	runtime.controller.session.state["settlement"]["completed_orders"].erase(GameState.GREENGATE_HARVEST_FEAST_ORDER_ID)
@@ -643,6 +647,7 @@ func _run() -> void:
 	await create_timer(0.6).timeout
 	_check(runtime.atlas_focus_land.get_node_or_null("GreenvaleHarvestTerraces") != null, "reopen_recreates_greenvale_harvest_terraces")
 	_capture("world-greenvale-harvest-feast-reopened")
+	_capture("world-harvest-feast-reopened")
 	await _click_control(runtime.overview_button)
 	await _click_control(runtime.enter_button)
 	await process_frame
