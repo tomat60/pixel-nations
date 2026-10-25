@@ -18,6 +18,9 @@ const ATLAS_OVERVIEW_POSITION := Vector3(0.0, 0.0, 0.0)
 # viewport instead of floating inside a wide band of empty donor background.
 const ATLAS_OVERVIEW_ZOOM := 225.0
 const ATLAS_FOCUS_ZOOM := 82.0
+const ATLAS_OVERVIEW_PITCH := -85.0
+const ATLAS_FOCUS_PITCH := -62.0
+const ATLAS_FOCUS_ELEVATION := 4.2
 const HUD_PAPER := Color("f5e4bd")
 const HUD_INK := Color("3a2a18")
 const HUD_BRONZE := Color("b58a48")
@@ -39,6 +42,7 @@ var highmere_survey_material: StandardMaterial3D
 var northgate_scout_link: MeshInstance3D
 var northgate_scout_material: StandardMaterial3D
 var atlas_root: Node3D
+var atlas_focus_land: Node3D
 var land_materials: Dictionary = {}
 var land_outline_materials: Dictionary = {}
 var land_labels: Dictionary = {}
@@ -74,6 +78,7 @@ var save_button: Button
 var return_button: Button
 var atlas_is_focused := false
 var camera_zoom_tween: Tween
+var camera_pitch_tween: Tween
 var granary_site_choice_active := false
 
 const GRANARY_SITE_TRANSFORMS := {
@@ -111,6 +116,7 @@ func _ready() -> void:
 	player.province_selected.connect(_on_world_position_selected)
 	player.position = ATLAS_OVERVIEW_POSITION
 	player.camera.position.z = ATLAS_OVERVIEW_ZOOM
+	player.camera_socket.rotation.x = deg_to_rad(ATLAS_OVERVIEW_PITCH)
 	_build_a01_atlas()
 	_build_frontier_link()
 	_build_highmere_survey_link()
@@ -157,6 +163,10 @@ func _build_a01_atlas() -> void:
 	atlas_root.add_child(substrate)
 	for land_value in lands:
 		_build_land_polygon(land_value as Dictionary)
+	atlas_focus_land = Node3D.new()
+	atlas_focus_land.name = "SelectedLandFocusRelief"
+	atlas_focus_land.visible = false
+	atlas_root.add_child(atlas_focus_land)
 	_build_land_label("PN-A01-001", "GREENVALE", "HOME · GREENGATE", Color("dbe9ff"))
 	_build_land_label("PN-A01-002", "RIVERBEND", "", Color("d6ffff"))
 	_build_land_label("PN-A01-003", "HIGHMERE", "", Color("f2ead2"))
@@ -490,6 +500,7 @@ func _select_land_by_id(land_id: String) -> void:
 		selected_land = land
 		controller.select_land_from_map(land_id)
 		if atlas_is_focused:
+			_rebuild_focus_land(land)
 			_move_camera_to_land(land_id)
 		return
 
@@ -499,15 +510,21 @@ func _focus_selected_land() -> void:
 	if land_id.is_empty():
 		return
 	atlas_is_focused = true
+	for land_value in lands:
+		var land := land_value as Dictionary
+		if String(land.get("id", "")) == land_id:
+			_rebuild_focus_land(land)
+			break
 	_move_camera_to_land(land_id)
 	_render_snapshot(controller.current_snapshot())
 
 
 func _show_atlas_overview() -> void:
 	atlas_is_focused = false
+	atlas_focus_land.visible = false
 	var player := world.get_node("Player")
 	player.move_to(Vector2(ATLAS_OVERVIEW_POSITION.x, ATLAS_OVERVIEW_POSITION.z))
-	_tween_camera_zoom(ATLAS_OVERVIEW_ZOOM)
+	_tween_atlas_pose(ATLAS_OVERVIEW_ZOOM, ATLAS_OVERVIEW_PITCH)
 	_render_snapshot(controller.current_snapshot())
 
 
@@ -517,19 +534,106 @@ func _move_camera_to_land(land_id: String) -> void:
 		return
 	var player := world.get_node("Player")
 	# Retain OpenGS camera navigation: its native move_to keeps panning semantics,
-	# while the closer scale makes the selected canonical parcel readable.
+	# while the oblique focus pose makes the selected parcel's physical lift
+	# legible without replacing the complete painted overview.
 	player.move_to(center)
-	_tween_camera_zoom(ATLAS_FOCUS_ZOOM)
+	_tween_atlas_pose(ATLAS_FOCUS_ZOOM, ATLAS_FOCUS_PITCH)
 
 
-func _tween_camera_zoom(target_zoom: float) -> void:
+func _tween_atlas_pose(target_zoom: float, target_pitch_degrees: float) -> void:
 	var player := world.get_node("Player")
 	if camera_zoom_tween != null and camera_zoom_tween.is_running():
 		camera_zoom_tween.kill()
+	if camera_pitch_tween != null and camera_pitch_tween.is_running():
+		camera_pitch_tween.kill()
 	camera_zoom_tween = create_tween()
 	camera_zoom_tween.set_trans(Tween.TRANS_SINE)
 	camera_zoom_tween.set_ease(Tween.EASE_OUT)
 	camera_zoom_tween.tween_property(player.camera, "position:z", target_zoom, 0.35)
+	camera_pitch_tween = create_tween()
+	camera_pitch_tween.set_trans(Tween.TRANS_SINE)
+	camera_pitch_tween.set_ease(Tween.EASE_OUT)
+	camera_pitch_tween.tween_property(
+		player.camera_socket,
+		"rotation:x",
+		deg_to_rad(target_pitch_degrees),
+		0.35
+	)
+
+
+func _rebuild_focus_land(land: Dictionary) -> void:
+	for child in atlas_focus_land.get_children():
+		child.queue_free()
+	atlas_focus_land.set_meta("land_id", String(land.get("id", "")))
+	var points := PackedVector2Array()
+	for raw_point in land.get("points", []):
+		points.append(Vector2(
+			WORLD_LEFT + float(raw_point[0]) / MAP_WIDTH * WORLD_WIDTH,
+			WORLD_TOP + float(raw_point[1]) / MAP_HEIGHT * WORLD_HEIGHT
+		))
+	var triangles := Geometry2D.triangulate_polygon(points)
+	if triangles.is_empty():
+		push_error("PN_A01_FOCUS_POLYGON_INVALID")
+		return
+	var top_surface := SurfaceTool.new()
+	top_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for index in triangles:
+		var point := points[int(index)]
+		top_surface.set_uv(Vector2(
+			(point.x - WORLD_LEFT) / WORLD_WIDTH,
+			(point.y - WORLD_TOP) / WORLD_HEIGHT
+		))
+		top_surface.add_vertex(Vector3(point.x, ATLAS_FOCUS_ELEVATION, point.y))
+	var top_mesh := top_surface.commit()
+	var top_material := StandardMaterial3D.new()
+	top_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	top_material.albedo_texture = load("res://pixel_nations/a01_atlas_substrate.png")
+	top_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	top_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	top_mesh.surface_set_material(0, top_material)
+	var top := MeshInstance3D.new()
+	top.name = "PaintedLandTop"
+	top.mesh = top_mesh
+	atlas_focus_land.add_child(top)
+	var side_surface := SurfaceTool.new()
+	side_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for point_index in points.size():
+		var point := points[point_index]
+		var next := points[(point_index + 1) % points.size()]
+		for vertex in [
+			Vector3(point.x, 0.20, point.y),
+			Vector3(next.x, ATLAS_FOCUS_ELEVATION, next.y),
+			Vector3(next.x, 0.20, next.y),
+			Vector3(point.x, 0.20, point.y),
+			Vector3(point.x, ATLAS_FOCUS_ELEVATION, point.y),
+			Vector3(next.x, ATLAS_FOCUS_ELEVATION, next.y),
+		]:
+			side_surface.add_vertex(vertex)
+	var side_mesh := side_surface.commit()
+	var side_material := StandardMaterial3D.new()
+	side_material.albedo_color = Color("6f5036")
+	side_material.roughness = 0.92
+	side_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	side_mesh.surface_set_material(0, side_material)
+	var sides := MeshInstance3D.new()
+	sides.name = "EarthenLandSides"
+	sides.mesh = side_mesh
+	atlas_focus_land.add_child(sides)
+	var rim_material := StandardMaterial3D.new()
+	rim_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	rim_material.albedo_color = Color("e3b85f")
+	rim_material.no_depth_test = true
+	var rim_mesh := ImmediateMesh.new()
+	rim_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, rim_material)
+	for point in points:
+		rim_mesh.surface_add_vertex(Vector3(point.x, ATLAS_FOCUS_ELEVATION + 0.08, point.y))
+	rim_mesh.surface_add_vertex(Vector3(points[0].x, ATLAS_FOCUS_ELEVATION + 0.08, points[0].y))
+	rim_mesh.surface_end()
+	var rim := MeshInstance3D.new()
+	rim.name = "SelectedLandRim"
+	rim.mesh = rim_mesh
+	atlas_focus_land.add_child(rim)
+	atlas_focus_land.visible = true
 
 
 func canonical_center_world(land_id: String) -> Vector2:
