@@ -49,7 +49,7 @@ func _run() -> void:
 	_check(String((runtime.land_subtitles.get(HOME_ID) as Label3D).text) == "HOME · GREENGATE", "home_settlement_identity_is_secondary")
 	_check(not (runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "overview_hides_secondary_land_detail")
 	var substrate := runtime.atlas_root.get_node("FictionalAurelianRelief") as MeshInstance3D
-	var substrate_material := substrate.mesh.material as StandardMaterial3D
+	var substrate_material := substrate.mesh.surface_get_material(0) as StandardMaterial3D
 	_check(substrate_material.albedo_texture.resource_path.ends_with("a01_atlas_substrate.png"), "painted_aurelian_substrate_installed")
 	_check(substrate_material.shading_mode == BaseMaterial3D.SHADING_MODE_PER_PIXEL, "painted_atlas_uses_lit_relief_surface")
 	_check(int(substrate.get_meta("relief_columns", 0)) == 48 and int(substrate.get_meta("relief_rows", 0)) == 24, "atlas_relief_has_broad_non_noisy_grid")
