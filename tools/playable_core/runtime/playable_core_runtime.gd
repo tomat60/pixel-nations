@@ -20,6 +20,8 @@ const ATLAS_OVERVIEW_ZOOM := 225.0
 const ATLAS_FOCUS_ZOOM := 82.0
 const ATLAS_OVERVIEW_PITCH := -85.0
 const ATLAS_FOCUS_PITCH := -70.0
+const ATLAS_FEAST_FOCUS_ZOOM := 68.0
+const ATLAS_FEAST_FOCUS_PITCH := -62.0
 const ATLAS_FOCUS_ELEVATION := 6.0
 const HUD_PAPER := Color("f5e4bd")
 const HUD_INK := Color("3a2a18")
@@ -537,7 +539,14 @@ func _move_camera_to_land(land_id: String) -> void:
 	# while the oblique focus pose makes the selected parcel's physical lift
 	# legible without replacing the complete painted overview.
 	player.move_to(center)
-	_tween_atlas_pose(ATLAS_FOCUS_ZOOM, ATLAS_FOCUS_PITCH)
+	var feast_fabric_visible := (
+		land_id == "PN-A01-001"
+		and bool(controller.current_snapshot().get("greengate_harvest_feast_held", false))
+	)
+	_tween_atlas_pose(
+		ATLAS_FEAST_FOCUS_ZOOM if feast_fabric_visible else ATLAS_FOCUS_ZOOM,
+		ATLAS_FEAST_FOCUS_PITCH if feast_fabric_visible else ATLAS_FOCUS_PITCH
+	)
 
 
 func _tween_atlas_pose(target_zoom: float, target_pitch_degrees: float) -> void:
@@ -563,6 +572,7 @@ func _tween_atlas_pose(target_zoom: float, target_pitch_degrees: float) -> void:
 
 func _rebuild_focus_land(land: Dictionary) -> void:
 	for child in atlas_focus_land.get_children():
+		atlas_focus_land.remove_child(child)
 		child.queue_free()
 	atlas_focus_land.set_meta("land_id", String(land.get("id", "")))
 	var points := PackedVector2Array()
@@ -633,7 +643,135 @@ func _rebuild_focus_land(land: Dictionary) -> void:
 	rim.name = "SelectedLandRim"
 	rim.mesh = rim_mesh
 	atlas_focus_land.add_child(rim)
+	if (
+		String(land.get("id", "")) == "PN-A01-001"
+		and bool(controller.current_snapshot().get("greengate_harvest_feast_held", false))
+	):
+		_build_greenvale_settlement_fabric(land)
 	atlas_focus_land.visible = true
+
+
+func _fabric_material(
+	color: Color,
+	emission: Color = Color.TRANSPARENT,
+	emission_energy: float = 0.0
+) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.roughness = 0.92
+	if emission_energy > 0.0:
+		material.emission_enabled = true
+		material.emission = emission
+		material.emission_energy_multiplier = emission_energy
+	return material
+
+
+func _fabric_box(
+	parent: Node3D,
+	name_value: String,
+	size: Vector3,
+	position_value: Vector3,
+	color: Color,
+	rotation_y: float = 0.0
+) -> MeshInstance3D:
+	var instance := MeshInstance3D.new()
+	instance.name = name_value
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	mesh.material = _fabric_material(color)
+	instance.mesh = mesh
+	instance.position = position_value
+	instance.rotation.y = rotation_y
+	parent.add_child(instance)
+	return instance
+
+
+func _build_greenvale_settlement_fabric(land: Dictionary) -> void:
+	var center_data: Array = land.get("center", [0.0, 0.0])
+	var center := Vector2(
+		WORLD_LEFT + float(center_data[0]) / MAP_WIDTH * WORLD_WIDTH,
+		WORLD_TOP + float(center_data[1]) / MAP_HEIGHT * WORLD_HEIGHT
+	)
+	var fabric := Node3D.new()
+	fabric.name = "GreenvaleSettlementFabric"
+	fabric.set_meta("canonical_action", "greengate_harvest_feast")
+	fabric.set_meta("food_cost", 5)
+	fabric.set_meta("physical_components", ["field_terraces", "paths", "hedgerows", "feast_courtyard"])
+	fabric.set_meta("presentation", "parcel_scale")
+
+	# Broad field masses cover the western half of Greenvale as a readable quilt,
+	# replacing the rejected line-like strips. Their depth, stagger and raised
+	# edges make the paid action legible from the oblique camera at thumbnail size.
+	var fields := Node3D.new()
+	fields.name = "FieldTerraces"
+	fabric.add_child(fields)
+	var field_specs := [
+		["NorthField", Vector3(10.8, 0.62, 4.6), Vector3(-5.2, 0.45, -5.1), Color("c99a3e"), -0.10],
+		["WestField", Vector3(8.8, 0.78, 5.0), Vector3(-6.3, 0.56, 0.4), Color("79954a"), 0.08],
+		["MiddleField", Vector3(10.2, 0.92, 4.5), Vector3(-3.8, 0.64, 5.8), Color("d2b65a"), -0.06],
+		["OrchardField", Vector3(6.0, 1.02, 5.2), Vector3(3.2, 0.70, 6.1), Color("657f3e"), 0.12],
+	]
+	for spec in field_specs:
+		var spec_size: Vector3 = spec[1]
+		var spec_offset: Vector3 = spec[2]
+		var spec_color: Color = spec[3]
+		_fabric_box(
+			fields,
+			String(spec[0]),
+			spec_size,
+			Vector3(center.x, ATLAS_FOCUS_ELEVATION, center.y) + spec_offset,
+			spec_color,
+			float(spec[4])
+		)
+
+	var paths := Node3D.new()
+	paths.name = "FarmPaths"
+	fabric.add_child(paths)
+	_fabric_box(paths, "NorthSouthPath", Vector3(1.55, 0.34, 15.8), Vector3(center.x + 0.2, ATLAS_FOCUS_ELEVATION + 0.42, center.y + 0.6), Color("c8aa73"), -0.04)
+	_fabric_box(paths, "CourtyardApproach", Vector3(11.2, 0.38, 1.65), Vector3(center.x + 4.5, ATLAS_FOCUS_ELEVATION + 0.45, center.y + 0.4), Color("d0b27d"), 0.10)
+
+	var hedges := Node3D.new()
+	hedges.name = "Hedgerows"
+	fabric.add_child(hedges)
+	_fabric_box(hedges, "WestHedge", Vector3(0.75, 1.1, 14.5), Vector3(center.x - 10.5, ATLAS_FOCUS_ELEVATION + 0.72, center.y + 0.6), Color("365d35"), 0.05)
+	_fabric_box(hedges, "NorthHedge", Vector3(12.8, 1.0, 0.8), Vector3(center.x - 4.6, ATLAS_FOCUS_ELEVATION + 0.67, center.y - 8.0), Color("41683b"), -0.08)
+	_fabric_box(hedges, "OrchardHedge", Vector3(7.2, 1.15, 0.85), Vector3(center.x + 3.0, ATLAS_FOCUS_ELEVATION + 0.76, center.y + 9.0), Color("315632"), 0.12)
+
+	var courtyard := Node3D.new()
+	courtyard.name = "FeastCourtyard"
+	fabric.add_child(courtyard)
+	var court := MeshInstance3D.new()
+	court.name = "StoneCourt"
+	var court_mesh := CylinderMesh.new()
+	court_mesh.top_radius = 4.5
+	court_mesh.bottom_radius = 4.9
+	court_mesh.height = 0.72
+	court_mesh.material = _fabric_material(Color("b99b6d"))
+	court.mesh = court_mesh
+	court.position = Vector3(center.x + 7.3, ATLAS_FOCUS_ELEVATION + 0.46, center.y - 1.8)
+	courtyard.add_child(court)
+	var hearth := MeshInstance3D.new()
+	hearth.name = "FeastHearth"
+	var hearth_mesh := CylinderMesh.new()
+	hearth_mesh.top_radius = 1.45
+	hearth_mesh.bottom_radius = 1.75
+	hearth_mesh.height = 1.35
+	hearth_mesh.material = _fabric_material(Color("713b27"), Color("ef8d3b"), 2.2)
+	hearth.mesh = hearth_mesh
+	hearth.position = Vector3(center.x + 7.3, ATLAS_FOCUS_ELEVATION + 1.45, center.y - 1.8)
+	courtyard.add_child(hearth)
+	for bench_index in range(4):
+		var angle := TAU * float(bench_index) / 4.0
+		_fabric_box(
+			courtyard,
+			"GatheringBench_%02d" % (bench_index + 1),
+			Vector3(3.0, 0.58, 0.78),
+			Vector3(center.x + 7.3 + cos(angle) * 3.25, ATLAS_FOCUS_ELEVATION + 1.0, center.y - 1.8 + sin(angle) * 3.25),
+			Color("6f4c31"),
+			-angle + PI * 0.5
+		)
+
+	atlas_focus_land.add_child(fabric)
 
 
 func canonical_center_world(land_id: String) -> Vector2:
@@ -850,6 +988,13 @@ func _collect_riverbend_storehouse_provisions() -> void:
 func _hold_greengate_harvest_feast() -> void:
 	if controller.hold_greengate_harvest_feast():
 		controller.save_game()
+		if atlas_is_focused:
+			for land_value in lands:
+				var land := land_value as Dictionary
+				if String(land.get("id", "")) == "PN-A01-001":
+					_rebuild_focus_land(land)
+					_move_camera_to_land("PN-A01-001")
+					break
 
 
 func _save() -> void:
@@ -1215,7 +1360,16 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		or bool(snapshot.get("greengate_harvest_feast_held", false))
 		or int(snapshot.get("food", 0)) < int(snapshot.get("greengate_harvest_feast_food_cost", 5))
 	)
-	feast_button.visible = view == "village" and bool(snapshot.get("riverbend_storehouse_provisions_collected", false)) and not bool(snapshot.get("greengate_harvest_feast_held", false))
+	var focused_greenvale_feast := (
+		view == "world"
+		and atlas_is_focused
+		and selected_id == "PN-A01-001"
+	)
+	feast_button.visible = (
+		(view == "village" or focused_greenvale_feast)
+		and bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
+		and not bool(snapshot.get("greengate_harvest_feast_held", false))
+	)
 	if frontier_link != null:
 		frontier_link.visible = view == "world" and bool(snapshot.get("riverbend_claimed", false))
 		_set_frontier_link_connected(bool(snapshot.get("riverbend_connected", false)))

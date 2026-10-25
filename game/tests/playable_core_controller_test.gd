@@ -246,7 +246,7 @@ func _run() -> void:
 	_expect(bool(provisions.get("riverbend_storehouse_provisions_collected", false)), "reports first Storehouse provisions collected")
 	_expect(int(provisions.get("food", -1)) == 5, "first Storehouse provisions add five food")
 	_expect(String(provisions.get("nation_status", "")) == "not_founded", "provisions keep nation unfounded")
-	_expect(not reopened.hold_greengate_harvest_feast(), "rejects Harvest Feast from World")
+	_expect(not reopened.hold_greengate_harvest_feast(), "rejects Harvest Feast from Riverbend World selection")
 	_expect(not reopened.collect_riverbend_storehouse_provisions(), "rejects duplicate Storehouse provisions")
 	_expect(reopened.save_game(), "saves Storehouse provisions")
 	reopened.session.state["resources"]["food"] = 0
@@ -257,8 +257,7 @@ func _run() -> void:
 	_expect(int(provisions_reopened.get("food", -1)) == 5, "reopen preserves Storehouse food")
 	_expect(String(provisions_reopened.get("next_goal", "")) == "Return to Greengate and hold the Harvest Feast with 5 food", "reports visible food consequence goal")
 	_expect(reopened.select_land_from_map(HOME_LAND_ID), "reselects Greenvale for Harvest Feast")
-	_expect(reopened.enter_selected_land(), "enters Greengate for Harvest Feast")
-	_expect(reopened.hold_greengate_harvest_feast(), "holds one Harvest Feast")
+	_expect(reopened.hold_greengate_harvest_feast(), "holds one Harvest Feast from selected Greenvale")
 	var feast := reopened.current_snapshot()
 	_expect(bool(feast.get("greengate_harvest_feast_held", false)), "reports completed Harvest Feast")
 	_expect(int(feast.get("food", -1)) == 0, "Harvest Feast spends five food")
@@ -268,7 +267,6 @@ func _run() -> void:
 	_expect(String(feast.get("next_goal", "")) == "Greengate Harvest Feast complete; further settlement growth is not yet playable", "Harvest Feast reports honest stop gate")
 	_expect(not reopened.hold_greengate_harvest_feast(), "rejects duplicate Harvest Feast")
 	_expect(reopened.save_game(), "saves Harvest Feast")
-	_expect(reopened.return_to_world(), "returns to World after Harvest Feast")
 	reopened.session.state["resources"]["food"] = 5
 	reopened.session.state["settlement"]["completed_orders"].erase(GameState.GREENGATE_HARVEST_FEAST_ORDER_ID)
 	_expect(reopened.load_game(), "reloads Harvest Feast")

@@ -602,41 +602,55 @@ func _run() -> void:
 	_check(String(provisions_reopened.get("next_goal", "")) == "Return to Greengate and hold the Harvest Feast with 5 food", "reopen_keeps_feast_goal")
 	await process_frame
 	_capture("world-riverbend-storehouse-provisions-reopened")
-	# Follow the rendered objective through its visible CTA; do not teleport home.
-	_check(runtime.enter_button.visible and not runtime.enter_button.disabled, "saved_provisions_offer_visible_feast_return")
-	_check(runtime.enter_button.text == "Return to Greengate · feast", "feast_return_cta_names_destination")
-	await _click_control(runtime.enter_button)
-	await process_frame
-	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "feast_return_cta_enters_village")
-	_check(String(runtime.village.hud._tutorial_title.text) == "Riverbend provisions delivered", "completed_provisions_replace_stale_storehouse_guidance")
-	_check(String(runtime.village.hud._tutorial_intro.text) == "3/30 lands claimed · 2 settlements · Nation not founded.", "completed_storehouse_dispatch_is_truthful")
-	_check("delivered 5 food" in String(runtime.village.hud._tutorial_more.text), "completed_provisions_report_saved_reward")
-	_check("Harvest Feast" in String(runtime.village.hud._tutorial_more.text), "completed_provisions_offer_visible_feast")
-	_check(runtime.feast_button.visible and not runtime.feast_button.disabled, "harvest_feast_action_is_clickable")
-	_check(runtime.village_riverbend_supply_yard != null, "saved_storehouse_restores_physical_supply_yard")
-	_check(runtime.village_riverbend_supply_yard.get_node_or_null("RiverbendReceivingDepot") != null, "restored_supply_yard_keeps_authored_depot")
-	_check(not runtime.village.hud._objectives_panel.is_visible_in_tree(), "donor_objectives_stay_hidden_after_reopen")
-	_check(not (runtime.village.hud._tabs["objectives"] as Button).is_visible_in_tree(), "donor_objective_tab_stays_hidden_after_reopen")
+	# The saved provisions now become a physical World-land action. Select and
+	# focus Greenvale through real pointer input before spending the same 5 food.
+	var home_reopened_label := runtime.land_labels.get(HOME_ID) as Label3D
+	var home_reopened_screen: Vector2 = player.camera.unproject_position(home_reopened_label.global_position)
+	await _click_position(home_reopened_screen)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HOME_ID, "pointer_selects_greenvale_for_feast")
+	await _click_control(runtime.focus_button)
+	await create_timer(0.6).timeout
+	_check(runtime.atlas_is_focused, "greenvale_is_focused_for_feast")
+	_check(runtime.feast_button.visible and not runtime.feast_button.disabled, "focused_greenvale_offers_harvest_feast")
+	_check(runtime.atlas_focus_land.get_node_or_null("GreenvaleSettlementFabric") == null, "unpaid_settlement_fabric_is_absent")
+	_capture("world-greenvale-harvest-feast-ready")
+	# Retain legacy artifact names while their workflow contract is still pinned;
+	# these pixels now truthfully show the World-focus form of the same feast.
 	_capture("village-harvest-feast-ready")
 	await _click_control(runtime.feast_button)
-	var feast_village: Dictionary = runtime.controller.current_snapshot()
-	_check(bool(feast_village.get("greengate_harvest_feast_held", false)), "harvest_feast_completed")
-	_check("Return to World" in String(runtime.village.hud._tutorial_more.text), "post_feast_dispatch_points_to_real_next_view")
-	_check(int(feast_village.get("food", -1)) == 0, "harvest_feast_spends_five_food")
-	_check(int(feast_village.get("claimed_lands", -1)) == 3, "harvest_feast_does_not_claim_fourth_land")
-	_check(int(feast_village.get("settlement_count", -1)) == 2, "harvest_feast_preserves_two_settlements")
-	_check(String(feast_village.get("nation_status", "")) == "not_founded", "harvest_feast_does_not_invent_nation")
+	await create_timer(0.6).timeout
+	var feast_world: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(feast_world.get("greengate_harvest_feast_held", false)), "harvest_feast_completed")
+	_check(int(feast_world.get("food", -1)) == 0, "harvest_feast_spends_five_food")
+	_check(int(feast_world.get("claimed_lands", -1)) == 3, "harvest_feast_does_not_claim_fourth_land")
+	_check(int(feast_world.get("settlement_count", -1)) == 2, "harvest_feast_preserves_two_settlements")
+	_check(String(feast_world.get("nation_status", "")) == "not_founded", "harvest_feast_does_not_invent_nation")
 	_check(not runtime.feast_button.visible, "completed_harvest_feast_hides_duplicate_action")
-	_check(runtime.village_harvest_feast != null and runtime.village_harvest_feast.get_child_count() == 5, "harvest_feast_gathers_four_authored_residents")
-	var feast_guest: Node3D = runtime.village_harvest_feast.get_child(0) as Node3D
-	var feast_rig: Dictionary = feast_guest.get_meta("approved_rig", {})
-	_check(not feast_rig.is_empty() and (feast_rig.get("cargo") as Node3D).visible, "harvest_feast_uses_authored_food_cargo")
-	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate Harvest Feast", "harvest_feast_has_coherent_village_identity")
-	_check(String(feast_village.get("nation_status", "")) == "not_founded", "harvest_feast_ui_uses_truthful_canonical_nation_status")
-	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "post_feast_dispatch_offers_truthful_world_navigation")
+	_check(absf(player.camera.position.z - runtime.ATLAS_FEAST_FOCUS_ZOOM) < 1.0, "settlement_fabric_uses_closer_focus_zoom")
+	_check(absf(rad_to_deg(player.camera_socket.rotation.x) - runtime.ATLAS_FEAST_FOCUS_PITCH) < 1.0, "settlement_fabric_uses_more_oblique_focus_pitch")
+	var fabric := runtime.atlas_focus_land.get_node_or_null("GreenvaleSettlementFabric") as Node3D
+	_check(fabric != null and fabric.get_child_count() == 4, "harvest_feast_adds_four_physical_fabric_groups")
+	var fields := fabric.get_node_or_null("FieldTerraces") as Node3D
+	var paths := fabric.get_node_or_null("FarmPaths") as Node3D
+	var hedges := fabric.get_node_or_null("Hedgerows") as Node3D
+	var courtyard := fabric.get_node_or_null("FeastCourtyard") as Node3D
+	_check(fields != null and fields.get_child_count() == 4, "settlement_fabric_has_four_broad_field_masses")
+	_check(paths != null and paths.get_child_count() == 2, "settlement_fabric_has_connected_paths")
+	_check(hedges != null and hedges.get_child_count() == 3, "settlement_fabric_has_physical_hedgerows")
+	_check(courtyard != null and courtyard.get_child_count() == 6, "settlement_fabric_has_courtyard_hearth_and_gathering")
+	_check(courtyard.get_node_or_null("FeastHearth") is MeshInstance3D, "harvest_feast_adds_physical_hearth")
+	_check(String(fabric.get_meta("canonical_action", "")) == "greengate_harvest_feast", "settlement_fabric_tracks_canonical_action")
+	_check(int(fabric.get_meta("food_cost", -1)) == 5, "settlement_fabric_tracks_true_food_cost")
+	_check(String(fabric.get_meta("presentation", "")) == "parcel_scale", "settlement_fabric_declares_parcel_scale_presentation")
+	var west_screen: Vector2 = player.camera.unproject_position((fields.get_node("WestField") as Node3D).global_position)
+	var court_screen: Vector2 = player.camera.unproject_position((courtyard.get_node("StoneCourt") as Node3D).global_position)
+	var north_screen: Vector2 = player.camera.unproject_position((fields.get_node("NorthField") as Node3D).global_position)
+	var orchard_fabric_screen: Vector2 = player.camera.unproject_position((fields.get_node("OrchardField") as Node3D).global_position)
+	_check(west_screen.distance_to(court_screen) >= 48.0, "settlement_fabric_has_readable_screen_width")
+	_check(north_screen.distance_to(orchard_fabric_screen) >= 32.0, "settlement_fabric_has_readable_screen_depth")
+	_capture("world-greenvale-harvest-feast-held")
 	_capture("village-harvest-feast-held")
-	await _click_control(runtime.village.hud._tutorial_button)
-	_check(String(runtime.controller.current_snapshot().get("view", "")) == "world", "post_feast_dispatch_opens_world")
+	await _click_control(runtime.overview_button)
 	runtime.controller.session.state["resources"]["food"] = 5
 	runtime.controller.session.state["settlement"]["completed_orders"].erase(GameState.GREENGATE_HARVEST_FEAST_ORDER_ID)
 	_check(runtime.controller.load_game(), "harvest_feast_reopens")
@@ -644,7 +658,12 @@ func _run() -> void:
 	_check(bool(feast_reopened.get("greengate_harvest_feast_held", false)), "reopen_keeps_harvest_feast")
 	_check(int(feast_reopened.get("food", -1)) == 0, "reopen_keeps_harvest_feast_food_cost")
 	await process_frame
+	await _click_control(runtime.focus_button)
+	await create_timer(0.6).timeout
+	_check(runtime.atlas_focus_land.get_node_or_null("GreenvaleSettlementFabric") != null, "reopen_recreates_greenvale_settlement_fabric")
+	_capture("world-greenvale-harvest-feast-reopened")
 	_capture("world-harvest-feast-reopened")
+	await _click_control(runtime.overview_button)
 	await _click_control(runtime.enter_button)
 	await process_frame
 	_check(runtime.village_harvest_feast != null and runtime.village_harvest_feast.get_child_count() == 5, "reopen_recreates_harvest_feast_gathering")
