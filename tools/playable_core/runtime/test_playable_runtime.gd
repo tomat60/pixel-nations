@@ -1,3 +1,4 @@
+ 1 file changed, 1 insertion(+)
 extends SceneTree
 
 const GameState = preload("res://pixel_nations/core/game_state.gd")
@@ -624,6 +625,7 @@ func _run() -> void:
 	_check(not runtime.feast_button.visible, "completed_harvest_feast_hides_duplicate_action")
 	var terraces := runtime.atlas_focus_land.get_node_or_null("GreenvaleHarvestTerraces") as Node3D
 	_check(terraces != null and terraces.get_child_count() == 5, "harvest_feast_adds_four_terraces_and_hearth")
+	_check(terraces.get_node_or_null("FeastHearth") is MeshInstance3D, "harvest_feast_adds_physical_hearth")
 	_check(String(terraces.get_meta("canonical_action", "")) == "greengate_harvest_feast", "terraces_track_canonical_action")
 	_check(int(terraces.get_meta("food_cost", -1)) == 5, "terraces_track_true_food_cost")
 	var first_terrace_screen: Vector2 = player.camera.unproject_position((terraces.get_child(0) as Node3D).global_position)
