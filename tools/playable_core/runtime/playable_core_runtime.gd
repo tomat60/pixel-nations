@@ -159,7 +159,9 @@ func _build_a01_atlas() -> void:
 	substrate_material.albedo_texture = atlas_texture
 	substrate_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	substrate_material.roughness = 0.82
-	substrate_mesh.material = substrate_material
+	# ArrayMesh owns materials per surface; assigning the PrimitiveMesh-style
+	# `material` property aborts World construction in Godot 4.7.1.
+	substrate_mesh.surface_set_material(0, substrate_material)
 	substrate.mesh = substrate_mesh
 	substrate.set_meta("relief_columns", ATLAS_RELIEF_COLUMNS)
 	substrate.set_meta("relief_rows", ATLAS_RELIEF_ROWS)
