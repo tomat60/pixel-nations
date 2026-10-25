@@ -159,6 +159,10 @@ func _build_a01_atlas() -> void:
 	substrate_material.albedo_texture = atlas_texture
 	substrate_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	substrate_material.roughness = 0.82
+	# SurfaceTool's atlas grid is authored in map-space winding. Keep the
+	# retained painting visible from the established overhead camera while the
+	# generated normals still carry directional relief lighting.
+	substrate_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	# ArrayMesh owns materials per surface; assigning the PrimitiveMesh-style
 	# `material` property aborts World construction in Godot 4.7.1.
 	substrate_mesh.surface_set_material(0, substrate_material)
