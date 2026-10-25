@@ -642,6 +642,10 @@ func _run() -> void:
 	_check(String(fabric.get_meta("canonical_action", "")) == "greengate_harvest_feast", "settlement_fabric_tracks_canonical_action")
 	_check(int(fabric.get_meta("food_cost", -1)) == 5, "settlement_fabric_tracks_true_food_cost")
 	_check(String(fabric.get_meta("presentation", "")) == "parcel_scale", "settlement_fabric_declares_parcel_scale_presentation")
+	var west_field_mesh := (fields.get_node("WestField") as MeshInstance3D).mesh as BoxMesh
+	var court_mesh := (courtyard.get_node("StoneCourt") as MeshInstance3D).mesh as CylinderMesh
+	_check(west_field_mesh.size.x >= 8.0 and west_field_mesh.size.z >= 4.5, "settlement_fabric_rejects_line_like_field_strips")
+	_check(court_mesh.top_radius >= 4.0, "settlement_fabric_has_landmark_scale_courtyard")
 	var west_screen: Vector2 = player.camera.unproject_position((fields.get_node("WestField") as Node3D).global_position)
 	var court_screen: Vector2 = player.camera.unproject_position((courtyard.get_node("StoneCourt") as Node3D).global_position)
 	var north_screen: Vector2 = player.camera.unproject_position((fields.get_node("NorthField") as Node3D).global_position)
