@@ -1,4 +1,3 @@
- 1 file changed, 1 insertion(+)
 extends SceneTree
 
 const GameState = preload("res://pixel_nations/core/game_state.gd")
