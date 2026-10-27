@@ -28,3 +28,12 @@ On 2026-10-24, the former full AGENTS.md guidance was relocated **verbatim** int
 - Strategy, market research, player metrics, monetization: `docs/agent-guides/PLAYER_AND_BUSINESS_EVIDENCE.md`
 
 For cross-cutting tasks, consult each relevant guide. Do not duplicate state, issues, stewards or handoff files to compensate for a lack of product progress.
+
+## OWNER-WIDE NON-NEGOTIABLE TYPOGRAPHY RULE (2026-10-27)
+
+Apply to this project, its agents, Claude/Codex tasks and every authored output: emails, casting submissions, notifications, social posts, documents, UI labels, in-app text, design copy, generated artifacts and reports.
+
+- NEVER emit Unicode long dash characters U+2012, U+2013, U+2014 or U+2015. Use ASCII hyphen-minus (U+002D), a comma, colon or full stop instead. This includes email subjects, email bodies, signatures, source code strings, templates and generated copy.
+- Check the FINAL outgoing payload before any external send/publish or commit. If a forbidden character is present in authored text, correct it before continuing. An instruction alone is not validation; add deterministic lint and a regression test wherever the application sends or generates text.
+- For pasted third-party/legal material, preserve the source internally when necessary, but do not put forbidden punctuation into our authored public copy. Never silently alter the meaning of legal text.
+- Treat this rule as higher priority than editorial or design style preferences. Apply it also to new repositories at bootstrap, not only existing projects.
