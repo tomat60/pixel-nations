@@ -230,6 +230,28 @@ def apply_pixel_nations_village_identity(village: Path) -> int:
     return changed
 
 
+def fix_village_civil_stone_multimesh(village: Path) -> int:
+    """Supply the shared stone mesh required by the donor civil batch."""
+    path = village / "presentation" / "approved_civil_buildings.gd"
+    text = path.read_text(encoding="utf-8")
+    source = "var asset: Dictionary = b.finish(_materials,Base._roof_tile())"
+    replacement = (
+        "var asset: Dictionary = "
+        "b.finish(_materials,Base._roof_tile(),Base._stone_unit_mesh())"
+    )
+    if text.count(source) != 1:
+        raise SourceError(
+            "Village civil batch finalizer changed; refuse unsafe stone MultiMesh fix"
+        )
+    if replacement in text:
+        raise SourceError("Village civil stone MultiMesh fix is unexpectedly pre-applied")
+    path.write_text(text.replace(source, replacement, 1), encoding="utf-8")
+    rewritten = path.read_text(encoding="utf-8")
+    if rewritten.count(replacement) != 1 or source in rewritten:
+        raise SourceError("Village civil stone MultiMesh fix is incomplete")
+    return 1
+
+
 def install_a01_atlas_substrate(output: Path) -> dict[str, str]:
     """Install the retained repository-owned painted Aurelian Basin substrate."""
     if not ATLAS_SOURCE.is_file():
@@ -250,9 +272,10 @@ def write_change_notice(output: Path, opengs_commit: str, village_commit: str) -
 - OpenGS scene/data files are copied; generated project.godot is rebranded for Pixel Nations and starts the canonical playable scene.
 - The donor `game/main_game.gd` editor-only PNG preview export is removed from the generated runtime: release packs cannot write into `res://`, and these diagnostic previews are not gameplay resources.
 - OpenGS `ne2.png` is a Thomas Holtvedt QGIS derivative of the public-domain Natural Earth 2 raster; its exact hash and source URL are pinned in the integration spec.
-- Village source: Lucas Marques, from Shiva — The Free Game, `{village_commit}`.
+- Village source: Lucas Marques, from Shiva - The Free Game, `{village_commit}`.
 - Village files are moved below `res://village/`; textual `res://` references are rewritten to that namespace.
 - Player-visible Village branding, first-run guidance and command dock are changed to Pixel Nations / Greengate English; the retained resource bar shows canonical timber, stone and food instead of donor stock; donor credits, licenses, source link and notices remain available under Credits.
+- The Village civil-building batch receives its existing shared stone mesh when finalizing masonry MultiMeshes; this prevents null renderer resources without replacing donor art.
 - Pixel Nations adds a namespaced integration scene, canonical A-01 hit geometry, truthful state UI, and World/Village navigation under `res://pixel_nations/`.
 - Canonical land borders are restyled into a state-aware cartographic hierarchy: neutral boundaries recede beneath the painted geography while inspected, claimed and selected lands remain explicit.
 - Reachable Atlas labels are split into primary place names and smaller truthful settlement/route-state subtitles so development remains visible without turning overview labels into dense text blocks.
@@ -412,6 +435,7 @@ def materialize(spec_path: Path, output: Path) -> dict[str, object]:
             village_files -= 1
         rewritten_files = namespace_village(village_root)
         village_identity_files = apply_pixel_nations_village_identity(village_root)
+        village_stone_multimesh_files = fix_village_civil_stone_multimesh(village_root)
 
         notices = output / "third_party" / "the-free-game"
         notices.mkdir(parents=True, exist_ok=True)
@@ -433,6 +457,7 @@ def materialize(spec_path: Path, output: Path) -> dict[str, object]:
         "village_files": village_files,
         "village_text_files_rewritten": rewritten_files,
         "village_identity_files_transformed": village_identity_files,
+        "village_stone_multimesh_files_transformed": village_stone_multimesh_files,
         "village_scene": "res://village/scenes/approved.tscn",
         "playable_scene": "res://pixel_nations/playable_core.tscn",
         "pixel_nations_runtime_files": runtime_files,
