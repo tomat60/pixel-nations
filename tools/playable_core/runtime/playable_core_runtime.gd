@@ -614,6 +614,7 @@ func _set_focus_interaction_pickable(active: bool) -> void:
 	if not active:
 		atlas_focus_hovered = false
 		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+		DisplayServer.cursor_set_shape(DisplayServer.CURSOR_ARROW)
 
 
 func _on_focus_mouse_entered() -> void:
@@ -621,12 +622,16 @@ func _on_focus_mouse_entered() -> void:
 		return
 	atlas_focus_hovered = true
 	Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)
+	# Apply the actual OS cursor shape, even when Control nodes override the
+	# viewport's default cursor preference.
+	DisplayServer.cursor_set_shape(DisplayServer.CURSOR_POINTING_HAND)
 	_refresh_land_visuals(controller.current_snapshot())
 
 
 func _on_focus_mouse_exited() -> void:
 	atlas_focus_hovered = false
 	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+	DisplayServer.cursor_set_shape(DisplayServer.CURSOR_ARROW)
 	_refresh_land_visuals(controller.current_snapshot())
 
 
