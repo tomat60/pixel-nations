@@ -107,6 +107,10 @@ func _run() -> void:
 	_check(not runtime.atlas_is_focused, "atlas_overview_mode_restored")
 	_check(not runtime.atlas_focus_land.visible, "atlas_overview_collapses_selected_land")
 	_check(not focus_interaction.input_ray_pickable, "atlas_overview_disables_focused_land_picking")
+	# Hovering the Overview HUD button legitimately uses a hand cursor. Move to
+	# neutral viewport space before asserting that the World fallback is an arrow.
+	await _move_pointer(Vector2(20.0, 20.0))
+	_check(not runtime.atlas_focus_hovered, "atlas_overview_clears_land_hover")
 	_check(Input.get_current_cursor_shape() == Input.CURSOR_ARROW, "atlas_overview_restores_arrow_cursor")
 	_check(not (runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "overview_restores_clean_place_name_hierarchy")
 	_check(player.position.distance_to(runtime.ATLAS_OVERVIEW_POSITION) < 1.0, "atlas_overview_restores_position")
@@ -158,8 +162,12 @@ func _run() -> void:
 	await process_frame
 	await create_timer(0.6).timeout
 	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "enter_button_opens_village")
-	_check(not focus_interaction.input_ray_pickable, "village_disables_focused_land_picking")
-	_check(Input.get_current_cursor_shape() == Input.CURSOR_ARROW, "village_restores_arrow_cursor")
+	_check(
+		not is_instance_valid(focus_interaction)
+		or not focus_interaction.input_ray_pickable,
+		"village_disables_focused_land_picking"
+	)
+	_check(not runtime.atlas_focus_hovered, "village_clears_focused_land_hover")
 	_check(runtime.village != null, "real_village_scene_instantiated")
 	_check(String(runtime.village.hud._brand.text) == "Pixel Nations", "village_brand_is_pixel_nations")
 	_check(String(runtime.village.hud._credit_label.text) == "Greengate · Aurelian Basin", "village_location_is_canonical")
@@ -734,6 +742,9 @@ func _move_pointer(position: Vector2) -> void:
 	motion.position = position
 	motion.global_position = position
 	root.push_input(motion)
+	# Godot updates 3D object picking on the physics tick, not synchronously in
+	# the pushed input event. Without this tick the hover assertion is a race.
+	await physics_frame
 	await process_frame
 
 
