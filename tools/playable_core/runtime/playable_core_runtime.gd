@@ -637,6 +637,12 @@ func _on_focus_input_event(
 	_normal: Vector3,
 	_shape_index: int
 ) -> void:
+	if event is InputEventMouseMotion:
+		# Keep hover discoverable even when a fast pointer movement does not
+		# produce a separate mouse_entered signal before input_event.
+		if not atlas_focus_hovered:
+			_on_focus_mouse_entered()
+		return
 	if not (event is InputEventMouseButton):
 		return
 	var mouse_event := event as InputEventMouseButton

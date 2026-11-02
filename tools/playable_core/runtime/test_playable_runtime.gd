@@ -142,6 +142,8 @@ func _run() -> void:
 		Vector3(home_world.x, 0.4, home_world.y)
 	)
 	await _move_pointer(focused_land_screen)
+	print("PN_FOCUS_HOVER_DIAG hovered=", runtime.atlas_focus_hovered, " current_cursor=", Input.get_current_cursor_shape())
+	_check(runtime.atlas_focus_hovered, "focused_land_hover_reaches_physics_picker")
 	_check(Input.get_current_cursor_shape() == Input.CURSOR_POINTING_HAND, "focused_land_hover_uses_hand_cursor")
 	await _click_position_with_button(focused_land_screen, MOUSE_BUTTON_RIGHT)
 	_check(String(runtime.controller.current_snapshot().get("claimed_land_id", "")).is_empty(), "focused_land_right_click_is_rejected")
@@ -355,12 +357,21 @@ func _run() -> void:
 	_check(int(claim_reopened.get("stone", -1)) == 0, "reopen_keeps_frontier_connection_cost")
 	await process_frame
 	_capture("world-riverbend-connected")
-	await _click_position(home_screen)
+	# The camera may still be focused after Village reentry. Use the actual
+	# visible Overview action, then project the home center in the current pose.
+	if runtime.atlas_is_focused:
+		await _click_control(runtime.overview_button)
+		await create_timer(0.6).timeout
+	var supply_home_screen: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.0, home_world.y))
+	await _click_position(supply_home_screen)
 	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HOME_ID, "pointer_reselects_home_for_supply")
 	await _click_control(runtime.enter_button)
 	await process_frame
 	await create_timer(0.6).timeout
 	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "supply_path_enters_village")
+	if runtime.village == null:
+		quit(1)
+		return
 	_check(runtime.village_paved_road != null and runtime.village_paved_road.get_child_count() == 5, "saved_road_reappears_on_village_reentry")
 	_check(not runtime.village.hud._dock.is_visible_in_tree(), "saved_reentry_never_restores_noncanonical_donor_dock")
 	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 0, "village_reentry_still_uses_canonical_stock")
@@ -391,7 +402,11 @@ func _run() -> void:
 	_check(int(supplied_reopened.get("stone", -1)) == 5, "reopen_keeps_riverbend_supply_reward")
 	await process_frame
 	_capture("world-riverbend-supplied")
-	await _click_position(home_screen)
+	if runtime.atlas_is_focused:
+		await _click_control(runtime.overview_button)
+		await create_timer(0.6).timeout
+	var reentry_home_screen: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.0, home_world.y))
+	await _click_position(reentry_home_screen)
 	await _click_control(runtime.enter_button)
 	await process_frame
 	await create_timer(0.6).timeout
