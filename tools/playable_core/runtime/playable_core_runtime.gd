@@ -20,7 +20,8 @@ const ATLAS_OVERVIEW_ZOOM := 225.0
 const ATLAS_FOCUS_ZOOM := 82.0
 const ATLAS_OVERVIEW_PITCH := -85.0
 const ATLAS_FOCUS_PITCH := -70.0
-const ATLAS_FOCUS_ELEVATION := 6.0
+const ATLAS_FOCUS_COLLIDER_BOTTOM := 0.08
+const ATLAS_FOCUS_COLLIDER_TOP := 1.20
 const HUD_PAPER := Color("f5e4bd")
 const HUD_INK := Color("3a2a18")
 const HUD_BRONZE := Color("b58a48")
@@ -43,6 +44,8 @@ var northgate_scout_link: MeshInstance3D
 var northgate_scout_material: StandardMaterial3D
 var atlas_root: Node3D
 var atlas_focus_land: Node3D
+var atlas_focus_interaction: Area3D
+var atlas_focus_hovered := false
 var land_materials: Dictionary = {}
 var land_outline_materials: Dictionary = {}
 var land_labels: Dictionary = {}
@@ -520,6 +523,7 @@ func _focus_selected_land() -> void:
 
 
 func _show_atlas_overview() -> void:
+	_set_focus_interaction_pickable(false)
 	atlas_is_focused = false
 	atlas_focus_land.visible = false
 	var player := world.get_node("Player")
@@ -533,9 +537,9 @@ func _move_camera_to_land(land_id: String) -> void:
 	if not is_finite(center.x):
 		return
 	var player := world.get_node("Player")
-	# Retain OpenGS camera navigation: its native move_to keeps panning semantics,
-	# while the oblique focus pose makes the selected parcel's physical lift
-	# legible without replacing the complete painted overview.
+	# Retain OpenGS camera navigation and the complete painted geography. The
+	# oblique focus pose improves local readability without lifting a duplicate
+	# terrain copy out of the atlas.
 	player.move_to(center)
 	_tween_atlas_pose(ATLAS_FOCUS_ZOOM, ATLAS_FOCUS_PITCH)
 
@@ -562,8 +566,11 @@ func _tween_atlas_pose(target_zoom: float, target_pitch_degrees: float) -> void:
 
 
 func _rebuild_focus_land(land: Dictionary) -> void:
+	_set_focus_interaction_pickable(false)
 	for child in atlas_focus_land.get_children():
 		child.queue_free()
+	atlas_focus_interaction = null
+	atlas_focus_hovered = false
 	atlas_focus_land.set_meta("land_id", String(land.get("id", "")))
 	var points := PackedVector2Array()
 	for raw_point in land.get("points", []):
@@ -575,65 +582,82 @@ func _rebuild_focus_land(land: Dictionary) -> void:
 	if triangles.is_empty():
 		push_error("PN_A01_FOCUS_POLYGON_INVALID")
 		return
-	var top_surface := SurfaceTool.new()
-	top_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for index in triangles:
-		var point := points[int(index)]
-		top_surface.set_uv(Vector2(
-			(point.x - WORLD_LEFT) / WORLD_WIDTH,
-			(point.y - WORLD_TOP) / WORLD_HEIGHT
-		))
-		top_surface.add_vertex(Vector3(point.x, ATLAS_FOCUS_ELEVATION, point.y))
-	var top_mesh := top_surface.commit()
-	var top_material := StandardMaterial3D.new()
-	top_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	top_material.albedo_texture = load("res://pixel_nations/a01_atlas_substrate.png")
-	top_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	top_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	top_mesh.surface_set_material(0, top_material)
-	var top := MeshInstance3D.new()
-	top.name = "PaintedLandTop"
-	top.mesh = top_mesh
-	atlas_focus_land.add_child(top)
-	var side_surface := SurfaceTool.new()
-	side_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for point_index in points.size():
-		var point := points[point_index]
-		var next := points[(point_index + 1) % points.size()]
-		for vertex in [
-			Vector3(point.x, 0.20, point.y),
-			Vector3(next.x, ATLAS_FOCUS_ELEVATION, next.y),
-			Vector3(next.x, 0.20, next.y),
-			Vector3(point.x, 0.20, point.y),
-			Vector3(point.x, ATLAS_FOCUS_ELEVATION, point.y),
-			Vector3(next.x, ATLAS_FOCUS_ELEVATION, next.y),
-		]:
-			side_surface.add_vertex(vertex)
-	var side_mesh := side_surface.commit()
-	var side_material := StandardMaterial3D.new()
-	side_material.albedo_color = Color("6f5036")
-	side_material.roughness = 0.92
-	side_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	side_mesh.surface_set_material(0, side_material)
-	var sides := MeshInstance3D.new()
-	sides.name = "EarthenLandSides"
-	sides.mesh = side_mesh
-	atlas_focus_land.add_child(sides)
-	var rim_material := StandardMaterial3D.new()
-	rim_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	rim_material.albedo_color = Color("e3b85f")
-	rim_material.no_depth_test = true
-	var rim_mesh := ImmediateMesh.new()
-	rim_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, rim_material)
-	for point in points:
-		rim_mesh.surface_add_vertex(Vector3(point.x, ATLAS_FOCUS_ELEVATION + 0.08, point.y))
-	rim_mesh.surface_add_vertex(Vector3(points[0].x, ATLAS_FOCUS_ELEVATION + 0.08, points[0].y))
-	rim_mesh.surface_end()
-	var rim := MeshInstance3D.new()
-	rim.name = "SelectedLandRim"
-	rim.mesh = rim_mesh
-	atlas_focus_land.add_child(rim)
+	# The painted atlas already owns the visible terrain. Focus must not lift a
+	# second copy into a cliff or plate. Build only exact triangle-prism picking
+	# geometry and let the existing terrain wash and outline carry selection.
+	atlas_focus_interaction = Area3D.new()
+	atlas_focus_interaction.name = "SelectedLandFocusInteraction"
+	atlas_focus_interaction.input_ray_pickable = false
+	atlas_focus_interaction.mouse_entered.connect(_on_focus_mouse_entered)
+	atlas_focus_interaction.mouse_exited.connect(_on_focus_mouse_exited)
+	atlas_focus_interaction.input_event.connect(_on_focus_input_event)
+	for triangle_index in range(0, triangles.size(), 3):
+		var prism_points := PackedVector3Array()
+		for height in [ATLAS_FOCUS_COLLIDER_BOTTOM, ATLAS_FOCUS_COLLIDER_TOP]:
+			for corner in range(3):
+				var point := points[int(triangles[triangle_index + corner])]
+				prism_points.append(Vector3(point.x, height, point.y))
+		var shape := ConvexPolygonShape3D.new()
+		shape.points = prism_points
+		var collision := CollisionShape3D.new()
+		collision.name = "FocusTriangle%02d" % (triangle_index / 3)
+		collision.shape = shape
+		atlas_focus_interaction.add_child(collision)
+	atlas_focus_land.add_child(atlas_focus_interaction)
 	atlas_focus_land.visible = true
+	_set_focus_interaction_pickable(world.visible and atlas_is_focused)
+
+
+func _set_focus_interaction_pickable(active: bool) -> void:
+	if atlas_focus_interaction != null and is_instance_valid(atlas_focus_interaction):
+		atlas_focus_interaction.input_ray_pickable = active
+	if not active:
+		atlas_focus_hovered = false
+		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+		DisplayServer.cursor_set_shape(DisplayServer.CURSOR_ARROW)
+
+
+func _on_focus_mouse_entered() -> void:
+	if atlas_focus_interaction == null or not atlas_focus_interaction.input_ray_pickable:
+		return
+	atlas_focus_hovered = true
+	Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)
+	# Apply the actual OS cursor shape, even when Control nodes override the
+	# viewport's default cursor preference.
+	DisplayServer.cursor_set_shape(DisplayServer.CURSOR_POINTING_HAND)
+	_refresh_land_visuals(controller.current_snapshot())
+
+
+func _on_focus_mouse_exited() -> void:
+	atlas_focus_hovered = false
+	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+	DisplayServer.cursor_set_shape(DisplayServer.CURSOR_ARROW)
+	_refresh_land_visuals(controller.current_snapshot())
+
+
+func _on_focus_input_event(
+	_camera: Node,
+	event: InputEvent,
+	_event_position: Vector3,
+	_normal: Vector3,
+	_shape_index: int
+) -> void:
+	if event is InputEventMouseMotion:
+		# Keep hover discoverable even when a fast pointer movement does not
+		# produce a separate mouse_entered signal before input_event.
+		if not atlas_focus_hovered:
+			_on_focus_mouse_entered()
+		return
+	if not (event is InputEventMouseButton):
+		return
+	var mouse_event := event as InputEventMouseButton
+	if not mouse_event.pressed or mouse_event.button_index != MOUSE_BUTTON_LEFT:
+		return
+	get_viewport().set_input_as_handled()
+	if claim_button.visible and not claim_button.disabled:
+		_claim()
+	elif enter_button.visible and not enter_button.disabled:
+		_enter()
 
 
 func canonical_center_world(land_id: String) -> Vector2:
@@ -870,6 +894,7 @@ func _on_view_changed(view: String, snapshot: Dictionary) -> void:
 
 
 func _show_village() -> void:
+	_set_focus_interaction_pickable(false)
 	world.visible = false
 	world.process_mode = Node.PROCESS_MODE_DISABLED
 	if village == null:
@@ -926,6 +951,7 @@ func _show_world() -> void:
 	village_harvest_feast = null
 	world.visible = true
 	world.process_mode = Node.PROCESS_MODE_INHERIT
+	_set_focus_interaction_pickable(atlas_is_focused)
 	panel.move_to_front()
 
 
@@ -1657,6 +1683,8 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 				outline_color = Color(0.58, 0.88, 0.94, 0.96)
 			if land_id == selected_id:
 				outline_color = Color(1.0, 0.82, 0.34, 1.0)
+				if atlas_focus_hovered:
+					outline_color = Color(1.0, 0.95, 0.62, 1.0)
 			outline_material.albedo_color = outline_color
 	var labels_visible := String(snapshot.get("view", "world")) == "world"
 	for land_id_value in land_labels.keys():

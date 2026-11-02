@@ -92,27 +92,63 @@ func _run() -> void:
 	_check(player.position.distance_to(Vector3(home_world.x, 0.0, home_world.y)) < 1.0, "atlas_focus_centers_selected_land")
 	_check(absf(player.camera.position.z - runtime.ATLAS_FOCUS_ZOOM) < 1.0, "atlas_focus_uses_readable_zoom")
 	_check(absf(rad_to_deg(player.camera_socket.rotation.x) - runtime.ATLAS_FOCUS_PITCH) < 1.0, "atlas_focus_uses_oblique_camera_pitch")
-	_check(runtime.atlas_focus_land.visible, "atlas_focus_raises_selected_land")
+	_check(runtime.atlas_focus_land.visible, "atlas_focus_interaction_root_is_active")
 	_check(String(runtime.atlas_focus_land.get_meta("land_id", "")) == HOME_ID, "atlas_focus_geometry_tracks_selected_land")
-	_check(runtime.atlas_focus_land.get_node_or_null("PaintedLandTop") is MeshInstance3D, "atlas_focus_retains_painted_land_surface")
-	var focus_sides := runtime.atlas_focus_land.get_node_or_null("EarthenLandSides") as MeshInstance3D
-	_check(focus_sides != null and focus_sides.get_aabb().size.y >= 3.5, "atlas_focus_has_perceptible_physical_elevation")
-	var focused_base_screen: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.2, home_world.y))
-	var focused_top_screen: Vector2 = player.camera.unproject_position(Vector3(home_world.x, runtime.ATLAS_FOCUS_ELEVATION, home_world.y))
-	_check(focused_base_screen.distance_to(focused_top_screen) >= 12.0, "atlas_focus_elevation_is_screen_readable")
+	_check(runtime.atlas_focus_land.get_node_or_null("PaintedLandTop") == null, "atlas_focus_does_not_duplicate_painted_terrain")
+	_check(runtime.atlas_focus_land.get_node_or_null("EarthenLandSides") == null, "atlas_focus_does_not_extrude_a_cliff")
+	var focus_interaction := runtime.atlas_focus_land.get_node_or_null("SelectedLandFocusInteraction") as Area3D
+	_check(focus_interaction != null, "focused_land_has_direct_interaction_area")
+	_check(focus_interaction != null and focus_interaction.input_ray_pickable, "focused_land_interaction_is_pickable")
+	_check(focus_interaction != null and focus_interaction.get_child_count() > 0, "focused_land_uses_triangulated_collision")
 	_check(runtime.overview_button.visible and not runtime.focus_button.visible, "focused_land_offers_overview_recovery")
 	_capture("world-home-focused")
 	await _click_control(runtime.overview_button)
 	await create_timer(0.6).timeout
 	_check(not runtime.atlas_is_focused, "atlas_overview_mode_restored")
 	_check(not runtime.atlas_focus_land.visible, "atlas_overview_collapses_selected_land")
+	_check(not focus_interaction.input_ray_pickable, "atlas_overview_disables_focused_land_picking")
+	# Hovering the Overview HUD button legitimately uses a hand cursor. Move to
+	# neutral viewport space before asserting that the World fallback is an arrow.
+	await _move_pointer(Vector2(20.0, 20.0))
+	_check(not runtime.atlas_focus_hovered, "atlas_overview_clears_land_hover")
+	_check(Input.get_current_cursor_shape() == Input.CURSOR_ARROW, "atlas_overview_restores_arrow_cursor")
 	_check(not (runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "overview_restores_clean_place_name_hierarchy")
 	_check(player.position.distance_to(runtime.ATLAS_OVERVIEW_POSITION) < 1.0, "atlas_overview_restores_position")
 	_check(absf(player.camera.position.z - runtime.ATLAS_OVERVIEW_ZOOM) < 1.0, "atlas_overview_restores_zoom")
 	_check(absf(rad_to_deg(player.camera_socket.rotation.x) - runtime.ATLAS_OVERVIEW_PITCH) < 1.0, "atlas_overview_restores_camera_pitch")
 	var atlas_center_screen: Vector2 = player.camera.unproject_position(Vector3.ZERO)
 	_check(atlas_center_screen.distance_to(Vector2(root.size) * 0.5) < 2.0, "atlas_overview_centers_painted_basin")
-	await _click_control(runtime.claim_button)
+	# Re-enter focus and use the land itself. Right click must never claim or
+	# enter; two left clicks must perform the visible claim then enter actions.
+	await _click_control(runtime.focus_button)
+	await create_timer(0.6).timeout
+	focus_interaction = runtime.atlas_focus_interaction
+	_check(focus_interaction != null and focus_interaction.input_ray_pickable, "refocused_land_restores_picking")
+	# A neighboring land remains selectable through real pointer input while the
+	# focused polygon picker is active. This proves the exact triangulation does
+	# not steal the surrounding map space that a box or plate would cover.
+	var focused_neighbor_screen: Vector2 = player.camera.unproject_position(
+		Vector3(runtime.canonical_center_world(FRONTIER_ID).x, 0.0, runtime.canonical_center_world(FRONTIER_ID).y)
+	)
+	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(focused_neighbor_screen), "focused_neighbor_projects_inside_viewport")
+	await _click_position(focused_neighbor_screen)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == FRONTIER_ID, "focused_neighbor_receives_pointer_input")
+	_check(String(runtime.controller.current_snapshot().get("claimed_land_id", "")).is_empty(), "focused_neighbor_click_does_not_claim_home")
+	runtime._select_land_by_id(HOME_ID)
+	await create_timer(0.6).timeout
+	focus_interaction = runtime.atlas_focus_interaction
+	_check(focus_interaction != null and focus_interaction.input_ray_pickable, "home_refocus_restores_exact_picker")
+	var focused_land_screen: Vector2 = player.camera.unproject_position(
+		Vector3(home_world.x, 0.4, home_world.y)
+	)
+	await _move_pointer(focused_land_screen)
+	print("PN_FOCUS_HOVER_DIAG hovered=", runtime.atlas_focus_hovered, " current_cursor=", Input.get_current_cursor_shape(), " os_cursor=", DisplayServer.cursor_get_shape())
+	_check(runtime.atlas_focus_hovered, "focused_land_hover_reaches_physics_picker")
+	_check(DisplayServer.cursor_get_shape() == DisplayServer.CURSOR_POINTING_HAND, "focused_land_hover_uses_hand_cursor")
+	await _click_position_with_button(focused_land_screen, MOUSE_BUTTON_RIGHT)
+	_check(String(runtime.controller.current_snapshot().get("claimed_land_id", "")).is_empty(), "focused_land_right_click_is_rejected")
+	_check(String(runtime.controller.current_snapshot().get("view", "")) == "world", "focused_land_right_click_keeps_world")
+	await _click_position(focused_land_screen)
 	_check(String(runtime.controller.current_snapshot().get("claimed_land_id", "")) == HOME_ID, "claim_button_claims_home")
 	await process_frame
 	_check(runtime.frontier_progress.value == 1.0, "world_progress_tracks_claimed_home")
@@ -124,10 +160,16 @@ func _run() -> void:
 	_check(runtime.enter_button.text == "Found Greengate", "first_world_action_explicitly_founds_settlement")
 	_check(not runtime.claim_button.visible and not runtime.inspect_button.visible and not runtime.connect_button.visible, "world_hides_irrelevant_actions")
 	_capture("world-claimed")
-	await _click_control(runtime.enter_button)
+	await _click_position(focused_land_screen)
 	await process_frame
 	await create_timer(0.6).timeout
 	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "enter_button_opens_village")
+	_check(
+		not is_instance_valid(focus_interaction)
+		or not focus_interaction.input_ray_pickable,
+		"village_disables_focused_land_picking"
+	)
+	_check(not runtime.atlas_focus_hovered, "village_clears_focused_land_hover")
 	_check(runtime.village != null, "real_village_scene_instantiated")
 	_check(String(runtime.village.hud._brand.text) == "Pixel Nations", "village_brand_is_pixel_nations")
 	_check(String(runtime.village.hud._credit_label.text) == "Greengate · Aurelian Basin", "village_location_is_canonical")
@@ -315,12 +357,21 @@ func _run() -> void:
 	_check(int(claim_reopened.get("stone", -1)) == 0, "reopen_keeps_frontier_connection_cost")
 	await process_frame
 	_capture("world-riverbend-connected")
-	await _click_position(home_screen)
+	# The camera may still be focused after Village reentry. Use the actual
+	# visible Overview action, then project the home center in the current pose.
+	if runtime.atlas_is_focused:
+		await _click_control(runtime.overview_button)
+		await create_timer(0.6).timeout
+	var supply_home_screen: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.0, home_world.y))
+	await _click_position(supply_home_screen)
 	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HOME_ID, "pointer_reselects_home_for_supply")
 	await _click_control(runtime.enter_button)
 	await process_frame
 	await create_timer(0.6).timeout
 	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "supply_path_enters_village")
+	if runtime.village == null:
+		quit(1)
+		return
 	_check(runtime.village_paved_road != null and runtime.village_paved_road.get_child_count() == 5, "saved_road_reappears_on_village_reentry")
 	_check(not runtime.village.hud._dock.is_visible_in_tree(), "saved_reentry_never_restores_noncanonical_donor_dock")
 	_check(int(runtime.controller.current_snapshot().get("stone", -1)) == 0, "village_reentry_still_uses_canonical_stock")
@@ -351,7 +402,11 @@ func _run() -> void:
 	_check(int(supplied_reopened.get("stone", -1)) == 5, "reopen_keeps_riverbend_supply_reward")
 	await process_frame
 	_capture("world-riverbend-supplied")
-	await _click_position(home_screen)
+	if runtime.atlas_is_focused:
+		await _click_control(runtime.overview_button)
+		await create_timer(0.6).timeout
+	var reentry_home_screen: Vector2 = player.camera.unproject_position(Vector3(home_world.x, 0.0, home_world.y))
+	await _click_position(reentry_home_screen)
 	await _click_control(runtime.enter_button)
 	await process_frame
 	await create_timer(0.6).timeout
@@ -692,15 +747,26 @@ func _click_control(control: BaseButton) -> void:
 
 
 func _click_position(position: Vector2) -> void:
+	await _move_pointer(position)
+	await _click_position_with_button(position, MOUSE_BUTTON_LEFT)
+
+
+func _move_pointer(position: Vector2) -> void:
 	root.warp_mouse(position)
 	var motion := InputEventMouseMotion.new()
 	motion.position = position
 	motion.global_position = position
 	root.push_input(motion)
+	# Godot updates 3D object picking on the physics tick, not synchronously in
+	# the pushed input event. Without this tick the hover assertion is a race.
+	await physics_frame
 	await process_frame
+
+
+func _click_position_with_button(position: Vector2, button_index: MouseButton) -> void:
 	for pressed in [true, false]:
 		var event := InputEventMouseButton.new()
-		event.button_index = MOUSE_BUTTON_LEFT
+		event.button_index = button_index
 		event.pressed = pressed
 		event.position = position
 		event.global_position = position
