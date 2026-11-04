@@ -93,6 +93,14 @@ async function waitForStoredOutcome(page, outcomeId) {
   );
 }
 
+async function readStoredRun(page) {
+  return page.evaluate((key) => {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) throw new Error(`Missing persisted play state at ${key}`);
+    return JSON.parse(raw);
+  }, STORAGE_KEY);
+}
+
 async function resetStoredRun(page) {
   await page.evaluate((key) => window.localStorage.removeItem(key), STORAGE_KEY);
   await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
@@ -111,16 +119,22 @@ async function runBranch(browser, branchCase) {
   const page = await context.newPage();
   const video = page.video();
   const screenshots = [];
+  const seed = buildSeed(branchCase.escalationId);
 
   try {
     await page.goto(`${APP_URL}/play`, { waitUntil: "domcontentloaded", timeout: 10000 });
     await page.evaluate(
       ({ key, state }) => window.localStorage.setItem(key, JSON.stringify(state)),
-      { key: STORAGE_KEY, state: buildSeed(branchCase.escalationId) },
+      { key: STORAGE_KEY, state: seed },
     );
     await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await dismissFounderRecord(page, { depth: "founder-run" });
+    await dismissFounderRecord(page, {
+      depth: "founder-run",
+      required: true,
+      rehydrateState: seed,
+      storageKey: STORAGE_KEY,
+    });
 
     await page.locator(`[data-qa="posture-label"][data-posture="${branchCase.posture}"]`).first().waitFor({ state: "visible", timeout: 5000 });
     await page.locator(`[data-qa="post-empire-branch"][data-posture="${branchCase.posture}"][data-outcome="none"]`).waitFor({ state: "visible", timeout: 5000 });
@@ -133,13 +147,19 @@ async function runBranch(browser, branchCase) {
     await choice.click({ force: true });
     await page.locator(`[data-qa="post-empire-outcome"][data-outcome-id="${branchCase.outcomeId}"]`).waitFor({ state: "visible", timeout: 5000 });
     await waitForStoredOutcome(page, branchCase.outcomeId);
+    const persistedOutcomeState = await readStoredRun(page);
     const choiceShot = `${branchCase.posture}-02-outcome.png`;
     await page.screenshot({ path: `${SCREENSHOT_DIR}/${choiceShot}`, fullPage: true });
     screenshots.push(choiceShot);
 
     await page.reload({ waitUntil: "domcontentloaded", timeout: 10000 });
     await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
-    await dismissFounderRecord(page, { depth: "founder-run" });
+    await dismissFounderRecord(page, {
+      depth: "founder-run",
+      required: true,
+      rehydrateState: persistedOutcomeState,
+      storageKey: STORAGE_KEY,
+    });
     await page.locator(`[data-qa="post-empire-branch"][data-posture="${branchCase.posture}"][data-outcome="${branchCase.outcomeId}"]`).waitFor({ state: "visible", timeout: 5000 });
     await page.locator(`[data-qa="post-empire-outcome"][data-outcome-id="${branchCase.outcomeId}"]`).waitFor({ state: "visible", timeout: 5000 });
 
