@@ -27,6 +27,10 @@ func _run() -> void:
 		quit(1)
 		return
 	var runtime = packed.instantiate()
+	if runtime == null or runtime.get_script() == null or not runtime.has_method("_render_snapshot"):
+		_check(false, "playable_runtime_script_instantiates")
+		quit(1)
+		return
 	runtime.controller = null
 	root.add_child(runtime)
 	await process_frame
@@ -171,6 +175,9 @@ func _run() -> void:
 	)
 	_check(not runtime.atlas_focus_hovered, "village_clears_focused_land_hover")
 	_check(runtime.village != null, "real_village_scene_instantiated")
+	if runtime.village == null or not is_instance_valid(runtime.village):
+		quit(1)
+		return
 	_check(String(runtime.village.hud._brand.text) == "Pixel Nations", "village_brand_is_pixel_nations")
 	_check(String(runtime.village.hud._credit_label.text) == "Greengate · Aurelian Basin", "village_location_is_canonical")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate's first road", "village_onboarding_matches_product_loop")

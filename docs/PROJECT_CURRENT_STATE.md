@@ -1,17 +1,24 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-10-24
-Current state revision: 50.0
-Authority baseline SHA: `5305f0b19c04aabed6c1ca241756cce6ce749640`
-Product baseline SHA: `b0de6fa22ca617e93dd57fbb2567e732d9913858`
-Runtime baseline SHA: `b0de6fa22ca617e93dd57fbb2567e732d9913858`
+Updated: 2026-11-05
+Current state revision: 51.0
+Authority baseline SHA: `b12d171e7920176c25d35ac215b085a15cc3939c`
+Product baseline SHA: `b12d171e7920176c25d35ac215b085a15cc3939c`
+Runtime baseline SHA: `b12d171e7920176c25d35ac215b085a15cc3939c`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
 Current product phase: First Playable Vertical Slice. Godot production remains locked; the active visible front is the integrated Aurelian World/Region map and separate camera-controllable Greengate Village journey.
 Current milestone: complete the unaided first-10-minutes path using visible player input and canonical saved resources, with physical 3D Village changes for purchased improvements while preserving the `land -> settlement/city -> nation -> empire` product model.
 Active execution issue: #721
-Next allowed action: run the mandatory whole-product portfolio gate against current `main@5305f0b19c04aabed6c1ca241756cce6ce749640`, using the accepted connected Granary choice as the first-10-minutes baseline. Compare the largest remaining bottleneck across full progression/world shape, repeatable settlement agency, UX clarity, inhabited visual density and demo value, then authorize at most ONE materially larger player-visible milestone. Do not infer another hidden route click, automatic isolated building, text/state counter, static scene plate or speculative economy from the last reducer transition. Any implementation must reuse the legal live Godot 3D scene, create a perceptible physical consequence through real input, preserve save/re-entry and World/Village continuity, and pass exact-head runtime plus directly reviewed 1440x900 and 360x225 PRE/POST evidence. Cursor/MAX/Unity/additional paid services remain blocked. Generic image generation remains blocked; extra spend remains $0.
+Next allowed action: First repair the failed postmerge Play Visual QA at main b12d171e7920176c25d35ac215b085a15cc3939c with the locally Chromium-verified bounded hydration fix, exact-head checks and postmerge production verification. The accepted Godot #836 runtime remains intact. For any new Godot runtime QA, fail closed on missing global script class, invalid root instance or missing Village scene, and use the established cloud renderer rather than the owner's personal Mac. After release health is green, deliver ONE substantial physical World/Sector/neighboring-settlement agency milestone, with player inputs, resource spend, saved persistence, real 1440x900 and 360x225 before/after image review, and postmerge checks. No new engine, static map replacement, paid service, or asset licensing risk.
+
+## 2026-11-05 actual production reconciliation
+
+- Godot PR #836 was merged to `main@b12d171e7920176c25d35ac215b085a15cc3939c` on 2026-11-02. A real Godot 4.7.1 Xvfb run (41458947006) passed pointer/save/reopen and captured full 1440x900 and 360x225 frames. This is functional First Playable evidence, not premium full-game visual acceptance.
+- Postmerge CI, RC1, native exports and public route health passed. Postmerge Play Visual QA run `41460753436` failed on a browser hydration race. The single-file fix on `steward/fix-play-visual-qa-hydration@b20497f3007f1ae75fb2ddf631e305701a9c6542` was separately exercised in real Chromium: 3/3 posture journeys and save/reload passed, with 9 screenshots and 3 videos; it is not yet merged or exact-head CI accepted.
+- The 2026-11-05 personal-Mac Godot test was found hung after a GDScript duplicate global class parse error, with no new valid evidence. The process was stopped. New runtime QA should abort immediately when the root script or Village scene cannot load. Avoid using the owner's Mac for unattended production tests.
+- The regional World/Sector prototype that used raw tower meshes remains rejected/unmerged: appearance, interaction journey and performance were not accepted. Preserve its source as a local candidate only; do not repeat this visual technique without a materially different art method.
 
 ## 2026-10-24 connected Granary access checkpoint
 
