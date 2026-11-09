@@ -1,17 +1,24 @@
 # Pixel Nations Current State
 
 Status: ACTIVE
-Updated: 2026-11-05
-Current state revision: 51.0
-Authority baseline SHA: `b12d171e7920176c25d35ac215b085a15cc3939c`
-Product baseline SHA: `b12d171e7920176c25d35ac215b085a15cc3939c`
-Runtime baseline SHA: `b12d171e7920176c25d35ac215b085a15cc3939c`
+Updated: 2026-11-09
+Current state revision: 52.0
+Authority baseline SHA: `3f6b90432fbb4b7817fa87b668394876c8152996`
+Product baseline SHA: `3f6b90432fbb4b7817fa87b668394876c8152996`
+Runtime baseline SHA: `3f6b90432fbb4b7817fa87b668394876c8152996`
 Gameplay rollback baseline SHA: `cf952cc055af15370bcc99a71893b8f9aa7c83ab`
 
+Distribution: Windows desktop game first, macOS/Linux desktop next; later optional browser demo must export the SAME Godot project. The historical Next.js /play remains reference/marketing only and is frozen against new gameplay features. Never use Next.js screenshots as evidence of a Godot 3D gameplay release.
 Current product phase: First Playable Vertical Slice. Godot production remains locked; the active visible front is the integrated Aurelian World/Region map and separate camera-controllable Greengate Village journey.
 Current milestone: complete the unaided first-10-minutes path using visible player input and canonical saved resources, with physical 3D Village changes for purchased improvements while preserving the `land -> settlement/city -> nation -> empire` product model.
 Active execution issue: #721
-Next allowed action: First repair the failed postmerge Play Visual QA at main b12d171e7920176c25d35ac215b085a15cc3939c with the locally Chromium-verified bounded hydration fix, exact-head checks and postmerge production verification. The accepted Godot #836 runtime remains intact. For any new Godot runtime QA, fail closed on missing global script class, invalid root instance or missing Village scene, and use the established cloud renderer rather than the owner's personal Mac. After release health is green, deliver ONE substantial physical World/Sector/neighboring-settlement agency milestone, with player inputs, resource spend, saved persistence, real 1440x900 and 360x225 before/after image review, and postmerge checks. No new engine, static map replacement, paid service, or asset licensing risk.
+Next allowed action: Prove ONE existing-Godot regional breadth milestone on an isolated PR using real canonical settlement state: Greengate founding, paid Granary, Riverbend Hamlet, and paid Storehouse must create and preserve geographically anchored miniature versions of the licensed authored 3D Village structures on World/Sector, without replacing the painted atlas, spawning unearned rivals, inventing resources or touching the Next.js game. Test full player pointer journey, resource spend, World-Village transitions, save/reopen, desktop and compact real Godot screenshots; reject if art or performance is worse. No owner Mac, new paid tool, parallel renderer or engine migration.
+
+## 2026-11-09 actual release and desktop product priority
+
+- PR #837 merged as main `3f6b90432fbb4b7817fa87b668394876c8152996`. Exact-head and postmerge CI, full Play Visual QA, RC1, Godot Linux/macOS playable exports and signed macOS start PASS; production Vercel `READY` on exact SHA. This repaired the web QA hydration blocker but DID NOT improve Godot scene art/gameplay.
+- Desktop-first decision remains ADR-001, with Windows as initial commercial target. Future browser distribution means exporting the same Godot game, not extending the independent historical Next.js scene engine. Do not repeat the flat web screenshots as real Godot improvements.
+- The immediate proof is physical regional settlement visibility in the existing Godot World/Sector, tied only to real saved player purchases/settlement creation. Use licensed retained Village prefab meshes and spatial anchors, never the rejected primitive tower scatter.
 
 ## 2026-11-05 actual production reconciliation
 

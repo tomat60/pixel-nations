@@ -44,6 +44,7 @@ var northgate_scout_link: MeshInstance3D
 var northgate_scout_material: StandardMaterial3D
 var atlas_root: Node3D
 var atlas_focus_land: Node3D
+var regional_landmarks: Dictionary = {}
 var atlas_focus_interaction: Area3D
 var atlas_focus_hovered := false
 var land_materials: Dictionary = {}
@@ -1256,6 +1257,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		northgate_scout_link.visible = view == "world" and bool(snapshot.get("highmere_connected", false))
 		_set_northgate_scout_state(bool(snapshot.get("northgate_inspected", false)))
 	_refresh_land_visuals(snapshot)
+	_sync_regional_settlements(snapshot)
 	_sync_village_road_visual(snapshot)
 	_sync_village_granary_sites(snapshot)
 	_sync_village_granary(snapshot)
@@ -1648,6 +1650,56 @@ func _sync_village_harvest_feast(snapshot: Dictionary) -> void:
 	feast_light.omni_range = 9.0
 	feast_light.shadow_enabled = false
 	village_harvest_feast.add_child(feast_light)
+
+
+# World/Sector scale uses restrained miniatures of the same licensed,
+# authored buildings as Greengate. No duplicate Village simulation or invented
+# settlements: a footprint appears only after the saved player action.
+func _sync_regional_landmark(key: String, land_id: String, kind: String, offset: Vector2, active: bool) -> void:
+	var current := regional_landmarks.get(key) as Node3D
+	if not active:
+		if current != null and is_instance_valid(current):
+			current.queue_free()
+		regional_landmarks.erase(key)
+		return
+	if current != null and is_instance_valid(current):
+		return
+	var center := canonical_center_world(land_id)
+	if not is_finite(center.x):
+		push_error("PN_REGION_LANDMARK_UNKNOWN_LAND_%s" % land_id)
+		return
+	var building: Node3D = ApprovedCivil.building(kind)
+	if building == null:
+		push_error("PN_REGION_LANDMARK_UNAVAILABLE_%s" % kind)
+		return
+	building.name = key
+	building.position = Vector3(center.x + offset.x, 0.48, center.y + offset.y)
+	building.scale = Vector3.ONE * (1.05 if kind == "house" else 0.82)
+	building.rotation.y = -0.20 if kind == "house" else 0.24
+	building.set_meta("canonical_land_id", land_id)
+	building.set_meta("regional_landmark", true)
+	atlas_root.add_child(building)
+	regional_landmarks[key] = building
+
+
+func _sync_regional_settlements(snapshot: Dictionary) -> void:
+	var settled_lands: Array = snapshot.get("settlement_land_ids", []) as Array
+	_sync_regional_landmark(
+		"GreenvaleHomestead", "PN-A01-001", "house", Vector2(-5.6, -5.0),
+		settled_lands.has("PN-A01-001")
+	)
+	_sync_regional_landmark(
+		"GreenvaleGranary", "PN-A01-001", "store", Vector2(5.5, -4.7),
+		settled_lands.has("PN-A01-001") and bool(snapshot.get("greengate_granary_built", false))
+	)
+	_sync_regional_landmark(
+		"RiverbendHamlet", "PN-A01-002", "house", Vector2(-5.6, -5.0),
+		settled_lands.has("PN-A01-002")
+	)
+	_sync_regional_landmark(
+		"RiverbendStorehouse", "PN-A01-002", "store", Vector2(5.5, -4.7),
+		settled_lands.has("PN-A01-002") and bool(snapshot.get("riverbend_storehouse_built", false))
+	)
 
 
 func _refresh_land_visuals(snapshot: Dictionary) -> void:
