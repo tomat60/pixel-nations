@@ -1674,7 +1674,7 @@ func _sync_regional_landmark(key: String, land_id: String, kind: String, offset:
 		return
 	building.name = key
 	building.position = Vector3(center.x + offset.x, 0.48, center.y + offset.y)
-	building.scale = Vector3.ONE * (1.05 if kind == "house" else 0.82)
+	building.scale = Vector3.ONE * (1.56 if kind == "house" else 1.24)
 	building.rotation.y = -0.20 if kind == "house" else 0.24
 	building.set_meta("canonical_land_id", land_id)
 	building.set_meta("regional_landmark", true)
@@ -1685,19 +1685,19 @@ func _sync_regional_landmark(key: String, land_id: String, kind: String, offset:
 func _sync_regional_settlements(snapshot: Dictionary) -> void:
 	var settled_lands: Array = snapshot.get("settlement_land_ids", []) as Array
 	_sync_regional_landmark(
-		"GreenvaleHomestead", "PN-A01-001", "house", Vector2(-5.6, -5.0),
+		"GreenvaleHomestead", "PN-A01-001", "house", Vector2(-7.4, -8.0),
 		settled_lands.has("PN-A01-001")
 	)
 	_sync_regional_landmark(
-		"GreenvaleGranary", "PN-A01-001", "store", Vector2(5.5, -4.7),
+		"GreenvaleGranary", "PN-A01-001", "store", Vector2(7.4, -8.0),
 		settled_lands.has("PN-A01-001") and bool(snapshot.get("greengate_granary_built", false))
 	)
 	_sync_regional_landmark(
-		"RiverbendHamlet", "PN-A01-002", "house", Vector2(-5.6, -5.0),
+		"RiverbendHamlet", "PN-A01-002", "house", Vector2(-7.4, -8.0),
 		settled_lands.has("PN-A01-002")
 	)
 	_sync_regional_landmark(
-		"RiverbendStorehouse", "PN-A01-002", "store", Vector2(5.5, -4.7),
+		"RiverbendStorehouse", "PN-A01-002", "store", Vector2(7.4, -8.0),
 		settled_lands.has("PN-A01-002") and bool(snapshot.get("riverbend_storehouse_built", false))
 	)
 
