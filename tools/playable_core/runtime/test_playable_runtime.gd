@@ -175,6 +175,7 @@ func _run() -> void:
 		"village_disables_focused_land_picking"
 	)
 	_check(not runtime.atlas_focus_hovered, "village_clears_focused_land_hover")
+	_check((runtime.controller.current_snapshot().get("settlement_land_ids", []) as Array).has(HOME_ID), "village_view_model_exposes_canonical_settlement_ids")
 	_check(runtime.regional_landmarks.has("GreenvaleHomestead"), "founding_greengate_creates_authored_world_settlement")
 	if runtime.regional_landmarks.has("GreenvaleHomestead"):
 		_check(runtime.regional_landmarks["GreenvaleHomestead"].get_meta("catalog_id", "") == "bld_02_casas", "world_home_uses_existing_licensed_house")

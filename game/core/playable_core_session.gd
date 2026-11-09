@@ -337,6 +337,7 @@ func village_view_model() -> Dictionary:
 		"claimed_lands": int(progress.get("claimed_lands", 0)),
 		"charted_lands": int(progress.get("charted_lands", 0)),
 		"settlement_count": int(progress.get("settlement_count", 0)),
+		"settlement_land_ids": (progress.get("settlement_land_ids", []) as Array).duplicate(),
 		"nation_status": String(progress.get("nation_status", "not_founded")),
 		"next_goal": String(progress.get("next_goal", "")),
 		"road_built": (settlement.get("built_improvements", []) as Array).has("road"),
