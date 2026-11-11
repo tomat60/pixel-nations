@@ -12,6 +12,19 @@ on:
       - "tools/playable_core/**"
       - "migration/golden_run_v1.json"
       - ".github/workflows/godot-cloud-workbench.yml"
+  # Verify exact PR heads regardless of steward branch naming.
+  # Scoped paths prevent unrelated Next.js-only changes running Godot.
+  pull_request:
+    branches:
+      - "main"
+    paths:
+      - "game/core/**"
+      - "game/integration/**"
+      - "game/scenes/bootstrap/**"
+      - "game/tests/**"
+      - "tools/playable_core/**"
+      - "migration/golden_run_v1.json"
+      - ".github/workflows/godot-cloud-workbench.yml"
   workflow_dispatch:
 
 permissions:
