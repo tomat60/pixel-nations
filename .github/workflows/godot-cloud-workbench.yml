@@ -145,8 +145,11 @@ jobs:
               exit 1
             }
           grep -F "PN_PLAYABLE_SOURCE_BRIDGE=PASS" "$EVIDENCE_DIR/source-bridge.log"
-          "$GODOT_BIN" --headless --single-threaded-scene --editor \
-            --path /tmp/pn-playable-scene-sources --quit \
+          # Initial source font reimport must complete before editor shutdown.
+          # --editor --quit can race the importer and abort in native font cleanup.
+          # Godot's dedicated --import command waits for the resource import.
+          "$GODOT_BIN" --headless --single-threaded-scene --import \
+            --path /tmp/pn-playable-scene-sources \
             > "$EVIDENCE_DIR/source-bridge-import.log" 2>&1 || {
               cat "$EVIDENCE_DIR/source-bridge-import.log"
               exit 1
