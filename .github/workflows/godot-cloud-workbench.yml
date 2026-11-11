@@ -54,10 +54,30 @@ jobs:
         timeout-minutes: 4
         run: |
           set -Eeuo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends \
-            xvfb unzip libgl1 libvulkan1 mesa-vulkan-drivers vulkan-tools \
-            libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 > /dev/null
+          # GitHub's pinned ubuntu-24.04 image already contains Xvfb, curl,
+          # unzip and graphics libraries. An unconditional apt-get update
+          # previously blocked all engine tests when azure.archive.ubuntu.com
+          # DNS failed. Install only if the actual runner lacks a prerequisite.
+          missing=()
+          for executable in xvfb-run curl unzip; do
+            if ! command -v "$executable" >/dev/null 2>&1; then
+              missing+=("$executable")
+            fi
+          done
+          for library in libGL.so.1 libvulkan.so.1 libX11.so.6; do
+            if ! ldconfig -p | grep -Fq "$library"; then
+              missing+=("$library")
+            fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            printf 'PN_RUNNER_MISSING_PREINSTALLED=%s\\n' "${missing[*]}"
+            sudo apt-get update -qq -o Acquire::Retries=2
+            sudo apt-get install -y -qq --no-install-recommends \
+              xvfb unzip libgl1 libvulkan1 mesa-vulkan-drivers vulkan-tools \
+              libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 > /dev/null
+          else
+            echo "PN_RUNNER_PREINSTALLED_DEPS=PASS"
+          fi
           mkdir -p /tmp/pn-godot
           curl -fsSL --retry 3 --connect-timeout 15 \
             "https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
@@ -65,7 +85,11 @@ jobs:
           unzip -q /tmp/pn-godot/godot.zip -d /tmp/pn-godot
           chmod +x "$GODOT_BIN"
           "$GODOT_BIN" --version | tee "$EVIDENCE_DIR/godot-version.txt"
-          vulkaninfo --summary > "$EVIDENCE_DIR/vulkan-summary.txt"
+          if command -v vulkaninfo >/dev/null 2>&1; then
+            vulkaninfo --summary > "$EVIDENCE_DIR/vulkan-summary.txt" 2>&1
+          else
+            echo "vulkaninfo is diagnostic only; the real Godot renderer is the gate" > "$EVIDENCE_DIR/vulkan-summary.txt"
+          fi
 
       - name: Import and execute canonical reducer/save tests
         shell: bash
