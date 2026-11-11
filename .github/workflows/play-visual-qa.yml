@@ -25,7 +25,7 @@ jobs:
   draft-core-qa:
     name: Fast draft gameplay gate
     if: github.event_name == 'pull_request' && github.event.pull_request.draft == true
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
 
     steps:
@@ -61,7 +61,7 @@ jobs:
   play-visual-qa:
     name: Generate /play gameplay evidence
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
 
     steps:
