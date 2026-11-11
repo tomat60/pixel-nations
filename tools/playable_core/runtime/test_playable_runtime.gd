@@ -83,11 +83,11 @@ func _run() -> void:
 	var atlas_coverage := (atlas_max - atlas_min) / Vector2(root.size)
 	_check(atlas_coverage.x >= 0.92 and atlas_coverage.y >= 0.70, "atlas_overview_uses_strategic_viewport")
 	_check(atlas_min.x >= 0.0 and atlas_max.x <= float(root.size.x), "atlas_overview_keeps_complete_painted_basin")
-	var home_material := runtime.land_materials.get(HOME_ID) as StandardMaterial3D
-	_check(home_material.albedo_color.a >= 0.08 and home_material.albedo_color.a <= 0.12, "neutral_land_wash_defers_to_painted_geography")
-	var neutral_border := runtime.land_outline_materials.get(HOME_ID) as StandardMaterial3D
+	var background_view_material := runtime.land_materials.get("PN-A01-004") as StandardMaterial3D
+	_check(background_view_material.albedo_color.a < 0.10, "background_land_wash_defers_to_painted_geography")
+	var neutral_border := runtime.land_outline_materials.get("PN-A01-004") as StandardMaterial3D
 	_check(neutral_border.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA, "neutral_borders_preserve_painted_atlas")
-	_check(neutral_border.albedo_color.a < 0.40, "neutral_borders_recede_below_geography")
+	_check(neutral_border.albedo_color.a < 0.30, "background_borders_recede_below_geography")
 	_check(runtime.panel.get_theme_stylebox("panel") is StyleBoxTexture, "pixel_nations_panel_reuses_village_parchment")
 	_check(runtime.claim_button.get_theme_stylebox("normal") is StyleBoxFlat, "pixel_nations_actions_use_retained_village_button_language")
 	_check(runtime.detail_label.get_theme_color("font_color") == runtime.HUD_INK, "parchment_panel_uses_readable_dark_ink")
