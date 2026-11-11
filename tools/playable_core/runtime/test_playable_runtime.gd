@@ -111,6 +111,8 @@ func _run() -> void:
 	await _click_control(runtime.focus_button)
 	await create_timer(0.6).timeout
 	_check(runtime.atlas_is_focused, "atlas_focus_mode_enabled")
+	_check((runtime.land_labels.get(HOME_ID) as Label3D).visible, "focused_land_keeps_selected_territory_name")
+	_check(not (runtime.land_labels.get("PN-A01-010") as Label3D).visible, "focused_land_hides_context_territory_names")
 	_check((runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "focused_land_reveals_secondary_identity")
 	_check(player.position.distance_to(Vector3(home_world.x, 0.0, home_world.y)) < 1.0, "atlas_focus_centers_selected_land")
 	_check(absf(player.camera.position.z - runtime.ATLAS_FOCUS_ZOOM) < 1.0, "atlas_focus_uses_readable_zoom")
@@ -136,6 +138,7 @@ func _run() -> void:
 	_check(not runtime.atlas_focus_hovered, "atlas_overview_clears_land_hover")
 	_check(Input.get_current_cursor_shape() == Input.CURSOR_ARROW, "atlas_overview_restores_arrow_cursor")
 	_check(not (runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "overview_restores_clean_place_name_hierarchy")
+	_check((runtime.land_labels.get("PN-A01-010") as Label3D).visible, "overview_restores_context_territory_names")
 	_check(player.position.distance_to(runtime.ATLAS_OVERVIEW_POSITION) < 1.0, "atlas_overview_restores_position")
 	_check(absf(player.camera.position.z - runtime.ATLAS_OVERVIEW_ZOOM) < 1.0, "atlas_overview_restores_zoom")
 	_check(absf(rad_to_deg(player.camera_socket.rotation.x) - runtime.ATLAS_OVERVIEW_PITCH) < 1.0, "atlas_overview_restores_camera_pitch")

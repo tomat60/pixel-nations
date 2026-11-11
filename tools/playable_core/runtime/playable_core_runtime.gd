@@ -1778,7 +1778,7 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 			label_color = Color("bdebf0")
 		if label_land_id == selected_id:
 			label_color = Color("ffd66d")
-		label.visible = labels_visible
+		label.visible = labels_visible and (not atlas_is_focused or label_land_id == selected_id)
 		label.modulate = label_color
 		if subtitle != null:
 			subtitle.modulate = label_color.darkened(0.08)
