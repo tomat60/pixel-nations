@@ -53,7 +53,7 @@ jobs:
 
   smoke:
     name: Bounded mechanical smoke validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     timeout-minutes: 20
     steps:
@@ -89,7 +89,7 @@ jobs:
 
   screenshots:
     name: Optional screenshot QA manual
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.validation == 'full-screens' }}
     timeout-minutes: 40
