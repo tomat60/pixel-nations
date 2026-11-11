@@ -1779,6 +1779,16 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 		if label_land_id == selected_id:
 			label_color = Color("ffd66d")
 		label.visible = labels_visible and (not atlas_is_focused or label_land_id == selected_id)
+		# Context labels were only 2-4 pixels tall in the 1440x900 overview.
+		# Keep map names screen-sized while zoomed out, but retain authored
+		# local-scale typography on the selected land in focused mode.
+		var primary: bool = bool(label.get_meta("strategic_primary", false))
+		label.fixed_size = not atlas_is_focused
+		label.pixel_size = (
+			(0.00085 if primary else 0.0010)
+			if not atlas_is_focused else
+			(0.12 if primary else 0.09)
+		)
 		label.modulate = label_color
 		if subtitle != null:
 			subtitle.modulate = label_color.darkened(0.08)

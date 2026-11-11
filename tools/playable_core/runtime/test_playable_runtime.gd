@@ -64,6 +64,8 @@ func _run() -> void:
 	_check(String((runtime.land_labels.get("PN-A01-027") as Label3D).text) == "REDWILLOW", "eastern_frontier_has_canonical_identity")
 	_check(bool((runtime.land_labels.get(HOME_ID) as Label3D).get_meta("strategic_primary", false)), "home_label_keeps_primary_hierarchy")
 	_check(not bool((runtime.land_labels.get("PN-A01-010") as Label3D).get_meta("strategic_primary", true)), "context_labels_recede_below_progression_places")
+	_check((runtime.land_labels.get("PN-A01-010") as Label3D).fixed_size, "overview_context_names_keep_readable_size")
+	_check((runtime.land_labels.get(HOME_ID) as Label3D).fixed_size, "overview_primary_name_keeps_readable_size")
 	_check(String((runtime.land_subtitles.get(HOME_ID) as Label3D).text) == "HOME · GREENGATE", "home_settlement_identity_is_secondary")
 	_check(not (runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "overview_hides_secondary_land_detail")
 	var substrate := runtime.atlas_root.get_node("FictionalAurelianSubstrate") as MeshInstance3D
