@@ -71,7 +71,7 @@ jobs:
 
       - name: Install Playwright Chromium
         timeout-minutes: 8
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Run bounded smoke
         timeout-minutes: 13
@@ -107,7 +107,7 @@ jobs:
         run: npm ci
 
       - name: Install playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Run screenshots
         run: npm run qa:screens
