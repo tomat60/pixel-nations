@@ -53,6 +53,7 @@ func _run() -> void:
 	_check(runtime.regional_landmarks.is_empty(), "no_unearned_world_settlement_miniatures")
 	_check(runtime.land_materials.size() == 30, "all_canonical_lands_have_visible_surfaces")
 	_check(runtime.land_outline_materials.size() == 30, "all_canonical_lands_have_state_aware_borders")
+	_check(STRATEGIC_TERRITORY_IDS.size() == 12, "exactly_twelve_strategic_geographies")
 	for territory_id in STRATEGIC_TERRITORY_IDS:
 		var territory_material := runtime.land_materials.get(territory_id) as StandardMaterial3D
 		var territory_outline := runtime.land_outline_materials.get(territory_id) as StandardMaterial3D
