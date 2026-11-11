@@ -45,6 +45,7 @@ func _run() -> void:
 	var player = runtime.world.get_node("Player")
 	_check(not runtime.world.get_node("Map/MeshInstance3D").visible, "natural_earth_surface_hidden")
 	_check(runtime.atlas_root != null, "fictional_a01_atlas_instantiated")
+	_check(runtime.regional_landmarks.is_empty(), "no_unearned_world_settlement_miniatures")
 	_check(runtime.land_materials.size() == 30, "all_canonical_lands_have_visible_surfaces")
 	_check(runtime.land_outline_materials.size() == 30, "all_canonical_lands_have_state_aware_borders")
 	_check(runtime.land_labels.size() == 4, "home_and_reachable_lands_are_named")
@@ -174,6 +175,11 @@ func _run() -> void:
 		"village_disables_focused_land_picking"
 	)
 	_check(not runtime.atlas_focus_hovered, "village_clears_focused_land_hover")
+	_check((runtime.controller.current_snapshot().get("settlement_land_ids", []) as Array).has(HOME_ID), "village_view_model_exposes_canonical_settlement_ids")
+	_check(runtime.regional_landmarks.has("GreenvaleHomestead"), "founding_greengate_creates_authored_world_settlement")
+	if runtime.regional_landmarks.has("GreenvaleHomestead"):
+		_check(runtime.regional_landmarks["GreenvaleHomestead"].get_meta("catalog_id", "") == "bld_02_casas", "world_home_uses_existing_licensed_house")
+	_check(not runtime.regional_landmarks.has("RiverbendHamlet"), "unfounded_riverbend_does_not_show_a_hamlet")
 	_check(runtime.village != null, "real_village_scene_instantiated")
 	if runtime.village == null or not is_instance_valid(runtime.village):
 		quit(1)
@@ -264,6 +270,9 @@ func _run() -> void:
 	await _click_position(orchard_screen)
 	var first_granary: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(first_granary.get("greengate_granary_built", false)), "first_journey_granary_changes_canonical_state")
+	_check(runtime.regional_landmarks.has("GreenvaleGranary"), "greengate_granary_changes_physical_world_map")
+	if runtime.regional_landmarks.has("GreenvaleGranary"):
+		_check(runtime.regional_landmarks["GreenvaleGranary"].get_meta("catalog_id", "") == "bld_03_armazem", "world_granary_uses_existing_licensed_store")
 	_check(String(first_granary.get("greengate_granary_site", "")) == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "first_journey_granary_records_orchard_lane_choice")
 	_check(int(first_granary.get("stone", -1)) == 5, "first_journey_granary_preserves_riverbend_connection_stone")
 	_check(runtime.village_granary != null and is_instance_valid(runtime.village_granary), "first_journey_granary_adds_real_3d_scene_geometry")
@@ -578,6 +587,10 @@ func _run() -> void:
 	await _click_control(runtime.hamlet_button)
 	var hamlet_world: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(hamlet_world.get("riverbend_hamlet_founded", false)), "riverbend_hamlet_founded")
+	_check(runtime.regional_landmarks.has("RiverbendHamlet"), "riverbend_hamlet_appears_on_real_world_map")
+	if runtime.regional_landmarks.has("RiverbendHamlet"):
+		_check(runtime.regional_landmarks["RiverbendHamlet"].get_meta("catalog_id", "") == "bld_02_casas", "riverbend_marker_uses_licensed_authored_house")
+	_check(not runtime.regional_landmarks.has("RiverbendStorehouse"), "riverbend_storehouse_not_shown_before_purchase")
 	_check(int(hamlet_world.get("settlement_count", -1)) == 2, "world_reports_two_settlements")
 	_check(int(hamlet_world.get("timber", -1)) == 0, "riverbend_hamlet_costs_five_timber")
 	_check(String(hamlet_world.get("nation_status", "")) == "not_founded", "riverbend_hamlet_does_not_invent_nation")
@@ -615,6 +628,9 @@ func _run() -> void:
 	await _click_control(runtime.storehouse_button)
 	var storehouse_world: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(storehouse_world.get("riverbend_storehouse_built", false)), "riverbend_storehouse_built")
+	_check(runtime.regional_landmarks.has("RiverbendStorehouse"), "second_settlement_builds_a_physical_world_storehouse")
+	if runtime.regional_landmarks.has("RiverbendStorehouse"):
+		_check(runtime.regional_landmarks["RiverbendStorehouse"].get_meta("catalog_id", "") == "bld_03_armazem", "regional_storehouse_reuses_licensed_prefab")
 	_check(int(storehouse_world.get("stone", -1)) == 0, "riverbend_storehouse_costs_five_stone")
 	_check(String(storehouse_world.get("nation_status", "")) == "not_founded", "riverbend_storehouse_does_not_invent_nation")
 	_check("STOREHOUSE" in String((runtime.land_subtitles.get(FRONTIER_ID) as Label3D).text), "riverbend_subtitle_shows_storehouse")
@@ -637,6 +653,7 @@ func _run() -> void:
 	_check(runtime.controller.load_game(), "riverbend_storehouse_reopens")
 	var storehouse_reopened: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(storehouse_reopened.get("riverbend_storehouse_built", false)), "reopen_keeps_riverbend_storehouse")
+	_check(runtime.regional_landmarks.has("RiverbendHamlet") and runtime.regional_landmarks.has("RiverbendStorehouse"), "disk_reopen_preserves_physical_regional_settlement")
 	_check(String(storehouse_reopened.get("next_goal", "")) == "Collect Riverbend Storehouse's first provisions", "storehouse_reopen_reports_first_production_goal")
 	_check(runtime.village_riverbend_supply_yard == null, "world_reentry_releases_village_supply_yard")
 	await process_frame
