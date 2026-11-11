@@ -5,6 +5,11 @@ const HOME_ID := "PN-A01-001"
 const FRONTIER_ID := "PN-A01-002"
 const HIGHMERE_ID := "PN-A01-003"
 const NORTHGATE_ID := "PN-A01-024"
+const STRATEGIC_TERRITORY_IDS := [
+	"PN-A01-001", "PN-A01-002", "PN-A01-003", "PN-A01-010",
+	"PN-A01-011", "PN-A01-012", "PN-A01-015", "PN-A01-017",
+	"PN-A01-020", "PN-A01-023", "PN-A01-024", "PN-A01-027",
+]
 var failures: Array[String] = []
 
 
@@ -48,9 +53,17 @@ func _run() -> void:
 	_check(runtime.regional_landmarks.is_empty(), "no_unearned_world_settlement_miniatures")
 	_check(runtime.land_materials.size() == 30, "all_canonical_lands_have_visible_surfaces")
 	_check(runtime.land_outline_materials.size() == 30, "all_canonical_lands_have_state_aware_borders")
-	_check(runtime.land_labels.size() == 4, "home_and_reachable_lands_are_named")
-	_check(runtime.land_subtitles.size() == 4, "reachable_lands_have_secondary_cartographic_labels")
+	_check(runtime.land_labels.size() == 12, "twelve_strategic_territories_are_named")
+	_check(runtime.land_subtitles.size() == 12, "strategic_territories_keep_focus_detail_slots")
+	for territory_id in STRATEGIC_TERRITORY_IDS:
+		var territory_label := runtime.land_labels.get(territory_id) as Label3D
+		_check(territory_label != null and territory_label.visible, "strategic_territory_%s_is_visible" % territory_id)
 	_check(String((runtime.land_labels.get(HOME_ID) as Label3D).text) == "GREENVALE", "home_place_name_stays_primary")
+	_check(String((runtime.land_labels.get("PN-A01-010") as Label3D).text) == "WESTWATCH", "western_frontier_has_canonical_identity")
+	_check(String((runtime.land_labels.get("PN-A01-015") as Label3D).text) == "LAST LIGHT", "southern_coast_has_canonical_identity")
+	_check(String((runtime.land_labels.get("PN-A01-027") as Label3D).text) == "REDWILLOW", "eastern_frontier_has_canonical_identity")
+	_check(bool((runtime.land_labels.get(HOME_ID) as Label3D).get_meta("strategic_primary", false)), "home_label_keeps_primary_hierarchy")
+	_check(not bool((runtime.land_labels.get("PN-A01-010") as Label3D).get_meta("strategic_primary", true)), "context_labels_recede_below_progression_places")
 	_check(String((runtime.land_subtitles.get(HOME_ID) as Label3D).text) == "HOME · GREENGATE", "home_settlement_identity_is_secondary")
 	_check(not (runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "overview_hides_secondary_land_detail")
 	var substrate := runtime.atlas_root.get_node("FictionalAurelianSubstrate") as MeshInstance3D
@@ -81,6 +94,11 @@ func _run() -> void:
 	_check(runtime.frontier_progress.visible, "world_shows_claimed_land_progress")
 	_check(runtime.frontier_progress.max_value == 30.0, "world_progress_uses_canonical_land_total")
 	_check(runtime.frontier_progress.value == 0.0, "world_progress_starts_unclaimed")
+	var westwatch_label := runtime.land_labels.get("PN-A01-010") as Label3D
+	var westwatch_screen: Vector2 = player.camera.unproject_position(westwatch_label.global_position)
+	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(westwatch_screen), "western_frontier_label_projects_inside_viewport")
+	await _click_position(westwatch_screen)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == "PN-A01-010", "visible_westwatch_label_selects_canonical_land")
 	var home_screen: Vector2 = player.camera.unproject_position(
 		Vector3(home_world.x, 0.0, home_world.y)
 	)

@@ -85,6 +85,21 @@ var camera_zoom_tween: Tween
 var camera_pitch_tween: Tween
 var granary_site_choice_active := false
 
+const STRATEGIC_TERRITORY_LABELS := [
+	{"id": "PN-A01-001", "name": "GREENVALE", "subtitle": "HOME · GREENGATE", "primary": true, "color": Color("dbe9ff")},
+	{"id": "PN-A01-002", "name": "RIVERBEND", "subtitle": "", "primary": true, "color": Color("d6ffff")},
+	{"id": "PN-A01-003", "name": "HIGHMERE", "subtitle": "", "primary": true, "color": Color("f2ead2")},
+	{"id": "PN-A01-010", "name": "WESTWATCH", "subtitle": "", "primary": false, "color": Color("ded4b8")},
+	{"id": "PN-A01-011", "name": "IRON COAST", "subtitle": "", "primary": false, "color": Color("d9c9aa")},
+	{"id": "PN-A01-012", "name": "BLUEFEN", "subtitle": "", "primary": false, "color": Color("c6e3e8")},
+	{"id": "PN-A01-015", "name": "LAST LIGHT", "subtitle": "", "primary": false, "color": Color("ead6af")},
+	{"id": "PN-A01-017", "name": "DUSKHOLLOW", "subtitle": "", "primary": false, "color": Color("d4c9c0")},
+	{"id": "PN-A01-020", "name": "MAREFIELD", "subtitle": "", "primary": false, "color": Color("e4d99f")},
+	{"id": "PN-A01-023", "name": "STORMCAP", "subtitle": "", "primary": false, "color": Color("d8d0bf")},
+	{"id": "PN-A01-024", "name": "NORTHGATE", "subtitle": "", "primary": true, "color": Color("e3f1df")},
+	{"id": "PN-A01-027", "name": "REDWILLOW", "subtitle": "", "primary": false, "color": Color("c7d7bd")},
+]
+
 const GRANARY_SITE_TRANSFORMS := {
 	"plaza_edge": {"position": Vector3(27.0, 0.0, 44.0), "rotation": -0.12},
 	"orchard_lane": {"position": Vector3(43.0, 0.0, 22.5), "rotation": 0.18},
@@ -171,10 +186,16 @@ func _build_a01_atlas() -> void:
 	atlas_focus_land.name = "SelectedLandFocusRelief"
 	atlas_focus_land.visible = false
 	atlas_root.add_child(atlas_focus_land)
-	_build_land_label("PN-A01-001", "GREENVALE", "HOME · GREENGATE", Color("dbe9ff"))
-	_build_land_label("PN-A01-002", "RIVERBEND", "", Color("d6ffff"))
-	_build_land_label("PN-A01-003", "HIGHMERE", "", Color("f2ead2"))
-	_build_land_label("PN-A01-024", "NORTHGATE", "", Color("e3f1df"))
+	for territory_value in STRATEGIC_TERRITORY_LABELS:
+		var territory := territory_value as Dictionary
+		var territory_color: Color = territory.get("color", Color.WHITE)
+		_build_land_label(
+			String(territory.get("id", "")),
+			String(territory.get("name", "")),
+			String(territory.get("subtitle", "")),
+			territory_color,
+			bool(territory.get("primary", false))
+		)
 
 
 func _build_land_polygon(land: Dictionary) -> void:
@@ -236,7 +257,13 @@ func _build_land_polygon(land: Dictionary) -> void:
 	land_outline_materials[String(land.get("id", ""))] = outline_material
 
 
-func _build_land_label(land_id: String, text_value: String, subtitle_value: String, color: Color) -> void:
+func _build_land_label(
+	land_id: String,
+	text_value: String,
+	subtitle_value: String,
+	color: Color,
+	primary: bool
+) -> void:
 	var center := canonical_center_world(land_id)
 	var label := Label3D.new()
 	label.name = "%s_Label" % land_id.replace("-", "_")
@@ -244,11 +271,12 @@ func _build_land_label(land_id: String, text_value: String, subtitle_value: Stri
 	label.position = Vector3(center.x, 2.0, center.y)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
-	label.font_size = 32
-	label.outline_size = 12
+	label.font_size = 32 if primary else 22
+	label.outline_size = 12 if primary else 8
 	label.modulate = color
 	label.outline_modulate = Color(0.02, 0.04, 0.05, 0.95)
-	label.pixel_size = 0.12
+	label.pixel_size = 0.12 if primary else 0.09
+	label.set_meta("strategic_primary", primary)
 	atlas_root.add_child(label)
 	land_labels[land_id] = label
 	var subtitle := Label3D.new()
