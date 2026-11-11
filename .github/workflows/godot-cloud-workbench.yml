@@ -1,4 +1,4 @@
-name: Godot Cloud Workbench — playable core
+name: Godot Cloud Workbench - playable core
 
 on:
   push:
@@ -24,7 +24,7 @@ concurrency:
 jobs:
   playable-core-proof:
     name: State tests and rendered foundation frame (cloud)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
       GODOT_RELEASE: "4.7.1-stable"
