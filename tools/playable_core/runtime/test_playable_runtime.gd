@@ -5,6 +5,11 @@ const HOME_ID := "PN-A01-001"
 const FRONTIER_ID := "PN-A01-002"
 const HIGHMERE_ID := "PN-A01-003"
 const NORTHGATE_ID := "PN-A01-024"
+const STRATEGIC_TERRITORY_IDS := [
+	"PN-A01-001", "PN-A01-002", "PN-A01-003", "PN-A01-010",
+	"PN-A01-011", "PN-A01-012", "PN-A01-015", "PN-A01-017",
+	"PN-A01-020", "PN-A01-023", "PN-A01-024", "PN-A01-027",
+]
 var failures: Array[String] = []
 
 
@@ -48,6 +53,13 @@ func _run() -> void:
 	_check(runtime.regional_landmarks.is_empty(), "no_unearned_world_settlement_miniatures")
 	_check(runtime.land_materials.size() == 30, "all_canonical_lands_have_visible_surfaces")
 	_check(runtime.land_outline_materials.size() == 30, "all_canonical_lands_have_state_aware_borders")
+	for territory_id in STRATEGIC_TERRITORY_IDS:
+		var territory_material := runtime.land_materials.get(territory_id) as StandardMaterial3D
+		var territory_outline := runtime.land_outline_materials.get(territory_id) as StandardMaterial3D
+		_check(territory_material != null and is_equal_approx(territory_material.albedo_color.a, 0.22), "strategic_territory_%s_uses_geography_weight" % territory_id)
+		_check(territory_outline != null and is_equal_approx(territory_outline.albedo_color.a, 0.48), "strategic_territory_%s_has_compact_boundary_weight" % territory_id)
+	var background_material := runtime.land_materials.get("PN-A01-004") as StandardMaterial3D
+	_check(background_material != null and is_equal_approx(background_material.albedo_color.a, 0.07), "background_parcels_recede_below_strategic_geography")
 	_check(runtime.land_labels.size() == 4, "home_and_reachable_lands_are_named")
 	_check(runtime.land_subtitles.size() == 4, "reachable_lands_have_secondary_cartographic_labels")
 	_check(String((runtime.land_labels.get(HOME_ID) as Label3D).text) == "GREENVALE", "home_place_name_stays_primary")
