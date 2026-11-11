@@ -66,6 +66,12 @@ var enter_button: Button
 var inspect_button: Button
 var connect_button: Button
 var road_button: Button
+
+const STRATEGIC_TERRITORY_IDS := [
+	"PN-A01-001", "PN-A01-002", "PN-A01-003", "PN-A01-010",
+	"PN-A01-011", "PN-A01-012", "PN-A01-015", "PN-A01-017",
+	"PN-A01-020", "PN-A01-023", "PN-A01-024", "PN-A01-027",
+]
 var granary_button: Button
 var granary_site_row: HBoxContainer
 var granary_plaza_button: Button
@@ -197,7 +203,11 @@ func _build_land_polygon(land: Dictionary) -> void:
 	var mesh := surface.commit()
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.albedo_color = _terrain_color(String(land.get("terrain", "grassland")))
+	var land_id := String(land.get("id", ""))
+	material.albedo_color = _terrain_color(
+		String(land.get("terrain", "grassland")),
+		STRATEGIC_TERRITORY_IDS.has(land_id)
+	)
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mesh.surface_set_material(0, material)
@@ -205,13 +215,16 @@ func _build_land_polygon(land: Dictionary) -> void:
 	polygon.name = String(land.get("id", "Land")).replace("-", "_")
 	polygon.mesh = mesh
 	atlas_root.add_child(polygon)
-	land_materials[String(land.get("id", ""))] = material
+	land_materials[land_id] = material
 	var outline_material := StandardMaterial3D.new()
 	outline_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	# Let the retained painting carry the overview. Canonical borders remain
 	# present for hit-area legibility, but only selected, claimed and inspected
 	# lands rise into the cartographic hierarchy.
-	outline_material.albedo_color = Color(0.16, 0.18, 0.14, 0.30)
+	outline_material.albedo_color = Color(
+		0.16, 0.18, 0.14,
+		0.48 if STRATEGIC_TERRITORY_IDS.has(land_id) else 0.22
+	)
 	outline_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	outline_material.no_depth_test = true
 	var outline_mesh := ImmediateMesh.new()
@@ -267,7 +280,7 @@ func _build_land_label(land_id: String, text_value: String, subtitle_value: Stri
 	land_subtitles[land_id] = subtitle
 
 
-func _terrain_color(terrain: String) -> Color:
+func _terrain_color(terrain: String, strategic: bool = false) -> Color:
 	var colors := {
 		"grassland": Color("718b4e"),
 		"forest": Color("28583b"),
@@ -282,7 +295,10 @@ func _terrain_color(terrain: String) -> Color:
 	# Neutral hit areas should not recolor the authored Basin into a patchwork.
 	# Their faint wash and border preserve parcel discovery; explicit inspected,
 	# claimed and selected states rise into the hierarchy in _refresh_land_visuals.
-	color.a = 0.10
+	# The twelve strategic territories use their exact canonical polygon and
+	# terrain family as the compact identity carrier. This is geography, not an
+	# extra marker or label layer. Remaining parcels recede into the atlas.
+	color.a = 0.22 if strategic else 0.07
 	return color
 
 
@@ -1712,7 +1728,8 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 		var material := land_materials.get(land_id) as StandardMaterial3D
 		if material == null:
 			continue
-		var color := _terrain_color(String(land.get("terrain", "grassland")))
+		var strategic := STRATEGIC_TERRITORY_IDS.has(land_id)
+		var color := _terrain_color(String(land.get("terrain", "grassland")), strategic)
 		if claimed_ids.has(land_id):
 			color = Color("2868b8") if land_id == "PN-A01-001" else Color("2b8b88")
 			# Claimed land should read as player state without painting over the
@@ -1728,7 +1745,7 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 		material.albedo_color = color
 		var outline_material := land_outline_materials.get(land_id) as StandardMaterial3D
 		if outline_material != null:
-			var outline_color := Color(0.16, 0.18, 0.14, 0.30)
+			var outline_color := Color(0.16, 0.18, 0.14, 0.48 if strategic else 0.22)
 			if inspected_ids.has(land_id):
 				outline_color = Color(0.92, 0.66, 0.24, 0.94)
 			if claimed_ids.has(land_id):
