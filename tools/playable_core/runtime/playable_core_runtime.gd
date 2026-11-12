@@ -1668,18 +1668,41 @@ func _sync_regional_landmark(key: String, land_id: String, kind: String, offset:
 	if not is_finite(center.x):
 		push_error("PN_REGION_LANDMARK_UNKNOWN_LAND_%s" % land_id)
 		return
-	var building: Node3D = ApprovedCivil.building(kind)
-	if building == null:
-		push_error("PN_REGION_LANDMARK_UNAVAILABLE_%s" % kind)
-		return
-	building.name = key
-	building.position = Vector3(center.x + offset.x, 0.48, center.y + offset.y)
-	building.scale = Vector3.ONE * (1.56 if kind == "house" else 1.24)
-	building.rotation.y = -0.20 if kind == "house" else 0.24
-	building.set_meta("canonical_land_id", land_id)
-	building.set_meta("regional_landmark", true)
-	atlas_root.add_child(building)
-	regional_landmarks[key] = building
+	# A saved settlement must read as a place at atlas scale, not as one tiny
+	# marker. Reuse the same licensed Village prefab in a compact authored
+	# compound. Paid stores remain separate and appear only after their saved
+	# purchase, so this does not invent buildings or progression.
+	var compound := Node3D.new()
+	compound.name = key
+	compound.position = Vector3(center.x + offset.x, 0.48, center.y + offset.y)
+	compound.set_meta("canonical_land_id", land_id)
+	compound.set_meta("regional_landmark", true)
+	compound.set_meta("catalog_id", "bld_02_casas" if kind == "house" else "bld_03_armazem")
+	var layout := [
+		{"at": Vector2(-3.2, -2.0), "yaw": -0.24, "scale": 1.34},
+		{"at": Vector2(3.2, -1.6), "yaw": 0.31, "scale": 1.24},
+		{"at": Vector2(0.4, 3.1), "yaw": -0.06, "scale": 1.30},
+	] if kind == "house" else [
+		{"at": Vector2.ZERO, "yaw": 0.24, "scale": 1.42},
+	]
+	for index in range(layout.size()):
+		var member_spec: Dictionary = layout[index]
+		var member: Node3D = ApprovedCivil.building(kind)
+		if member == null:
+			push_error("PN_REGION_LANDMARK_UNAVAILABLE_%s" % kind)
+			compound.queue_free()
+			return
+		member.name = "%sMember%d" % [key, index + 1]
+		var member_at: Vector2 = member_spec["at"]
+		member.position = Vector3(member_at.x, 0.0, member_at.y)
+		member.rotation.y = float(member_spec["yaw"])
+		member.scale = Vector3.ONE * float(member_spec["scale"])
+		member.set_meta("canonical_land_id", land_id)
+		member.set_meta("regional_compound_member", true)
+		compound.add_child(member)
+	compound.set_meta("regional_compound_members", compound.get_child_count())
+	atlas_root.add_child(compound)
+	regional_landmarks[key] = compound
 
 
 func _sync_regional_settlements(snapshot: Dictionary) -> void:
