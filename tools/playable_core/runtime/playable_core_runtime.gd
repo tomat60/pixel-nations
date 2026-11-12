@@ -1258,6 +1258,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		_set_northgate_scout_state(bool(snapshot.get("northgate_inspected", false)))
 	_refresh_land_visuals(snapshot)
 	_sync_regional_settlements(snapshot)
+	_refresh_regional_landmark_focus(snapshot)
 	_sync_village_road_visual(snapshot)
 	_sync_village_granary_sites(snapshot)
 	_sync_village_granary(snapshot)
@@ -1678,6 +1679,7 @@ func _sync_regional_landmark(key: String, land_id: String, kind: String, offset:
 	building.rotation.y = -0.20 if kind == "house" else 0.24
 	building.set_meta("canonical_land_id", land_id)
 	building.set_meta("regional_landmark", true)
+	building.set_meta("landmark_kind", kind)
 	atlas_root.add_child(building)
 	regional_landmarks[key] = building
 
@@ -1700,6 +1702,34 @@ func _sync_regional_settlements(snapshot: Dictionary) -> void:
 		"RiverbendStorehouse", "PN-A01-002", "store", Vector2(7.4, -8.0),
 		settled_lands.has("PN-A01-002") and bool(snapshot.get("riverbend_storehouse_built", false))
 	)
+
+
+# Overview preserves the full basin. Focus turns the selected saved settlement
+# into a readable local inspection without inventing geometry or duplicating
+# structures. Other lands recede so Hamlet and paid Storehouse stages remain
+# physically distinct at both supported viewports.
+func _refresh_regional_landmark_focus(snapshot: Dictionary) -> void:
+	var selected_id := String(snapshot.get("selected_land_id", ""))
+	var focused_world := (
+		String(snapshot.get("view", "world")) == "world"
+		and atlas_is_focused
+		and not selected_id.is_empty()
+	)
+	for landmark_value in regional_landmarks.values():
+		var landmark := landmark_value as Node3D
+		if landmark == null or not is_instance_valid(landmark):
+			continue
+		var land_id := String(landmark.get_meta("canonical_land_id", ""))
+		var kind := String(landmark.get_meta("landmark_kind", "house"))
+		var selected_focus := focused_world and land_id == selected_id
+		landmark.visible = (
+			String(snapshot.get("view", "world")) == "world"
+			and (not focused_world or selected_focus)
+		)
+		var scale_value := 1.56 if kind == "house" else 1.24
+		if selected_focus:
+			scale_value = 4.8 if kind == "house" else 4.2
+		landmark.scale = Vector3.ONE * scale_value
 
 
 func _refresh_land_visuals(snapshot: Dictionary) -> void:

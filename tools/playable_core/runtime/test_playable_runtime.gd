@@ -597,6 +597,19 @@ func _run() -> void:
 	_check("HAMLET" in String((runtime.land_subtitles.get(FRONTIER_ID) as Label3D).text), "riverbend_subtitle_shows_hamlet")
 	await process_frame
 	_capture("world-riverbend-hamlet")
+	var focused_hamlet := runtime.regional_landmarks["RiverbendHamlet"] as Node3D
+	_check(absf(focused_hamlet.scale.x - 1.56) < 0.01, "hamlet_keeps_restrained_overview_scale")
+	await _click_control(runtime.focus_button)
+	await create_timer(0.6).timeout
+	_check(runtime.atlas_is_focused, "riverbend_hamlet_focus_uses_player_inspection_mode")
+	_check(absf(focused_hamlet.scale.x - 4.8) < 0.01, "focused_hamlet_enlarges_authored_house")
+	_check(focused_hamlet.visible, "focused_hamlet_remains_visible")
+	_check(not (runtime.regional_landmarks["GreenvaleHomestead"] as Node3D).visible, "focus_isolates_selected_saved_settlement")
+	_capture("world-riverbend-hamlet-focused")
+	await _click_control(runtime.overview_button)
+	await create_timer(0.6).timeout
+	_check(absf(focused_hamlet.scale.x - 1.56) < 0.01, "overview_restores_hamlet_cartographic_scale")
+	_check((runtime.regional_landmarks["GreenvaleHomestead"] as Node3D).visible, "overview_restores_other_saved_settlements")
 	runtime.controller.session.state["settlement_land_ids"] = [HOME_ID]
 	_check(runtime.controller.load_game(), "riverbend_hamlet_reopens")
 	var hamlet_reopened: Dictionary = runtime.controller.current_snapshot()
@@ -636,6 +649,16 @@ func _run() -> void:
 	_check("STOREHOUSE" in String((runtime.land_subtitles.get(FRONTIER_ID) as Label3D).text), "riverbend_subtitle_shows_storehouse")
 	await process_frame
 	_capture("world-riverbend-storehouse")
+	var focused_storehouse := runtime.regional_landmarks["RiverbendStorehouse"] as Node3D
+	await _click_control(runtime.focus_button)
+	await create_timer(0.6).timeout
+	_check(absf(focused_hamlet.scale.x - 4.8) < 0.01, "storehouse_focus_keeps_hamlet_structure_readable")
+	_check(absf(focused_storehouse.scale.x - 4.2) < 0.01, "storehouse_focus_enlarges_paid_authored_structure")
+	_check(focused_hamlet.visible and focused_storehouse.visible, "storehouse_focus_shows_saved_physical_stage")
+	_capture("world-riverbend-storehouse-focused")
+	await _click_control(runtime.overview_button)
+	await create_timer(0.6).timeout
+	_check(absf(focused_storehouse.scale.x - 1.24) < 0.01, "overview_restores_storehouse_cartographic_scale")
 	var greenvale_storehouse_label := runtime.land_labels.get(HOME_ID) as Label3D
 	_check(greenvale_storehouse_label != null and greenvale_storehouse_label.visible, "greenvale_label_is_visible_for_built_yard_visit")
 	var home_screen_for_built_yard: Vector2 = player.camera.unproject_position(greenvale_storehouse_label.global_position)
