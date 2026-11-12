@@ -659,6 +659,7 @@ func _run() -> void:
 	var storehouse_reopened: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(storehouse_reopened.get("riverbend_storehouse_built", false)), "reopen_keeps_riverbend_storehouse")
 	_check(runtime.regional_landmarks.has("RiverbendHamlet") and runtime.regional_landmarks.has("RiverbendStorehouse"), "disk_reopen_preserves_physical_regional_settlement")
+	_check(runtime.regional_landmarks["RiverbendHamlet"].get_child_count() == 3, "disk_reopen_preserves_authored_riverbend_compound")
 	_check(String(storehouse_reopened.get("next_goal", "")) == "Collect Riverbend Storehouse's first provisions", "storehouse_reopen_reports_first_production_goal")
 	_check(runtime.village_riverbend_supply_yard == null, "world_reentry_releases_village_supply_yard")
 	await process_frame
