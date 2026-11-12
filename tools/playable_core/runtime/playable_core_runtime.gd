@@ -17,9 +17,10 @@ const ATLAS_OVERVIEW_POSITION := Vector3(0.0, 0.0, 0.0)
 # Keep the complete retained painting visible, but let it occupy the strategic
 # viewport instead of floating inside a wide band of empty donor background.
 const ATLAS_OVERVIEW_ZOOM := 225.0
-const ATLAS_FOCUS_ZOOM := 82.0
+# Focus changes camera composition only. Saved structures keep geographic scale.
+const ATLAS_FOCUS_ZOOM := 52.0
 const ATLAS_OVERVIEW_PITCH := -85.0
-const ATLAS_FOCUS_PITCH := -70.0
+const ATLAS_FOCUS_PITCH := -68.0
 const ATLAS_FOCUS_COLLIDER_BOTTOM := 0.08
 const ATLAS_FOCUS_COLLIDER_TOP := 1.20
 const HUD_PAPER := Color("f5e4bd")
@@ -1750,7 +1751,10 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 			label_color = Color("bdebf0")
 		if label_land_id == selected_id:
 			label_color = Color("ffd66d")
-		label.visible = labels_visible
+		# Focus is a local inspection composition. Keep the selected place name
+		# and saved physical structures readable while the atlas and routes remain
+		# continuous beneath them. Overview restores the full label hierarchy.
+		label.visible = labels_visible and (not atlas_is_focused or label_land_id == selected_id)
 		label.modulate = label_color
 		if subtitle != null:
 			subtitle.modulate = label_color.darkened(0.08)
