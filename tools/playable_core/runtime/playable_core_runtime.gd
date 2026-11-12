@@ -17,6 +17,7 @@ const ATLAS_OVERVIEW_POSITION := Vector3(0.0, 0.0, 0.0)
 # Keep the complete retained painting visible, but let it occupy the strategic
 # viewport instead of floating inside a wide band of empty donor background.
 const ATLAS_OVERVIEW_ZOOM := 225.0
+# Focus changes camera composition only. Saved structures keep geographic scale.
 const ATLAS_FOCUS_ZOOM := 52.0
 const ATLAS_OVERVIEW_PITCH := -85.0
 const ATLAS_FOCUS_PITCH := -68.0
