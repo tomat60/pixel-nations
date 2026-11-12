@@ -179,6 +179,8 @@ func _run() -> void:
 	_check(runtime.regional_landmarks.has("GreenvaleHomestead"), "founding_greengate_creates_authored_world_settlement")
 	if runtime.regional_landmarks.has("GreenvaleHomestead"):
 		_check(runtime.regional_landmarks["GreenvaleHomestead"].get_meta("catalog_id", "") == "bld_02_casas", "world_home_uses_existing_licensed_house")
+		_check(runtime.regional_landmarks["GreenvaleHomestead"].get_child_count() == 3, "world_home_is_a_three_building_authored_compound")
+		_check(int(runtime.regional_landmarks["GreenvaleHomestead"].get_meta("regional_compound_members", 0)) == 3, "world_home_compound_has_explicit_saved_state_provenance")
 	_check(not runtime.regional_landmarks.has("RiverbendHamlet"), "unfounded_riverbend_does_not_show_a_hamlet")
 	_check(runtime.village != null, "real_village_scene_instantiated")
 	if runtime.village == null or not is_instance_valid(runtime.village):
@@ -273,6 +275,7 @@ func _run() -> void:
 	_check(runtime.regional_landmarks.has("GreenvaleGranary"), "greengate_granary_changes_physical_world_map")
 	if runtime.regional_landmarks.has("GreenvaleGranary"):
 		_check(runtime.regional_landmarks["GreenvaleGranary"].get_meta("catalog_id", "") == "bld_03_armazem", "world_granary_uses_existing_licensed_store")
+		_check(runtime.regional_landmarks["GreenvaleGranary"].get_child_count() == 1, "world_granary_adds_only_the_paid_authored_store")
 	_check(String(first_granary.get("greengate_granary_site", "")) == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "first_journey_granary_records_orchard_lane_choice")
 	_check(int(first_granary.get("stone", -1)) == 5, "first_journey_granary_preserves_riverbend_connection_stone")
 	_check(runtime.village_granary != null and is_instance_valid(runtime.village_granary), "first_journey_granary_adds_real_3d_scene_geometry")
@@ -590,6 +593,7 @@ func _run() -> void:
 	_check(runtime.regional_landmarks.has("RiverbendHamlet"), "riverbend_hamlet_appears_on_real_world_map")
 	if runtime.regional_landmarks.has("RiverbendHamlet"):
 		_check(runtime.regional_landmarks["RiverbendHamlet"].get_meta("catalog_id", "") == "bld_02_casas", "riverbend_marker_uses_licensed_authored_house")
+		_check(runtime.regional_landmarks["RiverbendHamlet"].get_child_count() == 3, "riverbend_hamlet_is_a_three_building_authored_compound")
 	_check(not runtime.regional_landmarks.has("RiverbendStorehouse"), "riverbend_storehouse_not_shown_before_purchase")
 	_check(int(hamlet_world.get("settlement_count", -1)) == 2, "world_reports_two_settlements")
 	_check(int(hamlet_world.get("timber", -1)) == 0, "riverbend_hamlet_costs_five_timber")
@@ -631,6 +635,7 @@ func _run() -> void:
 	_check(runtime.regional_landmarks.has("RiverbendStorehouse"), "second_settlement_builds_a_physical_world_storehouse")
 	if runtime.regional_landmarks.has("RiverbendStorehouse"):
 		_check(runtime.regional_landmarks["RiverbendStorehouse"].get_meta("catalog_id", "") == "bld_03_armazem", "regional_storehouse_reuses_licensed_prefab")
+		_check(runtime.regional_landmarks["RiverbendStorehouse"].get_child_count() == 1, "regional_storehouse_adds_only_the_paid_authored_store")
 	_check(int(storehouse_world.get("stone", -1)) == 0, "riverbend_storehouse_costs_five_stone")
 	_check(String(storehouse_world.get("nation_status", "")) == "not_founded", "riverbend_storehouse_does_not_invent_nation")
 	_check("STOREHOUSE" in String((runtime.land_subtitles.get(FRONTIER_ID) as Label3D).text), "riverbend_subtitle_shows_storehouse")
