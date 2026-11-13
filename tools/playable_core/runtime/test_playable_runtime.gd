@@ -573,6 +573,36 @@ func _run() -> void:
 	_capture("village-northgate-settlement-timber")
 	await _click_control(runtime.return_button)
 	await process_frame
+	# Exercise the mutually exclusive Highmere branch before restoring the same
+	# saved decision point and continuing the established Riverbend campaign.
+	var settlement_choice_state: Dictionary = runtime.controller.session.state.duplicate(true)
+	var highmere_choice_label := runtime.land_labels.get(HIGHMERE_ID) as Label3D
+	var highmere_choice_screen: Vector2 = player.camera.unproject_position(highmere_choice_label.global_position)
+	await _click_position(highmere_choice_screen)
+	_check(runtime.hamlet_button.visible and not runtime.hamlet_button.disabled, "highmere_hamlet_choice_is_clickable")
+	_check(runtime.hamlet_button.text == "Found Highmere Hamlet · 5 timber", "highmere_choice_names_physical_destination")
+	await _click_control(runtime.hamlet_button)
+	var highmere_hamlet_world: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(highmere_hamlet_world.get("highmere_hamlet_founded", false)), "highmere_hamlet_founded")
+	_check(not bool(highmere_hamlet_world.get("riverbend_hamlet_founded", false)), "highmere_choice_keeps_riverbend_unbuilt")
+	_check(int(highmere_hamlet_world.get("settlement_count", -1)) == 2, "highmere_choice_reports_two_settlements")
+	_check(int(highmere_hamlet_world.get("timber", -1)) == 0, "highmere_hamlet_spends_five_timber")
+	_check(runtime.regional_landmarks.has("HighmereHamlet"), "highmere_choice_materializes_authored_world_house")
+	if runtime.regional_landmarks.has("HighmereHamlet"):
+		_check(runtime.regional_landmarks["HighmereHamlet"].get_meta("catalog_id", "") == "bld_02_casas", "highmere_hamlet_uses_licensed_authored_house")
+	await process_frame
+	_capture("world-highmere-hamlet-choice")
+	_check(runtime.controller.save_game(), "highmere_hamlet_choice_saves")
+	runtime.controller.session.state["settlement_land_ids"] = [HOME_ID]
+	_check(runtime.controller.load_game(), "highmere_hamlet_choice_reopens")
+	_check(bool(runtime.controller.current_snapshot().get("highmere_hamlet_founded", false)), "reopen_keeps_highmere_hamlet_choice")
+	_check(runtime.regional_landmarks.has("HighmereHamlet"), "reopen_restores_highmere_physical_hamlet")
+	await process_frame
+	_capture("world-highmere-hamlet-choice-reopened")
+	runtime.controller.session.state = settlement_choice_state.duplicate(true)
+	_check(runtime.controller.save_game(), "settlement_choice_point_restored")
+	runtime.controller._publish_snapshot()
+	await process_frame
 	# Continue from the visible map itself. Clicking the rendered RIVERBEND
 	# place name proves the hamlet journey does not depend on a hidden canonical
 	# coordinate after the player returns from the Northgate timber shipment.
