@@ -20,6 +20,7 @@ const HIGHMERE_LINK_SUPPLY_ORDER_ID := "highmere_link_stone_shipment"
 const NORTHGATE_SETTLEMENT_TIMBER_REWARD := 5
 const NORTHGATE_SETTLEMENT_TIMBER_ORDER_ID := "northgate_settlement_timber"
 const RIVERBEND_HAMLET_TIMBER_COST := 5
+const HIGHMERE_HAMLET_TIMBER_COST := 5
 const RIVERBEND_STOREHOUSE_STONE_REWARD := 5
 const RIVERBEND_STOREHOUSE_STONE_ORDER_ID := "riverbend_storehouse_stone"
 const RIVERBEND_STOREHOUSE_STONE_COST := 5
@@ -337,6 +338,7 @@ static func reduce(state: Dictionary, action: Dictionary) -> Dictionary:
 				or not completed_orders.has(NORTHGATE_SETTLEMENT_TIMBER_ORDER_ID)
 				or not settlement_land_ids.has(GREENVALE_LAND_ID)
 				or settlement_land_ids.has(RIVERBEND_LAND_ID)
+				or settlement_land_ids.has(HIGHMERE_LAND_ID)
 			):
 				return next_state
 			var resources: Dictionary = next_state.get("resources", {}).duplicate(true)
@@ -344,6 +346,33 @@ static func reduce(state: Dictionary, action: Dictionary) -> Dictionary:
 				return next_state
 			resources["timber"] = int(resources.get("timber", 0)) - RIVERBEND_HAMLET_TIMBER_COST
 			settlement_land_ids.append(RIVERBEND_LAND_ID)
+			next_state["resources"] = resources
+			next_state["settlement_land_ids"] = settlement_land_ids
+
+		"FOUND_HIGHMERE_HAMLET":
+			var claimed_land_ids: Array = next_state.get("claimed_land_ids", [])
+			var connected_land_ids: Array = next_state.get("connected_land_ids", [])
+			var inspected_land_ids: Array = next_state.get("inspected_land_ids", [])
+			var settlement: Dictionary = next_state.get("settlement", {})
+			var completed_orders: Array = settlement.get("completed_orders", [])
+			var settlement_land_ids: Array = next_state.get("settlement_land_ids", []).duplicate()
+			if (
+				String(next_state.get("selected_land_id", "")) != HIGHMERE_LAND_ID
+				or not claimed_land_ids.has(HIGHMERE_LAND_ID)
+				or not connected_land_ids.has(RIVERBEND_LAND_ID)
+				or not connected_land_ids.has(HIGHMERE_LAND_ID)
+				or not inspected_land_ids.has(NORTHGATE_LAND_ID)
+				or not completed_orders.has(NORTHGATE_SETTLEMENT_TIMBER_ORDER_ID)
+				or not settlement_land_ids.has(GREENVALE_LAND_ID)
+				or settlement_land_ids.has(RIVERBEND_LAND_ID)
+				or settlement_land_ids.has(HIGHMERE_LAND_ID)
+			):
+				return next_state
+			var resources: Dictionary = next_state.get("resources", {}).duplicate(true)
+			if int(resources.get("timber", 0)) < HIGHMERE_HAMLET_TIMBER_COST:
+				return next_state
+			resources["timber"] = int(resources.get("timber", 0)) - HIGHMERE_HAMLET_TIMBER_COST
+			settlement_land_ids.append(HIGHMERE_LAND_ID)
 			next_state["resources"] = resources
 			next_state["settlement_land_ids"] = settlement_land_ids
 
@@ -471,6 +500,7 @@ static func progress(state: Dictionary) -> Dictionary:
 		(settlement.get("completed_orders", []) as Array).has(NORTHGATE_SETTLEMENT_TIMBER_ORDER_ID)
 	)
 	var riverbend_hamlet_founded := settlement_land_ids.has(RIVERBEND_LAND_ID)
+	var highmere_hamlet_founded := settlement_land_ids.has(HIGHMERE_LAND_ID)
 	var riverbend_storehouse_stone_delivered := (
 		(settlement.get("completed_orders", []) as Array).has(RIVERBEND_STOREHOUSE_STONE_ORDER_ID)
 	)
@@ -511,8 +541,10 @@ static func progress(state: Dictionary) -> Dictionary:
 		next_goal = "Inspect Northgate beyond the Highmere ridge"
 	elif northgate_inspected and not northgate_settlement_timber_delivered:
 		next_goal = "Return to Greengate for the Northgate settlement timber"
-	elif northgate_settlement_timber_delivered and not riverbend_hamlet_founded:
-		next_goal = "Found Riverbend Hamlet with 5 timber"
+	elif northgate_settlement_timber_delivered and not riverbend_hamlet_founded and not highmere_hamlet_founded:
+		next_goal = "Choose Riverbend or Highmere for the next Hamlet"
+	elif highmere_hamlet_founded:
+		next_goal = "Highmere Hamlet founded; the alternate Riverbend branch remains unbuilt"
 	elif riverbend_hamlet_founded and not riverbend_storehouse_stone_delivered:
 		next_goal = "Return to Greengate for Riverbend Storehouse stone"
 	elif riverbend_storehouse_stone_delivered and not riverbend_storehouse_built:
@@ -549,6 +581,7 @@ static func progress(state: Dictionary) -> Dictionary:
 		"northgate_status": "inspected" if northgate_inspected else ("reachable" if highmere_connected else "locked"),
 		"northgate_settlement_timber_delivered": northgate_settlement_timber_delivered,
 		"riverbend_hamlet_founded": riverbend_hamlet_founded,
+		"highmere_hamlet_founded": highmere_hamlet_founded,
 		"riverbend_storehouse_stone_delivered": riverbend_storehouse_stone_delivered,
 		"riverbend_storehouse_built": riverbend_storehouse_built,
 		"riverbend_storehouse_provisions_collected": riverbend_storehouse_provisions_collected,
@@ -725,6 +758,17 @@ static func _normalize_state(saved: Dictionary) -> Dictionary:
 		and normalized_completed_orders.has(NORTHGATE_SETTLEMENT_TIMBER_ORDER_ID)
 	):
 		normalized["settlement_land_ids"] = [GREENVALE_LAND_ID, RIVERBEND_LAND_ID]
+	if (
+		saved_settlement_land_ids is Array
+		and not saved_settlement_land_ids.has(RIVERBEND_LAND_ID)
+		and saved_settlement_land_ids.has(HIGHMERE_LAND_ID)
+		and normalized["claimed_land_ids"].has(HIGHMERE_LAND_ID)
+		and normalized["connected_land_ids"].has(RIVERBEND_LAND_ID)
+		and normalized["connected_land_ids"].has(HIGHMERE_LAND_ID)
+		and normalized["inspected_land_ids"].has(NORTHGATE_LAND_ID)
+		and normalized_completed_orders.has(NORTHGATE_SETTLEMENT_TIMBER_ORDER_ID)
+	):
+		normalized["settlement_land_ids"] = [GREENVALE_LAND_ID, HIGHMERE_LAND_ID]
 	if (
 		normalized_completed_orders.has(RIVERBEND_STOREHOUSE_STONE_ORDER_ID)
 		and not normalized["settlement_land_ids"].has(RIVERBEND_LAND_ID)
