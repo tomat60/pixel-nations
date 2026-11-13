@@ -762,6 +762,16 @@ func _enter() -> void:
 				and bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
 				and not bool(snapshot.get("greengate_harvest_feast_held", false))
 			)
+			or (
+				String(snapshot.get("selected_land_id", "")) == "PN-A01-003"
+				and bool(snapshot.get("highmere_hamlet_founded", false))
+				and not bool(snapshot.get("highmere_ridge_hall_stone_delivered", false))
+			)
+			or (
+				String(snapshot.get("selected_land_id", "")) == "PN-A01-003"
+				and bool(snapshot.get("highmere_ridge_hall_provisions_collected", false))
+				and not bool(snapshot.get("greengate_harvest_feast_held", false))
+			)
 			or
 			(
 				String(snapshot.get("selected_land_id", "")) == "PN-A01-003"
