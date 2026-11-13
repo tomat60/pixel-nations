@@ -116,6 +116,13 @@ func found_riverbend_hamlet() -> bool:
 	return _reject("found_riverbend_hamlet", "Select linked Riverbend after receiving 5 settlement timber.")
 
 
+func found_highmere_hamlet() -> bool:
+	if session.found_highmere_hamlet():
+		_publish_snapshot()
+		return true
+	return _reject("found_highmere_hamlet", "Select linked Highmere after receiving 5 settlement timber; only one frontier Hamlet can use that shipment.")
+
+
 func receive_riverbend_storehouse_stone() -> bool:
 	if session.receive_riverbend_storehouse_stone():
 		_publish_snapshot()
