@@ -627,11 +627,11 @@ func _run() -> void:
 	runtime.controller.session.state["settlement_improvements_by_land"] = {}
 	runtime.controller.session.state["settlement"]["completed_orders"].erase("highmere_ridge_hall_provisions")
 	_check(runtime.controller.load_game(), "highmere_ridge_hall_choice_reopens")
-	var highmere_reopened: Dictionary = runtime.controller.current_snapshot()
-	_check(bool(highmere_reopened.get("highmere_hamlet_founded", false)), "reopen_keeps_highmere_hamlet_choice")
-	_check(bool(highmere_reopened.get("highmere_ridge_hall_built", false)), "reopen_keeps_highmere_ridge_hall")
-	_check(bool(highmere_reopened.get("highmere_ridge_hall_provisions_collected", false)), "reopen_keeps_highmere_provisions")
-	_check(int(highmere_reopened.get("food", -1)) == 5, "reopen_keeps_highmere_food")
+	var highmere_hall_reopened: Dictionary = runtime.controller.current_snapshot()
+	_check(bool(highmere_hall_reopened.get("highmere_hamlet_founded", false)), "reopen_keeps_highmere_hamlet_choice")
+	_check(bool(highmere_hall_reopened.get("highmere_ridge_hall_built", false)), "reopen_keeps_highmere_ridge_hall")
+	_check(bool(highmere_hall_reopened.get("highmere_ridge_hall_provisions_collected", false)), "reopen_keeps_highmere_provisions")
+	_check(int(highmere_hall_reopened.get("food", -1)) == 5, "reopen_keeps_highmere_food")
 	_check(runtime.regional_landmarks.has("HighmereHamlet"), "reopen_restores_highmere_physical_hamlet")
 	_check(runtime.regional_landmarks.has("HighmereRidgeHall"), "reopen_restores_highmere_physical_ridge_hall")
 	await process_frame
