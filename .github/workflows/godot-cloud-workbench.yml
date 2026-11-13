@@ -53,7 +53,7 @@ jobs:
           set -Eeuo pipefail
           mkdir -p "$EVIDENCE_DIR"
           git rev-parse HEAD | tee "$EVIDENCE_DIR/commit-sha.txt"
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
           python3 -m py_compile tools/playable_core/materialize_scene_sources.py
           cmp migration/golden_run_v1.json game/tests/fixtures/golden_run_v1.json
           test -s game/scenes/bootstrap/bootstrap.tscn
@@ -263,7 +263,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pn-cloud-core-${{ github.sha }}-${{ github.run_id }}
+          name: pn-cloud-core-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: evidence/godot-cloud-workbench/**
           if-no-files-found: warn
           retention-days: 7
