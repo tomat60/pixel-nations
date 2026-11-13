@@ -182,7 +182,7 @@ func _init() -> void:
 	var timber_supplied := STATE.reduce(inspected_northgate, {"type": "RECEIVE_NORTHGATE_SETTLEMENT_TIMBER"})
 	_check(int(timber_supplied.get("resources", {}).get("timber", -1)) == 5, "northgate_supply_delivers_five_timber")
 	_check(bool(STATE.progress(timber_supplied).get("northgate_settlement_timber_delivered", false)), "northgate_supply_visible")
-	_check(String(STATE.progress(timber_supplied).get("next_goal", "")) == "Found Riverbend Hamlet with 5 timber", "northgate_supply_reveals_hamlet")
+	_check(String(STATE.progress(timber_supplied).get("next_goal", "")) == "Choose Riverbend or Highmere for the next Hamlet", "northgate_supply_reveals_hamlet_choice")
 	var premature_storehouse_supply := STATE.reduce(timber_supplied, {"type": "RECEIVE_RIVERBEND_STOREHOUSE_STONE"})
 	_check(int(premature_storehouse_supply.get("resources", {}).get("stone", -1)) == 0, "storehouse_supply_requires_riverbend_hamlet")
 	var riverbend_selected_for_hamlet := STATE.reduce(timber_supplied, {"type": "SELECT_LAND", "land_id": STATE.RIVERBEND_LAND_ID})

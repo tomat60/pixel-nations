@@ -370,7 +370,7 @@ func _build_ui() -> void:
 	granary_site_row.add_child(granary_orchard_button)
 	supply_button = _button("Receive Riverbend stone · +5", "SupplyButton", _receive_next_supply)
 	survey_button = _button("Commission Highmere survey · 5 stone", "SurveyButton", _commission_highmere_survey)
-	hamlet_button = _button("Found Riverbend Hamlet · 5 timber", "HamletButton", _found_riverbend_hamlet)
+	hamlet_button = _button("Found frontier Hamlet · 5 timber", "HamletButton", _found_frontier_hamlet)
 	storehouse_button = _button("Build Riverbend Storehouse · 5 stone", "StorehouseButton", _build_riverbend_storehouse)
 	provisions_button = _button("Collect Riverbend provisions · +5 food", "ProvisionsButton", _collect_riverbend_storehouse_provisions)
 	feast_button = _button("Hold Greengate Harvest Feast · 5 food", "FeastButton", _hold_greengate_harvest_feast)
@@ -858,8 +858,10 @@ func _commission_highmere_survey() -> void:
 		controller.save_game()
 
 
-func _found_riverbend_hamlet() -> void:
-	if controller.found_riverbend_hamlet():
+func _found_frontier_hamlet() -> void:
+	var selected_id := String(controller.current_snapshot().get("selected_land_id", ""))
+	var founded: bool = controller.found_highmere_hamlet() if selected_id == "PN-A01-003" else controller.found_riverbend_hamlet()
+	if founded:
 		controller.save_game()
 
 
@@ -997,7 +999,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		elif bool(snapshot.get("riverbend_storehouse_built", false)):
 			goal_label.text = "NEXT · Select Riverbend and collect its first provisions"
 		elif bool(snapshot.get("northgate_settlement_timber_delivered", false)):
-			goal_label.text = "NEXT · Return to World and found Riverbend Hamlet"
+			goal_label.text = "NEXT · Return to World and choose Riverbend or Highmere Hamlet"
 		elif bool(snapshot.get("northgate_inspected", false)):
 			goal_label.text = "NEXT · Receive Northgate settlement timber"
 		elif bool(snapshot.get("highmere_link_supply_delivered", false)):
@@ -1218,13 +1220,18 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	# duplicate so an unaided player has one clear action and the runtime test
 	# cannot silently bypass the dominant journey guidance.
 	survey_button.visible = false
-	hamlet_button.disabled = (
-		selected_id != "PN-A01-002"
-		or not bool(snapshot.get("northgate_settlement_timber_delivered", false))
-		or bool(snapshot.get("riverbend_hamlet_founded", false))
-		or int(snapshot.get("timber", 0)) < int(snapshot.get("riverbend_hamlet_timber_cost", 5))
+	var frontier_hamlet_choice_open := (
+		bool(snapshot.get("northgate_settlement_timber_delivered", false))
+		and not bool(snapshot.get("riverbend_hamlet_founded", false))
+		and not bool(snapshot.get("highmere_hamlet_founded", false))
 	)
-	hamlet_button.visible = view == "world" and selected_id == "PN-A01-002" and bool(snapshot.get("northgate_settlement_timber_delivered", false)) and not bool(snapshot.get("riverbend_hamlet_founded", false))
+	hamlet_button.text = "Found Highmere Hamlet · 5 timber" if selected_id == "PN-A01-003" else "Found Riverbend Hamlet · 5 timber"
+	hamlet_button.disabled = (
+		not (selected_id in ["PN-A01-002", "PN-A01-003"])
+		or not frontier_hamlet_choice_open
+		or int(snapshot.get("timber", 0)) < 5
+	)
+	hamlet_button.visible = view == "world" and selected_id in ["PN-A01-002", "PN-A01-003"] and frontier_hamlet_choice_open
 	storehouse_button.disabled = (
 		selected_id != "PN-A01-002"
 		or not bool(snapshot.get("riverbend_storehouse_stone_delivered", false))
@@ -1698,6 +1705,10 @@ func _sync_regional_settlements(snapshot: Dictionary) -> void:
 		settled_lands.has("PN-A01-002")
 	)
 	_sync_regional_landmark(
+		"HighmereHamlet", "PN-A01-003", "house", Vector2(-7.4, -8.0),
+		settled_lands.has("PN-A01-003")
+	)
+	_sync_regional_landmark(
 		"RiverbendStorehouse", "PN-A01-002", "store", Vector2(7.4, -8.0),
 		settled_lands.has("PN-A01-002") and bool(snapshot.get("riverbend_storehouse_built", false))
 	)
@@ -1769,10 +1780,12 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 	var highmere_subtitle := land_subtitles.get("PN-A01-003") as Label3D
 	if highmere_subtitle != null:
 		highmere_subtitle.text = (
+			"HAMLET" if bool(snapshot.get("highmere_hamlet_founded", false)) else (
 			"CONNECTED" if bool(snapshot.get("highmere_connected", false)) else (
 				"CLAIMED" if bool(snapshot.get("highmere_claimed", false)) else (
 					"SURVEYED" if bool(snapshot.get("highmere_inspected", false)) else ""
 				)
+			)
 			)
 		)
 	var northgate_subtitle := land_subtitles.get("PN-A01-024") as Label3D
