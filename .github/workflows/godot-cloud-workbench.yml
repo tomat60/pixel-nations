@@ -1,9 +1,19 @@
-name: Godot Cloud Workbench — playable core
+name: Godot Cloud Workbench - playable core
 
 on:
   push:
     branches:
       - "steward/playable-core-*"
+    paths:
+      - "game/core/**"
+      - "game/integration/**"
+      - "game/scenes/bootstrap/**"
+      - "game/tests/**"
+      - "tools/playable_core/**"
+      - "migration/golden_run_v1.json"
+      - ".github/workflows/godot-cloud-workbench.yml"
+  pull_request:
+    branches: [main]
     paths:
       - "game/core/**"
       - "game/integration/**"
@@ -24,7 +34,7 @@ concurrency:
 jobs:
   playable-core-proof:
     name: State tests and rendered foundation frame (cloud)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
       GODOT_RELEASE: "4.7.1-stable"
@@ -34,6 +44,7 @@ jobs:
       - name: Checkout exact cloud candidate
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
 
       - name: Record provenance and reject fixture mismatch
