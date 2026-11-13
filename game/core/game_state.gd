@@ -27,6 +27,12 @@ const RIVERBEND_STOREHOUSE_STONE_COST := 5
 const RIVERBEND_STOREHOUSE_IMPROVEMENT_ID := "storehouse"
 const RIVERBEND_STOREHOUSE_PROVISIONS_REWARD := 5
 const RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID := "riverbend_storehouse_provisions"
+const HIGHMERE_RIDGE_HALL_STONE_REWARD := 5
+const HIGHMERE_RIDGE_HALL_STONE_ORDER_ID := "highmere_ridge_hall_stone"
+const HIGHMERE_RIDGE_HALL_STONE_COST := 5
+const HIGHMERE_RIDGE_HALL_IMPROVEMENT_ID := "ridge_hall"
+const HIGHMERE_RIDGE_HALL_PROVISIONS_REWARD := 5
+const HIGHMERE_RIDGE_HALL_PROVISIONS_ORDER_ID := "highmere_ridge_hall_provisions"
 const GREENGATE_HARVEST_FEAST_FOOD_COST := 5
 const GREENGATE_HARVEST_FEAST_ORDER_ID := "greengate_harvest_feast"
 const GREENVALE_LAND_ID := "PN-A01-001"
@@ -432,12 +438,71 @@ static func reduce(state: Dictionary, action: Dictionary) -> Dictionary:
 			next_state["resources"] = resources
 			next_state["settlement"] = settlement
 
+		"RECEIVE_HIGHMERE_RIDGE_HALL_STONE":
+			var settlement_land_ids: Array = next_state.get("settlement_land_ids", [])
+			var settlement: Dictionary = next_state.get("settlement", {}).duplicate(true)
+			var completed_orders: Array = settlement.get("completed_orders", []).duplicate()
+			if (
+				not settlement_land_ids.has(HIGHMERE_LAND_ID)
+				or completed_orders.has(HIGHMERE_RIDGE_HALL_STONE_ORDER_ID)
+			):
+				return next_state
+			var resources: Dictionary = next_state.get("resources", {}).duplicate(true)
+			resources["stone"] = int(resources.get("stone", 0)) + HIGHMERE_RIDGE_HALL_STONE_REWARD
+			completed_orders.append(HIGHMERE_RIDGE_HALL_STONE_ORDER_ID)
+			settlement["completed_orders"] = completed_orders
+			next_state["resources"] = resources
+			next_state["settlement"] = settlement
+
+		"BUILD_HIGHMERE_RIDGE_HALL":
+			var settlement_land_ids: Array = next_state.get("settlement_land_ids", [])
+			var settlement: Dictionary = next_state.get("settlement", {})
+			var completed_orders: Array = settlement.get("completed_orders", [])
+			var improvements_by_land: Dictionary = next_state.get("settlement_improvements_by_land", {}).duplicate(true)
+			var highmere_improvements: Array = improvements_by_land.get(HIGHMERE_LAND_ID, []).duplicate()
+			if (
+				String(next_state.get("selected_land_id", "")) != HIGHMERE_LAND_ID
+				or not settlement_land_ids.has(HIGHMERE_LAND_ID)
+				or not completed_orders.has(HIGHMERE_RIDGE_HALL_STONE_ORDER_ID)
+				or highmere_improvements.has(HIGHMERE_RIDGE_HALL_IMPROVEMENT_ID)
+			):
+				return next_state
+			var resources: Dictionary = next_state.get("resources", {}).duplicate(true)
+			if int(resources.get("stone", 0)) < HIGHMERE_RIDGE_HALL_STONE_COST:
+				return next_state
+			resources["stone"] = int(resources.get("stone", 0)) - HIGHMERE_RIDGE_HALL_STONE_COST
+			highmere_improvements.append(HIGHMERE_RIDGE_HALL_IMPROVEMENT_ID)
+			improvements_by_land[HIGHMERE_LAND_ID] = highmere_improvements
+			next_state["resources"] = resources
+			next_state["settlement_improvements_by_land"] = improvements_by_land
+
+		"COLLECT_HIGHMERE_RIDGE_HALL_PROVISIONS":
+			var improvements_by_land: Dictionary = next_state.get("settlement_improvements_by_land", {})
+			var highmere_improvements: Array = improvements_by_land.get(HIGHMERE_LAND_ID, [])
+			var settlement: Dictionary = next_state.get("settlement", {}).duplicate(true)
+			var completed_orders: Array = settlement.get("completed_orders", []).duplicate()
+			if (
+				String(next_state.get("selected_land_id", "")) != HIGHMERE_LAND_ID
+				or not highmere_improvements.has(HIGHMERE_RIDGE_HALL_IMPROVEMENT_ID)
+				or completed_orders.has(HIGHMERE_RIDGE_HALL_PROVISIONS_ORDER_ID)
+			):
+				return next_state
+			var resources: Dictionary = next_state.get("resources", {}).duplicate(true)
+			resources["food"] = int(resources.get("food", 0)) + HIGHMERE_RIDGE_HALL_PROVISIONS_REWARD
+			completed_orders.append(HIGHMERE_RIDGE_HALL_PROVISIONS_ORDER_ID)
+			settlement["completed_orders"] = completed_orders
+			next_state["resources"] = resources
+			next_state["settlement"] = settlement
+
 		"HOLD_GREENGATE_HARVEST_FEAST":
 			var settlement: Dictionary = next_state.get("settlement", {}).duplicate(true)
 			var completed_orders: Array = settlement.get("completed_orders", []).duplicate()
 			if (
 				not bool(settlement.get("founded", false))
-				or not completed_orders.has(RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
+				or (
+					not completed_orders.has(RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
+					and not completed_orders.has(HIGHMERE_RIDGE_HALL_PROVISIONS_ORDER_ID)
+				)
 				or completed_orders.has(GREENGATE_HARVEST_FEAST_ORDER_ID)
 			):
 				return next_state
@@ -511,6 +576,15 @@ static func progress(state: Dictionary) -> Dictionary:
 	var riverbend_storehouse_provisions_collected := (
 		(settlement.get("completed_orders", []) as Array).has(RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
 	)
+	var highmere_ridge_hall_stone_delivered := (
+		(settlement.get("completed_orders", []) as Array).has(HIGHMERE_RIDGE_HALL_STONE_ORDER_ID)
+	)
+	var highmere_ridge_hall_built := (
+		(improvements_by_land.get(HIGHMERE_LAND_ID, []) as Array).has(HIGHMERE_RIDGE_HALL_IMPROVEMENT_ID)
+	)
+	var highmere_ridge_hall_provisions_collected := (
+		(settlement.get("completed_orders", []) as Array).has(HIGHMERE_RIDGE_HALL_PROVISIONS_ORDER_ID)
+	)
 	var greengate_harvest_feast_held := (
 		(settlement.get("completed_orders", []) as Array).has(GREENGATE_HARVEST_FEAST_ORDER_ID)
 	)
@@ -543,8 +617,14 @@ static func progress(state: Dictionary) -> Dictionary:
 		next_goal = "Return to Greengate for the Northgate settlement timber"
 	elif northgate_settlement_timber_delivered and not riverbend_hamlet_founded and not highmere_hamlet_founded:
 		next_goal = "Choose Riverbend or Highmere for the next Hamlet"
-	elif highmere_hamlet_founded:
-		next_goal = "Highmere Hamlet founded; the alternate Riverbend branch remains unbuilt"
+	elif highmere_hamlet_founded and not highmere_ridge_hall_stone_delivered:
+		next_goal = "Return to Greengate for Highmere Ridge Hall stone"
+	elif highmere_ridge_hall_stone_delivered and not highmere_ridge_hall_built:
+		next_goal = "Build Highmere Ridge Hall with 5 stone"
+	elif highmere_ridge_hall_built and not highmere_ridge_hall_provisions_collected:
+		next_goal = "Collect Highmere Ridge Hall's first provisions"
+	elif highmere_ridge_hall_provisions_collected and not greengate_harvest_feast_held:
+		next_goal = "Return to Greengate and hold the Harvest Feast with 5 food"
 	elif riverbend_hamlet_founded and not riverbend_storehouse_stone_delivered:
 		next_goal = "Return to Greengate for Riverbend Storehouse stone"
 	elif riverbend_storehouse_stone_delivered and not riverbend_storehouse_built:
@@ -585,6 +665,9 @@ static func progress(state: Dictionary) -> Dictionary:
 		"riverbend_storehouse_stone_delivered": riverbend_storehouse_stone_delivered,
 		"riverbend_storehouse_built": riverbend_storehouse_built,
 		"riverbend_storehouse_provisions_collected": riverbend_storehouse_provisions_collected,
+		"highmere_ridge_hall_stone_delivered": highmere_ridge_hall_stone_delivered,
+		"highmere_ridge_hall_built": highmere_ridge_hall_built,
+		"highmere_ridge_hall_provisions_collected": highmere_ridge_hall_provisions_collected,
 		"greengate_harvest_feast_held": greengate_harvest_feast_held,
 		"highmere_link_status": (
 			"connected" if highmere_connected else (
