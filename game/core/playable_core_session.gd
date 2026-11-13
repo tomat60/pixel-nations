@@ -321,6 +321,7 @@ func world_view_model() -> Dictionary:
 		"northgate_status": String(progress.get("northgate_status", "locked")),
 		"northgate_settlement_timber_delivered": bool(progress.get("northgate_settlement_timber_delivered", false)),
 		"riverbend_hamlet_founded": bool(progress.get("riverbend_hamlet_founded", false)),
+		"highmere_hamlet_founded": bool(progress.get("highmere_hamlet_founded", false)),
 		"riverbend_storehouse_stone_delivered": bool(progress.get("riverbend_storehouse_stone_delivered", false)),
 		"riverbend_storehouse_built": bool(progress.get("riverbend_storehouse_built", false)),
 		"riverbend_storehouse_provisions_collected": bool(progress.get("riverbend_storehouse_provisions_collected", false)),
