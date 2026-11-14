@@ -605,6 +605,7 @@ func _run() -> void:
 	_capture("village-highmere-ridge-hall-stone")
 	await _click_control(runtime.return_button)
 	await process_frame
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HIGHMERE_ID, "highmere_hall_supply_returns_to_selected_hamlet")
 	_check(runtime.storehouse_button.visible and not runtime.storehouse_button.disabled, "highmere_ridge_hall_action_is_clickable")
 	_check(runtime.storehouse_button.text == "Build Highmere Ridge Hall · 5 stone", "highmere_build_action_names_ridge_hall")
 	await _click_control(runtime.storehouse_button)
