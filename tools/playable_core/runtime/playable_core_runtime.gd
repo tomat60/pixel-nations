@@ -85,6 +85,8 @@ var atlas_is_focused := false
 var camera_zoom_tween: Tween
 var camera_pitch_tween: Tween
 var granary_site_choice_active := false
+# Restore the selected frontier after a dedicated Highmere Hall supply visit.
+var return_to_highmere_ridge_hall := false
 
 const GRANARY_SITE_TRANSFORMS := {
 	"plaza_edge": {"position": Vector3(27.0, 0.0, 44.0), "rotation": -0.12},
@@ -371,8 +373,8 @@ func _build_ui() -> void:
 	supply_button = _button("Receive Riverbend stone · +5", "SupplyButton", _receive_next_supply)
 	survey_button = _button("Commission Highmere survey · 5 stone", "SurveyButton", _commission_highmere_survey)
 	hamlet_button = _button("Found frontier Hamlet · 5 timber", "HamletButton", _found_frontier_hamlet)
-	storehouse_button = _button("Build Riverbend Storehouse · 5 stone", "StorehouseButton", _build_riverbend_storehouse)
-	provisions_button = _button("Collect Riverbend provisions · +5 food", "ProvisionsButton", _collect_riverbend_storehouse_provisions)
+	storehouse_button = _button("Build frontier improvement · 5 stone", "StorehouseButton", _build_frontier_improvement)
+	provisions_button = _button("Collect frontier provisions · +5 food", "ProvisionsButton", _collect_frontier_provisions)
 	feast_button = _button("Hold Greengate Harvest Feast · 5 food", "FeastButton", _hold_greengate_harvest_feast)
 	focus_button = _button("Focus selected land", "FocusButton", _focus_selected_land)
 	overview_button = _button("Return to atlas overview", "OverviewButton", _show_atlas_overview)
@@ -747,6 +749,12 @@ func _claim() -> void:
 
 func _enter() -> void:
 	var snapshot: Dictionary = controller.current_snapshot()
+	return_to_highmere_ridge_hall = (
+		String(snapshot.get("view", "")) == "world"
+		and String(snapshot.get("selected_land_id", "")) == "PN-A01-003"
+		and bool(snapshot.get("highmere_hamlet_founded", false))
+		and not bool(snapshot.get("highmere_ridge_hall_stone_delivered", false))
+	)
 	# When a frontier explicitly sends the player back for its shipment, make
 	# the visible CTA complete that navigation instead of requiring map knowledge.
 	if (
@@ -760,6 +768,16 @@ func _enter() -> void:
 			or (
 				String(snapshot.get("selected_land_id", "")) == "PN-A01-002"
 				and bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
+				and not bool(snapshot.get("greengate_harvest_feast_held", false))
+			)
+			or (
+				String(snapshot.get("selected_land_id", "")) == "PN-A01-003"
+				and bool(snapshot.get("highmere_hamlet_founded", false))
+				and not bool(snapshot.get("highmere_ridge_hall_stone_delivered", false))
+			)
+			or (
+				String(snapshot.get("selected_land_id", "")) == "PN-A01-003"
+				and bool(snapshot.get("highmere_ridge_hall_provisions_collected", false))
 				and not bool(snapshot.get("greengate_harvest_feast_held", false))
 			)
 			or
@@ -839,14 +857,17 @@ func _connect_selected_link() -> void:
 func _receive_next_supply() -> void:
 	var snapshot: Dictionary = controller.current_snapshot()
 	var delivered: bool = (
-		controller.receive_riverbend_storehouse_stone()
-		if bool(snapshot.get("riverbend_hamlet_founded", false)) and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false)) else (
+		controller.receive_highmere_ridge_hall_stone()
+		if bool(snapshot.get("highmere_hamlet_founded", false)) and not bool(snapshot.get("highmere_ridge_hall_stone_delivered", false)) else (
+			controller.receive_riverbend_storehouse_stone()
+			if bool(snapshot.get("riverbend_hamlet_founded", false)) and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false)) else (
 			controller.receive_northgate_settlement_timber()
 			if bool(snapshot.get("northgate_inspected", false)) and not bool(snapshot.get("northgate_settlement_timber_delivered", false)) else (
 			controller.receive_highmere_link_supply()
 			if bool(snapshot.get("highmere_claimed", false))
 			else controller.receive_riverbend_supply()
 			)
+		)
 		)
 	)
 	if delivered:
@@ -865,13 +886,17 @@ func _found_frontier_hamlet() -> void:
 		controller.save_game()
 
 
-func _build_riverbend_storehouse() -> void:
-	if controller.build_riverbend_storehouse():
+func _build_frontier_improvement() -> void:
+	var selected_id := String(controller.current_snapshot().get("selected_land_id", ""))
+	var built: bool = controller.build_highmere_ridge_hall() if selected_id == "PN-A01-003" else controller.build_riverbend_storehouse()
+	if built:
 		controller.save_game()
 
 
-func _collect_riverbend_storehouse_provisions() -> void:
-	if controller.collect_riverbend_storehouse_provisions():
+func _collect_frontier_provisions() -> void:
+	var selected_id := String(controller.current_snapshot().get("selected_land_id", ""))
+	var collected: bool = controller.collect_highmere_ridge_hall_provisions() if selected_id == "PN-A01-003" else controller.collect_riverbend_storehouse_provisions()
+	if collected:
 		controller.save_game()
 
 
@@ -886,6 +911,11 @@ func _save() -> void:
 
 func _return_world() -> void:
 	if controller.return_to_world():
+		# The shipment CTA temporarily selects Greengate. Restore Highmere
+		# so the paid Hall action stays available after returning to World.
+		if return_to_highmere_ridge_hall:
+			controller.select_land_from_map("PN-A01-003")
+		return_to_highmere_ridge_hall = false
 		controller.save_game()
 
 
@@ -1084,10 +1114,22 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		and bool(snapshot.get("riverbend_hamlet_founded", false))
 		and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false))
 	)
+	var highmere_hall_return_ready := (
+		view == "world"
+		and selected_id == "PN-A01-003"
+		and bool(snapshot.get("highmere_hamlet_founded", false))
+		and not bool(snapshot.get("highmere_ridge_hall_stone_delivered", false))
+	)
 	var riverbend_feast_return_ready := (
 		view == "world"
 		and selected_id == "PN-A01-002"
 		and bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
+		and not bool(snapshot.get("greengate_harvest_feast_held", false))
+	)
+	var highmere_feast_return_ready := (
+		view == "world"
+		and selected_id == "PN-A01-003"
+		and bool(snapshot.get("highmere_ridge_hall_provisions_collected", false))
 		and not bool(snapshot.get("greengate_harvest_feast_held", false))
 	)
 	var northgate_return_ready := (
@@ -1099,15 +1141,17 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	enter_button.visible = (
 		view == "world"
 		and String(snapshot.get("claimed_land_id", "")) == "PN-A01-001"
-		and (selected_id == "PN-A01-001" or riverbend_storehouse_return_ready or riverbend_feast_return_ready or highmere_return_ready or northgate_return_ready)
+		and (selected_id == "PN-A01-001" or riverbend_storehouse_return_ready or highmere_hall_return_ready or riverbend_feast_return_ready or highmere_feast_return_ready or highmere_return_ready or northgate_return_ready)
 	)
 	# The first entrance actually creates a settlement in the canonical state.
 	# Never label that founding action as merely visiting an existing village.
 	enter_button.text = (
 		"Return to Greengate · feast"
-		if riverbend_feast_return_ready else (
-			"Return to Greengate · stone"
-			if riverbend_storehouse_return_ready else (
+		if riverbend_feast_return_ready or highmere_feast_return_ready else (
+			"Return to Greengate · hall stone"
+			if highmere_hall_return_ready else (
+				"Return to Greengate · stone"
+				if riverbend_storehouse_return_ready else (
 				"Return to Greengate · timber"
 				if northgate_return_ready else (
 					"Return to Greengate for ridge stone"
@@ -1115,6 +1159,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 						"Found Greengate" if settlement_count == 0 else "Enter Greengate"
 					)
 				)
+			)
 			)
 		)
 	)
@@ -1183,8 +1228,10 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	granary_plaza_button.disabled = not granary_site_choice_active
 	granary_orchard_button.disabled = not granary_site_choice_active
 	supply_button.text = (
-		"Receive Riverbend Storehouse stone · +5"
-		if bool(snapshot.get("riverbend_hamlet_founded", false)) and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false)) else (
+		"Receive Highmere Ridge Hall stone · +5"
+		if bool(snapshot.get("highmere_hamlet_founded", false)) and not bool(snapshot.get("highmere_ridge_hall_stone_delivered", false)) else (
+			"Receive Riverbend Storehouse stone · +5"
+			if bool(snapshot.get("riverbend_hamlet_founded", false)) and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false)) else (
 			"Receive Northgate settlement timber · +5"
 			if bool(snapshot.get("northgate_inspected", false)) and not bool(snapshot.get("northgate_settlement_timber_delivered", false)) else (
 			"Receive Highmere ridge stone · +5"
@@ -1192,8 +1239,11 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 			else "Receive Riverbend stone · +5"
 			)
 		)
+		)
 	)
-	if bool(snapshot.get("riverbend_hamlet_founded", false)) and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false)):
+	if bool(snapshot.get("highmere_hamlet_founded", false)) and not bool(snapshot.get("highmere_ridge_hall_stone_delivered", false)):
+		supply_button.disabled = false
+	elif bool(snapshot.get("riverbend_hamlet_founded", false)) and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false)):
 		supply_button.disabled = false
 	elif bool(snapshot.get("northgate_inspected", false)) and not bool(snapshot.get("northgate_settlement_timber_delivered", false)):
 		supply_button.disabled = bool(snapshot.get("northgate_settlement_timber_delivered", false))
@@ -1205,7 +1255,8 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 			or bool(snapshot.get("riverbend_supply_delivered", false))
 		)
 	supply_button.visible = view == "village" and (
-		(bool(snapshot.get("riverbend_hamlet_founded", false)) and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false)))
+		(bool(snapshot.get("highmere_hamlet_founded", false)) and not bool(snapshot.get("highmere_ridge_hall_stone_delivered", false)))
+		or (bool(snapshot.get("riverbend_hamlet_founded", false)) and not bool(snapshot.get("riverbend_storehouse_stone_delivered", false)))
 		or (bool(snapshot.get("northgate_inspected", false)) and not bool(snapshot.get("northgate_settlement_timber_delivered", false)))
 		or (bool(snapshot.get("highmere_claimed", false)) and not bool(snapshot.get("highmere_link_supply_delivered", false)))
 		or (bool(snapshot.get("riverbend_connected", false)) and not bool(snapshot.get("riverbend_supply_delivered", false)))
@@ -1232,25 +1283,24 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 		or int(snapshot.get("timber", 0)) < 5
 	)
 	hamlet_button.visible = view == "world" and selected_id in ["PN-A01-002", "PN-A01-003"] and frontier_hamlet_choice_open
-	storehouse_button.disabled = (
-		selected_id != "PN-A01-002"
-		or not bool(snapshot.get("riverbend_storehouse_stone_delivered", false))
-		or bool(snapshot.get("riverbend_storehouse_built", false))
-		or int(snapshot.get("stone", 0)) < int(snapshot.get("riverbend_storehouse_stone_cost", 5))
-	)
-	storehouse_button.visible = view == "world" and selected_id == "PN-A01-002" and bool(snapshot.get("riverbend_storehouse_stone_delivered", false)) and not bool(snapshot.get("riverbend_storehouse_built", false))
-	provisions_button.disabled = (
-		selected_id != "PN-A01-002"
-		or not bool(snapshot.get("riverbend_storehouse_built", false))
-		or bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
-	)
-	provisions_button.visible = view == "world" and selected_id == "PN-A01-002" and bool(snapshot.get("riverbend_storehouse_built", false)) and not bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
+	var highmere_improvement_selected := selected_id == "PN-A01-003"
+	var frontier_stone_delivered := bool(snapshot.get("highmere_ridge_hall_stone_delivered", false)) if highmere_improvement_selected else bool(snapshot.get("riverbend_storehouse_stone_delivered", false))
+	var frontier_improvement_built := bool(snapshot.get("highmere_ridge_hall_built", false)) if highmere_improvement_selected else bool(snapshot.get("riverbend_storehouse_built", false))
+	var frontier_provisions_collected := bool(snapshot.get("highmere_ridge_hall_provisions_collected", false)) if highmere_improvement_selected else bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
+	var frontier_improvement_cost := int(snapshot.get("highmere_ridge_hall_stone_cost", 5)) if highmere_improvement_selected else int(snapshot.get("riverbend_storehouse_stone_cost", 5))
+	storehouse_button.text = "Build Highmere Ridge Hall · 5 stone" if highmere_improvement_selected else "Build Riverbend Storehouse · 5 stone"
+	storehouse_button.disabled = not frontier_stone_delivered or frontier_improvement_built or int(snapshot.get("stone", 0)) < frontier_improvement_cost
+	storehouse_button.visible = view == "world" and selected_id in ["PN-A01-002", "PN-A01-003"] and frontier_stone_delivered and not frontier_improvement_built
+	provisions_button.text = "Collect Ridge Hall provisions · +5 food" if highmere_improvement_selected else "Collect Riverbend provisions · +5 food"
+	provisions_button.disabled = not frontier_improvement_built or frontier_provisions_collected
+	provisions_button.visible = view == "world" and selected_id in ["PN-A01-002", "PN-A01-003"] and frontier_improvement_built and not frontier_provisions_collected
+	var any_frontier_provisions := bool(snapshot.get("riverbend_storehouse_provisions_collected", false)) or bool(snapshot.get("highmere_ridge_hall_provisions_collected", false))
 	feast_button.disabled = (
-		not bool(snapshot.get("riverbend_storehouse_provisions_collected", false))
+		not any_frontier_provisions
 		or bool(snapshot.get("greengate_harvest_feast_held", false))
 		or int(snapshot.get("food", 0)) < int(snapshot.get("greengate_harvest_feast_food_cost", 5))
 	)
-	feast_button.visible = view == "village" and bool(snapshot.get("riverbend_storehouse_provisions_collected", false)) and not bool(snapshot.get("greengate_harvest_feast_held", false))
+	feast_button.visible = view == "village" and any_frontier_provisions and not bool(snapshot.get("greengate_harvest_feast_held", false))
 	if frontier_link != null:
 		frontier_link.visible = view == "world" and bool(snapshot.get("riverbend_claimed", false))
 		_set_frontier_link_connected(bool(snapshot.get("riverbend_connected", false)))
@@ -1712,6 +1762,10 @@ func _sync_regional_settlements(snapshot: Dictionary) -> void:
 		"RiverbendStorehouse", "PN-A01-002", "store", Vector2(7.4, -8.0),
 		settled_lands.has("PN-A01-002") and bool(snapshot.get("riverbend_storehouse_built", false))
 	)
+	_sync_regional_landmark(
+		"HighmereRidgeHall", "PN-A01-003", "store", Vector2(7.4, -8.0),
+		settled_lands.has("PN-A01-003") and bool(snapshot.get("highmere_ridge_hall_built", false))
+	)
 
 
 func _refresh_land_visuals(snapshot: Dictionary) -> void:
@@ -1780,11 +1834,14 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 	var highmere_subtitle := land_subtitles.get("PN-A01-003") as Label3D
 	if highmere_subtitle != null:
 		highmere_subtitle.text = (
-			"HAMLET" if bool(snapshot.get("highmere_hamlet_founded", false)) else (
+			"HAMLET · RIDGE HALL"
+			if bool(snapshot.get("highmere_ridge_hall_built", false)) else (
+				"HAMLET" if bool(snapshot.get("highmere_hamlet_founded", false)) else (
 			"CONNECTED" if bool(snapshot.get("highmere_connected", false)) else (
 				"CLAIMED" if bool(snapshot.get("highmere_claimed", false)) else (
 					"SURVEYED" if bool(snapshot.get("highmere_inspected", false)) else ""
 				)
+			)
 			)
 			)
 		)
