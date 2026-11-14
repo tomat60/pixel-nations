@@ -85,6 +85,8 @@ var atlas_is_focused := false
 var camera_zoom_tween: Tween
 var camera_pitch_tween: Tween
 var granary_site_choice_active := false
+# Restore the selected frontier after a dedicated Highmere Hall supply visit.
+var return_to_highmere_ridge_hall := false
 
 const GRANARY_SITE_TRANSFORMS := {
 	"plaza_edge": {"position": Vector3(27.0, 0.0, 44.0), "rotation": -0.12},
@@ -747,6 +749,12 @@ func _claim() -> void:
 
 func _enter() -> void:
 	var snapshot: Dictionary = controller.current_snapshot()
+	return_to_highmere_ridge_hall = (
+		String(snapshot.get("view", "")) == "world"
+		and String(snapshot.get("selected_land_id", "")) == "PN-A01-003"
+		and bool(snapshot.get("highmere_hamlet_founded", false))
+		and not bool(snapshot.get("highmere_ridge_hall_stone_delivered", false))
+	)
 	# When a frontier explicitly sends the player back for its shipment, make
 	# the visible CTA complete that navigation instead of requiring map knowledge.
 	if (
@@ -903,6 +911,11 @@ func _save() -> void:
 
 func _return_world() -> void:
 	if controller.return_to_world():
+		# The shipment CTA temporarily selects Greengate. Restore Highmere
+		# so the paid Hall action stays available after returning to World.
+		if return_to_highmere_ridge_hall:
+			controller.select_land_from_map("PN-A01-003")
+		return_to_highmere_ridge_hall = false
 		controller.save_game()
 
 
