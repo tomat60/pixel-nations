@@ -144,6 +144,27 @@ func collect_riverbend_storehouse_provisions() -> bool:
 	return _reject("collect_riverbend_storehouse_provisions", "Select Riverbend after building its Storehouse; provisions can be collected once.")
 
 
+func receive_highmere_ridge_hall_stone() -> bool:
+	if session.receive_highmere_ridge_hall_stone():
+		_publish_snapshot()
+		return true
+	return _reject("receive_highmere_ridge_hall_stone", "The Ridge Hall shipment requires founded Highmere Hamlet and the Village view.")
+
+
+func build_highmere_ridge_hall() -> bool:
+	if session.build_highmere_ridge_hall():
+		_publish_snapshot()
+		return true
+	return _reject("build_highmere_ridge_hall", "Select Highmere after receiving 5 Ridge Hall stone.")
+
+
+func collect_highmere_ridge_hall_provisions() -> bool:
+	if session.collect_highmere_ridge_hall_provisions():
+		_publish_snapshot()
+		return true
+	return _reject("collect_highmere_ridge_hall_provisions", "Select Highmere after building its Ridge Hall; provisions can be collected once.")
+
+
 func hold_greengate_harvest_feast() -> bool:
 	if session.hold_greengate_harvest_feast():
 		_publish_snapshot()

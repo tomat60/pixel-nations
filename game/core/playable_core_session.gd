@@ -246,6 +246,53 @@ func collect_riverbend_storehouse_provisions() -> bool:
 	)
 
 
+func receive_highmere_ridge_hall_stone() -> bool:
+	if current_view != VIEW_VILLAGE:
+		return false
+	var completed_before: Array = state.get("settlement", {}).get("completed_orders", []).duplicate()
+	var stone_before := int(state.get("resources", {}).get("stone", 0))
+	state = GameState.reduce(state, {"type": "RECEIVE_HIGHMERE_RIDGE_HALL_STONE"})
+	var completed_after: Array = state.get("settlement", {}).get("completed_orders", [])
+	var stone_after := int(state.get("resources", {}).get("stone", 0))
+	return (
+		completed_after.has(GameState.HIGHMERE_RIDGE_HALL_STONE_ORDER_ID)
+		and not completed_before.has(GameState.HIGHMERE_RIDGE_HALL_STONE_ORDER_ID)
+		and stone_after == stone_before + GameState.HIGHMERE_RIDGE_HALL_STONE_REWARD
+	)
+
+
+func build_highmere_ridge_hall() -> bool:
+	if current_view != VIEW_WORLD:
+		return false
+	var improvements_before: Dictionary = state.get("settlement_improvements_by_land", {}).duplicate(true)
+	var highmere_before: Array = improvements_before.get(GameState.HIGHMERE_LAND_ID, [])
+	var stone_before := int(state.get("resources", {}).get("stone", 0))
+	state = GameState.reduce(state, {"type": "BUILD_HIGHMERE_RIDGE_HALL"})
+	var improvements_after: Dictionary = state.get("settlement_improvements_by_land", {})
+	var highmere_after: Array = improvements_after.get(GameState.HIGHMERE_LAND_ID, [])
+	var stone_after := int(state.get("resources", {}).get("stone", 0))
+	return (
+		highmere_after.has(GameState.HIGHMERE_RIDGE_HALL_IMPROVEMENT_ID)
+		and not highmere_before.has(GameState.HIGHMERE_RIDGE_HALL_IMPROVEMENT_ID)
+		and stone_after == stone_before - GameState.HIGHMERE_RIDGE_HALL_STONE_COST
+	)
+
+
+func collect_highmere_ridge_hall_provisions() -> bool:
+	if current_view != VIEW_WORLD:
+		return false
+	var completed_before: Array = state.get("settlement", {}).get("completed_orders", []).duplicate()
+	var food_before := int(state.get("resources", {}).get("food", 0))
+	state = GameState.reduce(state, {"type": "COLLECT_HIGHMERE_RIDGE_HALL_PROVISIONS"})
+	var completed_after: Array = state.get("settlement", {}).get("completed_orders", [])
+	var food_after := int(state.get("resources", {}).get("food", 0))
+	return (
+		completed_after.has(GameState.HIGHMERE_RIDGE_HALL_PROVISIONS_ORDER_ID)
+		and not completed_before.has(GameState.HIGHMERE_RIDGE_HALL_PROVISIONS_ORDER_ID)
+		and food_after == food_before + GameState.HIGHMERE_RIDGE_HALL_PROVISIONS_REWARD
+	)
+
+
 func hold_greengate_harvest_feast() -> bool:
 	if current_view != VIEW_VILLAGE:
 		return false
@@ -325,6 +372,9 @@ func world_view_model() -> Dictionary:
 		"riverbend_storehouse_stone_delivered": bool(progress.get("riverbend_storehouse_stone_delivered", false)),
 		"riverbend_storehouse_built": bool(progress.get("riverbend_storehouse_built", false)),
 		"riverbend_storehouse_provisions_collected": bool(progress.get("riverbend_storehouse_provisions_collected", false)),
+		"highmere_ridge_hall_stone_delivered": bool(progress.get("highmere_ridge_hall_stone_delivered", false)),
+		"highmere_ridge_hall_built": bool(progress.get("highmere_ridge_hall_built", false)),
+		"highmere_ridge_hall_provisions_collected": bool(progress.get("highmere_ridge_hall_provisions_collected", false)),
 		"greengate_harvest_feast_held": bool(progress.get("greengate_harvest_feast_held", false)),
 		"highmere_link_status": String(progress.get("highmere_link_status", "locked")),
 		"highmere_status": String(progress.get("highmere_status", "locked")),
@@ -337,6 +387,8 @@ func world_view_model() -> Dictionary:
 		"riverbend_hamlet_timber_cost": GameState.RIVERBEND_HAMLET_TIMBER_COST,
 		"riverbend_storehouse_stone_cost": GameState.RIVERBEND_STOREHOUSE_STONE_COST,
 		"riverbend_storehouse_provisions_reward": GameState.RIVERBEND_STOREHOUSE_PROVISIONS_REWARD,
+		"highmere_ridge_hall_stone_cost": GameState.HIGHMERE_RIDGE_HALL_STONE_COST,
+		"highmere_ridge_hall_provisions_reward": GameState.HIGHMERE_RIDGE_HALL_PROVISIONS_REWARD,
 		"greengate_harvest_feast_food_cost": GameState.GREENGATE_HARVEST_FEAST_FOOD_COST,
 		"nation_status": String(progress.get("nation_status", "not_founded")),
 		"next_goal": String(progress.get("next_goal", "")),
@@ -384,6 +436,11 @@ func village_view_model() -> Dictionary:
 		"riverbend_storehouse_built": ((state.get("settlement_improvements_by_land", {}) as Dictionary).get(GameState.RIVERBEND_LAND_ID, []) as Array).has(GameState.RIVERBEND_STOREHOUSE_IMPROVEMENT_ID),
 		"riverbend_storehouse_provisions_collected": (settlement.get("completed_orders", []) as Array).has(GameState.RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID),
 		"riverbend_storehouse_provisions_reward": GameState.RIVERBEND_STOREHOUSE_PROVISIONS_REWARD,
+		"highmere_ridge_hall_stone_delivered": (settlement.get("completed_orders", []) as Array).has(GameState.HIGHMERE_RIDGE_HALL_STONE_ORDER_ID),
+		"highmere_ridge_hall_stone_reward": GameState.HIGHMERE_RIDGE_HALL_STONE_REWARD,
+		"highmere_ridge_hall_built": ((state.get("settlement_improvements_by_land", {}) as Dictionary).get(GameState.HIGHMERE_LAND_ID, []) as Array).has(GameState.HIGHMERE_RIDGE_HALL_IMPROVEMENT_ID),
+		"highmere_ridge_hall_provisions_collected": (settlement.get("completed_orders", []) as Array).has(GameState.HIGHMERE_RIDGE_HALL_PROVISIONS_ORDER_ID),
+		"highmere_ridge_hall_provisions_reward": GameState.HIGHMERE_RIDGE_HALL_PROVISIONS_REWARD,
 		"greengate_harvest_feast_held": (settlement.get("completed_orders", []) as Array).has(GameState.GREENGATE_HARVEST_FEAST_ORDER_ID),
 		"greengate_harvest_feast_food_cost": GameState.GREENGATE_HARVEST_FEAST_FOOD_COST,
 	}
