@@ -858,6 +858,13 @@ static func _normalize_state(saved: Dictionary) -> Dictionary:
 	):
 		normalized_completed_orders.erase(RIVERBEND_STOREHOUSE_STONE_ORDER_ID)
 		normalized["settlement"]["completed_orders"] = normalized_completed_orders
+	# An unfounded Highmere hamlet cannot retain a Hall shipment.
+	if (
+		normalized_completed_orders.has(HIGHMERE_RIDGE_HALL_STONE_ORDER_ID)
+		and not normalized["settlement_land_ids"].has(HIGHMERE_LAND_ID)
+	):
+		normalized_completed_orders.erase(HIGHMERE_RIDGE_HALL_STONE_ORDER_ID)
+		normalized["settlement"]["completed_orders"] = normalized_completed_orders
 	var saved_improvements_by_land = saved.get("settlement_improvements_by_land", {})
 	if (
 		saved_improvements_by_land is Dictionary
@@ -868,6 +875,17 @@ static func _normalize_state(saved: Dictionary) -> Dictionary:
 		normalized["settlement_improvements_by_land"] = {
 			RIVERBEND_LAND_ID: [RIVERBEND_STOREHOUSE_IMPROVEMENT_ID],
 		}
+	# Rehydrate only the physically earned Highmere Hall, never arbitrary
+	# buildings injected into a save file. Keep Riverbend normalization intact.
+	if (
+		saved_improvements_by_land is Dictionary
+		and (saved_improvements_by_land.get(HIGHMERE_LAND_ID, []) as Array).has(HIGHMERE_RIDGE_HALL_IMPROVEMENT_ID)
+		and normalized["settlement_land_ids"].has(HIGHMERE_LAND_ID)
+		and normalized_completed_orders.has(HIGHMERE_RIDGE_HALL_STONE_ORDER_ID)
+	):
+		var restored_improvements: Dictionary = normalized["settlement_improvements_by_land"]
+		restored_improvements[HIGHMERE_LAND_ID] = [HIGHMERE_RIDGE_HALL_IMPROVEMENT_ID]
+		normalized["settlement_improvements_by_land"] = restored_improvements
 	if (
 		normalized_completed_orders.has(RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
 		and not (
@@ -878,8 +896,20 @@ static func _normalize_state(saved: Dictionary) -> Dictionary:
 		normalized_completed_orders.erase(RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
 		normalized["settlement"]["completed_orders"] = normalized_completed_orders
 	if (
+		normalized_completed_orders.has(HIGHMERE_RIDGE_HALL_PROVISIONS_ORDER_ID)
+		and not (
+			(normalized.get("settlement_improvements_by_land", {}).get(HIGHMERE_LAND_ID, []) as Array)
+			.has(HIGHMERE_RIDGE_HALL_IMPROVEMENT_ID)
+		)
+	):
+		normalized_completed_orders.erase(HIGHMERE_RIDGE_HALL_PROVISIONS_ORDER_ID)
+		normalized["settlement"]["completed_orders"] = normalized_completed_orders
+	if (
 		normalized_completed_orders.has(GREENGATE_HARVEST_FEAST_ORDER_ID)
-		and not normalized_completed_orders.has(RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
+		and not (
+			normalized_completed_orders.has(RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
+			or normalized_completed_orders.has(HIGHMERE_RIDGE_HALL_PROVISIONS_ORDER_ID)
+		)
 	):
 		normalized_completed_orders.erase(GREENGATE_HARVEST_FEAST_ORDER_ID)
 		normalized["settlement"]["completed_orders"] = normalized_completed_orders
