@@ -122,21 +122,22 @@ jobs:
           # project only. This does not change product-side game settings.
           python3 - <<'PY'
           from pathlib import Path
-          import re
 
           project = Path("/tmp/pn-playable-scene-sources/project.godot")
-          content = project.read_text(encoding="utf-8")
-          section = re.search(r"(?m)^\\[editor\\]\\s*$", content)
-          if section:
-              setting = re.search(r"(?m)^import/use_multiple_threads\\s*=.*$", content)
-              if setting:
-                  content = content[:setting.start()] + "import/use_multiple_threads=false" + content[setting.end():]
-              else:
-                  content = content[:section.end()] + "\\nimport/use_multiple_threads=false" + content[section.end():]
+          lines = project.read_text(encoding="utf-8").splitlines()
+          editor_positions = [i for i, line in enumerate(lines) if line.strip() == "[editor]"]
+          assert len(editor_positions) <= 1, "duplicate editor project sections"
+          setting_positions = [i for i, line in enumerate(lines) if line.strip().startswith("import/use_multiple_threads=")]
+          assert len(setting_positions) <= 1, "duplicate resource import settings"
+          if setting_positions:
+              lines[setting_positions[0]] = "import/use_multiple_threads=false"
+          elif editor_positions:
+              lines.insert(editor_positions[0] + 1, "import/use_multiple_threads=false")
           else:
-              content = content.rstrip() + "\\n\\n[editor]\\nimport/use_multiple_threads=false\\n"
-          project.write_text(content, encoding="utf-8")
+              lines.extend(["", "[editor]", "import/use_multiple_threads=false"])
+          content = "\n".join(lines) + "\n"
           assert content.count("import/use_multiple_threads=false") == 1
+          project.write_text(content, encoding="utf-8")
           print("PN_SOURCE_IMPORT_THREADS=DISABLED")
           PY
           # --import waits for resource import completion; --editor --quit
