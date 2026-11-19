@@ -229,7 +229,7 @@ func _build_land_polygon(land: Dictionary) -> void:
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.albedo_color = _terrain_color(String(land.get("terrain", "grassland")))
-	material.albedo_color.a = 0.16 if strategic else 0.055
+	material.albedo_color.a = 0.12 if strategic else 0.05
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mesh.surface_set_material(0, material)
@@ -243,7 +243,7 @@ func _build_land_polygon(land: Dictionary) -> void:
 	# Let the retained painting carry the overview. Canonical borders remain
 	# present for hit-area legibility, but only selected, claimed and inspected
 	# lands rise into the cartographic hierarchy.
-	outline_material.albedo_color = Color(0.16, 0.18, 0.14, 0.48 if strategic else 0.12)
+	outline_material.albedo_color = Color(0.16, 0.18, 0.14, 0.36 if strategic else 0.10)
 	outline_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	outline_material.no_depth_test = true
 	var outline_mesh := ImmediateMesh.new()
@@ -1815,7 +1815,7 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 		if material == null:
 			continue
 		var color := _terrain_color(String(land.get("terrain", "grassland")))
-		color.a = 0.16 if STRATEGIC_TERRITORY_IDS.has(land_id) else 0.055
+		color.a = 0.12 if STRATEGIC_TERRITORY_IDS.has(land_id) else 0.05
 		if claimed_ids.has(land_id):
 			color = Color("2868b8") if land_id == "PN-A01-001" else Color("2b8b88")
 			# Claimed land should read as player state without painting over the
@@ -1833,7 +1833,7 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 		if outline_material != null:
 			var outline_color := Color(
 				0.16, 0.18, 0.14,
-				0.48 if STRATEGIC_TERRITORY_IDS.has(land_id) else 0.12
+				0.36 if STRATEGIC_TERRITORY_IDS.has(land_id) else 0.10
 			)
 			if inspected_ids.has(land_id):
 				outline_color = Color(0.92, 0.66, 0.24, 0.94)
