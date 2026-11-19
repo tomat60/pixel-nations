@@ -88,6 +88,26 @@ var granary_site_choice_active := false
 # Restore the selected frontier after a dedicated Highmere Hall supply visit.
 var return_to_highmere_ridge_hall := false
 
+const STRATEGIC_TERRITORIES := [
+	{"id": "PN-A01-001", "name": "GREENVALE", "subtitle": "HOME · GREENGATE", "primary": true, "color": Color("dbe9ff")},
+	{"id": "PN-A01-002", "name": "RIVERBEND", "subtitle": "RIVER FRONTIER", "primary": true, "color": Color("d6ffff")},
+	{"id": "PN-A01-003", "name": "HIGHMERE", "subtitle": "RIDGE FRONTIER", "primary": true, "color": Color("f2ead2")},
+	{"id": "PN-A01-010", "name": "WESTWATCH", "subtitle": "WESTERN FRONTIER", "primary": false, "color": Color("ded4b8")},
+	{"id": "PN-A01-011", "name": "IRON COAST", "subtitle": "RIVAL COAST", "primary": false, "color": Color("d9c9aa")},
+	{"id": "PN-A01-012", "name": "BLUEFEN", "subtitle": "SOUTHERN FRONTIER", "primary": false, "color": Color("c6e3e8")},
+	{"id": "PN-A01-015", "name": "LAST LIGHT", "subtitle": "TRADE COAST", "primary": false, "color": Color("ead6af")},
+	{"id": "PN-A01-017", "name": "DUSKHOLLOW", "subtitle": "OLD KINGDOM", "primary": false, "color": Color("d4c9c0")},
+	{"id": "PN-A01-020", "name": "MAREFIELD", "subtitle": "EASTERN FARMS", "primary": false, "color": Color("e4d99f")},
+	{"id": "PN-A01-023", "name": "STORMCAP", "subtitle": "NORTH RIDGE", "primary": false, "color": Color("d8d0bf")},
+	{"id": "PN-A01-024", "name": "NORTHGATE", "subtitle": "NORTH ROAD", "primary": true, "color": Color("e3f1df")},
+	{"id": "PN-A01-027", "name": "REDWILLOW", "subtitle": "EASTWOOD FRONTIER", "primary": false, "color": Color("c7d7bd")},
+]
+const STRATEGIC_TERRITORY_IDS := [
+	"PN-A01-001", "PN-A01-002", "PN-A01-003", "PN-A01-010",
+	"PN-A01-011", "PN-A01-012", "PN-A01-015", "PN-A01-017",
+	"PN-A01-020", "PN-A01-023", "PN-A01-024", "PN-A01-027",
+]
+
 const GRANARY_SITE_TRANSFORMS := {
 	"plaza_edge": {"position": Vector3(27.0, 0.0, 44.0), "rotation": -0.12},
 	"orchard_lane": {"position": Vector3(43.0, 0.0, 22.5), "rotation": 0.18},
@@ -174,13 +194,21 @@ func _build_a01_atlas() -> void:
 	atlas_focus_land.name = "SelectedLandFocusRelief"
 	atlas_focus_land.visible = false
 	atlas_root.add_child(atlas_focus_land)
-	_build_land_label("PN-A01-001", "GREENVALE", "HOME · GREENGATE", Color("dbe9ff"))
-	_build_land_label("PN-A01-002", "RIVERBEND", "", Color("d6ffff"))
-	_build_land_label("PN-A01-003", "HIGHMERE", "", Color("f2ead2"))
-	_build_land_label("PN-A01-024", "NORTHGATE", "", Color("e3f1df"))
+	for territory_value in STRATEGIC_TERRITORIES:
+		var territory := territory_value as Dictionary
+		var territory_color: Color = territory.get("color", Color.WHITE)
+		_build_land_label(
+			String(territory.get("id", "")),
+			String(territory.get("name", "")),
+			String(territory.get("subtitle", "")),
+			territory_color,
+			bool(territory.get("primary", false))
+		)
 
 
 func _build_land_polygon(land: Dictionary) -> void:
+	var land_id := String(land.get("id", ""))
+	var strategic := STRATEGIC_TERRITORY_IDS.has(land_id)
 	var points := PackedVector2Array()
 	for raw_point in land.get("points", []):
 		points.append(Vector2(float(raw_point[0]), float(raw_point[1])))
@@ -201,6 +229,7 @@ func _build_land_polygon(land: Dictionary) -> void:
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.albedo_color = _terrain_color(String(land.get("terrain", "grassland")))
+	material.albedo_color.a = 0.16 if strategic else 0.055
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mesh.surface_set_material(0, material)
@@ -208,13 +237,13 @@ func _build_land_polygon(land: Dictionary) -> void:
 	polygon.name = String(land.get("id", "Land")).replace("-", "_")
 	polygon.mesh = mesh
 	atlas_root.add_child(polygon)
-	land_materials[String(land.get("id", ""))] = material
+	land_materials[land_id] = material
 	var outline_material := StandardMaterial3D.new()
 	outline_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	# Let the retained painting carry the overview. Canonical borders remain
 	# present for hit-area legibility, but only selected, claimed and inspected
 	# lands rise into the cartographic hierarchy.
-	outline_material.albedo_color = Color(0.16, 0.18, 0.14, 0.30)
+	outline_material.albedo_color = Color(0.16, 0.18, 0.14, 0.48 if strategic else 0.12)
 	outline_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	outline_material.no_depth_test = true
 	var outline_mesh := ImmediateMesh.new()
@@ -236,10 +265,16 @@ func _build_land_polygon(land: Dictionary) -> void:
 	outline.name = "%s_Border" % polygon.name
 	outline.mesh = outline_mesh
 	atlas_root.add_child(outline)
-	land_outline_materials[String(land.get("id", ""))] = outline_material
+	land_outline_materials[land_id] = outline_material
 
 
-func _build_land_label(land_id: String, text_value: String, subtitle_value: String, color: Color) -> void:
+func _build_land_label(
+	land_id: String,
+	text_value: String,
+	subtitle_value: String,
+	color: Color,
+	primary: bool
+) -> void:
 	var center := canonical_center_world(land_id)
 	var label := Label3D.new()
 	label.name = "%s_Label" % land_id.replace("-", "_")
@@ -247,11 +282,12 @@ func _build_land_label(land_id: String, text_value: String, subtitle_value: Stri
 	label.position = Vector3(center.x, 2.0, center.y)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
-	label.font_size = 32
-	label.outline_size = 12
+	label.font_size = 30 if primary else 20
+	label.outline_size = 12 if primary else 8
 	label.modulate = color
 	label.outline_modulate = Color(0.02, 0.04, 0.05, 0.95)
-	label.pixel_size = 0.12
+	label.pixel_size = 0.12 if primary else 0.09
+	label.set_meta("strategic_primary", primary)
 	atlas_root.add_child(label)
 	land_labels[land_id] = label
 	var subtitle := Label3D.new()
@@ -1779,6 +1815,7 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 		if material == null:
 			continue
 		var color := _terrain_color(String(land.get("terrain", "grassland")))
+		color.a = 0.16 if STRATEGIC_TERRITORY_IDS.has(land_id) else 0.055
 		if claimed_ids.has(land_id):
 			color = Color("2868b8") if land_id == "PN-A01-001" else Color("2b8b88")
 			# Claimed land should read as player state without painting over the
@@ -1794,7 +1831,10 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 		material.albedo_color = color
 		var outline_material := land_outline_materials.get(land_id) as StandardMaterial3D
 		if outline_material != null:
-			var outline_color := Color(0.16, 0.18, 0.14, 0.30)
+			var outline_color := Color(
+				0.16, 0.18, 0.14,
+				0.48 if STRATEGIC_TERRITORY_IDS.has(land_id) else 0.12
+			)
 			if inspected_ids.has(land_id):
 				outline_color = Color(0.92, 0.66, 0.24, 0.94)
 			if claimed_ids.has(land_id):
@@ -1820,6 +1860,13 @@ func _refresh_land_visuals(snapshot: Dictionary) -> void:
 		# and saved physical structures readable while the atlas and routes remain
 		# continuous beneath them. Overview restores the full label hierarchy.
 		label.visible = labels_visible and (not atlas_is_focused or label_land_id == selected_id)
+		var primary: bool = bool(label.get_meta("strategic_primary", false))
+		label.fixed_size = not atlas_is_focused
+		label.pixel_size = (
+			(0.00085 if primary else 0.0010)
+			if not atlas_is_focused else
+			(0.12 if primary else 0.09)
+		)
 		label.modulate = label_color
 		if subtitle != null:
 			subtitle.modulate = label_color.darkened(0.08)
