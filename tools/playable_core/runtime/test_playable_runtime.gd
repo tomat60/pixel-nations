@@ -5,6 +5,11 @@ const HOME_ID := "PN-A01-001"
 const FRONTIER_ID := "PN-A01-002"
 const HIGHMERE_ID := "PN-A01-003"
 const NORTHGATE_ID := "PN-A01-024"
+const STRATEGIC_TERRITORY_IDS := [
+	"PN-A01-001", "PN-A01-002", "PN-A01-003", "PN-A01-010",
+	"PN-A01-011", "PN-A01-012", "PN-A01-015", "PN-A01-017",
+	"PN-A01-020", "PN-A01-023", "PN-A01-024", "PN-A01-027",
+]
 var failures: Array[String] = []
 
 
@@ -48,8 +53,15 @@ func _run() -> void:
 	_check(runtime.regional_landmarks.is_empty(), "no_unearned_world_settlement_miniatures")
 	_check(runtime.land_materials.size() == 30, "all_canonical_lands_have_visible_surfaces")
 	_check(runtime.land_outline_materials.size() == 30, "all_canonical_lands_have_state_aware_borders")
-	_check(runtime.land_labels.size() == 4, "home_and_reachable_lands_are_named")
-	_check(runtime.land_subtitles.size() == 4, "reachable_lands_have_secondary_cartographic_labels")
+	_check(runtime.land_labels.size() == 12, "twelve_strategic_territories_are_named")
+	_check(runtime.land_subtitles.size() == 12, "strategic_territories_keep_focus_detail_slots")
+	for territory_id in STRATEGIC_TERRITORY_IDS:
+		var territory_label := runtime.land_labels.get(territory_id) as Label3D
+		_check(territory_label != null and territory_label.visible, "strategic_territory_%s_is_visible" % territory_id)
+	_check(bool((runtime.land_labels.get(HOME_ID) as Label3D).get_meta("strategic_primary", false)), "home_label_keeps_primary_hierarchy")
+	_check(not bool((runtime.land_labels.get("PN-A01-010") as Label3D).get_meta("strategic_primary", true)), "context_labels_recede_below_progression_places")
+	_check((runtime.land_labels.get(HOME_ID) as Label3D).fixed_size, "overview_primary_name_keeps_readable_size")
+	_check((runtime.land_labels.get("PN-A01-010") as Label3D).fixed_size, "overview_context_name_keeps_readable_size")
 	_check(String((runtime.land_labels.get(HOME_ID) as Label3D).text) == "GREENVALE", "home_place_name_stays_primary")
 	_check(String((runtime.land_subtitles.get(HOME_ID) as Label3D).text) == "HOME · GREENGATE", "home_settlement_identity_is_secondary")
 	_check(not (runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "overview_hides_secondary_land_detail")
@@ -74,6 +86,10 @@ func _run() -> void:
 	_check(home_material.albedo_color.a >= 0.08 and home_material.albedo_color.a <= 0.12, "neutral_land_wash_defers_to_painted_geography")
 	var neutral_border := runtime.land_outline_materials.get(HOME_ID) as StandardMaterial3D
 	_check(neutral_border.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA, "neutral_borders_preserve_painted_atlas")
+	var westwatch_border := runtime.land_outline_materials.get("PN-A01-010") as StandardMaterial3D
+	var background_border := runtime.land_outline_materials.get("PN-A01-004") as StandardMaterial3D
+	_check(westwatch_border.albedo_color.a > background_border.albedo_color.a, "strategic_territory_meshes_rise_above_background_parcels")
+	_capture("world-twelve-territory-overview")
 	_check(neutral_border.albedo_color.a < 0.40, "neutral_borders_recede_below_geography")
 	_check(runtime.panel.get_theme_stylebox("panel") is StyleBoxTexture, "pixel_nations_panel_reuses_village_parchment")
 	_check(runtime.claim_button.get_theme_stylebox("normal") is StyleBoxFlat, "pixel_nations_actions_use_retained_village_button_language")
@@ -81,6 +97,12 @@ func _run() -> void:
 	_check(runtime.frontier_progress.visible, "world_shows_claimed_land_progress")
 	_check(runtime.frontier_progress.max_value == 30.0, "world_progress_uses_canonical_land_total")
 	_check(runtime.frontier_progress.value == 0.0, "world_progress_starts_unclaimed")
+	var westwatch_screen: Vector2 = player.camera.unproject_position(
+		Vector3(runtime.canonical_center_world("PN-A01-010").x, 0.0, runtime.canonical_center_world("PN-A01-010").y)
+	)
+	await _click_position(westwatch_screen)
+	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == "PN-A01-010", "pointer_selects_visible_westwatch_territory")
+	_check((runtime.land_outline_materials.get("PN-A01-010") as StandardMaterial3D).albedo_color.r > 0.9, "selected_strategic_territory_mesh_turns_gold")
 	var home_screen: Vector2 = player.camera.unproject_position(
 		Vector3(home_world.x, 0.0, home_world.y)
 	)
@@ -93,6 +115,8 @@ func _run() -> void:
 	await _click_control(runtime.focus_button)
 	await create_timer(0.6).timeout
 	_check(runtime.atlas_is_focused, "atlas_focus_mode_enabled")
+	_check((runtime.land_labels.get(HOME_ID) as Label3D).visible, "focused_land_keeps_selected_territory_name")
+	_check(not (runtime.land_labels.get("PN-A01-010") as Label3D).visible, "focused_land_hides_context_territory_names")
 	_check((runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "focused_land_reveals_secondary_identity")
 	_check(player.position.distance_to(Vector3(home_world.x, 0.0, home_world.y)) < 1.0, "atlas_focus_centers_selected_land")
 	_check(absf(player.camera.position.z - runtime.ATLAS_FOCUS_ZOOM) < 1.0, "atlas_focus_uses_readable_zoom")
@@ -118,6 +142,7 @@ func _run() -> void:
 	_check(not runtime.atlas_focus_hovered, "atlas_overview_clears_land_hover")
 	_check(Input.get_current_cursor_shape() == Input.CURSOR_ARROW, "atlas_overview_restores_arrow_cursor")
 	_check(not (runtime.land_subtitles.get(HOME_ID) as Label3D).visible, "overview_restores_clean_place_name_hierarchy")
+	_check((runtime.land_labels.get("PN-A01-010") as Label3D).visible, "overview_restores_context_territory_names")
 	_check(player.position.distance_to(runtime.ATLAS_OVERVIEW_POSITION) < 1.0, "atlas_overview_restores_position")
 	_check(absf(player.camera.position.z - runtime.ATLAS_OVERVIEW_ZOOM) < 1.0, "atlas_overview_restores_zoom")
 	_check(absf(rad_to_deg(player.camera_socket.rotation.x) - runtime.ATLAS_OVERVIEW_PITCH) < 1.0, "atlas_overview_restores_camera_pitch")
