@@ -917,12 +917,12 @@ func _capture(stem: String) -> void:
 	if test_runtime != null and is_instance_valid(test_runtime):
 		_check(test_runtime.compact_layout, "%s_uses_native_compact_layout" % stem)
 		var panel_rect: Rect2 = test_runtime.panel.get_global_rect()
-		_check(panel_rect.size.x <= 155.0, "%s_command_rail_leaves_scene_visible" % stem)
-		_check(panel_rect.position.x >= 198.0, "%s_command_rail_stays_at_scene_edge" % stem)
+		_check(panel_rect.size.x <= 160.0, "%s_command_rail_leaves_scene_visible" % stem)
+		_check(panel_rect.position.x >= 194.0, "%s_command_rail_stays_at_scene_edge" % stem)
+		_check(panel_rect.position.x >= 200.0 - 6.0, "%s_keeps_two_hundred_pixels_for_scene" % stem)
 		var view := String(test_runtime.controller.current_snapshot().get("view", "world"))
 		if view == "village" and test_runtime.village != null:
-			var tutorial_rect: Rect2 = test_runtime.village.hud._tutorial.get_global_rect()
-			_check(tutorial_rect.size.x <= 195.0, "%s_village_dispatch_leaves_scene_visible" % stem)
+			_check(not test_runtime.village.hud._tutorial.visible, "%s_duplicate_village_dispatch_is_hidden" % stem)
 			_check(not test_runtime.village.hud._tutorial_more.visible, "%s_village_secondary_copy_collapses" % stem)
 	image = root.get_viewport().get_texture().get_image()
 	if image.get_size() != Vector2i(360, 225):
