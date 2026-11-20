@@ -11,6 +11,7 @@ const STRATEGIC_TERRITORY_IDS := [
 	"PN-A01-020", "PN-A01-023", "PN-A01-024", "PN-A01-027",
 ]
 var failures: Array[String] = []
+var test_runtime: Node
 
 
 func _initialize() -> void:
@@ -32,6 +33,7 @@ func _run() -> void:
 		quit(1)
 		return
 	var runtime = packed.instantiate()
+	test_runtime = runtime
 	if runtime == null or runtime.get_script() == null or not runtime.has_method("_render_snapshot"):
 		_check(false, "playable_runtime_script_instantiates")
 		quit(1)
@@ -872,6 +874,7 @@ func _run() -> void:
 	_check(runtime.village_granary_access != null and runtime.village_granary_access.get_meta("granary_site", "") == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "reopened_granary_restores_selected_access_lane")
 	_check(runtime.village_granary_access.get_child_count() == 4, "reopened_orchard_lane_restores_four_physical_tiles")
 	await _capture("village-granary-reopened")
+	await _measure_runtime_fps()
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")
@@ -932,6 +935,16 @@ func _capture(stem: String) -> void:
 	root.size = Vector2i(360, 225)
 	await process_frame
 	await process_frame
+	if test_runtime != null and is_instance_valid(test_runtime):
+		_check(test_runtime.compact_layout, "%s_uses_compact_layout_at_360" % stem)
+		var panel_rect: Rect2 = test_runtime.panel.get_global_rect()
+		_check(panel_rect.size.x <= 155.0, "%s_command_rail_leaves_scene_visible" % stem)
+		_check(panel_rect.position.x >= 198.0, "%s_command_rail_stays_at_scene_edge" % stem)
+		var view := String(test_runtime.controller.current_snapshot().get("view", "world"))
+		if view == "village" and test_runtime.village != null:
+			var tutorial_rect: Rect2 = test_runtime.village.hud._tutorial.get_global_rect()
+			_check(tutorial_rect.size.x <= 195.0, "%s_village_dispatch_leaves_scene_visible" % stem)
+			_check(not test_runtime.village.hud._tutorial_more.visible, "%s_village_secondary_copy_collapses" % stem)
 	image = root.get_viewport().get_texture().get_image()
 	if image.get_size() != Vector2i(360, 225):
 		failures.append("%s_360_frame_dimensions" % stem)
@@ -940,3 +953,16 @@ func _capture(stem: String) -> void:
 	image.save_png(folder.path_join("%s-360x225.png" % stem))
 	root.size = original_size
 	await process_frame
+
+
+func _measure_runtime_fps() -> void:
+	root.size = Vector2i(1440, 900)
+	await process_frame
+	var started := Time.get_ticks_usec()
+	var frame_count := 120
+	for index in range(frame_count):
+		await process_frame
+	var elapsed_seconds := float(Time.get_ticks_usec() - started) / 1000000.0
+	var measured_fps := float(frame_count) / maxf(elapsed_seconds, 0.001)
+	print("PN_PLAYABLE_RUNTIME_FPS_SAMPLE=%.2f frames=%d seconds=%.3f" % [measured_fps, frame_count, elapsed_seconds])
+	_check(is_finite(measured_fps) and measured_fps >= 10.0, "runtime_fps_sample_reaches_playable_floor")
