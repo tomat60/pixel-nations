@@ -56,6 +56,8 @@ var lands: Array = []
 var selected_land: Dictionary = {}
 var ui_layer: CanvasLayer
 var panel: PanelContainer
+var panel_margin: MarginContainer
+var panel_column: VBoxContainer
 var title_label: Label
 var identity_label: Label
 var detail_label: Label
@@ -81,6 +83,7 @@ var focus_button: Button
 var overview_button: Button
 var save_button: Button
 var return_button: Button
+var compact_layout := false
 var atlas_is_focused := false
 var camera_zoom_tween: Tween
 var camera_pitch_tween: Tween
@@ -129,6 +132,8 @@ func _ready() -> void:
 	_build_highmere_survey_link()
 	_build_northgate_scout_link()
 	_build_ui()
+	get_viewport().size_changed.connect(_queue_responsive_layout)
+	_queue_responsive_layout()
 	if not controller.load_game():
 		_render_snapshot(controller.current_snapshot())
 	print("PN_PLAYABLE_RUNTIME_READY=PASS")
@@ -317,15 +322,15 @@ func _build_ui() -> void:
 	panel_style.content_margin_bottom = 0
 	panel.add_theme_stylebox_override("panel", panel_style)
 	ui_layer.add_child(panel)
-	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 14)
-	margin.add_theme_constant_override("margin_top", 12)
-	margin.add_theme_constant_override("margin_right", 14)
-	margin.add_theme_constant_override("margin_bottom", 12)
-	panel.add_child(margin)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 8)
-	margin.add_child(column)
+	panel_margin = MarginContainer.new()
+	panel_margin.add_theme_constant_override("margin_left", 14)
+	panel_margin.add_theme_constant_override("margin_top", 12)
+	panel_margin.add_theme_constant_override("margin_right", 14)
+	panel_margin.add_theme_constant_override("margin_bottom", 12)
+	panel.add_child(panel_margin)
+	panel_column = VBoxContainer.new()
+	panel_column.add_theme_constant_override("separation", 8)
+	panel_margin.add_child(panel_column)
 	title_label = _label("AURELIAN BASIN · A-01", 16)
 	identity_label = _label("Select a canonical land on the map", 18)
 	detail_label = _label("0/30 lands · 0 settlements · Stone 10", 14)
@@ -351,10 +356,10 @@ func _build_ui() -> void:
 	route_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	for label in [title_label, identity_label, detail_label]:
-		column.add_child(label)
-	column.add_child(frontier_progress)
-	column.add_child(route_label)
-	column.add_child(goal_label)
+		panel_column.add_child(label)
+	panel_column.add_child(frontier_progress)
+	panel_column.add_child(route_label)
+	panel_column.add_child(goal_label)
 	claim_button = _button("Claim selected land", "ClaimButton", _claim)
 	enter_button = _button("Enter Greengate", "EnterButton", _enter)
 	inspect_button = _button("Inspect Riverbend frontier", "InspectButton", _inspect_frontier)
@@ -381,9 +386,71 @@ func _build_ui() -> void:
 	save_button = _button("Save progress", "SaveButton", _save)
 	return_button = _button("Return to World", "ReturnButton", _return_world)
 	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, granary_button, supply_button, survey_button, hamlet_button, storehouse_button, provisions_button, feast_button, focus_button, overview_button, save_button, return_button]:
-		column.add_child(button)
-	column.add_child(granary_site_row)
-	column.move_child(granary_site_row, granary_button.get_index() + 1)
+		panel_column.add_child(button)
+	panel_column.add_child(granary_site_row)
+	panel_column.move_child(granary_site_row, granary_button.get_index() + 1)
+
+func _queue_responsive_layout() -> void:
+	call_deferred("_apply_responsive_layout")
+
+
+func _apply_responsive_layout() -> void:
+	if panel == null or not is_instance_valid(panel):
+		return
+	var viewport_size := get_viewport().get_visible_rect().size
+	compact_layout = viewport_size.x <= 480.0 or viewport_size.y <= 300.0
+	var panel_width := minf(330.0, viewport_size.x - 32.0)
+	var edge := 16.0
+	var spacing := 8
+	var padding := 14
+	var button_height := 38.0
+	if compact_layout:
+		panel_width = minf(154.0, viewport_size.x * 0.43)
+		edge = 6.0
+		spacing = 3
+		padding = 6
+		button_height = 24.0
+	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	panel.position = Vector2(viewport_size.x - panel_width - edge, edge)
+	panel.custom_minimum_size = Vector2(panel_width, 0)
+	panel.size.x = panel_width
+	panel_column.add_theme_constant_override("separation", spacing)
+	for side in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:
+		panel_margin.add_theme_constant_override(side, padding)
+	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, granary_button, granary_plaza_button, granary_orchard_button, supply_button, survey_button, hamlet_button, storehouse_button, provisions_button, feast_button, focus_button, overview_button, save_button, return_button]:
+		button.custom_minimum_size.y = button_height
+		button.add_theme_font_size_override("font_size", 9 if compact_layout else 16)
+	title_label.add_theme_font_size_override("font_size", 10 if compact_layout else 16)
+	identity_label.add_theme_font_size_override("font_size", 11 if compact_layout else 18)
+	detail_label.add_theme_font_size_override("font_size", 9 if compact_layout else 14)
+	route_label.add_theme_font_size_override("font_size", 9 if compact_layout else 13)
+	goal_label.add_theme_font_size_override("font_size", 9 if compact_layout else 14)
+	var view := "world" if controller == null else String(controller.current_snapshot().get("view", "world"))
+	if compact_layout:
+		title_label.visible = false
+		frontier_progress.visible = false
+		route_label.visible = false
+		goal_label.visible = false
+		save_button.visible = view == "world"
+	if view == "village" and village != null and is_instance_valid(village):
+		var hud = village.hud
+		if is_instance_valid(hud._tutorial):
+			if not hud._tutorial.has_meta("pixel_nations_desktop_position"):
+				hud._tutorial.set_meta("pixel_nations_desktop_position", hud._tutorial.position)
+				hud._tutorial.set_meta("pixel_nations_desktop_width", hud._tutorial.size.x)
+			if compact_layout:
+				hud._tutorial.position = Vector2(6, 84)
+				hud._tutorial.size.x = minf(194.0, viewport_size.x * 0.54)
+			else:
+				hud._tutorial.position = hud._tutorial.get_meta("pixel_nations_desktop_position")
+				hud._tutorial.size.x = float(hud._tutorial.get_meta("pixel_nations_desktop_width"))
+			hud._tutorial_title.add_theme_font_size_override("font_size", 12 if compact_layout else 21)
+			hud._tutorial_intro.add_theme_font_size_override("font_size", 10 if compact_layout else 15)
+			hud._tutorial_intro.max_lines_visible = 2 if compact_layout else 7
+			hud._tutorial_more.visible = not compact_layout
+			hud._tutorial_button.custom_minimum_size.y = 26.0 if compact_layout else 54.0
+			hud._tutorial_button.add_theme_font_size_override("font_size", 9 if compact_layout else 17)
+	panel.reset_size()
 
 
 func _label(text_value: String, font_size: int) -> Label:
@@ -1323,6 +1390,7 @@ func _render_snapshot(snapshot: Dictionary) -> void:
 	_sync_village_harvest_feast(snapshot)
 	_sync_village_guidance(snapshot)
 	panel.reset_size()
+	_queue_responsive_layout()
 
 
 # Reuse the donor's authored parchment tutorial card as a canonical, save-driven
