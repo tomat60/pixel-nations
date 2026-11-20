@@ -450,7 +450,10 @@ func _apply_responsive_layout() -> void:
 		spacing = 3
 		padding = 6
 		button_height = 24.0
-	panel.position = Vector2(-panel_width - edge, edge)
+	# Use explicit viewport coordinates. Top-right anchors plus negative offsets
+	# can leave the rail offscreen while the root viewport is being resized.
+	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	panel.position = Vector2(viewport_size.x - panel_width - edge, edge)
 	panel.custom_minimum_size = Vector2(panel_width, 0)
 	panel.size.x = panel_width
 	panel_column.add_theme_constant_override("separation", spacing)
