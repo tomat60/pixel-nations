@@ -6,6 +6,7 @@ const FRONTIER_ID := "PN-A01-002"
 const HIGHMERE_ID := "PN-A01-003"
 const NORTHGATE_ID := "PN-A01-024"
 var failures: Array[String] = []
+var test_runtime: Node
 
 
 func _initialize() -> void:
@@ -27,6 +28,7 @@ func _run() -> void:
 		quit(1)
 		return
 	var runtime = packed.instantiate()
+	test_runtime = runtime
 	if runtime == null or runtime.get_script() == null or not runtime.has_method("_render_snapshot"):
 		_check(false, "playable_runtime_script_instantiates")
 		quit(1)
@@ -106,7 +108,7 @@ func _run() -> void:
 	_check(focus_interaction != null and focus_interaction.input_ray_pickable, "focused_land_interaction_is_pickable")
 	_check(focus_interaction != null and focus_interaction.get_child_count() > 0, "focused_land_uses_triangulated_collision")
 	_check(runtime.overview_button.visible and not runtime.focus_button.visible, "focused_land_offers_overview_recovery")
-	_capture("world-home-focused")
+	await _capture("world-home-focused")
 	await _click_control(runtime.overview_button)
 	await create_timer(0.6).timeout
 	_check(not runtime.atlas_is_focused, "atlas_overview_mode_restored")
@@ -164,7 +166,7 @@ func _run() -> void:
 	_check(runtime.enter_button.visible and runtime.save_button.visible, "world_shows_relevant_actions")
 	_check(runtime.enter_button.text == "Found Greengate", "first_world_action_explicitly_founds_settlement")
 	_check(not runtime.claim_button.visible and not runtime.inspect_button.visible and not runtime.connect_button.visible, "world_hides_irrelevant_actions")
-	_capture("world-claimed")
+	await _capture("world-claimed")
 	await _click_position(focused_land_screen)
 	await process_frame
 	await create_timer(0.6).timeout
@@ -226,7 +228,7 @@ func _run() -> void:
 	for donor_item in ["gold", "trunks", "loaves", "population"]:
 		_check(not (runtime.village.hud._resource_buttons[donor_item] as Button).visible, "noncanonical_%s_stock_is_hidden" % donor_item)
 	await process_frame
-	_capture("village-before-road")
+	await _capture("village-before-road")
 	# Follow the dominant dispatch-card CTA exactly as an unaided player would.
 	# It must build the named physical road rather than silently doing nothing.
 	await _click_control(runtime.village.hud._tutorial_button)
@@ -246,7 +248,7 @@ func _run() -> void:
 		for tile in runtime.village_paved_road.get_children():
 			_check((tile as Node3D).get_node_or_null("StoneSurface") is MeshInstance3D, "canonical_tile_uses_retained_paving_mesh")
 	await process_frame
-	_capture("village-road-built")
+	await _capture("village-road-built")
 	# The dominant dispatch opens two real terrain footprints. Select the eastern
 	# Orchard Lane pad through the running 3D scene, not a hidden test shortcut.
 	await _click_control(runtime.village.hud._tutorial_button)
@@ -264,7 +266,7 @@ func _run() -> void:
 	_check(orchard_site.get_node_or_null("SiteMarker") is MeshInstance3D, "orchard_lane_has_restrained_terrain_marker")
 	_check(orchard_site.get_node_or_null("SiteLabel") == null, "granary_sites_never_use_world_space_text_billboards")
 	await process_frame
-	_capture("village-granary-sites-ready")
+	await _capture("village-granary-sites-ready")
 	var orchard_screen: Vector2 = runtime.village.world.camera.unproject_position(orchard_site.global_position)
 	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(orchard_screen), "orchard_lane_site_projects_inside_viewport")
 	await _click_position(orchard_screen)
@@ -293,7 +295,7 @@ func _run() -> void:
 	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "built_granary_dispatch_offers_world_navigation")
 	_check(runtime.village.hud._tutorial.is_visible_in_tree(), "built_granary_dispatch_remains_visible_after_purchase")
 	await process_frame
-	_capture("village-granary-first-ten-minutes-built")
+	await _capture("village-granary-first-ten-minutes-built")
 	# Reuse the still-visible dispatch CTA after it has advanced to navigation.
 	await _click_control(runtime.village.hud._tutorial_button)
 	await process_frame
@@ -353,7 +355,7 @@ func _run() -> void:
 	var claimed_home_fill := runtime.land_materials.get(HOME_ID) as StandardMaterial3D
 	_check(claimed_home_fill.albedo_color.a <= 0.461, "claimed_land_wash_preserves_painted_geography")
 	await process_frame
-	_capture("world-riverbend-claimed")
+	await _capture("world-riverbend-claimed")
 	await _click_control(runtime.connect_button)
 	var connected_frontier: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(connected_frontier.get("riverbend_connected", false)), "connect_button_completes_frontier_link")
@@ -372,7 +374,7 @@ func _run() -> void:
 	_check(int(claim_reopened.get("claimed_lands", -1)) == 2, "reopen_keeps_two_claimed_lands")
 	_check(int(claim_reopened.get("stone", -1)) == 0, "reopen_keeps_frontier_connection_cost")
 	await process_frame
-	_capture("world-riverbend-connected")
+	await _capture("world-riverbend-connected")
 	# The camera may still be focused after Village reentry. Use the actual
 	# visible Overview action, then project the home center in the current pose.
 	if runtime.atlas_is_focused:
@@ -394,7 +396,7 @@ func _run() -> void:
 	_check(String(runtime.village.hud._tutorial_button.text) == "Receive Riverbend stone · +5", "riverbend_delivery_guidance_offers_the_real_reward")
 	_check(runtime.village.hud._tutorial.is_visible_in_tree(), "riverbend_delivery_dispatch_is_visible")
 	await process_frame
-	_capture("village-riverbend-supply-ready")
+	await _capture("village-riverbend-supply-ready")
 	# Follow the dominant dispatch exactly as an unaided player would.
 	await _click_control(runtime.village.hud._tutorial_button)
 	var supplied_village: Dictionary = runtime.controller.current_snapshot()
@@ -404,7 +406,7 @@ func _run() -> void:
 	_check(String(runtime.village.hud._tutorial_button.text) == "Commission Highmere survey · 5 stone", "riverbend_delivery_advances_to_the_real_next_greengate_action")
 	_check(runtime.village.hud._tutorial.is_visible_in_tree(), "post_delivery_dispatch_remains_visible")
 	await process_frame
-	_capture("village-riverbend-supply")
+	await _capture("village-riverbend-supply")
 	await _click_control(runtime.return_button)
 	await process_frame
 	var supplied_world: Dictionary = runtime.controller.current_snapshot()
@@ -417,7 +419,7 @@ func _run() -> void:
 	_check(bool(supplied_reopened.get("riverbend_supply_delivered", false)), "reopen_keeps_riverbend_supply")
 	_check(int(supplied_reopened.get("stone", -1)) == 5, "reopen_keeps_riverbend_supply_reward")
 	await process_frame
-	_capture("world-riverbend-supplied")
+	await _capture("world-riverbend-supplied")
 	if runtime.atlas_is_focused:
 		await _click_control(runtime.overview_button)
 		await create_timer(0.6).timeout
@@ -429,7 +431,7 @@ func _run() -> void:
 	_check(String(runtime.village.hud._tutorial_button.text) == "Commission Highmere survey · 5 stone", "highmere_survey_guidance_offers_the_real_action")
 	_check(runtime.village.hud._tutorial.is_visible_in_tree(), "highmere_survey_dispatch_is_visible")
 	_check(not runtime.survey_button.visible, "highmere_survey_has_no_competing_panel_action")
-	_capture("village-highmere-survey-ready")
+	await _capture("village-highmere-survey-ready")
 	# Continue the unaided journey through the same dominant dispatch.
 	await _click_control(runtime.village.hud._tutorial_button)
 	var survey_village: Dictionary = runtime.controller.current_snapshot()
@@ -438,13 +440,13 @@ func _run() -> void:
 	_check(runtime.survey_button.disabled, "highmere_survey_is_one_time")
 	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "highmere_survey_dispatch_advances_to_world")
 	await process_frame
-	_capture("village-highmere-survey")
+	await _capture("village-highmere-survey")
 	await _click_control(runtime.village.hud._tutorial_button)
 	await process_frame
 	_check(String(runtime.controller.current_snapshot().get("view", "")) == "world", "post_survey_dispatch_opens_world")
 	_check(runtime.highmere_survey_link.visible, "commissioned_survey_creates_world_route")
 	await process_frame
-	_capture("world-highmere-survey-route")
+	await _capture("world-highmere-survey-route")
 	var survey_route_screen: Vector2 = player.camera.unproject_position(runtime.highmere_survey_link.position)
 	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(survey_route_screen), "highmere_survey_route_projects_inside_viewport")
 	# Follow the visible commissioned route instead of bypassing guidance with
@@ -453,7 +455,7 @@ func _run() -> void:
 	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HIGHMERE_ID, "pointer_click_on_survey_route_selects_highmere")
 	_check(runtime.inspect_button.visible and not runtime.inspect_button.disabled, "selected_survey_destination_offers_highmere_inspection")
 	await process_frame
-	_capture("world-highmere-route-selected")
+	await _capture("world-highmere-route-selected")
 	await _click_control(runtime.inspect_button)
 	var inspected_highmere: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(inspected_highmere.get("highmere_inspected", false)), "highmere_inspection_recorded")
@@ -465,7 +467,7 @@ func _run() -> void:
 	var inspected_highmere_fill := runtime.land_materials.get(HIGHMERE_ID) as StandardMaterial3D
 	_check(inspected_highmere_fill.albedo_color.a <= 0.501, "selected_inspected_land_wash_preserves_painted_geography")
 	await process_frame
-	_capture("world-highmere-inspected")
+	await _capture("world-highmere-inspected")
 	await _click_control(runtime.claim_button)
 	var claimed_highmere: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(claimed_highmere.get("highmere_claimed", false)), "highmere_claim_recorded")
@@ -476,7 +478,7 @@ func _run() -> void:
 	_check(runtime.highmere_survey_material.albedo_color.r > runtime.highmere_survey_material.albedo_color.g, "claimed_highmere_route_turns_pending_amber")
 	_check(runtime.controller.save_game(), "highmere_claim_saves")
 	await process_frame
-	_capture("world-highmere-claimed")
+	await _capture("world-highmere-claimed")
 	runtime.controller.session.state["inspected_land_ids"] = [FRONTIER_ID]
 	runtime.controller.session.state["settlement"]["completed_orders"].erase("highmere_survey")
 	runtime.controller.session.state["claimed_land_ids"] = [HOME_ID, FRONTIER_ID]
@@ -491,8 +493,8 @@ func _run() -> void:
 	_check(runtime.enter_button.text == "Return to Greengate for ridge stone", "highmere_return_cta_names_the_shipment_destination")
 	_check(not runtime.connect_button.visible, "unfunded_highmere_hides_premature_connect_action")
 	await process_frame
-	_capture("world-highmere-claimed-reopened")
-	_capture("world-highmere-return-ready")
+	await _capture("world-highmere-claimed-reopened")
+	await _capture("world-highmere-return-ready")
 	await _click_control(runtime.enter_button)
 	await process_frame
 	await create_timer(0.6).timeout
@@ -504,7 +506,7 @@ func _run() -> void:
 	_check(int(highmere_link_supplied.get("stone", -1)) == 5, "highmere_ridge_supply_restores_five_stone")
 	_check(runtime.supply_button.disabled, "highmere_ridge_supply_is_one_time")
 	await process_frame
-	_capture("village-highmere-link-supply")
+	await _capture("village-highmere-link-supply")
 	await _click_control(runtime.return_button)
 	await process_frame
 	var return_route_screen: Vector2 = player.camera.unproject_position(runtime.highmere_survey_link.position)
@@ -521,7 +523,7 @@ func _run() -> void:
 	_check(runtime.highmere_survey_material.albedo_color.g > runtime.highmere_survey_material.albedo_color.r, "connected_highmere_route_turns_green")
 	_check(runtime.controller.save_game(), "highmere_link_saves")
 	await process_frame
-	_capture("world-highmere-connected")
+	await _capture("world-highmere-connected")
 	runtime.controller.session.state["connected_land_ids"] = [FRONTIER_ID]
 	runtime.controller.session.state["resources"]["stone"] = 5
 	runtime.controller.session.state["settlement"]["completed_orders"].erase("highmere_link_stone_shipment")
@@ -531,7 +533,7 @@ func _run() -> void:
 	_check(bool(highmere_link_reopened.get("highmere_connected", false)), "reopen_keeps_highmere_link")
 	_check(int(highmere_link_reopened.get("stone", -1)) == 0, "reopen_keeps_highmere_link_cost")
 	await process_frame
-	_capture("world-highmere-connected-reopened")
+	await _capture("world-highmere-connected-reopened")
 	_check(runtime.northgate_scout_link.visible, "highmere_link_shows_northgate_scout_route")
 	var northgate_route_screen: Vector2 = player.camera.unproject_position(runtime.northgate_scout_link.position)
 	_check(Rect2(Vector2.ZERO, Vector2(root.size)).has_point(northgate_route_screen), "northgate_scout_route_projects_inside_viewport")
@@ -541,7 +543,7 @@ func _run() -> void:
 	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == NORTHGATE_ID, "pointer_click_on_scout_route_selects_northgate")
 	_check(runtime.inspect_button.visible and not runtime.inspect_button.disabled, "selected_scout_destination_offers_northgate_inspection")
 	await process_frame
-	_capture("world-northgate-route-selected")
+	await _capture("world-northgate-route-selected")
 	await _click_control(runtime.inspect_button)
 	var northgate_inspected: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(northgate_inspected.get("northgate_inspected", false)), "northgate_inspection_recorded")
@@ -551,7 +553,7 @@ func _run() -> void:
 	_check(runtime.northgate_scout_material.albedo_color.b > runtime.northgate_scout_material.albedo_color.r, "inspected_northgate_route_turns_blue")
 	_check(not runtime.inspect_button.visible, "completed_northgate_action_is_hidden")
 	await process_frame
-	_capture("world-northgate-inspected")
+	await _capture("world-northgate-inspected")
 	runtime.controller.session.state["inspected_land_ids"].erase(NORTHGATE_ID)
 	_check(runtime.controller.load_game(), "northgate_inspection_reopens")
 	var northgate_reopened: Dictionary = runtime.controller.current_snapshot()
@@ -561,7 +563,7 @@ func _run() -> void:
 	_check(runtime.enter_button.visible and not runtime.enter_button.disabled, "inspected_northgate_offers_visible_greengate_return")
 	_check(runtime.enter_button.text == "Return to Greengate · timber", "northgate_return_cta_names_the_timber_destination")
 	await process_frame
-	_capture("world-northgate-inspected-reopened")
+	await _capture("world-northgate-inspected-reopened")
 	await _click_control(runtime.enter_button)
 	await process_frame
 	_check(String(runtime.controller.current_snapshot().get("view", "")) == "village", "northgate_return_cta_enters_village")
@@ -570,7 +572,7 @@ func _run() -> void:
 	var timber_village: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(timber_village.get("northgate_settlement_timber_delivered", false)), "settlement_timber_delivered")
 	_check(int(timber_village.get("timber", -1)) == 5, "settlement_timber_adds_five")
-	_capture("village-northgate-settlement-timber")
+	await _capture("village-northgate-settlement-timber")
 	await _click_control(runtime.return_button)
 	await process_frame
 	# Exercise the mutually exclusive Highmere branch before restoring the same
@@ -591,7 +593,7 @@ func _run() -> void:
 	if runtime.regional_landmarks.has("HighmereHamlet"):
 		_check(runtime.regional_landmarks["HighmereHamlet"].get_meta("catalog_id", "") == "bld_02_casas", "highmere_hamlet_uses_licensed_authored_house")
 	await process_frame
-	_capture("world-highmere-hamlet-choice")
+	await _capture("world-highmere-hamlet-choice")
 	_check(runtime.enter_button.visible and not runtime.enter_button.disabled, "highmere_hamlet_offers_visible_ridge_hall_return")
 	_check(runtime.enter_button.text == "Return to Greengate · hall stone", "highmere_return_cta_names_hall_stone")
 	await _click_control(runtime.enter_button)
@@ -602,7 +604,7 @@ func _run() -> void:
 	var highmere_hall_supply: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(highmere_hall_supply.get("highmere_ridge_hall_stone_delivered", false)), "highmere_hall_stone_delivered")
 	_check(int(highmere_hall_supply.get("stone", -1)) == 5, "highmere_hall_supply_adds_five_stone")
-	_capture("village-highmere-ridge-hall-stone")
+	await _capture("village-highmere-ridge-hall-stone")
 	await _click_control(runtime.return_button)
 	await process_frame
 	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == HIGHMERE_ID, "highmere_hall_supply_returns_to_selected_hamlet")
@@ -622,7 +624,7 @@ func _run() -> void:
 	_check(bool(highmere_provisions_world.get("highmere_ridge_hall_provisions_collected", false)), "highmere_hall_provisions_collected")
 	_check(int(highmere_provisions_world.get("food", -1)) == 5, "highmere_hall_adds_five_food")
 	await process_frame
-	_capture("world-highmere-ridge-hall-provisions")
+	await _capture("world-highmere-ridge-hall-provisions")
 	_check(runtime.controller.save_game(), "highmere_ridge_hall_choice_saves")
 	runtime.controller.session.state["settlement_land_ids"] = [HOME_ID]
 	runtime.controller.session.state["settlement_improvements_by_land"] = {}
@@ -636,7 +638,7 @@ func _run() -> void:
 	_check(runtime.regional_landmarks.has("HighmereHamlet"), "reopen_restores_highmere_physical_hamlet")
 	_check(runtime.regional_landmarks.has("HighmereRidgeHall"), "reopen_restores_highmere_physical_ridge_hall")
 	await process_frame
-	_capture("world-highmere-ridge-hall-reopened")
+	await _capture("world-highmere-ridge-hall-reopened")
 	runtime.controller.session.state = settlement_choice_state.duplicate(true)
 	_check(runtime.controller.save_game(), "settlement_choice_point_restored")
 	runtime.controller._publish_snapshot()
@@ -664,7 +666,7 @@ func _run() -> void:
 	_check(String(hamlet_world.get("nation_status", "")) == "not_founded", "riverbend_hamlet_does_not_invent_nation")
 	_check("HAMLET" in String((runtime.land_subtitles.get(FRONTIER_ID) as Label3D).text), "riverbend_subtitle_shows_hamlet")
 	await process_frame
-	_capture("world-riverbend-hamlet")
+	await _capture("world-riverbend-hamlet")
 	var focused_hamlet := runtime.regional_landmarks["RiverbendHamlet"] as Node3D
 	await _click_control(runtime.focus_button)
 	await create_timer(0.6).timeout
@@ -674,7 +676,7 @@ func _run() -> void:
 	_check((runtime.land_labels.get(FRONTIER_ID) as Label3D).visible, "riverbend_focus_keeps_selected_place_name")
 	_check(not (runtime.land_labels.get(HOME_ID) as Label3D).visible, "riverbend_focus_removes_unselected_label_clutter")
 	_check(runtime.frontier_link.visible, "riverbend_focus_preserves_connected_route")
-	_capture("world-riverbend-hamlet-focused-camera")
+	await _capture("world-riverbend-hamlet-focused-camera")
 	await _click_control(runtime.overview_button)
 	await create_timer(0.6).timeout
 	_check((runtime.land_labels.get(HOME_ID) as Label3D).visible, "overview_restores_neighbor_place_names")
@@ -685,7 +687,7 @@ func _run() -> void:
 	_check(int(hamlet_reopened.get("settlement_count", -1)) == 2, "reopen_keeps_two_settlements")
 	_check(String(hamlet_reopened.get("next_goal", "")) == "Return to Greengate for Riverbend Storehouse stone", "hamlet_reopen_reports_storehouse_supply_goal")
 	await process_frame
-	_capture("world-riverbend-hamlet-reopened")
+	await _capture("world-riverbend-hamlet-reopened")
 	_check(runtime.enter_button.visible and not runtime.enter_button.disabled, "riverbend_hamlet_offers_visible_storehouse_return")
 	_check(runtime.enter_button.text == "Return to Greengate · stone", "storehouse_return_cta_names_stone_destination")
 	await _click_control(runtime.enter_button)
@@ -697,7 +699,7 @@ func _run() -> void:
 	_check(bool(storehouse_supply_village.get("riverbend_storehouse_stone_delivered", false)), "storehouse_stone_delivered")
 	_check(int(storehouse_supply_village.get("stone", -1)) == 5, "storehouse_supply_adds_five_stone")
 	_check(runtime.village_riverbend_supply_yard == null, "supply_yard_absent_before_storehouse_build")
-	_capture("village-riverbend-storehouse-stone")
+	await _capture("village-riverbend-storehouse-stone")
 	await _click_control(runtime.return_button)
 	await process_frame
 	var riverbend_storehouse_label := runtime.land_labels.get(FRONTIER_ID) as Label3D
@@ -716,7 +718,7 @@ func _run() -> void:
 	_check(String(storehouse_world.get("nation_status", "")) == "not_founded", "riverbend_storehouse_does_not_invent_nation")
 	_check("STOREHOUSE" in String((runtime.land_subtitles.get(FRONTIER_ID) as Label3D).text), "riverbend_subtitle_shows_storehouse")
 	await process_frame
-	_capture("world-riverbend-storehouse")
+	await _capture("world-riverbend-storehouse")
 	var focused_storehouse := runtime.regional_landmarks["RiverbendStorehouse"] as Node3D
 	await _click_control(runtime.focus_button)
 	await create_timer(0.6).timeout
@@ -724,7 +726,7 @@ func _run() -> void:
 	_check(absf(focused_storehouse.scale.x - 1.24) < 0.01, "storehouse_focus_keeps_paid_structure_geographic_scale")
 	_check(focused_hamlet.visible and focused_storehouse.visible, "storehouse_focus_keeps_saved_physical_stage")
 	_check(runtime.frontier_link.visible, "storehouse_focus_preserves_connected_route")
-	_capture("world-riverbend-storehouse-focused-camera")
+	await _capture("world-riverbend-storehouse-focused-camera")
 	await _click_control(runtime.overview_button)
 	await create_timer(0.6).timeout
 	var greenvale_storehouse_label := runtime.land_labels.get(HOME_ID) as Label3D
@@ -737,7 +739,7 @@ func _run() -> void:
 	_check(runtime.village_riverbend_supply_yard != null, "built_storehouse_creates_physical_greengate_supply_yard")
 	_check(runtime.village_riverbend_supply_yard.get_node_or_null("RiverbendReceivingDepot") != null, "supply_yard_uses_authored_storehouse_prefab")
 	_check(runtime.village_riverbend_supply_yard.get_child_count() == 5, "supply_yard_has_depot_and_four_physical_road_tiles")
-	_capture("village-riverbend-storehouse-built")
+	await _capture("village-riverbend-storehouse-built")
 	await _click_control(runtime.return_button)
 	await process_frame
 	runtime.controller.session.state["settlement_improvements_by_land"] = {}
@@ -753,7 +755,7 @@ func _run() -> void:
 	var riverbend_screen_after_reopen: Vector2 = player.camera.unproject_position(riverbend_reopened_label.global_position)
 	await _click_position(riverbend_screen_after_reopen)
 	_check(String(runtime.controller.current_snapshot().get("selected_land_id", "")) == FRONTIER_ID, "pointer_reselects_riverbend_after_storehouse_reopen")
-	_capture("world-riverbend-storehouse-reopened")
+	await _capture("world-riverbend-storehouse-reopened")
 	_check(runtime.provisions_button.visible and not runtime.provisions_button.disabled, "riverbend_provisions_action_is_clickable")
 	await _click_control(runtime.provisions_button)
 	var provisions_world: Dictionary = runtime.controller.current_snapshot()
@@ -762,7 +764,7 @@ func _run() -> void:
 	_check(String(provisions_world.get("nation_status", "")) == "not_founded", "riverbend_storehouse_provisions_do_not_invent_nation")
 	_check(String(provisions_world.get("next_goal", "")) == "Return to Greengate and hold the Harvest Feast with 5 food", "provisions_report_visible_feast_goal")
 	await process_frame
-	_capture("world-riverbend-storehouse-provisions")
+	await _capture("world-riverbend-storehouse-provisions")
 	runtime.controller.session.state["resources"]["food"] = 0
 	runtime.controller.session.state["settlement"]["completed_orders"].erase(GameState.RIVERBEND_STOREHOUSE_PROVISIONS_ORDER_ID)
 	_check(runtime.controller.load_game(), "riverbend_storehouse_provisions_reopen")
@@ -771,7 +773,7 @@ func _run() -> void:
 	_check(int(provisions_reopened.get("food", -1)) == 5, "reopen_keeps_storehouse_food")
 	_check(String(provisions_reopened.get("next_goal", "")) == "Return to Greengate and hold the Harvest Feast with 5 food", "reopen_keeps_feast_goal")
 	await process_frame
-	_capture("world-riverbend-storehouse-provisions-reopened")
+	await _capture("world-riverbend-storehouse-provisions-reopened")
 	# Follow the rendered objective through its visible CTA; do not teleport home.
 	_check(runtime.enter_button.visible and not runtime.enter_button.disabled, "saved_provisions_offer_visible_feast_return")
 	_check(runtime.enter_button.text == "Return to Greengate · feast", "feast_return_cta_names_destination")
@@ -787,7 +789,7 @@ func _run() -> void:
 	_check(runtime.village_riverbend_supply_yard.get_node_or_null("RiverbendReceivingDepot") != null, "restored_supply_yard_keeps_authored_depot")
 	_check(not runtime.village.hud._objectives_panel.is_visible_in_tree(), "donor_objectives_stay_hidden_after_reopen")
 	_check(not (runtime.village.hud._tabs["objectives"] as Button).is_visible_in_tree(), "donor_objective_tab_stays_hidden_after_reopen")
-	_capture("village-harvest-feast-ready")
+	await _capture("village-harvest-feast-ready")
 	await _click_control(runtime.feast_button)
 	var feast_village: Dictionary = runtime.controller.current_snapshot()
 	_check(bool(feast_village.get("greengate_harvest_feast_held", false)), "harvest_feast_completed")
@@ -804,7 +806,7 @@ func _run() -> void:
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate Harvest Feast", "harvest_feast_has_coherent_village_identity")
 	_check(String(feast_village.get("nation_status", "")) == "not_founded", "harvest_feast_ui_uses_truthful_canonical_nation_status")
 	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "post_feast_dispatch_offers_truthful_world_navigation")
-	_capture("village-harvest-feast-held")
+	await _capture("village-harvest-feast-held")
 	await _click_control(runtime.village.hud._tutorial_button)
 	_check(String(runtime.controller.current_snapshot().get("view", "")) == "world", "post_feast_dispatch_opens_world")
 	runtime.controller.session.state["resources"]["food"] = 5
@@ -814,13 +816,13 @@ func _run() -> void:
 	_check(bool(feast_reopened.get("greengate_harvest_feast_held", false)), "reopen_keeps_harvest_feast")
 	_check(int(feast_reopened.get("food", -1)) == 0, "reopen_keeps_harvest_feast_food_cost")
 	await process_frame
-	_capture("world-harvest-feast-reopened")
+	await _capture("world-harvest-feast-reopened")
 	await _click_control(runtime.enter_button)
 	await process_frame
 	_check(runtime.village_harvest_feast != null and runtime.village_harvest_feast.get_child_count() == 5, "reopen_recreates_harvest_feast_gathering")
 	_check(String(runtime.village.hud._tutorial_title.text) == "Greengate Harvest Feast", "reopen_keeps_harvest_feast_guidance")
 	_check(String(runtime.village.hud._tutorial_button.text) == "Return to World", "reopen_keeps_truthful_world_navigation")
-	_capture("village-harvest-feast-reopened")
+	await _capture("village-harvest-feast-reopened")
 	# The granary was purchased through real player input in the first journey;
 	# verify it remains physical through the complete campaign and disk reload.
 	var granary_village: Dictionary = runtime.controller.current_snapshot()
@@ -833,7 +835,7 @@ func _run() -> void:
 		_check(runtime.village_granary.get_meta("catalog_id", "") == "bld_03_armazem", "persistent_granary_keeps_authored_licensed_model")
 		_check(runtime.village_granary.get_meta("granary_site", "") == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "persistent_granary_keeps_selected_site")
 	await process_frame
-	_capture("village-granary-late-state")
+	await _capture("village-granary-late-state")
 	_check(runtime.controller.save_game(), "granary_saves_canonical_progress")
 	await _click_control(runtime.return_button)
 	runtime.controller.session.state["settlement"]["built_improvements"].erase("granary")
@@ -846,7 +848,7 @@ func _run() -> void:
 	_check(runtime.village_granary.get_meta("granary_site", "") == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "reopened_granary_reappears_at_selected_site")
 	_check(runtime.village_granary_access != null and runtime.village_granary_access.get_meta("granary_site", "") == GameState.GREENGATE_GRANARY_SITE_ORCHARD, "reopened_granary_restores_selected_access_lane")
 	_check(runtime.village_granary_access.get_child_count() == 4, "reopened_orchard_lane_restores_four_physical_tiles")
-	_capture("village-granary-reopened")
+	await _capture("village-granary-reopened")
 	if failures.is_empty():
 		print("PN_PLAYABLE_POINTER_PATH=PASS")
 		print("PN_PLAYABLE_RUNTIME_CONTRACT=PASS")
@@ -894,10 +896,40 @@ func _capture(stem: String) -> void:
 	var folder := OS.get_environment("PN_CLOUD_EVIDENCE_DIR")
 	if folder.is_empty():
 		return
+	var original_size := root.size
+	var original_content_scale := root.content_scale_size
+	root.content_scale_size = Vector2i(1440, 900)
+	root.size = Vector2i(1440, 900)
+	await process_frame
+	await process_frame
 	var image := root.get_viewport().get_texture().get_image()
 	if image.get_size() != Vector2i(1440, 900):
-		failures.append("%s_frame_dimensions" % stem)
+		failures.append("%s_1440_frame_dimensions" % stem)
+		root.content_scale_size = original_content_scale
+		root.size = original_size
 		return
 	image.save_png(folder.path_join("%s-1440x900.png" % stem))
-	image.resize(360, 225, Image.INTERPOLATE_LANCZOS)
-	image.save_png(folder.path_join("%s-360x225.png" % stem))
+	root.content_scale_size = Vector2i(360, 225)
+	root.size = Vector2i(360, 225)
+	await process_frame
+	await process_frame
+	await process_frame
+	if test_runtime != null and is_instance_valid(test_runtime):
+		_check(test_runtime.compact_layout, "%s_uses_native_compact_layout" % stem)
+		var panel_rect: Rect2 = test_runtime.panel.get_global_rect()
+		_check(panel_rect.size.x <= 155.0, "%s_command_rail_leaves_scene_visible" % stem)
+		_check(panel_rect.position.x >= 198.0, "%s_command_rail_stays_at_scene_edge" % stem)
+		var view := String(test_runtime.controller.current_snapshot().get("view", "world"))
+		if view == "village" and test_runtime.village != null:
+			var tutorial_rect: Rect2 = test_runtime.village.hud._tutorial.get_global_rect()
+			_check(tutorial_rect.size.x <= 195.0, "%s_village_dispatch_leaves_scene_visible" % stem)
+			_check(not test_runtime.village.hud._tutorial_more.visible, "%s_village_secondary_copy_collapses" % stem)
+	image = root.get_viewport().get_texture().get_image()
+	if image.get_size() != Vector2i(360, 225):
+		failures.append("%s_360_frame_dimensions" % stem)
+	else:
+		image.save_png(folder.path_join("%s-360x225.png" % stem))
+	root.content_scale_size = original_content_scale
+	root.size = original_size
+	await process_frame
+	await process_frame
