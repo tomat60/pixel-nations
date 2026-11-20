@@ -420,6 +420,9 @@ func _apply_responsive_layout() -> void:
 	for button in [claim_button, enter_button, inspect_button, connect_button, road_button, granary_button, granary_plaza_button, granary_orchard_button, supply_button, survey_button, hamlet_button, storehouse_button, provisions_button, feast_button, focus_button, overview_button, save_button, return_button]:
 		button.custom_minimum_size.y = button_height
 		button.add_theme_font_size_override("font_size", 9 if compact_layout else 16)
+		# Long state-specific actions must not widen the compact rail.
+		button.clip_text = compact_layout
+		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS if compact_layout else TextServer.OVERRUN_NO_TRIMMING
 	title_label.add_theme_font_size_override("font_size", 10 if compact_layout else 16)
 	identity_label.add_theme_font_size_override("font_size", 11 if compact_layout else 18)
 	detail_label.add_theme_font_size_override("font_size", 9 if compact_layout else 14)
