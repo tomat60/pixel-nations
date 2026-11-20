@@ -439,9 +439,12 @@ func _apply_responsive_layout() -> void:
 				hud._tutorial.set_meta("pixel_nations_desktop_position", hud._tutorial.position)
 				hud._tutorial.set_meta("pixel_nations_desktop_width", hud._tutorial.size.x)
 			if compact_layout:
-				hud._tutorial.position = Vector2(6, 84)
-				hud._tutorial.size.x = minf(194.0, viewport_size.x * 0.54)
+				# The compact command rail already carries the actionable CTA.
+				# Hiding the donor tutorial prevents a second overlapping command
+				# surface from covering most of the native 360x225 scene.
+				hud._tutorial.visible = false
 			else:
+				hud._tutorial.visible = true
 				hud._tutorial.position = hud._tutorial.get_meta("pixel_nations_desktop_position")
 				hud._tutorial.size.x = float(hud._tutorial.get_meta("pixel_nations_desktop_width"))
 			hud._tutorial_title.add_theme_font_size_override("font_size", 12 if compact_layout else 21)
